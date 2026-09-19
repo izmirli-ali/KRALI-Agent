@@ -2,6 +2,40 @@
 
 KRALİ'nin hedefi bir komut çalıştırıcı olmak değil; kullanıcının niyetini anlayan, bağlamı koruyan, plan üreten, uygun aracı seçen, sonucu doğrulayan ve zamanla çalışma tercihlerini öğrenen yerel bir kişisel ajan olmaktır.
 
+## North Star — KRALİ neye dönüşecek?
+
+KRALİ sabit modül kalıpları arasında seçim yapan bir panel olmayacak. Nihai hedef, izin verilen dijital ortamda kullanıcının yapabildiği işleri araçlar üzerinden yapabilen; ne yapacağını önceden tek tek programlamak yerine hedefi anlayıp yolu kendisi kurabilen genel amaçlı kişisel bir ajan oluşturmaktır.
+
+KRALİ'nin son durumda sahip olması gereken temel nitelikler:
+
+- **Genel amaçlı akıl yürütme:** yalnızca önceden tanımlı intent eşleşmeleriyle değil, yeni ve daha önce görülmemiş görevleri de hedef–kısıt–alternatif–sonuç ilişkisiyle çözebilmek.
+- **Dinamik planlama:** görevleri sabit "modüller" kalıbına zorlamak yerine gerektiği kadar alt göreve bölmek, sıralamayı değiştirmek ve yeni bir plan üretmek.
+- **Araç bağımsızlığı:** File Search, Browser, Premiere, Mail veya başka entegrasyonlar KRALİ'nin kimliği değil; yalnızca kullanabildiği araçlardır. Core hangi araca ne zaman ihtiyaç olduğunu kendisi belirler.
+- **Araştırma yeteneği:** bilmediğini fark etmek, güvenilir kaynağı seçmek, araştırmak, çelişkileri ayırmak ve yeni bilgiyi mevcut bağlama katmak.
+- **İnsan benzeri iş akışı:** gözlemle → düşün → planla → uygula → sonucu kontrol et → gerekiyorsa düzelt. Ama insan gibi davranıyormuş izlenimi vermek için uydurma durum, algı veya yetenek üretme.
+- **Kalıcı kimlik ve süreklilik:** adı KRALİ'dir. Geçmiş tercihleri, çalışma bağlamını, projeleri ve uzun vadeli hedefleri uygun bellek katmanlarında korur.
+- **Kendi sınırını bilme:** görmediği şeyi gördüğünü, kullanamadığı aracı kullandığını veya doğrulamadığı sonucu doğruladığını söylemez.
+- **Yetkinlik genişlemesi:** yeni araç veya beceri eklendiğinde Core'un yeniden yazılması gerekmez; yeni yetenekler ortak capability arayüzüne eklenir ve Planner bunları otomatik kullanabilir.
+- **Asistan + ajan birleşimi:** hem konuşabilen ve açıklayabilen gelişmiş bir yapay zeka, hem de izin verilen işleri gerçekten tamamlayan gelişmiş bir asistan olmalıdır.
+
+Bu nedenle "modül" kelimesi KRALİ içinde sabit görev şablonu anlamına gelmez. Modüller yalnızca **capability provider**'dır. Karar verme, görev parçalama ve akıl yürütme Core'a aittir.
+
+### Hedef davranış örneği
+
+Kullanıcı "dünkü çekimleri bul, hangilerinin işe yarayacağını incele, en iyi adayları bir klasörde hazırla ve bana nedenlerini söyle" dediğinde KRALİ'nin bunu önceden yazılmış tek bir komut olarak tanıması beklenmez. Core:
+
+1. "dünkü çekimler" kapsamını çözer,
+2. gerekli dosya aramasını yapar,
+3. dosya ve ileride görüntü/ses içeriğini değerlendirir,
+4. seçim kriterlerini bağlama göre oluşturur,
+5. birkaç alternatif üretir,
+6. geri döndürülebilir dosya işlemi gerekiyorsa güvenli plan kurar,
+7. uygular,
+8. sonucu tekrar kontrol eder,
+9. kullanıcıya karar gerekçesini ve sonucu açıklar.
+
+Amaç, "hangi modülü çağırayım?" diyen bir sistem değil; **"bu hedefe en iyi nasıl ulaşırım?"** diye çalışan bir sistemdir.
+
 ## Tasarım ilkesi
 
 Geliştirme sırası özellik sayısına göre değil, zeka iskeletine göre ilerler:
@@ -10,11 +44,11 @@ Geliştirme sırası özellik sayısına göre değil, zeka iskeletine göre ile
 2. **Context** — önceki konuşma, son arama ve aktif çalışma alanını koru.
 3. **Principles** — güvenlik sınırları ve değişmez davranış kuralları.
 4. **Planner** — tek komut yerine hedefe ulaşmak için alternatif planlar üret.
-5. **Router** — gerekli modülleri kullanıcı seçmeden otomatik belirle.
+5. **Capability Router** — görevi sabit modüllere sıkıştırmadan, mevcut yetenekler arasından gereken araçları dinamik olarak seç.
 6. **Executor** — izin verilen yerel işlemleri uygula.
 7. **Verifier** — yapılan işin gerçekten tamamlandığını kontrol et.
 8. **Memory / Learning** — açık kullanıcı tercihlerini ve tekrar eden çalışma kurallarını sakla.
-9. **Multimodal / Tools** — görüntü, ses, tarayıcı, Premiere, mail ve diğer bağlantılar daha sonra bu çekirdeğe eklenir.
+9. **Multimodal / Tools** — görüntü, ses, tarayıcı, Premiere, mail, masaüstü etkileşimi ve gelecekteki yetenekler Core'a capability olarak eklenir.
 
 ## Neden bu sıra?
 
@@ -50,6 +84,9 @@ Input
 - Bağlantısı olmayan bir aracı varmış gibi gösterme.
 - Kullanıcının son bağlamını kaybetmeden yeni mesajı yorumla.
 - Modül seçimini kullanıcıya yükleme; Core kendisi yönlendirsin.
+- Yeni görevleri yalnızca anahtar kelime / sabit intent kalıplarına uydurmaya çalışma.
+- Araç isimlerini planın merkezi yapma; önce hedefi ve gerekli yeteneği düşün.
+- Kullanıcının yapabildiği bir dijital işi teknik olarak yapabilmek uzun vadeli hedeftir; erişim, izin ve güvenlik sınırları ayrıca korunur.
 
 ## Sürüm aşamaları
 
