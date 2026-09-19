@@ -689,7 +689,7 @@ struct ContentView: View {
                 }
 
                 Text(
-                    "v0.7.4: Capability-aware doğrulama eklendi. Bir görevin bazı adımları tamamlanıp gerekli bir kabiliyet eksikse KRALİ artık “tamamlandı” demez; sonucu “kısmi” olarak işaretler ve hangi kısmın doğrulanamadığını açıklar. Eski “alt modül” dili kaldırıldı; aktif rota görünümü dar panelde daha okunur hale getirildi."
+                    "v0.7.5: Goal Contract + Response Synthesis temeli eklendi. KRALİ artık intent etiketinden ayrı bir hedef profili çıkarıyor; gerekli kabiliyetleri öncelikle bu hedef sözleşmesinden seçiyor. Son cevap Verifier sonucuna göre üretiliyor: kısmi görevlerde “tamamlandı” iddiası kaldırılıyor ve eksik kabiliyet açıkça belirtiliyor."
                 )
                 .font(.caption2)
                 .foregroundStyle(.orange)
