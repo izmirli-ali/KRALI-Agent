@@ -101,9 +101,9 @@ struct AgentCapabilityRegistry {
         AgentCapability(
             id: "research.web",
             name: "Web araştırma",
-            summary: "Güncel kaynakları araştırır, karşılaştırır ve doğrular.",
+            summary: "Anahtarsız bootstrap arama sağlayıcısıyla güncel web kaynaklarını bulur; sonuçları doğrulama/sentez için Core'a verir.",
             risk: .external,
-            isAvailable: false,
+            isAvailable: true,
             requiresWorkspace: false
         ),
         AgentCapability(
@@ -178,7 +178,13 @@ struct AgentCapabilityRegistry {
                 ids.append("premiere.control")
             }
             if containsAny(text, ["araştır", "arastir", "web", "internet"]) {
-                ids += ["research.web", "browser.control"]
+                ids.append("research.web")
+            }
+            if containsAny(text, [
+                "tarayıcıda", "tarayicida", "siteye gir", "sayfayı aç",
+                "sayfayi ac", "tıkla", "tikla", "formu doldur"
+            ]) {
+                ids.append("browser.control")
             }
             if containsAny(text, ["mail", "gmail"]) {
                 ids.append("mail.work")
