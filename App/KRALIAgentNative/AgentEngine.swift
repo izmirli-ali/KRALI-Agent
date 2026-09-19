@@ -27,6 +27,7 @@ final class AgentEngine: ObservableObject {
     @Published var verificationState: AgentVerificationState = .idle
     @Published var verificationSummary = "Henüz doğrulama yapılmadı."
     @Published var fallbackPlan: String?
+    @Published var recoverySummary: String?
 
     @Published var voiceOutputEnabled = true {
         didSet {
@@ -101,6 +102,7 @@ final class AgentEngine: ObservableObject {
         verificationState = .idle
         verificationSummary = "Uygulama adımı tamamlanınca kontrol edilecek."
         fallbackPlan = executionPlan.fallback
+        recoverySummary = nil
 
         log("KRALİ Core hedefi çıkardı: \(decision.goal)")
         log("Seçilen plan: \(decision.selectedPlan)")
@@ -144,13 +146,38 @@ final class AgentEngine: ObservableObject {
                 verificationSummary = verification.summary
             }
 
+            var finalBaseReply = baseReply
+            var finalVerification = verification
+
+            if verification.state == .attention,
+               let recovery = attemptSafeRecovery(
+                    for: text,
+                    decision: decision
+               ) {
+                finalBaseReply = "İlk plan sonuç vermedi. Güvenli Plan B'yi otomatik denedim.\n\n" + recovery.reply
+                finalVerification = recovery.verification
+                verificationState = recovery.verification.state
+                verificationSummary = recovery.verification.summary
+                recoverySummary = recovery.summary
+
+                if recovery.verification.state == .passed {
+                    updateExecutionStep(3, state: .completed)
+                    fallbackPlan = nil
+                    log("Plan B başarılı: \(recovery.summary)")
+                } else {
+                    updateExecutionStep(3, state: .attention)
+                    fallbackPlan = recovery.verification.fallback ?? fallbackPlan
+                    log("Plan B de hedefi doğrulayamadı")
+                }
+            }
+
             var reply = appendSuggestion(
-                to: baseReply,
+                to: finalBaseReply,
                 suggestion: decision.proactiveSuggestion
             )
 
-            if verification.state == .attention {
-                reply += "\n\nDoğrulama: " + verification.summary
+            if finalVerification.state == .attention {
+                reply += "\n\nDoğrulama: " + finalVerification.summary
                 if let fallback = fallbackPlan {
                     reply += "\nAlternatif plan: " + fallback
                 }
@@ -245,6 +272,66 @@ final class AgentEngine: ObservableObject {
             previousFolderResultCount: folderSearchResults.count,
             lastTarget: lastDecision?.target,
             lastGoal: lastDecision?.goal
+        )
+    }
+
+    private struct RecoveryAttempt {
+        let reply: String
+        let verification: AgentVerificationResult
+        let summary: String
+    }
+
+    private func attemptSafeRecovery(
+        for text: String,
+        decision: AgentDecision
+    ) -> RecoveryAttempt? {
+        guard decision.intent == .fileSearch else { return nil }
+
+        let hasRelaxableConstraint =
+            decision.usePreviousResults ||
+            decision.dateRange != nil
+
+        guard hasRelaxableConstraint else { return nil }
+
+        let recoveryDecision = AgentDecision(
+            intent: .fileSearch,
+            target: decision.target,
+            dateRange: nil,
+            dateField: .either,
+            sortMode: decision.sortMode,
+            route: decision.route + ["Plan B"],
+            goal: "Daha geniş kapsamda " + decision.goal,
+            selectedPlan: "İlk aramada sonuç çıkmadığı için tarih / önceki-sonuç kısıtını kaldır ve aynı hedefi seçili çalışma alanında salt-okunur yeniden ara.",
+            alternatives: decision.alternatives,
+            proactiveSuggestion: nil,
+            usePreviousResults: false,
+            resultSelection: nil
+        )
+
+        log("Plan B deneniyor: arama kapsamı güvenli biçimde genişletiliyor")
+
+        let reply: String
+        if recoveryDecision.target == .folder {
+            reply = searchIndexedFolders(
+                for: text,
+                decision: recoveryDecision
+            )
+        } else {
+            reply = searchIndexedFiles(
+                for: text,
+                decision: recoveryDecision
+            )
+        }
+
+        let verification = verifier.verify(
+            decision: recoveryDecision,
+            snapshot: verificationSnapshot()
+        )
+
+        return RecoveryAttempt(
+            reply: reply,
+            verification: verification,
+            summary: "Tarih / önceki sonuç kısıtı kaldırılarak aynı hedef seçili çalışma alanında yeniden arandı."
         )
     }
 
