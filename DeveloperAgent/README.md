@@ -4,12 +4,12 @@ KRALİ Developer Agent, **KRALİ'nin kendisi değildir**. Geliştirme döneminde
 
 ## Neden Cline?
 
-Cline CLI headless/JSON çalışabiliyor, çalışma dizini seçebiliyor, araçları otomatik kullanabiliyor ve model/provider seçimini komut satırından sabitleyebiliyor. KRALİ tarafında varsayılan seçim:
+Cline CLI headless/JSON çalışabiliyor, çalışma dizini seçebiliyor, araçları otomatik kullanabiliyor ve ChatGPT Subscription OAuth ile mevcut ChatGPT aboneliğini kullanabiliyor. KRALİ tarafında varsayılan seçim:
 
-- Provider: `cline`
-- Model: `nvidia/nemotron-3.5-lightning`
+- Provider: `openai-codex` (ChatGPT Subscription)
+- Model: `cline auth` sırasında kullanıcının seçtiği model
 
-Bu model Cline tarafından şu anda ücretsiz model olarak sunuluyor. Ücretsiz durum değişirse workflow ücretli modele otomatik geçmez; hata verip durması tercih edilir.
+Developer Agent ayrı bir OpenAI API anahtarı istemez. Kullanım, ChatGPT aboneliğinin Codex/OAuth erişimi ve ilgili kullanım limitleri içinde kalır. Script ücretli API anahtarına veya Cline kredi sistemine kendiliğinden geçmez.
 
 ## Güvenlik modeli
 
@@ -28,12 +28,10 @@ Cline CLI:
 
 ```bash
 npm install -g cline
-cline auth cline
+cline auth
 ```
 
-Cline sağlayıcısında ücretsiz `nvidia/nemotron-3.5-lightning` modelini seç.
-
-Alternatif olarak Cline'ın desteklediği ChatGPT Subscription OAuth kullanılabilir; KRALİ scripti varsayılan olarak ücretsiz Nemotron modeline sabitlenmiştir ve ücretli modele kendiliğinden geçmez.
+Auth ekranında **Sign in with ChatGPT** seçilir. Ardından ChatGPT Subscription için kullanılacak model seçilir. KRALİ Developer Agent varsayılan olarak bu provider/model seçimini yeniden kullanır.
 
 ## Çalıştırma
 
