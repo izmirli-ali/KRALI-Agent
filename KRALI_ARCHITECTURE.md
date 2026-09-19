@@ -59,6 +59,8 @@ Yerel dosya algısı, güvenli aksiyonlar, intent, tarih çözümleme, bağlam v
 ### 0.7.x — Planner + Verifier
 Çok adımlı görev planları, alternatif yol, işlem sonrası doğrulama ve başarısızlıkta ikinci plan.
 
+**v0.7.0 başlangıcı:** Her tur için görünür yürütme planı oluşturulur. Executor sonrası Verifier, File Search ve güvenli File Actions durumunu tekrar okur. Doğrulanamayan gerçek işlemlerde Core otomatik olarak Plan B taşır; bağlantısı olmayan araçlarda sahte başarı üretmez.
+
 ### 0.8.x — Memory
 Kısa süreli konuşma belleği ile kalıcı kullanıcı tercihlerini ayırma; bağlam özetleme.
 
