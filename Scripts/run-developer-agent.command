@@ -31,12 +31,38 @@ if [ ! -d "$ROOT/.git" ]; then
     exit 10
 fi
 
+NPM_BIN="$(command -v npm || true)"
+NODE_BIN="$(command -v node || true)"
+BREW_BIN="$(command -v brew || true)"
+
+if [ -z "$NPM_BIN" ] || [ -z "$NODE_BIN" ]; then
+    if [ -n "$BREW_BIN" ]; then
+        write_status "setup_node|Node.js/npm bulunamadı|brew install node"
+        echo "❌ Node.js/npm bulunamadı." | tee -a "$LOG"
+        echo "Kurulum: brew install node" | tee -a "$LOG"
+        exit 11
+    fi
+
+    write_status "setup_homebrew|Node.js/npm ve Homebrew bulunamadı|Önce Homebrew, sonra Node.js kurulmalı"
+    echo "❌ Node.js/npm ve Homebrew bulunamadı." | tee -a "$LOG"
+    echo "Önce Homebrew kurulmalı; ardından: brew install node" | tee -a "$LOG"
+    exit 11
+fi
+
+NODE_MAJOR="$("$NODE_BIN" -p 'process.versions.node.split(".")[0]' 2>/dev/null || echo 0)"
+if [ "$NODE_MAJOR" -lt 20 ]; then
+    write_status "setup_node_upgrade|Node.js 20+ gerekiyor|brew upgrade node"
+    echo "❌ Node.js sürümü eski: $("$NODE_BIN" -v 2>/dev/null || true)" | tee -a "$LOG"
+    echo "Cline için Node.js 20+ gerekiyor (22+ önerilir)." | tee -a "$LOG"
+    exit 11
+fi
+
 CLINE_BIN="$(command -v cline || true)"
 if [ -z "$CLINE_BIN" ]; then
-    write_status "setup_required|Cline CLI bulunamadı"
+    write_status "setup_cline|Cline CLI bulunamadı|npm install -g cline"
     echo "❌ Cline CLI bulunamadı." | tee -a "$LOG"
     echo "Kurulum: npm install -g cline" | tee -a "$LOG"
-    echo "Ücretsiz provider kurulumu: cline auth cline" | tee -a "$LOG"
+    echo "Ardından: cline auth" | tee -a "$LOG"
     exit 11
 fi
 
