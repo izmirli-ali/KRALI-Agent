@@ -39,13 +39,11 @@ struct CapabilityLearningPlan: Identifiable, Hashable {
 
 struct AgentCapabilityLearner {
     func makePlans(
-        for capabilities: [AgentCapability]
+        for capabilities: [AgentCapability],
+        webResearchAvailable: Bool
     ) -> [CapabilityLearningPlan] {
         let unavailable = capabilities.filter { !$0.isAvailable }
         guard !unavailable.isEmpty else { return [] }
-
-        let webResearchAvailable =
-            capabilities.first(where: { $0.id == "research.web" })?.isAvailable == true
 
         return unavailable.map {
             plan(
