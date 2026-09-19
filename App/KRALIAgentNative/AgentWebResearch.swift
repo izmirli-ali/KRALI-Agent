@@ -30,7 +30,7 @@ enum WebResearchError: LocalizedError {
         case .invalidResponse:
             return "Arama sağlayıcısından geçerli bir yanıt alınamadı."
         case .noResults:
-            return "Web araştırması sonuç üretmedi."
+            return "Web araştırması yeterince alakalı sonuç üretmedi."
         case .allProvidersFailed(let message):
             return "Tüm web araştırma sağlayıcıları başarısız oldu: \(message)"
         case .transport(let message):
@@ -41,17 +41,24 @@ enum WebResearchError: LocalizedError {
 
 actor AgentWebResearchService {
     private enum Provider: CaseIterable {
+        case bingRSS
         case google
-        case bing
+        case bingHTML
         case duckDuckGo
 
         var name: String {
             switch self {
-            case .google: return "Google HTML bootstrap"
-            case .bing: return "Bing HTML fallback"
-            case .duckDuckGo: return "DuckDuckGo HTML fallback"
+            case .bingRSS: return "Bing RSS"
+            case .google: return "Google HTML"
+            case .bingHTML: return "Bing HTML"
+            case .duckDuckGo: return "DuckDuckGo HTML"
             }
         }
+    }
+
+    private struct ScoredResult {
+        let result: WebResearchResult
+        let score: Int
     }
 
     private let session: URLSession
@@ -63,7 +70,7 @@ actor AgentWebResearchService {
         configuration.requestCachePolicy = .reloadIgnoringLocalCacheData
         configuration.httpAdditionalHeaders = [
             "User-Agent": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/18.0 Safari/605.1.15",
-            "Accept": "text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8",
+            "Accept": "text/html,application/xhtml+xml,application/rss+xml,application/xml;q=0.9,*/*;q=0.8",
             "Accept-Language": "tr-TR,tr;q=0.9,en;q=0.8"
         ]
         session = URLSession(configuration: configuration)
@@ -81,47 +88,121 @@ actor AgentWebResearchService {
             throw WebResearchError.invalidQuery
         }
 
-        let safeLimit = max(1, min(limit, 8))
+        let safeLimit = max(2, min(limit, 8))
+        let variants = queryVariants(for: query)
+        let queryTerms = meaningfulTerms(from: query)
+
         var failures: [String] = []
+        var providerNames: [String] = []
+        var candidates: [ScoredResult] = []
+        var seenURLs = Set<String>()
 
-        for provider in Provider.allCases {
-            do {
-                let html = try await fetchHTML(
-                    provider: provider,
-                    query: query
-                )
+        for variant in variants {
+            for provider in Provider.allCases {
+                do {
+                    let payload = try await fetch(
+                        provider: provider,
+                        query: variant
+                    )
 
-                let results = parseResults(
-                    provider: provider,
-                    html: html,
-                    limit: safeLimit
-                )
+                    let parsed = parseResults(
+                        provider: provider,
+                        payload: payload,
+                        queryTerms: queryTerms,
+                        limit: safeLimit * 2
+                    )
 
-                if !results.isEmpty {
-                    return WebResearchReport(
-                        query: query,
-                        provider: provider.name,
-                        results: results,
-                        fetchedAt: Date()
+                    if !parsed.isEmpty && !providerNames.contains(provider.name) {
+                        providerNames.append(provider.name)
+                    }
+
+                    for item in parsed {
+                        let key = canonicalURLKey(item.result.url)
+                        guard !seenURLs.contains(key) else {
+                            continue
+                        }
+
+                        seenURLs.insert(key)
+                        candidates.append(item)
+                    }
+
+                    candidates.sort { left, right in
+                        if left.score == right.score {
+                            return left.result.title.count >
+                                right.result.title.count
+                        }
+                        return left.score > right.score
+                    }
+
+                    if candidates.filter({ $0.score >= 3 }).count >= safeLimit {
+                        break
+                    }
+                } catch {
+                    failures.append(
+                        provider.name + ": " + error.localizedDescription
                     )
                 }
+            }
 
-                failures.append(
-                    provider.name + ": sonuç ayrıştırılamadı"
-                )
-            } catch {
-                failures.append(
-                    provider.name + ": " + error.localizedDescription
-                )
+            if candidates.filter({ $0.score >= 3 }).count >= safeLimit {
+                break
             }
         }
 
-        throw WebResearchError.allProvidersFailed(
-            failures.joined(separator: " • ")
+        let relevant = candidates
+            .filter { $0.score >= 3 }
+            .prefix(safeLimit)
+            .map(\.result)
+
+        guard !relevant.isEmpty else {
+            if failures.count == Provider.allCases.count * variants.count {
+                throw WebResearchError.allProvidersFailed(
+                    failures.joined(separator: " • ")
+                )
+            }
+
+            throw WebResearchError.noResults
+        }
+
+        return WebResearchReport(
+            query: query,
+            provider: providerNames.isEmpty
+                ? "Web bootstrap"
+                : providerNames.joined(separator: " + "),
+            results: Array(relevant),
+            fetchedAt: Date()
         )
     }
 
-    private func fetchHTML(
+    private func queryVariants(
+        for query: String
+    ) -> [String] {
+        var variants = [query]
+        let normalized = normalize(query)
+
+        if !normalized.contains("official") &&
+           !normalized.contains("resmi") {
+            variants.append(query + " official documentation")
+        }
+
+        if normalized.contains("macos") ||
+           normalized.contains("ios") ||
+           normalized.contains("apple") {
+            variants.append(
+                query + " Apple Developer documentation"
+            )
+        }
+
+        var seen = Set<String>()
+        return variants.filter { value in
+            let key = normalize(value)
+            guard !seen.contains(key) else { return false }
+            seen.insert(key)
+            return true
+        }
+    }
+
+    private func fetch(
         provider: Provider,
         query: String
     ) async throws -> String {
@@ -147,15 +228,15 @@ actor AgentWebResearchService {
                 throw WebResearchError.invalidResponse
             }
 
-            if let html = String(data: data, encoding: .utf8) {
-                return html
+            if let text = String(data: data, encoding: .utf8) {
+                return text
             }
 
-            if let html = String(
+            if let text = String(
                 data: data,
                 encoding: .isoLatin1
             ) {
-                return html
+                return text
             }
 
             throw WebResearchError.invalidResponse
@@ -173,6 +254,17 @@ actor AgentWebResearchService {
         query: String
     ) -> URL? {
         switch provider {
+        case .bingRSS:
+            var components = URLComponents(
+                string: "https://www.bing.com/search"
+            )
+            components?.queryItems = [
+                URLQueryItem(name: "q", value: query),
+                URLQueryItem(name: "format", value: "rss"),
+                URLQueryItem(name: "setlang", value: "tr")
+            ]
+            return components?.url
+
         case .google:
             var components = URLComponents(
                 string: "https://www.google.com/search"
@@ -185,7 +277,7 @@ actor AgentWebResearchService {
             ]
             return components?.url
 
-        case .bing:
+        case .bingHTML:
             var components = URLComponents(
                 string: "https://www.bing.com/search"
             )
@@ -209,45 +301,171 @@ actor AgentWebResearchService {
 
     private func parseResults(
         provider: Provider,
-        html: String,
+        payload: String,
+        queryTerms: [String],
         limit: Int
-    ) -> [WebResearchResult] {
-        let patterns: [(String, Int, Int)]
+    ) -> [ScoredResult] {
+        let raw: [WebResearchResult]
 
         switch provider {
-        case .google:
-            patterns = [
-                (
-                    #"<a[^>]+href=["']/url\?q=([^&"']+)[^"']*["'][^>]*>.*?<h3[^>]*>(.*?)</h3>"#,
-                    1,
-                    2
-                ),
-                (
-                    #"<a[^>]+href=["'](https?://[^"']+)["'][^>]*>.*?<h3[^>]*>(.*?)</h3>"#,
-                    1,
-                    2
-                )
-            ]
+        case .bingRSS:
+            raw = parseBingRSS(
+                payload,
+                limit: limit
+            )
 
-        case .bing:
-            patterns = [
-                (
-                    #"<li[^>]+class=["'][^"']*b_algo[^"']*["'][^>]*>.*?<h2[^>]*>.*?<a[^>]+href=["'](https?://[^"']+)["'][^>]*>(.*?)</a>"#,
-                    1,
-                    2
-                )
-            ]
+        case .google:
+            raw = parseHTML(
+                payload,
+                patterns: [
+                    (
+                        #"<a[^>]+href=["']/url\?q=([^&"']+)[^"']*["'][^>]*>.*?<h3[^>]*>(.*?)</h3>"#,
+                        1,
+                        2
+                    ),
+                    (
+                        #"<a[^>]+href=["'](https?://[^"']+)["'][^>]*>.*?<h3[^>]*>(.*?)</h3>"#,
+                        1,
+                        2
+                    )
+                ],
+                limit: limit
+            )
+
+        case .bingHTML:
+            raw = parseHTML(
+                payload,
+                patterns: [
+                    (
+                        #"<li[^>]+class=["'][^"']*b_algo[^"']*["'][^>]*>.*?<h2[^>]*>.*?<a[^>]+href=["'](https?://[^"']+)["'][^>]*>(.*?)</a>"#,
+                        1,
+                        2
+                    )
+                ],
+                limit: limit
+            )
 
         case .duckDuckGo:
-            patterns = [
-                (
-                    #"<a[^>]*class=["'][^"']*result__a[^"']*["'][^>]*href=["']([^"']+)["'][^>]*>(.*?)</a>"#,
-                    1,
-                    2
-                )
-            ]
+            raw = parseHTML(
+                payload,
+                patterns: [
+                    (
+                        #"<a[^>]*class=["'][^"']*result__a[^"']*["'][^>]*href=["']([^"']+)["'][^>]*>(.*?)</a>"#,
+                        1,
+                        2
+                    )
+                ],
+                limit: limit
+            )
         }
 
+        return raw.compactMap { result in
+            guard !isJunkResult(result) else {
+                return nil
+            }
+
+            let score = relevanceScore(
+                result,
+                queryTerms: queryTerms
+            )
+
+            return ScoredResult(
+                result: result,
+                score: score
+            )
+        }
+    }
+
+    private func parseBingRSS(
+        _ xml: String,
+        limit: Int
+    ) -> [WebResearchResult] {
+        let itemPattern = #"<item>(.*?)</item>"#
+        let items = regexMatches(
+            pattern: itemPattern,
+            in: xml
+        )
+
+        var results: [WebResearchResult] = []
+
+        for item in items {
+            guard
+                results.count < limit,
+                let itemRange = Range(
+                    item.range(at: 1),
+                    in: xml
+                )
+            else {
+                continue
+            }
+
+            let block = String(xml[itemRange])
+
+            guard
+                let title = firstTagValue(
+                    "title",
+                    in: block
+                ),
+                let link = firstTagValue(
+                    "link",
+                    in: block
+                ),
+                let url = URL(
+                    string: decodeHTMLEntities(link)
+                ),
+                isUsefulExternalURL(url)
+            else {
+                continue
+            }
+
+            let description = firstTagValue(
+                "description",
+                in: block
+            )
+
+            results.append(
+                WebResearchResult(
+                    title: cleanHTML(title),
+                    url: url,
+                    domain: url.host ?? "web",
+                    snippet: description.map(cleanHTML)
+                )
+            )
+        }
+
+        return results
+    }
+
+    private func firstTagValue(
+        _ tag: String,
+        in text: String
+    ) -> String? {
+        let pattern =
+            "<" + tag + "[^>]*>(.*?)</" + tag + ">"
+
+        guard
+            let match = regexMatches(
+                pattern: pattern,
+                in: text
+            ).first,
+            let range = Range(
+                match.range(at: 1),
+                in: text
+            )
+        else {
+            return nil
+        }
+
+        return String(text[range])
+            .replacingOccurrences(of: "<![CDATA[", with: "")
+            .replacingOccurrences(of: "]]>", with: "")
+    }
+
+    private func parseHTML(
+        _ html: String,
+        patterns: [(String, Int, Int)],
+        limit: Int
+    ) -> [WebResearchResult] {
         var results: [WebResearchResult] = []
         var seen = Set<String>()
 
@@ -289,9 +507,9 @@ actor AgentWebResearchService {
                 }
 
                 let title = cleanHTML(rawTitle)
-                guard title.count >= 3 else { continue }
+                guard title.count >= 4 else { continue }
 
-                let key = resolvedURL.absoluteString
+                let key = canonicalURLKey(resolvedURL)
                 guard !seen.contains(key) else { continue }
                 seen.insert(key)
 
@@ -304,25 +522,124 @@ actor AgentWebResearchService {
                     )
                 )
             }
+        }
 
-            if results.count >= limit {
-                break
+        return results
+    }
+
+    private func relevanceScore(
+        _ result: WebResearchResult,
+        queryTerms: [String]
+    ) -> Int {
+        let title = normalize(result.title)
+        let domain = normalize(result.domain)
+        let snippet = normalize(result.snippet ?? "")
+
+        var score = 0
+
+        for term in queryTerms {
+            if title.contains(term) {
+                score += 3
+            }
+            if snippet.contains(term) {
+                score += 1
+            }
+            if domain.contains(term) {
+                score += 1
             }
         }
 
-        if results.isEmpty {
-            results = genericAnchorFallback(
-                html: html,
-                limit: limit
-            )
+        let trustedTechnicalHosts = [
+            "developer.apple.com",
+            "learn.microsoft.com",
+            "developer.mozilla.org",
+            "github.com",
+            "docs.github.com"
+        ]
+
+        if trustedTechnicalHosts.contains(
+            where: { result.domain.lowercased().hasSuffix($0) }
+        ) {
+            score += 2
         }
 
-        return Array(results.prefix(limit))
+        if title.count >= 20 {
+            score += 1
+        }
+
+        return score
+    }
+
+    private func meaningfulTerms(
+        from query: String
+    ) -> [String] {
+        let stopWords = Set([
+            "icin", "hangi", "nasil", "neden", "ile", "ve",
+            "veya", "olarak", "uzerinde", "kullanabilecegini",
+            "edebilmek", "etmek", "olan", "bir", "bu", "su",
+            "the", "for", "with", "what", "which", "how",
+            "can", "use", "using", "about"
+        ])
+
+        let parts = normalize(query)
+            .components(
+                separatedBy: CharacterSet.alphanumerics.inverted
+            )
+            .filter { $0.count >= 3 }
+
+        var seen = Set<String>()
+        return parts.filter { term in
+            guard !stopWords.contains(term) else {
+                return false
+            }
+            guard !seen.contains(term) else {
+                return false
+            }
+            seen.insert(term)
+            return true
+        }
+    }
+
+    private func isJunkResult(
+        _ result: WebResearchResult
+    ) -> Bool {
+        let title = normalize(result.title)
+        let domain = normalize(result.domain)
+
+        let junkTitles = [
+            "geri bildirim",
+            "feedback",
+            "privacy",
+            "gizlilik",
+            "oturum ac",
+            "sign in",
+            "yardim",
+            "help",
+            "cache",
+            "translate"
+        ]
+
+        if junkTitles.contains(
+            where: { title == $0 || title.hasPrefix($0 + " ") }
+        ) {
+            return true
+        }
+
+        let junkDomainTitlePairs = [
+            ("support.google.com", "geri bildirim"),
+            ("support.google.com", "feedback"),
+            ("accounts.google.com", "")
+        ]
+
+        return junkDomainTitlePairs.contains { pair in
+            domain.hasSuffix(pair.0) &&
+            (pair.1.isEmpty || title.contains(pair.1))
+        }
     }
 
     private func regexMatches(
         pattern: String,
-        in html: String
+        in text: String
     ) -> [NSTextCheckingResult] {
         guard let regex = try? NSRegularExpression(
             pattern: pattern,
@@ -335,71 +652,13 @@ actor AgentWebResearchService {
         }
 
         return regex.matches(
-            in: html,
+            in: text,
             options: [],
             range: NSRange(
-                html.startIndex..<html.endIndex,
-                in: html
+                text.startIndex..<text.endIndex,
+                in: text
             )
         )
-    }
-
-    private func genericAnchorFallback(
-        html: String,
-        limit: Int
-    ) -> [WebResearchResult] {
-        let pattern = #"<a[^>]+href=["'](https?://[^"']+)["'][^>]*>(.*?)</a>"#
-        let matches = regexMatches(
-            pattern: pattern,
-            in: html
-        )
-
-        var results: [WebResearchResult] = []
-        var seen = Set<String>()
-
-        for match in matches {
-            guard
-                results.count < limit,
-                let hrefRange = Range(
-                    match.range(at: 1),
-                    in: html
-                ),
-                let titleRange = Range(
-                    match.range(at: 2),
-                    in: html
-                )
-            else {
-                continue
-            }
-
-            let href = String(html[hrefRange])
-            let title = cleanHTML(
-                String(html[titleRange])
-            )
-
-            guard
-                title.count >= 8,
-                let url = URL(string: decodeHTMLEntities(href)),
-                isUsefulExternalURL(url)
-            else {
-                continue
-            }
-
-            let key = url.absoluteString
-            guard !seen.contains(key) else { continue }
-            seen.insert(key)
-
-            results.append(
-                WebResearchResult(
-                    title: title,
-                    url: url,
-                    domain: url.host ?? "web",
-                    snippet: nil
-                )
-            )
-        }
-
-        return results
     }
 
     private func resolvedResultURL(
@@ -471,6 +730,28 @@ actor AgentWebResearchService {
         return !blockedHosts.contains(host)
     }
 
+    private func canonicalURLKey(
+        _ url: URL
+    ) -> String {
+        var components = URLComponents(
+            url: url,
+            resolvingAgainstBaseURL: false
+        )
+        components?.fragment = nil
+
+        if let items = components?.queryItems {
+            components?.queryItems = items.filter { item in
+                let name = item.name.lowercased()
+                return !name.hasPrefix("utm_") &&
+                    name != "gclid" &&
+                    name != "fbclid"
+            }
+        }
+
+        return components?.url?.absoluteString ??
+            url.absoluteString
+    }
+
     private func cleanHTML(
         _ value: String
     ) -> String {
@@ -486,6 +767,23 @@ actor AgentWebResearchService {
                 with: " ",
                 options: .regularExpression
             )
+            .trimmingCharacters(
+                in: .whitespacesAndNewlines
+            )
+    }
+
+    private func normalize(
+        _ value: String
+    ) -> String {
+        value
+            .folding(
+                options: [
+                    .diacriticInsensitive,
+                    .caseInsensitive
+                ],
+                locale: Locale(identifier: "tr_TR")
+            )
+            .lowercased()
             .trimmingCharacters(
                 in: .whitespacesAndNewlines
             )
