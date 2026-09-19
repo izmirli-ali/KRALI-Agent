@@ -777,8 +777,9 @@ struct ContentView: View {
                                     .textSelection(.enabled)
                             }
 
-                            if engine.developerAgentStatus.isSetupRequired {
-                                Text("Bir kerelik kurulum: npm install -g cline → cline auth cline")
+                            if engine.developerAgentStatus.isSetupRequired,
+                               let hint = engine.developerAgentStatus.setupHint {
+                                Text(hint)
                                     .font(.caption2)
                                     .foregroundStyle(.orange)
                                     .textSelection(.enabled)
@@ -1163,7 +1164,7 @@ struct ContentView: View {
                 }
 
                 Text(
-                    "v0.7.20: Developer Agent köprüsü eklendi. KRALİ diagnostic’leri gerektiğinde Cline CLI + ücretsiz Nemotron ile izole Git worktree/branch içinde incelenebiliyor; aday değişiklik bağımsız build-check’ten geçmeden hazır sayılmıyor ve main branch otomatik değiştirilmiyor. Training/Live Eval tamamen yeşilse gereksiz kod değişikliği yapmaması temel kural."
+                    "v0.7.21: Developer Agent kurulum tanısı iyileştirildi. KRALİ artık Node.js/npm yokluğu, eski Node sürümü ve Cline CLI eksikliğini ayrı ayrı algılıyor; kullanıcıya yanlış npm komutu göstermek yerine doğru kurulum adımını veriyor. Cline resmi gereksinimine göre Node.js 20+ kontrolü eklendi."
                 )
                 .font(.caption2)
                 .foregroundStyle(.orange)
