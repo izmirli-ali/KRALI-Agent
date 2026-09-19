@@ -9,6 +9,7 @@ struct AgentVerificationSnapshot {
     let unavailableCapabilityIDs: Set<String>
     let selectedCapabilityIDs: Set<String>
     let webResearchResultCount: Int
+    let webResearchEvidenceCount: Int
 }
 
 struct AgentVerifier {
@@ -176,6 +177,14 @@ struct AgentVerifier {
                     )
                 }
 
+                if snapshot.webResearchEvidenceCount < 2 {
+                    return AgentVerificationResult(
+                        state: .partial,
+                        summary: "Alakalı kaynaklar bulundu fakat en az 2 kaynağın sayfa içeriğinden kanıt çıkarılamadı. Araştırma keşif seviyesinde kaldı.",
+                        fallback: nil
+                    )
+                }
+
                 if !snapshot.unavailableCapabilityIDs.isEmpty {
                     return AgentVerificationResult(
                         state: .partial,
@@ -186,7 +195,7 @@ struct AgentVerifier {
 
                 return AgentVerificationResult(
                     state: .passed,
-                    summary: "Web araştırması gerçek ve alakalı sonuç kümesiyle doğrulandı: \(snapshot.webResearchResultCount) kaynak.",
+                    summary: "Web araştırması doğrulandı: \(snapshot.webResearchResultCount) alakalı kaynak, \(snapshot.webResearchEvidenceCount) kaynak derin okundu.",
                     fallback: nil
                 )
             }
