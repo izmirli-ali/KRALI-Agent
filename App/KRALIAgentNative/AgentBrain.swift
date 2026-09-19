@@ -22,6 +22,7 @@ enum AgentTargetKind {
     case project
     case screenshot
     case pdf
+    case folder
 }
 
 enum AgentSortMode {
@@ -277,11 +278,14 @@ struct AgentBrain {
     }
 
     private func isFileSearchIntent(_ text: String) -> Bool {
-        let actions = ["bul", "ara", "göster", "goster", "listele", "nerede", "hangileri"]
+        let actions = [
+            "bul", "ara", "göster", "goster", "listele", "nerede", "hangileri",
+            "neler", "ne var", "incele", "inceler misin", "bak", "getir", "çıkar", "cikar"
+        ]
         let targets = [
             "dosya", "video", "çekim", "cekim", "pdf", "görsel", "gorsel",
             "resim", "fotoğraf", "fotograf", "proje", "belge", "doküman",
-            "dokuman", "logo", "ekran görünt", "ekran gorunt", "ekran resmi"
+            "dokuman", "logo", "klasör", "klasor", "ekran görünt", "ekran gorunt", "ekran resmi"
         ]
         return containsAny(text, actions) && containsAny(text, targets)
     }
@@ -289,6 +293,9 @@ struct AgentBrain {
     private func resolveTarget(_ text: String) -> AgentTargetKind {
         if containsAny(text, ["ekran görünt", "ekran gorunt", "ekran resmi", "screenshot"]) {
             return .screenshot
+        }
+        if containsAny(text, ["klasör", "klasor"]) {
+            return .folder
         }
         if text.contains("pdf") {
             return .pdf
@@ -331,6 +338,30 @@ struct AgentBrain {
                 return (nil, nil)
             }
             return (dayInterval(for: yesterday), "dün")
+        }
+
+        if containsAny(text, ["geçen hafta", "geçtiğimiz hafta", "gecen hafta", "gectigimiz hafta"]) {
+            let startToday = calendar.startOfDay(for: now)
+            let weekday = calendar.component(.weekday, from: startToday)
+            let daysSinceMonday = (weekday + 5) % 7
+
+            guard let thisMonday = calendar.date(
+                byAdding: .day,
+                value: -daysSinceMonday,
+                to: startToday
+            ),
+            let previousMonday = calendar.date(
+                byAdding: .day,
+                value: -7,
+                to: thisMonday
+            ) else {
+                return (nil, nil)
+            }
+
+            return (
+                DateInterval(start: previousMonday, end: thisMonday),
+                "geçen hafta"
+            )
         }
 
         if containsAny(text, ["geçtiğimiz pazar", "geçen pazar", "gecen pazar", "gecmis pazar"]) {
@@ -418,6 +449,7 @@ struct AgentBrain {
         case .project: targetText = "proje dosyalarını"
         case .screenshot: targetText = "ekran görüntülerini"
         case .pdf: targetText = "PDF dosyalarını"
+        case .folder: targetText = "klasörleri"
         case .any: targetText = "dosyaları"
         }
 
