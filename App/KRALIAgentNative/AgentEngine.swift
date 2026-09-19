@@ -32,6 +32,7 @@ final class AgentEngine: ObservableObject {
     @Published var capabilityLearningPlans: [CapabilityLearningPlan] = []
     @Published var capabilityLearningBacklog: [CapabilityLearningTask] = []
     @Published var webResearchResults: [WebResearchResult] = []
+    @Published var webResearchEvidence: [WebSourceEvidence] = []
     @Published var webResearchStatus = "Henüz web araştırması yapılmadı."
 
     @Published var voiceOutputEnabled = true {
@@ -59,6 +60,7 @@ final class AgentEngine: ObservableObject {
     private let capabilityLearner = AgentCapabilityLearner()
     private let learningStore = AgentLearningStore()
     private let webResearchService = AgentWebResearchService()
+    private let webSourceReader = AgentWebSourceReader()
     private var lastDecision: AgentDecision?
 
     init() {
@@ -156,6 +158,7 @@ final class AgentEngine: ObservableObject {
 
         if !goalProfile.outcomes.contains(.research) {
             webResearchResults = []
+            webResearchEvidence = []
             webResearchStatus = "Bu görevde web araştırması istenmedi."
         }
 
@@ -542,7 +545,8 @@ final class AgentEngine: ObservableObject {
             selectedCapabilityIDs: Set(
                 selectedCapabilities.map(\.id)
             ),
-            webResearchResultCount: webResearchResults.count
+            webResearchResultCount: webResearchResults.count,
+            webResearchEvidenceCount: webResearchEvidence.count
         )
     }
 
@@ -600,17 +604,34 @@ final class AgentEngine: ObservableObject {
                 limit: 5
             )
 
-            webResearchResults = report.results
+            let evidence = await webSourceReader.read(
+                report.results,
+                query: query,
+                limit: 4
+            )
+
+            webResearchEvidence = evidence
+
+            if !evidence.isEmpty {
+                webResearchResults = evidence.map(\.source)
+            } else {
+                webResearchResults = report.results
+            }
+
             webResearchStatus =
-                "\(report.results.count) kaynak bulundu • \(report.provider)"
+                "\(webResearchResults.count) kaynak • " +
+                "\(evidence.count) derin okuma • " +
+                report.provider
 
             log(
                 "Web Research tamamlandı: " +
-                String(report.results.count) +
-                " kaynak"
+                String(webResearchResults.count) +
+                " kaynak, " +
+                String(evidence.count) +
+                " kaynak okundu"
             )
 
-            let lines = report.results.enumerated().map {
+            let lines = webResearchResults.enumerated().map {
                 index,
                 result in
 
@@ -618,11 +639,28 @@ final class AgentEngine: ObservableObject {
             }
             .joined(separator: "\n")
 
-            return "Web'de araştırdım ve \(report.results.count) kaynak buldum.\n\n" +
-                lines +
-                "\n\nKaynak adresleri sağ panelde açık. Bu bootstrap sürümünde sonuçları bulup kaynakları ayırıyorum; derin sayfa okuma ve çok-kaynak sentezi sonraki katman."
+            let evidenceText = evidence.prefix(3).map { item in
+                "• \(item.source.title): \(item.excerpt)"
+            }
+            .joined(separator: "\n")
+
+            var reply =
+                "Web'de araştırdım ve \(webResearchResults.count) alakalı kaynak buldum."
+
+            if !evidenceText.isEmpty {
+                reply +=
+                    "\n\nKaynakların içine girip okuduğum kanıtlar:\n" +
+                    evidenceText
+            } else {
+                reply +=
+                    "\n\nKaynakları buldum fakat bu turda sayfa içeriğinden yeterli kanıt çıkaramadım."
+            }
+
+            reply += "\n\nKaynaklar:\n" + lines
+            return reply
         } catch {
             webResearchResults = []
+            webResearchEvidence = []
             webResearchStatus = error.localizedDescription
             log(
                 "Web Research başarısız: " +
