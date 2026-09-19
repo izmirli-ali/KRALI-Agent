@@ -7,7 +7,7 @@ final class UpdateController: ObservableObject {
     @Published var updateAvailable = false
     @Published var isChecking = false
     @Published var isLaunchingUpdate = false
-    @Published var statusText = "Local agent aktif"
+    @Published var statusText = "KRALİ aktif"
 
     private let rootURL = FileManager.default.homeDirectoryForCurrentUser
         .appendingPathComponent("Developer/KRALI-Agent", isDirectory: true)
@@ -44,17 +44,27 @@ final class UpdateController: ObservableObject {
                         arguments: ["-C", root.path, "rev-parse", "origin/main"]
                     ).trimmingCharacters(in: .whitespacesAndNewlines)
 
-                    let remoteVersion = try? Self.run(
+                    let remoteVersion = try Self.run(
                         executable: "/usr/bin/git",
                         arguments: ["-C", root.path, "show", "origin/main:VERSION"]
                     )
                     .trimmingCharacters(in: .whitespacesAndNewlines)
 
-                    return (local != remote, remoteVersion)
+                    return (
+                        localDiffersFromRemote: local != remote,
+                        remoteVersion: remoteVersion
+                    )
                 }.value
 
-                updateAvailable = result.0
-                remoteVersion = result.1
+                remoteVersion = result.remoteVersion
+
+                let installedVersionDiffers =
+                    !result.remoteVersion.isEmpty &&
+                    result.remoteVersion != currentVersion
+
+                updateAvailable =
+                    result.localDiffersFromRemote ||
+                    installedVersionDiffers
 
                 if updateAvailable {
                     if let remoteVersion, !remoteVersion.isEmpty {
