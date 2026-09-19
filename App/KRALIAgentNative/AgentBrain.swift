@@ -238,6 +238,20 @@ struct AgentBrain {
             )
         }
 
+        if isExplicitWebResearchIntent(text) {
+            return decision(
+                intent: .general,
+                route: ["Core", "Goal", "Planner", "Research"],
+                goal: "Web araştırması yap",
+                plan: "Soruyu dosya araması olarak yorumlama; web araştırması için temiz bir sorgu oluştur, güncel kaynakları bul ve sonucu doğrula",
+                alternatives: [
+                    "Sorguyu daralt",
+                    "Resmi kaynaklara öncelik ver",
+                    "Bulunan kaynakları karşılaştır"
+                ]
+            )
+        }
+
         if isCompoundFileTask(text) {
             let target = resolveTarget(text)
             let dateResolution = resolveDate(text, now: now)
@@ -431,6 +445,22 @@ struct AgentBrain {
         ])
 
         return target != .any && filterAction
+    }
+
+    private func isExplicitWebResearchIntent(_ text: String) -> Bool {
+        let researchAction = containsAny(text, [
+            "web'de araştır", "webde araştır",
+            "web'de arastir", "webde arastir",
+            "internetten araştır", "internetten arastir",
+            "internette araştır", "internette arastir",
+            "internet'te araştır", "internet'te arastir",
+            "google'da araştır", "googleda araştır",
+            "google'da arastir", "googleda arastir",
+            "kaynak bul", "güncel kaynak", "guncel kaynak",
+            "internetten bak", "web'den bak", "webden bak"
+        ])
+
+        return researchAction
     }
 
     private func isCompoundFileTask(_ text: String) -> Bool {
