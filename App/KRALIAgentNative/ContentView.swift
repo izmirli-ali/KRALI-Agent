@@ -1164,7 +1164,7 @@ struct ContentView: View {
                 }
 
                 Text(
-                    "v0.7.22: Developer Agent artık varsayılan olarak Cline içindeki ChatGPT Subscription / openai-codex provider’ını kullanıyor ve cline auth sırasında seçilen modeli yeniden kullanıyor. Ayrı OpenAI API anahtarı veya Cline kredisi gerekmiyor. Updater da uygulama açılışında otomatik sürüm kontrolü yapıyor."
+                    "v0.7.23: Developer Agent için hızlı diagnostic gate ve canlı durum takibi eklendi. Training Lab + Live Research Eval güncel sürümde tamamen yeşilse Cline gereksiz yere çalıştırılmıyor; gerekiyorsa hazırlık → diagnostic → Cline → build doğrulama aşamaları UI’da canlı görünür. Cline turu 15 dakika ile sınırlandı."
                 )
                 .font(.caption2)
                 .foregroundStyle(.orange)
