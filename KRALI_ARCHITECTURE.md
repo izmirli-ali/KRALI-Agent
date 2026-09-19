@@ -118,6 +118,8 @@ Yerel dosya algısı, güvenli aksiyonlar, intent, tarih çözümleme, bağlam v
 
 **v0.7.9 persistent learning backlog:** Capability gap artık yalnızca tek tur bağlamında kalmaz. Öğrenme kuyruğu eksik yeteneğin ilk görülme zamanını, kaç görevde tekrar ihtiyaç duyulduğunu, araştırma hedefini, ön koşulu ve sonraki adımı yerel olarak saklar. Aynı capability daha sonra gerçekten kullanılabilir hale geldiğinde kayıt `enabled` durumuna taşınabilir. Böylece KRALİ hangi yetenekleri tekrar tekrar öğrenmesi gerektiğini oturumlar arasında takip eder.
 
+**v0.7.10 web research bootstrap:** İlk gerçek araştırma provider katmanı eklenir. KRALİ API anahtarı/token gerektirmeyen bir HTML arama bootstrap sağlayıcısından güncel web sonucu bulabilir, URL/domain bilgisini ayrı kaynak olarak saklar ve Verifier gerçek sonuç kümesini kontrol eder. Bu sürüm arama/keşif katmanıdır; derin sayfa okuma, kaynak güvenilirliği puanlama ve çok-kaynak sentezi sonraki aşamadır. Öğrenme kuyruğunda `readyToResearch` olan eksik capability'ler için KRALİ tek seferlik otomatik kaynak araştırması yapabilir ve kaydı `proposalReady` durumuna taşır. Rastgele web kodu indirme/çalıştırma hâlâ yasaktır.
+
 ### 0.8.x — Memory
 Kısa süreli konuşma belleği ile kalıcı kullanıcı tercihlerini ayırma; bağlam özetleme.
 
