@@ -6,6 +6,7 @@ struct AgentResponseComposer {
         verification: AgentVerificationResult,
         goal: AgentGoalProfile,
         capabilities: [AgentCapability],
+        learningPlans: [CapabilityLearningPlan],
         fallbackPlan: String?
     ) -> String {
         let unavailable = capabilities.filter { !$0.isAvailable }
@@ -26,6 +27,10 @@ struct AgentResponseComposer {
                     unavailable.map(\.name).joined(separator: ", ") + "."
             }
 
+            if let learning = learningPlans.first {
+                reply += "\nYetkinlik kazanma planı: " + learning.nextStep
+            }
+
             return reply
 
         case .attention:
@@ -34,6 +39,10 @@ struct AgentResponseComposer {
 
             if let fallbackPlan, !fallbackPlan.isEmpty {
                 reply += "\nAlternatif plan: " + fallbackPlan
+            }
+
+            if let learning = learningPlans.first {
+                reply += "\nYetkinlik kazanma planı: " + learning.nextStep
             }
 
             return reply
