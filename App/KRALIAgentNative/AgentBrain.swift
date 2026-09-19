@@ -1,0 +1,457 @@
+import Foundation
+
+enum AgentIntentKind {
+    case conversation
+    case assessWorkspace
+    case fileSearch
+    case organizeScreenshots
+    case remember
+    case undo
+    case approve
+    case reject
+    case workMail
+    case futureCapability
+    case general
+}
+
+enum AgentTargetKind {
+    case any
+    case video
+    case image
+    case document
+    case project
+    case screenshot
+    case pdf
+}
+
+enum AgentSortMode {
+    case relevance
+    case newestFirst
+}
+
+enum AgentDateField {
+    case either
+    case created
+    case modified
+}
+
+struct AgentContextSnapshot {
+    let hasWorkspace: Bool
+    let workspaceName: String?
+    let fileCount: Int
+    let imageCount: Int
+    let videoCount: Int
+    let projectCount: Int
+    let documentCount: Int
+    let screenshotCount: Int
+    let hasPendingAction: Bool
+}
+
+struct AgentDecision {
+    let intent: AgentIntentKind
+    let target: AgentTargetKind
+    let dateRange: DateInterval?
+    let dateField: AgentDateField
+    let sortMode: AgentSortMode
+    let route: [String]
+    let goal: String
+    let selectedPlan: String
+    let alternatives: [String]
+    let proactiveSuggestion: String?
+}
+
+struct AgentBrain {
+    private let calendar = Calendar.autoupdatingCurrent
+
+    func analyze(
+        _ rawText: String,
+        context: AgentContextSnapshot,
+        now: Date = Date()
+    ) -> AgentDecision {
+        let text = normalize(rawText)
+
+        if context.hasPendingAction && isApproval(text) {
+            return decision(
+                intent: .approve,
+                route: ["Core", "Intent", "File Actions"],
+                goal: "Bekleyen güvenli dosya işlemini onayla",
+                plan: "Önceden hazırlanmış işlemi uygula ve sonucu doğrula",
+                alternatives: ["İşlemi iptal et", "Önce ayrıntıları tekrar göster"]
+            )
+        }
+
+        if context.hasPendingAction && isRejection(text) {
+            return decision(
+                intent: .reject,
+                route: ["Core", "Intent", "File Actions"],
+                goal: "Bekleyen dosya işlemini iptal et",
+                plan: "Dosyalara dokunmadan bekleyen işlemi kaldır",
+                alternatives: ["İşlem planını değiştir", "Yeni bir görev ver"]
+            )
+        }
+
+        if containsAny(text, ["geri al", "undo", "önceki işlemi geri", "onceki islemi geri"]) {
+            return decision(
+                intent: .undo,
+                route: ["Core", "Intent", "File Actions"],
+                goal: "Son geri alınabilir işlemi tersine çevir",
+                plan: "Son taşıma kaydını kullanarak dosyaları güvenli biçimde geri yükle",
+                alternatives: ["Önce son işlemin ayrıntısını incele"]
+            )
+        }
+
+        if isConversation(text) {
+            return decision(
+                intent: .conversation,
+                route: ["Core", "Conversation"],
+                goal: "Doğal konuşmayı sürdür",
+                plan: "Kısa ve bağlama uygun cevap ver",
+                alternatives: context.hasWorkspace
+                    ? ["Çalışma alanının durumunu özetle", "Bir sonraki işi öner"]
+                    : ["Bir çalışma alanı seç", "Ne yapmak istediğini konuş"]
+            )
+        }
+
+        if isWorkspaceAssessment(text) {
+            var alternatives = [
+                "Dosya dağılımını incele",
+                "Son eklenen dosyaları kontrol et",
+                "Düşük riskli düzenleme önerileri üret"
+            ]
+
+            var suggestion: String?
+            if context.screenshotCount >= 5 {
+                alternatives.insert("Ekran görüntülerini ayrı klasörde toparla", at: 0)
+                suggestion = "En düşük riskli ilk adım olarak ekran görüntülerini toparlamak mantıklı görünüyor."
+            } else if context.fileCount >= 50 {
+                suggestion = "Önce hangi dosya türlerinin alanı kalabalıklaştırdığını çıkarmak daha güvenli."
+            }
+
+            return decision(
+                intent: .assessWorkspace,
+                route: ["Core", "Context", "Planner"],
+                goal: "Çalışma alanını incele ve yararlı seçenekler üret",
+                plan: "Önce sadece oku; durumu özetle, alternatifleri karşılaştır ve değişiklik yapmadan öner",
+                alternatives: alternatives,
+                suggestion: suggestion
+            )
+        }
+
+        if isRememberIntent(text) {
+            return decision(
+                intent: .remember,
+                route: ["Core", "Intent", "Learning"],
+                goal: "Kullanıcının açık çalışma kuralını hafızaya al",
+                plan: "Kuralı temizle, sakla ve sonraki görevlerde bağlam olarak kullan",
+                alternatives: ["Kuralı sadece bu oturum için uygula"]
+            )
+        }
+
+        if isScreenshotOrganizeIntent(text) {
+            return decision(
+                intent: .organizeScreenshots,
+                target: .screenshot,
+                route: ["Core", "Intent", "Context", "Planner", "File Actions"],
+                goal: "Ekran görüntülerini güvenli biçimde toparla",
+                plan: "Adayları bul, planı göster, onaydan sonra taşı ve geri alma kaydı oluştur",
+                alternatives: ["Sadece ekran görüntülerini listele", "Tarihe göre daralt"]
+            )
+        }
+
+        if isFileSearchIntent(text) {
+            let target = resolveTarget(text)
+            let dateResolution = resolveDate(text, now: now)
+            let sort: AgentSortMode = containsAny(
+                text,
+                ["son eklenen", "en yeni", "en son", "son çekilen", "son cekilen", "latest"]
+            ) ? .newestFirst : .relevance
+
+            return AgentDecision(
+                intent: .fileSearch,
+                target: target,
+                dateRange: dateResolution.range,
+                dateField: resolveDateField(text),
+                sortMode: sort,
+                route: ["Core", "Intent", "Context", "File Search"],
+                goal: fileSearchGoal(
+                    target: target,
+                    dateDescription: dateResolution.description,
+                    newestFirst: sort == .newestFirst
+                ),
+                selectedPlan: "Seçili çalışma alanını salt-okunur tara, filtreleri uygula ve en uygun sonuçları göster",
+                alternatives: [
+                    "Dosya adına göre daralt",
+                    "Tarihe göre daralt",
+                    "Sonuçları en yeniye göre sırala"
+                ],
+                proactiveSuggestion: nil
+            )
+        }
+
+        if containsAny(text, ["17:55", "mail", "gmail"]) {
+            return decision(
+                intent: .workMail,
+                route: ["Core", "Intent", "Planner", "Work/Mail"],
+                goal: "İş maili görevini planla",
+                plan: "Kaynağı belirle, taslağı hazırla ve gönderimden önce onay iste",
+                alternatives: ["Sadece taslak hazırla", "Önce günlük işleri özetle"]
+            )
+        }
+
+        if containsAny(text, ["premiere", "openai", "chatgpt"]) {
+            return decision(
+                intent: .futureCapability,
+                route: ["Core", "Intent", "Planner"],
+                goal: "Henüz bağlı olmayan bir yetenek için uygulanabilir plan üret",
+                plan: "Mevcut yerel yeteneklerle yapılabilecek kısmı ayır; dış bağlantı gerektiren kısmı beklet",
+                alternatives: ["Yerelde çözülebilen kısmı yap", "Gereken entegrasyonu daha sonra ekle"]
+            )
+        }
+
+        return decision(
+            intent: .general,
+            route: ["Core", "Intent", "Context", "Planner"],
+            goal: "Kullanıcının hedefini anlamlandır ve uygulanabilir bir sonraki adımı seç",
+            plan: "Bağlamı incele; doğrudan araç eşleşmesi yoksa güvenli alternatifler üret",
+            alternatives: context.hasWorkspace
+                ? ["Çalışma alanını incele", "Dosya araması yap", "Yeni bir çalışma kuralı öğren"]
+                : ["Çalışma alanı seç", "Hedefi biraz daha somutlaştır"]
+        )
+    }
+
+    private func decision(
+        intent: AgentIntentKind,
+        target: AgentTargetKind = .any,
+        route: [String],
+        goal: String,
+        plan: String,
+        alternatives: [String],
+        suggestion: String? = nil
+    ) -> AgentDecision {
+        AgentDecision(
+            intent: intent,
+            target: target,
+            dateRange: nil,
+            dateField: .either,
+            sortMode: .relevance,
+            route: route,
+            goal: goal,
+            selectedPlan: plan,
+            alternatives: alternatives,
+            proactiveSuggestion: suggestion
+        )
+    }
+
+    private func isConversation(_ text: String) -> Bool {
+        containsAny(text, [
+            "nasılsın", "nasilsin", "naber", "ne haber",
+            "selam", "merhaba", "günaydın", "gunaydin",
+            "iyi akşamlar", "iyi aksamlar", "ne yapıyorsun", "ne yapiyorsun"
+        ])
+    }
+
+    private func isWorkspaceAssessment(_ text: String) -> Bool {
+        containsAny(text, [
+            "ne önerirsin", "ne onerirsin", "sence ne yapalım", "sence ne yapalim",
+            "bu klasör dağınık", "bu klasor daginik", "klasör dağınık", "klasor daginik",
+            "burayı düzenleyelim", "burayi duzenleyelim", "burada ne yapabiliriz",
+            "çalışma alanını incele", "calisma alanini incele"
+        ])
+    }
+
+    private func isRememberIntent(_ text: String) -> Bool {
+        containsAny(text, [
+            "öğret:", "ogret:", "bunu unutma", "aklında tut", "aklinda tut",
+            "bunu hatırla", "bunu hatirla", "bundan sonra"
+        ])
+    }
+
+    private func isScreenshotOrganizeIntent(_ text: String) -> Bool {
+        let screenshot = containsAny(text, [
+            "ekran görünt", "ekran gorunt", "ekran resmi", "screenshot", "screen shot"
+        ])
+        let action = containsAny(text, [
+            "toparla", "taşı", "tasi", "klasöre", "klasore", "düzenle", "duzenle"
+        ])
+        return screenshot && action
+    }
+
+    private func isFileSearchIntent(_ text: String) -> Bool {
+        let actions = ["bul", "ara", "göster", "goster", "listele", "nerede", "hangileri"]
+        let targets = [
+            "dosya", "video", "çekim", "cekim", "pdf", "görsel", "gorsel",
+            "resim", "fotoğraf", "fotograf", "proje", "belge", "doküman",
+            "dokuman", "logo", "ekran görünt", "ekran gorunt", "ekran resmi"
+        ]
+        return containsAny(text, actions) && containsAny(text, targets)
+    }
+
+    private func resolveTarget(_ text: String) -> AgentTargetKind {
+        if containsAny(text, ["ekran görünt", "ekran gorunt", "ekran resmi", "screenshot"]) {
+            return .screenshot
+        }
+        if text.contains("pdf") {
+            return .pdf
+        }
+        if containsAny(text, ["video", "videolar", "çekim", "cekim", "klip"]) {
+            return .video
+        }
+        if containsAny(text, ["görsel", "gorsel", "resim", "fotoğraf", "fotograf"]) {
+            return .image
+        }
+        if containsAny(text, ["proje", "project"]) {
+            return .project
+        }
+        if containsAny(text, ["belge", "doküman", "dokuman"]) {
+            return .document
+        }
+        return .any
+    }
+
+    private func resolveDateField(_ text: String) -> AgentDateField {
+        if containsAny(text, ["eklenen", "eklendi", "oluşturulan", "olusturulan"]) {
+            return .created
+        }
+        if containsAny(text, ["değiştirilen", "degistirilen", "düzenlenen", "duzenlenen"]) {
+            return .modified
+        }
+        return .either
+    }
+
+    private func resolveDate(
+        _ text: String,
+        now: Date
+    ) -> (range: DateInterval?, description: String?) {
+        if containsAny(text, ["bugün", "bugun"]) {
+            return (dayInterval(for: now), "bugün")
+        }
+
+        if containsAny(text, ["dün", "dun"]) {
+            guard let yesterday = calendar.date(byAdding: .day, value: -1, to: now) else {
+                return (nil, nil)
+            }
+            return (dayInterval(for: yesterday), "dün")
+        }
+
+        if containsAny(text, ["geçtiğimiz pazar", "geçen pazar", "gecen pazar", "gecmis pazar"]) {
+            let startToday = calendar.startOfDay(for: now)
+            let weekday = calendar.component(.weekday, from: startToday)
+            let daysSinceSunday = (weekday - 1 + 7) % 7
+            let daysBack = daysSinceSunday == 0 ? 7 : daysSinceSunday
+
+            if let sunday = calendar.date(byAdding: .day, value: -daysBack, to: startToday) {
+                return (dayInterval(for: sunday), "geçtiğimiz pazar")
+            }
+        }
+
+        if let explicit = explicitDayMonth(in: text, now: now) {
+            return (dayInterval(for: explicit.date), explicit.label)
+        }
+
+        return (nil, nil)
+    }
+
+    private func explicitDayMonth(
+        in text: String,
+        now: Date
+    ) -> (date: Date, label: String)? {
+        let months: [(names: [String], number: Int, display: String)] = [
+            (["ocak"], 1, "Ocak"),
+            (["şubat", "subat"], 2, "Şubat"),
+            (["mart"], 3, "Mart"),
+            (["nisan"], 4, "Nisan"),
+            (["mayıs", "mayis"], 5, "Mayıs"),
+            (["haziran"], 6, "Haziran"),
+            (["temmuz"], 7, "Temmuz"),
+            (["ağustos", "agustos"], 8, "Ağustos"),
+            (["eylül", "eylul"], 9, "Eylül"),
+            (["ekim"], 10, "Ekim"),
+            (["kasım", "kasim"], 11, "Kasım"),
+            (["aralık", "aralik"], 12, "Aralık")
+        ]
+
+        let tokens = text
+            .split(whereSeparator: { $0.isWhitespace || $0.isPunctuation })
+            .map(String.init)
+
+        for month in months {
+            for monthName in month.names {
+                guard let index = tokens.firstIndex(of: monthName) else { continue }
+
+                let candidateIndexes = [index - 1, index + 1]
+                for candidateIndex in candidateIndexes where tokens.indices.contains(candidateIndex) {
+                    guard let day = Int(tokens[candidateIndex]), (1...31).contains(day) else {
+                        continue
+                    }
+
+                    var components = calendar.dateComponents([.year], from: now)
+                    components.month = month.number
+                    components.day = day
+                    components.hour = 12
+
+                    if let date = calendar.date(from: components) {
+                        return (date, "\(day) \(month.display)")
+                    }
+                }
+            }
+        }
+
+        return nil
+    }
+
+    private func dayInterval(for date: Date) -> DateInterval {
+        let start = calendar.startOfDay(for: date)
+        let end = calendar.date(byAdding: .day, value: 1, to: start) ?? start.addingTimeInterval(86_400)
+        return DateInterval(start: start, end: end)
+    }
+
+    private func fileSearchGoal(
+        target: AgentTargetKind,
+        dateDescription: String?,
+        newestFirst: Bool
+    ) -> String {
+        let targetText: String
+        switch target {
+        case .video: targetText = "videoları"
+        case .image: targetText = "görselleri"
+        case .document: targetText = "belgeleri"
+        case .project: targetText = "proje dosyalarını"
+        case .screenshot: targetText = "ekran görüntülerini"
+        case .pdf: targetText = "PDF dosyalarını"
+        case .any: targetText = "dosyaları"
+        }
+
+        var parts = [targetText]
+        if let dateDescription {
+            parts.append(dateDescription + " filtresiyle")
+        }
+        if newestFirst {
+            parts.append("en yeniden eskiye")
+        }
+
+        return parts.joined(separator: " ") + " bul"
+    }
+
+    private func isApproval(_ text: String) -> Bool {
+        [
+            "evet", "onayla", "tamam", "devam", "yap",
+            "olur", "taşı", "tasi", "onaylıyorum", "onayliyorum"
+        ].contains(text)
+    }
+
+    private func isRejection(_ text: String) -> Bool {
+        [
+            "hayır", "hayir", "iptal", "vazgeç", "vazgec", "yapma"
+        ].contains(text)
+    }
+
+    private func normalize(_ text: String) -> String {
+        text
+            .lowercased(with: Locale(identifier: "tr_TR"))
+            .trimmingCharacters(in: .whitespacesAndNewlines)
+    }
+
+    private func containsAny(_ text: String, _ values: [String]) -> Bool {
+        values.contains { text.contains($0) }
+    }
+}
