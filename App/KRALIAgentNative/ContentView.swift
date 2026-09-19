@@ -419,6 +419,49 @@ struct ContentView: View {
                 .background(Color(nsColor: .controlBackgroundColor))
                 .clipShape(RoundedRectangle(cornerRadius: 10))
 
+                if !engine.capabilityLearningBacklog.isEmpty {
+                    sectionTitle("Öğrenme kuyruğu")
+
+                    VStack(alignment: .leading, spacing: 8) {
+                        ForEach(engine.capabilityLearningBacklog.prefix(5)) { task in
+                            HStack(alignment: .top, spacing: 8) {
+                                Image(systemName: task.progress.systemImage)
+                                    .font(.caption)
+                                    .foregroundStyle(
+                                        task.progress == .enabled
+                                            ? Color.green
+                                            : Color.orange
+                                    )
+
+                                VStack(alignment: .leading, spacing: 2) {
+                                    Text(task.capabilityName)
+                                        .font(.caption.weight(.medium))
+
+                                    Text(task.progress.title)
+                                        .font(.caption2)
+                                        .foregroundStyle(.secondary)
+
+                                    Text(task.nextStep)
+                                        .font(.caption2)
+                                        .foregroundStyle(.secondary)
+                                        .lineLimit(3)
+
+                                    if task.encounterCount > 1 {
+                                        Text("\(task.encounterCount) görevde ihtiyaç duyuldu")
+                                            .font(.caption2)
+                                            .foregroundStyle(.secondary)
+                                    }
+                                }
+
+                                Spacer()
+                            }
+                        }
+                    }
+                    .padding(10)
+                    .background(Color(nsColor: .controlBackgroundColor))
+                    .clipShape(RoundedRectangle(cornerRadius: 10))
+                }
+
                 sectionTitle("Aktif rota")
                 LazyVGrid(
                     columns: [
@@ -729,7 +772,7 @@ struct ContentView: View {
                 }
 
                 Text(
-                    "v0.7.8: Capability Learning Loop temeli eklendi. KRALİ eksik bir yeteneği sadece “yok” diye bırakmıyor; araştırma hedefi, ön koşul ve edinme yolunu çıkarıyor. Web araştırma bağlıysa resmi kaynakları araştırmaya hazırlanabiliyor; web araştırmanın kendisi gibi bootstrap yetenekleri için gereken entegrasyonu açıkça belirtiyor. Yeni kod/izin etkinleştirmesi kullanıcı onayı olmadan yapılmıyor."
+                    "v0.7.9: Kalıcı öğrenme kuyruğu eklendi. KRALİ eksik capability’leri artık yalnızca o turda göstermiyor; hangi yeteneğe kaç görevde ihtiyaç duyduğunu, araştırma ön koşulunu ve sonraki adımı oturumlar arasında koruyor. Bir capability ileride etkinleşirse aynı kayıt “Etkin” durumuna geçebilecek."
                 )
                 .font(.caption2)
                 .foregroundStyle(.orange)
