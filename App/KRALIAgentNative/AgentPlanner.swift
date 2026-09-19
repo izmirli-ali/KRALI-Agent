@@ -266,6 +266,38 @@ struct AgentPlanner {
             fallback = decision.alternatives.first
         }
 
+        if goal.outcomes.contains(.research) &&
+           !steps.contains(where: {
+               $0.capabilityID == "research.web"
+           }) {
+            let researchStep = action(
+                "Web'de araştır",
+                "Güncel web kaynaklarını anahtarsız bootstrap sağlayıcısıyla bul; kaynak başlıklarını ve adreslerini Core'a getir.",
+                capability: "research.web"
+            )
+
+            if let responseIndex = steps.firstIndex(
+                where: { $0.kind == .response }
+            ) {
+                steps.insert(researchStep, at: responseIndex)
+            } else if let verificationIndex = steps.firstIndex(
+                where: { $0.kind == .verification }
+            ) {
+                steps.insert(researchStep, at: verificationIndex)
+            } else {
+                steps.append(researchStep)
+            }
+
+            if !steps.contains(where: { $0.kind == .verification }) {
+                steps.append(
+                    verificationStep(
+                        "Web araştırmasının gerçek sonuç üretip üretmediğini doğrula."
+                    )
+                )
+            }
+            requiresVerification = true
+        }
+
         if !learningPlans.isEmpty {
             let learningStep = AgentExecutionStep(
                 title: "Yetkinlik edinme planı oluştur",
