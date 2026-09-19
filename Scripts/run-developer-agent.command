@@ -130,7 +130,7 @@ fi
 
 write_status "verifying|Aday değişiklik build ediliyor|$BRANCH|$WORKTREE"
 
-if ! "$WORKTREE/Scripts/build-check.command" "$WORKTREE" >>"$LOG" 2>&1; then
+if ! /bin/zsh "$WORKTREE/Scripts/build-check.command" "$WORKTREE" >>"$LOG" 2>&1; then
     git add -A
     git commit -m "Developer Agent candidate (build failed)" >>"$LOG" 2>&1 || true
     git push -u origin "$BRANCH" >>"$LOG" 2>&1 || true
