@@ -59,6 +59,13 @@ struct UndoFileAction {
 }
 
 
+enum AgentExecutionStepKind: String, Hashable {
+    case reasoning
+    case action
+    case verification
+    case response
+}
+
 enum AgentStepState: String, Hashable {
     case pending
     case running
@@ -81,17 +88,23 @@ struct AgentExecutionStep: Identifiable, Hashable {
     let id: UUID
     let title: String
     let detail: String
+    let kind: AgentExecutionStepKind
+    let capabilityID: String?
     var state: AgentStepState
 
     init(
         id: UUID = UUID(),
         title: String,
         detail: String,
+        kind: AgentExecutionStepKind = .action,
+        capabilityID: String? = nil,
         state: AgentStepState = .pending
     ) {
         self.id = id
         self.title = title
         self.detail = detail
+        self.kind = kind
+        self.capabilityID = capabilityID
         self.state = state
     }
 }
