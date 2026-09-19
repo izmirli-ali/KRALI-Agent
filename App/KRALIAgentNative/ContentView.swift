@@ -547,7 +547,7 @@ struct ContentView: View {
                 }
 
                 Text(
-                    "v0.6.5: Uygulama kimliği “KRALİ” olarak sadeleştirildi. Yeni kırmızı Crown logosu macOS uygulama ikonu ve üst bar kimliği olarak kullanılır; arayüz accent rengi KRALİ kırmızısına taşındı."
+                    "v0.6.6: Güncelleme denetimi artık yalnızca Git commit farkına değil, kurulu uygulama sürümü ile GitHub VERSION dosyasının farkına da bakar. Böylece kaynak kod güncellenmiş ama uygulama henüz build edilmemişse KRALİ bunu yeniden güncelleme olarak görür."
                 )
                 .font(.caption2)
                 .foregroundStyle(.orange)
