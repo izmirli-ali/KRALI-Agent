@@ -689,7 +689,7 @@ struct ContentView: View {
                 }
 
                 Text(
-                    "v0.7.5: Goal Contract + Response Synthesis temeli eklendi. KRALİ artık intent etiketinden ayrı bir hedef profili çıkarıyor; gerekli kabiliyetleri öncelikle bu hedef sözleşmesinden seçiyor. Son cevap Verifier sonucuna göre üretiliyor: kısmi görevlerde “tamamlandı” iddiası kaldırılıyor ve eksik kabiliyet açıkça belirtiliyor."
+                    "v0.7.6: Aktif rota artık eski intent/modül isimlerinden değil Goal Contract + seçilen capability’lerden üretiliyor. Alt seviye dosya araması rotayı geriye çevirmiyor. Böylece rota Core → Goal → Context → Plan → Files/Perception/Research… → Verify → Response şeklinde göreve göre dinamik oluşuyor."
                 )
                 .font(.caption2)
                 .foregroundStyle(.orange)
