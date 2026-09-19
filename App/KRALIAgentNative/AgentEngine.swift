@@ -392,15 +392,26 @@ final class AgentEngine: ObservableObject {
             switch executionSteps[index].kind {
             case .reasoning:
                 executionSteps[index].state = .completed
-            case .action, .verification, .response:
+
+            case .action:
+                if isStepCapabilityAvailable(executionSteps[index]) {
+                    executionSteps[index].state = .pending
+                } else {
+                    executionSteps[index].state = .blocked
+                }
+
+            case .verification, .response:
                 executionSteps[index].state = .pending
             }
         }
 
-        if let firstAction = executionSteps.firstIndex(
-            where: { $0.kind == .action }
+        if let firstRunnableAction = executionSteps.firstIndex(
+            where: {
+                $0.kind == .action &&
+                $0.state == .pending
+            }
         ) {
-            executionSteps[firstAction].state = .running
+            executionSteps[firstRunnableAction].state = .running
         } else if let response = executionSteps.firstIndex(
             where: { $0.kind == .response }
         ) {
@@ -410,8 +421,14 @@ final class AgentEngine: ObservableObject {
 
     private func completeActionSteps() {
         for index in executionSteps.indices {
-            if executionSteps[index].kind == .action {
+            guard executionSteps[index].kind == .action else {
+                continue
+            }
+
+            if isStepCapabilityAvailable(executionSteps[index]) {
                 executionSteps[index].state = .completed
+            } else {
+                executionSteps[index].state = .blocked
             }
         }
 
@@ -420,6 +437,22 @@ final class AgentEngine: ObservableObject {
         ) {
             executionSteps[response].state = .completed
         }
+    }
+
+    private func isStepCapabilityAvailable(
+        _ step: AgentExecutionStep
+    ) -> Bool {
+        guard let capabilityID = step.capabilityID else {
+            return true
+        }
+
+        guard let capability = selectedCapabilities.first(
+            where: { $0.id == capabilityID }
+        ) else {
+            return true
+        }
+
+        return capability.isAvailable
     }
 
     private func setVerificationStep(
