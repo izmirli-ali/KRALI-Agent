@@ -1,0 +1,9 @@
+.DS_Store
+build/
+DerivedData/
+*.xcuserstate
+xcuserdata/
+Data/*
+!Data/.gitkeep
+Backups/*
+!Backups/.gitkeep

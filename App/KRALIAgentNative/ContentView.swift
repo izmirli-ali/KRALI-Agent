@@ -1,0 +1,631 @@
+import SwiftUI
+
+struct ContentView: View {
+    @EnvironmentObject private var engine: AgentEngine
+    @State private var prompt = ""
+    @State private var memoryDraft = ""
+
+    var body: some View {
+        VStack(spacing: 0) {
+            topBar
+            Divider()
+
+            HSplitView {
+                chatPane
+                    .frame(minWidth: 640)
+
+                sidePane
+                    .frame(minWidth: 320, idealWidth: 360, maxWidth: 410)
+            }
+        }
+        .background(Color(nsColor: .windowBackgroundColor))
+    }
+
+    private var topBar: some View {
+        HStack(spacing: 12) {
+            ZStack {
+                Circle()
+                    .stroke(Color.accentColor.opacity(0.8), lineWidth: 1)
+                    .frame(width: 34, height: 34)
+
+                Circle()
+                    .stroke(Color.accentColor.opacity(0.55), lineWidth: 1)
+                    .frame(width: 22, height: 22)
+
+                Circle()
+                    .fill(Color.accentColor.opacity(0.15))
+                    .frame(width: 12, height: 12)
+            }
+
+            VStack(alignment: .leading, spacing: 2) {
+                Text("KRALİ Agent")
+                    .font(.headline)
+
+                Text("Native macOS demo v0.4 • ilk gerçek File Agent aksiyonu")
+                    .font(.caption)
+                    .foregroundStyle(.secondary)
+            }
+
+            Spacer()
+
+            HStack(spacing: 7) {
+                Circle()
+                    .fill(Color.green)
+                    .frame(width: 8, height: 8)
+
+                Text("Local agent aktif")
+                    .font(.caption)
+                    .foregroundStyle(.green)
+            }
+        }
+        .padding(.horizontal, 16)
+        .frame(height: 62)
+    }
+
+    private var chatPane: some View {
+        VStack(spacing: 0) {
+            HStack {
+                VStack(alignment: .leading, spacing: 2) {
+                    Text("KRALİ")
+                        .font(.headline)
+
+                    Text("Görevi söyle; gereken alt modülleri KRALİ seçer.")
+                        .font(.caption)
+                        .foregroundStyle(.secondary)
+                }
+
+                Spacer()
+
+                Toggle(isOn: $engine.voiceOutputEnabled) {
+                    Label(
+                        "Sesli cevap",
+                        systemImage: engine.voiceOutputEnabled
+                            ? "speaker.wave.2.fill"
+                            : "speaker.slash.fill"
+                    )
+                }
+                .toggleStyle(.button)
+            }
+            .padding(14)
+
+            Divider()
+
+            ScrollViewReader { proxy in
+                ScrollView {
+                    LazyVStack(spacing: 10) {
+                        ForEach(engine.messages) { message in
+                            messageBubble(message)
+                                .id(message.id)
+                        }
+
+                        if engine.busy {
+                            HStack {
+                                ProgressView()
+                                    .controlSize(.small)
+
+                                Text("KRALİ düşünüyor…")
+                                    .font(.caption)
+                                    .foregroundStyle(.secondary)
+
+                                Spacer()
+                            }
+                            .padding(.horizontal, 8)
+                        }
+                    }
+                    .padding(14)
+                }
+                .onChange(of: engine.messages.count) { _, _ in
+                    if let last = engine.messages.last {
+                        withAnimation {
+                            proxy.scrollTo(last.id, anchor: .bottom)
+                        }
+                    }
+                }
+            }
+
+            Divider()
+
+            quickActions
+                .padding(.horizontal, 12)
+                .padding(.top, 10)
+
+            VoiceStatusView(speech: engine.speech)
+                .padding(.horizontal, 12)
+                .padding(.top, 8)
+
+            VoiceComposerView(
+                speech: engine.speech,
+                prompt: $prompt,
+                onSend: { text in
+                    engine.send(text)
+                }
+            )
+            .padding(12)
+        }
+    }
+
+    private func messageBubble(_ message: ChatMessage) -> some View {
+        HStack {
+            if message.role == .user {
+                Spacer(minLength: 80)
+            }
+
+            Text(message.text)
+                .textSelection(.enabled)
+                .padding(.horizontal, 12)
+                .padding(.vertical, 10)
+                .background(
+                    message.role == .user
+                        ? Color.accentColor.opacity(0.22)
+                        : Color(nsColor: .controlBackgroundColor)
+                )
+                .clipShape(
+                    RoundedRectangle(
+                        cornerRadius: 12,
+                        style: .continuous
+                    )
+                )
+
+            if message.role == .assistant {
+                Spacer(minLength: 80)
+            }
+        }
+    }
+
+    private var quickActions: some View {
+        ScrollView(.horizontal, showsIndicators: false) {
+            HStack(spacing: 7) {
+                quickButton(
+                    "Ekran görüntülerini toparla",
+                    "Masaüstümdeki ekran görüntülerini bir klasöre toparla."
+                )
+
+                quickButton(
+                    "Geri al",
+                    "geri al"
+                )
+
+                quickButton(
+                    "Bir şey öğret",
+                    "Öğret: konuşmalı Reels videolarında 35 saniyeyi geçme."
+                )
+
+                quickButton(
+                    "Sorunu çöz",
+                    "Premiere eklentisinde hata var. Önce projeyi incele, çözemezsen ChatGPT'ye sor."
+                )
+            }
+        }
+    }
+
+    private func quickButton(_ title: String, _ value: String) -> some View {
+        Button(title) {
+            engine.send(value)
+        }
+        .buttonStyle(.bordered)
+        .controlSize(.small)
+    }
+
+    private var sidePane: some View {
+        ScrollView {
+            VStack(alignment: .leading, spacing: 18) {
+                sectionTitle("Aktif rota")
+                FlowLayout(items: engine.activeRoute)
+
+                if let action = engine.pendingFileAction {
+                    sectionTitle("Onay bekleyen gerçek işlem")
+
+                    VStack(alignment: .leading, spacing: 9) {
+                        Label(action.title, systemImage: "folder.badge.gearshape")
+                            .font(.headline)
+
+                        Text(action.detail)
+                            .font(.caption)
+                            .foregroundStyle(.secondary)
+
+                        Text("Hedef: \(action.destinationFolderURL.path)")
+                            .font(.caption2.monospaced())
+                            .foregroundStyle(.secondary)
+                            .textSelection(.enabled)
+
+                        HStack {
+                            Button("Onayla ve Taşı") {
+                                let reply = engine.approvePendingFileAction()
+                                engine.messages.append(
+                                    ChatMessage(role: .assistant, text: reply)
+                                )
+                            }
+                            .buttonStyle(.borderedProminent)
+
+                            Button("İptal", role: .cancel) {
+                                engine.cancelPendingFileAction()
+                            }
+                            .buttonStyle(.bordered)
+                        }
+                    }
+                    .padding(11)
+                    .background(Color.orange.opacity(0.09))
+                    .overlay(
+                        RoundedRectangle(cornerRadius: 10)
+                            .stroke(Color.orange.opacity(0.35), lineWidth: 1)
+                    )
+                    .clipShape(RoundedRectangle(cornerRadius: 10))
+                }
+
+                if engine.lastUndoAction != nil {
+                    Button {
+                        let reply = engine.undoLastFileAction()
+                        engine.messages.append(
+                            ChatMessage(role: .assistant, text: reply)
+                        )
+                    } label: {
+                        Label("Son dosya taşıma işlemini geri al", systemImage: "arrow.uturn.backward")
+                    }
+                }
+
+                sectionTitle("Şu anda ne yapıyor?")
+
+                VStack(spacing: 7) {
+                    ForEach(engine.activities.prefix(12)) { item in
+                        HStack(alignment: .top, spacing: 7) {
+                            Circle()
+                                .fill(Color.accentColor)
+                                .frame(width: 5, height: 5)
+                                .padding(.top, 6)
+
+                            Text(item.text)
+                                .font(.caption)
+
+                            Spacer()
+                        }
+                        .padding(8)
+                        .background(
+                            Color(nsColor: .controlBackgroundColor)
+                        )
+                        .clipShape(
+                            RoundedRectangle(cornerRadius: 8)
+                        )
+                    }
+                }
+
+                sectionTitle("Öğrendikleri")
+
+                VStack(spacing: 7) {
+                    ForEach(engine.memories.reversed(), id: \.self) { item in
+                        Text(item)
+                            .font(.caption)
+                            .frame(
+                                maxWidth: .infinity,
+                                alignment: .leading
+                            )
+                            .padding(8)
+                            .background(
+                                Color(nsColor: .controlBackgroundColor)
+                            )
+                            .clipShape(
+                                RoundedRectangle(cornerRadius: 8)
+                            )
+                    }
+                }
+
+                HStack {
+                    TextField(
+                        "Yeni kural…",
+                        text: $memoryDraft
+                    )
+                    .textFieldStyle(.roundedBorder)
+
+                    Button("Ekle") {
+                        engine.addMemory(memoryDraft)
+                        memoryDraft = ""
+                    }
+                    .disabled(
+                        memoryDraft
+                            .trimmingCharacters(
+                                in: .whitespacesAndNewlines
+                            )
+                            .isEmpty
+                    )
+                }
+
+                sectionTitle("Yerel File Agent")
+
+                Button {
+                    engine.chooseFolder()
+                } label: {
+                    Label(
+                        "Çalışma klasörü seç ve indeksle",
+                        systemImage: "folder.badge.plus"
+                    )
+                }
+
+                if let root = engine.selectedRootURL {
+                    Text("Seçili klasör: \(root.path)")
+                        .font(.caption2.monospaced())
+                        .foregroundStyle(.secondary)
+                        .textSelection(.enabled)
+
+                    HStack {
+                        Label(
+                            "\(engine.indexedFiles.count) dosya",
+                            systemImage: "doc.on.doc"
+                        )
+
+                        Label(
+                            "\(engine.screenshotCount) ekran görüntüsü",
+                            systemImage: "camera.viewfinder"
+                        )
+                    }
+                    .font(.caption)
+                    .foregroundStyle(.secondary)
+                } else {
+                    Text("Henüz çalışma klasörü seçilmedi.")
+                        .font(.caption)
+                        .foregroundStyle(.secondary)
+                }
+
+                ForEach(
+                    engine.indexedFiles.prefix(10)
+                ) { file in
+                    HStack(spacing: 7) {
+                        Image(systemName: file.isScreenshot ? "photo" : "doc")
+                            .foregroundStyle(
+                                file.isScreenshot ? Color.accentColor : Color.secondary
+                            )
+
+                        Text(file.name)
+                            .font(.caption2.monospaced())
+                            .lineLimit(1)
+                            .truncationMode(.middle)
+                    }
+                }
+
+                Text(
+                    "v0.4 güvenlik kuralı: KRALİ yalnızca senin NSOpenPanel ile seçtiğin klasörün doğrudan içindeki dosyaları taşıyabilir. Gerçek taşıma işleminden önce onay ister ve son işlemi geri alabilir."
+                )
+                .font(.caption2)
+                .foregroundStyle(.orange)
+                .padding(9)
+                .background(
+                    Color.orange.opacity(0.08)
+                )
+                .clipShape(
+                    RoundedRectangle(cornerRadius: 8)
+                )
+            }
+            .padding(14)
+        }
+    }
+
+    private func sectionTitle(_ title: String) -> some View {
+        Text(title.uppercased())
+            .font(.caption2.weight(.semibold))
+            .tracking(1.0)
+            .foregroundStyle(.secondary)
+    }
+}
+
+// MARK: - Voice UI
+
+private struct VoiceStatusView: View {
+    @ObservedObject var speech: SpeechController
+
+    var body: some View {
+        Group {
+            switch speech.state {
+            case .recording:
+                HStack(spacing: 8) {
+                    Circle()
+                        .fill(Color.red)
+                        .frame(width: 8, height: 8)
+
+                    Text(
+                        "Dinliyorum • \(formattedTime(speech.elapsedSeconds)) • tekrar mikrofon/stop tuşuna basınca kayıt bitecek."
+                    )
+                    .font(.caption)
+                    .foregroundStyle(.secondary)
+
+                    Spacer()
+
+                    Button("İptal") {
+                        speech.cancelRecording()
+                    }
+                    .buttonStyle(.borderless)
+                }
+
+            case .transcribing:
+                HStack(spacing: 8) {
+                    ProgressView()
+                        .controlSize(.small)
+
+                    Text("Ses yazıya çevriliyor…")
+                        .font(.caption)
+                        .foregroundStyle(.secondary)
+
+                    Spacer()
+                }
+
+            case .requestingPermission:
+                HStack(spacing: 8) {
+                    ProgressView()
+                        .controlSize(.small)
+
+                    Text("İzinler kontrol ediliyor…")
+                        .font(.caption)
+                        .foregroundStyle(.secondary)
+
+                    Spacer()
+                }
+
+            case .denied:
+                HStack {
+                    Text(
+                        "Mikrofon veya Konuşma Tanıma izni kapalı."
+                    )
+                    .font(.caption)
+                    .foregroundStyle(.orange)
+
+                    Spacer()
+
+                    Button("Ayarları Aç") {
+                        speech.openPrivacySettings()
+                    }
+                    .buttonStyle(.borderless)
+                }
+
+            case .failed(let message):
+                HStack(alignment: .top) {
+                    Image(systemName: "exclamationmark.triangle.fill")
+                        .foregroundStyle(.orange)
+
+                    Text(message)
+                        .font(.caption)
+                        .foregroundStyle(.orange)
+                        .textSelection(.enabled)
+
+                    Spacer()
+
+                    Button("Kapat") {
+                        speech.dismissError()
+                    }
+                    .buttonStyle(.borderless)
+                }
+
+            case .idle:
+                if !speech.statusText.isEmpty
+                    && speech.statusText != "Hazır" {
+                    HStack {
+                        Text(speech.statusText)
+                            .font(.caption)
+                            .foregroundStyle(.secondary)
+
+                        Spacer()
+                    }
+                }
+            }
+        }
+    }
+
+    private func formattedTime(_ seconds: Int) -> String {
+        String(
+            format: "%02d:%02d",
+            seconds / 60,
+            seconds % 60
+        )
+    }
+}
+
+private struct VoiceComposerView: View {
+    @ObservedObject var speech: SpeechController
+    @Binding var prompt: String
+    let onSend: (String) -> Void
+
+    var body: some View {
+        HStack(alignment: .bottom, spacing: 8) {
+            Button {
+                speech.microphoneTapped { text in
+                    prompt = ""
+                    onSend(text)
+                }
+            } label: {
+                Image(systemName: micIcon)
+                    .foregroundStyle(
+                        speech.isRecording
+                            ? Color.red
+                            : Color.primary
+                    )
+                    .frame(width: 26, height: 26)
+            }
+            .buttonStyle(.bordered)
+            .disabled(speech.isBusy)
+            .help(micHelp)
+
+            TextField(
+                "KRALİ'ye normal konuşur gibi görev ver…",
+                text: $prompt,
+                axis: .vertical
+            )
+            .textFieldStyle(.roundedBorder)
+            .lineLimit(1...5)
+            .onSubmit {
+                sendPrompt()
+            }
+
+            Button("Gönder") {
+                sendPrompt()
+            }
+            .buttonStyle(.borderedProminent)
+            .disabled(
+                prompt
+                    .trimmingCharacters(
+                        in: .whitespacesAndNewlines
+                    )
+                    .isEmpty
+            )
+        }
+    }
+
+    private var micIcon: String {
+        switch speech.state {
+        case .recording:
+            return "stop.circle.fill"
+        case .transcribing, .requestingPermission:
+            return "hourglass"
+        default:
+            return "mic.fill"
+        }
+    }
+
+    private var micHelp: String {
+        switch speech.state {
+        case .recording:
+            return "Kaydı durdur ve yazıya çevir"
+        case .transcribing:
+            return "Ses yazıya çevriliyor"
+        case .requestingPermission:
+            return "İzinler kontrol ediliyor"
+        default:
+            return "Ses kaydını başlat"
+        }
+    }
+
+    private func sendPrompt() {
+        let text = prompt
+            .trimmingCharacters(
+                in: .whitespacesAndNewlines
+            )
+
+        guard !text.isEmpty else { return }
+
+        prompt = ""
+        onSend(text)
+    }
+}
+
+private struct FlowLayout: View {
+    let items: [String]
+
+    var body: some View {
+        HStack(spacing: 6) {
+            ForEach(items, id: \.self) { item in
+                Text(item)
+                    .font(.caption2)
+                    .padding(.horizontal, 8)
+                    .padding(.vertical, 4)
+                    .background(
+                        Color.accentColor.opacity(0.12)
+                    )
+                    .overlay(
+                        Capsule()
+                            .stroke(
+                                Color.accentColor.opacity(0.30),
+                                lineWidth: 1
+                            )
+                    )
+                    .clipShape(Capsule())
+            }
+
+            Spacer()
+        }
+    }
+}
