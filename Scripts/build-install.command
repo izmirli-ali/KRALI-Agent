@@ -24,7 +24,42 @@ if [ ! -d "$PROJECT" ]; then
     exit 1
 fi
 
-echo "1/5  Yeni sürüm derleniyor..."
+echo "1/6  KRALİ marka ikonları hazırlanıyor..."
+
+ICON_SCRIPT="$ROOT/Scripts/generate-app-icon.swift"
+ICON_DIR="$ROOT/App/KRALIAgentNative/Assets.xcassets/AppIcon.appiconset"
+MASTER_ICON="$ICON_DIR/krali-master-1024.png"
+
+mkdir -p "$ICON_DIR"
+
+if ! xcrun swift "$ICON_SCRIPT" "$MASTER_ICON"; then
+    echo "❌ KRALİ ikonu üretilemedi."
+    exit 1
+fi
+
+make_icon() {
+    local size="$1"
+    local name="$2"
+
+    cp "$MASTER_ICON" "$ICON_DIR/$name"
+
+    if [ "$size" -ne 1024 ]; then
+        sips -z "$size" "$size" "$ICON_DIR/$name" >/dev/null
+    fi
+}
+
+make_icon 16   "icon_16x16.png"
+make_icon 32   "icon_16x16@2x.png"
+make_icon 32   "icon_32x32.png"
+make_icon 64   "icon_32x32@2x.png"
+make_icon 128  "icon_128x128.png"
+make_icon 256  "icon_128x128@2x.png"
+make_icon 256  "icon_256x256.png"
+make_icon 512  "icon_256x256@2x.png"
+make_icon 512  "icon_512x512.png"
+make_icon 1024 "icon_512x512@2x.png"
+
+echo "2/6  Yeni sürüm derleniyor..."
 rm -rf "$BUILD_DIR"
 
 if ! xcodebuild \
@@ -45,14 +80,14 @@ if [ ! -d "$PRODUCT" ]; then
     exit 1
 fi
 
-echo "2/5  Mevcut sürüm yedekleniyor..."
+echo "3/6  Mevcut sürüm yedekleniyor..."
 if [ -d "$TARGET" ]; then
     ditto "$TARGET" "$BACKUP"
     echo "✓ Yedek: $BACKUP"
 fi
 
-echo "3/5  Çalışan KRALİ kapatılıyor..."
-osascript -e 'tell application "KRALİ Agent" to quit' 2>/dev/null || true
+echo "4/6  Çalışan KRALİ kapatılıyor..."
+osascript -e 'tell application id "com.aliihsancanuysal.kraliagent" to quit' 2>/dev/null || true
 
 for i in 1 2 3 4 5; do
     if ! pgrep -x "$PROCESS_NAME" >/dev/null 2>&1; then
@@ -67,7 +102,7 @@ if pgrep -x "$PROCESS_NAME" >/dev/null 2>&1; then
     sleep 1
 fi
 
-echo "4/5  Yeni KRALİ kuruluyor..."
+echo "5/6  Yeni KRALİ kuruluyor..."
 if [ -w "/Applications" ]; then
     rm -rf "$TARGET"
     ditto "$PRODUCT" "$TARGET"
@@ -83,16 +118,16 @@ echo "İmza kontrolü:"
 codesign --verify --deep --strict "$TARGET"
 codesign -dv --verbose=2 "$TARGET" 2>&1 | grep -E "Identifier|TeamIdentifier|Authority" || true
 
-echo "5/5  KRALİ yeniden açılıyor..."
+echo "6/6  KRALİ yeniden açılıyor..."
 open "$TARGET"
 sleep 2
 
 if pgrep -x "$PROCESS_NAME" >/dev/null 2>&1; then
     echo ""
-    echo "✅ KRALİ Agent güncellendi ve yeniden açıldı."
+    echo "✅ KRALİ güncellendi ve yeniden açıldı."
     echo "📍 $TARGET"
 else
     echo ""
     echo "⚠️ Güncelleme kuruldu ancak uygulama otomatik açılamadı."
-    echo "Finder > Applications > KRALİ Agent üzerinden açabilirsin."
+    echo "Finder > Applications > KRALİ üzerinden açabilirsin."
 fi
