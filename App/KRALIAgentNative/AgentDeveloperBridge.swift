@@ -12,7 +12,28 @@ struct DeveloperAgentStatus: Hashable {
     }
 
     var isSetupRequired: Bool {
-        state == "setup_required"
+        [
+            "setup_required",
+            "setup_node",
+            "setup_homebrew",
+            "setup_node_upgrade",
+            "setup_cline"
+        ].contains(state)
+    }
+
+    var setupHint: String? {
+        switch state {
+        case "setup_node":
+            return "Terminal: brew install node"
+        case "setup_homebrew":
+            return "Önce Homebrew kur; ardından brew install node"
+        case "setup_node_upgrade":
+            return "Node.js 20+ gerekiyor; Homebrew kullanıyorsan brew upgrade node"
+        case "setup_cline", "setup_required":
+            return "Terminal: npm install -g cline → cline auth"
+        default:
+            return nil
+        }
     }
 }
 
