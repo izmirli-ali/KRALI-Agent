@@ -6,6 +6,7 @@ struct AgentVerificationSnapshot {
     let folderResultCount: Int
     let hasPendingAction: Bool
     let hasUndoAction: Bool
+    let unavailableCapabilityIDs: Set<String>
 }
 
 struct AgentVerifier {
@@ -54,9 +55,17 @@ struct AgentVerifier {
                 )
             }
 
+            if snapshot.unavailableCapabilityIDs.contains("perception.media") {
+                return AgentVerificationResult(
+                    state: .partial,
+                    summary: "Arama ve kısa liste tamamlandı; ancak görsel / video algısı bağlı olmadığı için içerik uygunluğu doğrulanamadı. Sonuç kısmi.",
+                    fallback: nil
+                )
+            }
+
             return AgentVerificationResult(
                 state: .passed,
-                summary: "Çok adımlı görev tamamlandı; kısa listede \(snapshot.fileResultCount) aday doğrulandı.",
+                summary: "Çok adımlı görev tamamlandı; kısa listede \(snapshot.fileResultCount) aday ve istenen değerlendirme kapsamı doğrulandı.",
                 fallback: nil
             )
 
