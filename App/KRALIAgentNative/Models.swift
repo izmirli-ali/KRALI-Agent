@@ -19,6 +19,8 @@ struct FileRecord: Identifiable, Hashable {
     let relativePath: String
     let fileExtension: String
     let isScreenshot: Bool
+    let creationDate: Date?
+    let modificationDate: Date?
 
     var id: String { url.path }
 }
