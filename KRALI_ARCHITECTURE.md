@@ -116,6 +116,8 @@ Yerel dosya algısı, güvenli aksiyonlar, intent, tarih çözümleme, bağlam v
 
 **v0.7.8 capability learning loop:** Core bir capability açığını yalnızca hata olarak bırakmaz. Eksik yetenek için ayrı bir acquisition planı üretir: araştırma hedefi → ön koşullar → güvenli prototip → test → kullanıcı onayı → etkinleştirme. Web araştırma capability'si bağlıysa resmi kaynak araştırması o görevin alt görevi olabilir. Web araştırmanın kendisi gibi bootstrap yetenekleri kendi kendine web üzerinden edinilmiş gibi gösterilmez; gereken entegrasyon açıkça belirtilir. KRALİ internetten rastgele kod indirip çalıştırmaz ve yeni kod/izinleri kullanıcı onayı olmadan etkinleştirmez.
 
+**v0.7.9 persistent learning backlog:** Capability gap artık yalnızca tek tur bağlamında kalmaz. Öğrenme kuyruğu eksik yeteneğin ilk görülme zamanını, kaç görevde tekrar ihtiyaç duyulduğunu, araştırma hedefini, ön koşulu ve sonraki adımı yerel olarak saklar. Aynı capability daha sonra gerçekten kullanılabilir hale geldiğinde kayıt `enabled` durumuna taşınabilir. Böylece KRALİ hangi yetenekleri tekrar tekrar öğrenmesi gerektiğini oturumlar arasında takip eder.
+
 ### 0.8.x — Memory
 Kısa süreli konuşma belleği ile kalıcı kullanıcı tercihlerini ayırma; bağlam özetleme.
 
