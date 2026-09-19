@@ -161,6 +161,8 @@ Varsayılan provider/model `cline + nvidia/nemotron-3.5-lightning` olarak sabitl
 
 **v0.7.21 Developer setup diagnostics:** Developer Agent kurulumu artık tek bir “Cline yok” durumuna indirgenmez. Node.js/npm yokluğu, eski Node sürümü ve Cline CLI eksikliği ayrı durumlar olarak raporlanır. Cline CLI'nin resmi kurulum gereksinimine göre Node.js 20+ kontrol edilir; uygun kurulum adımı UI'da doğrudan gösterilir.
 
+**v0.7.22 ChatGPT Subscription Developer Agent + auto updater check:** Kullanıcının ek API ücreti istememesi nedeniyle Developer Agent'ın varsayılan provider'ı Cline içindeki `openai-codex` / ChatGPT Subscription OAuth olarak değiştirilir. Model adı script içinde sabitlenmez; `cline auth` sırasında ChatGPT aboneliği için seçilen model provider ayarından yeniden kullanılır. Böylece ayrı OpenAI API anahtarı veya Cline kredi bakiyesi gerektiren yola sessizce geçilmez. Updater da uygulama açılışından kısa süre sonra otomatik `origin/main` + `VERSION` kontrolü yapar.
+
 ### 0.8.x — Memory
 Kısa süreli konuşma belleği ile kalıcı kullanıcı tercihlerini ayırma; bağlam özetleme.
 
