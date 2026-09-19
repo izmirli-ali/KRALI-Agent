@@ -40,6 +40,9 @@ final class AgentEngine: ObservableObject {
     @Published var trainingLabReport: TrainingLabReport?
     @Published var trainingLabStatus = "Henüz Training Lab çalıştırılmadı."
     @Published var trainingLabBusy = false
+    @Published var liveResearchEvalReport: LiveResearchEvalReport?
+    @Published var liveResearchEvalStatus = "Henüz gerçek internet kalite testi yapılmadı."
+    @Published var liveResearchEvalBusy = false
     @Published var localIntelligenceState: LocalIntelligenceState = .checking
 
     @Published var voiceOutputEnabled = true {
@@ -71,6 +74,8 @@ final class AgentEngine: ObservableObject {
     private let mentorTraceStore = MentorTraceStore()
     private let trainingLab = AgentTrainingLab()
     private let trainingLabStore = TrainingLabStore()
+    private let liveResearchEval = AgentLiveResearchEval()
+    private let liveResearchEvalStore = LiveResearchEvalStore()
     private let localIntelligence = AgentLocalIntelligence()
     private var lastDecision: AgentDecision?
 
@@ -108,12 +113,23 @@ final class AgentEngine: ObservableObject {
             }
         }
 
+        liveResearchEvalReport = liveResearchEvalStore.load()
+        if let report = liveResearchEvalReport {
+            liveResearchEvalStatus =
+                "Son gerçek test: \(report.passed)/\(report.total) geçti"
+
+            mentorTraceReady = true
+        }
+
         let currentVersion = Bundle.main.object(
             forInfoDictionaryKey: "CFBundleShortVersionString"
         ) as? String ?? "unknown"
 
         let shouldAutoRunTrainingLab =
             trainingLabReport?.appVersion != currentVersion
+
+        let shouldAutoRunLiveResearchEval =
+            liveResearchEvalReport?.appVersion != currentVersion
 
         log("KRALİ Core hazır")
         log("Dinamik hedef ve kabiliyet yönlendirme aktif")
@@ -132,6 +148,15 @@ final class AgentEngine: ObservableObject {
                     for: .milliseconds(650)
                 )
                 self?.runTrainingLab()
+            }
+        }
+
+        if shouldAutoRunLiveResearchEval {
+            Task { @MainActor [weak self] in
+                try? await Task.sleep(
+                    for: .seconds(2)
+                )
+                self?.runLiveResearchEval()
             }
         }
     }
@@ -937,6 +962,46 @@ final class AgentEngine: ObservableObject {
         }
     }
 
+    func runLiveResearchEval() {
+        guard !liveResearchEvalBusy else { return }
+
+        liveResearchEvalBusy = true
+        liveResearchEvalStatus =
+            "Gerçek internet araştırma kalitesi test ediliyor…"
+        log("Live Research Eval başladı")
+
+        Task {
+            let report = await liveResearchEval.run()
+            liveResearchEvalReport = report
+
+            do {
+                try liveResearchEvalStore.save(report)
+
+                liveResearchEvalStatus =
+                    "\(report.passed)/\(report.total) gerçek araştırma testi geçti"
+
+                mentorTraceReady = true
+                mentorTraceStatus =
+                    "Live Research Eval raporu hazır • Mentora gönderilebilir"
+
+                log(
+                    "Live Research Eval tamamlandı: " +
+                    String(report.passed) +
+                    "/" +
+                    String(report.total)
+                )
+            } catch {
+                liveResearchEvalStatus =
+                    "Live Research Eval tamamlandı fakat rapor kaydedilemedi: " +
+                    error.localizedDescription
+
+                log("Live Research Eval raporu kaydedilemedi")
+            }
+
+            liveResearchEvalBusy = false
+        }
+    }
+
     func syncMentorTrace() {
         guard !mentorSyncBusy else { return }
 
@@ -946,11 +1011,14 @@ final class AgentEngine: ObservableObject {
         let hasTrainingReport = fileManager.fileExists(
             atPath: trainingLabStore.outputURL.path
         )
+        let hasLiveEvalReport = fileManager.fileExists(
+            atPath: liveResearchEvalStore.outputURL.path
+        )
 
-        guard hasTrace || hasTrainingReport else {
+        guard hasTrace || hasTrainingReport || hasLiveEvalReport else {
             mentorTraceReady = false
             mentorTraceStatus =
-                "Önce bir KRALİ görevi veya Training Lab çalıştır."
+                "Önce bir KRALİ görevi, Training Lab veya Live Research Eval çalıştır."
             return
         }
 
