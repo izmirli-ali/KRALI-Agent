@@ -4,6 +4,7 @@ struct ContentView: View {
     @EnvironmentObject private var engine: AgentEngine
     @State private var prompt = ""
     @State private var memoryDraft = ""
+    @StateObject private var updater = UpdateController()
 
     var body: some View {
         VStack(spacing: 0) {
@@ -41,21 +42,45 @@ struct ContentView: View {
                 Text("KRALİ Agent")
                     .font(.headline)
 
-                Text("Native macOS demo v0.4 • ilk gerçek File Agent aksiyonu")
+                Text("Native macOS • v\(updater.currentVersion) • standalone agent")
                     .font(.caption)
                     .foregroundStyle(.secondary)
             }
 
             Spacer()
 
-            HStack(spacing: 7) {
+            HStack(spacing: 8) {
                 Circle()
-                    .fill(Color.green)
+                    .fill(updater.updateAvailable ? Color.orange : Color.green)
                     .frame(width: 8, height: 8)
 
-                Text("Local agent aktif")
+                Text(updater.statusText)
                     .font(.caption)
-                    .foregroundStyle(.green)
+                    .foregroundStyle(updater.updateAvailable ? Color.orange : Color.green)
+
+                Button {
+                    updater.checkForUpdates()
+                } label: {
+                    if updater.isChecking {
+                        ProgressView()
+                            .controlSize(.small)
+                    } else {
+                        Image(systemName: "arrow.clockwise")
+                    }
+                }
+                .buttonStyle(.bordered)
+                .controlSize(.small)
+                .disabled(updater.isChecking || updater.isLaunchingUpdate)
+                .help("GitHub güncellemelerini kontrol et")
+
+                if updater.updateAvailable {
+                    Button("Güncelle") {
+                        updater.updateNow()
+                    }
+                    .buttonStyle(.borderedProminent)
+                    .controlSize(.small)
+                    .disabled(updater.isLaunchingUpdate)
+                }
             }
         }
         .padding(.horizontal, 16)
@@ -381,7 +406,7 @@ struct ContentView: View {
                 }
 
                 Text(
-                    "v0.4 güvenlik kuralı: KRALİ yalnızca senin NSOpenPanel ile seçtiğin klasörün doğrudan içindeki dosyaları taşıyabilir. Gerçek taşıma işleminden önce onay ister ve son işlemi geri alabilir."
+                    "v0.5.1: KRALİ artık GitHub güncellemesini uygulama içinden kontrol edebilir. File Agent güvenlik kuralı korunur: yalnızca seçtiğin klasörün doğrudan içindeki dosyaları taşır, önce onay ister ve son taşıma işlemini geri alabilir."
                 )
                 .font(.caption2)
                 .foregroundStyle(.orange)
