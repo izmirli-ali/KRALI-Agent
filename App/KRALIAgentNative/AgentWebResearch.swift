@@ -93,17 +93,23 @@ actor AgentWebResearchService {
         let safeLimit = max(2, min(limit, 8))
         let queryPlan = queryPlanner.plan(query)
         let variants = queryPlan.variants
-        let requiredCoverage = min(
-            2,
-            max(1, queryPlan.conceptGroups.count)
-        )
+        let requiredCoverage = queryPlan.isEntityResearch
+            ? 1
+            : min(
+                2,
+                max(1, queryPlan.conceptGroups.count)
+            )
+
+        let minimumVariantsToSearch = queryPlan.isEntityResearch
+            ? min(4, variants.count)
+            : 1
 
         var failures: [String] = []
         var providerNames: [String] = []
         var candidates: [ScoredResult] = []
         var seenURLs = Set<String>()
 
-        for variant in variants {
+        for (variantIndex, variant) in variants.enumerated() {
             for provider in Provider.allCases {
                 do {
                     let payload = try await fetch(
@@ -117,6 +123,7 @@ actor AgentWebResearchService {
                         conceptGroups: queryPlan.conceptGroups,
                         mandatoryConceptGroups: queryPlan.mandatoryConceptGroups,
                         preferredDomains: queryPlan.preferredDomains,
+                        entityTerms: queryPlan.entityTerms,
                         limit: safeLimit * 2
                     )
 
@@ -152,17 +159,25 @@ actor AgentWebResearchService {
                 }
             }
 
-            if candidates.filter({ $0.conceptCoverage >= requiredCoverage }).count >= safeLimit {
+            let searchedEnoughVariants =
+                variantIndex + 1 >= minimumVariantsToSearch
+
+            if searchedEnoughVariants &&
+               candidates.filter({
+                   $0.conceptCoverage >= requiredCoverage
+               }).count >= safeLimit {
                 break
             }
         }
 
-        let relevant = candidates
-            .filter {
-                $0.conceptCoverage >= requiredCoverage
-            }
-            .prefix(safeLimit)
-            .map(\.result)
+        let relevantCandidates = candidates.filter {
+            $0.conceptCoverage >= requiredCoverage
+        }
+
+        let relevant = selectDiverseResults(
+            relevantCandidates,
+            limit: safeLimit
+        )
 
         guard !relevant.isEmpty else {
             if failures.count == Provider.allCases.count * variants.count {
@@ -179,7 +194,7 @@ actor AgentWebResearchService {
             provider: providerNames.isEmpty
                 ? "Web bootstrap"
                 : providerNames.joined(separator: " + "),
-            results: Array(relevant),
+            results: relevant,
             fetchedAt: Date()
         )
     }
@@ -287,6 +302,7 @@ actor AgentWebResearchService {
         conceptGroups: [[String]],
         mandatoryConceptGroups: [[String]],
         preferredDomains: [String],
+        entityTerms: [String],
         limit: Int
     ) -> [ScoredResult] {
         let raw: [WebResearchResult]
@@ -352,7 +368,8 @@ actor AgentWebResearchService {
                 result,
                 conceptGroups: conceptGroups,
                 mandatoryConceptGroups: mandatoryConceptGroups,
-                preferredDomains: preferredDomains
+                preferredDomains: preferredDomains,
+                entityTerms: entityTerms
             )
 
             guard evaluation.mandatorySatisfied else {
@@ -522,7 +539,8 @@ actor AgentWebResearchService {
         _ result: WebResearchResult,
         conceptGroups: [[String]],
         mandatoryConceptGroups: [[String]],
-        preferredDomains: [String]
+        preferredDomains: [String],
+        entityTerms: [String]
     ) -> (score: Int, coverage: Int, mandatorySatisfied: Bool) {
         let title = normalize(result.title)
         let domain = normalize(result.domain)
@@ -538,6 +556,18 @@ actor AgentWebResearchService {
                 .contains {
                     !$0.isEmpty && combined.contains($0)
                 }
+        }
+
+        let entitySatisfied =
+            entityTerms.isEmpty ||
+            entityTerms
+                .map(normalize)
+                .contains {
+                    !$0.isEmpty && combined.contains($0)
+                }
+
+        guard mandatorySatisfied && entitySatisfied else {
+            return (0, 0, false)
         }
 
         for group in conceptGroups {
@@ -589,6 +619,53 @@ actor AgentWebResearchService {
         }
 
         return (score, coverage, mandatorySatisfied)
+    }
+
+    private func selectDiverseResults(
+        _ candidates: [ScoredResult],
+        limit: Int
+    ) -> [WebResearchResult] {
+        var selected: [WebResearchResult] = []
+        var deferred: [ScoredResult] = []
+        var domainCounts: [String: Int] = [:]
+
+        for candidate in candidates {
+            guard selected.count < limit else {
+                break
+            }
+
+            let domain = normalize(
+                candidate.result.domain
+            )
+            let count = domainCounts[domain, default: 0]
+
+            if count == 0 {
+                selected.append(candidate.result)
+                domainCounts[domain] = 1
+            } else {
+                deferred.append(candidate)
+            }
+        }
+
+        for candidate in deferred {
+            guard selected.count < limit else {
+                break
+            }
+
+            let domain = normalize(
+                candidate.result.domain
+            )
+            let count = domainCounts[domain, default: 0]
+
+            guard count < 2 else {
+                continue
+            }
+
+            selected.append(candidate.result)
+            domainCounts[domain] = count + 1
+        }
+
+        return selected
     }
 
     private func isJunkResult(
