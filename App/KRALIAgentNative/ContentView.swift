@@ -303,7 +303,8 @@ struct ContentView: View {
                                     .font(.caption)
                                     .foregroundStyle(
                                         (step.state == .attention ||
-                                         step.state == .partial)
+                                         step.state == .partial ||
+                                         step.state == .blocked)
                                             ? Color.orange
                                             : Color.secondary
                                     )
@@ -689,7 +690,7 @@ struct ContentView: View {
                 }
 
                 Text(
-                    "v0.7.6: Aktif rota artık eski intent/modül isimlerinden değil Goal Contract + seçilen capability’lerden üretiliyor. Alt seviye dosya araması rotayı geriye çevirmiyor. Böylece rota Core → Goal → Context → Plan → Files/Perception/Research… → Verify → Response şeklinde göreve göre dinamik oluşuyor."
+                    "v0.7.7: Plan fidelity eklendi. KRALİ artık bağlı olmayan bir capability gerektiren adımı yanlışlıkla tamamlandı göstermiyor; bu adımlar “blocked” kalıyor. Eksik capability bulunan planlar otomatik olarak doğrulamaya giriyor ve hedefin tamamı yürütülemiyorsa sonuç “kısmi” oluyor."
                 )
                 .font(.caption2)
                 .foregroundStyle(.orange)
