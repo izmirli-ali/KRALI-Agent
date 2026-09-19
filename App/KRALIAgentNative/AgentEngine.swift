@@ -511,6 +511,8 @@ final class AgentEngine: ObservableObject {
             results = indexedFiles.filter { projectExtensions.contains($0.fileExtension) }
         case .document:
             results = indexedFiles.filter { documentExtensions.contains($0.fileExtension) }
+        case .folder:
+            results = []
         case .any:
             let query = fileNameQuery(from: text)
             title = query.isEmpty ? decision.goal : "“\(query)” araması"
