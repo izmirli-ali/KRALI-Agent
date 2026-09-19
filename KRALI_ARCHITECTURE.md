@@ -67,7 +67,9 @@ Input
   → Goal
   → Principles
   → Planner / Alternatives
-  → Router
+  → Capability Router
+  → Capability Gap Check
+  → Research / Learn (gerekiyorsa)
   → Execute
   → Verify
   → Response
@@ -111,6 +113,8 @@ Yerel dosya algısı, güvenli aksiyonlar, intent, tarih çözümleme, bağlam v
 **v0.7.6 capability-derived route:** Görünür ve iç operasyon rotası legacy intent etiketlerinden ayrılır. Route Builder; Goal Contract, seçilen capability’ler ve doğrulama ihtiyacından Core → Goal → Context → Plan → capability stages → Verify → Response zincirini dinamik kurar. Alt seviye executor fonksiyonları artık üst seviye reasoning rotasını ezemez.
 
 **v0.7.7 plan fidelity / blocked capabilities:** Plan adımlarının durumu capability readiness ile bağlanır. Bağlı olmayan bir capability gerektiren action “completed” olamaz; `blocked` durumda kalır. Eksik capability bulunan görevler zorunlu olarak Verifier'dan geçer ve hedef bütünü tamamlanmadıysa `partial` sonucuna düşer. Böylece UI, Planner ve gerçek çalışma kabiliyeti aynı gerçeği taşır.
+
+**v0.7.8 capability learning loop:** Core bir capability açığını yalnızca hata olarak bırakmaz. Eksik yetenek için ayrı bir acquisition planı üretir: araştırma hedefi → ön koşullar → güvenli prototip → test → kullanıcı onayı → etkinleştirme. Web araştırma capability'si bağlıysa resmi kaynak araştırması o görevin alt görevi olabilir. Web araştırmanın kendisi gibi bootstrap yetenekleri kendi kendine web üzerinden edinilmiş gibi gösterilmez; gereken entegrasyon açıkça belirtilir. KRALİ internetten rastgele kod indirip çalıştırmaz ve yeni kod/izinleri kullanıcı onayı olmadan etkinleştirmez.
 
 ### 0.8.x — Memory
 Kısa süreli konuşma belleği ile kalıcı kullanıcı tercihlerini ayırma; bağlam özetleme.
