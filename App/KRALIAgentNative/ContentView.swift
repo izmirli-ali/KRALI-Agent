@@ -299,6 +299,12 @@ struct ContentView: View {
                                     .font(.caption2)
                                     .foregroundStyle(.secondary)
 
+                                if let recovery = engine.recoverySummary {
+                                    Text("Otomatik Plan B: \(recovery)")
+                                        .font(.caption2)
+                                        .foregroundStyle(.secondary)
+                                }
+
                                 if let fallback = engine.fallbackPlan,
                                    engine.verificationState == .attention {
                                     Text("Plan B: \(fallback)")
@@ -608,7 +614,7 @@ struct ContentView: View {
                 }
 
                 Text(
-                    "v0.7.0: Planner + Verifier temeli eklendi. KRALİ artık her görev için Anla → Bağlam + Plan → Uygula → Doğrula akışını görünür biçimde yürütür. Gerçek araç işlemlerinden sonra sonucu yeniden kontrol eder; doğrulama sorununda Plan B üretir."
+                    "v0.7.1: Verifier artık “işlem çalıştı” ile “hedef gerçekten gerçekleşti” arasını ayırır. Salt-okunur arama 0 sonuç verirse ve tarih / önceki sonuç filtresi varsa KRALİ güvenli Plan B olarak kapsamı bir kez otomatik genişletir, yeniden arar ve sonucu tekrar doğrular."
                 )
                 .font(.caption2)
                 .foregroundStyle(.orange)
