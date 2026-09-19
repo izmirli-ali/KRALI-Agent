@@ -459,6 +459,40 @@ struct ContentView: View {
                     .clipShape(RoundedRectangle(cornerRadius: 10))
                 }
 
+                if !engine.webResearchEvidence.isEmpty {
+                    sectionTitle("Kaynak kanıtı")
+
+                    VStack(alignment: .leading, spacing: 8) {
+                        ForEach(engine.webResearchEvidence.prefix(4)) { evidence in
+                            VStack(alignment: .leading, spacing: 4) {
+                                HStack(spacing: 6) {
+                                    Image(systemName: "doc.text.magnifyingglass")
+                                        .font(.caption)
+                                        .foregroundStyle(.secondary)
+
+                                    Text(evidence.source.title)
+                                        .font(.caption.weight(.medium))
+                                        .lineLimit(2)
+
+                                    Spacer()
+
+                                    Text("\(evidence.conceptCoverage) kavram")
+                                        .font(.caption2)
+                                        .foregroundStyle(.secondary)
+                                }
+
+                                Text(evidence.excerpt)
+                                    .font(.caption2)
+                                    .foregroundStyle(.secondary)
+                                    .lineLimit(5)
+                            }
+                        }
+                    }
+                    .padding(10)
+                    .background(Color(nsColor: .controlBackgroundColor))
+                    .clipShape(RoundedRectangle(cornerRadius: 10))
+                }
+
                 if !engine.capabilityLearningBacklog.isEmpty {
                     sectionTitle("Öğrenme kuyruğu")
 
@@ -812,7 +846,7 @@ struct ContentView: View {
                 }
 
                 Text(
-                    "v0.7.13: Semantic Research Query Planner eklendi. KRALİ araştırma sorusunu yalnızca kelime eşleşmesiyle değerlendirmiyor; platform, medya, analiz ve teknoloji gibi kavram gruplarını çıkarıp İngilizce teknik/resmi dokümantasyon sorguları da üretiyor. Sonuçların en az iki ayrı kavramı karşılaması gerekiyor; yalnızca “macOS” geçen alakasız sayfalar eleniyor."
+                    "v0.7.14: Deep Source Reader eklendi. KRALİ artık yalnızca arama başlıklarını toplamıyor; en alakalı sayfaların içine girip gerçek metni okuyor, sorguyla ilgili kanıt cümlelerini çıkarıyor ve Verifier tam başarı için en az iki kaynaktan sayfa içeriği kanıtı istiyor. Sağ panelde “Kaynak kanıtı” bölümü görünür."
                 )
                 .font(.caption2)
                 .foregroundStyle(.orange)
