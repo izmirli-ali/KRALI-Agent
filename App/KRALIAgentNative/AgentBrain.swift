@@ -4,6 +4,7 @@ enum AgentIntentKind {
     case conversation
     case assessWorkspace
     case fileSearch
+    case compoundFileTask
     case openPreviousResult
     case contextSuggestion
     case organizeScreenshots
@@ -237,6 +238,34 @@ struct AgentBrain {
             )
         }
 
+        if isCompoundFileTask(text) {
+            let target = resolveTarget(text)
+            let dateResolution = resolveDate(text, now: now)
+            let sort: AgentSortMode = containsAny(
+                text,
+                ["son eklenen", "en yeni", "en yenilerini", "en son", "son çekilen", "son cekilen", "latest"]
+            ) ? .newestFirst : .relevance
+
+            return AgentDecision(
+                intent: .compoundFileTask,
+                target: target,
+                dateRange: dateResolution.range,
+                dateField: resolveDateField(text),
+                sortMode: sort,
+                route: ["Core", "Intent", "Context", "Planner", "File Search", "Synthesis"],
+                goal: "Çok adımlı dosya görevini yürüt",
+                selectedPlan: "Hedef dosyaları bul; istenen ölçüte göre kısa liste oluştur; mevcut metadata ile değerlendir; sonucu doğrula",
+                alternatives: [
+                    "Sadece adayları listele",
+                    "En yeni adayları kısa listele",
+                    "Görüntü içeriği analizi eklenene kadar metadata temelli ön seçim yap"
+                ],
+                proactiveSuggestion: nil,
+                usePreviousResults: hasContextReference(text) && context.previousFileResultCount > 0,
+                resultSelection: nil
+            )
+        }
+
         if isFileSearchIntent(text) {
             let target = resolveTarget(text)
             let dateResolution = resolveDate(text, now: now)
@@ -402,6 +431,37 @@ struct AgentBrain {
         ])
 
         return target != .any && filterAction
+    }
+
+    private func isCompoundFileTask(_ text: String) -> Bool {
+        let target = resolveTarget(text)
+
+        guard target != .any, target != .folder else {
+            return false
+        }
+
+        let searchAction = containsAny(text, [
+            "bul", "ara", "göster", "goster", "listele", "incele", "getir"
+        ])
+
+        let selectionAction = containsAny(text, [
+            "seç", "sec", "seçelim", "secelim", "en yenilerini",
+            "en iyilerini", "ayırt", "ayirt", "daralt"
+        ])
+
+        let assessmentAction = containsAny(text, [
+            "uygun", "değerlendir", "degerlendir", "hangileri",
+            "hangisi", "öner", "oner", "seçmeye değer", "secmeye deger"
+        ])
+
+        let sequenceMarker = containsAny(text, [
+            "sonra", "ardından", "ardindan", "ve sonra",
+            "ve ardından", "ve ardindan", ","
+        ])
+
+        return searchAction &&
+            sequenceMarker &&
+            (selectionAction || assessmentAction)
     }
 
     private func isFileSearchIntent(_ text: String) -> Bool {
