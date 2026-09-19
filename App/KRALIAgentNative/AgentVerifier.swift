@@ -39,6 +39,27 @@ struct AgentVerifier {
                 fallback: nil
             )
 
+        case .compoundFileTask:
+            guard snapshot.hasWorkspace else {
+                return attention(
+                    "Çok adımlı görev yürütülemedi çünkü aktif çalışma alanı yok.",
+                    fallback: "Önce çalışma klasörü seç ve zinciri yeniden çalıştır."
+                )
+            }
+
+            guard snapshot.fileResultCount > 0 else {
+                return attention(
+                    "Zincirin arama / kısa liste aşaması sonuç üretmedi.",
+                    fallback: "Tarih veya önceki-sonuç kısıtını kaldırıp aynı dosya hedefinde zinciri bir kez daha dene."
+                )
+            }
+
+            return AgentVerificationResult(
+                state: .passed,
+                summary: "Çok adımlı görev tamamlandı; kısa listede \(snapshot.fileResultCount) aday doğrulandı.",
+                fallback: nil
+            )
+
         case .organizeScreenshots:
             if snapshot.hasPendingAction {
                 return AgentVerificationResult(
