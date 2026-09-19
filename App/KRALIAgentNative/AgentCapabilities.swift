@@ -135,10 +135,12 @@ struct AgentCapabilityRegistry {
     func select(
         for rawText: String,
         decision: AgentDecision,
-        context: AgentContextSnapshot
+        context: AgentContextSnapshot,
+        goal: AgentGoalProfile
     ) -> [AgentCapability] {
         let text = normalize(rawText)
         var ids = ["core.reasoning", "context.local"]
+        ids += goal.requiredCapabilityIDs.sorted()
 
         switch decision.intent {
         case .fileSearch:
