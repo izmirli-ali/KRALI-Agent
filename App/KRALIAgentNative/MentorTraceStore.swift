@@ -204,7 +204,7 @@ struct MentorTraceStore {
             .appendingPathComponent(
                 formatter.string(from: trace.createdAt) +
                 "-" +
-                trace.traceID.prefix(8) +
+                String(trace.traceID.prefix(8)) +
                 ".json"
             )
 
