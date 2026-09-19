@@ -143,6 +143,14 @@ struct AgentGoalInterpreter {
             capabilityIDs.insert("mail.work")
         }
 
+        if containsAny(text, [
+            "siteye gir", "web sitesine gir", "sayfayı aç", "sayfayi ac",
+            "tarayıcıda", "tarayicida", "tıkla", "tikla",
+            "formu doldur", "sayfaları incele", "sayfalari incele"
+        ]) {
+            capabilityIDs.insert("browser.control")
+        }
+
         if containsAny(text, ["aç", "ac", "finder'da", "finderda"]) &&
            (context.previousFileResultCount > 0 || context.previousFolderResultCount > 0) {
             outcomes.insert(.open)
