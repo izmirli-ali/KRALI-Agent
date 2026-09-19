@@ -1,5 +1,10 @@
 import Foundation
 
+enum ChatInputSource {
+    case text
+    case voice
+}
+
 struct ChatMessage: Identifiable, Hashable {
     enum Role { case user, assistant }
     let id = UUID()
