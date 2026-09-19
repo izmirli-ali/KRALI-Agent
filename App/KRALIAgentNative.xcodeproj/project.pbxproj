@@ -13,6 +13,7 @@
 		A10000000000000000000004 /* SpeechController.swift in Sources */ = {isa = PBXBuildFile; fileRef = B10000000000000000000004 /* SpeechController.swift */; };
 		A10000000000000000000005 /* Models.swift in Sources */ = {isa = PBXBuildFile; fileRef = B10000000000000000000005 /* Models.swift */; };
 		A10000000000000000000006 /* UpdateController.swift in Sources */ = {isa = PBXBuildFile; fileRef = B10000000000000000000006 /* UpdateController.swift */; };
+		A10000000000000000000007 /* AgentBrain.swift in Sources */ = {isa = PBXBuildFile; fileRef = B10000000000000000000007 /* AgentBrain.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
@@ -23,6 +24,7 @@
 		B10000000000000000000004 /* SpeechController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SpeechController.swift; sourceTree = "<group>"; };
 		B10000000000000000000005 /* Models.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Models.swift; sourceTree = "<group>"; };
 		B10000000000000000000006 /* UpdateController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = UpdateController.swift; sourceTree = "<group>"; };
+		B10000000000000000000007 /* AgentBrain.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AgentBrain.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -53,6 +55,7 @@
 				B10000000000000000000004 /* SpeechController.swift */,
 				B10000000000000000000005 /* Models.swift */,
 				B10000000000000000000006 /* UpdateController.swift */,
+				B10000000000000000000007 /* AgentBrain.swift */,
 			);
 			path = KRALIAgentNative;
 			sourceTree = "<group>";
@@ -140,6 +143,7 @@
 				A10000000000000000000004 /* SpeechController.swift in Sources */,
 				A10000000000000000000005 /* Models.swift in Sources */,
 				A10000000000000000000006 /* UpdateController.swift in Sources */,
+				A10000000000000000000007 /* AgentBrain.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -175,7 +179,7 @@
 			buildSettings = {
 				CODE_SIGN_STYLE = Automatic;
 				COMBINE_HIDPI_IMAGES = YES;
-				CURRENT_PROJECT_VERSION = 11;
+				CURRENT_PROJECT_VERSION = 12;
 				DEVELOPMENT_TEAM = 65244UMFCK;
 				ENABLE_HARDENED_RUNTIME = NO;
 				ENABLE_PREVIEWS = YES;
@@ -189,7 +193,7 @@
 					"@executable_path/../Frameworks",
 				);
 				MACOSX_DEPLOYMENT_TARGET = 14.0;
-				MARKETING_VERSION = 0.6.2;
+				MARKETING_VERSION = 0.6.3;
 				PRODUCT_BUNDLE_IDENTIFIER = com.aliihsancanuysal.kraliagent;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				SDKROOT = macosx;
@@ -203,7 +207,7 @@
 			buildSettings = {
 				CODE_SIGN_STYLE = Automatic;
 				COMBINE_HIDPI_IMAGES = YES;
-				CURRENT_PROJECT_VERSION = 11;
+				CURRENT_PROJECT_VERSION = 12;
 				DEVELOPMENT_TEAM = 65244UMFCK;
 				ENABLE_HARDENED_RUNTIME = NO;
 				GENERATE_INFOPLIST_FILE = YES;
@@ -216,7 +220,7 @@
 					"@executable_path/../Frameworks",
 				);
 				MACOSX_DEPLOYMENT_TARGET = 14.0;
-				MARKETING_VERSION = 0.6.2;
+				MARKETING_VERSION = 0.6.3;
 				PRODUCT_BUNDLE_IDENTIFIER = com.aliihsancanuysal.kraliagent;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				SDKROOT = macosx;
