@@ -1,4 +1,5 @@
 import SwiftUI
+import AppKit
 
 struct ContentView: View {
     @EnvironmentObject private var engine: AgentEngine
@@ -24,25 +25,20 @@ struct ContentView: View {
 
     private var topBar: some View {
         HStack(spacing: 12) {
-            ZStack {
-                Circle()
-                    .stroke(Color.accentColor.opacity(0.8), lineWidth: 1)
-                    .frame(width: 34, height: 34)
-
-                Circle()
-                    .stroke(Color.accentColor.opacity(0.55), lineWidth: 1)
-                    .frame(width: 22, height: 22)
-
-                Circle()
-                    .fill(Color.accentColor.opacity(0.15))
-                    .frame(width: 12, height: 12)
-            }
+            Image(nsImage: NSApplication.shared.applicationIconImage)
+                .resizable()
+                .interpolation(.high)
+                .frame(width: 42, height: 42)
+                .shadow(
+                    color: Color.red.opacity(0.22),
+                    radius: 8
+                )
 
             VStack(alignment: .leading, spacing: 2) {
-                Text("KRALİ Agent")
+                Text("KRALİ")
                     .font(.headline)
 
-                Text("Native macOS • v\(updater.currentVersion) • standalone agent")
+                Text("Native macOS • v\(updater.currentVersion) • personal agent")
                     .font(.caption)
                     .foregroundStyle(.secondary)
             }
@@ -551,7 +547,7 @@ struct ContentView: View {
                 }
 
                 Text(
-                    "v0.6.4: Core artık tek karar kaynağıdır; eski keyword cevapları modül kararını ezemez. “Son eklenen videolar neler?”, “geçen hafta eklenen klasörleri inceler misin?” gibi farklı cümleler hedef, zaman ve nesneye ayrılır. Dosya ve klasör araması ayrı modüllere yönlendirilir."
+                    "v0.6.5: Uygulama kimliği “KRALİ” olarak sadeleştirildi. Yeni kırmızı Crown logosu macOS uygulama ikonu ve üst bar kimliği olarak kullanılır; arayüz accent rengi KRALİ kırmızısına taşındı."
                 )
                 .font(.caption2)
                 .foregroundStyle(.orange)
