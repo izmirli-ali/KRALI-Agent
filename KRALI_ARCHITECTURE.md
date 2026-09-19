@@ -61,6 +61,8 @@ Yerel dosya algısı, güvenli aksiyonlar, intent, tarih çözümleme, bağlam v
 
 **v0.7.0 başlangıcı:** Her tur için görünür yürütme planı oluşturulur. Executor sonrası Verifier, File Search ve güvenli File Actions durumunu tekrar okur. Doğrulanamayan gerçek işlemlerde Core otomatik olarak Plan B taşır; bağlantısı olmayan araçlarda sahte başarı üretmez.
 
+**v0.7.1 reflection/recovery:** Verifier yalnızca fonksiyonun çalışmasını başarı saymaz; hedef sonucunu da kontrol eder. Salt-okunur dosya aramasında 0 sonuç oluşursa ve ilk plan tarih veya önceki-sonuç filtresi içeriyorsa Core bu kısıtı bir kez güvenli biçimde gevşetir, yeniden yürütür ve ikinci sonucu tekrar doğrular. Yazma işlemlerinde otomatik retry yapılmaz.
+
 ### 0.8.x — Memory
 Kısa süreli konuşma belleği ile kalıcı kullanıcı tercihlerini ayırma; bağlam özetleme.
 
