@@ -119,6 +119,7 @@ final class AgentEngine: ObservableObject {
             decision: decision,
             context: brainContext(),
             capabilities: capabilities,
+            learningPlans: learningPlans,
             goal: goalProfile
         )
 
