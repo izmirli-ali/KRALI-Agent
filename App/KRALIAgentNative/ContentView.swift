@@ -244,6 +244,39 @@ struct ContentView: View {
     private var sidePane: some View {
         ScrollView {
             VStack(alignment: .leading, spacing: 18) {
+                sectionTitle("KRALİ'nin planı")
+
+                VStack(alignment: .leading, spacing: 8) {
+                    Text(engine.currentGoal)
+                        .font(.headline)
+
+                    Text(engine.currentPlan)
+                        .font(.caption)
+                        .foregroundStyle(.secondary)
+
+                    if !engine.currentAlternatives.isEmpty {
+                        Text("Alternatifler")
+                            .font(.caption2.weight(.semibold))
+                            .foregroundStyle(.secondary)
+
+                        ForEach(engine.currentAlternatives.prefix(3), id: \.self) { item in
+                            HStack(alignment: .top, spacing: 6) {
+                                Image(systemName: "lightbulb")
+                                    .font(.caption2)
+                                    .foregroundStyle(.secondary)
+
+                                Text(item)
+                                    .font(.caption2)
+
+                                Spacer()
+                            }
+                        }
+                    }
+                }
+                .padding(10)
+                .background(Color(nsColor: .controlBackgroundColor))
+                .clipShape(RoundedRectangle(cornerRadius: 10))
+
                 sectionTitle("Aktif rota")
                 FlowLayout(items: engine.activeRoute)
 
@@ -471,7 +504,7 @@ struct ContentView: View {
                 }
 
                 Text(
-                    "v0.6.2: File Agent artık seçili klasörün alt klasörlerini de indeksler ve dosyaları ad, tür veya “9 Eylül tarihli dosyayı bul” gibi tarih ifadeleriyle arar. “Bilgisayarımda” dersen kapsamın hâlâ seçili klasör olduğunu açıkça belirtir. Taşıma işlemi yalnızca seçili klasörün doğrudan içindeki dosyalarda kalır."
+                    "v0.6.3: KRALİ Core artık mesajı önce hedef, bağlam, plan ve alternatifler olarak analiz eder; ardından uygun modülü seçer. “Bugün eklenen videolar”, “20 Eylül videoları”, “geçtiğimiz pazar” ve “son eklenen videolar” aynı File Search görevine standartlaştırılabilir. Doğal sohbet ve çalışma alanı önerileri de Core üzerinden yürür."
                 )
                 .font(.caption2)
                 .foregroundStyle(.orange)
