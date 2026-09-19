@@ -290,6 +290,45 @@ struct ContentView: View {
                         }
                     }
 
+                    if !engine.capabilityLearningPlans.isEmpty {
+                        Divider()
+
+                        Text("Yetkinlik kazanma")
+                            .font(.caption2.weight(.semibold))
+                            .foregroundStyle(.secondary)
+
+                        VStack(alignment: .leading, spacing: 7) {
+                            ForEach(engine.capabilityLearningPlans) { plan in
+                                HStack(alignment: .top, spacing: 7) {
+                                    Image(systemName: plan.state.systemImage)
+                                        .font(.caption)
+                                        .foregroundStyle(.orange)
+
+                                    VStack(alignment: .leading, spacing: 2) {
+                                        Text(plan.capabilityName)
+                                            .font(.caption.weight(.medium))
+
+                                        Text(plan.state.title)
+                                            .font(.caption2)
+                                            .foregroundStyle(.orange)
+
+                                        Text(plan.nextStep)
+                                            .font(.caption2)
+                                            .foregroundStyle(.secondary)
+
+                                        if plan.requiresApprovalBeforeActivation {
+                                            Text("Etkinleştirme öncesi kullanıcı onayı gerekir.")
+                                                .font(.caption2)
+                                                .foregroundStyle(.secondary)
+                                        }
+                                    }
+
+                                    Spacer()
+                                }
+                            }
+                        }
+                    }
+
                     if !engine.executionSteps.isEmpty {
                         Divider()
 
@@ -690,7 +729,7 @@ struct ContentView: View {
                 }
 
                 Text(
-                    "v0.7.7: Plan fidelity eklendi. KRALİ artık bağlı olmayan bir capability gerektiren adımı yanlışlıkla tamamlandı göstermiyor; bu adımlar “blocked” kalıyor. Eksik capability bulunan planlar otomatik olarak doğrulamaya giriyor ve hedefin tamamı yürütülemiyorsa sonuç “kısmi” oluyor."
+                    "v0.7.8: Capability Learning Loop temeli eklendi. KRALİ eksik bir yeteneği sadece “yok” diye bırakmıyor; araştırma hedefi, ön koşul ve edinme yolunu çıkarıyor. Web araştırma bağlıysa resmi kaynakları araştırmaya hazırlanabiliyor; web araştırmanın kendisi gibi bootstrap yetenekleri için gereken entegrasyonu açıkça belirtiyor. Yeni kod/izin etkinleştirmesi kullanıcı onayı olmadan yapılmıyor."
                 )
                 .font(.caption2)
                 .foregroundStyle(.orange)
