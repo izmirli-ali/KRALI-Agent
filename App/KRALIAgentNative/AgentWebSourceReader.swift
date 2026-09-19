@@ -33,10 +33,12 @@ actor AgentWebSourceReader {
         limit: Int = 4
     ) async -> [WebSourceEvidence] {
         let plan = queryPlanner.plan(query)
-        let requiredCoverage = min(
-            2,
-            max(1, plan.conceptGroups.count)
-        )
+        let requiredCoverage = plan.isEntityResearch
+            ? 1
+            : min(
+                2,
+                max(1, plan.conceptGroups.count)
+            )
 
         var evidence: [WebSourceEvidence] = []
         var seenDomains: [String: Int] = [:]
@@ -149,6 +151,11 @@ actor AgentWebSourceReader {
             mandatoryConceptsSatisfied(
                 selected.matches,
                 plan: plan
+            ),
+            entitySatisfied(
+                in: selected.excerpt,
+                source: source,
+                plan: plan
             )
         else {
             return fallbackEvidence(
@@ -188,6 +195,11 @@ actor AgentWebSourceReader {
             selected.coverage >= requiredCoverage,
             mandatoryConceptsSatisfied(
                 selected.matches,
+                plan: plan
+            ),
+            entitySatisfied(
+                in: selected.excerpt,
+                source: source,
                 plan: plan
             )
         else {
@@ -310,6 +322,29 @@ actor AgentWebSourceReader {
             coverage: uniqueMatches.count,
             matches: uniqueMatches
         )
+    }
+
+    private func entitySatisfied(
+        in excerpt: String,
+        source: WebResearchResult,
+        plan: ResearchQueryPlan
+    ) -> Bool {
+        guard !plan.entityTerms.isEmpty else {
+            return true
+        }
+
+        let combined = normalize(
+            excerpt + " " +
+            source.title + " " +
+            source.domain + " " +
+            (source.snippet ?? "")
+        )
+
+        return plan.entityTerms
+            .map(normalize)
+            .contains {
+                !$0.isEmpty && combined.contains($0)
+            }
     }
 
     private func mandatoryConceptsSatisfied(
