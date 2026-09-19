@@ -547,7 +547,7 @@ struct ContentView: View {
                 }
 
                 Text(
-                    "v0.6.6: Güncelleme denetimi artık yalnızca Git commit farkına değil, kurulu uygulama sürümü ile GitHub VERSION dosyasının farkına da bakar. Böylece kaynak kod güncellenmiş ama uygulama henüz build edilmemişse KRALİ bunu yeniden güncelleme olarak görür."
+                    "v0.6.7: Güncelleme başlatıldığında KRALİ updater’ı dış süreçte bırakıp kendini kontrollü kapatır. Build tamamlanınca uygulama yeni instance olarak yeniden açılır; build başarısız olursa kurulu eski sürüm otomatik geri açılır."
                 )
                 .font(.caption2)
                 .foregroundStyle(.orange)
