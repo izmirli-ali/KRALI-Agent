@@ -4,6 +4,7 @@ struct ResearchQueryPlan: Hashable {
     let original: String
     let variants: [String]
     let conceptGroups: [[String]]
+    let mandatoryConceptGroups: [[String]]
     let preferredDomains: [String]
 }
 
@@ -15,13 +16,16 @@ struct AgentResearchQueryPlanner {
         let normalized = normalize(query)
 
         var conceptGroups: [[String]] = []
+        var mandatoryConceptGroups: [[String]] = []
         var englishTerms: [String] = []
         var preferredDomains: [String] = []
 
         if containsAny(normalized, ["macos", "apple", "swift", "ios"]) {
-            conceptGroups.append([
+            let platformGroup = [
                 "macos", "apple", "darwin", "swift"
-            ])
+            ]
+            conceptGroups.append(platformGroup)
+            mandatoryConceptGroups.append(platformGroup)
             englishTerms.append("macOS")
             preferredDomains.append("developer.apple.com")
         }
@@ -48,11 +52,13 @@ struct AgentResearchQueryPlanner {
             "analiz", "incele", "degerlendir", "analysis",
             "analyze", "recognition", "detect"
         ]) {
-            conceptGroups.append([
+            let analysisGroup = [
                 "analysis", "analyze", "vision",
                 "recognition", "detect", "classification",
                 "machine learning", "core ml"
-            ])
+            ]
+            conceptGroups.append(analysisGroup)
+            mandatoryConceptGroups.append(analysisGroup)
             englishTerms.append("analysis")
         }
 
@@ -162,6 +168,7 @@ struct AgentResearchQueryPlanner {
             original: query,
             variants: variants,
             conceptGroups: conceptGroups,
+            mandatoryConceptGroups: mandatoryConceptGroups,
             preferredDomains: Array(
                 Set(preferredDomains)
             ).sorted()
