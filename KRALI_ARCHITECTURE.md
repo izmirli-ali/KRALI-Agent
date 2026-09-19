@@ -124,6 +124,8 @@ Yerel dosya algısı, güvenli aksiyonlar, intent, tarih çözümleme, bağlam v
 
 **v0.7.12 research quality / source diversity:** Provider'dan dönen ilk link araştırma başarısı sayılmaz. Bing RSS birincil keşif yolu olarak eklenir; HTML provider'lar fallback kalır. Sonuçlar sorgu terimleriyle alaka puanına tabi tutulur, arama motoru iç sayfaları ve “geri bildirim / sign in / yardım” gibi gürültüler elenir, aynı URL'ler tekilleştirilir. Bir kaynak yalnızca kısmi araştırma sayılır; tam doğrulama için en az iki alakalı kaynak gerekir.
 
+**v0.7.13 semantic research query planner:** Araştırma sorgusu yüzey kelimeleriyle bırakılmaz. Ayrı Query Planner, platform/medya/analiz/framework gibi kavram gruplarını çıkarır, gerektiğinde İngilizce teknik ve resmi dokümantasyon varyantları üretir ve tercih edilen resmi domainleri belirler. Research scorer bir sonucun yalnızca tek güçlü kelimeyi (ör. “macOS”) taşımasını yeterli saymaz; en az iki bağımsız kavram grubunu karşılamasını ister. Böylece genel macOS haber/indirme sayfaları gibi tematik olarak alakasız sonuçlar elenir.
+
 ### 0.8.x — Memory
 Kısa süreli konuşma belleği ile kalıcı kullanıcı tercihlerini ayırma; bağlam özetleme.
 
