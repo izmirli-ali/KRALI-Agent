@@ -89,16 +89,18 @@ fi
 echo "4/6  Çalışan KRALİ kapatılıyor..."
 osascript -e 'tell application id "com.aliihsancanuysal.kraliagent" to quit' 2>/dev/null || true
 
+APP_EXEC="$TARGET/Contents/MacOS/$PROCESS_NAME"
+
 for i in 1 2 3 4 5; do
-    if ! pgrep -x "$PROCESS_NAME" >/dev/null 2>&1; then
+    if ! pgrep -f "$APP_EXEC" >/dev/null 2>&1; then
         break
     fi
     sleep 1
 done
 
-if pgrep -x "$PROCESS_NAME" >/dev/null 2>&1; then
+if pgrep -f "$APP_EXEC" >/dev/null 2>&1; then
     echo "• Uygulama kapanmadı; güvenli TERM sinyali gönderiliyor..."
-    pkill -TERM -x "$PROCESS_NAME" 2>/dev/null || true
+    pkill -TERM -f "$APP_EXEC" 2>/dev/null || true
     sleep 1
 fi
 
@@ -119,10 +121,12 @@ codesign --verify --deep --strict "$TARGET"
 codesign -dv --verbose=2 "$TARGET" 2>&1 | grep -E "Identifier|TeamIdentifier|Authority" || true
 
 echo "6/6  KRALİ yeniden açılıyor..."
-open "$TARGET"
-sleep 2
+/usr/bin/open -n "$TARGET"
+sleep 3
 
-if pgrep -x "$PROCESS_NAME" >/dev/null 2>&1; then
+APP_EXEC="$TARGET/Contents/MacOS/$PROCESS_NAME"
+
+if pgrep -f "$APP_EXEC" >/dev/null 2>&1; then
     echo ""
     echo "✅ KRALİ güncellendi ve yeniden açıldı."
     echo "📍 $TARGET"
