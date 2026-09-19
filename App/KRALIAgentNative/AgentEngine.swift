@@ -471,7 +471,7 @@ final class AgentEngine: ObservableObject {
             } ?? fileSearchResults[0]
 
             log("Bağlamdan çalışma adayı seçildi: \(candidate.name)")
-            return "Önceki sonuçlar içinde başlangıç adayı olarak “\(candidate.name)” dosyasını öne çıkarıyorum. Mevcut metadata içinde en güncel görünen aday bu. İstersen “onu aç” veya “sonuçları daralt” diyebilirsin."
+            return "Önceki sonuçlar içinde başlangıç adayı olarak “\(candidate.name)” dosyasını öne çıkarıyorum. Mevcut metadata içinde en güncel görünen aday bu. Sağdaki sonuçtan açabilir veya “ilkini aç / sonuncusunu aç” diyebilirsin."
         }
 
         if !folderSearchResults.isEmpty {
@@ -482,7 +482,7 @@ final class AgentEngine: ObservableObject {
             } ?? folderSearchResults[0]
 
             log("Bağlamdan klasör adayı seçildi: \(candidate.name)")
-            return "Önceki klasör sonuçları içinde “\(candidate.name)” en güncel aday olarak öne çıkıyor. İstersen “onu aç” diyebilirsin."
+            return "Önceki klasör sonuçları içinde “\(candidate.name)” en güncel aday olarak öne çıkıyor. Sağdaki sonuçtan açabilir veya “ilkini aç / sonuncusunu aç” diyebilirsin."
         }
 
         return "Önceki sonuç kalmadığı için seçim yapamıyorum. Önce ilgili dosya veya klasörleri bulalım."
@@ -709,6 +709,7 @@ final class AgentEngine: ObservableObject {
             "seçili", "secili", "çalışma", "calisma",
             "içindeki", "icindeki", "olan", "tarihli",
             "bilgisayarımda", "bilgisayarimda",
+            "son eklenen", "en yeni", "en son",
             "var mı", "varmi", "lütfen", "lutfen"
         ]
 
