@@ -331,6 +331,52 @@ struct ContentView: View {
                     }
                 }
 
+                if !engine.folderSearchResults.isEmpty {
+                    sectionTitle(engine.fileSearchTitle)
+
+                    VStack(spacing: 7) {
+                        ForEach(engine.folderSearchResults.prefix(12)) { folder in
+                            Button {
+                                engine.revealFolder(folder)
+                            } label: {
+                                HStack(spacing: 8) {
+                                    Image(systemName: "folder.fill")
+                                        .frame(width: 18)
+
+                                    VStack(alignment: .leading, spacing: 2) {
+                                        Text(folder.name)
+                                            .font(.caption)
+                                            .lineLimit(1)
+                                            .truncationMode(.middle)
+
+                                        Text(folder.relativePath)
+                                            .font(.caption2)
+                                            .foregroundStyle(.secondary)
+                                            .lineLimit(1)
+                                            .truncationMode(.middle)
+                                    }
+
+                                    Spacer()
+
+                                    Image(systemName: "arrow.forward.circle")
+                                        .foregroundStyle(.secondary)
+                                }
+                                .contentShape(Rectangle())
+                            }
+                            .buttonStyle(.plain)
+                            .padding(8)
+                            .background(Color(nsColor: .controlBackgroundColor))
+                            .clipShape(RoundedRectangle(cornerRadius: 8))
+                        }
+                    }
+
+                    if engine.folderSearchResults.count > 12 {
+                        Text("+ \(engine.folderSearchResults.count - 12) klasör daha")
+                            .font(.caption2)
+                            .foregroundStyle(.secondary)
+                    }
+                }
+
                 if !engine.fileSearchResults.isEmpty {
                     sectionTitle(engine.fileSearchTitle)
 
@@ -474,6 +520,7 @@ struct ContentView: View {
                     FlowLayout(
                         items: [
                             "Dosya \(engine.indexedFiles.count)",
+                            "Klasör \(engine.indexedFolders.count)",
                             "Görsel \(engine.imageCount)",
                             "Video \(engine.videoCount)",
                             "Proje \(engine.projectCount)",
@@ -504,7 +551,7 @@ struct ContentView: View {
                 }
 
                 Text(
-                    "v0.6.3: KRALİ Core artık mesajı önce hedef, bağlam, plan ve alternatifler olarak analiz eder; ardından uygun modülü seçer. “Bugün eklenen videolar”, “20 Eylül videoları”, “geçtiğimiz pazar” ve “son eklenen videolar” aynı File Search görevine standartlaştırılabilir. Doğal sohbet ve çalışma alanı önerileri de Core üzerinden yürür."
+                    "v0.6.4: Core artık tek karar kaynağıdır; eski keyword cevapları modül kararını ezemez. “Son eklenen videolar neler?”, “geçen hafta eklenen klasörleri inceler misin?” gibi farklı cümleler hedef, zaman ve nesneye ayrılır. Dosya ve klasör araması ayrı modüllere yönlendirilir."
                 )
                 .font(.caption2)
                 .foregroundStyle(.orange)
