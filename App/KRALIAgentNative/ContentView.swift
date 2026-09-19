@@ -812,7 +812,7 @@ struct ContentView: View {
                 }
 
                 Text(
-                    "v0.7.12: Research Quality katmanı eklendi. KRALİ artık ilk gelen linki başarı saymıyor; Bing RSS + Google/Bing/DDG kaynaklarını birleştiriyor, sorguyla alaka puanı veriyor, “geri bildirim / sign in / yardım” gibi gürültüyü eliyor ve yalnızca alakalı sonuçları tutuyor. Tek kaynak artık tam başarı değil “kısmi” kabul ediliyor."
+                    "v0.7.13: Semantic Research Query Planner eklendi. KRALİ araştırma sorusunu yalnızca kelime eşleşmesiyle değerlendirmiyor; platform, medya, analiz ve teknoloji gibi kavram gruplarını çıkarıp İngilizce teknik/resmi dokümantasyon sorguları da üretiyor. Sonuçların en az iki ayrı kavramı karşılaması gerekiyor; yalnızca “macOS” geçen alakasız sayfalar eleniyor."
                 )
                 .font(.caption2)
                 .foregroundStyle(.orange)
