@@ -744,6 +744,71 @@ struct ContentView: View {
                 .background(Color(nsColor: .controlBackgroundColor))
                 .clipShape(RoundedRectangle(cornerRadius: 10))
 
+                sectionTitle("Developer Agent")
+
+                VStack(alignment: .leading, spacing: 8) {
+                    HStack(alignment: .top, spacing: 8) {
+                        Image(
+                            systemName: engine.developerAgentStatus.isReadyForReview
+                                ? "hammer.circle.fill"
+                                : "hammer.circle"
+                        )
+                        .font(.caption)
+                        .foregroundStyle(
+                            engine.developerAgentStatus.isReadyForReview
+                                ? Color.orange
+                                : Color.secondary
+                        )
+
+                        VStack(alignment: .leading, spacing: 2) {
+                            Text(engine.developerAgentStatus.message)
+                                .font(.caption.weight(.medium))
+
+                            Text(
+                                "İzole branch/worktree • main otomatik değişmez • varsayılan ücretsiz Nemotron"
+                            )
+                            .font(.caption2)
+                            .foregroundStyle(.secondary)
+
+                            if let branch = engine.developerAgentStatus.branch {
+                                Text(branch)
+                                    .font(.caption2.monospaced())
+                                    .foregroundStyle(.secondary)
+                                    .textSelection(.enabled)
+                            }
+
+                            if engine.developerAgentStatus.isSetupRequired {
+                                Text("Bir kerelik kurulum: npm install -g cline → cline auth cline")
+                                    .font(.caption2)
+                                    .foregroundStyle(.orange)
+                                    .textSelection(.enabled)
+                            }
+                        }
+
+                        Spacer()
+                    }
+
+                    Button {
+                        engine.runDeveloperAgent()
+                    } label: {
+                        if engine.developerAgentBusy {
+                            ProgressView()
+                                .controlSize(.small)
+                        } else {
+                            Label(
+                                "Developer Agent'i çalıştır",
+                                systemImage: "hammer"
+                            )
+                        }
+                    }
+                    .buttonStyle(.bordered)
+                    .controlSize(.small)
+                    .disabled(engine.developerAgentBusy)
+                }
+                .padding(10)
+                .background(Color(nsColor: .controlBackgroundColor))
+                .clipShape(RoundedRectangle(cornerRadius: 10))
+
                 sectionTitle("Mentor bridge")
 
                 VStack(alignment: .leading, spacing: 7) {
@@ -1098,7 +1163,7 @@ struct ContentView: View {
                 }
 
                 Text(
-                    "v0.7.19: Brand Research Mission + Live Research Eval eklendi. Marka araştırmaları tek uzun sorgu yerine resmi kaynak, tarihçe, ürün/hizmet, pazar/rakip ve güncel gelişme alt sorgularına ayrılıyor; kaynakların araştırılan varlıkla gerçekten eşleşmesi zorunlu. Her yeni sürümde gerçek internet üzerinden marka ve teknik araştırma kalite probları otomatik çalışıyor ve Mentor’a raporlanabiliyor."
+                    "v0.7.20: Developer Agent köprüsü eklendi. KRALİ diagnostic’leri gerektiğinde Cline CLI + ücretsiz Nemotron ile izole Git worktree/branch içinde incelenebiliyor; aday değişiklik bağımsız build-check’ten geçmeden hazır sayılmıyor ve main branch otomatik değiştirilmiyor. Training/Live Eval tamamen yeşilse gereksiz kod değişikliği yapmaması temel kural."
                 )
                 .font(.caption2)
                 .foregroundStyle(.orange)
