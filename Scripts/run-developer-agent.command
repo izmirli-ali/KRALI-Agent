@@ -62,7 +62,7 @@ if [ -z "$CLINE_BIN" ]; then
     write_status "setup_cline|Cline CLI bulunamadı|npm install -g cline"
     echo "❌ Cline CLI bulunamadı." | tee -a "$LOG"
     echo "Kurulum: npm install -g cline" | tee -a "$LOG"
-    echo "Ardından: cline auth" | tee -a "$LOG"
+    echo "Ardından: cline auth → Sign in with ChatGPT" | tee -a "$LOG"
     exit 11
 fi
 
@@ -134,10 +134,24 @@ write_status "running|Cline Developer Agent çalışıyor"
 
 export CLINE_COMMAND_PERMISSIONS='{"allow":["git status*","git diff*","git log*","git show*","xcodebuild *","xcrun *","swift *","grep *","rg *","find *","cat *","head *","tail *","sed *","ls *"],"deny":["sudo *","rm -rf *","git push*","git reset --hard*","git clean*","open *","osascript *"]}'
 
-MODEL="${KRALI_DEV_MODEL:-nvidia/nemotron-3.5-lightning}"
-PROVIDER="${KRALI_DEV_PROVIDER:-cline}"
+PROVIDER="${KRALI_DEV_PROVIDER:-openai-codex}"
+MODEL="${KRALI_DEV_MODEL:-}"
 
-if ! "$CLINE_BIN"     --json     --auto-approve true     --provider "$PROVIDER"     --model "$MODEL"     --cwd "$WORKTREE"     --timeout 1800     "$(cat "$PROMPT_FILE")" >>"$LOG" 2>&1
+CLINE_ARGS=(
+    --json
+    --auto-approve true
+    --provider "$PROVIDER"
+    --cwd "$WORKTREE"
+    --timeout 1800
+)
+
+# Model boş bırakılırsa "cline auth" sırasında bu provider için seçilen model kullanılır.
+# Böylece ChatGPT Subscription model seçimi tek yerde yönetilir.
+if [ -n "$MODEL" ]; then
+    CLINE_ARGS+=(--model "$MODEL")
+fi
+
+if ! "$CLINE_BIN" "${CLINE_ARGS[@]}"     "$(cat "$PROMPT_FILE")" >>"$LOG" 2>&1
 then
     write_status "failed|Cline görevi başarısız oldu|$BRANCH|$WORKTREE"
     echo "❌ Cline görevi başarısız oldu." | tee -a "$LOG"
