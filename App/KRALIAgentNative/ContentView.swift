@@ -77,6 +77,29 @@ struct ContentView: View {
                     .controlSize(.small)
                     .disabled(updater.isLaunchingUpdate)
                 }
+
+                Button {
+                    engine.syncMentorTrace()
+                } label: {
+                    if engine.mentorSyncBusy {
+                        ProgressView()
+                            .controlSize(.small)
+                    } else {
+                        Label(
+                            "Mentor",
+                            systemImage: "arrow.up.doc"
+                        )
+                    }
+                }
+                .buttonStyle(.bordered)
+                .controlSize(.small)
+                .disabled(
+                    !engine.mentorTraceReady ||
+                    engine.mentorSyncBusy
+                )
+                .help(
+                    "Son KRALİ görev kaydını private GitHub reposuna gönder. Sonra ChatGPT'ye “mentor kaydına bak” diyebilirsin."
+                )
             }
         }
         .padding(.horizontal, 16)
@@ -536,6 +559,50 @@ struct ContentView: View {
                     .clipShape(RoundedRectangle(cornerRadius: 10))
                 }
 
+                sectionTitle("Mentor bridge")
+
+                VStack(alignment: .leading, spacing: 7) {
+                    HStack(alignment: .top, spacing: 7) {
+                        Image(
+                            systemName: engine.mentorTraceReady
+                                ? "doc.text.fill"
+                                : "doc.text"
+                        )
+                        .font(.caption)
+                        .foregroundStyle(.secondary)
+
+                        VStack(alignment: .leading, spacing: 2) {
+                            Text(engine.mentorTraceStatus)
+                                .font(.caption2)
+                                .foregroundStyle(.secondary)
+
+                            Text("API kullanmaz • sen gönderene kadar yerelde kalır")
+                                .font(.caption2)
+                                .foregroundStyle(.secondary)
+                        }
+
+                        Spacer()
+                    }
+
+                    Button {
+                        engine.syncMentorTrace()
+                    } label: {
+                        Label(
+                            "Son kaydı Mentora gönder",
+                            systemImage: "arrow.up.doc"
+                        )
+                    }
+                    .buttonStyle(.bordered)
+                    .controlSize(.small)
+                    .disabled(
+                        !engine.mentorTraceReady ||
+                        engine.mentorSyncBusy
+                    )
+                }
+                .padding(10)
+                .background(Color(nsColor: .controlBackgroundColor))
+                .clipShape(RoundedRectangle(cornerRadius: 10))
+
                 sectionTitle("Aktif rota")
                 LazyVGrid(
                     columns: [
@@ -846,7 +913,7 @@ struct ContentView: View {
                 }
 
                 Text(
-                    "v0.7.14: Deep Source Reader eklendi. KRALİ artık yalnızca arama başlıklarını toplamıyor; en alakalı sayfaların içine girip gerçek metni okuyor, sorguyla ilgili kanıt cümlelerini çıkarıyor ve Verifier tam başarı için en az iki kaynaktan sayfa içeriği kanıtı istiyor. Sağ panelde “Kaynak kanıtı” bölümü görünür."
+                    "v0.7.15: Mentor Bridge + Research Precision eklendi. KRALİ her görevin Goal/Capability/Plan/Verifier/yanıt/research izini yerelde JSON olarak kaydediyor; kullanıcı “Mentor” ile private GitHub’a açıkça gönderdiğinde ChatGPT gerçek çalışma kaydını inceleyip kodu düzeltebiliyor. OpenAI API kullanılmıyor. Araştırmada kritik platform/analiz kavramları zorunlu hale getirildi."
                 )
                 .font(.caption2)
                 .foregroundStyle(.orange)
