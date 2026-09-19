@@ -40,6 +40,7 @@ final class AgentEngine: ObservableObject {
     @Published var trainingLabReport: TrainingLabReport?
     @Published var trainingLabStatus = "Henüz Training Lab çalıştırılmadı."
     @Published var trainingLabBusy = false
+    @Published var localIntelligenceState: LocalIntelligenceState = .checking
 
     @Published var voiceOutputEnabled = true {
         didSet {
@@ -70,6 +71,7 @@ final class AgentEngine: ObservableObject {
     private let mentorTraceStore = MentorTraceStore()
     private let trainingLab = AgentTrainingLab()
     private let trainingLabStore = TrainingLabStore()
+    private let localIntelligence = AgentLocalIntelligence()
     private var lastDecision: AgentDecision?
 
     init() {
@@ -116,6 +118,13 @@ final class AgentEngine: ObservableObject {
         log("KRALİ Core hazır")
         log("Dinamik hedef ve kabiliyet yönlendirme aktif")
         restoreSelectedFolder()
+
+        Task { @MainActor [weak self] in
+            guard let self else { return }
+            let state = await self.localIntelligence.availability()
+            self.localIntelligenceState = state
+            self.log(state.title)
+        }
 
         if shouldAutoRunTrainingLab {
             Task { @MainActor [weak self] in
@@ -318,6 +327,43 @@ final class AgentEngine: ObservableObject {
                     fallbackPlan = recovery.verification.fallback ?? fallbackPlan
                     log("Plan B de hedefi doğrulayamadı")
                 }
+            }
+
+            if shouldUseLocalIntelligence(
+                goal: goalProfile,
+                verification: finalVerification
+            ),
+               let synthesized = await localIntelligence.synthesize(
+                   userInput: text,
+                   goal: goalProfile.summary,
+                   draft: finalBaseReply,
+                   verification: finalVerification,
+                   capabilities: capabilities,
+                   researchEvidence: webResearchEvidence
+               ) {
+                finalBaseReply = synthesized
+
+                if !activeRoute.contains("Intelligence") {
+                    if let verifyIndex = activeRoute.firstIndex(
+                        of: "Verify"
+                    ) {
+                        activeRoute.insert(
+                            "Intelligence",
+                            at: verifyIndex
+                        )
+                    } else if let responseIndex = activeRoute.firstIndex(
+                        of: "Response"
+                    ) {
+                        activeRoute.insert(
+                            "Intelligence",
+                            at: responseIndex
+                        )
+                    } else {
+                        activeRoute.append("Intelligence")
+                    }
+                }
+
+                log("Yerel zeka sentezi uygulandı")
             }
 
             let replyWithSuggestion = appendSuggestion(
@@ -983,6 +1029,28 @@ final class AgentEngine: ObservableObject {
                 log("Mentor sync başarısız")
             }
         }
+    }
+
+    private func shouldUseLocalIntelligence(
+        goal: AgentGoalProfile,
+        verification: AgentVerificationResult
+    ) -> Bool {
+        guard localIntelligenceState.isAvailable else {
+            return false
+        }
+
+        if goal.outcomes.contains(.analyze) ||
+           goal.outcomes.contains(.ideate) ||
+           goal.outcomes.contains(.research) {
+            return true
+        }
+
+        if goal.outcomes.contains(.explain) &&
+           verification.state != .attention {
+            return true
+        }
+
+        return false
     }
 
     private func appendSuggestion(
