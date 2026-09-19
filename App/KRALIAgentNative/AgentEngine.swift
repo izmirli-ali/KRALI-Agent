@@ -49,6 +49,8 @@ final class AgentEngine: ObservableObject {
     private let planner = AgentPlanner()
     private let verifier = AgentVerifier()
     private let capabilityRegistry = AgentCapabilityRegistry()
+    private let goalInterpreter = AgentGoalInterpreter()
+    private let responseComposer = AgentResponseComposer()
     private var lastDecision: AgentDecision?
 
     init() {
@@ -62,7 +64,7 @@ final class AgentEngine: ObservableObject {
 
         loadMemory()
         log("KRALİ Core hazır")
-        log("Otomatik alt-modül yönlendirme aktif")
+        log("Dinamik hedef ve kabiliyet yönlendirme aktif")
         restoreSelectedFolder()
     }
 
@@ -86,8 +88,16 @@ final class AgentEngine: ObservableObject {
             context: brainContext()
         )
 
-        activeRoute = decision.route
-        currentGoal = decision.goal
+        let goalProfile = goalInterpreter.interpret(
+            text,
+            decision: decision,
+            context: brainContext()
+        )
+
+        activeRoute = decision.route.map {
+            $0 == "Intent" ? "Goal" : $0
+        }
+        currentGoal = goalProfile.summary
         currentPlan = decision.selectedPlan
         currentAlternatives = decision.alternatives
         lastDecision = decision
@@ -95,14 +105,16 @@ final class AgentEngine: ObservableObject {
         let capabilities = capabilityRegistry.select(
             for: text,
             decision: decision,
-            context: brainContext()
+            context: brainContext(),
+            goal: goalProfile
         )
         selectedCapabilities = capabilities
 
         let executionPlan = planner.makePlan(
             decision: decision,
             context: brainContext(),
-            capabilities: capabilities
+            capabilities: capabilities,
+            goal: goalProfile
         )
 
         executionSteps = executionPlan.steps
@@ -112,7 +124,7 @@ final class AgentEngine: ObservableObject {
         fallbackPlan = executionPlan.fallback
         recoverySummary = nil
 
-        log("KRALİ Core hedefi çıkardı: \(decision.goal)")
+        log("KRALİ Core hedef sözleşmesi: \(goalProfile.summary)")
         log("Seçilen plan: \(decision.selectedPlan)")
         log("Otomatik rota: \(activeRoute.joined(separator: " → "))")
         log(
@@ -181,6 +193,10 @@ final class AgentEngine: ObservableObject {
                     setVerificationStep(.completed)
                     fallbackPlan = nil
                     log("Plan B başarılı: \(recovery.summary)")
+                } else if recovery.verification.state == .partial {
+                    setVerificationStep(.partial)
+                    fallbackPlan = nil
+                    log("Plan B kısmi sonuç verdi: \(recovery.summary)")
                 } else {
                     setVerificationStep(.attention)
                     fallbackPlan = recovery.verification.fallback ?? fallbackPlan
@@ -188,19 +204,18 @@ final class AgentEngine: ObservableObject {
                 }
             }
 
-            var reply = appendSuggestion(
+            let replyWithSuggestion = appendSuggestion(
                 to: finalBaseReply,
                 suggestion: decision.proactiveSuggestion
             )
 
-            if finalVerification.state == .partial {
-                reply += "\n\nKısmi doğrulama: " + finalVerification.summary
-            } else if finalVerification.state == .attention {
-                reply += "\n\nDoğrulama: " + finalVerification.summary
-                if let fallback = fallbackPlan {
-                    reply += "\nAlternatif plan: " + fallback
-                }
-            }
+            let reply = responseComposer.compose(
+                baseReply: replyWithSuggestion,
+                verification: finalVerification,
+                goal: goalProfile,
+                capabilities: capabilities,
+                fallbackPlan: fallbackPlan
+            )
 
             messages.append(ChatMessage(role: .assistant, text: reply))
             busy = false
@@ -769,10 +784,10 @@ final class AgentEngine: ObservableObject {
         ])
 
         if asksForSuitability {
-            return "Görevi zincir halinde tamamladım. Önce adayları buldum, sonra kısa listeyi \(shortlistCount) öğeye indirdim.\n\n\(lines)\n\nŞu an yapabildiğim ön seçim dosya türü ve oluşturma/değiştirilme zamanı gibi metadata'ya dayanıyor. Görüntü içeriği, netlik, kadraj, hareket ve ses analizi henüz bağlı olmadığı için “kurguya en uygun” aday konusunda kesin içerik değerlendirmesi yapmıyorum. Bu kısa liste, sonraki görsel analiz katmanı için doğru başlangıç kümesi."
+            return "Adayları buldum ve kısa listeyi \(shortlistCount) öğeye indirdim.\n\n\(lines)\n\nŞu an yapabildiğim ön seçim dosya türü ve oluşturma/değiştirilme zamanı gibi metadata'ya dayanıyor. Görüntü içeriği, netlik, kadraj, hareket ve ses analizi henüz bağlı olmadığı için “kurguya en uygun” aday konusunda kesin içerik değerlendirmesi yapmıyorum. Bu kısa liste, sonraki görsel analiz katmanı için doğru başlangıç kümesi."
         }
 
-        return "Görevi zincir halinde tamamladım: hedefleri buldum ve \(shortlistCount) adaylık kısa liste oluşturdum.\n\n\(lines)"
+        return "Hedefleri buldum ve \(shortlistCount) adaylık kısa liste oluşturdum.\n\n\(lines)"
     }
 
     private func openPreviousResult(
