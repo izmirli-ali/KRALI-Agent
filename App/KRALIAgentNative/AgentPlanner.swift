@@ -84,10 +84,10 @@ struct AgentPlanner {
             if let perception = capabilities.first(where: { $0.id == "perception.media" }) {
                 steps.append(
                     action(
-                        perception.isAvailable ? "İçeriği analiz et" : "İçerik analizi sınırını belirle",
+                        "İçeriği analiz et",
                         perception.isAvailable
                             ? "Dosyaların görüntü / ses içeriğini doğrudan değerlendir."
-                            : "Görsel/video algısı henüz bağlı değil; metadata ile içerik analizini birbirine karıştırma.",
+                            : "Bu adım için görsel/video algısı gerekiyor; capability bağlı olmadığı için adım bekliyor.",
                         capability: perception.id
                     )
                 )
@@ -265,8 +265,23 @@ struct AgentPlanner {
             fallback = decision.alternatives.first
         }
 
+        let hasUnavailableCapability = capabilities.contains {
+            !$0.isAvailable
+        }
+
+        if hasUnavailableCapability {
+            if !steps.contains(where: { $0.kind == .verification }) {
+                steps.append(
+                    verificationStep(
+                        "Gerekli capability'lerin hazır olup olmadığını ve hedefin hangi kısmının gerçekten tamamlandığını doğrula."
+                    )
+                )
+            }
+            requiresVerification = true
+        }
+
         return AgentExecutionPlan(
-            goal: decision.goal,
+            goal: goal.summary,
             steps: steps,
             fallback: fallback,
             requiresVerification: requiresVerification
