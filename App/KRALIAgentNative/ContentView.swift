@@ -998,7 +998,7 @@ struct ContentView: View {
                 }
 
                 Text(
-                    "v0.7.16: Training Lab eklendi. KRALİ artık kullanıcıdan tek tek test istemeden araştırma, marka analizi, bağımsız fikir üretme, yerel dosya görevleri, capability gap, güvenlik, bağlam ve North Star senaryolarını toplu çalıştırıyor. Başarısız testleri yerel rapora yazıp Mentor Sync ile ChatGPT’ye aktarabiliyor; ücretli API kullanılmıyor."
+                    "v0.7.17: Training Lab’in ilk 5 bulgusu Core’a işlendi. “fikri üret” gibi doğal dil varyasyonları, doğrudan medya yorumu, browser görevleri ve capability-gap öğrenme hedefleri daha doğru çözülüyor. Her yeni KRALİ sürümünde Training Lab otomatik regression turu çalıştırıyor; kullanıcı tek tek senaryo başlatmak zorunda değil."
                 )
                 .font(.caption2)
                 .foregroundStyle(.orange)
