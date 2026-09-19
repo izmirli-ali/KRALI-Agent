@@ -559,6 +559,91 @@ struct ContentView: View {
                     .clipShape(RoundedRectangle(cornerRadius: 10))
                 }
 
+                sectionTitle("Training Lab")
+
+                VStack(alignment: .leading, spacing: 8) {
+                    HStack {
+                        VStack(alignment: .leading, spacing: 2) {
+                            Text(engine.trainingLabStatus)
+                                .font(.caption2)
+                                .foregroundStyle(.secondary)
+
+                            if let report = engine.trainingLabReport {
+                                Text(
+                                    "Core: \(report.corePassed)/\(report.coreTotal) • North Star: \(report.northStarPassed)/\(report.northStarTotal)"
+                                )
+                                .font(.caption2.weight(.medium))
+                            }
+                        }
+
+                        Spacer()
+                    }
+
+                    if let report = engine.trainingLabReport {
+                        let failures = report.results
+                            .filter { !$0.passed }
+                            .prefix(5)
+
+                        if !failures.isEmpty {
+                            Divider()
+
+                            Text("Geliştirme kuyruğuna düşen testler")
+                                .font(.caption2.weight(.semibold))
+                                .foregroundStyle(.secondary)
+
+                            ForEach(Array(failures)) { result in
+                                VStack(alignment: .leading, spacing: 2) {
+                                    HStack(spacing: 6) {
+                                        Image(systemName: "exclamationmark.triangle.fill")
+                                            .font(.caption2)
+                                            .foregroundStyle(.orange)
+
+                                        Text(result.title)
+                                            .font(.caption.weight(.medium))
+
+                                        Spacer()
+
+                                        Text(
+                                            result.tier == .core
+                                                ? "CORE"
+                                                : "NORTH STAR"
+                                        )
+                                        .font(.caption2)
+                                        .foregroundStyle(.secondary)
+                                    }
+
+                                    if let first = result.diagnostics.first {
+                                        Text(first)
+                                            .font(.caption2)
+                                            .foregroundStyle(.secondary)
+                                            .lineLimit(2)
+                                    }
+                                }
+                            }
+                        }
+                    }
+
+                    Button {
+                        engine.runTrainingLab()
+                    } label: {
+                        if engine.trainingLabBusy {
+                            ProgressView()
+                                .controlSize(.small)
+                        } else {
+                            Label(
+                                "Training Lab'i çalıştır",
+                                systemImage: "checklist.checked"
+                            )
+                        }
+                    }
+                    .buttonStyle(.borderedProminent)
+                    .controlSize(.small)
+                    .disabled(engine.trainingLabBusy)
+                }
+                .padding(10)
+                .background(Color(nsColor: .controlBackgroundColor))
+                .clipShape(RoundedRectangle(cornerRadius: 10))
+
                 sectionTitle("Mentor bridge")
 
                 VStack(alignment: .leading, spacing: 7) {
@@ -913,7 +998,7 @@ struct ContentView: View {
                 }
 
                 Text(
-                    "v0.7.15: Mentor Bridge + Research Precision eklendi. KRALİ her görevin Goal/Capability/Plan/Verifier/yanıt/research izini yerelde JSON olarak kaydediyor; kullanıcı “Mentor” ile private GitHub’a açıkça gönderdiğinde ChatGPT gerçek çalışma kaydını inceleyip kodu düzeltebiliyor. OpenAI API kullanılmıyor. Araştırmada kritik platform/analiz kavramları zorunlu hale getirildi."
+                    "v0.7.16: Training Lab eklendi. KRALİ artık kullanıcıdan tek tek test istemeden araştırma, marka analizi, bağımsız fikir üretme, yerel dosya görevleri, capability gap, güvenlik, bağlam ve North Star senaryolarını toplu çalıştırıyor. Başarısız testleri yerel rapora yazıp Mentor Sync ile ChatGPT’ye aktarabiliyor; ücretli API kullanılmıyor."
                 )
                 .font(.caption2)
                 .foregroundStyle(.orange)
