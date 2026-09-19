@@ -122,6 +122,8 @@ Yerel dosya algısı, güvenli aksiyonlar, intent, tarih çözümleme, bağlam v
 
 **v0.7.11 research routing + resilient providers:** Açık web araştırma isteği dosya hedef kelimeleri içerse bile yerel File Search intent'ine düşmez; Research hedefi önceliklidir. Web provider katmanı tek bir servise bağımlı değildir: güvenli HTTPS üzerinden Google HTML bootstrap → Bing fallback → DuckDuckGo fallback sırasıyla denenir. TLS, HTTP veya parse hatasında sertifika doğrulaması gevşetilmez; yalnızca sonraki sağlayıcıya geçilir.
 
+**v0.7.12 research quality / source diversity:** Provider'dan dönen ilk link araştırma başarısı sayılmaz. Bing RSS birincil keşif yolu olarak eklenir; HTML provider'lar fallback kalır. Sonuçlar sorgu terimleriyle alaka puanına tabi tutulur, arama motoru iç sayfaları ve “geri bildirim / sign in / yardım” gibi gürültüler elenir, aynı URL'ler tekilleştirilir. Bir kaynak yalnızca kısmi araştırma sayılır; tam doğrulama için en az iki alakalı kaynak gerekir.
+
 ### 0.8.x — Memory
 Kısa süreli konuşma belleği ile kalıcı kullanıcı tercihlerini ayırma; bağlam özetleme.
 
