@@ -198,6 +198,16 @@ struct AgentCapabilityRegistry {
             ids.append("research.web")
         }
 
+        if containsAny(text, [
+            "siteye gir", "sitesine gir", "resmi sitesine gir",
+            "web sitesine gir", "web sitesini aç", "web sitesini ac",
+            "sayfayı aç", "sayfayi ac", "tarayıcıda", "tarayicida",
+            "tıkla", "tikla", "formu doldur", "sayfaları incele",
+            "sayfalari incele", "ürün sayfalarını incele", "urun sayfalarini incele"
+        ]) {
+            ids.append("browser.control")
+        }
+
         var seen = Set<String>()
         return ids.compactMap { id in
             guard !seen.contains(id) else { return nil }
