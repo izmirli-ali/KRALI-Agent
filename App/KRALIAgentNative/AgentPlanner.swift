@@ -15,6 +15,10 @@ struct AgentPlanner {
                 : "Seçili çalışma alanında salt-okunur aramayı çalıştır."
             fallback = "Filtreyi gevşet, kapsamı yeniden kontrol et veya dosya adına göre daralt."
 
+        case .compoundFileTask:
+            executeDetail = "Zinciri sırayla yürüt: hedef dosyaları bul → adayları kısa listele → mevcut metadata ile değerlendir → sonucu doğrula."
+            fallback = "İlk arama gereksiz dar kaldıysa yalnızca salt-okunur kısıtları gevşet ve zinciri bir kez daha çalıştır."
+
         case .organizeScreenshots:
             executeDetail = "Aday ekran görüntülerini belirle ve gerçek taşıma öncesi onay planı oluştur."
             fallback = "Hiçbir dosyayı değiştirmeden adayları sadece listele."
