@@ -316,9 +316,11 @@ struct ContentView: View {
                                             .lineLimit(1)
                                             .truncationMode(.middle)
 
-                                        Text(file.fileExtension.isEmpty ? "Dosya" : file.fileExtension.uppercased())
+                                        Text(file.relativePath)
                                             .font(.caption2)
                                             .foregroundStyle(.secondary)
+                                            .lineLimit(1)
+                                            .truncationMode(.middle)
                                     }
 
                                     Spacer()
@@ -469,7 +471,7 @@ struct ContentView: View {
                 }
 
                 Text(
-                    "v0.6.1: File Agent seçili klasörde doğal dille dosya arayabilir; PDF, video, görsel, proje, belge ve dosya adına göre sonuçları listeler. Sonuçlara tıklayarak Finder’da gösterebilirsin. Taşıma güvenliği değişmedi."
+                    "v0.6.2: File Agent artık seçili klasörün alt klasörlerini de indeksler ve dosyaları ad, tür veya “9 Eylül tarihli dosyayı bul” gibi tarih ifadeleriyle arar. “Bilgisayarımda” dersen kapsamın hâlâ seçili klasör olduğunu açıkça belirtir. Taşıma işlemi yalnızca seçili klasörün doğrudan içindeki dosyalarda kalır."
                 )
                 .font(.caption2)
                 .foregroundStyle(.orange)
