@@ -593,6 +593,72 @@ struct ContentView: View {
                 .background(Color(nsColor: .controlBackgroundColor))
                 .clipShape(RoundedRectangle(cornerRadius: 10))
 
+                sectionTitle("Live Research Eval")
+
+                VStack(alignment: .leading, spacing: 8) {
+                    Text(engine.liveResearchEvalStatus)
+                        .font(.caption2)
+                        .foregroundStyle(.secondary)
+
+                    if let report = engine.liveResearchEvalReport {
+                        ForEach(report.probes) { probe in
+                            HStack(alignment: .top, spacing: 7) {
+                                Image(
+                                    systemName: probe.passed
+                                        ? "checkmark.circle.fill"
+                                        : "exclamationmark.triangle.fill"
+                                )
+                                .font(.caption)
+                                .foregroundStyle(
+                                    probe.passed
+                                        ? Color.green
+                                        : Color.orange
+                                )
+
+                                VStack(alignment: .leading, spacing: 2) {
+                                    Text(probe.title)
+                                        .font(.caption.weight(.medium))
+
+                                    Text(
+                                        "\(probe.sourceCount) kaynak • \(probe.evidenceCount) derin okuma • \(probe.uniqueDomainCount) domain"
+                                    )
+                                    .font(.caption2)
+                                    .foregroundStyle(.secondary)
+
+                                    if let first = probe.diagnostics.first {
+                                        Text(first)
+                                            .font(.caption2)
+                                            .foregroundStyle(.orange)
+                                            .lineLimit(2)
+                                    }
+                                }
+
+                                Spacer()
+                            }
+                        }
+                    }
+
+                    Button {
+                        engine.runLiveResearchEval()
+                    } label: {
+                        if engine.liveResearchEvalBusy {
+                            ProgressView()
+                                .controlSize(.small)
+                        } else {
+                            Label(
+                                "Gerçek araştırma testini çalıştır",
+                                systemImage: "globe.badge.chevron.backward"
+                            )
+                        }
+                    }
+                    .buttonStyle(.bordered)
+                    .controlSize(.small)
+                    .disabled(engine.liveResearchEvalBusy)
+                }
+                .padding(10)
+                .background(Color(nsColor: .controlBackgroundColor))
+                .clipShape(RoundedRectangle(cornerRadius: 10))
+
                 sectionTitle("Training Lab")
 
                 VStack(alignment: .leading, spacing: 8) {
@@ -1032,7 +1098,7 @@ struct ContentView: View {
                 }
 
                 Text(
-                    "v0.7.18: Ücretsiz yerel zeka katmanı eklendi. Uygun Mac’lerde Apple Foundation Models ile araştırma kanıtları, analiz hedefleri ve bağımsız fikir üretimi cihaz üzerinde sentezleniyor. Model hazır değilse KRALİ mevcut Core’a güvenli biçimde geri dönüyor; ücretli API veya ek abonelik gerekmiyor."
+                    "v0.7.19: Brand Research Mission + Live Research Eval eklendi. Marka araştırmaları tek uzun sorgu yerine resmi kaynak, tarihçe, ürün/hizmet, pazar/rakip ve güncel gelişme alt sorgularına ayrılıyor; kaynakların araştırılan varlıkla gerçekten eşleşmesi zorunlu. Her yeni sürümde gerçek internet üzerinden marka ve teknik araştırma kalite probları otomatik çalışıyor ve Mentor’a raporlanabiliyor."
                 )
                 .font(.caption2)
                 .foregroundStyle(.orange)
