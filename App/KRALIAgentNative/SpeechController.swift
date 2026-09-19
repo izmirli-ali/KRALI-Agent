@@ -285,6 +285,10 @@ final class SpeechController: NSObject, ObservableObject, AVAudioRecorderDelegat
         }
     }
 
+    func stopSpeaking() {
+        synthesizer.stopSpeaking(at: .immediate)
+    }
+
     func speak(_ text: String) {
         synthesizer.stopSpeaking(at: .immediate)
         let utterance = AVSpeechUtterance(string: text)
