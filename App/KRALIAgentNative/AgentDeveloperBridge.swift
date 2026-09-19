@@ -90,6 +90,8 @@ struct AgentDeveloperBridge {
             )
         }
 
+        let scriptPath = scriptURL.path
+
         let result = await Task.detached(
             priority: .utility
         ) {
@@ -100,7 +102,7 @@ struct AgentDeveloperBridge {
                 fileURLWithPath: "/bin/zsh"
             )
             process.arguments = [
-                self.scriptURL.path
+                scriptPath
             ]
             process.standardOutput = pipe
             process.standardError = pipe
