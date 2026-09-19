@@ -237,6 +237,12 @@ final class AgentEngine: ObservableObject {
                 decision: decision
             )
 
+        case .compoundFileTask:
+            return executeCompoundFileTask(
+                for: text,
+                decision: decision
+            )
+
         case .openPreviousResult:
             return openPreviousResult(
                 selection: decision.resultSelection
@@ -285,7 +291,10 @@ final class AgentEngine: ObservableObject {
         for text: String,
         decision: AgentDecision
     ) -> RecoveryAttempt? {
-        guard decision.intent == .fileSearch else { return nil }
+        guard decision.intent == .fileSearch ||
+              decision.intent == .compoundFileTask else {
+            return nil
+        }
 
         let hasRelaxableConstraint =
             decision.usePreviousResults ||
@@ -294,7 +303,7 @@ final class AgentEngine: ObservableObject {
         guard hasRelaxableConstraint else { return nil }
 
         let recoveryDecision = AgentDecision(
-            intent: .fileSearch,
+            intent: decision.intent,
             target: decision.target,
             dateRange: nil,
             dateField: .either,
@@ -311,7 +320,12 @@ final class AgentEngine: ObservableObject {
         log("Plan B deneniyor: arama kapsamı güvenli biçimde genişletiliyor")
 
         let reply: String
-        if recoveryDecision.target == .folder {
+        if recoveryDecision.intent == .compoundFileTask {
+            reply = executeCompoundFileTask(
+                for: text,
+                decision: recoveryDecision
+            )
+        } else if recoveryDecision.target == .folder {
             reply = searchIndexedFolders(
                 for: text,
                 decision: recoveryDecision
@@ -614,6 +628,90 @@ final class AgentEngine: ObservableObject {
 
         NSWorkspace.shared.selectFile(nil, inFileViewerRootedAtPath: folder.url.path)
         log("Finder'da klasör açıldı: \(folder.name)")
+    }
+
+    private func executeCompoundFileTask(
+        for rawText: String,
+        decision: AgentDecision
+    ) -> String {
+        guard selectedRootURL != nil else {
+            fileSearchResults = []
+            return "Bu çok adımlı görev için önce bir çalışma klasörü seçmeliyim."
+        }
+
+        let searchDecision = AgentDecision(
+            intent: .fileSearch,
+            target: decision.target,
+            dateRange: decision.dateRange,
+            dateField: decision.dateField,
+            sortMode: decision.sortMode,
+            route: decision.route + ["Search"],
+            goal: decision.goal,
+            selectedPlan: "Zincirin ilk adımı olarak hedef dosyaları salt-okunur bul.",
+            alternatives: decision.alternatives,
+            proactiveSuggestion: nil,
+            usePreviousResults: decision.usePreviousResults,
+            resultSelection: nil
+        )
+
+        log("Zincir 1/3: hedef dosyalar aranıyor")
+        let searchReply = searchIndexedFiles(
+            for: rawText,
+            decision: searchDecision
+        )
+
+        guard !fileSearchResults.isEmpty else {
+            log("Zincir durdu: arama sonucu yok")
+            return searchReply
+        }
+
+        log("Zincir 2/3: adaylar kısa listeye indiriliyor")
+
+        var candidates = fileSearchResults
+
+        if decision.sortMode == .newestFirst {
+            candidates.sort {
+                let left = $0.modificationDate ?? $0.creationDate ?? .distantPast
+                let right = $1.modificationDate ?? $1.creationDate ?? .distantPast
+                return left > right
+            }
+        }
+
+        let shortlistCount = min(3, candidates.count)
+        candidates = Array(candidates.prefix(shortlistCount))
+        fileSearchResults = candidates
+        fileSearchTitle = "KRALİ kısa liste • \(decision.goal)"
+
+        log("Zincir 3/3: kısa liste mevcut metadata ile değerlendiriliyor")
+
+        let lines = candidates.enumerated().map { index, file in
+            let date = file.modificationDate ?? file.creationDate
+            let dateText: String
+
+            if let date {
+                dateText = date.formatted(
+                    date: .abbreviated,
+                    time: .shortened
+                )
+            } else {
+                dateText = "tarih bilinmiyor"
+            }
+
+            return "\(index + 1). \(file.name) • .\(file.fileExtension) • \(dateText)"
+        }
+        .joined(separator: "\n")
+
+        let text = normalize(rawText)
+        let asksForSuitability = containsAny(text, [
+            "uygun", "değerlendir", "degerlendir",
+            "hangileri", "hangisi", "öner", "oner"
+        ])
+
+        if asksForSuitability {
+            return "Görevi zincir halinde tamamladım. Önce adayları buldum, sonra kısa listeyi \(shortlistCount) öğeye indirdim.\n\n\(lines)\n\nŞu an yapabildiğim ön seçim dosya türü ve oluşturma/değiştirilme zamanı gibi metadata'ya dayanıyor. Görüntü içeriği, netlik, kadraj, hareket ve ses analizi henüz bağlı olmadığı için “kurguya en uygun” aday konusunda kesin içerik değerlendirmesi yapmıyorum. Bu kısa liste, sonraki görsel analiz katmanı için doğru başlangıç kümesi."
+        }
+
+        return "Görevi zincir halinde tamamladım: hedefleri buldum ve \(shortlistCount) adaylık kısa liste oluşturdum.\n\n\(lines)"
     }
 
     private func openPreviousResult(
