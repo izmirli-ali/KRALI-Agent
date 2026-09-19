@@ -10,6 +10,7 @@ LOG_DIR="$HOME/Library/Logs"
 LOG="$LOG_DIR/KRALI-Developer-Agent.log"
 STATUS_DIR="$HOME/Library/Application Support/KRALI Agent/Developer"
 STATUS="$STATUS_DIR/latest.txt"
+LOCAL_MENTOR_DIR="$HOME/Library/Application Support/KRALI Agent/Mentor"
 
 export PATH="/opt/homebrew/bin:/usr/local/bin:$HOME/.npm-global/bin:/usr/bin:/bin:/usr/sbin:/sbin:$PATH"
 
@@ -86,6 +87,67 @@ if ! git pull --ff-only >>"$LOG" 2>&1; then
     exit 14
 fi
 
+write_status "checking|Training Lab, Live Eval ve mentor trace karşılaştırılıyor"
+
+DIAGNOSTIC_DECISION="$("$NODE_BIN" - "$ROOT" "$LOCAL_MENTOR_DIR" <<'NODE'
+const fs = require("fs");
+const path = require("path");
+
+const root = process.argv[2];
+const localMentor = process.argv[3];
+
+function readJSON(file) {
+  try {
+    return JSON.parse(fs.readFileSync(file, "utf8"));
+  } catch {
+    return null;
+  }
+}
+
+function readText(file) {
+  try {
+    return fs.readFileSync(file, "utf8").trim();
+  } catch {
+    return "";
+  }
+}
+
+const version = readText(path.join(root, "VERSION"));
+const training = readJSON(path.join(localMentor, "training-latest.json"));
+const live = readJSON(path.join(localMentor, "live-eval-latest.json"));
+const mentor = readJSON(path.join(localMentor, "latest.json"));
+
+const trainingGreen =
+  training &&
+  training.appVersion === version &&
+  Number(training.failed || 0) === 0 &&
+  Number(training.passed || 0) === Number(training.total || -1);
+
+const liveGreen =
+  live &&
+  live.appVersion === version &&
+  Number(live.failed || 0) === 0 &&
+  Number(live.passed || 0) === Number(live.total || -1);
+
+const mentorCurrent = mentor && mentor.appVersion === version;
+const mentorNeedsAttention =
+  mentorCurrent &&
+  !["passed", "skipped"].includes(String(mentor.verificationState || ""));
+
+if (trainingGreen && liveGreen && !mentorNeedsAttention) {
+  process.stdout.write("green");
+} else {
+  process.stdout.write("run");
+}
+NODE
+)"
+
+if [ "$DIAGNOSTIC_DECISION" = "green" ]; then
+    write_status "no_change|Training Lab ve Live Research Eval güncel sürümde yeşil; Developer Agent çalıştırılmadı"
+    echo "✅ Güncel diagnostic'ler yeşil. Cline çağrısı gereksiz olduğu için atlandı." | tee -a "$LOG"
+    exit 0
+fi
+
 if ! git worktree add -b "$BRANCH" "$WORKTREE" origin/main >>"$LOG" 2>&1; then
     write_status "failed|worktree oluşturulamadı"
     exit 15
@@ -101,6 +163,10 @@ Sen KRALİ projesinin Developer Agent'ısın.
 - Mentor/live-eval-latest.json (varsa)
 - Mentor/latest.json (varsa)
 - VERSION
+- Yerel güncel diagnostic'ler için gerekirse shell ile şu dosyaları da oku:
+  ~/Library/Application Support/KRALI Agent/Mentor/training-latest.json
+  ~/Library/Application Support/KRALI Agent/Mentor/live-eval-latest.json
+  ~/Library/Application Support/KRALI Agent/Mentor/latest.json
 
 Amaç:
 KRALİ'nin kullanıcının hedeflediği genel yapay zeka/asistan iskeletini güvenilir biçimde geliştirmek.
@@ -142,7 +208,9 @@ CLINE_ARGS=(
     --auto-approve true
     --provider "$PROVIDER"
     --cwd "$WORKTREE"
-    --timeout 1800
+    --thinking medium
+    --retries 2
+    --timeout 900
 )
 
 # Model boş bırakılırsa "cline auth" sırasında bu provider için seçilen model kullanılır.
