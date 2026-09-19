@@ -63,6 +63,8 @@ Yerel dosya algısı, güvenli aksiyonlar, intent, tarih çözümleme, bağlam v
 
 **v0.7.1 reflection/recovery:** Verifier yalnızca fonksiyonun çalışmasını başarı saymaz; hedef sonucunu da kontrol eder. Salt-okunur dosya aramasında 0 sonuç oluşursa ve ilk plan tarih veya önceki-sonuç filtresi içeriyorsa Core bu kısıtı bir kez güvenli biçimde gevşetir, yeniden yürütür ve ikinci sonucu tekrar doğrular. Yazma işlemlerinde otomatik retry yapılmaz.
 
+**v0.7.2 task decomposition:** Core ilk bileşik dosya görevlerini tek intent yerine zincir olarak yürütür. Arama → kısa liste → metadata temelli değerlendirme sıralı çalışır. İçerik analizi henüz bağlı değilse KRALİ bunu açıkça söyler; metadata çıkarımını görüntü içeriği analiziymiş gibi sunmaz.
+
 ### 0.8.x — Memory
 Kısa süreli konuşma belleği ile kalıcı kullanıcı tercihlerini ayırma; bağlam özetleme.
 
