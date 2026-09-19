@@ -115,6 +115,7 @@ actor AgentWebResearchService {
                         provider: provider,
                         payload: payload,
                         conceptGroups: queryPlan.conceptGroups,
+                        mandatoryConceptGroups: queryPlan.mandatoryConceptGroups,
                         preferredDomains: queryPlan.preferredDomains,
                         limit: safeLimit * 2
                     )
@@ -284,6 +285,7 @@ actor AgentWebResearchService {
         provider: Provider,
         payload: String,
         conceptGroups: [[String]],
+        mandatoryConceptGroups: [[String]],
         preferredDomains: [String],
         limit: Int
     ) -> [ScoredResult] {
@@ -349,8 +351,13 @@ actor AgentWebResearchService {
             let evaluation = relevanceEvaluation(
                 result,
                 conceptGroups: conceptGroups,
+                mandatoryConceptGroups: mandatoryConceptGroups,
                 preferredDomains: preferredDomains
             )
+
+            guard evaluation.mandatorySatisfied else {
+                return nil
+            }
 
             return ScoredResult(
                 result: result,
@@ -514,8 +521,9 @@ actor AgentWebResearchService {
     private func relevanceEvaluation(
         _ result: WebResearchResult,
         conceptGroups: [[String]],
+        mandatoryConceptGroups: [[String]],
         preferredDomains: [String]
-    ) -> (score: Int, coverage: Int) {
+    ) -> (score: Int, coverage: Int, mandatorySatisfied: Bool) {
         let title = normalize(result.title)
         let domain = normalize(result.domain)
         let snippet = normalize(result.snippet ?? "")
@@ -523,6 +531,14 @@ actor AgentWebResearchService {
 
         var score = 0
         var coverage = 0
+
+        let mandatorySatisfied = mandatoryConceptGroups.allSatisfy { group in
+            group
+                .map(normalize)
+                .contains {
+                    !$0.isEmpty && combined.contains($0)
+                }
+        }
 
         for group in conceptGroups {
             let normalizedAliases = group.map(normalize)
@@ -572,7 +588,7 @@ actor AgentWebResearchService {
             score += 1
         }
 
-        return (score, coverage)
+        return (score, coverage, mandatorySatisfied)
     }
 
     private func isJunkResult(
