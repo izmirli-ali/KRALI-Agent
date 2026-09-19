@@ -22,6 +22,7 @@
 		A10000000000000000000013 /* AgentResponseComposer.swift in Sources */ = {isa = PBXBuildFile; fileRef = B10000000000000000000013 /* AgentResponseComposer.swift */; };
 		A10000000000000000000014 /* AgentRouteBuilder.swift in Sources */ = {isa = PBXBuildFile; fileRef = B10000000000000000000014 /* AgentRouteBuilder.swift */; };
 		A10000000000000000000015 /* AgentCapabilityLearner.swift in Sources */ = {isa = PBXBuildFile; fileRef = B10000000000000000000015 /* AgentCapabilityLearner.swift */; };
+		A10000000000000000000016 /* AgentLearningStore.swift in Sources */ = {isa = PBXBuildFile; fileRef = B10000000000000000000016 /* AgentLearningStore.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
@@ -41,6 +42,7 @@
 		B10000000000000000000013 /* AgentResponseComposer.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AgentResponseComposer.swift; sourceTree = "<group>"; };
 		B10000000000000000000014 /* AgentRouteBuilder.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AgentRouteBuilder.swift; sourceTree = "<group>"; };
 		B10000000000000000000015 /* AgentCapabilityLearner.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AgentCapabilityLearner.swift; sourceTree = "<group>"; };
+		B10000000000000000000016 /* AgentLearningStore.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AgentLearningStore.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -80,6 +82,7 @@
 				B10000000000000000000013 /* AgentResponseComposer.swift */,
 				B10000000000000000000014 /* AgentRouteBuilder.swift */,
 				B10000000000000000000015 /* AgentCapabilityLearner.swift */,
+				B10000000000000000000016 /* AgentLearningStore.swift */,
 			);
 			path = KRALIAgentNative;
 			sourceTree = "<group>";
@@ -176,6 +179,7 @@
 				A10000000000000000000013 /* AgentResponseComposer.swift in Sources */,
 				A10000000000000000000014 /* AgentRouteBuilder.swift in Sources */,
 				A10000000000000000000015 /* AgentCapabilityLearner.swift in Sources */,
+				A10000000000000000000016 /* AgentLearningStore.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -213,7 +217,7 @@
 				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
 				CODE_SIGN_STYLE = Automatic;
 				COMBINE_HIDPI_IMAGES = YES;
-				CURRENT_PROJECT_VERSION = 28;
+				CURRENT_PROJECT_VERSION = 29;
 				DEVELOPMENT_TEAM = 65244UMFCK;
 				ENABLE_HARDENED_RUNTIME = NO;
 				ENABLE_PREVIEWS = YES;
@@ -228,7 +232,7 @@
 					"@executable_path/../Frameworks",
 				);
 				MACOSX_DEPLOYMENT_TARGET = 14.0;
-				MARKETING_VERSION = 0.7.8;
+				MARKETING_VERSION = 0.7.9;
 				PRODUCT_BUNDLE_IDENTIFIER = com.aliihsancanuysal.kraliagent;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				SDKROOT = macosx;
@@ -244,7 +248,7 @@
 				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
 				CODE_SIGN_STYLE = Automatic;
 				COMBINE_HIDPI_IMAGES = YES;
-				CURRENT_PROJECT_VERSION = 28;
+				CURRENT_PROJECT_VERSION = 29;
 				DEVELOPMENT_TEAM = 65244UMFCK;
 				ENABLE_HARDENED_RUNTIME = NO;
 				GENERATE_INFOPLIST_FILE = YES;
@@ -258,7 +262,7 @@
 					"@executable_path/../Frameworks",
 				);
 				MACOSX_DEPLOYMENT_TARGET = 14.0;
-				MARKETING_VERSION = 0.7.8;
+				MARKETING_VERSION = 0.7.9;
 				PRODUCT_BUNDLE_IDENTIFIER = com.aliihsancanuysal.kraliagent;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				SDKROOT = macosx;
