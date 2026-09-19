@@ -4,12 +4,13 @@ struct AgentPlanner {
     func makePlan(
         decision: AgentDecision,
         context: AgentContextSnapshot,
-        capabilities: [AgentCapability]
+        capabilities: [AgentCapability],
+        goal: AgentGoalProfile
     ) -> AgentExecutionPlan {
         var steps: [AgentExecutionStep] = [
             AgentExecutionStep(
                 title: "Hedefi çöz",
-                detail: "İstenen sonucu, kısıtları ve mevcut bağlamı anlamlandır.",
+                detail: "Hedef sözleşmesi: \(goal.summary). Kısıtları ve mevcut bağlamı anlamlandır.",
                 kind: .reasoning,
                 capabilityID: "core.reasoning"
             )
@@ -96,6 +97,16 @@ struct AgentPlanner {
                         "Adayları değerlendir",
                         "Mevcut yerel metadata ile açıklanabilir ön değerlendirme yap.",
                         capability: "files.metadata"
+                    )
+                )
+            }
+
+            if goal.outcomes.contains(.explain) {
+                steps.append(
+                    AgentExecutionStep(
+                        title: "Gerekçeyi açıkla",
+                        detail: "Tamamlanan ve tamamlanamayan kısımları ayır; sonucu nedenleriyle açıkla.",
+                        kind: .response
                     )
                 )
             }
