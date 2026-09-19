@@ -765,7 +765,7 @@ struct ContentView: View {
                                 .font(.caption.weight(.medium))
 
                             Text(
-                                "İzole branch/worktree • main otomatik değişmez • varsayılan ücretsiz Nemotron"
+                                "İzole branch/worktree • main otomatik değişmez • ChatGPT Subscription OAuth"
                             )
                             .font(.caption2)
                             .foregroundStyle(.secondary)
@@ -1164,7 +1164,7 @@ struct ContentView: View {
                 }
 
                 Text(
-                    "v0.7.21: Developer Agent kurulum tanısı iyileştirildi. KRALİ artık Node.js/npm yokluğu, eski Node sürümü ve Cline CLI eksikliğini ayrı ayrı algılıyor; kullanıcıya yanlış npm komutu göstermek yerine doğru kurulum adımını veriyor. Cline resmi gereksinimine göre Node.js 20+ kontrolü eklendi."
+                    "v0.7.22: Developer Agent artık varsayılan olarak Cline içindeki ChatGPT Subscription / openai-codex provider’ını kullanıyor ve cline auth sırasında seçilen modeli yeniden kullanıyor. Ayrı OpenAI API anahtarı veya Cline kredisi gerekmiyor. Updater da uygulama açılışında otomatik sürüm kontrolü yapıyor."
                 )
                 .font(.caption2)
                 .foregroundStyle(.orange)
