@@ -812,7 +812,7 @@ struct ContentView: View {
                 }
 
                 Text(
-                    "v0.7.11: Web Research sağlamlaştırıldı. Açık “web’de araştır / internetten araştır” komutları artık yerel dosya aramasıyla karışmıyor; doğrudan Research rotasına gidiyor. Google → Bing → DuckDuckGo güvenli fallback zinciri eklendi; bir sağlayıcı TLS/parse hatası verirse diğeri otomatik deneniyor. Araştırma komutundaki gereksiz fiiller de sorgudan temizleniyor."
+                    "v0.7.12: Research Quality katmanı eklendi. KRALİ artık ilk gelen linki başarı saymıyor; Bing RSS + Google/Bing/DDG kaynaklarını birleştiriyor, sorguyla alaka puanı veriyor, “geri bildirim / sign in / yardım” gibi gürültüyü eliyor ve yalnızca alakalı sonuçları tutuyor. Tek kaynak artık tam başarı değil “kısmi” kabul ediliyor."
                 )
                 .font(.caption2)
                 .foregroundStyle(.orange)
