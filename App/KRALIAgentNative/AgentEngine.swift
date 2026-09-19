@@ -31,6 +31,8 @@ final class AgentEngine: ObservableObject {
     @Published var selectedCapabilities: [AgentCapability] = []
     @Published var capabilityLearningPlans: [CapabilityLearningPlan] = []
     @Published var capabilityLearningBacklog: [CapabilityLearningTask] = []
+    @Published var webResearchResults: [WebResearchResult] = []
+    @Published var webResearchStatus = "Henüz web araştırması yapılmadı."
 
     @Published var voiceOutputEnabled = true {
         didSet {
@@ -56,6 +58,7 @@ final class AgentEngine: ObservableObject {
     private let routeBuilder = AgentRouteBuilder()
     private let capabilityLearner = AgentCapabilityLearner()
     private let learningStore = AgentLearningStore()
+    private let webResearchService = AgentWebResearchService()
     private var lastDecision: AgentDecision?
 
     init() {
@@ -113,8 +116,14 @@ final class AgentEngine: ObservableObject {
         )
         selectedCapabilities = capabilities
 
+        let webResearchAvailable =
+            capabilityRegistry.all.first(
+                where: { $0.id == "research.web" }
+            )?.isAvailable == true
+
         let learningPlans = capabilityLearner.makePlans(
-            for: capabilities
+            for: capabilities,
+            webResearchAvailable: webResearchAvailable
         )
         capabilityLearningPlans = learningPlans
         capabilityLearningBacklog = learningStore.merge(
@@ -145,6 +154,11 @@ final class AgentEngine: ObservableObject {
         fallbackPlan = executionPlan.fallback
         recoverySummary = nil
 
+        if !goalProfile.outcomes.contains(.research) {
+            webResearchResults = []
+            webResearchStatus = "Bu görevde web araştırması istenmedi."
+        }
+
         log("KRALİ Core hedef sözleşmesi: \(goalProfile.summary)")
         log("Seçilen plan: \(decision.selectedPlan)")
         log("Otomatik rota: \(activeRoute.joined(separator: " → "))")
@@ -168,7 +182,28 @@ final class AgentEngine: ObservableObject {
 
         Task {
             try? await Task.sleep(for: .milliseconds(180))
-            let baseReply = makeReply(for: text, decision: decision)
+
+            var baseReply: String
+            if goalProfile.outcomes.contains(.research),
+               capabilities.contains(where: {
+                   $0.id == "research.web" && $0.isAvailable
+               }) {
+                baseReply = await performWebResearch(
+                    query: text
+                )
+            } else {
+                baseReply = makeReply(
+                    for: text,
+                    decision: decision
+                )
+            }
+
+            if let learningSummary = await researchCapabilityGapIfNeeded(
+                plans: learningPlans
+            ) {
+                baseReply += "\n\nÖğrenme araştırması: " + learningSummary
+            }
+
             completeActionSteps()
 
             let verification: AgentVerificationResult
@@ -503,8 +538,133 @@ final class AgentEngine: ObservableObject {
                 selectedCapabilities
                     .filter { !$0.isAvailable }
                     .map(\.id)
-            )
+            ),
+            selectedCapabilityIDs: Set(
+                selectedCapabilities.map(\.id)
+            ),
+            webResearchResultCount: webResearchResults.count
         )
+    }
+
+    private func performWebResearch(
+        query: String
+    ) async -> String {
+        webResearchStatus = "Web araştırılıyor…"
+        log("Web Research başladı")
+
+        do {
+            let report = try await webResearchService.search(
+                query,
+                limit: 5
+            )
+
+            webResearchResults = report.results
+            webResearchStatus =
+                "\(report.results.count) kaynak bulundu • \(report.provider)"
+
+            log(
+                "Web Research tamamlandı: " +
+                String(report.results.count) +
+                " kaynak"
+            )
+
+            let lines = report.results.enumerated().map {
+                index,
+                result in
+
+                "\(index + 1). \(result.title) — \(result.domain)"
+            }
+            .joined(separator: "\n")
+
+            return "Web'de araştırdım ve \(report.results.count) kaynak buldum.\n\n" +
+                lines +
+                "\n\nKaynak adresleri sağ panelde açık. Bu bootstrap sürümünde sonuçları bulup kaynakları ayırıyorum; derin sayfa okuma ve çok-kaynak sentezi sonraki katman."
+        } catch {
+            webResearchResults = []
+            webResearchStatus = error.localizedDescription
+            log(
+                "Web Research başarısız: " +
+                error.localizedDescription
+            )
+
+            return "Web araştırmasını başlattım fakat doğrulanabilir sonuç kümesi alamadım: " +
+                error.localizedDescription
+        }
+    }
+
+    private func researchCapabilityGapIfNeeded(
+        plans: [CapabilityLearningPlan]
+    ) async -> String? {
+        guard let plan = plans.first(where: {
+            $0.canResearchAutonomously
+        }) else {
+            return nil
+        }
+
+        guard let task = capabilityLearningBacklog.first(
+            where: { $0.capabilityID == plan.capabilityID }
+        ) else {
+            return nil
+        }
+
+        guard task.progress == .readyToResearch else {
+            return nil
+        }
+
+        capabilityLearningBacklog = learningStore.update(
+            existing: capabilityLearningBacklog,
+            capabilityID: plan.capabilityID,
+            progress: .researching,
+            nextStep: "KRALİ resmi ve güvenilir web kaynaklarını araştırıyor."
+        )
+
+        log(
+            "Yetkinlik araştırması başladı: " +
+            plan.capabilityName
+        )
+
+        do {
+            let report = try await webResearchService.search(
+                plan.researchGoal,
+                limit: 5
+            )
+
+            let domains = report.results
+                .map(\.domain)
+                .joined(separator: ", ")
+
+            let nextStep =
+                "\(report.results.count) kaynak bulundu (\(domains)). " +
+                "Sonraki adım: kaynakları derin oku, uygulanabilir mimari önerisini çıkar, izole prototip ve test planı hazırla."
+
+            capabilityLearningBacklog = learningStore.update(
+                existing: capabilityLearningBacklog,
+                capabilityID: plan.capabilityID,
+                progress: .proposalReady,
+                nextStep: nextStep
+            )
+
+            log(
+                "Yetkinlik araştırması kaynak buldu: " +
+                plan.capabilityName
+            )
+
+            return "\(plan.capabilityName) için \(report.results.count) kaynak buldum. Çözüm önerisi hazırlama kuyruğuna aldım."
+        } catch {
+            capabilityLearningBacklog = learningStore.update(
+                existing: capabilityLearningBacklog,
+                capabilityID: plan.capabilityID,
+                progress: .readyToResearch,
+                nextStep: "Araştırma denemesi başarısız oldu: \(error.localizedDescription). Daha sonra farklı sorgu / sağlayıcıyla tekrar dene."
+            )
+
+            log(
+                "Yetkinlik araştırması başarısız: " +
+                error.localizedDescription
+            )
+
+            return "\(plan.capabilityName) için araştırma denemesi başarısız oldu; öğrenme kuyruğunda bekliyor."
+        }
     }
 
     private func appendSuggestion(
