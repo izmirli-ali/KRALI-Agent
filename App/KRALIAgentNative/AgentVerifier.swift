@@ -163,22 +163,30 @@ struct AgentVerifier {
             if snapshot.selectedCapabilityIDs.contains("research.web") {
                 guard snapshot.webResearchResultCount > 0 else {
                     return attention(
-                        "Web araştırma adımı çalıştı ancak doğrulanabilir sonuç üretmedi.",
-                        fallback: "Sorguyu sadeleştir, farklı anahtar kelimelerle yeniden ara veya alternatif araştırma sağlayıcısı kullan."
+                        "Web araştırma adımı çalıştı ancak doğrulanabilir ve alakalı sonuç üretmedi.",
+                        fallback: "Sorguyu yeniden ifade et, resmi dokümantasyon terimleri ekle veya farklı sağlayıcılarla tekrar ara."
+                    )
+                }
+
+                if snapshot.webResearchResultCount == 1 {
+                    return AgentVerificationResult(
+                        state: .partial,
+                        summary: "Web araştırması yalnızca 1 alakalı kaynak buldu. Kaynak keşfi çalışıyor ancak sağlam bir araştırma sonucu saymak için kaynak çeşitliliği yetersiz.",
+                        fallback: nil
                     )
                 }
 
                 if !snapshot.unavailableCapabilityIDs.isEmpty {
                     return AgentVerificationResult(
                         state: .partial,
-                        summary: "Web araştırması (snapshot.webResearchResultCount) kaynak buldu; ancak hedefte gereken diğer capability'lerden en az biri henüz bağlı değil. Sonuç kısmi.",
+                        summary: "Web araştırması \(snapshot.webResearchResultCount) alakalı kaynak buldu; ancak hedefte gereken diğer capability'lerden en az biri henüz bağlı değil. Sonuç kısmi.",
                         fallback: nil
                     )
                 }
 
                 return AgentVerificationResult(
                     state: .passed,
-                    summary: "Web araştırması gerçek sonuç kümesiyle doğrulandı: (snapshot.webResearchResultCount) kaynak.",
+                    summary: "Web araştırması gerçek ve alakalı sonuç kümesiyle doğrulandı: \(snapshot.webResearchResultCount) kaynak.",
                     fallback: nil
                 )
             }
