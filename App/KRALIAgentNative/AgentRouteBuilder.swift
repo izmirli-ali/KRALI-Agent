@@ -4,6 +4,7 @@ struct AgentRouteBuilder {
     func build(
         goal: AgentGoalProfile,
         capabilities: [AgentCapability],
+        learningPlans: [CapabilityLearningPlan],
         requiresVerification: Bool
     ) -> [String] {
         var route = ["Core", "Goal", "Context"]
@@ -20,6 +21,10 @@ struct AgentRouteBuilder {
         let stages = actionCapabilities.compactMap(stageName(for:))
         for stage in stages where !route.contains(stage) {
             route.append(stage)
+        }
+
+        if !learningPlans.isEmpty {
+            route.append("Learn")
         }
 
         if requiresVerification {
