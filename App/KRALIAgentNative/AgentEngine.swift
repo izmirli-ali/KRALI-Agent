@@ -43,6 +43,13 @@ final class AgentEngine: ObservableObject {
     @Published var liveResearchEvalReport: LiveResearchEvalReport?
     @Published var liveResearchEvalStatus = "Henüz gerçek internet kalite testi yapılmadı."
     @Published var liveResearchEvalBusy = false
+    @Published var developerAgentStatus = DeveloperAgentStatus(
+        state: "idle",
+        message: "Developer Agent henüz çalıştırılmadı.",
+        branch: nil,
+        worktree: nil
+    )
+    @Published var developerAgentBusy = false
     @Published var localIntelligenceState: LocalIntelligenceState = .checking
 
     @Published var voiceOutputEnabled = true {
@@ -76,6 +83,7 @@ final class AgentEngine: ObservableObject {
     private let trainingLabStore = TrainingLabStore()
     private let liveResearchEval = AgentLiveResearchEval()
     private let liveResearchEvalStore = LiveResearchEvalStore()
+    private let developerBridge = AgentDeveloperBridge()
     private let localIntelligence = AgentLocalIntelligence()
     private var lastDecision: AgentDecision?
 
@@ -120,6 +128,8 @@ final class AgentEngine: ObservableObject {
 
             mentorTraceReady = true
         }
+
+        developerAgentStatus = developerBridge.readStatus()
 
         let currentVersion = Bundle.main.object(
             forInfoDictionaryKey: "CFBundleShortVersionString"
@@ -999,6 +1009,49 @@ final class AgentEngine: ObservableObject {
             }
 
             liveResearchEvalBusy = false
+        }
+    }
+
+    func runDeveloperAgent() {
+        guard !developerAgentBusy else { return }
+
+        developerAgentBusy = true
+        developerAgentStatus = DeveloperAgentStatus(
+            state: "running",
+            message: "Developer Agent diagnostic'leri inceliyor…",
+            branch: nil,
+            worktree: nil
+        )
+
+        log("Developer Agent başlatıldı")
+
+        Task {
+            let status = await developerBridge.run()
+            developerAgentStatus = status
+            developerAgentBusy = false
+
+            switch status.state {
+            case "ready_for_review":
+                log(
+                    "Developer Agent adayı incelemeye hazır: " +
+                    (status.branch ?? "branch bilinmiyor")
+                )
+
+            case "no_change":
+                log("Developer Agent değişiklik gerekmedi sonucuna vardı")
+
+            case "setup_required":
+                log("Developer Agent için Cline kurulumu gerekiyor")
+
+            case "build_failed":
+                log(
+                    "Developer Agent adayı build geçmedi: " +
+                    (status.branch ?? "branch bilinmiyor")
+                )
+
+            default:
+                log("Developer Agent durumu: " + status.message)
+            }
         }
     }
 
