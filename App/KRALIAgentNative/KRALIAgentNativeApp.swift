@@ -5,7 +5,7 @@ struct KRALIAgentNativeApp: App {
     @StateObject private var engine = AgentEngine()
 
     var body: some Scene {
-        WindowGroup("KRALİ Agent") {
+        WindowGroup("KRALİ") {
             ContentView()
                 .environmentObject(engine)
                 .frame(minWidth: 1000, minHeight: 700)
