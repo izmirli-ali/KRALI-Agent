@@ -206,6 +206,16 @@ struct ContentView: View {
                 )
 
                 quickButton(
+                    "PDF'leri bul",
+                    "PDF dosyalarını bul."
+                )
+
+                quickButton(
+                    "Videoları bul",
+                    "Video dosyalarını bul."
+                )
+
+                quickButton(
                     "Geri al",
                     "geri al"
                 )
@@ -285,6 +295,50 @@ struct ContentView: View {
                         )
                     } label: {
                         Label("Son dosya taşıma işlemini geri al", systemImage: "arrow.uturn.backward")
+                    }
+                }
+
+                if !engine.fileSearchResults.isEmpty {
+                    sectionTitle(engine.fileSearchTitle)
+
+                    VStack(spacing: 7) {
+                        ForEach(engine.fileSearchResults.prefix(12)) { file in
+                            Button {
+                                engine.revealFile(file)
+                            } label: {
+                                HStack(spacing: 8) {
+                                    Image(systemName: file.isScreenshot ? "photo" : "doc")
+                                        .frame(width: 18)
+
+                                    VStack(alignment: .leading, spacing: 2) {
+                                        Text(file.name)
+                                            .font(.caption)
+                                            .lineLimit(1)
+                                            .truncationMode(.middle)
+
+                                        Text(file.fileExtension.isEmpty ? "Dosya" : file.fileExtension.uppercased())
+                                            .font(.caption2)
+                                            .foregroundStyle(.secondary)
+                                    }
+
+                                    Spacer()
+
+                                    Image(systemName: "arrow.forward.circle")
+                                        .foregroundStyle(.secondary)
+                                }
+                                .contentShape(Rectangle())
+                            }
+                            .buttonStyle(.plain)
+                            .padding(8)
+                            .background(Color(nsColor: .controlBackgroundColor))
+                            .clipShape(RoundedRectangle(cornerRadius: 8))
+                        }
+                    }
+
+                    if engine.fileSearchResults.count > 12 {
+                        Text("+ \(engine.fileSearchResults.count - 12) sonuç daha")
+                            .font(.caption2)
+                            .foregroundStyle(.secondary)
                     }
                 }
 
@@ -415,7 +469,7 @@ struct ContentView: View {
                 }
 
                 Text(
-                    "v0.6.0: Seçtiğin çalışma klasörü artık uygulama yeniden açılsa da hatırlanır ve otomatik indekslenir. File Agent dosya türlerini özetler, taşıma öncesi aday dosyaları gösterir; onay ve geri alma güvenliği korunur."
+                    "v0.6.1: File Agent seçili klasörde doğal dille dosya arayabilir; PDF, video, görsel, proje, belge ve dosya adına göre sonuçları listeler. Sonuçlara tıklayarak Finder’da gösterebilirsin. Taşıma güvenliği değişmedi."
                 )
                 .font(.caption2)
                 .foregroundStyle(.orange)
