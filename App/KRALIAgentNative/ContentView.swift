@@ -253,6 +253,64 @@ struct ContentView: View {
                         .font(.caption)
                         .foregroundStyle(.secondary)
 
+                    if !engine.executionSteps.isEmpty {
+                        Divider()
+
+                        Text("İşlem akışı")
+                            .font(.caption2.weight(.semibold))
+                            .foregroundStyle(.secondary)
+
+                        ForEach(engine.executionSteps) { step in
+                            HStack(alignment: .top, spacing: 7) {
+                                Image(systemName: step.state.systemImage)
+                                    .font(.caption)
+                                    .foregroundStyle(
+                                        step.state == .attention
+                                            ? Color.orange
+                                            : Color.secondary
+                                    )
+
+                                VStack(alignment: .leading, spacing: 2) {
+                                    Text(step.title)
+                                        .font(.caption.weight(.medium))
+
+                                    Text(step.detail)
+                                        .font(.caption2)
+                                        .foregroundStyle(.secondary)
+                                }
+
+                                Spacer()
+                            }
+                        }
+
+                        HStack(alignment: .top, spacing: 7) {
+                            Image(systemName: engine.verificationState.systemImage)
+                                .foregroundStyle(
+                                    engine.verificationState == .attention
+                                        ? Color.orange
+                                        : Color.secondary
+                                )
+
+                            VStack(alignment: .leading, spacing: 2) {
+                                Text("Verifier")
+                                    .font(.caption.weight(.medium))
+
+                                Text(engine.verificationSummary)
+                                    .font(.caption2)
+                                    .foregroundStyle(.secondary)
+
+                                if let fallback = engine.fallbackPlan,
+                                   engine.verificationState == .attention {
+                                    Text("Plan B: \(fallback)")
+                                        .font(.caption2)
+                                        .foregroundStyle(.orange)
+                                }
+                            }
+
+                            Spacer()
+                        }
+                    }
+
                     if !engine.currentAlternatives.isEmpty {
                         Text("Alternatifler")
                             .font(.caption2.weight(.semibold))
@@ -550,7 +608,7 @@ struct ContentView: View {
                 }
 
                 Text(
-                    "v0.6.10: Sesli yanıt davranışı giriş moduna bağlandı. Yazılı mesajlar artık hiçbir zaman otomatik okunmaz; yalnızca mikrofonla verilen komutlara, “Sesli mod yanıtı” açıksa sesli cevap verilir. Tercih uygulama yeniden açıldığında korunur."
+                    "v0.7.0: Planner + Verifier temeli eklendi. KRALİ artık her görev için Anla → Bağlam + Plan → Uygula → Doğrula akışını görünür biçimde yürütür. Gerçek araç işlemlerinden sonra sonucu yeniden kontrol eder; doğrulama sorununda Plan B üretir."
                 )
                 .font(.caption2)
                 .foregroundStyle(.orange)
