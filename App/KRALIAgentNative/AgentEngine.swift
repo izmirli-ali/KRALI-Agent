@@ -23,6 +23,10 @@ final class AgentEngine: ObservableObject {
     @Published var currentGoal = "Hazır"
     @Published var currentPlan = "Yeni görevi bekliyor"
     @Published var currentAlternatives: [String] = []
+    @Published var executionSteps: [AgentExecutionStep] = []
+    @Published var verificationState: AgentVerificationState = .idle
+    @Published var verificationSummary = "Henüz doğrulama yapılmadı."
+    @Published var fallbackPlan: String?
 
     @Published var voiceOutputEnabled = true {
         didSet {
@@ -40,6 +44,8 @@ final class AgentEngine: ObservableObject {
     private let selectedRootKey = "krali.native.selectedRootPath.v1"
     private let fileManager = FileManager.default
     private let brain = AgentBrain()
+    private let planner = AgentPlanner()
+    private let verifier = AgentVerifier()
     private var lastDecision: AgentDecision?
 
     init() {
@@ -83,6 +89,19 @@ final class AgentEngine: ObservableObject {
         currentAlternatives = decision.alternatives
         lastDecision = decision
 
+        let executionPlan = planner.makePlan(
+            decision: decision,
+            context: brainContext()
+        )
+
+        executionSteps = executionPlan.steps
+        updateExecutionStep(0, state: .completed)
+        updateExecutionStep(1, state: .completed)
+        updateExecutionStep(2, state: .running)
+        verificationState = .idle
+        verificationSummary = "Uygulama adımı tamamlanınca kontrol edilecek."
+        fallbackPlan = executionPlan.fallback
+
         log("KRALİ Core hedefi çıkardı: \(decision.goal)")
         log("Seçilen plan: \(decision.selectedPlan)")
         log("Otomatik rota: \(activeRoute.joined(separator: " → "))")
@@ -92,10 +111,50 @@ final class AgentEngine: ObservableObject {
         Task {
             try? await Task.sleep(for: .milliseconds(180))
             let baseReply = makeReply(for: text, decision: decision)
-            let reply = appendSuggestion(
+            updateExecutionStep(2, state: .completed)
+
+            let verification: AgentVerificationResult
+            if executionPlan.requiresVerification {
+                updateExecutionStep(3, state: .running)
+                verificationState = .checking
+                verificationSummary = "Sonuç kontrol ediliyor…"
+
+                verification = verifier.verify(
+                    decision: decision,
+                    snapshot: verificationSnapshot()
+                )
+
+                verificationState = verification.state
+                verificationSummary = verification.summary
+
+                if verification.state == .attention {
+                    updateExecutionStep(3, state: .attention)
+                    fallbackPlan = verification.fallback ?? executionPlan.fallback
+                } else {
+                    updateExecutionStep(3, state: .completed)
+                }
+            } else {
+                updateExecutionStep(3, state: .skipped)
+                verification = AgentVerificationResult(
+                    state: .skipped,
+                    summary: "Bu turda doğrulanacak gerçek araç işlemi yok.",
+                    fallback: nil
+                )
+                verificationState = .skipped
+                verificationSummary = verification.summary
+            }
+
+            var reply = appendSuggestion(
                 to: baseReply,
                 suggestion: decision.proactiveSuggestion
             )
+
+            if verification.state == .attention {
+                reply += "\n\nDoğrulama: " + verification.summary
+                if let fallback = fallbackPlan {
+                    reply += "\nAlternatif plan: " + fallback
+                }
+            }
 
             messages.append(ChatMessage(role: .assistant, text: reply))
             busy = false
@@ -186,6 +245,24 @@ final class AgentEngine: ObservableObject {
             previousFolderResultCount: folderSearchResults.count,
             lastTarget: lastDecision?.target,
             lastGoal: lastDecision?.goal
+        )
+    }
+
+    private func updateExecutionStep(
+        _ index: Int,
+        state: AgentStepState
+    ) {
+        guard executionSteps.indices.contains(index) else { return }
+        executionSteps[index].state = state
+    }
+
+    private func verificationSnapshot() -> AgentVerificationSnapshot {
+        AgentVerificationSnapshot(
+            hasWorkspace: selectedRootURL != nil,
+            fileResultCount: fileSearchResults.count,
+            folderResultCount: folderSearchResults.count,
+            hasPendingAction: pendingFileAction != nil,
+            hasUndoAction: lastUndoAction != nil
         )
     }
 
