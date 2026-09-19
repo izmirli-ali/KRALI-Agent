@@ -3,93 +3,285 @@ import Foundation
 struct AgentPlanner {
     func makePlan(
         decision: AgentDecision,
-        context: AgentContextSnapshot
+        context: AgentContextSnapshot,
+        capabilities: [AgentCapability]
     ) -> AgentExecutionPlan {
-        let executeDetail: String
-        let fallback: String?
+        var steps: [AgentExecutionStep] = [
+            AgentExecutionStep(
+                title: "Hedefi çöz",
+                detail: "İstenen sonucu, kısıtları ve mevcut bağlamı anlamlandır.",
+                kind: .reasoning,
+                capabilityID: "core.reasoning"
+            )
+        ]
+
+        if decision.usePreviousResults ||
+           context.previousFileResultCount > 0 ||
+           context.previousFolderResultCount > 0 {
+            steps.append(
+                AgentExecutionStep(
+                    title: "Bağlamı bağla",
+                    detail: "Önceki sonuçları ve son hedefi yeni isteğin referanslarıyla eşleştir.",
+                    kind: .reasoning,
+                    capabilityID: "context.local"
+                )
+            )
+        }
+
+        var fallback: String?
+        var requiresVerification = false
 
         switch decision.intent {
+        case .conversation:
+            steps.append(
+                AgentExecutionStep(
+                    title: "Yanıt oluştur",
+                    detail: "Konuşma bağlamına uygun, kısa ve doğal yanıt üret.",
+                    kind: .response
+                )
+            )
+
         case .fileSearch:
-            executeDetail = decision.usePreviousResults
-                ? "Önceki sonuç kümesinde yeni filtreyi uygula."
-                : "Seçili çalışma alanında salt-okunur aramayı çalıştır."
-            fallback = "Filtreyi gevşet, kapsamı yeniden kontrol et veya dosya adına göre daralt."
+            steps.append(
+                action(
+                    "Kapsamı tara",
+                    decision.usePreviousResults
+                        ? "Önceki sonuç kümesinde istenen filtreyi uygula."
+                        : "Seçili çalışma alanını salt-okunur tara.",
+                    capability: "files.search"
+                )
+            )
+
+            if decision.sortMode == .newestFirst || decision.dateRange != nil {
+                steps.append(
+                    action(
+                        "Sonuçları daralt",
+                        "Tarih ve sıralama ölçütlerini sonuç kümesine uygula.",
+                        capability: "files.metadata"
+                    )
+                )
+            }
+
+            steps.append(verificationStep("Sonuç kümesini yeniden okuyup hedefi doğrula."))
+            fallback = "Filtreyi güvenli biçimde gevşet ve aynı hedefi bir kez daha ara."
+            requiresVerification = true
 
         case .compoundFileTask:
-            executeDetail = "Zinciri sırayla yürüt: hedef dosyaları bul → adayları kısa listele → mevcut metadata ile değerlendir → sonucu doğrula."
-            fallback = "İlk arama gereksiz dar kaldıysa yalnızca salt-okunur kısıtları gevşet ve zinciri bir kez daha çalıştır."
+            steps += [
+                action(
+                    "Adayları bul",
+                    "Hedef dosyaları salt-okunur ara.",
+                    capability: "files.search"
+                ),
+                action(
+                    "Kısa liste oluştur",
+                    "İstenen ölçütlere göre sonuç kümesini daha anlamlı adaylara indir.",
+                    capability: "files.metadata"
+                )
+            ]
 
-        case .organizeScreenshots:
-            executeDetail = "Aday ekran görüntülerini belirle ve gerçek taşıma öncesi onay planı oluştur."
-            fallback = "Hiçbir dosyayı değiştirmeden adayları sadece listele."
+            if let perception = capabilities.first(where: { $0.id == "perception.media" }) {
+                steps.append(
+                    action(
+                        perception.isAvailable ? "İçeriği analiz et" : "İçerik analizi sınırını belirle",
+                        perception.isAvailable
+                            ? "Dosyaların görüntü / ses içeriğini doğrudan değerlendir."
+                            : "Görsel/video algısı henüz bağlı değil; metadata ile içerik analizini birbirine karıştırma.",
+                        capability: perception.id
+                    )
+                )
+            } else {
+                steps.append(
+                    action(
+                        "Adayları değerlendir",
+                        "Mevcut yerel metadata ile açıklanabilir ön değerlendirme yap.",
+                        capability: "files.metadata"
+                    )
+                )
+            }
 
-        case .approve:
-            executeDetail = "Onaylanmış dosya işlemini güvenlik sınırları içinde uygula."
-            fallback = "İşlemi durdur, dosya durumunu yeniden indeksle ve güvenli planı tekrar oluştur."
-
-        case .undo:
-            executeDetail = "Son geri alınabilir dosya taşıma kaydını tersine uygula."
-            fallback = "Dosya konumlarını yeniden indeksle ve geri alınamayan öğeleri ayrı raporla."
-
-        case .openPreviousResult:
-            executeDetail = "Konuşma bağlamındaki doğru sonucu çöz ve Finder'da göster."
-            fallback = "Önceki sonuçları yeniden listele ve referansı yeniden çöz."
+            steps.append(verificationStep("Zincirin ürettiği kısa listeyi ve hedef sonucunu doğrula."))
+            fallback = "Gereksiz dar filtreleri kaldırıp aynı zinciri salt-okunur yeniden çalıştır."
+            requiresVerification = true
 
         case .assessWorkspace:
-            executeDetail = "Çalışma alanını değiştirmeden oku, dağılımı incele ve seçenekleri çıkar."
-            fallback = "Daha küçük bir klasör kapsamıyla yeniden incele."
+            steps += [
+                action(
+                    "Çalışma alanını gözlemle",
+                    "Dosya ve klasör dağılımını değiştirmeden oku.",
+                    capability: "files.search"
+                ),
+                action(
+                    "Seçenek üret",
+                    "Düşük riskli alternatifleri mevcut dağılıma göre oluştur.",
+                    capability: "core.reasoning"
+                ),
+                verificationStep("İncelemenin dosya değişikliği yapmadan tamamlandığını kontrol et.")
+            ]
+            fallback = "Daha küçük bir çalışma alanıyla yeniden gözlemle."
+            requiresVerification = true
+
+        case .organizeScreenshots:
+            steps += [
+                action(
+                    "Adayları bul",
+                    "Doğrudan seçili klasördeki ekran görüntülerini güvenli biçimde belirle.",
+                    capability: "files.search"
+                ),
+                action(
+                    "Taşıma planı hazırla",
+                    "Hedef klasörü ve çakışma güvenliğini hesapla; henüz dosyayı değiştirme.",
+                    capability: "files.move.reversible"
+                ),
+                action(
+                    "Onay bekle",
+                    "Gerçek yazma işleminden önce kullanıcı onayını bekle.",
+                    capability: "files.move.reversible"
+                ),
+                verificationStep("Bekleyen planın gerçek işlem yapmadan hazırlandığını doğrula.")
+            ]
+            fallback = "Dosyaları değiştirmeden yalnızca aday listesini göster."
+            requiresVerification = true
+
+        case .approve:
+            steps += [
+                action(
+                    "Güvenlik sınırını kontrol et",
+                    "Kaynakların seçili çalışma alanında olduğunu yeniden doğrula.",
+                    capability: "files.move.reversible"
+                ),
+                action(
+                    "İşlemi uygula",
+                    "Onaylanmış geri alınabilir dosya işlemini uygula.",
+                    capability: "files.move.reversible"
+                ),
+                action(
+                    "Durumu yenile",
+                    "Dosya sistemini tekrar indeksle ve geri alma kaydını oluştur.",
+                    capability: "files.search"
+                ),
+                verificationStep("Gerçek işlemin hedefe ulaştığını ve geri alma kaydını doğrula.")
+            ]
+            fallback = "Yazmayı durdur, yeniden indeksle ve güvenli planı tekrar oluştur."
+            requiresVerification = true
+
+        case .undo:
+            steps += [
+                action(
+                    "Geri alma kaydını çöz",
+                    "Son geri alınabilir hareketleri ters sırada hazırla.",
+                    capability: "files.move.reversible"
+                ),
+                action(
+                    "Konumları geri yükle",
+                    "Dosyaları çakışma güvenliğiyle önceki konumlarına taşı.",
+                    capability: "files.move.reversible"
+                ),
+                verificationStep("Geri alma kaydının temizlendiğini ve işlemin tamamlandığını kontrol et.")
+            ]
+            fallback = "Kalan dosya konumlarını yeniden indeksle ve geri alınamayan öğeleri raporla."
+            requiresVerification = true
 
         case .reject:
-            executeDetail = "Bekleyen gerçek işlemi dosyalara dokunmadan iptal et."
-            fallback = nil
+            steps += [
+                action(
+                    "Bekleyen planı kaldır",
+                    "Dosyalara dokunmadan onay bekleyen işlemi iptal et.",
+                    capability: "files.move.reversible"
+                ),
+                verificationStep("Bekleyen yazma planının temizlendiğini doğrula.")
+            ]
+            requiresVerification = true
 
-        case .conversation, .contextSuggestion, .remember, .workMail, .futureCapability, .general:
-            executeDetail = decision.selectedPlan
+        case .openPreviousResult:
+            steps += [
+                action(
+                    "Referansı çöz",
+                    "Önceki sonuçlardan istenen öğeyi belirle.",
+                    capability: "context.local"
+                ),
+                action(
+                    "Finder'da göster",
+                    "Çözülen dosya veya klasörü Finder'da aç.",
+                    capability: "files.reveal"
+                ),
+                verificationStep("Önceki sonuç bağlamının korunup korunmadığını kontrol et.")
+            ]
+            fallback = "Sonuçları yeniden listele ve referansı tekrar çöz."
+            requiresVerification = true
+
+        case .contextSuggestion:
+            steps += [
+                action(
+                    "Adayları karşılaştır",
+                    "Önceki sonuçları mevcut metadata ve bağlama göre karşılaştır.",
+                    capability: "files.metadata"
+                ),
+                AgentExecutionStep(
+                    title: "Öneriyi açıkla",
+                    detail: "Seçim gerekçesini ve belirsizlikleri kullanıcıya açıkla.",
+                    kind: .response
+                )
+            ]
+
+        case .remember:
+            steps += [
+                action(
+                    "Kuralı ayıkla",
+                    "Mesajdan kalıcı çalışma tercihini temiz biçimde çıkar.",
+                    capability: "core.reasoning"
+                ),
+                action(
+                    "Yerel hafızaya kaydet",
+                    "Açık kullanıcı kuralını yerel belleğe ekle.",
+                    capability: "memory.local"
+                )
+            ]
+
+        case .workMail, .futureCapability, .general:
+            steps += [
+                action(
+                    "Gerekli yetenekleri tara",
+                    "Hedef için mevcut ve eksik capability'leri ayır.",
+                    capability: "core.reasoning"
+                ),
+                AgentExecutionStep(
+                    title: "Uygulanabilir yolu açıkla",
+                    detail: decision.selectedPlan,
+                    kind: .response
+                )
+            ]
             fallback = decision.alternatives.first
         }
 
-        let verifyDetail: String
-        switch decision.intent {
-        case .conversation, .contextSuggestion, .remember, .workMail, .futureCapability, .general:
-            verifyDetail = "Bu turda gerçek araç işlemi olmadığı için yalnızca karar tutarlılığını kaydet."
-        default:
-            verifyDetail = "İşlem sonrası durumu tekrar oku ve hedefin gerçekleşip gerçekleşmediğini kontrol et."
-        }
-
-        let requiresVerification: Bool
-        switch decision.intent {
-        case .conversation, .contextSuggestion, .remember, .workMail, .futureCapability, .general:
-            requiresVerification = false
-        default:
-            requiresVerification = true
-        }
-
-        let workspaceDetail = context.hasWorkspace
-            ? "Aktif çalışma alanı ve son konuşma bağlamını hesaba kat."
-            : "Aktif çalışma alanı yoksa bunu plan kısıtı olarak koru."
-
         return AgentExecutionPlan(
             goal: decision.goal,
-            steps: [
-                AgentExecutionStep(
-                    title: "Anla",
-                    detail: "Niyet, hedef, nesne ve zaman bilgisini çıkar."
-                ),
-                AgentExecutionStep(
-                    title: "Bağlam + Plan",
-                    detail: workspaceDetail + " " + decision.selectedPlan
-                ),
-                AgentExecutionStep(
-                    title: "Uygula",
-                    detail: executeDetail
-                ),
-                AgentExecutionStep(
-                    title: "Doğrula",
-                    detail: verifyDetail
-                )
-            ],
+            steps: steps,
             fallback: fallback,
             requiresVerification: requiresVerification
+        )
+    }
+
+    private func action(
+        _ title: String,
+        _ detail: String,
+        capability: String
+    ) -> AgentExecutionStep {
+        AgentExecutionStep(
+            title: title,
+            detail: detail,
+            kind: .action,
+            capabilityID: capability
+        )
+    }
+
+    private func verificationStep(
+        _ detail: String
+    ) -> AgentExecutionStep {
+        AgentExecutionStep(
+            title: "Doğrula",
+            detail: detail,
+            kind: .verification
         )
     }
 }
