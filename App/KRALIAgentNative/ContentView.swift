@@ -614,7 +614,7 @@ struct ContentView: View {
                 }
 
                 Text(
-                    "v0.7.1: Verifier artık “işlem çalıştı” ile “hedef gerçekten gerçekleşti” arasını ayırır. Salt-okunur arama 0 sonuç verirse ve tarih / önceki sonuç filtresi varsa KRALİ güvenli Plan B olarak kapsamı bir kez otomatik genişletir, yeniden arar ve sonucu tekrar doğrular."
+                    "v0.7.2: Planner ilk çok adımlı dosya zincirlerini yürütmeye başladı. “Son çekimleri bul, en yenilerini seç, sonra hangileriyle çalışacağımızı söyle” gibi görevlerde KRALİ arama → kısa liste → metadata temelli değerlendirme adımlarını tek turda sırayla çalıştırır ve sonucu Verifier ile kontrol eder."
                 )
                 .font(.caption2)
                 .foregroundStyle(.orange)
