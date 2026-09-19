@@ -5,6 +5,8 @@ enum AgentGoalOutcome: String, Hashable {
     case locate
     case shortlist
     case assessContent
+    case analyze
+    case ideate
     case explain
     case organize
     case open
@@ -75,18 +77,47 @@ struct AgentGoalInterpreter {
             break
         }
 
+        let mentionsMedia = containsAny(text, [
+            "video", "görsel", "gorsel", "görüntü", "goruntu",
+            "fotoğraf", "fotograf", "kadraj", "netlik", "hareket"
+        ])
+
         if containsAny(text, [
             "uygun", "kalite", "netlik", "kadraj", "hareket",
             "görüntü içeri", "goruntu iceri", "ses analizi",
-            "hangisi daha iyi", "hangileri daha iyi"
-        ]) && (decision.target == .video || decision.target == .image) {
+            "hangisi daha iyi", "hangileri daha iyi", "kurgu potansiyeli",
+            "içerikten yorum", "icerikten yorum"
+        ]) && (
+            decision.target == .video ||
+            decision.target == .image ||
+            mentionsMedia
+        ) {
             outcomes.insert(.assessContent)
             capabilityIDs.insert("perception.media")
         }
 
         if containsAny(text, [
+            "analiz et", "analizini yap", "değerlendir", "degerlendir",
+            "karşılaştır", "karsilastir", "çıkarım", "cikarim",
+            "güçlü ve zayıf", "guclu ve zayif", "fırsat", "firsat",
+            "eksik gördüğün", "eksik gordugun"
+        ]) {
+            outcomes.insert(.analyze)
+        }
+
+        if containsAny(text, [
+            "kendi fikir", "kendi yorum", "benim söylemediğim",
+            "benim soylemedigim", "özgün fikir", "ozgun fikir",
+            "fikir üret", "fikir uret", "öneri üret", "oneri uret",
+            "olası fırsat", "olasi firsat"
+        ]) {
+            outcomes.insert(.ideate)
+        }
+
+        if containsAny(text, [
             "neden", "nedenlerini", "açıkla", "acikla",
-            "söyle", "soyle", "raporla", "özetle", "ozetle"
+            "söyle", "soyle", "raporla", "özetle", "ozetle",
+            "çıkarımları", "cikarimlari", "yorumlarını", "yorumlarini"
         ]) {
             outcomes.insert(.explain)
         }
@@ -119,7 +150,7 @@ struct AgentGoalInterpreter {
         }
 
         let isCompound =
-            outcomes.subtracting([.converse, .explain]).count > 1 ||
+            outcomes.subtracting([.converse, .explain, .ideate]).count > 1 ||
             decision.intent == .compoundFileTask
 
         return AgentGoalProfile(
@@ -160,7 +191,13 @@ struct AgentGoalInterpreter {
             parts.append("anlamlı adaylara indir")
         }
         if outcomes.contains(.assessContent) {
-            parts.append("içerik uygunluğunu değerlendir")
+            parts.append("içeriği doğrudan değerlendir")
+        }
+        if outcomes.contains(.analyze) {
+            parts.append("bulguları analiz et")
+        }
+        if outcomes.contains(.ideate) {
+            parts.append("bağımsız fikir ve çıkarım üret")
         }
         if outcomes.contains(.organize) {
             parts.append("güvenli biçimde düzenle")
