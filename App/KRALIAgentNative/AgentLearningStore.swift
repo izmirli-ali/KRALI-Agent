@@ -133,6 +133,40 @@ struct AgentLearningStore {
         return tasks
     }
 
+    func update(
+        existing: [CapabilityLearningTask],
+        capabilityID: String,
+        progress: CapabilityLearningProgress,
+        nextStep: String? = nil
+    ) -> [CapabilityLearningTask] {
+        var tasks = existing
+        guard let index = tasks.firstIndex(
+            where: { $0.capabilityID == capabilityID }
+        ) else {
+            return tasks
+        }
+
+        tasks[index].progress = progress
+        tasks[index].updatedAt = Date()
+
+        if let nextStep, !nextStep.isEmpty {
+            tasks[index].nextStep = nextStep
+        }
+
+        tasks.sort { left, right in
+            if left.progress == .enabled && right.progress != .enabled {
+                return false
+            }
+            if right.progress == .enabled && left.progress != .enabled {
+                return true
+            }
+            return left.updatedAt > right.updatedAt
+        }
+
+        save(tasks)
+        return tasks
+    }
+
     func save(_ tasks: [CapabilityLearningTask]) {
         guard let data = try? JSONEncoder().encode(tasks) else { return }
         UserDefaults.standard.set(data, forKey: key)
