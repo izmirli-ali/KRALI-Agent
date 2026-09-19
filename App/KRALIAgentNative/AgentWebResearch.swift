@@ -59,9 +59,11 @@ actor AgentWebResearchService {
     private struct ScoredResult {
         let result: WebResearchResult
         let score: Int
+        let conceptCoverage: Int
     }
 
     private let session: URLSession
+    private let queryPlanner = AgentResearchQueryPlanner()
 
     init() {
         let configuration = URLSessionConfiguration.ephemeral
@@ -89,8 +91,12 @@ actor AgentWebResearchService {
         }
 
         let safeLimit = max(2, min(limit, 8))
-        let variants = queryVariants(for: query)
-        let queryTerms = meaningfulTerms(from: query)
+        let queryPlan = queryPlanner.plan(query)
+        let variants = queryPlan.variants
+        let requiredCoverage = min(
+            2,
+            max(1, queryPlan.conceptGroups.count)
+        )
 
         var failures: [String] = []
         var providerNames: [String] = []
@@ -108,7 +114,8 @@ actor AgentWebResearchService {
                     let parsed = parseResults(
                         provider: provider,
                         payload: payload,
-                        queryTerms: queryTerms,
+                        conceptGroups: queryPlan.conceptGroups,
+                        preferredDomains: queryPlan.preferredDomains,
                         limit: safeLimit * 2
                     )
 
@@ -134,7 +141,7 @@ actor AgentWebResearchService {
                         return left.score > right.score
                     }
 
-                    if candidates.filter({ $0.score >= 3 }).count >= safeLimit {
+                    if candidates.filter({ $0.conceptCoverage >= requiredCoverage }).count >= safeLimit {
                         break
                     }
                 } catch {
@@ -144,13 +151,15 @@ actor AgentWebResearchService {
                 }
             }
 
-            if candidates.filter({ $0.score >= 3 }).count >= safeLimit {
+            if candidates.filter({ $0.conceptCoverage >= requiredCoverage }).count >= safeLimit {
                 break
             }
         }
 
         let relevant = candidates
-            .filter { $0.score >= 3 }
+            .filter {
+                $0.conceptCoverage >= requiredCoverage
+            }
             .prefix(safeLimit)
             .map(\.result)
 
@@ -172,34 +181,6 @@ actor AgentWebResearchService {
             results: Array(relevant),
             fetchedAt: Date()
         )
-    }
-
-    private func queryVariants(
-        for query: String
-    ) -> [String] {
-        var variants = [query]
-        let normalized = normalize(query)
-
-        if !normalized.contains("official") &&
-           !normalized.contains("resmi") {
-            variants.append(query + " official documentation")
-        }
-
-        if normalized.contains("macos") ||
-           normalized.contains("ios") ||
-           normalized.contains("apple") {
-            variants.append(
-                query + " Apple Developer documentation"
-            )
-        }
-
-        var seen = Set<String>()
-        return variants.filter { value in
-            let key = normalize(value)
-            guard !seen.contains(key) else { return false }
-            seen.insert(key)
-            return true
-        }
     }
 
     private func fetch(
@@ -302,7 +283,8 @@ actor AgentWebResearchService {
     private func parseResults(
         provider: Provider,
         payload: String,
-        queryTerms: [String],
+        conceptGroups: [[String]],
+        preferredDomains: [String],
         limit: Int
     ) -> [ScoredResult] {
         let raw: [WebResearchResult]
@@ -364,14 +346,16 @@ actor AgentWebResearchService {
                 return nil
             }
 
-            let score = relevanceScore(
+            let evaluation = relevanceEvaluation(
                 result,
-                queryTerms: queryTerms
+                conceptGroups: conceptGroups,
+                preferredDomains: preferredDomains
             )
 
             return ScoredResult(
                 result: result,
-                score: score
+                score: evaluation.score,
+                conceptCoverage: evaluation.coverage
             )
         }
     }
@@ -527,30 +511,51 @@ actor AgentWebResearchService {
         return results
     }
 
-    private func relevanceScore(
+    private func relevanceEvaluation(
         _ result: WebResearchResult,
-        queryTerms: [String]
-    ) -> Int {
+        conceptGroups: [[String]],
+        preferredDomains: [String]
+    ) -> (score: Int, coverage: Int) {
         let title = normalize(result.title)
         let domain = normalize(result.domain)
         let snippet = normalize(result.snippet ?? "")
+        let combined = title + " " + snippet + " " + domain
 
         var score = 0
+        var coverage = 0
 
-        for term in queryTerms {
-            if title.contains(term) {
-                score += 3
+        for group in conceptGroups {
+            let normalizedAliases = group.map(normalize)
+            let matched = normalizedAliases.contains {
+                !$0.isEmpty && combined.contains($0)
             }
-            if snippet.contains(term) {
-                score += 1
+
+            if matched {
+                coverage += 1
+
+                if normalizedAliases.contains(
+                    where: { !$0.isEmpty && title.contains($0) }
+                ) {
+                    score += 4
+                } else if normalizedAliases.contains(
+                    where: { !$0.isEmpty && snippet.contains($0) }
+                ) {
+                    score += 2
+                } else {
+                    score += 1
+                }
             }
-            if domain.contains(term) {
-                score += 1
-            }
+        }
+
+        if preferredDomains.contains(
+            where: { domain.hasSuffix(normalize($0)) }
+        ) {
+            score += 5
         }
 
         let trustedTechnicalHosts = [
             "developer.apple.com",
+            "developer.adobe.com",
             "learn.microsoft.com",
             "developer.mozilla.org",
             "github.com",
@@ -558,7 +563,7 @@ actor AgentWebResearchService {
         ]
 
         if trustedTechnicalHosts.contains(
-            where: { result.domain.lowercased().hasSuffix($0) }
+            where: { domain.hasSuffix(normalize($0)) }
         ) {
             score += 2
         }
@@ -567,37 +572,7 @@ actor AgentWebResearchService {
             score += 1
         }
 
-        return score
-    }
-
-    private func meaningfulTerms(
-        from query: String
-    ) -> [String] {
-        let stopWords = Set([
-            "icin", "hangi", "nasil", "neden", "ile", "ve",
-            "veya", "olarak", "uzerinde", "kullanabilecegini",
-            "edebilmek", "etmek", "olan", "bir", "bu", "su",
-            "the", "for", "with", "what", "which", "how",
-            "can", "use", "using", "about"
-        ])
-
-        let parts = normalize(query)
-            .components(
-                separatedBy: CharacterSet.alphanumerics.inverted
-            )
-            .filter { $0.count >= 3 }
-
-        var seen = Set<String>()
-        return parts.filter { term in
-            guard !stopWords.contains(term) else {
-                return false
-            }
-            guard !seen.contains(term) else {
-                return false
-            }
-            seen.insert(term)
-            return true
-        }
+        return (score, coverage)
     }
 
     private func isJunkResult(
