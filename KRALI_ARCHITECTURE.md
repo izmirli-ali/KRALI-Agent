@@ -151,6 +151,10 @@ Genel analiz davranışına `analyze` ve `ideate` hedefleri eklendi. KRALİ yaln
 
 Yerel modelin rolü Executor veya Verifier olmak değildir. Model; doğrulanmış evidence + Goal Contract + capability durumu + verifier sonucundan kullanıcıya yararlı analiz/sentez üretir. Bağlı olmayan capability'yi varmış gibi göstermemesi, kanıt ile çıkarımı ayırması ve kullanıcı tarafından söylenmeyen özgün fakat gerekçeli fikirleri kanıttan türetmesi temel prompt sözleşmesidir.
 
+**v0.7.19 brand research mission + live evaluation:** Gerçek Mentor trace'i, statik Training Lab 16/16 olsa bile marka araştırmasının sahada başarısız olabileceğini gösterir. Research katmanı bu nedenle tek uzun sorgu yaklaşımından görev-özel araştırma misyonuna geçer. Marka/şirket araştırmalarında varlık (entity) çıkarılır ve araştırma resmi kaynak, tarihçe, ürün/hizmet, pazar/rakip ve güncel gelişmeler gibi facet'lere bölünür. Sonuçlar araştırılan varlıkla gerçekten eşleşmek zorundadır; yalnızca genel anahtar kelime benzerliği yeterli değildir. Kaynak seçimi domain çeşitliliğini korur ve deep source evidence de entity-grounded olur.
+
+Ayrıca statik Training Lab'den ayrı **Live Research Eval** eklenir. Her yeni sürümde gerçek internet üzerinden en az bir marka/entity araştırması ve bir teknik/resmi-dokümantasyon araştırması çalıştırılır. Kaynak sayısı, derin okuma kanıtı ve domain çeşitliliği ölçülür; sonuç `live-eval-latest.json` olarak Mentor Bridge'e eklenir. Böylece regression yalnızca “doğru rota seçildi mi?” değil, gerçek dünyada araştırma provider'ları ve evidence pipeline'ı gerçekten çalışıyor mu sorusunu da test eder.
+
 ### 0.8.x — Memory
 Kısa süreli konuşma belleği ile kalıcı kullanıcı tercihlerini ayırma; bağlam özetleme.
 
