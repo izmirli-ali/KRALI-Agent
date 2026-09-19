@@ -108,6 +108,8 @@ Yerel dosya algısı, güvenli aksiyonlar, intent, tarih çözümleme, bağlam v
 
 **v0.7.5 goal contract + response synthesis:** Intent artık hedefin kendisi kabul edilmez. Ayrı Goal Interpreter; locate, shortlist, assess-content, explain, organize, research, edit, communicate gibi istenen sonuçları çıkarır ve capability seçimini bu hedef sözleşmesi yönlendirir. Son kullanıcı cevabı da Executor metninden doğrudan çıkmaz; Verifier sonucu üzerinden Response Composer tarafından sentezlenir. Kısmi hedefte başarı dili kullanılamaz.
 
+**v0.7.6 capability-derived route:** Görünür ve iç operasyon rotası legacy intent etiketlerinden ayrılır. Route Builder; Goal Contract, seçilen capability’ler ve doğrulama ihtiyacından Core → Goal → Context → Plan → capability stages → Verify → Response zincirini dinamik kurar. Alt seviye executor fonksiyonları artık üst seviye reasoning rotasını ezemez.
+
 ### 0.8.x — Memory
 Kısa süreli konuşma belleği ile kalıcı kullanıcı tercihlerini ayırma; bağlam özetleme.
 
