@@ -108,7 +108,9 @@ struct AgentGoalInterpreter {
         if containsAny(text, [
             "kendi fikir", "kendi yorum", "benim söylemediğim",
             "benim soylemedigim", "özgün fikir", "ozgun fikir",
-            "fikir üret", "fikir uret", "öneri üret", "oneri uret",
+            "fikir üret", "fikir uret", "fikri üret", "fikri uret",
+            "fikirleri üret", "fikirleri uret", "öneri üret", "oneri uret",
+            "özgün içerik", "ozgun icerik", "büyüme fikri", "buyume fikri",
             "olası fırsat", "olasi firsat"
         ]) {
             outcomes.insert(.ideate)
@@ -117,7 +119,8 @@ struct AgentGoalInterpreter {
         if containsAny(text, [
             "neden", "nedenlerini", "açıkla", "acikla",
             "söyle", "soyle", "raporla", "özetle", "ozetle",
-            "çıkarımları", "cikarimlari", "yorumlarını", "yorumlarini"
+            "çıkarımları", "cikarimlari", "yorumlarını", "yorumlarini",
+            "yorum yap", "yorumla", "hakkında yorum", "hakkinda yorum"
         ]) {
             outcomes.insert(.explain)
         }
@@ -128,6 +131,15 @@ struct AgentGoalInterpreter {
         ]) {
             outcomes.insert(.research)
             capabilityIDs.insert("research.web")
+        }
+
+        if containsAny(text, [
+            "hangi yeteneğin eksik", "hangi yetenegin eksik",
+            "neyin eksik olduğunu bul", "neyin eksik oldugunu bul",
+            "öğrenme planı", "ogrenme plani", "kendine öğren",
+            "kendine ogren", "nasıl yapıldığını araştır", "nasil yapildigini arastir"
+        ]) {
+            outcomes.formUnion([.analyze, .explain])
         }
 
         if containsAny(text, [
@@ -144,9 +156,11 @@ struct AgentGoalInterpreter {
         }
 
         if containsAny(text, [
-            "siteye gir", "web sitesine gir", "sayfayı aç", "sayfayi ac",
-            "tarayıcıda", "tarayicida", "tıkla", "tikla",
-            "formu doldur", "sayfaları incele", "sayfalari incele"
+            "siteye gir", "sitesine gir", "resmi sitesine gir",
+            "web sitesine gir", "web sitesini aç", "web sitesini ac",
+            "sayfayı aç", "sayfayi ac", "tarayıcıda", "tarayicida",
+            "tıkla", "tikla", "formu doldur", "sayfaları incele",
+            "sayfalari incele", "ürün sayfalarını incele", "urun sayfalarini incele"
         ]) {
             capabilityIDs.insert("browser.control")
         }
