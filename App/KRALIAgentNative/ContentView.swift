@@ -253,10 +253,47 @@ struct ContentView: View {
                         .font(.caption)
                         .foregroundStyle(.secondary)
 
+                    if !engine.selectedCapabilities.isEmpty {
+                        Divider()
+
+                        Text("Kabiliyetler")
+                            .font(.caption2.weight(.semibold))
+                            .foregroundStyle(.secondary)
+
+                        VStack(alignment: .leading, spacing: 4) {
+                            ForEach(engine.selectedCapabilities) { capability in
+                                HStack(spacing: 6) {
+                                    Image(
+                                        systemName: capability.isAvailable
+                                            ? "checkmark.circle.fill"
+                                            : "clock.badge.exclamationmark"
+                                    )
+                                    .font(.caption2)
+                                    .foregroundStyle(
+                                        capability.isAvailable
+                                            ? Color.secondary
+                                            : Color.orange
+                                    )
+
+                                    Text(capability.name)
+                                        .font(.caption2)
+
+                                    if !capability.isAvailable {
+                                        Text("henüz bağlı değil")
+                                            .font(.caption2)
+                                            .foregroundStyle(.orange)
+                                    }
+
+                                    Spacer()
+                                }
+                            }
+                        }
+                    }
+
                     if !engine.executionSteps.isEmpty {
                         Divider()
 
-                        Text("İşlem akışı")
+                        Text("Dinamik işlem planı")
                             .font(.caption2.weight(.semibold))
                             .foregroundStyle(.secondary)
 
@@ -614,7 +651,7 @@ struct ContentView: View {
                 }
 
                 Text(
-                    "v0.7.2: Planner ilk çok adımlı dosya zincirlerini yürütmeye başladı. “Son çekimleri bul, en yenilerini seç, sonra hangileriyle çalışacağımızı söyle” gibi görevlerde KRALİ arama → kısa liste → metadata temelli değerlendirme adımlarını tek turda sırayla çalıştırır ve sonucu Verifier ile kontrol eder."
+                    "v0.7.3: Sabit modül mantığından capability mimarisine geçiş başladı. KRALİ her görevde ihtiyaç duyduğu kabiliyetleri ayrı seçer; Planner artık her turda aynı dört adımı göstermiyor, görevin yapısına göre değişken sayıda adım kuruyor. Bağlı olmayan görsel algı, web, Premiere veya mail gibi yetenekler de uydurulmadan “henüz bağlı değil” olarak görünür."
                 )
                 .font(.caption2)
                 .foregroundStyle(.orange)
