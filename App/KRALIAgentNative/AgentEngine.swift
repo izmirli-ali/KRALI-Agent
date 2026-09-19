@@ -28,6 +28,7 @@ final class AgentEngine: ObservableObject {
     @Published var verificationSummary = "Henüz doğrulama yapılmadı."
     @Published var fallbackPlan: String?
     @Published var recoverySummary: String?
+    @Published var selectedCapabilities: [AgentCapability] = []
 
     @Published var voiceOutputEnabled = true {
         didSet {
@@ -47,6 +48,7 @@ final class AgentEngine: ObservableObject {
     private let brain = AgentBrain()
     private let planner = AgentPlanner()
     private let verifier = AgentVerifier()
+    private let capabilityRegistry = AgentCapabilityRegistry()
     private var lastDecision: AgentDecision?
 
     init() {
@@ -90,15 +92,21 @@ final class AgentEngine: ObservableObject {
         currentAlternatives = decision.alternatives
         lastDecision = decision
 
-        let executionPlan = planner.makePlan(
+        let capabilities = capabilityRegistry.select(
+            for: text,
             decision: decision,
             context: brainContext()
         )
+        selectedCapabilities = capabilities
+
+        let executionPlan = planner.makePlan(
+            decision: decision,
+            context: brainContext(),
+            capabilities: capabilities
+        )
 
         executionSteps = executionPlan.steps
-        updateExecutionStep(0, state: .completed)
-        updateExecutionStep(1, state: .completed)
-        updateExecutionStep(2, state: .running)
+        prepareExecutionSteps()
         verificationState = .idle
         verificationSummary = "Uygulama adımı tamamlanınca kontrol edilecek."
         fallbackPlan = executionPlan.fallback
@@ -107,17 +115,23 @@ final class AgentEngine: ObservableObject {
         log("KRALİ Core hedefi çıkardı: \(decision.goal)")
         log("Seçilen plan: \(decision.selectedPlan)")
         log("Otomatik rota: \(activeRoute.joined(separator: " → "))")
+        log(
+            "Seçilen kabiliyetler: " +
+            capabilities
+                .map { $0.name + ($0.isAvailable ? "" : " [bekliyor]") }
+                .joined(separator: ", ")
+        )
 
         busy = true
 
         Task {
             try? await Task.sleep(for: .milliseconds(180))
             let baseReply = makeReply(for: text, decision: decision)
-            updateExecutionStep(2, state: .completed)
+            completeActionSteps()
 
             let verification: AgentVerificationResult
             if executionPlan.requiresVerification {
-                updateExecutionStep(3, state: .running)
+                setVerificationStep(.running)
                 verificationState = .checking
                 verificationSummary = "Sonuç kontrol ediliyor…"
 
@@ -130,13 +144,13 @@ final class AgentEngine: ObservableObject {
                 verificationSummary = verification.summary
 
                 if verification.state == .attention {
-                    updateExecutionStep(3, state: .attention)
+                    setVerificationStep(.attention)
                     fallbackPlan = verification.fallback ?? executionPlan.fallback
                 } else {
-                    updateExecutionStep(3, state: .completed)
+                    setVerificationStep(.completed)
                 }
             } else {
-                updateExecutionStep(3, state: .skipped)
+                setVerificationStep(.skipped)
                 verification = AgentVerificationResult(
                     state: .skipped,
                     summary: "Bu turda doğrulanacak gerçek araç işlemi yok.",
@@ -161,11 +175,11 @@ final class AgentEngine: ObservableObject {
                 recoverySummary = recovery.summary
 
                 if recovery.verification.state == .passed {
-                    updateExecutionStep(3, state: .completed)
+                    setVerificationStep(.completed)
                     fallbackPlan = nil
                     log("Plan B başarılı: \(recovery.summary)")
                 } else {
-                    updateExecutionStep(3, state: .attention)
+                    setVerificationStep(.attention)
                     fallbackPlan = recovery.verification.fallback ?? fallbackPlan
                     log("Plan B de hedefi doğrulayamadı")
                 }
@@ -349,12 +363,49 @@ final class AgentEngine: ObservableObject {
         )
     }
 
-    private func updateExecutionStep(
-        _ index: Int,
-        state: AgentStepState
+    private func prepareExecutionSteps() {
+        for index in executionSteps.indices {
+            switch executionSteps[index].kind {
+            case .reasoning:
+                executionSteps[index].state = .completed
+            case .action, .verification, .response:
+                executionSteps[index].state = .pending
+            }
+        }
+
+        if let firstAction = executionSteps.firstIndex(
+            where: { $0.kind == .action }
+        ) {
+            executionSteps[firstAction].state = .running
+        } else if let response = executionSteps.firstIndex(
+            where: { $0.kind == .response }
+        ) {
+            executionSteps[response].state = .running
+        }
+    }
+
+    private func completeActionSteps() {
+        for index in executionSteps.indices {
+            if executionSteps[index].kind == .action {
+                executionSteps[index].state = .completed
+            }
+        }
+
+        if let response = executionSteps.firstIndex(
+            where: { $0.kind == .response }
+        ) {
+            executionSteps[response].state = .completed
+        }
+    }
+
+    private func setVerificationStep(
+        _ state: AgentStepState
     ) {
-        guard executionSteps.indices.contains(index) else { return }
-        executionSteps[index].state = state
+        for index in executionSteps.indices {
+            if executionSteps[index].kind == .verification {
+                executionSteps[index].state = state
+            }
+        }
     }
 
     private func verificationSnapshot() -> AgentVerificationSnapshot {
