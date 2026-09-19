@@ -18,6 +18,10 @@ final class AgentEngine: ObservableObject {
     @Published var fileSearchResults: [FileRecord] = []
     @Published var fileSearchTitle = ""
 
+    @Published var currentGoal = "Hazır"
+    @Published var currentPlan = "Yeni görevi bekliyor"
+    @Published var currentAlternatives: [String] = []
+
     @Published var voiceOutputEnabled = true
     @Published var busy = false
 
@@ -26,6 +30,7 @@ final class AgentEngine: ObservableObject {
     private let memoryKey = "krali.native.memories.v1"
     private let selectedRootKey = "krali.native.selectedRootPath.v1"
     private let fileManager = FileManager.default
+    private let brain = AgentBrain()
 
     init() {
         loadMemory()
@@ -41,15 +46,31 @@ final class AgentEngine: ObservableObject {
         guard !text.isEmpty else { return }
 
         messages.append(ChatMessage(role: .user, text: text))
-        activeRoute = chooseModules(for: text)
-        log("Niyet analiz edildi")
+
+        let decision = brain.analyze(
+            text,
+            context: brainContext()
+        )
+
+        activeRoute = decision.route
+        currentGoal = decision.goal
+        currentPlan = decision.selectedPlan
+        currentAlternatives = decision.alternatives
+
+        log("KRALİ Core hedefi çıkardı: \(decision.goal)")
+        log("Seçilen plan: \(decision.selectedPlan)")
         log("Otomatik rota: \(activeRoute.joined(separator: " → "))")
 
         busy = true
 
         Task {
-            try? await Task.sleep(for: .milliseconds(220))
-            let reply = makeReply(for: text)
+            try? await Task.sleep(for: .milliseconds(180))
+            let baseReply = makeReply(for: text, decision: decision)
+            let reply = appendSuggestion(
+                to: baseReply,
+                suggestion: decision.proactiveSuggestion
+            )
+
             messages.append(ChatMessage(role: .assistant, text: reply))
             busy = false
 
@@ -59,7 +80,10 @@ final class AgentEngine: ObservableObject {
         }
     }
 
-    private func makeReply(for text: String) -> String {
+    private func makeReply(
+        for text: String,
+        decision: AgentDecision
+    ) -> String {
         let t = normalize(text)
 
         if pendingFileAction != nil && isApproval(t) {
@@ -76,6 +100,14 @@ final class AgentEngine: ObservableObject {
             return undoLastFileAction()
         }
 
+        if decision.intent == .conversation {
+            return conversationReply(for: text)
+        }
+
+        if decision.intent == .assessWorkspace {
+            return assessWorkspace()
+        }
+
         if let explicitRule = memoryIntent(from: text) {
             addMemory(explicitRule)
             return "Kaydettim: “\(explicitRule)”. Uygun görevlerde bunu otomatik uygulayacağım."
@@ -85,8 +117,11 @@ final class AgentEngine: ObservableObject {
             return prepareScreenshotOrganizeAction()
         }
 
-        if isFileSearchIntent(t) {
-            return searchIndexedFiles(for: text)
+        if decision.intent == .fileSearch {
+            return searchIndexedFiles(
+                for: text,
+                decision: decision
+            )
         }
 
         if containsAny(t, ["17:55", "mail"]) {
@@ -137,7 +172,98 @@ final class AgentEngine: ObservableObject {
             return "Evet, sesli komutun yazıya çevrildi ve bana ulaştı."
         }
 
-        return "Görevi aldım. \(activeRoute.joined(separator: " → ")) rotasını otomatik seçtim."
+        return "Hedefi analiz ettim fakat bunu henüz doğrudan tamamlayacak yerel bir aracım yok. Şu an en güvenli planım: \(decision.selectedPlan). İstersen mevcut çalışma alanından başlayıp uygulanabilir kısmı kendim çıkarabilirim."
+    }
+
+    private func brainContext() -> AgentContextSnapshot {
+        AgentContextSnapshot(
+            hasWorkspace: selectedRootURL != nil,
+            workspaceName: selectedRootURL?.lastPathComponent,
+            fileCount: indexedFiles.count,
+            imageCount: imageCount,
+            videoCount: videoCount,
+            projectCount: projectCount,
+            documentCount: documentCount,
+            screenshotCount: screenshotCount,
+            hasPendingAction: pendingFileAction != nil
+        )
+    }
+
+    private func appendSuggestion(
+        to reply: String,
+        suggestion: String?
+    ) -> String {
+        guard let suggestion, !suggestion.isEmpty else {
+            return reply
+        }
+
+        return reply + "\n\nÖnerim: " + suggestion
+    }
+
+    private func conversationReply(for text: String) -> String {
+        let t = normalize(text)
+
+        if containsAny(t, ["nasılsın", "nasilsin", "naber", "ne haber"]) {
+            if let root = selectedRootURL {
+                return "İyiyim, hazırım. Şu an “\(root.lastPathComponent)” çalışma alanını hatırlıyorum ve \(indexedFiles.count) dosyayı yerel olarak görebiliyorum."
+            }
+
+            return "İyiyim, hazırım. Şu an aktif bir çalışma klasörü seçili değil; istersen bir alan seçip birlikte inceleyebiliriz."
+        }
+
+        if containsAny(t, ["ne yapıyorsun", "ne yapiyorsun"]) {
+            if let root = selectedRootURL {
+                return "Şu an “\(root.lastPathComponent)” çalışma alanını takip ediyorum. \(indexedFiles.count) dosya indeksli; yeni bir hedef verdiğinde önce ne istediğini analiz edip uygun modülü kendim seçeceğim."
+            }
+
+            return "Şu an yeni bir hedef bekliyorum. Bir görev verdiğinde önce niyeti ve bağlamı analiz edip hangi modülün gerektiğine kendim karar vereceğim."
+        }
+
+        return "Selam. Hazırım; sadece komut beklemek yerine hedefini anlamaya, seçenekleri düşünmeye ve uygun yolu seçmeye çalışacağım."
+    }
+
+    private func assessWorkspace() -> String {
+        guard let root = selectedRootURL else {
+            return "Önce bir çalışma klasörü seçmeliyim. Sonra hiçbir dosyayı değiştirmeden yapıyı inceleyip birkaç alternatif önerebilirim."
+        }
+
+        indexSelectedFolder()
+
+        var observations: [String] = [
+            "\(indexedFiles.count) dosya",
+            "\(imageCount) görsel",
+            "\(videoCount) video",
+            "\(documentCount) belge",
+            "\(projectCount) proje dosyası"
+        ]
+
+        if screenshotCount > 0 {
+            observations.append("\(screenshotCount) ekran görüntüsü")
+        }
+
+        var ideas: [String] = []
+
+        if screenshotCount >= 5 {
+            ideas.append("Ekran görüntülerini ayrı klasöre toplamak düşük riskli ve geri alınabilir bir ilk adım.")
+        }
+
+        if videoCount > 0 {
+            ideas.append("Videoları en yeni veya belirli bir tarihe göre ayırıp yalnızca ilgili çekimleri öne çıkarabilirim.")
+        }
+
+        if documentCount > 0 {
+            ideas.append("Belgeleri tür veya tarihe göre gruplandırmadan önce sadece listeleyip dağınıklığın kaynağını gösterebilirim.")
+        }
+
+        if ideas.isEmpty {
+            ideas.append("Şimdilik değişiklik yapmak yerine son eklenen dosyaları inceleyip en yararlı düzenleme adımını seçebiliriz.")
+        }
+
+        return "“\(root.lastPathComponent)” alanını inceledim: " +
+            observations.joined(separator: ", ") +
+            ".\n\nDüşündüğüm seçenekler:\n• " +
+            ideas.joined(separator: "\n• ") +
+            "\n\nDosyalarda değişiklik yapmadım."
     }
 
     // MARK: - File Selection & Indexing
@@ -296,7 +422,10 @@ final class AgentEngine: ObservableObject {
         return containsAny(text, actionWords) && containsAny(text, fileWords)
     }
 
-    private func searchIndexedFiles(for rawText: String) -> String {
+    private func searchIndexedFiles(
+        for rawText: String,
+        decision: AgentDecision
+    ) -> String {
         activeRoute = ["Core", "File Memory", "File Search"]
 
         guard let root = selectedRootURL else {
@@ -313,36 +442,25 @@ final class AgentEngine: ObservableObject {
         let projectExtensions = Set(["prproj", "aep", "psd", "ai", "indd", "fcpxml"])
         let documentExtensions = Set(["pdf", "doc", "docx", "txt", "rtf", "md", "pages", "numbers", "key"])
 
-        var title = "Dosya araması"
+        var title = decision.goal
         var results: [FileRecord]
 
-        if let requestedDate = turkishDayMonth(from: text) {
-            title = "\(requestedDate.day) \(requestedDate.monthName) tarihli dosyalar"
-            results = indexedFiles.filter {
-                matches(day: requestedDate.day, month: requestedDate.month, date: $0.modificationDate) ||
-                matches(day: requestedDate.day, month: requestedDate.month, date: $0.creationDate)
-            }
-        } else if containsAny(text, ["ekran görünt", "ekran gorunt", "ekran resmi", "screenshot", "screen shot"]) {
-            title = "Ekran görüntüleri"
+        switch decision.target {
+        case .screenshot:
             results = indexedFiles.filter(\.isScreenshot)
-        } else if text.contains("pdf") {
-            title = "PDF dosyaları"
+        case .pdf:
             results = indexedFiles.filter { $0.fileExtension == "pdf" }
-        } else if containsAny(text, ["video", "videolar"]) {
-            title = "Video dosyaları"
+        case .video:
             results = indexedFiles.filter { videoExtensions.contains($0.fileExtension) }
-        } else if containsAny(text, ["görsel", "gorsel", "resim", "fotoğraf", "fotograf"]) {
-            title = "Görsel dosyaları"
+        case .image:
             results = indexedFiles.filter { imageExtensions.contains($0.fileExtension) }
-        } else if containsAny(text, ["proje", "project"]) {
-            title = "Proje dosyaları"
+        case .project:
             results = indexedFiles.filter { projectExtensions.contains($0.fileExtension) }
-        } else if containsAny(text, ["belge", "doküman", "dokuman"]) {
-            title = "Belge dosyaları"
+        case .document:
             results = indexedFiles.filter { documentExtensions.contains($0.fileExtension) }
-        } else {
+        case .any:
             let query = fileNameQuery(from: text)
-            title = query.isEmpty ? "Dosya araması" : "“\(query)” araması"
+            title = query.isEmpty ? decision.goal : "“\(query)” araması"
 
             if query.isEmpty {
                 results = indexedFiles
@@ -353,6 +471,31 @@ final class AgentEngine: ObservableObject {
                     let path = normalize(file.relativePath)
                     return tokens.allSatisfy { name.contains($0) || path.contains($0) }
                 }
+            }
+        }
+
+        if let range = decision.dateRange {
+            results = results.filter { file in
+                switch decision.dateField {
+                case .created:
+                    guard let date = file.creationDate else { return false }
+                    return range.contains(date)
+                case .modified:
+                    guard let date = file.modificationDate else { return false }
+                    return range.contains(date)
+                case .either:
+                    let createdMatch = file.creationDate.map(range.contains) ?? false
+                    let modifiedMatch = file.modificationDate.map(range.contains) ?? false
+                    return createdMatch || modifiedMatch
+                }
+            }
+        }
+
+        if decision.sortMode == .newestFirst {
+            results.sort {
+                let left = $0.creationDate ?? $0.modificationDate ?? .distantPast
+                let right = $1.creationDate ?? $1.modificationDate ?? .distantPast
+                return left > right
             }
         }
 
