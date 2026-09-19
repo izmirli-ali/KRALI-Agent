@@ -26,6 +26,13 @@ struct AgentVerifier {
                 ? snapshot.folderResultCount
                 : snapshot.fileResultCount
 
+            guard count > 0 else {
+                return attention(
+                    "Arama teknik olarak tamamlandı ancak 0 sonuç döndü.",
+                    fallback: "Tarih veya önceki-sonuç filtresini kaldırıp aynı hedefi daha geniş kapsamda bir kez daha ara."
+                )
+            }
+
             return AgentVerificationResult(
                 state: .passed,
                 summary: "Arama tamamlandı ve sonuç kümesi yeniden okunarak doğrulandı: \(count) eşleşme.",
