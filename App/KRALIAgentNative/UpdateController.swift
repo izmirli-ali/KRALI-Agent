@@ -17,6 +17,13 @@ final class UpdateController: ObservableObject {
         currentVersion = Bundle.main.object(
             forInfoDictionaryKey: "CFBundleShortVersionString"
         ) as? String ?? "0.0.0"
+
+        Task { @MainActor [weak self] in
+            try? await Task.sleep(
+                for: .milliseconds(900)
+            )
+            self?.checkForUpdates()
+        }
     }
 
     func checkForUpdates() {
