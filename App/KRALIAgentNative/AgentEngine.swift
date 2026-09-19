@@ -37,6 +37,9 @@ final class AgentEngine: ObservableObject {
     @Published var mentorTraceStatus = "Henüz mentor kaydı yok."
     @Published var mentorTraceReady = false
     @Published var mentorSyncBusy = false
+    @Published var trainingLabReport: TrainingLabReport?
+    @Published var trainingLabStatus = "Henüz Training Lab çalıştırılmadı."
+    @Published var trainingLabBusy = false
 
     @Published var voiceOutputEnabled = true {
         didSet {
@@ -65,6 +68,8 @@ final class AgentEngine: ObservableObject {
     private let webResearchService = AgentWebResearchService()
     private let webSourceReader = AgentWebSourceReader()
     private let mentorTraceStore = MentorTraceStore()
+    private let trainingLab = AgentTrainingLab()
+    private let trainingLabStore = TrainingLabStore()
     private var lastDecision: AgentDecision?
 
     init() {
@@ -83,6 +88,14 @@ final class AgentEngine: ObservableObject {
         )
         if mentorTraceReady {
             mentorTraceStatus = "Son mentor kaydı hazır."
+        }
+
+        trainingLabReport = trainingLabStore.load()
+        if let report = trainingLabReport {
+            trainingLabStatus =
+                "Son test: \(report.passed)/\(report.total) geçti • " +
+                "Core \(report.corePassed)/\(report.coreTotal) • " +
+                "North Star \(report.northStarPassed)/\(report.northStarTotal)"
         }
 
         log("KRALİ Core hazır")
@@ -808,6 +821,49 @@ final class AgentEngine: ObservableObject {
                 "Mentor kaydı oluşturulamadı: " +
                 error.localizedDescription
             log(mentorTraceStatus)
+        }
+    }
+
+    func runTrainingLab() {
+        guard !trainingLabBusy else { return }
+
+        trainingLabBusy = true
+        trainingLabStatus = "KRALİ kendi temel yeterlilik testlerini çalıştırıyor…"
+        log("Training Lab başladı")
+
+        Task {
+            await Task.yield()
+
+            let report = trainingLab.run()
+            trainingLabReport = report
+
+            do {
+                try trainingLabStore.save(report)
+
+                trainingLabStatus =
+                    "\(report.passed)/\(report.total) test geçti • " +
+                    "Core \(report.corePassed)/\(report.coreTotal) • " +
+                    "North Star \(report.northStarPassed)/\(report.northStarTotal)"
+
+                mentorTraceReady = true
+                mentorTraceStatus =
+                    "Training Lab raporu hazır • Mentora gönderilebilir"
+
+                log(
+                    "Training Lab tamamlandı: " +
+                    String(report.passed) +
+                    "/" +
+                    String(report.total)
+                )
+            } catch {
+                trainingLabStatus =
+                    "Training Lab tamamlandı fakat rapor kaydedilemedi: " +
+                    error.localizedDescription
+
+                log("Training Lab raporu kaydedilemedi")
+            }
+
+            trainingLabBusy = false
         }
     }
 
