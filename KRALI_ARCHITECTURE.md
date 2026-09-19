@@ -128,6 +128,12 @@ Yerel dosya algısı, güvenli aksiyonlar, intent, tarih çözümleme, bağlam v
 
 **v0.7.14 deep source reader / evidence layer:** Research artık arama sonucunun başlığını doğruluk kanıtı saymaz. En alakalı kaynakların sayfa içeriği güvenli HTTPS üzerinden okunur; script/style/nav gürültüsü temizlenir, query concept gruplarıyla eşleşen kanıt cümleleri çıkarılır ve kaynak başına evidence kaydı üretilir. Verifier tam research başarısı için en az iki kaynakta gerçek sayfa-içi evidence ister; yalnızca arama sonucu bulunan ama okunamayan görevler `partial` kalır.
 
+**v0.7.15 mentor bridge + research precision:** Geliştirme döneminde KRALİ her tamamlanan görev için yapılandırılmış bir mentor trace üretir: kullanıcı hedefi, Goal Contract, seçilen capability'ler, plan, execution state'leri, Verifier sonucu, research kaynak/kanıtları ve nihai yanıt. Trace varsayılan olarak yalnızca yerelde tutulur. Kullanıcı açıkça Mentor Sync başlattığında son trace private GitHub reposundaki `Mentor/latest.json` dosyasına gönderilir; ChatGPT bağlı GitHub erişimiyle bunu okuyup davranış hatasını teşhis ederek kodu güncelleyebilir. Bu köprü OpenAI API kullanmaz ve ayrı API ücreti gerektirmez.
+
+Araştırma tarafında kritik kavramlar artık `mandatoryConceptGroups` olarak modellenir. Örneğin macOS + video analysis araştırmasında yalnızca “video analysis” geçen genel servisler yeterli değildir; platform ve analiz kavramlarının birlikte karşılanması gerekir. Böylece araştırma motoru kullanıcının gerçek hedefinden uzaklaşan fakat yüzeyde benzer içerikleri daha agresif eler.
+
+Mentor geliştirme ilkesi: KRALİ'nin kendisi ile Mentor aynı şey değildir. KRALİ bağımsız ajan olarak gelişir; Mentor yalnızca geliştirme/öğretim katmanıdır. İleride opsiyonel ücretsiz yerel reviewer (örn. local model runtime) eklenebilir, fakat hiçbir ücretli API varsayılan bağımlılık olmayacaktır.
+
 ### 0.8.x — Memory
 Kısa süreli konuşma belleği ile kalıcı kullanıcı tercihlerini ayırma; bağlam özetleme.
 
