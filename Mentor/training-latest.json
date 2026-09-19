@@ -1,0 +1,462 @@
+{
+  "appVersion" : "0.7.18",
+  "corePassed" : 12,
+  "coreTotal" : 12,
+  "createdAt" : "2026-09-19T23:11:11Z",
+  "failed" : 0,
+  "northStarPassed" : 4,
+  "northStarTotal" : 4,
+  "passed" : 16,
+  "results" : [
+    {
+      "diagnostics" : [
+
+      ],
+      "goal" : "güncel kaynaklarla araştır",
+      "passed" : true,
+      "prompt" : "macOS üzerinde video içeriğini analiz edebilmek için hangi teknolojileri kullanabileceğini web'de araştır",
+      "route" : [
+        "Core",
+        "Goal",
+        "Context",
+        "Plan",
+        "Research",
+        "Verify",
+        "Response"
+      ],
+      "scenarioID" : "research-technical",
+      "selectedCapabilities" : [
+        "context.local",
+        "core.reasoning",
+        "research.web"
+      ],
+      "tier" : "core",
+      "title" : "Teknik araştırma güvenilirliği",
+      "unavailableCapabilities" : [
+
+      ]
+    },
+    {
+      "diagnostics" : [
+
+      ],
+      "goal" : "bulguları analiz et → bağımsız fikir ve çıkarım üret → güncel kaynaklarla araştır → sonucu ve gerekçeyi açıkla",
+      "passed" : true,
+      "prompt" : "HABAŞ hakkında web'de detaylı araştır; tarihçesini, ürünlerini, rakiplerini ve fırsatlarını analiz et, nedenleriyle açıkla ve benim söylediklerim dışında kendi fikirlerini de ekle",
+      "route" : [
+        "Core",
+        "Goal",
+        "Context",
+        "Plan",
+        "Research",
+        "Verify",
+        "Response"
+      ],
+      "scenarioID" : "brand-research-ideas",
+      "selectedCapabilities" : [
+        "context.local",
+        "core.reasoning",
+        "research.web"
+      ],
+      "tier" : "core",
+      "title" : "Marka araştırması + bağımsız fikir",
+      "unavailableCapabilities" : [
+
+      ]
+    },
+    {
+      "diagnostics" : [
+
+      ],
+      "goal" : "bulguları analiz et → bağımsız fikir ve çıkarım üret → güncel kaynaklarla araştır",
+      "passed" : true,
+      "prompt" : "Vox Coffee Co hakkında internetten araştır, güçlü ve zayıf yönlerini analiz et ve markaya özel 5 özgün içerik fikri üret",
+      "route" : [
+        "Core",
+        "Goal",
+        "Context",
+        "Plan",
+        "Research",
+        "Verify",
+        "Response"
+      ],
+      "scenarioID" : "brand-content-strategy",
+      "selectedCapabilities" : [
+        "context.local",
+        "core.reasoning",
+        "research.web"
+      ],
+      "tier" : "core",
+      "title" : "Markadan içerik stratejisi çıkarma",
+      "unavailableCapabilities" : [
+
+      ]
+    },
+    {
+      "diagnostics" : [
+
+      ],
+      "goal" : "bulguları analiz et → bağımsız fikir ve çıkarım üret → sonucu ve gerekçeyi açıkla",
+      "passed" : true,
+      "prompt" : "Bu verileri analiz et, önemli çıkarımları nedenleriyle açıkla ve benim söylemediğim olası fırsatları da ekle",
+      "route" : [
+        "Core",
+        "Goal",
+        "Context",
+        "Response"
+      ],
+      "scenarioID" : "generic-analysis",
+      "selectedCapabilities" : [
+        "context.local",
+        "core.reasoning"
+      ],
+      "tier" : "core",
+      "title" : "Genel analiz ve çıkarım",
+      "unavailableCapabilities" : [
+
+      ]
+    },
+    {
+      "diagnostics" : [
+
+      ],
+      "goal" : "videoları bul",
+      "passed" : true,
+      "prompt" : "son eklenen videoları bul",
+      "route" : [
+        "Core",
+        "Goal",
+        "Context",
+        "Plan",
+        "Files",
+        "Verify",
+        "Response"
+      ],
+      "scenarioID" : "local-file-search",
+      "selectedCapabilities" : [
+        "context.local",
+        "core.reasoning",
+        "files.metadata",
+        "files.search"
+      ],
+      "tier" : "core",
+      "title" : "Yerel dosya araması",
+      "unavailableCapabilities" : [
+
+      ]
+    },
+    {
+      "diagnostics" : [
+
+      ],
+      "goal" : "videoları bul → anlamlı adaylara indir → içeriği doğrudan değerlendir → sonucu ve gerekçeyi açıkla",
+      "passed" : true,
+      "prompt" : "son videoları bul, en uygun olanları seç ve hangilerinin kurgu için daha iyi olduğunu nedenleriyle açıkla",
+      "route" : [
+        "Core",
+        "Goal",
+        "Context",
+        "Plan",
+        "Files",
+        "Perception",
+        "Learn",
+        "Verify",
+        "Response"
+      ],
+      "scenarioID" : "media-suitability",
+      "selectedCapabilities" : [
+        "context.local",
+        "core.reasoning",
+        "files.metadata",
+        "files.search",
+        "perception.media"
+      ],
+      "tier" : "core",
+      "title" : "İçerik uygunluğu analizi",
+      "unavailableCapabilities" : [
+        "perception.media"
+      ]
+    },
+    {
+      "diagnostics" : [
+
+      ],
+      "goal" : "ekran görüntülerini bul → güvenli biçimde düzenle",
+      "passed" : true,
+      "prompt" : "ekran görüntülerini toparla",
+      "route" : [
+        "Core",
+        "Goal",
+        "Context",
+        "Plan",
+        "Files",
+        "Verify",
+        "Response"
+      ],
+      "scenarioID" : "screenshot-organize",
+      "selectedCapabilities" : [
+        "context.local",
+        "core.reasoning",
+        "files.move.reversible",
+        "files.search"
+      ],
+      "tier" : "core",
+      "title" : "Güvenli dosya düzenleme",
+      "unavailableCapabilities" : [
+
+      ]
+    },
+    {
+      "diagnostics" : [
+
+      ],
+      "goal" : "çalışma kuralını öğren",
+      "passed" : true,
+      "prompt" : "bundan sonra konuşmalı Reels videolarında 35 saniyeyi geçme, bunu aklında tut",
+      "route" : [
+        "Core",
+        "Goal",
+        "Context",
+        "Plan",
+        "Memory",
+        "Response"
+      ],
+      "scenarioID" : "remember-rule",
+      "selectedCapabilities" : [
+        "context.local",
+        "core.reasoning",
+        "memory.local"
+      ],
+      "tier" : "core",
+      "title" : "Çalışma kuralını öğrenme",
+      "unavailableCapabilities" : [
+
+      ]
+    },
+    {
+      "diagnostics" : [
+
+      ],
+      "goal" : "doğal konuşmayı sürdür",
+      "passed" : true,
+      "prompt" : "nasılsın, bugün ne yapıyorsun?",
+      "route" : [
+        "Core",
+        "Goal",
+        "Context",
+        "Response"
+      ],
+      "scenarioID" : "conversation",
+      "selectedCapabilities" : [
+        "context.local",
+        "core.reasoning"
+      ],
+      "tier" : "core",
+      "title" : "Doğal konuşma",
+      "unavailableCapabilities" : [
+
+      ]
+    },
+    {
+      "diagnostics" : [
+
+      ],
+      "goal" : "istenen sonucu aç",
+      "passed" : true,
+      "prompt" : "bunlardan sonuncusunu Finder'da aç",
+      "route" : [
+        "Core",
+        "Goal",
+        "Context",
+        "Plan",
+        "Files",
+        "Verify",
+        "Response"
+      ],
+      "scenarioID" : "previous-result-open",
+      "selectedCapabilities" : [
+        "context.local",
+        "core.reasoning",
+        "files.reveal"
+      ],
+      "tier" : "core",
+      "title" : "Konuşma bağlamından sonuç açma",
+      "unavailableCapabilities" : [
+
+      ]
+    },
+    {
+      "diagnostics" : [
+
+      ],
+      "goal" : "uygulamada işle",
+      "passed" : true,
+      "prompt" : "Premiere'de aktif sequence içindeki boşlukları temizle ve sonucu kontrol et",
+      "route" : [
+        "Core",
+        "Goal",
+        "Context",
+        "Plan",
+        "Premiere",
+        "Learn",
+        "Verify",
+        "Response"
+      ],
+      "scenarioID" : "premiere-gap",
+      "selectedCapabilities" : [
+        "context.local",
+        "core.reasoning",
+        "premiere.control"
+      ],
+      "tier" : "core",
+      "title" : "Eksik uygulama yeteneğini fark etme",
+      "unavailableCapabilities" : [
+        "premiere.control"
+      ]
+    },
+    {
+      "diagnostics" : [
+
+      ],
+      "goal" : "iletişim görevini yürüt",
+      "passed" : true,
+      "prompt" : "günlük iş özetimi mail taslağına çevir ve göndermeden önce bana göster",
+      "route" : [
+        "Core",
+        "Goal",
+        "Context",
+        "Plan",
+        "Mail",
+        "Learn",
+        "Verify",
+        "Response"
+      ],
+      "scenarioID" : "mail-gap",
+      "selectedCapabilities" : [
+        "context.local",
+        "core.reasoning",
+        "mail.work"
+      ],
+      "tier" : "core",
+      "title" : "Mail capability gap",
+      "unavailableCapabilities" : [
+        "mail.work"
+      ]
+    },
+    {
+      "diagnostics" : [
+
+      ],
+      "goal" : "bulguları analiz et → bağımsız fikir ve çıkarım üret → güncel kaynaklarla araştır",
+      "passed" : true,
+      "prompt" : "Daha önce hiç konuşmadığımız bir markayı araştır, pazardaki konumunu analiz et, çelişkili bilgileri ayır ve bana üç özgün büyüme fikri üret",
+      "route" : [
+        "Core",
+        "Goal",
+        "Context",
+        "Plan",
+        "Research",
+        "Verify",
+        "Response"
+      ],
+      "scenarioID" : "open-world-brand",
+      "selectedCapabilities" : [
+        "context.local",
+        "core.reasoning",
+        "research.web"
+      ],
+      "tier" : "northStar",
+      "title" : "Yeni marka alanında açık dünya araştırması",
+      "unavailableCapabilities" : [
+
+      ]
+    },
+    {
+      "diagnostics" : [
+
+      ],
+      "goal" : "içeriği doğrudan değerlendir → bulguları analiz et → sonucu ve gerekçeyi açıkla",
+      "passed" : true,
+      "prompt" : "bu videoyu analiz et; kadraj, netlik, hareket, anlatı ve kurgu potansiyeli hakkında içerikten yorum yap",
+      "route" : [
+        "Core",
+        "Goal",
+        "Context",
+        "Plan",
+        "Perception",
+        "Learn",
+        "Verify",
+        "Response"
+      ],
+      "scenarioID" : "attached-media-analysis",
+      "selectedCapabilities" : [
+        "context.local",
+        "core.reasoning",
+        "perception.media"
+      ],
+      "tier" : "northStar",
+      "title" : "Doğrudan görsel/video analiz isteği",
+      "unavailableCapabilities" : [
+        "perception.media"
+      ]
+    },
+    {
+      "diagnostics" : [
+
+      ],
+      "goal" : "bulguları analiz et → sonucu ve gerekçeyi açıkla",
+      "passed" : true,
+      "prompt" : "markanın resmi sitesine gir, ürün sayfalarını incele ve rakiplerine göre eksik gördüğün alanları raporla",
+      "route" : [
+        "Core",
+        "Goal",
+        "Context",
+        "Plan",
+        "Browser",
+        "Learn",
+        "Verify",
+        "Response"
+      ],
+      "scenarioID" : "browser-open-world",
+      "selectedCapabilities" : [
+        "browser.control",
+        "context.local",
+        "core.reasoning"
+      ],
+      "tier" : "northStar",
+      "title" : "Tarayıcıda yeni görev",
+      "unavailableCapabilities" : [
+        "browser.control"
+      ]
+    },
+    {
+      "diagnostics" : [
+
+      ],
+      "goal" : "bulguları analiz et → güncel kaynaklarla araştır → sonucu ve gerekçeyi açıkla",
+      "passed" : true,
+      "prompt" : "Bunu şu an yapamıyorsan hangi yeteneğin eksik olduğunu bul, resmi kaynaklardan nasıl yapıldığını araştır ve kendine güvenli bir öğrenme planı çıkar",
+      "route" : [
+        "Core",
+        "Goal",
+        "Context",
+        "Plan",
+        "Research",
+        "Verify",
+        "Response"
+      ],
+      "scenarioID" : "self-learning",
+      "selectedCapabilities" : [
+        "context.local",
+        "core.reasoning",
+        "research.web"
+      ],
+      "tier" : "northStar",
+      "title" : "Yeteneği yoksa öğrenme döngüsü",
+      "unavailableCapabilities" : [
+
+      ]
+    }
+  ],
+  "total" : 16
+}
