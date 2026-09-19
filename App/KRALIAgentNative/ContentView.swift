@@ -559,6 +559,40 @@ struct ContentView: View {
                     .clipShape(RoundedRectangle(cornerRadius: 10))
                 }
 
+                sectionTitle("Yerel zeka")
+
+                HStack(alignment: .top, spacing: 8) {
+                    Image(
+                        systemName: engine.localIntelligenceState.isAvailable
+                            ? "brain.head.profile.fill"
+                            : "brain.head.profile"
+                    )
+                    .font(.caption)
+                    .foregroundStyle(
+                        engine.localIntelligenceState.isAvailable
+                            ? Color.green
+                            : Color.secondary
+                    )
+
+                    VStack(alignment: .leading, spacing: 2) {
+                        Text(engine.localIntelligenceState.title)
+                            .font(.caption.weight(.medium))
+
+                        Text(
+                            engine.localIntelligenceState.isAvailable
+                                ? "Analiz, araştırma sentezi ve bağımsız fikir üretimi cihaz üzerinde çalışır • ayrı API ücreti yok"
+                                : "KRALİ güvenli kural tabanlı Core ile devam eder; model hazır olduğunda otomatik kullanır"
+                        )
+                        .font(.caption2)
+                        .foregroundStyle(.secondary)
+                    }
+
+                    Spacer()
+                }
+                .padding(10)
+                .background(Color(nsColor: .controlBackgroundColor))
+                .clipShape(RoundedRectangle(cornerRadius: 10))
+
                 sectionTitle("Training Lab")
 
                 VStack(alignment: .leading, spacing: 8) {
@@ -998,7 +1032,7 @@ struct ContentView: View {
                 }
 
                 Text(
-                    "v0.7.17: Training Lab’in ilk 5 bulgusu Core’a işlendi. “fikri üret” gibi doğal dil varyasyonları, doğrudan medya yorumu, browser görevleri ve capability-gap öğrenme hedefleri daha doğru çözülüyor. Her yeni KRALİ sürümünde Training Lab otomatik regression turu çalıştırıyor; kullanıcı tek tek senaryo başlatmak zorunda değil."
+                    "v0.7.18: Ücretsiz yerel zeka katmanı eklendi. Uygun Mac’lerde Apple Foundation Models ile araştırma kanıtları, analiz hedefleri ve bağımsız fikir üretimi cihaz üzerinde sentezleniyor. Model hazır değilse KRALİ mevcut Core’a güvenli biçimde geri dönüyor; ücretli API veya ek abonelik gerekmiyor."
                 )
                 .font(.caption2)
                 .foregroundStyle(.orange)
