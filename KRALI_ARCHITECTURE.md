@@ -159,6 +159,8 @@ Ayrıca statik Training Lab'den ayrı **Live Research Eval** eklenir. Her yeni s
 
 Varsayılan provider/model `cline + nvidia/nemotron-3.5-lightning` olarak sabitlenir; bu model Cline tarafından ücretsiz sunulduğu sürece ek AI ücreti gerektirmez. Workflow ücretli modele sessizce geçmez. Cline'ın komut yetkileri sınırlandırılır; `sudo`, destructive reset/clean, `git push` ve uygulama açma gibi komutlar agent'a verilmez. Aday değişiklik daha sonra KRALİ'nin kendi `Scripts/build-check.command` doğrulamasından geçirilir. Build başarılıysa yalnızca aday branch GitHub'a push edilir; main'e merge otomatik değildir ve Mentor incelemesi beklenir. Diagnostic'ler tamamen yeşilse agent'ın sırf değişiklik üretmek için kodu kurcalamaması temel kuraldır.
 
+**v0.7.21 Developer setup diagnostics:** Developer Agent kurulumu artık tek bir “Cline yok” durumuna indirgenmez. Node.js/npm yokluğu, eski Node sürümü ve Cline CLI eksikliği ayrı durumlar olarak raporlanır. Cline CLI'nin resmi kurulum gereksinimine göre Node.js 20+ kontrol edilir; uygun kurulum adımı UI'da doğrudan gösterilir.
+
 ### 0.8.x — Memory
 Kısa süreli konuşma belleği ile kalıcı kullanıcı tercihlerini ayırma; bağlam özetleme.
 
