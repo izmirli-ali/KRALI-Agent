@@ -272,26 +272,33 @@ struct AgentPlanner {
            }) {
             let researchStep = action(
                 "Web'de araştır",
-                "Güncel web kaynaklarını anahtarsız bootstrap sağlayıcısıyla bul; kaynak başlıklarını ve adreslerini Core'a getir.",
+                "Güncel web kaynaklarını bul, semantik olarak sırala ve güvenilir adayları Core'a getir.",
+                capability: "research.web"
+            )
+
+            let readStep = action(
+                "Kaynakları oku",
+                "En alakalı kaynakların sayfa içeriğini aç, sorguyla ilgili kanıt cümlelerini çıkar ve yüzey başlık eşleşmesini gerçek içerikten ayır.",
                 capability: "research.web"
             )
 
             if let responseIndex = steps.firstIndex(
                 where: { $0.kind == .response }
             ) {
-                steps.insert(researchStep, at: responseIndex)
+                steps.insert(contentsOf: [researchStep, readStep], at: responseIndex)
             } else if let verificationIndex = steps.firstIndex(
                 where: { $0.kind == .verification }
             ) {
-                steps.insert(researchStep, at: verificationIndex)
+                steps.insert(contentsOf: [researchStep, readStep], at: verificationIndex)
             } else {
                 steps.append(researchStep)
+                steps.append(readStep)
             }
 
             if !steps.contains(where: { $0.kind == .verification }) {
                 steps.append(
                     verificationStep(
-                        "Web araştırmasının gerçek sonuç üretip üretmediğini doğrula."
+                        "Web araştırmasının alakalı sonuç üretip üretmediğini ve en az iki kaynaktan sayfa içeriği kanıtı çıkarılıp çıkarılmadığını doğrula."
                     )
                 )
             }
