@@ -7,3 +7,5 @@ Data/*
 !Data/.gitkeep
 Backups/*
 !Backups/.gitkeep
+
+.build/
