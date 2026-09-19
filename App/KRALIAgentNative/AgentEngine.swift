@@ -33,6 +33,7 @@ final class AgentEngine: ObservableObject {
     private let selectedRootKey = "krali.native.selectedRootPath.v1"
     private let fileManager = FileManager.default
     private let brain = AgentBrain()
+    private var lastDecision: AgentDecision?
 
     init() {
         loadMemory()
@@ -58,6 +59,7 @@ final class AgentEngine: ObservableObject {
         currentGoal = decision.goal
         currentPlan = decision.selectedPlan
         currentAlternatives = decision.alternatives
+        lastDecision = decision
 
         log("KRALİ Core hedefi çıkardı: \(decision.goal)")
         log("Seçilen plan: \(decision.selectedPlan)")
@@ -127,6 +129,14 @@ final class AgentEngine: ObservableObject {
                 decision: decision
             )
 
+        case .openPreviousResult:
+            return openPreviousResult(
+                selection: decision.resultSelection
+            )
+
+        case .contextSuggestion:
+            return suggestFromPreviousResults()
+
         case .workMail:
             log("Mail görevi planlandı; gönderim onay gerektiriyor")
             return "Mail hedefini anladım. Şimdilik gerçek mail bağlantısını çalıştırmadan önce kaynak ve taslak aşamasını ayrı tutuyorum."
@@ -149,7 +159,11 @@ final class AgentEngine: ObservableObject {
             projectCount: projectCount,
             documentCount: documentCount,
             screenshotCount: screenshotCount,
-            hasPendingAction: pendingFileAction != nil
+            hasPendingAction: pendingFileAction != nil,
+            previousFileResultCount: fileSearchResults.count,
+            previousFolderResultCount: folderSearchResults.count,
+            lastTarget: lastDecision?.target,
+            lastGoal: lastDecision?.goal
         )
     }
 
@@ -416,6 +430,64 @@ final class AgentEngine: ObservableObject {
         log("Finder'da klasör açıldı: \(folder.name)")
     }
 
+    private func openPreviousResult(
+        selection: AgentResultSelection?
+    ) -> String {
+        if !fileSearchResults.isEmpty {
+            let file: FileRecord
+            switch selection ?? .first {
+            case .first:
+                file = fileSearchResults[0]
+            case .last:
+                file = fileSearchResults[fileSearchResults.count - 1]
+            }
+
+            revealFile(file)
+            return "Önceki sonuçlardan “\(file.name)” dosyasını Finder'da gösterdim."
+        }
+
+        if !folderSearchResults.isEmpty {
+            let folder: FolderRecord
+            switch selection ?? .first {
+            case .first:
+                folder = folderSearchResults[0]
+            case .last:
+                folder = folderSearchResults[folderSearchResults.count - 1]
+            }
+
+            revealFolder(folder)
+            return "Önceki sonuçlardan “\(folder.name)” klasörünü Finder'da açtım."
+        }
+
+        return "Referans verebileceğim önceki bir arama sonucu kalmamış. Önce dosya veya klasör araması yapalım."
+    }
+
+    private func suggestFromPreviousResults() -> String {
+        if !fileSearchResults.isEmpty {
+            let candidate = fileSearchResults.max { left, right in
+                let leftDate = left.modificationDate ?? left.creationDate ?? .distantPast
+                let rightDate = right.modificationDate ?? right.creationDate ?? .distantPast
+                return leftDate < rightDate
+            } ?? fileSearchResults[0]
+
+            log("Bağlamdan çalışma adayı seçildi: \(candidate.name)")
+            return "Önceki sonuçlar içinde başlangıç adayı olarak “\(candidate.name)” dosyasını öne çıkarıyorum. Mevcut metadata içinde en güncel görünen aday bu. İstersen “onu aç” veya “sonuçları daralt” diyebilirsin."
+        }
+
+        if !folderSearchResults.isEmpty {
+            let candidate = folderSearchResults.max { left, right in
+                let leftDate = left.modificationDate ?? left.creationDate ?? .distantPast
+                let rightDate = right.modificationDate ?? right.creationDate ?? .distantPast
+                return leftDate < rightDate
+            } ?? folderSearchResults[0]
+
+            log("Bağlamdan klasör adayı seçildi: \(candidate.name)")
+            return "Önceki klasör sonuçları içinde “\(candidate.name)” en güncel aday olarak öne çıkıyor. İstersen “onu aç” diyebilirsin."
+        }
+
+        return "Önceki sonuç kalmadığı için seçim yapamıyorum. Önce ilgili dosya veya klasörleri bulalım."
+    }
+
     private func searchIndexedFolders(
         for rawText: String,
         decision: AgentDecision
@@ -497,20 +569,23 @@ final class AgentEngine: ObservableObject {
 
         var title = decision.goal
         var results: [FileRecord]
+        let sourceFiles = decision.usePreviousResults
+            ? fileSearchResults
+            : indexedFiles
 
         switch decision.target {
         case .screenshot:
-            results = indexedFiles.filter(\.isScreenshot)
+            results = sourceFiles.filter(\.isScreenshot)
         case .pdf:
-            results = indexedFiles.filter { $0.fileExtension == "pdf" }
+            results = sourceFiles.filter { $0.fileExtension == "pdf" }
         case .video:
-            results = indexedFiles.filter { videoExtensions.contains($0.fileExtension) }
+            results = sourceFiles.filter { videoExtensions.contains($0.fileExtension) }
         case .image:
-            results = indexedFiles.filter { imageExtensions.contains($0.fileExtension) }
+            results = sourceFiles.filter { imageExtensions.contains($0.fileExtension) }
         case .project:
-            results = indexedFiles.filter { projectExtensions.contains($0.fileExtension) }
+            results = sourceFiles.filter { projectExtensions.contains($0.fileExtension) }
         case .document:
-            results = indexedFiles.filter { documentExtensions.contains($0.fileExtension) }
+            results = sourceFiles.filter { documentExtensions.contains($0.fileExtension) }
         case .folder:
             results = []
         case .any:
@@ -518,10 +593,10 @@ final class AgentEngine: ObservableObject {
             title = query.isEmpty ? decision.goal : "“\(query)” araması"
 
             if query.isEmpty {
-                results = indexedFiles
+                results = sourceFiles
             } else {
                 let tokens = query.split(separator: " ").map(String.init)
-                results = indexedFiles.filter { file in
+                results = sourceFiles.filter { file in
                     let name = normalize(file.name)
                     let path = normalize(file.relativePath)
                     return tokens.allSatisfy { name.contains($0) || path.contains($0) }
@@ -559,6 +634,9 @@ final class AgentEngine: ObservableObject {
         fileSearchTitle = title
 
         log("Yerel dosya araması: \(title)")
+        if decision.usePreviousResults {
+            log("Bağlam filtresi önceki sonuç kümesine uygulandı")
+        }
         log("\(results.count) eşleşme bulundu")
 
         let askedForWholeComputer = containsAny(
@@ -566,9 +644,15 @@ final class AgentEngine: ObservableObject {
             ["bilgisayarımda", "bilgisayarimda", "mac'imde", "macimde", "tüm bilgisayar", "tum bilgisayar"]
         )
 
-        let scopeNote = askedForWholeComputer
+        let computerScopeNote = askedForWholeComputer
             ? "Not: Bu sürüm henüz tüm Mac’i değil, seçili “\(root.lastPathComponent)” klasörü ve alt klasörlerini tarıyor. "
             : ""
+
+        let contextScopeNote = decision.usePreviousResults
+            ? "Önceki sonuçların içinde filtreledim. "
+            : ""
+
+        let scopeNote = computerScopeNote + contextScopeNote
 
         guard !results.isEmpty else {
             return scopeNote + "\(title) için eşleşme bulamadım."
