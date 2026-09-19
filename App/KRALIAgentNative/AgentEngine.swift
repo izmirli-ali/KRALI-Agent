@@ -29,6 +29,7 @@ final class AgentEngine: ObservableObject {
     @Published var fallbackPlan: String?
     @Published var recoverySummary: String?
     @Published var selectedCapabilities: [AgentCapability] = []
+    @Published var capabilityLearningPlans: [CapabilityLearningPlan] = []
 
     @Published var voiceOutputEnabled = true {
         didSet {
@@ -52,6 +53,7 @@ final class AgentEngine: ObservableObject {
     private let goalInterpreter = AgentGoalInterpreter()
     private let responseComposer = AgentResponseComposer()
     private let routeBuilder = AgentRouteBuilder()
+    private let capabilityLearner = AgentCapabilityLearner()
     private var lastDecision: AgentDecision?
 
     init() {
@@ -108,6 +110,11 @@ final class AgentEngine: ObservableObject {
         )
         selectedCapabilities = capabilities
 
+        let learningPlans = capabilityLearner.makePlans(
+            for: capabilities
+        )
+        capabilityLearningPlans = learningPlans
+
         let executionPlan = planner.makePlan(
             decision: decision,
             context: brainContext(),
@@ -118,6 +125,7 @@ final class AgentEngine: ObservableObject {
         activeRoute = routeBuilder.build(
             goal: goalProfile,
             capabilities: capabilities,
+            learningPlans: learningPlans,
             requiresVerification: executionPlan.requiresVerification
         )
 
@@ -137,6 +145,15 @@ final class AgentEngine: ObservableObject {
                 .map { $0.name + ($0.isAvailable ? "" : " [bekliyor]") }
                 .joined(separator: ", ")
         )
+
+        if !learningPlans.isEmpty {
+            log(
+                "Yetkinlik öğrenme planı: " +
+                learningPlans
+                    .map { $0.capabilityName + " → " + $0.state.title }
+                    .joined(separator: ", ")
+            )
+        }
 
         busy = true
 
@@ -218,6 +235,7 @@ final class AgentEngine: ObservableObject {
                 verification: finalVerification,
                 goal: goalProfile,
                 capabilities: capabilities,
+                learningPlans: learningPlans,
                 fallbackPlan: fallbackPlan
             )
 
