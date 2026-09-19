@@ -134,6 +134,17 @@ Araştırma tarafında kritik kavramlar artık `mandatoryConceptGroups` olarak m
 
 Mentor geliştirme ilkesi: KRALİ'nin kendisi ile Mentor aynı şey değildir. KRALİ bağımsız ajan olarak gelişir; Mentor yalnızca geliştirme/öğretim katmanıdır. İleride opsiyonel ücretsiz yerel reviewer (örn. local model runtime) eklenebilir, fakat hiçbir ücretli API varsayılan bağımlılık olmayacaktır.
 
+**v0.7.16 Training Lab / batch learning:** Kullanıcının onlarca görevi tek tek manuel vermesi yerine KRALİ kendi reasoning iskeletini yerel senaryo paketiyle test eder. Senaryolar araştırma güvenilirliği, marka araştırması, içerik stratejisi, genel analiz/çıkarım, bağımsız fikir üretme, yerel dosya görevleri, context carry-over, capability gap, güvenlik ve açık-dünya North Star davranışlarını kapsar.
+
+Training Lab iki skoru ayrı raporlar:
+
+- **Core readiness:** bugün güvenilir çalışması gereken temel ajan davranışları.
+- **North Star readiness:** henüz gelişmekte olan genel amaçlı ajan yetkinlikleri.
+
+Her senaryoda Goal outcomes, capability seçimi, yanlış capability seçimi, route, dinamik plan adımları, capability learning planı ve araştırma concept coverage kontrol edilir. Başarısızlıklar `training-latest.json` raporunda toplanır ve Mentor Sync ile private GitHub'a aktarılabilir. Böylece ChatGPT Mentor tek tek kullanıcı testleri yerine toplu failure setini inceleyip Core kodunu güncelleyebilir.
+
+Genel analiz davranışına `analyze` ve `ideate` hedefleri eklendi. KRALİ yalnızca özet vermek yerine kanıttan çıkarım üretmeye ve kullanıcı tarafından açıkça söylenmemiş ama bağlamdan türetilebilen fikir/fırsatları ayrı reasoning adımı olarak oluşturmaya yönlendirilir.
+
 ### 0.8.x — Memory
 Kısa süreli konuşma belleği ile kalıcı kullanıcı tercihlerini ayırma; bağlam özetleme.
 
