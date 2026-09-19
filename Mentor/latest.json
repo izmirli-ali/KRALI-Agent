@@ -1,0 +1,173 @@
+{
+  "activityTail" : [
+    {
+      "date" : "2026-09-19T23:18:19Z",
+      "text" : "Web Research başarısız: Web araştırması yeterince alakalı sonuç üretmedi."
+    },
+    {
+      "date" : "2026-09-19T23:18:16Z",
+      "text" : "Web Research başladı"
+    },
+    {
+      "date" : "2026-09-19T23:18:16Z",
+      "text" : "Seçilen kabiliyetler: Akıl yürütme, Bağlam, Web araştırma"
+    },
+    {
+      "date" : "2026-09-19T23:18:16Z",
+      "text" : "Otomatik rota: Core → Goal → Context → Plan → Research → Verify → Response"
+    },
+    {
+      "date" : "2026-09-19T23:18:16Z",
+      "text" : "Seçilen plan: Bağlamı incele; doğrudan araç eşleşmesi yoksa güvenli alternatifler üret"
+    },
+    {
+      "date" : "2026-09-19T23:18:16Z",
+      "text" : "KRALİ Core hedef sözleşmesi: bulguları analiz et → bağımsız fikir ve çıkarım üret → güncel kaynaklarla araştır → sonucu ve gerekçeyi açıkla"
+    },
+    {
+      "date" : "2026-09-19T23:11:24Z",
+      "text" : "Mentor trace GitHub'a senkronlandı"
+    },
+    {
+      "date" : "2026-09-19T23:11:11Z",
+      "text" : "Training Lab tamamlandı: 16/16"
+    },
+    {
+      "date" : "2026-09-19T23:11:11Z",
+      "text" : "Training Lab başladı"
+    },
+    {
+      "date" : "2026-09-19T23:11:11Z",
+      "text" : "Yerel zeka kullanılamıyor: Apple Intelligence modeli bu Mac'te hazır değil"
+    },
+    {
+      "date" : "2026-09-19T23:11:10Z",
+      "text" : "Çalışma klasörü geri yüklendi: Desktop"
+    },
+    {
+      "date" : "2026-09-19T23:11:10Z",
+      "text" : "7 ekran görüntüsü adayı bulundu"
+    },
+    {
+      "date" : "2026-09-19T23:11:10Z",
+      "text" : "4640 dosya ve 360 klasör indekslendi"
+    },
+    {
+      "date" : "2026-09-19T23:11:10Z",
+      "text" : "İndeks güvenlik sınırına ulaştı: 5000 öğe"
+    },
+    {
+      "date" : "2026-09-19T23:11:10Z",
+      "text" : "Dinamik hedef ve kabiliyet yönlendirme aktif"
+    },
+    {
+      "date" : "2026-09-19T23:11:10Z",
+      "text" : "KRALİ Core hazır"
+    }
+  ],
+  "appVersion" : "0.7.18",
+  "capabilities" : [
+    {
+      "available" : true,
+      "id" : "core.reasoning",
+      "name" : "Akıl yürütme",
+      "risk" : "reasoning"
+    },
+    {
+      "available" : true,
+      "id" : "context.local",
+      "name" : "Bağlam",
+      "risk" : "reasoning"
+    },
+    {
+      "available" : true,
+      "id" : "research.web",
+      "name" : "Web araştırma",
+      "risk" : "external"
+    }
+  ],
+  "createdAt" : "2026-09-19T23:18:19Z",
+  "executionSteps" : [
+    {
+      "capabilityID" : "core.reasoning",
+      "detail" : "Hedef sözleşmesi: bulguları analiz et → bağımsız fikir ve çıkarım üret → güncel kaynaklarla araştır → sonucu ve gerekçeyi açıkla. Kısıtları ve mevcut bağlamı anlamlandır.",
+      "kind" : "reasoning",
+      "state" : "completed",
+      "title" : "Hedefi çöz"
+    },
+    {
+      "capabilityID" : "core.reasoning",
+      "detail" : "Hedef için mevcut ve eksik capability'leri ayır.",
+      "kind" : "action",
+      "state" : "completed",
+      "title" : "Gerekli yetenekleri tara"
+    },
+    {
+      "capabilityID" : "research.web",
+      "detail" : "Güncel web kaynaklarını bul, semantik olarak sırala ve güvenilir adayları Core'a getir.",
+      "kind" : "action",
+      "state" : "completed",
+      "title" : "Web'de araştır"
+    },
+    {
+      "capabilityID" : "research.web",
+      "detail" : "En alakalı kaynakların sayfa içeriğini aç, sorguyla ilgili kanıt cümlelerini çıkar ve yüzey başlık eşleşmesini gerçek içerikten ayır.",
+      "kind" : "action",
+      "state" : "completed",
+      "title" : "Kaynakları oku"
+    },
+    {
+      "capabilityID" : "core.reasoning",
+      "detail" : "Toplanan kanıtları, bağlamı ve kısıtları birlikte değerlendir; yalnızca yüzey özetleme yapma, neden-sonuç ilişkileri ve belirsizlikleri ayır.",
+      "kind" : "reasoning",
+      "state" : "completed",
+      "title" : "Analiz et"
+    },
+    {
+      "capabilityID" : "core.reasoning",
+      "detail" : "Kullanıcının doğrudan söylediği maddeleri tekrar etmekle yetinme; kanıtlardan ve analizden türetilmiş yeni fırsatlar, alternatifler veya yaratıcı öneriler üret ve bunları gerekçelendir.",
+      "kind" : "reasoning",
+      "state" : "completed",
+      "title" : "Bağımsız fikir üret"
+    },
+    {
+      "detail" : "Bağlamı incele; doğrudan araç eşleşmesi yoksa güvenli alternatifler üret",
+      "kind" : "response",
+      "state" : "completed",
+      "title" : "Uygulanabilir yolu açıkla"
+    },
+    {
+      "detail" : "Web araştırmasının alakalı sonuç üretip üretmediğini ve en az iki kaynaktan sayfa içeriği kanıtı çıkarılıp çıkarılmadığını doğrula.",
+      "kind" : "verification",
+      "state" : "attention",
+      "title" : "Doğrula"
+    }
+  ],
+  "fallbackPlan" : "Sorguyu yeniden ifade et, resmi dokümantasyon terimleri ekle veya farklı sağlayıcılarla tekrar ara.",
+  "finalResponse" : "Web araştırmasını başlattım fakat doğrulanabilir sonuç kümesi alamadım: Web araştırması yeterince alakalı sonuç üretmedi.\n\nDoğrulama: Web araştırma adımı çalıştı ancak doğrulanabilir ve alakalı sonuç üretmedi.\nAlternatif plan: Sorguyu yeniden ifade et, resmi dokümantasyon terimleri ekle veya farklı sağlayıcılarla tekrar ara.",
+  "goal" : "bulguları analiz et → bağımsız fikir ve çıkarım üret → güncel kaynaklarla araştır → sonucu ve gerekçeyi açıkla",
+  "inputSource" : "text",
+  "learningPlans" : [
+
+  ],
+  "plan" : "Bağlamı incele; doğrudan araç eşleşmesi yoksa güvenli alternatifler üret",
+  "researchEvidence" : [
+
+  ],
+  "researchSources" : [
+
+  ],
+  "route" : [
+    "Core",
+    "Goal",
+    "Context",
+    "Plan",
+    "Research",
+    "Verify",
+    "Response"
+  ],
+  "traceID" : "A8C73C1E-56F9-4353-8809-061DA1AE967F",
+  "userInput" : "HABAŞ markasını detaylı araştır, güçlü ve zayıf yönlerini analiz et, rakiplerinden ayrışabileceği noktaları bul ve benim söylemediğim 5 özgün fikir üret.",
+  "verificationState" : "attention",
+  "verificationSummary" : "Web araştırma adımı çalıştı ancak doğrulanabilir ve alakalı sonuç üretmedi."
+}
