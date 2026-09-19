@@ -120,6 +120,8 @@ Yerel dosya algısı, güvenli aksiyonlar, intent, tarih çözümleme, bağlam v
 
 **v0.7.10 web research bootstrap:** İlk gerçek araştırma provider katmanı eklenir. KRALİ API anahtarı/token gerektirmeyen bir HTML arama bootstrap sağlayıcısından güncel web sonucu bulabilir, URL/domain bilgisini ayrı kaynak olarak saklar ve Verifier gerçek sonuç kümesini kontrol eder. Bu sürüm arama/keşif katmanıdır; derin sayfa okuma, kaynak güvenilirliği puanlama ve çok-kaynak sentezi sonraki aşamadır. Öğrenme kuyruğunda `readyToResearch` olan eksik capability'ler için KRALİ tek seferlik otomatik kaynak araştırması yapabilir ve kaydı `proposalReady` durumuna taşır. Rastgele web kodu indirme/çalıştırma hâlâ yasaktır.
 
+**v0.7.11 research routing + resilient providers:** Açık web araştırma isteği dosya hedef kelimeleri içerse bile yerel File Search intent'ine düşmez; Research hedefi önceliklidir. Web provider katmanı tek bir servise bağımlı değildir: güvenli HTTPS üzerinden Google HTML bootstrap → Bing fallback → DuckDuckGo fallback sırasıyla denenir. TLS, HTTP veya parse hatasında sertifika doğrulaması gevşetilmez; yalnızca sonraki sağlayıcıya geçilir.
+
 ### 0.8.x — Memory
 Kısa süreli konuşma belleği ile kalıcı kullanıcı tercihlerini ayırma; bağlam özetleme.
 
