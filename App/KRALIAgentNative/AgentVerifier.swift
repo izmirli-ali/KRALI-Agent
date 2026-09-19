@@ -7,6 +7,8 @@ struct AgentVerificationSnapshot {
     let hasPendingAction: Bool
     let hasUndoAction: Bool
     let unavailableCapabilityIDs: Set<String>
+    let selectedCapabilityIDs: Set<String>
+    let webResearchResultCount: Int
 }
 
 struct AgentVerifier {
@@ -158,6 +160,29 @@ struct AgentVerifier {
                 )
 
         case .workMail, .futureCapability, .general:
+            if snapshot.selectedCapabilityIDs.contains("research.web") {
+                guard snapshot.webResearchResultCount > 0 else {
+                    return attention(
+                        "Web araştırma adımı çalıştı ancak doğrulanabilir sonuç üretmedi.",
+                        fallback: "Sorguyu sadeleştir, farklı anahtar kelimelerle yeniden ara veya alternatif araştırma sağlayıcısı kullan."
+                    )
+                }
+
+                if !snapshot.unavailableCapabilityIDs.isEmpty {
+                    return AgentVerificationResult(
+                        state: .partial,
+                        summary: "Web araştırması (snapshot.webResearchResultCount) kaynak buldu; ancak hedefte gereken diğer capability'lerden en az biri henüz bağlı değil. Sonuç kısmi.",
+                        fallback: nil
+                    )
+                }
+
+                return AgentVerificationResult(
+                    state: .passed,
+                    summary: "Web araştırması gerçek sonuç kümesiyle doğrulandı: (snapshot.webResearchResultCount) kaynak.",
+                    fallback: nil
+                )
+            }
+
             if !snapshot.unavailableCapabilityIDs.isEmpty {
                 return AgentVerificationResult(
                     state: .partial,
