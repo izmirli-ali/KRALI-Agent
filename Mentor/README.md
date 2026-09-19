@@ -52,3 +52,14 @@ Mentor Bridge OpenAI API çağrısı yapmaz. Kullanıcının mevcut ChatGPT abon
 - Repo temiz değilse script otomatik commit yapmaz.
 - Mentor trace herhangi bir uzaktan kodu indirip çalıştırmaz.
 - ChatGPT mentorluğu kod değişikliği önerebilir/uygulayabilir; KRALİ'nin kendi kendine sessizce yeni izin veya capability etkinleştirmesi ayrı onay gerektirir.
+
+
+## Live Research Eval
+
+Yeni sürümlerde gerçek internet araştırma kalitesi ayrı bir canlı test paketiyle ölçülür. Son rapor:
+
+```
+Mentor/live-eval-latest.json
+```
+
+dosyasına senkronlanır. Bu rapor statik Training Lab'den farklı olarak gerçek arama sağlayıcılarını ve sayfa-içi evidence okumasını çalıştırır; kaynak sayısı, domain çeşitliliği ve deep-reading başarısını gösterir. Mentor bu raporu kullanarak “iskelet geçti ama gerçek araştırma bozuk” durumlarını otomatik ayırabilir.
