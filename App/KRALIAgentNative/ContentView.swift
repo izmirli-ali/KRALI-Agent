@@ -547,7 +547,7 @@ struct ContentView: View {
                 }
 
                 Text(
-                    "v0.6.7: Güncelleme başlatıldığında KRALİ updater’ı dış süreçte bırakıp kendini kontrollü kapatır. Build tamamlanınca uygulama yeni instance olarak yeniden açılır; build başarısız olursa kurulu eski sürüm otomatik geri açılır."
+                    "v0.6.8: v0.6.4 ile eklenen klasör hedefi nedeniyle oluşan eksik Swift switch durumu düzeltildi. File Search dosya ve klasör hedeflerini derleme seviyesinde eksiksiz ele alıyor."
                 )
                 .font(.caption2)
                 .foregroundStyle(.orange)
