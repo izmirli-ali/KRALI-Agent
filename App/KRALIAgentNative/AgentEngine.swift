@@ -1026,7 +1026,26 @@ final class AgentEngine: ObservableObject {
         log("Developer Agent başlatıldı")
 
         Task {
+            let monitor = Task { @MainActor [weak self] in
+                while !Task.isCancelled {
+                    guard let self, self.developerAgentBusy else {
+                        break
+                    }
+
+                    let liveStatus = self.developerBridge.readStatus()
+                    if liveStatus.state != "idle" {
+                        self.developerAgentStatus = liveStatus
+                    }
+
+                    try? await Task.sleep(
+                        for: .milliseconds(700)
+                    )
+                }
+            }
+
             let status = await developerBridge.run()
+            monitor.cancel()
+
             developerAgentStatus = status
             developerAgentBusy = false
 
@@ -1040,8 +1059,12 @@ final class AgentEngine: ObservableObject {
             case "no_change":
                 log("Developer Agent değişiklik gerekmedi sonucuna vardı")
 
-            case "setup_required":
-                log("Developer Agent için Cline kurulumu gerekiyor")
+            case "setup_required",
+                 "setup_node",
+                 "setup_homebrew",
+                 "setup_node_upgrade",
+                 "setup_cline":
+                log("Developer Agent kurulumu tamamlanmalı")
 
             case "build_failed":
                 log(
