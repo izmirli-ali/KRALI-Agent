@@ -71,6 +71,7 @@ enum AgentStepState: String, Hashable {
     case running
     case completed
     case partial
+    case blocked
     case attention
     case skipped
 
@@ -80,6 +81,7 @@ enum AgentStepState: String, Hashable {
         case .running: return "circle.dotted"
         case .completed: return "checkmark.circle.fill"
         case .partial: return "exclamationmark.circle.fill"
+        case .blocked: return "circle.slash"
         case .attention: return "exclamationmark.triangle.fill"
         case .skipped: return "minus.circle"
         }
