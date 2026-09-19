@@ -99,13 +99,16 @@ struct ContentView: View {
 
                 Toggle(isOn: $engine.voiceOutputEnabled) {
                     Label(
-                        "Sesli cevap",
+                        "Sesli mod yanıtı",
                         systemImage: engine.voiceOutputEnabled
                             ? "speaker.wave.2.fill"
                             : "speaker.slash.fill"
                     )
                 }
                 .toggleStyle(.button)
+                .help(
+                    "Yalnızca mikrofonla gönderdiğin mesajlara sesli yanıt verir. Yazılı mesajlar sessiz kalır."
+                )
             }
             .padding(14)
 
@@ -157,8 +160,8 @@ struct ContentView: View {
             VoiceComposerView(
                 speech: engine.speech,
                 prompt: $prompt,
-                onSend: { text in
-                    engine.send(text)
+                onSend: { text, source in
+                    engine.send(text, source: source)
                 }
             )
             .padding(12)
@@ -547,7 +550,7 @@ struct ContentView: View {
                 }
 
                 Text(
-                    "v0.6.9: Context + Planning temeli eklendi. KRALİ artık önceki arama sonuçlarına “bunlardan”, “az önceki”, “sonuncusunu aç” gibi referanslarla dönebiliyor; önceki sonuç kümesini koruyup yeni filtreyi sadece onun içinde uygulayabiliyor."
+                    "v0.6.10: Sesli yanıt davranışı giriş moduna bağlandı. Yazılı mesajlar artık hiçbir zaman otomatik okunmaz; yalnızca mikrofonla verilen komutlara, “Sesli mod yanıtı” açıksa sesli cevap verilir. Tercih uygulama yeniden açıldığında korunur."
                 )
                 .font(.caption2)
                 .foregroundStyle(.orange)
@@ -684,14 +687,14 @@ private struct VoiceStatusView: View {
 private struct VoiceComposerView: View {
     @ObservedObject var speech: SpeechController
     @Binding var prompt: String
-    let onSend: (String) -> Void
+    let onSend: (String, ChatInputSource) -> Void
 
     var body: some View {
         HStack(alignment: .bottom, spacing: 8) {
             Button {
                 speech.microphoneTapped { text in
                     prompt = ""
-                    onSend(text)
+                    onSend(text, .voice)
                 }
             } label: {
                 Image(systemName: micIcon)
@@ -764,7 +767,7 @@ private struct VoiceComposerView: View {
         guard !text.isEmpty else { return }
 
         prompt = ""
-        onSend(text)
+        onSend(text, .text)
     }
 }
 
