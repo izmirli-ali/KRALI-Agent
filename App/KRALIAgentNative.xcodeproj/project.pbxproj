@@ -15,6 +15,8 @@
 		A10000000000000000000006 /* UpdateController.swift in Sources */ = {isa = PBXBuildFile; fileRef = B10000000000000000000006 /* UpdateController.swift */; };
 		A10000000000000000000007 /* AgentBrain.swift in Sources */ = {isa = PBXBuildFile; fileRef = B10000000000000000000007 /* AgentBrain.swift */; };
 		A10000000000000000000008 /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = B10000000000000000000008 /* Assets.xcassets */; };
+		A10000000000000000000009 /* AgentPlanner.swift in Sources */ = {isa = PBXBuildFile; fileRef = B10000000000000000000009 /* AgentPlanner.swift */; };
+		A10000000000000000000010 /* AgentVerifier.swift in Sources */ = {isa = PBXBuildFile; fileRef = B10000000000000000000010 /* AgentVerifier.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
@@ -27,6 +29,8 @@
 		B10000000000000000000006 /* UpdateController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = UpdateController.swift; sourceTree = "<group>"; };
 		B10000000000000000000007 /* AgentBrain.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AgentBrain.swift; sourceTree = "<group>"; };
 		B10000000000000000000008 /* Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Assets.xcassets; sourceTree = "<group>"; };
+		B10000000000000000000009 /* AgentPlanner.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AgentPlanner.swift; sourceTree = "<group>"; };
+		B10000000000000000000010 /* AgentVerifier.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AgentVerifier.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -59,6 +63,8 @@
 				B10000000000000000000006 /* UpdateController.swift */,
 				B10000000000000000000007 /* AgentBrain.swift */,
 				B10000000000000000000008 /* Assets.xcassets */,
+				B10000000000000000000009 /* AgentPlanner.swift */,
+				B10000000000000000000010 /* AgentVerifier.swift */,
 			);
 			path = KRALIAgentNative;
 			sourceTree = "<group>";
@@ -148,6 +154,8 @@
 				A10000000000000000000005 /* Models.swift in Sources */,
 				A10000000000000000000006 /* UpdateController.swift in Sources */,
 				A10000000000000000000007 /* AgentBrain.swift in Sources */,
+				A10000000000000000000009 /* AgentPlanner.swift in Sources */,
+				A10000000000000000000010 /* AgentVerifier.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -185,7 +193,7 @@
 				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
 				CODE_SIGN_STYLE = Automatic;
 				COMBINE_HIDPI_IMAGES = YES;
-				CURRENT_PROJECT_VERSION = 19;
+				CURRENT_PROJECT_VERSION = 20;
 				DEVELOPMENT_TEAM = 65244UMFCK;
 				ENABLE_HARDENED_RUNTIME = NO;
 				ENABLE_PREVIEWS = YES;
@@ -200,7 +208,7 @@
 					"@executable_path/../Frameworks",
 				);
 				MACOSX_DEPLOYMENT_TARGET = 14.0;
-				MARKETING_VERSION = 0.6.10;
+				MARKETING_VERSION = 0.7.0;
 				PRODUCT_BUNDLE_IDENTIFIER = com.aliihsancanuysal.kraliagent;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				SDKROOT = macosx;
@@ -216,7 +224,7 @@
 				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
 				CODE_SIGN_STYLE = Automatic;
 				COMBINE_HIDPI_IMAGES = YES;
-				CURRENT_PROJECT_VERSION = 19;
+				CURRENT_PROJECT_VERSION = 20;
 				DEVELOPMENT_TEAM = 65244UMFCK;
 				ENABLE_HARDENED_RUNTIME = NO;
 				GENERATE_INFOPLIST_FILE = YES;
@@ -230,7 +238,7 @@
 					"@executable_path/../Frameworks",
 				);
 				MACOSX_DEPLOYMENT_TARGET = 14.0;
-				MARKETING_VERSION = 0.6.10;
+				MARKETING_VERSION = 0.7.0;
 				PRODUCT_BUNDLE_IDENTIFIER = com.aliihsancanuysal.kraliagent;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				SDKROOT = macosx;
