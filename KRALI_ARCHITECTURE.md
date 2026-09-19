@@ -163,6 +163,8 @@ Varsayılan provider/model `cline + nvidia/nemotron-3.5-lightning` olarak sabitl
 
 **v0.7.22 ChatGPT Subscription Developer Agent + auto updater check:** Kullanıcının ek API ücreti istememesi nedeniyle Developer Agent'ın varsayılan provider'ı Cline içindeki `openai-codex` / ChatGPT Subscription OAuth olarak değiştirilir. Model adı script içinde sabitlenmez; `cline auth` sırasında ChatGPT aboneliği için seçilen model provider ayarından yeniden kullanılır. Böylece ayrı OpenAI API anahtarı veya Cline kredi bakiyesi gerektiren yola sessizce geçilmez. Updater da uygulama açılışından kısa süre sonra otomatik `origin/main` + `VERSION` kontrolü yapar.
 
+**v0.7.23 Developer Agent fast diagnostic gate + live progress:** Developer Agent artık her tıklamada doğrudan modele gitmez. Yerel `training-latest.json`, `live-eval-latest.json` ve `latest.json` raporları mevcut `VERSION` ile karşılaştırılır. Training Lab ve Live Research Eval güncel sürümde tamamen yeşilse ve güncel mentor trace ek müdahale gerektirmiyorsa Cline çağrısı atlanır; bu hem ChatGPT kullanım limitini hem bekleme süresini korur. Gerçek bir failure varsa Cline çalışır; UI yaklaşık 700 ms aralıkla status dosyasını okuyarak hazırlık, diagnostic kontrol, model çalışması ve build doğrulama aşamalarını canlı gösterir. Cline turu `medium` thinking ve 900 saniye timeout ile sınırlandırılır.
+
 ### 0.8.x — Memory
 Kısa süreli konuşma belleği ile kalıcı kullanıcı tercihlerini ayırma; bağlam özetleme.
 
