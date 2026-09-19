@@ -4,6 +4,8 @@ enum AgentIntentKind {
     case conversation
     case assessWorkspace
     case fileSearch
+    case openPreviousResult
+    case contextSuggestion
     case organizeScreenshots
     case remember
     case undo
@@ -36,6 +38,11 @@ enum AgentDateField {
     case modified
 }
 
+enum AgentResultSelection {
+    case first
+    case last
+}
+
 struct AgentContextSnapshot {
     let hasWorkspace: Bool
     let workspaceName: String?
@@ -46,6 +53,10 @@ struct AgentContextSnapshot {
     let documentCount: Int
     let screenshotCount: Int
     let hasPendingAction: Bool
+    let previousFileResultCount: Int
+    let previousFolderResultCount: Int
+    let lastTarget: AgentTargetKind?
+    let lastGoal: String?
 }
 
 struct AgentDecision {
@@ -59,6 +70,8 @@ struct AgentDecision {
     let selectedPlan: String
     let alternatives: [String]
     let proactiveSuggestion: String?
+    let usePreviousResults: Bool
+    let resultSelection: AgentResultSelection?
 }
 
 struct AgentBrain {
@@ -98,6 +111,71 @@ struct AgentBrain {
                 goal: "Son geri alınabilir işlemi tersine çevir",
                 plan: "Son taşıma kaydını kullanarak dosyaları güvenli biçimde geri yükle",
                 alternatives: ["Önce son işlemin ayrıntısını incele"]
+            )
+        }
+
+        let hasPreviousResults =
+            context.previousFileResultCount > 0 ||
+            context.previousFolderResultCount > 0
+
+        if hasPreviousResults && isOpenPreviousResultIntent(text) {
+            let selection: AgentResultSelection = containsAny(
+                text,
+                ["sonuncu", "sonuncusunu", "en sondaki", "en sonuncu"]
+            ) ? .last : .first
+
+            return decision(
+                intent: .openPreviousResult,
+                route: ["Core", "Context", "Planner", "File Search"],
+                goal: "Önceki sonuçlardan istenen öğeyi aç",
+                plan: "Önceki arama sonuçlarını koru, referansı çöz ve Finder'da doğru öğeyi göster",
+                alternatives: ["İlk sonucu aç", "Son sonucu aç", "Sonuçları yeniden listele"],
+                resultSelection: selection
+            )
+        }
+
+        if hasPreviousResults && isContextSuggestionIntent(text) {
+            return decision(
+                intent: .contextSuggestion,
+                route: ["Core", "Context", "Planner"],
+                goal: "Önceki sonuçlardan bir sonraki çalışma adayını seç",
+                plan: "Önceki sonuçların tür ve tarih bilgisini kullanarak açıklanabilir bir başlangıç adayı öner",
+                alternatives: ["En yeniyi seç", "İlk sonucu aç", "Sonuçları daralt"]
+            )
+        }
+
+        if context.previousFileResultCount > 0 && isContextualResultFilter(text) {
+            let resolvedTarget = resolveTarget(text)
+            let target = resolvedTarget == .any
+                ? (context.lastTarget ?? .any)
+                : resolvedTarget
+            let dateResolution = resolveDate(text, now: now)
+            let sort: AgentSortMode = containsAny(
+                text,
+                ["son eklenen", "en yeni", "en son", "son çekilen", "son cekilen", "latest"]
+            ) ? .newestFirst : .relevance
+
+            return AgentDecision(
+                intent: .fileSearch,
+                target: target,
+                dateRange: dateResolution.range,
+                dateField: resolveDateField(text),
+                sortMode: sort,
+                route: ["Core", "Context", "Planner", "File Search"],
+                goal: fileSearchGoal(
+                    target: target,
+                    dateDescription: dateResolution.description,
+                    newestFirst: sort == .newestFirst
+                ),
+                selectedPlan: "Önceki sonuç kümesini bağlam olarak koru; yalnızca onun içinde yeni filtreyi uygula",
+                alternatives: [
+                    "Önceki sonuçların tamamını tekrar göster",
+                    "Tarihe göre daralt",
+                    "İlk veya son sonucu aç"
+                ],
+                proactiveSuggestion: nil,
+                usePreviousResults: true,
+                resultSelection: nil
             )
         }
 
@@ -185,7 +263,9 @@ struct AgentBrain {
                     "Tarihe göre daralt",
                     "Sonuçları en yeniye göre sırala"
                 ],
-                proactiveSuggestion: nil
+                proactiveSuggestion: nil,
+                usePreviousResults: false,
+                resultSelection: nil
             )
         }
 
@@ -227,7 +307,9 @@ struct AgentBrain {
         goal: String,
         plan: String,
         alternatives: [String],
-        suggestion: String? = nil
+        suggestion: String? = nil,
+        usePreviousResults: Bool = false,
+        resultSelection: AgentResultSelection? = nil
     ) -> AgentDecision {
         AgentDecision(
             intent: intent,
@@ -239,7 +321,9 @@ struct AgentBrain {
             goal: goal,
             selectedPlan: plan,
             alternatives: alternatives,
-            proactiveSuggestion: suggestion
+            proactiveSuggestion: suggestion,
+            usePreviousResults: usePreviousResults,
+            resultSelection: resultSelection
         )
     }
 
@@ -275,6 +359,49 @@ struct AgentBrain {
             "toparla", "taşı", "tasi", "klasöre", "klasore", "düzenle", "duzenle"
         ])
         return screenshot && action
+    }
+
+    private func hasContextReference(_ text: String) -> Bool {
+        containsAny(text, [
+            "bunlardan", "bunların", "bunlar", "onlardan", "onların",
+            "şunlardan", "sunlardan", "sonuçlardan", "sonuclardan",
+            "az önce", "az once", "az önceki", "az onceki",
+            "bulduklarından", "bulduklarindan", "gösterdiklerinden", "gosterdiklerinden"
+        ])
+    }
+
+    private func isOpenPreviousResultIntent(_ text: String) -> Bool {
+        let openAction = containsAny(text, [
+            "aç", "ac", "finder'da göster", "finderda göster",
+            "finder'da goster", "finderda goster"
+        ])
+        let selection = containsAny(text, [
+            "ilkini", "birincisini", "sonuncusunu", "sonuncuyu",
+            "en sondakini", "ilk sonucu", "son sonucu"
+        ])
+
+        return openAction && (selection || hasContextReference(text))
+    }
+
+    private func isContextSuggestionIntent(_ text: String) -> Bool {
+        containsAny(text, [
+            "hangisini düzenleyelim", "hangisini duzenleyelim",
+            "hangisini seçelim", "hangisini secelim",
+            "hangisiyle başlayalım", "hangisiyle baslayalim",
+            "sence hangisi", "hangisinden başlayalım", "hangisinden baslayalim"
+        ])
+    }
+
+    private func isContextualResultFilter(_ text: String) -> Bool {
+        guard hasContextReference(text) else { return false }
+
+        let target = resolveTarget(text)
+        let filterAction = containsAny(text, [
+            "göster", "goster", "listele", "bul", "çıkar", "cikar",
+            "hangileri", "neler", "ne var"
+        ])
+
+        return target != .any && filterAction
     }
 
     private func isFileSearchIntent(_ text: String) -> Bool {
