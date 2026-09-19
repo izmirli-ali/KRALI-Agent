@@ -25,6 +25,16 @@ struct FileRecord: Identifiable, Hashable {
     var id: String { url.path }
 }
 
+struct FolderRecord: Identifiable, Hashable {
+    let url: URL
+    let name: String
+    let relativePath: String
+    let creationDate: Date?
+    let modificationDate: Date?
+
+    var id: String { url.path }
+}
+
 struct PendingFileAction: Identifiable {
     let id = UUID()
     let title: String
