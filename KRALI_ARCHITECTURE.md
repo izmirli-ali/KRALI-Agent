@@ -106,6 +106,8 @@ Yerel dosya algısı, güvenli aksiyonlar, intent, tarih çözümleme, bağlam v
 
 **v0.7.4 capability-aware verification:** Verifier hedefin tamamını değerlendirir. Arama ve kısa liste başarılı olsa bile görev görsel/video içerik değerlendirmesi istiyor ve perception capability bağlı değilse sonuç artık başarı sayılmaz; “kısmi” olarak işaretlenir. Böylece Core, tamamladığı alt görevlerle yerine getiremediği hedefi birbirinden ayırır.
 
+**v0.7.5 goal contract + response synthesis:** Intent artık hedefin kendisi kabul edilmez. Ayrı Goal Interpreter; locate, shortlist, assess-content, explain, organize, research, edit, communicate gibi istenen sonuçları çıkarır ve capability seçimini bu hedef sözleşmesi yönlendirir. Son kullanıcı cevabı da Executor metninden doğrudan çıkmaz; Verifier sonucu üzerinden Response Composer tarafından sentezlenir. Kısmi hedefte başarı dili kullanılamaz.
+
 ### 0.8.x — Memory
 Kısa süreli konuşma belleği ile kalıcı kullanıcı tercihlerini ayırma; bağlam özetleme.
 
