@@ -4,7 +4,7 @@ import AppKit
 @MainActor
 final class AgentEngine: ObservableObject {
     @Published var messages: [ChatMessage] = [
-        ChatMessage(role: .assistant, text: "Hazırım. Bana normal konuşur gibi görev ver; hangi alt modülün gerektiğini ben seçeceğim.")
+        ChatMessage(role: .assistant, text: "Hazırım. Bana normal konuşur gibi hedefini söyle; gerekli kabiliyetleri seçip yolu kendim kuracağım.")
     ]
 
     @Published var activities: [ActivityItem] = []
@@ -146,6 +146,9 @@ final class AgentEngine: ObservableObject {
                 if verification.state == .attention {
                     setVerificationStep(.attention)
                     fallbackPlan = verification.fallback ?? executionPlan.fallback
+                } else if verification.state == .partial {
+                    setVerificationStep(.partial)
+                    fallbackPlan = nil
                 } else {
                     setVerificationStep(.completed)
                 }
@@ -190,7 +193,9 @@ final class AgentEngine: ObservableObject {
                 suggestion: decision.proactiveSuggestion
             )
 
-            if finalVerification.state == .attention {
+            if finalVerification.state == .partial {
+                reply += "\n\nKısmi doğrulama: " + finalVerification.summary
+            } else if finalVerification.state == .attention {
                 reply += "\n\nDoğrulama: " + finalVerification.summary
                 if let fallback = fallbackPlan {
                     reply += "\nAlternatif plan: " + fallback
@@ -414,7 +419,12 @@ final class AgentEngine: ObservableObject {
             fileResultCount: fileSearchResults.count,
             folderResultCount: folderSearchResults.count,
             hasPendingAction: pendingFileAction != nil,
-            hasUndoAction: lastUndoAction != nil
+            hasUndoAction: lastUndoAction != nil,
+            unavailableCapabilityIDs: Set(
+                selectedCapabilities
+                    .filter { !$0.isAvailable }
+                    .map(\.id)
+            )
         )
     }
 
