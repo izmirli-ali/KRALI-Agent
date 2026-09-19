@@ -24,7 +24,14 @@ final class AgentEngine: ObservableObject {
     @Published var currentPlan = "Yeni görevi bekliyor"
     @Published var currentAlternatives: [String] = []
 
-    @Published var voiceOutputEnabled = true
+    @Published var voiceOutputEnabled = true {
+        didSet {
+            UserDefaults.standard.set(
+                voiceOutputEnabled,
+                forKey: "krali.native.voiceOutputEnabled.v1"
+            )
+        }
+    }
     @Published var busy = false
 
     let speech = SpeechController()
@@ -36,6 +43,14 @@ final class AgentEngine: ObservableObject {
     private var lastDecision: AgentDecision?
 
     init() {
+        if UserDefaults.standard.object(
+            forKey: "krali.native.voiceOutputEnabled.v1"
+        ) != nil {
+            voiceOutputEnabled = UserDefaults.standard.bool(
+                forKey: "krali.native.voiceOutputEnabled.v1"
+            )
+        }
+
         loadMemory()
         log("KRALİ Core hazır")
         log("Otomatik alt-modül yönlendirme aktif")
@@ -44,9 +59,16 @@ final class AgentEngine: ObservableObject {
 
     // MARK: - Chat
 
-    func send(_ raw: String) {
+    func send(
+        _ raw: String,
+        source: ChatInputSource = .text
+    ) {
         let text = raw.trimmingCharacters(in: .whitespacesAndNewlines)
         guard !text.isEmpty else { return }
+
+        if source == .text {
+            speech.stopSpeaking()
+        }
 
         messages.append(ChatMessage(role: .user, text: text))
 
@@ -78,7 +100,7 @@ final class AgentEngine: ObservableObject {
             messages.append(ChatMessage(role: .assistant, text: reply))
             busy = false
 
-            if voiceOutputEnabled {
+            if source == .voice && voiceOutputEnabled {
                 speech.speak(reply)
             }
         }
