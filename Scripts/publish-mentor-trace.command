@@ -2,8 +2,10 @@
 set -u
 
 ROOT="${KRALI_REPO_ROOT:-$HOME/Developer/KRALI-Agent}"
-SOURCE="$HOME/Library/Application Support/KRALI Agent/Mentor/latest.json"
-DEST="$ROOT/Mentor/latest.json"
+TRACE_SOURCE="$HOME/Library/Application Support/KRALI Agent/Mentor/latest.json"
+TRAINING_SOURCE="$HOME/Library/Application Support/KRALI Agent/Mentor/training-latest.json"
+TRACE_DEST="$ROOT/Mentor/latest.json"
+TRAINING_DEST="$ROOT/Mentor/training-latest.json"
 
 echo ""
 echo "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
@@ -17,9 +19,8 @@ if [ ! -d "$ROOT/.git" ]; then
     exit 10
 fi
 
-if [ ! -f "$SOURCE" ]; then
-    echo "❌ Henüz mentor kaydı yok:"
-    echo "$SOURCE"
+if [ ! -f "$TRACE_SOURCE" ] && [ ! -f "$TRAINING_SOURCE" ]; then
+    echo "❌ Gönderilecek mentor trace veya Training Lab raporu yok."
     exit 11
 fi
 
@@ -33,24 +34,35 @@ fi
 
 echo "1/4  Uzak repo güncelleniyor..."
 if ! git pull --ff-only; then
-    echo "❌ Git pull başarısız. Mentor kaydı gönderilmedi."
+    echo "❌ Git pull başarısız. Mentor verisi gönderilmedi."
     exit 13
 fi
 
-echo "2/4  Mentor kaydı hazırlanıyor..."
+echo "2/4  Mentor verisi hazırlanıyor..."
 mkdir -p "$ROOT/Mentor"
-cp "$SOURCE" "$DEST"
 
-if [ -z "$(git status --porcelain -- Mentor/latest.json)" ]; then
-    echo "✅ Mentor kaydı zaten güncel."
+FILES=()
+
+if [ -f "$TRACE_SOURCE" ]; then
+    cp "$TRACE_SOURCE" "$TRACE_DEST"
+    FILES+=("Mentor/latest.json")
+fi
+
+if [ -f "$TRAINING_SOURCE" ]; then
+    cp "$TRAINING_SOURCE" "$TRAINING_DEST"
+    FILES+=("Mentor/training-latest.json")
+fi
+
+if [ -z "$(git status --porcelain -- ${FILES[@]})" ]; then
+    echo "✅ Mentor verileri zaten güncel."
     exit 0
 fi
 
-echo "3/4  Mentor kaydı commit ediliyor..."
-git add Mentor/latest.json
+echo "3/4  Mentor verileri commit ediliyor..."
+git add -- ${FILES[@]}
 
-if ! git commit --only Mentor/latest.json -m "Sync KRALI mentor trace"; then
-    echo "❌ Mentor kaydı commit edilemedi."
+if ! git commit -m "Sync KRALI mentor diagnostics" -- ${FILES[@]}; then
+    echo "❌ Mentor verileri commit edilemedi."
     exit 14
 fi
 
@@ -61,5 +73,7 @@ if ! git push origin main; then
 fi
 
 echo ""
-echo "✅ Mentor kaydı GitHub'a aktarıldı."
-echo "📄 Mentor/latest.json"
+echo "✅ Mentor verileri GitHub'a aktarıldı."
+for file in ${FILES[@]}; do
+    echo "📄 $file"
+done
