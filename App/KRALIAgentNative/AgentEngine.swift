@@ -96,6 +96,14 @@ final class AgentEngine: ObservableObject {
                 "Son test: \(report.passed)/\(report.total) geçti • " +
                 "Core \(report.corePassed)/\(report.coreTotal) • " +
                 "North Star \(report.northStarPassed)/\(report.northStarTotal)"
+
+            mentorTraceReady = true
+            if !fileManager.fileExists(
+                atPath: mentorTraceStore.latestURL.path
+            ) {
+                mentorTraceStatus =
+                    "Training Lab raporu hazır • Mentora gönderilebilir"
+            }
         }
 
         log("KRALİ Core hazır")
@@ -870,11 +878,17 @@ final class AgentEngine: ObservableObject {
     func syncMentorTrace() {
         guard !mentorSyncBusy else { return }
 
-        guard fileManager.fileExists(
+        let hasTrace = fileManager.fileExists(
             atPath: mentorTraceStore.latestURL.path
-        ) else {
+        )
+        let hasTrainingReport = fileManager.fileExists(
+            atPath: trainingLabStore.outputURL.path
+        )
+
+        guard hasTrace || hasTrainingReport else {
             mentorTraceReady = false
-            mentorTraceStatus = "Önce KRALİ ile en az bir görev tamamla."
+            mentorTraceStatus =
+                "Önce bir KRALİ görevi veya Training Lab çalıştır."
             return
         }
 
