@@ -20,7 +20,26 @@ Mentor/latest.json
 
 konumuna gönderir.
 
-Böylece kullanıcı ChatGPT'ye sadece **“KRALİ mentor kaydına bak”** diyebilir. ChatGPT private GitHub bağlantısı üzerinden gerçek trace'i okuyup davranış hatasını teşhis edebilir ve kaynak kodu güncelleyebilir.
+Training Lab raporu varsa aynı senkron ayrıca:
+
+```
+Mentor/training-latest.json
+```
+
+dosyasını da gönderir. Bu rapor tek tek kullanıcı testi gerektirmeden Core ve North Star senaryolarının toplu sonucunu içerir.
+
+Böylece kullanıcı ChatGPT'ye sadece **“KRALİ mentor kaydına bak”** diyebilir. ChatGPT private GitHub bağlantısı üzerinden gerçek trace'i ve varsa Training Lab toplu raporunu okuyup davranış hatalarını teşhis edebilir ve kaynak kodu güncelleyebilir.
+
+## Training Lab
+
+Training Lab; araştırma güvenilirliği, marka analizi, genel analiz/çıkarım, bağımsız fikir üretme, dosya görevleri, bağlam, capability gap, güvenlik sınırları ve henüz tamamlanmamış North Star davranışları için yerel senaryolar çalıştırır.
+
+İki skor ayrı tutulur:
+
+- **Core:** bugün güvenilir çalışması gereken temel davranışlar.
+- **North Star:** KRALİ'nin nihai hedefindeki henüz gelişmekte olan genel ajan davranışları.
+
+Başarısız senaryolar hata olarak saklanır; kullanıcı bunları tek tek yeniden üretmek zorunda değildir.
 
 ## Maliyet
 
