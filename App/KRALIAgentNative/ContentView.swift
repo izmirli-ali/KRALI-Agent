@@ -355,13 +355,25 @@ struct ContentView: View {
 
                 sectionTitle("Yerel File Agent")
 
-                Button {
-                    engine.chooseFolder()
-                } label: {
-                    Label(
-                        "Çalışma klasörü seç ve indeksle",
-                        systemImage: "folder.badge.plus"
-                    )
+                HStack {
+                    Button {
+                        engine.chooseFolder()
+                    } label: {
+                        Label(
+                            "Çalışma klasörü seç",
+                            systemImage: "folder.badge.plus"
+                        )
+                    }
+
+                    Button {
+                        engine.indexSelectedFolder()
+                    } label: {
+                        Label(
+                            "Yenile",
+                            systemImage: "arrow.clockwise"
+                        )
+                    }
+                    .disabled(engine.selectedRootURL == nil)
                 }
 
                 if let root = engine.selectedRootURL {
@@ -370,19 +382,16 @@ struct ContentView: View {
                         .foregroundStyle(.secondary)
                         .textSelection(.enabled)
 
-                    HStack {
-                        Label(
-                            "\(engine.indexedFiles.count) dosya",
-                            systemImage: "doc.on.doc"
-                        )
-
-                        Label(
-                            "\(engine.screenshotCount) ekran görüntüsü",
-                            systemImage: "camera.viewfinder"
-                        )
-                    }
-                    .font(.caption)
-                    .foregroundStyle(.secondary)
+                    FlowLayout(
+                        items: [
+                            "Dosya \(engine.indexedFiles.count)",
+                            "Görsel \(engine.imageCount)",
+                            "Video \(engine.videoCount)",
+                            "Proje \(engine.projectCount)",
+                            "Belge \(engine.documentCount)",
+                            "Ekran Görüntüsü \(engine.screenshotCount)"
+                        ]
+                    )
                 } else {
                     Text("Henüz çalışma klasörü seçilmedi.")
                         .font(.caption)
@@ -406,7 +415,7 @@ struct ContentView: View {
                 }
 
                 Text(
-                    "v0.5.1: KRALİ artık GitHub güncellemesini uygulama içinden kontrol edebilir. File Agent güvenlik kuralı korunur: yalnızca seçtiğin klasörün doğrudan içindeki dosyaları taşır, önce onay ister ve son taşıma işlemini geri alabilir."
+                    "v0.6.0: Seçtiğin çalışma klasörü artık uygulama yeniden açılsa da hatırlanır ve otomatik indekslenir. File Agent dosya türlerini özetler, taşıma öncesi aday dosyaları gösterir; onay ve geri alma güvenliği korunur."
                 )
                 .font(.caption2)
                 .foregroundStyle(.orange)
