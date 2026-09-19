@@ -812,7 +812,7 @@ struct ContentView: View {
                 }
 
                 Text(
-                    "v0.7.10: İlk gerçek Web Research provider eklendi. KRALİ artık API anahtarı/token gerektirmeyen bootstrap aramasıyla web kaynaklarını gerçekten bulabiliyor, kaynak kümesini Verifier ile doğruluyor ve sağ panelde açılabilir sonuçlar gösteriyor. Eksik bir capability araştırılabilir durumdaysa KRALİ bunu otomatik alt görev yapıp kaynak aramasını başlatabiliyor."
+                    "v0.7.11: Web Research sağlamlaştırıldı. Açık “web’de araştır / internetten araştır” komutları artık yerel dosya aramasıyla karışmıyor; doğrudan Research rotasına gidiyor. Google → Bing → DuckDuckGo güvenli fallback zinciri eklendi; bir sağlayıcı TLS/parse hatası verirse diğeri otomatik deneniyor. Araştırma komutundaki gereksiz fiiller de sorgudan temizleniyor."
                 )
                 .font(.caption2)
                 .foregroundStyle(.orange)
