@@ -157,7 +157,22 @@ struct AgentVerifier {
                     fallback: "Önce çalışma klasörü seç."
                 )
 
-        case .conversation, .contextSuggestion, .remember, .workMail, .futureCapability, .general:
+        case .workMail, .futureCapability, .general:
+            if !snapshot.unavailableCapabilityIDs.isEmpty {
+                return AgentVerificationResult(
+                    state: .partial,
+                    summary: "Hedef anlaşıldı ve uygulanabilir plan üretildi; ancak gereken capability'lerden en az biri henüz bağlı olmadığı için hedefin tamamı yürütülemedi.",
+                    fallback: nil
+                )
+            }
+
+            return AgentVerificationResult(
+                state: .skipped,
+                summary: "Bu turda doğrulanacak gerçek araç işlemi yok.",
+                fallback: nil
+            )
+
+        case .conversation, .contextSuggestion, .remember:
             return AgentVerificationResult(
                 state: .skipped,
                 summary: "Bu turda doğrulanacak gerçek araç işlemi yok.",
