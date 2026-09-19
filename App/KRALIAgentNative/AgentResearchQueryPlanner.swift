@@ -1,11 +1,23 @@
 import Foundation
 
+struct ResearchFacet: Hashable {
+    let id: String
+    let title: String
+    let query: String
+}
+
 struct ResearchQueryPlan: Hashable {
     let original: String
     let variants: [String]
     let conceptGroups: [[String]]
     let mandatoryConceptGroups: [[String]]
     let preferredDomains: [String]
+    let entityTerms: [String]
+    let facets: [ResearchFacet]
+
+    var isEntityResearch: Bool {
+        !entityTerms.isEmpty
+    }
 }
 
 struct AgentResearchQueryPlanner {
@@ -15,12 +27,120 @@ struct AgentResearchQueryPlanner {
         )
         let normalized = normalize(query)
 
+        let entity = extractEntity(
+            from: query,
+            normalized: normalized
+        )
+        let isBrandResearch =
+            entity != nil &&
+            containsAny(normalized, [
+                "marka", "sirket", "firma", "rakip",
+                "tarihce", "urun", "pazar", "sektor",
+                "guclu", "zayif", "firsat"
+            ])
+
+        if let entity, isBrandResearch {
+            return brandPlan(
+                original: query,
+                entity: entity
+            )
+        }
+
+        return generalPlan(
+            original: query,
+            normalized: normalized
+        )
+    }
+
+    private func brandPlan(
+        original: String,
+        entity: String
+    ) -> ResearchQueryPlan {
+        let normalizedEntity = normalize(entity)
+        let entityAliases = entityAliasTerms(entity)
+
+        let facets = [
+            ResearchFacet(
+                id: "official",
+                title: "Resmi kaynak",
+                query: "\(entity) resmi site şirket"
+            ),
+            ResearchFacet(
+                id: "history",
+                title: "Tarihçe",
+                query: "\(entity) tarihçe kuruluş history"
+            ),
+            ResearchFacet(
+                id: "products",
+                title: "Ürün ve hizmetler",
+                query: "\(entity) ürünler hizmetler products services"
+            ),
+            ResearchFacet(
+                id: "market",
+                title: "Pazar ve rakipler",
+                query: "\(entity) rakipler sektör pazar competitors market"
+            ),
+            ResearchFacet(
+                id: "recent",
+                title: "Güncel gelişmeler",
+                query: "\(entity) haber yatırım üretim güncel news"
+            )
+        ]
+
+        var variants = [
+            original,
+            "\(entity) company overview",
+            "\(entity) official"
+        ]
+        variants.append(
+            contentsOf: facets.map(\.query)
+        )
+
+        var seen = Set<String>()
+        variants = variants.filter {
+            let key = normalize($0)
+            guard !seen.contains(key) else {
+                return false
+            }
+            seen.insert(key)
+            return true
+        }
+
+        let entityGroup = entityAliases.isEmpty
+            ? [normalizedEntity]
+            : entityAliases
+
+        return ResearchQueryPlan(
+            original: original,
+            variants: variants,
+            conceptGroups: [
+                entityGroup,
+                [
+                    "company", "sirket", "firma", "marka",
+                    "group", "holding", "corporation"
+                ]
+            ],
+            mandatoryConceptGroups: [
+                entityGroup
+            ],
+            preferredDomains: [],
+            entityTerms: entityGroup,
+            facets: facets
+        )
+    }
+
+    private func generalPlan(
+        original query: String,
+        normalized: String
+    ) -> ResearchQueryPlan {
         var conceptGroups: [[String]] = []
         var mandatoryConceptGroups: [[String]] = []
         var englishTerms: [String] = []
         var preferredDomains: [String] = []
 
-        if containsAny(normalized, ["macos", "apple", "swift", "ios"]) {
+        if containsAny(normalized, [
+            "macos", "apple", "swift", "ios"
+        ]) {
             let platformGroup = [
                 "macos", "apple", "darwin", "swift"
             ]
@@ -155,8 +275,8 @@ struct AgentResearchQueryPlanner {
         }
 
         var seen = Set<String>()
-        variants = variants.filter { value in
-            let key = normalize(value)
+        variants = variants.filter {
+            let key = normalize($0)
             guard !seen.contains(key) else {
                 return false
             }
@@ -171,8 +291,131 @@ struct AgentResearchQueryPlanner {
             mandatoryConceptGroups: mandatoryConceptGroups,
             preferredDomains: Array(
                 Set(preferredDomains)
-            ).sorted()
+            ).sorted(),
+            entityTerms: [],
+            facets: []
         )
+    }
+
+    private func extractEntity(
+        from original: String,
+        normalized: String
+    ) -> String? {
+        let markers = [
+            " markasını",
+            " markasini",
+            " markası",
+            " markasi",
+            " hakkında",
+            " hakkinda",
+            " şirketini",
+            " sirketini",
+            " şirketi",
+            " sirketi",
+            " firmasını",
+            " firmasini",
+            " firması",
+            " firmasi"
+        ]
+
+        for marker in markers {
+            guard let range = normalized.range(
+                of: marker
+            ) else {
+                continue
+            }
+
+            let prefixLength = normalized.distance(
+                from: normalized.startIndex,
+                to: range.lowerBound
+            )
+
+            let originalIndex = original.index(
+                original.startIndex,
+                offsetBy: min(
+                    prefixLength,
+                    original.count
+                )
+            )
+
+            var candidate = String(
+                original[..<originalIndex]
+            )
+            .trimmingCharacters(
+                in: .whitespacesAndNewlines
+            )
+
+            let removablePrefixes = [
+                "bana ",
+                "şu ",
+                "bu ",
+                "daha önce hiç konuşmadığımız ",
+                "daha once hic konusmadigimiz "
+            ]
+
+            for prefix in removablePrefixes {
+                if normalize(candidate).hasPrefix(
+                    normalize(prefix)
+                ) {
+                    candidate = String(
+                        candidate.dropFirst(
+                            min(
+                                prefix.count,
+                                candidate.count
+                            )
+                        )
+                    )
+                    .trimmingCharacters(
+                        in: .whitespacesAndNewlines
+                    )
+                }
+            }
+
+            if candidate.count >= 2 &&
+               candidate.count <= 80 {
+                return candidate
+            }
+        }
+
+        return nil
+    }
+
+    private func entityAliasTerms(
+        _ entity: String
+    ) -> [String] {
+        let normalized = normalize(entity)
+        var terms = [normalized]
+
+        let compact = normalized.replacingOccurrences(
+            of: " ",
+            with: ""
+        )
+
+        if compact != normalized {
+            terms.append(compact)
+        }
+
+        let alphanumeric = normalized
+            .components(
+                separatedBy: CharacterSet.alphanumerics.inverted
+            )
+            .filter { !$0.isEmpty }
+
+        if alphanumeric.count == 1,
+           let only = alphanumeric.first,
+           only.count >= 3 {
+            terms.append(only)
+        }
+
+        var seen = Set<String>()
+        return terms.filter {
+            guard !$0.isEmpty else { return false }
+            guard !seen.contains($0) else {
+                return false
+            }
+            seen.insert($0)
+            return true
+        }
     }
 
     private func lexicalConcepts(
