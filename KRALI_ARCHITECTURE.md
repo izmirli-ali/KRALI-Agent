@@ -104,6 +104,8 @@ Yerel dosya algısı, güvenli aksiyonlar, intent, tarih çözümleme, bağlam v
 
 **v0.7.3 capability routing + dynamic plans:** File Search / Mail / Premiere gibi isimler Core'un sabit modülleri olmaktan çıkarılmaya başlanır. Ortak capability registry; reasoning, context, file search, metadata, reversible write, perception, research, browser, Premiere ve mail gibi yeteneklerin kullanılabilirliğini ilan eder. Planner ihtiyaç duyduğu capability'lere göre göreve özel, değişken uzunlukta plan oluşturur. Bağlı olmayan capability plan içinde açıkça görünür; Core bunları çalışmış gibi göstermez.
 
+**v0.7.4 capability-aware verification:** Verifier hedefin tamamını değerlendirir. Arama ve kısa liste başarılı olsa bile görev görsel/video içerik değerlendirmesi istiyor ve perception capability bağlı değilse sonuç artık başarı sayılmaz; “kısmi” olarak işaretlenir. Böylece Core, tamamladığı alt görevlerle yerine getiremediği hedefi birbirinden ayırır.
+
 ### 0.8.x — Memory
 Kısa süreli konuşma belleği ile kalıcı kullanıcı tercihlerini ayırma; bağlam özetleme.
 
