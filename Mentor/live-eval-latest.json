@@ -1,0 +1,35 @@
+{
+  "appVersion" : "0.7.19",
+  "createdAt" : "2026-09-19T23:27:54Z",
+  "failed" : 0,
+  "passed" : 2,
+  "probes" : [
+    {
+      "diagnostics" : [
+
+      ],
+      "evidenceCount" : 4,
+      "passed" : true,
+      "probeID" : "brand-grounding",
+      "provider" : "Bing RSS",
+      "query" : "HABAŞ markasını detaylı araştır; tarihçesini, ürünlerini, rakiplerini ve güncel gelişmelerini bul",
+      "sourceCount" : 6,
+      "title" : "Marka araştırması / entity grounding",
+      "uniqueDomainCount" : 6
+    },
+    {
+      "diagnostics" : [
+
+      ],
+      "evidenceCount" : 2,
+      "passed" : true,
+      "probeID" : "technical-official",
+      "provider" : "DuckDuckGo HTML",
+      "query" : "macOS üzerinde video içeriği analizi için kullanılabilecek teknolojileri ve frameworkleri araştır",
+      "sourceCount" : 2,
+      "title" : "Teknik araştırma / resmi kaynak",
+      "uniqueDomainCount" : 1
+    }
+  ],
+  "total" : 2
+}
