@@ -110,6 +110,8 @@ Yerel dosya algısı, güvenli aksiyonlar, intent, tarih çözümleme, bağlam v
 
 **v0.7.6 capability-derived route:** Görünür ve iç operasyon rotası legacy intent etiketlerinden ayrılır. Route Builder; Goal Contract, seçilen capability’ler ve doğrulama ihtiyacından Core → Goal → Context → Plan → capability stages → Verify → Response zincirini dinamik kurar. Alt seviye executor fonksiyonları artık üst seviye reasoning rotasını ezemez.
 
+**v0.7.7 plan fidelity / blocked capabilities:** Plan adımlarının durumu capability readiness ile bağlanır. Bağlı olmayan bir capability gerektiren action “completed” olamaz; `blocked` durumda kalır. Eksik capability bulunan görevler zorunlu olarak Verifier'dan geçer ve hedef bütünü tamamlanmadıysa `partial` sonucuna düşer. Böylece UI, Planner ve gerçek çalışma kabiliyeti aynı gerçeği taşır.
+
 ### 0.8.x — Memory
 Kısa süreli konuşma belleği ile kalıcı kullanıcı tercihlerini ayırma; bağlam özetleme.
 
