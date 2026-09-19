@@ -15,6 +15,8 @@ final class AgentEngine: ObservableObject {
     @Published var indexedFiles: [FileRecord] = []
     @Published var pendingFileAction: PendingFileAction?
     @Published var lastUndoAction: UndoFileAction?
+    @Published var fileSearchResults: [FileRecord] = []
+    @Published var fileSearchTitle = ""
 
     @Published var voiceOutputEnabled = true
     @Published var busy = false
@@ -81,6 +83,10 @@ final class AgentEngine: ObservableObject {
 
         if isScreenshotOrganizeIntent(t) {
             return prepareScreenshotOrganizeAction()
+        }
+
+        if isFileSearchIntent(t) {
+            return searchIndexedFiles(for: text)
         }
 
         if containsAny(t, ["17:55", "mail"]) {
@@ -238,6 +244,123 @@ final class AgentEngine: ObservableObject {
         selectedRootURL = URL(fileURLWithPath: path, isDirectory: true)
         indexSelectedFolder()
         log("Çalışma klasörü geri yüklendi: \(selectedRootURL?.lastPathComponent ?? path)")
+    }
+
+    // MARK: - Local File Search
+
+    func revealFile(_ file: FileRecord) {
+        guard fileManager.fileExists(atPath: file.url.path) else {
+            log("Finder'da gösterilemedi: dosya artık mevcut değil")
+            return
+        }
+
+        NSWorkspace.shared.activateFileViewerSelecting([file.url])
+        log("Finder'da gösterildi: \(file.name)")
+    }
+
+    private func isFileSearchIntent(_ text: String) -> Bool {
+        let actionWords = [
+            "bul", "ara", "göster", "listele",
+            "nerede", "hangileri", "hangi dosya"
+        ]
+
+        let fileWords = [
+            "dosya", "pdf", "video", "görsel", "gorsel",
+            "resim", "fotoğraf", "fotograf", "proje",
+            "belge", "doküman", "dokuman", "logo",
+            "ekran görünt", "ekran gorunt", "ekran resmi"
+        ]
+
+        return containsAny(text, actionWords) && containsAny(text, fileWords)
+    }
+
+    private func searchIndexedFiles(for rawText: String) -> String {
+        activeRoute = ["Core", "File Memory", "File Search"]
+
+        guard selectedRootURL != nil else {
+            fileSearchResults = []
+            fileSearchTitle = ""
+            return "Önce bir çalışma klasörü seç. Aramayı yalnızca seçtiğin klasörün indeksinde yapacağım."
+        }
+
+        indexSelectedFolder()
+
+        let text = normalize(rawText)
+        let imageExtensions = Set(["png", "jpg", "jpeg", "heic", "tif", "tiff", "webp", "gif"])
+        let videoExtensions = Set(["mov", "mp4", "m4v", "avi", "mkv", "webm", "mts", "m2ts"])
+        let projectExtensions = Set(["prproj", "aep", "psd", "ai", "indd", "fcpxml"])
+        let documentExtensions = Set(["pdf", "doc", "docx", "txt", "rtf", "md", "pages", "numbers", "key"])
+
+        var title = "Dosya araması"
+        var results: [FileRecord]
+
+        if containsAny(text, ["ekran görünt", "ekran gorunt", "ekran resmi", "screenshot", "screen shot"]) {
+            title = "Ekran görüntüleri"
+            results = indexedFiles.filter(\.isScreenshot)
+        } else if text.contains("pdf") {
+            title = "PDF dosyaları"
+            results = indexedFiles.filter { $0.fileExtension == "pdf" }
+        } else if containsAny(text, ["video", "videolar"]) {
+            title = "Video dosyaları"
+            results = indexedFiles.filter { videoExtensions.contains($0.fileExtension) }
+        } else if containsAny(text, ["görsel", "gorsel", "resim", "fotoğraf", "fotograf"]) {
+            title = "Görsel dosyaları"
+            results = indexedFiles.filter { imageExtensions.contains($0.fileExtension) }
+        } else if containsAny(text, ["proje", "project"]) {
+            title = "Proje dosyaları"
+            results = indexedFiles.filter { projectExtensions.contains($0.fileExtension) }
+        } else if containsAny(text, ["belge", "doküman", "dokuman"]) {
+            title = "Belge dosyaları"
+            results = indexedFiles.filter { documentExtensions.contains($0.fileExtension) }
+        } else {
+            let query = fileNameQuery(from: text)
+            title = query.isEmpty ? "Dosya araması" : "“\(query)” araması"
+
+            if query.isEmpty {
+                results = indexedFiles
+            } else {
+                let tokens = query.split(separator: " ").map(String.init)
+                results = indexedFiles.filter { file in
+                    let name = normalize(file.name)
+                    return tokens.allSatisfy { name.contains($0) }
+                }
+            }
+        }
+
+        fileSearchResults = results
+        fileSearchTitle = title
+
+        log("Yerel dosya araması: \(title)")
+        log("\(results.count) eşleşme bulundu")
+
+        guard !results.isEmpty else {
+            return "\(title) için eşleşme bulamadım."
+        }
+
+        let preview = results.prefix(5).map(\.name).joined(separator: ", ")
+        let extra = results.count > 5 ? " ve \(results.count - 5) dosya daha" : ""
+
+        return "\(results.count) eşleşme buldum: \(preview)\(extra). Sağdaki sonuçlardan istediğini Finder'da gösterebilirsin."
+    }
+
+    private func fileNameQuery(from text: String) -> String {
+        var cleaned = text
+
+        let stopPhrases = [
+            "bana", "şu", "bu", "dosyayı", "dosyaları", "dosya",
+            "bul", "ara", "göster", "listele", "nerede",
+            "klasördeki", "klasörde", "seçili", "çalışma",
+            "içindeki", "olan", "var mı", "varmi", "lütfen"
+        ]
+
+        for phrase in stopPhrases {
+            cleaned = cleaned.replacingOccurrences(of: phrase, with: " ")
+        }
+
+        return cleaned
+            .split(whereSeparator: { $0.isWhitespace })
+            .joined(separator: " ")
+            .trimmingCharacters(in: .whitespacesAndNewlines)
     }
 
     // MARK: - Real File Actions
@@ -536,15 +659,19 @@ final class AgentEngine: ObservableObject {
         let t = normalize(text)
         var modules = ["Core"]
 
-        if containsAny(t, ["dosya", "klasör", "çekim", "bul", "logo", "arşiv", "masaüst", "masaustu", "ekran görünt", "ekran gorunt", "ekran resmi", "toparla", "taşı", "tasi"]) {
+        if containsAny(t, ["dosya", "klasör", "çekim", "bul", "ara", "göster", "listele", "logo", "arşiv", "masaüst", "masaustu", "ekran görünt", "ekran gorunt", "ekran resmi", "toparla", "taşı", "tasi"]) {
             modules.append("File Memory")
+        }
+
+        if isFileSearchIntent(t) {
+            modules.append("File Search")
         }
 
         if isScreenshotOrganizeIntent(t) || pendingFileAction != nil {
             modules.append("File Actions")
         }
 
-        if containsAny(t, ["reels", "video", "kurgu", "premiere", "altyaz", "export", "sequence"]) {
+        if !isFileSearchIntent(t) && containsAny(t, ["reels", "video", "kurgu", "premiere", "altyaz", "export", "sequence"]) {
             modules += ["Director", "Premiere"]
         }
 
