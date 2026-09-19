@@ -22,12 +22,14 @@ final class AgentEngine: ObservableObject {
     let speech = SpeechController()
 
     private let memoryKey = "krali.native.memories.v1"
+    private let selectedRootKey = "krali.native.selectedRootPath.v1"
     private let fileManager = FileManager.default
 
     init() {
         loadMemory()
         log("KRALİ Core hazır")
         log("Otomatik alt-modül yönlendirme aktif")
+        restoreSelectedFolder()
     }
 
     // MARK: - Chat
@@ -146,6 +148,7 @@ final class AgentEngine: ObservableObject {
         guard panel.runModal() == .OK, let url = panel.url else { return }
 
         selectedRootURL = url
+        UserDefaults.standard.set(url.path, forKey: selectedRootKey)
         pendingFileAction = nil
         lastUndoAction = nil
         indexSelectedFolder()
@@ -199,6 +202,44 @@ final class AgentEngine: ObservableObject {
         indexedFiles.filter(\.isScreenshot).count
     }
 
+    var imageCount: Int {
+        let extensions = Set(["png", "jpg", "jpeg", "heic", "tif", "tiff", "webp", "gif"])
+        return indexedFiles.filter { extensions.contains($0.fileExtension) }.count
+    }
+
+    var videoCount: Int {
+        let extensions = Set(["mov", "mp4", "m4v", "avi", "mkv", "webm", "mts", "m2ts"])
+        return indexedFiles.filter { extensions.contains($0.fileExtension) }.count
+    }
+
+    var projectCount: Int {
+        let extensions = Set(["prproj", "aep", "psd", "ai", "indd", "fcpxml"])
+        return indexedFiles.filter { extensions.contains($0.fileExtension) }.count
+    }
+
+    var documentCount: Int {
+        let extensions = Set(["pdf", "doc", "docx", "txt", "rtf", "md", "pages", "numbers", "key"])
+        return indexedFiles.filter { extensions.contains($0.fileExtension) }.count
+    }
+
+    private func restoreSelectedFolder() {
+        guard let path = UserDefaults.standard.string(forKey: selectedRootKey),
+              !path.isEmpty else {
+            return
+        }
+
+        var isDirectory: ObjCBool = false
+        guard fileManager.fileExists(atPath: path, isDirectory: &isDirectory),
+              isDirectory.boolValue else {
+            UserDefaults.standard.removeObject(forKey: selectedRootKey)
+            return
+        }
+
+        selectedRootURL = URL(fileURLWithPath: path, isDirectory: true)
+        indexSelectedFolder()
+        log("Çalışma klasörü geri yüklendi: \(selectedRootURL?.lastPathComponent ?? path)")
+    }
+
     // MARK: - Real File Actions
 
     private func prepareScreenshotOrganizeAction() -> String {
@@ -220,9 +261,17 @@ final class AgentEngine: ObservableObject {
 
         let destination = root.appendingPathComponent("Ekran Görüntüleri", isDirectory: true)
 
+        let preview = screenshots
+            .prefix(5)
+            .map { "• \($0.name)" }
+            .joined(separator: "\n")
+
+        let extraCount = max(0, screenshots.count - 5)
+        let extraLine = extraCount > 0 ? "\n… ve \(extraCount) dosya daha" : ""
+
         pendingFileAction = PendingFileAction(
             title: "Ekran görüntülerini toparla",
-            detail: "\(screenshots.count) ekran görüntüsü “Ekran Görüntüleri” klasörüne taşınacak.",
+            detail: "\(screenshots.count) ekran görüntüsü “Ekran Görüntüleri” klasörüne taşınacak.\n\n\(preview)\(extraLine)",
             sourceURLs: screenshots.map(\.url),
             destinationFolderURL: destination
         )
@@ -230,7 +279,12 @@ final class AgentEngine: ObservableObject {
         log("\(screenshots.count) ekran görüntüsü bulundu")
         log("Gerçek dosya taşıma işlemi onay bekliyor")
 
-        return "\(screenshots.count) ekran görüntüsü buldum. “Ekran Görüntüleri” klasörü oluşturup hepsini içine taşıyacağım. Onaylıyor musun?"
+        let sampleNames = screenshots
+            .prefix(3)
+            .map(\.name)
+            .joined(separator: ", ")
+
+        return "\(screenshots.count) ekran görüntüsü buldum. İlk adaylar: \(sampleNames). “Ekran Görüntüleri” klasörüne taşımak için onayını bekliyorum."
     }
 
     func approvePendingFileAction() -> String {
