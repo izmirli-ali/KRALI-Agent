@@ -1,4 +1,5 @@
 import Foundation
+import AppKit
 
 @MainActor
 final class UpdateController: ObservableObject {
@@ -119,7 +120,12 @@ final class UpdateController: ObservableObject {
             process.arguments = ["-lc", command]
             try process.run()
 
-            statusText = "Updater çalışıyor…"
+            statusText = "KRALİ kapanacak; güncelleme bitince yeniden açılacak…"
+
+            Task {
+                try? await Task.sleep(for: .milliseconds(700))
+                NSApplication.shared.terminate(nil)
+            }
         } catch {
             isLaunchingUpdate = false
             statusText = "Updater başlatılamadı"
