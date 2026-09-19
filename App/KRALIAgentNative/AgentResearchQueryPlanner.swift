@@ -87,13 +87,13 @@ struct AgentResearchQueryPlanner {
             )
         ]
 
-        var variants = [
-            original,
-            "\(entity) company overview",
-            "\(entity) official"
-        ]
+        var variants = facets.map(\.query)
         variants.append(
-            contentsOf: facets.map(\.query)
+            contentsOf: [
+                original,
+                "\(entity) company overview",
+                "\(entity) official"
+            ]
         )
 
         var seen = Set<String>()
