@@ -5,6 +5,7 @@ struct AgentPlanner {
         decision: AgentDecision,
         context: AgentContextSnapshot,
         capabilities: [AgentCapability],
+        learningPlans: [CapabilityLearningPlan],
         goal: AgentGoalProfile
     ) -> AgentExecutionPlan {
         var steps: [AgentExecutionStep] = [
@@ -263,6 +264,23 @@ struct AgentPlanner {
                 )
             ]
             fallback = decision.alternatives.first
+        }
+
+        if !learningPlans.isEmpty {
+            let learningStep = AgentExecutionStep(
+                title: "Yetkinlik edinme planı oluştur",
+                detail: "Eksik capability için araştırma hedefini, ön koşulları, prototip/test yolunu ve etkinleştirme onayını çıkar.",
+                kind: .reasoning,
+                capabilityID: "core.reasoning"
+            )
+
+            if let verificationIndex = steps.firstIndex(
+                where: { $0.kind == .verification }
+            ) {
+                steps.insert(learningStep, at: verificationIndex)
+            } else {
+                steps.append(learningStep)
+            }
         }
 
         let hasUnavailableCapability = capabilities.contains {
