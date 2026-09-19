@@ -28,6 +28,7 @@
 		A10000000000000000000019 /* AgentWebSourceReader.swift in Sources */ = {isa = PBXBuildFile; fileRef = B10000000000000000000019 /* AgentWebSourceReader.swift */; };
 		A10000000000000000000020 /* MentorTraceStore.swift in Sources */ = {isa = PBXBuildFile; fileRef = B10000000000000000000020 /* MentorTraceStore.swift */; };
 		A10000000000000000000021 /* AgentTrainingLab.swift in Sources */ = {isa = PBXBuildFile; fileRef = B10000000000000000000021 /* AgentTrainingLab.swift */; };
+		A10000000000000000000022 /* AgentLocalIntelligence.swift in Sources */ = {isa = PBXBuildFile; fileRef = B10000000000000000000022 /* AgentLocalIntelligence.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
@@ -53,6 +54,7 @@
 		B10000000000000000000019 /* AgentWebSourceReader.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AgentWebSourceReader.swift; sourceTree = "<group>"; };
 		B10000000000000000000020 /* MentorTraceStore.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MentorTraceStore.swift; sourceTree = "<group>"; };
 		B10000000000000000000021 /* AgentTrainingLab.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AgentTrainingLab.swift; sourceTree = "<group>"; };
+		B10000000000000000000022 /* AgentLocalIntelligence.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AgentLocalIntelligence.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -98,6 +100,7 @@
 				B10000000000000000000019 /* AgentWebSourceReader.swift */,
 				B10000000000000000000020 /* MentorTraceStore.swift */,
 				B10000000000000000000021 /* AgentTrainingLab.swift */,
+				B10000000000000000000022 /* AgentLocalIntelligence.swift */,
 			);
 			path = KRALIAgentNative;
 			sourceTree = "<group>";
@@ -200,6 +203,7 @@
 				A10000000000000000000019 /* AgentWebSourceReader.swift in Sources */,
 				A10000000000000000000020 /* MentorTraceStore.swift in Sources */,
 				A10000000000000000000021 /* AgentTrainingLab.swift in Sources */,
+				A10000000000000000000022 /* AgentLocalIntelligence.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -237,7 +241,7 @@
 				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
 				CODE_SIGN_STYLE = Automatic;
 				COMBINE_HIDPI_IMAGES = YES;
-				CURRENT_PROJECT_VERSION = 37;
+				CURRENT_PROJECT_VERSION = 38;
 				DEVELOPMENT_TEAM = 65244UMFCK;
 				ENABLE_HARDENED_RUNTIME = NO;
 				ENABLE_PREVIEWS = YES;
@@ -252,7 +256,7 @@
 					"@executable_path/../Frameworks",
 				);
 				MACOSX_DEPLOYMENT_TARGET = 14.0;
-				MARKETING_VERSION = 0.7.17;
+				MARKETING_VERSION = 0.7.18;
 				PRODUCT_BUNDLE_IDENTIFIER = com.aliihsancanuysal.kraliagent;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				SDKROOT = macosx;
@@ -268,7 +272,7 @@
 				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
 				CODE_SIGN_STYLE = Automatic;
 				COMBINE_HIDPI_IMAGES = YES;
-				CURRENT_PROJECT_VERSION = 37;
+				CURRENT_PROJECT_VERSION = 38;
 				DEVELOPMENT_TEAM = 65244UMFCK;
 				ENABLE_HARDENED_RUNTIME = NO;
 				GENERATE_INFOPLIST_FILE = YES;
@@ -282,7 +286,7 @@
 					"@executable_path/../Frameworks",
 				);
 				MACOSX_DEPLOYMENT_TARGET = 14.0;
-				MARKETING_VERSION = 0.7.17;
+				MARKETING_VERSION = 0.7.18;
 				PRODUCT_BUNDLE_IDENTIFIER = com.aliihsancanuysal.kraliagent;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				SDKROOT = macosx;
