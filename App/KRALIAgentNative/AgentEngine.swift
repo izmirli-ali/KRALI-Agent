@@ -106,9 +106,25 @@ final class AgentEngine: ObservableObject {
             }
         }
 
+        let currentVersion = Bundle.main.object(
+            forInfoDictionaryKey: "CFBundleShortVersionString"
+        ) as? String ?? "unknown"
+
+        let shouldAutoRunTrainingLab =
+            trainingLabReport?.appVersion != currentVersion
+
         log("KRALİ Core hazır")
         log("Dinamik hedef ve kabiliyet yönlendirme aktif")
         restoreSelectedFolder()
+
+        if shouldAutoRunTrainingLab {
+            Task { @MainActor [weak self] in
+                try? await Task.sleep(
+                    for: .milliseconds(650)
+                )
+                self?.runTrainingLab()
+            }
+        }
     }
 
     // MARK: - Chat
