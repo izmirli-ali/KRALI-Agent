@@ -155,6 +155,10 @@ Yerel modelin rolü Executor veya Verifier olmak değildir. Model; doğrulanmı�
 
 Ayrıca statik Training Lab'den ayrı **Live Research Eval** eklenir. Her yeni sürümde gerçek internet üzerinden en az bir marka/entity araştırması ve bir teknik/resmi-dokümantasyon araştırması çalıştırılır. Kaynak sayısı, derin okuma kanıtı ve domain çeşitliliği ölçülür; sonuç `live-eval-latest.json` olarak Mentor Bridge'e eklenir. Böylece regression yalnızca “doğru rota seçildi mi?” değil, gerçek dünyada araştırma provider'ları ve evidence pipeline'ı gerçekten çalışıyor mu sorusunu da test eder.
 
+**v0.7.20 Developer Agent / isolated auto-fix loop:** Geliştirme hattına Cline tabanlı yardımcı coding agent eklenir; bu katman KRALİ'nin runtime zekası değil, KRALİ'yi geliştiren ayrı bir developer worker'dır. Diagnostic önceliği Live Research Eval → güncel Mentor trace → Training Lab regression → capability gap sırasındadır. Developer Agent her turda `origin/main` üzerinden ayrı `krali-dev-agent/<timestamp>` branch ve worktree açar, main üzerinde doğrudan değişiklik yapmaz.
+
+Varsayılan provider/model `cline + nvidia/nemotron-3.5-lightning` olarak sabitlenir; bu model Cline tarafından ücretsiz sunulduğu sürece ek AI ücreti gerektirmez. Workflow ücretli modele sessizce geçmez. Cline'ın komut yetkileri sınırlandırılır; `sudo`, destructive reset/clean, `git push` ve uygulama açma gibi komutlar agent'a verilmez. Aday değişiklik daha sonra KRALİ'nin kendi `Scripts/build-check.command` doğrulamasından geçirilir. Build başarılıysa yalnızca aday branch GitHub'a push edilir; main'e merge otomatik değildir ve Mentor incelemesi beklenir. Diagnostic'ler tamamen yeşilse agent'ın sırf değişiklik üretmek için kodu kurcalamaması temel kuraldır.
+
 ### 0.8.x — Memory
 Kısa süreli konuşma belleği ile kalıcı kullanıcı tercihlerini ayırma; bağlam özetleme.
 
