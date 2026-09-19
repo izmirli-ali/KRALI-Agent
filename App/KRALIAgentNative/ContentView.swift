@@ -90,7 +90,7 @@ struct ContentView: View {
                     Text("KRALİ")
                         .font(.headline)
 
-                    Text("Görevi söyle; gereken alt modülleri KRALİ seçer.")
+                    Text("Hedefi söyle; KRALİ gerekli kabiliyetleri seçer ve yolu kendisi kurar.")
                         .font(.caption)
                         .foregroundStyle(.secondary)
                 }
@@ -302,7 +302,8 @@ struct ContentView: View {
                                 Image(systemName: step.state.systemImage)
                                     .font(.caption)
                                     .foregroundStyle(
-                                        step.state == .attention
+                                        (step.state == .attention ||
+                                         step.state == .partial)
                                             ? Color.orange
                                             : Color.secondary
                                     )
@@ -323,7 +324,8 @@ struct ContentView: View {
                         HStack(alignment: .top, spacing: 7) {
                             Image(systemName: engine.verificationState.systemImage)
                                 .foregroundStyle(
-                                    engine.verificationState == .attention
+                                    (engine.verificationState == .attention ||
+                                     engine.verificationState == .partial)
                                         ? Color.orange
                                         : Color.secondary
                                 )
@@ -378,7 +380,43 @@ struct ContentView: View {
                 .clipShape(RoundedRectangle(cornerRadius: 10))
 
                 sectionTitle("Aktif rota")
-                FlowLayout(items: engine.activeRoute)
+                LazyVGrid(
+                    columns: [
+                        GridItem(
+                            .adaptive(minimum: 72),
+                            spacing: 6,
+                            alignment: .leading
+                        )
+                    ],
+                    alignment: .leading,
+                    spacing: 6
+                ) {
+                    ForEach(engine.activeRoute, id: \.self) { item in
+                        Text(item)
+                            .font(.caption2)
+                            .lineLimit(1)
+                            .minimumScaleFactor(0.8)
+                            .padding(.horizontal, 8)
+                            .padding(.vertical, 5)
+                            .frame(
+                                maxWidth: .infinity,
+                                alignment: .leading
+                            )
+                            .background(
+                                Color.accentColor.opacity(0.12)
+                            )
+                            .overlay(
+                                RoundedRectangle(cornerRadius: 8)
+                                    .stroke(
+                                        Color.accentColor.opacity(0.28),
+                                        lineWidth: 1
+                                    )
+                            )
+                            .clipShape(
+                                RoundedRectangle(cornerRadius: 8)
+                            )
+                    }
+                }
 
                 if let action = engine.pendingFileAction {
                     sectionTitle("Onay bekleyen gerçek işlem")
@@ -651,7 +689,7 @@ struct ContentView: View {
                 }
 
                 Text(
-                    "v0.7.3: Sabit modül mantığından capability mimarisine geçiş başladı. KRALİ her görevde ihtiyaç duyduğu kabiliyetleri ayrı seçer; Planner artık her turda aynı dört adımı göstermiyor, görevin yapısına göre değişken sayıda adım kuruyor. Bağlı olmayan görsel algı, web, Premiere veya mail gibi yetenekler de uydurulmadan “henüz bağlı değil” olarak görünür."
+                    "v0.7.4: Capability-aware doğrulama eklendi. Bir görevin bazı adımları tamamlanıp gerekli bir kabiliyet eksikse KRALİ artık “tamamlandı” demez; sonucu “kısmi” olarak işaretler ve hangi kısmın doğrulanamadığını açıklar. Eski “alt modül” dili kaldırıldı; aktif rota görünümü dar panelde daha okunur hale getirildi."
                 )
                 .font(.caption2)
                 .foregroundStyle(.orange)
