@@ -165,43 +165,65 @@ final class AgentEngine: ObservableObject {
     func indexSelectedFolder() {
         guard let root = selectedRootURL else { return }
 
-        do {
-            let urls = try fileManager.contentsOfDirectory(
-                at: root,
-                includingPropertiesForKeys: [.isRegularFileKey, .isDirectoryKey],
-                options: [.skipsHiddenFiles]
-            )
+        let keys: [URLResourceKey] = [
+            .isRegularFileKey,
+            .creationDateKey,
+            .contentModificationDateKey
+        ]
 
-            let records = urls.compactMap { url -> FileRecord? in
-                do {
-                    let values = try url.resourceValues(forKeys: [.isRegularFileKey])
-                    guard values.isRegularFile == true else { return nil }
+        guard let enumerator = fileManager.enumerator(
+            at: root,
+            includingPropertiesForKeys: keys,
+            options: [.skipsHiddenFiles, .skipsPackageDescendants]
+        ) else {
+            indexedFiles = []
+            log("Klasör indekslenemedi")
+            return
+        }
 
-                    let name = url.lastPathComponent
-                    let ext = url.pathExtension.lowercased()
+        var records: [FileRecord] = []
+        let maxFiles = 5000
 
-                    return FileRecord(
+        for case let url as URL in enumerator {
+            if records.count >= maxFiles {
+                log("İndeks güvenlik sınırına ulaştı: \(maxFiles) dosya")
+                break
+            }
+
+            do {
+                let values = try url.resourceValues(forKeys: Set(keys))
+                guard values.isRegularFile == true else { continue }
+
+                let name = url.lastPathComponent
+                let ext = url.pathExtension.lowercased()
+                let relativePath = url.path.replacingOccurrences(
+                    of: root.path + "/",
+                    with: ""
+                )
+
+                records.append(
+                    FileRecord(
                         url: url,
                         name: name,
-                        relativePath: name,
+                        relativePath: relativePath,
                         fileExtension: ext,
-                        isScreenshot: isScreenshotFileName(name, extension: ext)
+                        isScreenshot: isScreenshotFileName(name, extension: ext),
+                        creationDate: values.creationDate,
+                        modificationDate: values.contentModificationDate
                     )
-                } catch {
-                    return nil
-                }
+                )
+            } catch {
+                continue
             }
-            .sorted { $0.name.localizedStandardCompare($1.name) == .orderedAscending }
-
-            indexedFiles = records
-
-            let screenshotCount = records.filter(\.isScreenshot).count
-            log("\(records.count) doğrudan dosya indekslendi")
-            log("\(screenshotCount) ekran görüntüsü adayı bulundu")
-        } catch {
-            indexedFiles = []
-            log("Klasör indekslenemedi: \(error.localizedDescription)")
         }
+
+        indexedFiles = records.sorted {
+            $0.relativePath.localizedStandardCompare($1.relativePath) == .orderedAscending
+        }
+
+        let screenshotCount = indexedFiles.filter(\.isScreenshot).count
+        log("\(indexedFiles.count) dosya alt klasörlerle birlikte indekslendi")
+        log("\(screenshotCount) ekran görüntüsü adayı bulundu")
     }
 
     var screenshotCount: Int {
@@ -277,10 +299,10 @@ final class AgentEngine: ObservableObject {
     private func searchIndexedFiles(for rawText: String) -> String {
         activeRoute = ["Core", "File Memory", "File Search"]
 
-        guard selectedRootURL != nil else {
+        guard let root = selectedRootURL else {
             fileSearchResults = []
             fileSearchTitle = ""
-            return "Önce bir çalışma klasörü seç. Aramayı yalnızca seçtiğin klasörün indeksinde yapacağım."
+            return "Önce bir çalışma klasörü seç. Aramayı seçtiğin klasör ve alt klasörlerinde yapacağım."
         }
 
         indexSelectedFolder()
@@ -294,7 +316,13 @@ final class AgentEngine: ObservableObject {
         var title = "Dosya araması"
         var results: [FileRecord]
 
-        if containsAny(text, ["ekran görünt", "ekran gorunt", "ekran resmi", "screenshot", "screen shot"]) {
+        if let requestedDate = turkishDayMonth(from: text) {
+            title = "\(requestedDate.day) \(requestedDate.monthName) tarihli dosyalar"
+            results = indexedFiles.filter {
+                matches(day: requestedDate.day, month: requestedDate.month, date: $0.modificationDate) ||
+                matches(day: requestedDate.day, month: requestedDate.month, date: $0.creationDate)
+            }
+        } else if containsAny(text, ["ekran görünt", "ekran gorunt", "ekran resmi", "screenshot", "screen shot"]) {
             title = "Ekran görüntüleri"
             results = indexedFiles.filter(\.isScreenshot)
         } else if text.contains("pdf") {
@@ -322,7 +350,8 @@ final class AgentEngine: ObservableObject {
                 let tokens = query.split(separator: " ").map(String.init)
                 results = indexedFiles.filter { file in
                     let name = normalize(file.name)
-                    return tokens.allSatisfy { name.contains($0) }
+                    let path = normalize(file.relativePath)
+                    return tokens.allSatisfy { name.contains($0) || path.contains($0) }
                 }
             }
         }
@@ -333,24 +362,71 @@ final class AgentEngine: ObservableObject {
         log("Yerel dosya araması: \(title)")
         log("\(results.count) eşleşme bulundu")
 
+        let askedForWholeComputer = containsAny(
+            text,
+            ["bilgisayarımda", "bilgisayarimda", "mac'imde", "macimde", "tüm bilgisayar", "tum bilgisayar"]
+        )
+
+        let scopeNote = askedForWholeComputer
+            ? "Not: Bu sürüm henüz tüm Mac’i değil, seçili “\(root.lastPathComponent)” klasörü ve alt klasörlerini tarıyor. "
+            : ""
+
         guard !results.isEmpty else {
-            return "\(title) için eşleşme bulamadım."
+            return scopeNote + "\(title) için eşleşme bulamadım."
         }
 
         let preview = results.prefix(5).map(\.name).joined(separator: ", ")
         let extra = results.count > 5 ? " ve \(results.count - 5) dosya daha" : ""
 
-        return "\(results.count) eşleşme buldum: \(preview)\(extra). Sağdaki sonuçlardan istediğini Finder'da gösterebilirsin."
+        return scopeNote + "\(results.count) eşleşme buldum: \(preview)\(extra). Sağdaki sonuçlardan istediğini Finder'da gösterebilirsin."
+    }
+
+    private func turkishDayMonth(from text: String) -> (day: Int, month: Int, monthName: String)? {
+        let months: [(name: String, number: Int)] = [
+            ("ocak", 1), ("şubat", 2), ("subat", 2), ("mart", 3),
+            ("nisan", 4), ("mayıs", 5), ("mayis", 5), ("haziran", 6),
+            ("temmuz", 7), ("ağustos", 8), ("agustos", 8),
+            ("eylül", 9), ("eylul", 9), ("ekim", 10),
+            ("kasım", 11), ("kasim", 11), ("aralık", 12), ("aralik", 12)
+        ]
+
+        for month in months where text.contains(month.name) {
+            let tokens = text
+                .replacingOccurrences(of: month.name, with: " \(month.name) ")
+                .split(whereSeparator: { $0.isWhitespace || $0.isPunctuation })
+                .map(String.init)
+
+            guard let monthIndex = tokens.firstIndex(of: month.name) else { continue }
+
+            let candidateIndexes = [monthIndex - 1, monthIndex + 1]
+            for index in candidateIndexes where tokens.indices.contains(index) {
+                if let day = Int(tokens[index]), (1...31).contains(day) {
+                    return (day, month.number, month.name)
+                }
+            }
+        }
+
+        return nil
+    }
+
+    private func matches(day: Int, month: Int, date: Date?) -> Bool {
+        guard let date else { return false }
+        let components = Calendar.current.dateComponents([.day, .month], from: date)
+        return components.day == day && components.month == month
     }
 
     private func fileNameQuery(from text: String) -> String {
         var cleaned = text
 
         let stopPhrases = [
-            "bana", "şu", "bu", "dosyayı", "dosyaları", "dosya",
-            "bul", "ara", "göster", "listele", "nerede",
-            "klasördeki", "klasörde", "seçili", "çalışma",
-            "içindeki", "olan", "var mı", "varmi", "lütfen"
+            "bana", "şu", "bu", "bir", "vardı", "vardi", "onu",
+            "dosyayı", "dosyalari", "dosyaları", "dosya",
+            "bul", "ara", "göster", "goster", "listele", "nerede",
+            "klasördeki", "klasordeki", "klasörde", "klasorde",
+            "seçili", "secili", "çalışma", "calisma",
+            "içindeki", "icindeki", "olan", "tarihli",
+            "bilgisayarımda", "bilgisayarimda",
+            "var mı", "varmi", "lütfen", "lutfen"
         ]
 
         for phrase in stopPhrases {
@@ -375,7 +451,10 @@ final class AgentEngine: ObservableObject {
 
         indexSelectedFolder()
 
-        let screenshots = indexedFiles.filter(\.isScreenshot)
+        let screenshots = indexedFiles.filter {
+            $0.isScreenshot &&
+            $0.url.deletingLastPathComponent().standardizedFileURL == root.standardizedFileURL
+        }
 
         guard !screenshots.isEmpty else {
             log("Ekran görüntüsü bulunamadı")
