@@ -126,6 +126,8 @@ Yerel dosya algısı, güvenli aksiyonlar, intent, tarih çözümleme, bağlam v
 
 **v0.7.13 semantic research query planner:** Araştırma sorgusu yüzey kelimeleriyle bırakılmaz. Ayrı Query Planner, platform/medya/analiz/framework gibi kavram gruplarını çıkarır, gerektiğinde İngilizce teknik ve resmi dokümantasyon varyantları üretir ve tercih edilen resmi domainleri belirler. Research scorer bir sonucun yalnızca tek güçlü kelimeyi (ör. “macOS”) taşımasını yeterli saymaz; en az iki bağımsız kavram grubunu karşılamasını ister. Böylece genel macOS haber/indirme sayfaları gibi tematik olarak alakasız sonuçlar elenir.
 
+**v0.7.14 deep source reader / evidence layer:** Research artık arama sonucunun başlığını doğruluk kanıtı saymaz. En alakalı kaynakların sayfa içeriği güvenli HTTPS üzerinden okunur; script/style/nav gürültüsü temizlenir, query concept gruplarıyla eşleşen kanıt cümleleri çıkarılır ve kaynak başına evidence kaydı üretilir. Verifier tam research başarısı için en az iki kaynakta gerçek sayfa-içi evidence ister; yalnızca arama sonucu bulunan ama okunamayan görevler `partial` kalır.
+
 ### 0.8.x — Memory
 Kısa süreli konuşma belleği ile kalıcı kullanıcı tercihlerini ayırma; bağlam özetleme.
 
