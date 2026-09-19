@@ -9,3 +9,6 @@ Backups/*
 !Backups/.gitkeep
 
 .build/
+
+# Generated KRALİ app icon rasters
+App/KRALIAgentNative/Assets.xcassets/AppIcon.appiconset/*.png
