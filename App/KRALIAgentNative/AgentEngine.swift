@@ -13,9 +13,11 @@ final class AgentEngine: ObservableObject {
 
     @Published var selectedRootURL: URL?
     @Published var indexedFiles: [FileRecord] = []
+    @Published var indexedFolders: [FolderRecord] = []
     @Published var pendingFileAction: PendingFileAction?
     @Published var lastUndoAction: UndoFileAction?
     @Published var fileSearchResults: [FileRecord] = []
+    @Published var folderSearchResults: [FolderRecord] = []
     @Published var fileSearchTitle = ""
 
     @Published var currentGoal = "Hazır"
@@ -84,95 +86,57 @@ final class AgentEngine: ObservableObject {
         for text: String,
         decision: AgentDecision
     ) -> String {
-        let t = normalize(text)
-
-        if pendingFileAction != nil && isApproval(t) {
+        switch decision.intent {
+        case .approve:
             return approvePendingFileAction()
-        }
 
-        if pendingFileAction != nil && isRejection(t) {
+        case .reject:
             pendingFileAction = nil
             log("Bekleyen dosya işlemi iptal edildi")
             return "Tamam, dosya işlemini iptal ettim."
-        }
 
-        if containsAny(t, ["geri al", "undo"]) {
+        case .undo:
             return undoLastFileAction()
-        }
 
-        if decision.intent == .conversation {
+        case .conversation:
             return conversationReply(for: text)
-        }
 
-        if decision.intent == .assessWorkspace {
+        case .assessWorkspace:
             return assessWorkspace()
-        }
 
-        if let explicitRule = memoryIntent(from: text) {
-            addMemory(explicitRule)
-            return "Kaydettim: “\(explicitRule)”. Uygun görevlerde bunu otomatik uygulayacağım."
-        }
+        case .remember:
+            if let explicitRule = memoryIntent(from: text) {
+                addMemory(explicitRule)
+                return "Kaydettim: “\(explicitRule)”. Uygun görevlerde bunu otomatik uygulayacağım."
+            }
+            return "Bunu bir çalışma kuralı olarak algıladım fakat kaydedilecek kısmı net çıkaramadım."
 
-        if isScreenshotOrganizeIntent(t) {
+        case .organizeScreenshots:
             return prepareScreenshotOrganizeAction()
-        }
 
-        if decision.intent == .fileSearch {
+        case .fileSearch:
+            if decision.target == .folder {
+                return searchIndexedFolders(
+                    for: text,
+                    decision: decision
+                )
+            }
+
             return searchIndexedFiles(
                 for: text,
                 decision: decision
             )
+
+        case .workMail:
+            log("Mail görevi planlandı; gönderim onay gerektiriyor")
+            return "Mail hedefini anladım. Şimdilik gerçek mail bağlantısını çalıştırmadan önce kaynak ve taslak aşamasını ayrı tutuyorum."
+
+        case .futureCapability:
+            return "Bu hedefi anladım fakat ilgili dış araç henüz KRALİ'ye bağlı değil. Mevcut yerel araçlarla yapılabilecek kısmı ayırıp güvenli plan üretebilirim."
+
+        case .general:
+            return "Hedefi analiz ettim fakat mevcut yerel araçlardan biriyle güvenilir biçimde eşleştiremedim. Şu an en güvenli planım: \(decision.selectedPlan)."
         }
-
-        if containsAny(t, ["17:55", "mail"]) {
-            log("Günlük rapor kaynağı seçildi")
-            log("Mail taslağı oluşturma akışı hazırlandı")
-            log("Gönderim noktası onay gerektiriyor")
-
-            return "Günlük iş maili akışını kendim seçtim. Gerçek sürümde raporu okuyup taslağı hazırlayacağım; sen onay vermeden göndermeyeceğim."
-        }
-
-        if containsAny(t, ["reels", "kurgu", "premiere", "video"]) {
-            log("Director görevi parçaladı")
-
-            if !indexedFiles.isEmpty {
-                log("\(indexedFiles.count) indeksli dosya aday olarak görüldü")
-            }
-
-            log("Premiere → Auto Cut")
-            log("Premiere → Caption")
-            log("QC → çalışma kopyası kontrolü")
-
-            return "Kurgu için File Memory, Director ve Premiere modüllerini otomatik devreye aldım. Gerçek Premiere bağlantısı sonraki modülde eklenecek."
-        }
-
-        if containsAny(t, ["hata", "sorun", "chatgpt", "openai", "bilmiyorsan"]) {
-            log("Önce yerel proje/hafıza taranacak")
-            log("Yetersizse OpenAI danışmanı çağrılacak")
-
-            return "Önce mevcut bilgi, proje ve geçmiş çözümleri incelerim. Yeterli olmazsa gerekli bağlamı paketleyip ChatGPT/OpenAI tarafına danışırım. Bu demo henüz gerçek OpenAI bağlantısı kurmuyor."
-        }
-
-        if containsAny(t, ["dosya", "bul", "logo", "klasör", "masaüst", "ekran görünt", "ekran resmi"]) {
-            log("Yerel dosya indeksinde arama")
-
-            guard selectedRootURL != nil else {
-                return "Önce sağdaki “Klasör seç ve indeksle” ile çalışacağım klasörü seç. Dosya işlemlerini yalnızca senin seçtiğin klasör içinde yapacağım."
-            }
-
-            if !indexedFiles.isEmpty {
-                let sample = indexedFiles.prefix(3).map(\.name).joined(separator: ", ")
-                return "Yerel dosya indeksini kullanıyorum. Örnek kayıtlar: \(sample)"
-            }
-
-            return "Seçtiğin klasörde henüz indekslenmiş dosya yok."
-        }
-
-        if containsAny(t, ["duyabiliyor musun", "beni duyuyor musun", "sesim geliyor mu"]) {
-            return "Evet, sesli komutun yazıya çevrildi ve bana ulaştı."
-        }
-
-        return "Hedefi analiz ettim fakat bunu henüz doğrudan tamamlayacak yerel bir aracım yok. Şu an en güvenli planım: \(decision.selectedPlan). İstersen mevcut çalışma alanından başlayıp uygulanabilir kısmı kendim çıkarabilirim."
     }
 
     private func brainContext() -> AgentContextSnapshot {
@@ -293,6 +257,7 @@ final class AgentEngine: ObservableObject {
 
         let keys: [URLResourceKey] = [
             .isRegularFileKey,
+            .isDirectoryKey,
             .creationDateKey,
             .contentModificationDateKey
         ]
@@ -308,24 +273,39 @@ final class AgentEngine: ObservableObject {
         }
 
         var records: [FileRecord] = []
-        let maxFiles = 5000
+        var folders: [FolderRecord] = []
+        let maxItems = 5000
 
         for case let url as URL in enumerator {
-            if records.count >= maxFiles {
-                log("İndeks güvenlik sınırına ulaştı: \(maxFiles) dosya")
+            if records.count + folders.count >= maxItems {
+                log("İndeks güvenlik sınırına ulaştı: \(maxItems) öğe")
                 break
             }
 
             do {
                 let values = try url.resourceValues(forKeys: Set(keys))
-                guard values.isRegularFile == true else { continue }
-
                 let name = url.lastPathComponent
-                let ext = url.pathExtension.lowercased()
                 let relativePath = url.path.replacingOccurrences(
                     of: root.path + "/",
                     with: ""
                 )
+
+                if values.isDirectory == true {
+                    folders.append(
+                        FolderRecord(
+                            url: url,
+                            name: name,
+                            relativePath: relativePath,
+                            creationDate: values.creationDate,
+                            modificationDate: values.contentModificationDate
+                        )
+                    )
+                    continue
+                }
+
+                guard values.isRegularFile == true else { continue }
+
+                let ext = url.pathExtension.lowercased()
 
                 records.append(
                     FileRecord(
@@ -347,8 +327,12 @@ final class AgentEngine: ObservableObject {
             $0.relativePath.localizedStandardCompare($1.relativePath) == .orderedAscending
         }
 
+        indexedFolders = folders.sorted {
+            $0.relativePath.localizedStandardCompare($1.relativePath) == .orderedAscending
+        }
+
         let screenshotCount = indexedFiles.filter(\.isScreenshot).count
-        log("\(indexedFiles.count) dosya alt klasörlerle birlikte indekslendi")
+        log("\(indexedFiles.count) dosya ve \(indexedFolders.count) klasör indekslendi")
         log("\(screenshotCount) ekran görüntüsü adayı bulundu")
     }
 
@@ -422,11 +406,80 @@ final class AgentEngine: ObservableObject {
         return containsAny(text, actionWords) && containsAny(text, fileWords)
     }
 
+    func revealFolder(_ folder: FolderRecord) {
+        guard fileManager.fileExists(atPath: folder.url.path) else {
+            log("Finder'da gösterilemedi: klasör artık mevcut değil")
+            return
+        }
+
+        NSWorkspace.shared.selectFile(nil, inFileViewerRootedAtPath: folder.url.path)
+        log("Finder'da klasör açıldı: \(folder.name)")
+    }
+
+    private func searchIndexedFolders(
+        for rawText: String,
+        decision: AgentDecision
+    ) -> String {
+        activeRoute = decision.route
+
+        guard let root = selectedRootURL else {
+            folderSearchResults = []
+            fileSearchResults = []
+            fileSearchTitle = ""
+            return "Önce bir çalışma klasörü seç. Klasör aramasını seçili alanın içinde yapacağım."
+        }
+
+        indexSelectedFolder()
+
+        var results = indexedFolders
+
+        if let range = decision.dateRange {
+            results = results.filter { folder in
+                switch decision.dateField {
+                case .created:
+                    guard let date = folder.creationDate else { return false }
+                    return range.contains(date)
+                case .modified:
+                    guard let date = folder.modificationDate else { return false }
+                    return range.contains(date)
+                case .either:
+                    let createdMatch = folder.creationDate.map(range.contains) ?? false
+                    let modifiedMatch = folder.modificationDate.map(range.contains) ?? false
+                    return createdMatch || modifiedMatch
+                }
+            }
+        }
+
+        if decision.sortMode == .newestFirst {
+            results.sort {
+                let left = $0.creationDate ?? $0.modificationDate ?? .distantPast
+                let right = $1.creationDate ?? $1.modificationDate ?? .distantPast
+                return left > right
+            }
+        }
+
+        folderSearchResults = results
+        fileSearchResults = []
+        fileSearchTitle = decision.goal
+
+        log("Yerel klasör araması: \(decision.goal)")
+        log("\(results.count) klasör eşleşmesi bulundu")
+
+        guard !results.isEmpty else {
+            return "“\(root.lastPathComponent)” içinde \(decision.goal) için eşleşme bulamadım."
+        }
+
+        let preview = results.prefix(5).map(\.name).joined(separator: ", ")
+        let extra = results.count > 5 ? " ve \(results.count - 5) klasör daha" : ""
+
+        return "\(results.count) klasör buldum: \(preview)\(extra). Sağdaki sonuçlardan klasörü Finder'da açabilirsin."
+    }
+
     private func searchIndexedFiles(
         for rawText: String,
         decision: AgentDecision
     ) -> String {
-        activeRoute = ["Core", "File Memory", "File Search"]
+        activeRoute = decision.route
 
         guard let root = selectedRootURL else {
             fileSearchResults = []
@@ -500,6 +553,7 @@ final class AgentEngine: ObservableObject {
         }
 
         fileSearchResults = results
+        folderSearchResults = []
         fileSearchTitle = title
 
         log("Yerel dosya araması: \(title)")
