@@ -30,6 +30,7 @@ final class AgentEngine: ObservableObject {
     @Published var recoverySummary: String?
     @Published var selectedCapabilities: [AgentCapability] = []
     @Published var capabilityLearningPlans: [CapabilityLearningPlan] = []
+    @Published var capabilityLearningBacklog: [CapabilityLearningTask] = []
 
     @Published var voiceOutputEnabled = true {
         didSet {
@@ -54,6 +55,7 @@ final class AgentEngine: ObservableObject {
     private let responseComposer = AgentResponseComposer()
     private let routeBuilder = AgentRouteBuilder()
     private let capabilityLearner = AgentCapabilityLearner()
+    private let learningStore = AgentLearningStore()
     private var lastDecision: AgentDecision?
 
     init() {
@@ -66,6 +68,7 @@ final class AgentEngine: ObservableObject {
         }
 
         loadMemory()
+        capabilityLearningBacklog = learningStore.load()
         log("KRALİ Core hazır")
         log("Dinamik hedef ve kabiliyet yönlendirme aktif")
         restoreSelectedFolder()
@@ -114,6 +117,11 @@ final class AgentEngine: ObservableObject {
             for: capabilities
         )
         capabilityLearningPlans = learningPlans
+        capabilityLearningBacklog = learningStore.merge(
+            existing: capabilityLearningBacklog,
+            plans: learningPlans,
+            capabilities: capabilities
+        )
 
         let executionPlan = planner.makePlan(
             decision: decision,
