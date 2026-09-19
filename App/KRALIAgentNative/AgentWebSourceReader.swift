@@ -133,6 +133,7 @@ actor AgentWebSourceReader {
         let candidateText = [
             source.title,
             source.snippet ?? "",
+            source.domain,
             pageText ?? ""
         ]
         .filter { !$0.isEmpty }
@@ -143,7 +144,13 @@ actor AgentWebSourceReader {
             plan: plan
         )
 
-        guard selected.coverage >= requiredCoverage else {
+        guard
+            selected.coverage >= requiredCoverage,
+            mandatoryConceptsSatisfied(
+                selected.matches,
+                plan: plan
+            )
+        else {
             return fallbackEvidence(
                 source,
                 plan: plan,
@@ -177,7 +184,13 @@ actor AgentWebSourceReader {
             plan: plan
         )
 
-        guard selected.coverage >= requiredCoverage else {
+        guard
+            selected.coverage >= requiredCoverage,
+            mandatoryConceptsSatisfied(
+                selected.matches,
+                plan: plan
+            )
+        else {
             return nil
         }
 
@@ -297,6 +310,19 @@ actor AgentWebSourceReader {
             coverage: uniqueMatches.count,
             matches: uniqueMatches
         )
+    }
+
+    private func mandatoryConceptsSatisfied(
+        _ matches: [String],
+        plan: ResearchQueryPlan
+    ) -> Bool {
+        let normalizedMatches = matches.map(normalize)
+
+        return plan.mandatoryConceptGroups.allSatisfy { group in
+            group.map(normalize).contains {
+                normalizedMatches.contains($0)
+            }
+        }
     }
 
     private func readableText(
