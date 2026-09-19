@@ -189,7 +189,7 @@ final class AgentEngine: ObservableObject {
                    $0.id == "research.web" && $0.isAvailable
                }) {
                 baseReply = await performWebResearch(
-                    query: text
+                    query: webResearchQuery(from: text)
                 )
             } else {
                 baseReply = makeReply(
@@ -544,6 +544,48 @@ final class AgentEngine: ObservableObject {
             ),
             webResearchResultCount: webResearchResults.count
         )
+    }
+
+    private func webResearchQuery(
+        from rawText: String
+    ) -> String {
+        var query = rawText
+
+        let phrases = [
+            "web'de araştır",
+            "webde araştır",
+            "web'de arastir",
+            "webde arastir",
+            "internetten araştır",
+            "internetten arastir",
+            "internette araştır",
+            "internette arastir",
+            "google'da araştır",
+            "googleda araştır",
+            "google'da arastir",
+            "googleda arastir"
+        ]
+
+        for phrase in phrases {
+            query = query.replacingOccurrences(
+                of: phrase,
+                with: " ",
+                options: [
+                    .caseInsensitive,
+                    .diacriticInsensitive
+                ]
+            )
+        }
+
+        return query
+            .replacingOccurrences(
+                of: "\\s+",
+                with: " ",
+                options: .regularExpression
+            )
+            .trimmingCharacters(
+                in: .whitespacesAndNewlines
+            )
     }
 
     private func performWebResearch(
