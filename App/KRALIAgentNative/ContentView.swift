@@ -419,6 +419,46 @@ struct ContentView: View {
                 .background(Color(nsColor: .controlBackgroundColor))
                 .clipShape(RoundedRectangle(cornerRadius: 10))
 
+                if !engine.webResearchResults.isEmpty {
+                    sectionTitle("Web araştırma")
+
+                    VStack(alignment: .leading, spacing: 8) {
+                        Text(engine.webResearchStatus)
+                            .font(.caption2)
+                            .foregroundStyle(.secondary)
+
+                        ForEach(engine.webResearchResults.prefix(5)) { result in
+                            Link(destination: result.url) {
+                                HStack(alignment: .top, spacing: 7) {
+                                    Image(systemName: "globe")
+                                        .font(.caption)
+                                        .foregroundStyle(.secondary)
+
+                                    VStack(alignment: .leading, spacing: 2) {
+                                        Text(result.title)
+                                            .font(.caption.weight(.medium))
+                                            .multilineTextAlignment(.leading)
+
+                                        Text(result.domain)
+                                            .font(.caption2)
+                                            .foregroundStyle(.secondary)
+                                    }
+
+                                    Spacer()
+
+                                    Image(systemName: "arrow.up.right")
+                                        .font(.caption2)
+                                        .foregroundStyle(.secondary)
+                                }
+                            }
+                            .buttonStyle(.plain)
+                        }
+                    }
+                    .padding(10)
+                    .background(Color(nsColor: .controlBackgroundColor))
+                    .clipShape(RoundedRectangle(cornerRadius: 10))
+                }
+
                 if !engine.capabilityLearningBacklog.isEmpty {
                     sectionTitle("Öğrenme kuyruğu")
 
@@ -772,7 +812,7 @@ struct ContentView: View {
                 }
 
                 Text(
-                    "v0.7.9: Kalıcı öğrenme kuyruğu eklendi. KRALİ eksik capability’leri artık yalnızca o turda göstermiyor; hangi yeteneğe kaç görevde ihtiyaç duyduğunu, araştırma ön koşulunu ve sonraki adımı oturumlar arasında koruyor. Bir capability ileride etkinleşirse aynı kayıt “Etkin” durumuna geçebilecek."
+                    "v0.7.10: İlk gerçek Web Research provider eklendi. KRALİ artık API anahtarı/token gerektirmeyen bootstrap aramasıyla web kaynaklarını gerçekten bulabiliyor, kaynak kümesini Verifier ile doğruluyor ve sağ panelde açılabilir sonuçlar gösteriyor. Eksik bir capability araştırılabilir durumdaysa KRALİ bunu otomatik alt görev yapıp kaynak aramasını başlatabiliyor."
                 )
                 .font(.caption2)
                 .foregroundStyle(.orange)
