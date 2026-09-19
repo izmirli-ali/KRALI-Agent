@@ -145,6 +145,8 @@ Her senaryoda Goal outcomes, capability seçimi, yanlış capability seçimi, ro
 
 Genel analiz davranışına `analyze` ve `ideate` hedefleri eklendi. KRALİ yalnızca özet vermek yerine kanıttan çıkarım üretmeye ve kullanıcı tarafından açıkça söylenmemiş ama bağlamdan türetilebilen fikir/fırsatları ayrı reasoning adımı olarak oluşturmaya yönlendirilir.
 
+**v0.7.17 regression learning loop:** İlk Training Lab turunda 11/16 sonucu görülür ve failure seti doğrudan Core geliştirmesine çevrilir. Doğal dilde “fikri üret / özgün içerik fikri”, medya hakkında “yorum yap”, “sitesine gir” gibi browser ifadeleri ve “hangi yeteneğin eksik / öğrenme planı” gibi capability-gap görevleri Goal Interpreter ve Capability Router'a eklenir. Yeni app version'ı ilk açıldığında Training Lab otomatik regression turu çalıştırır; böylece kullanıcı aynı testleri elle tekrar etmek zorunda kalmaz.
+
 ### 0.8.x — Memory
 Kısa süreli konuşma belleği ile kalıcı kullanıcı tercihlerini ayırma; bağlam özetleme.
 
