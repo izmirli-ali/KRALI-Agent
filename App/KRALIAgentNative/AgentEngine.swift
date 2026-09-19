@@ -51,6 +51,7 @@ final class AgentEngine: ObservableObject {
     private let capabilityRegistry = AgentCapabilityRegistry()
     private let goalInterpreter = AgentGoalInterpreter()
     private let responseComposer = AgentResponseComposer()
+    private let routeBuilder = AgentRouteBuilder()
     private var lastDecision: AgentDecision?
 
     init() {
@@ -94,9 +95,6 @@ final class AgentEngine: ObservableObject {
             context: brainContext()
         )
 
-        activeRoute = decision.route.map {
-            $0 == "Intent" ? "Goal" : $0
-        }
         currentGoal = goalProfile.summary
         currentPlan = decision.selectedPlan
         currentAlternatives = decision.alternatives
@@ -115,6 +113,12 @@ final class AgentEngine: ObservableObject {
             context: brainContext(),
             capabilities: capabilities,
             goal: goalProfile
+        )
+
+        activeRoute = routeBuilder.build(
+            goal: goalProfile,
+            capabilities: capabilities,
+            requiresVerification: executionPlan.requiresVerification
         )
 
         executionSteps = executionPlan.steps
@@ -467,10 +471,10 @@ final class AgentEngine: ObservableObject {
 
         if containsAny(t, ["ne yapıyorsun", "ne yapiyorsun"]) {
             if let root = selectedRootURL {
-                return "Şu an “\(root.lastPathComponent)” çalışma alanını takip ediyorum. \(indexedFiles.count) dosya indeksli; yeni bir hedef verdiğinde önce ne istediğini analiz edip uygun modülü kendim seçeceğim."
+                return "Şu an “\(root.lastPathComponent)” çalışma alanını takip ediyorum. \(indexedFiles.count) dosya indeksli; yeni bir hedef verdiğinde önce ne istediğini analiz edip gerekli kabiliyetleri kendim seçeceğim."
             }
 
-            return "Şu an yeni bir hedef bekliyorum. Bir görev verdiğinde önce niyeti ve bağlamı analiz edip hangi modülün gerektiğine kendim karar vereceğim."
+            return "Şu an yeni bir hedef bekliyorum. Bir görev verdiğinde önce hedefi ve bağlamı analiz edip gereken kabiliyetleri kendim seçeceğim."
         }
 
         return "Selam. Hazırım; sadece komut beklemek yerine hedefini anlamaya, seçenekleri düşünmeye ve uygun yolu seçmeye çalışacağım."
@@ -852,8 +856,6 @@ final class AgentEngine: ObservableObject {
         for rawText: String,
         decision: AgentDecision
     ) -> String {
-        activeRoute = decision.route
-
         guard let root = selectedRootURL else {
             folderSearchResults = []
             fileSearchResults = []
@@ -911,8 +913,6 @@ final class AgentEngine: ObservableObject {
         for rawText: String,
         decision: AgentDecision
     ) -> String {
-        activeRoute = decision.route
-
         guard let root = selectedRootURL else {
             fileSearchResults = []
             fileSearchTitle = ""
@@ -1086,8 +1086,6 @@ final class AgentEngine: ObservableObject {
     // MARK: - Real File Actions
 
     private func prepareScreenshotOrganizeAction() -> String {
-        activeRoute = ["Core", "File Memory", "File Actions"]
-
         guard let root = selectedRootURL else {
             log("Dosya işlemi için klasör seçimi bekleniyor")
             return "Önce sağdaki “Klasör seç ve indeksle” ile Masaüstü klasörünü seç. Bu sürüm dosyaları yalnızca senin seçtiğin klasör içinde değiştirecek."
