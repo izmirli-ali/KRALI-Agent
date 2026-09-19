@@ -547,7 +547,7 @@ struct ContentView: View {
                 }
 
                 Text(
-                    "v0.6.8: v0.6.4 ile eklenen klasör hedefi nedeniyle oluşan eksik Swift switch durumu düzeltildi. File Search dosya ve klasör hedeflerini derleme seviyesinde eksiksiz ele alıyor."
+                    "v0.6.9: Context + Planning temeli eklendi. KRALİ artık önceki arama sonuçlarına “bunlardan”, “az önceki”, “sonuncusunu aç” gibi referanslarla dönebiliyor; önceki sonuç kümesini koruyup yeni filtreyi sadece onun içinde uygulayabiliyor."
                 )
                 .font(.caption2)
                 .foregroundStyle(.orange)
