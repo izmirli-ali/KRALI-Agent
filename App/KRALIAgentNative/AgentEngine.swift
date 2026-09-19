@@ -34,6 +34,9 @@ final class AgentEngine: ObservableObject {
     @Published var webResearchResults: [WebResearchResult] = []
     @Published var webResearchEvidence: [WebSourceEvidence] = []
     @Published var webResearchStatus = "Henüz web araştırması yapılmadı."
+    @Published var mentorTraceStatus = "Henüz mentor kaydı yok."
+    @Published var mentorTraceReady = false
+    @Published var mentorSyncBusy = false
 
     @Published var voiceOutputEnabled = true {
         didSet {
@@ -61,6 +64,7 @@ final class AgentEngine: ObservableObject {
     private let learningStore = AgentLearningStore()
     private let webResearchService = AgentWebResearchService()
     private let webSourceReader = AgentWebSourceReader()
+    private let mentorTraceStore = MentorTraceStore()
     private var lastDecision: AgentDecision?
 
     init() {
@@ -74,6 +78,13 @@ final class AgentEngine: ObservableObject {
 
         loadMemory()
         capabilityLearningBacklog = learningStore.load()
+        mentorTraceReady = fileManager.fileExists(
+            atPath: mentorTraceStore.latestURL.path
+        )
+        if mentorTraceReady {
+            mentorTraceStatus = "Son mentor kaydı hazır."
+        }
+
         log("KRALİ Core hazır")
         log("Dinamik hedef ve kabiliyet yönlendirme aktif")
         restoreSelectedFolder()
@@ -284,6 +295,18 @@ final class AgentEngine: ObservableObject {
                 capabilities: capabilities,
                 learningPlans: learningPlans,
                 fallbackPlan: fallbackPlan
+            )
+
+            recordMentorTrace(
+                input: text,
+                source: source,
+                goal: goalProfile.summary,
+                plan: decision.selectedPlan,
+                route: activeRoute,
+                capabilities: capabilities,
+                learningPlans: learningPlans,
+                verification: finalVerification,
+                finalResponse: reply
             )
 
             messages.append(ChatMessage(role: .assistant, text: reply))
@@ -744,6 +767,135 @@ final class AgentEngine: ObservableObject {
             )
 
             return "\(plan.capabilityName) için araştırma denemesi başarısız oldu; öğrenme kuyruğunda bekliyor."
+        }
+    }
+
+    private func recordMentorTrace(
+        input: String,
+        source: ChatInputSource,
+        goal: String,
+        plan: String,
+        route: [String],
+        capabilities: [AgentCapability],
+        learningPlans: [CapabilityLearningPlan],
+        verification: AgentVerificationResult,
+        finalResponse: String
+    ) {
+        do {
+            _ = try mentorTraceStore.save(
+                input: input,
+                inputSource: source,
+                goal: goal,
+                plan: plan,
+                route: route,
+                capabilities: capabilities,
+                learningPlans: learningPlans,
+                executionSteps: executionSteps,
+                verification: verification,
+                fallbackPlan: fallbackPlan,
+                finalResponse: finalResponse,
+                researchSources: webResearchResults,
+                researchEvidence: webResearchEvidence,
+                activities: activities
+            )
+
+            mentorTraceReady = true
+            mentorTraceStatus = "Mentor kaydı hazır • GitHub'a gönderilebilir"
+            log("Mentor trace yerel olarak kaydedildi")
+        } catch {
+            mentorTraceReady = false
+            mentorTraceStatus =
+                "Mentor kaydı oluşturulamadı: " +
+                error.localizedDescription
+            log(mentorTraceStatus)
+        }
+    }
+
+    func syncMentorTrace() {
+        guard !mentorSyncBusy else { return }
+
+        guard fileManager.fileExists(
+            atPath: mentorTraceStore.latestURL.path
+        ) else {
+            mentorTraceReady = false
+            mentorTraceStatus = "Önce KRALİ ile en az bir görev tamamla."
+            return
+        }
+
+        let scriptPath = fileManager.homeDirectoryForCurrentUser
+            .appendingPathComponent(
+                "Developer/KRALI-Agent/Scripts/publish-mentor-trace.command"
+            )
+            .path
+
+        guard fileManager.fileExists(atPath: scriptPath) else {
+            mentorTraceStatus =
+                "Mentor sync scripti bulunamadı. Önce uygulamayı güncelle."
+            return
+        }
+
+        mentorSyncBusy = true
+        mentorTraceStatus = "Mentor kaydı private GitHub'a aktarılıyor…"
+
+        Task {
+            let result = await Task.detached(
+                priority: .utility
+            ) {
+                let process = Process()
+                let pipe = Pipe()
+
+                process.executableURL = URL(
+                    fileURLWithPath: "/bin/zsh"
+                )
+                process.arguments = [scriptPath]
+                process.standardOutput = pipe
+                process.standardError = pipe
+
+                do {
+                    try process.run()
+                    process.waitUntilExit()
+
+                    let data = pipe.fileHandleForReading
+                        .readDataToEndOfFile()
+
+                    let output = String(
+                        data: data,
+                        encoding: .utf8
+                    ) ?? ""
+
+                    return (
+                        Int(process.terminationStatus),
+                        output
+                    )
+                } catch {
+                    return (
+                        -1,
+                        error.localizedDescription
+                    )
+                }
+            }
+            .value
+
+            mentorSyncBusy = false
+
+            if result.0 == 0 {
+                mentorTraceStatus =
+                    "Mentor kaydı GitHub'a aktarıldı • bana “mentor kaydına bak” diyebilirsin."
+                log("Mentor trace GitHub'a senkronlandı")
+            } else {
+                let compact = result.1
+                    .split(separator: "\n")
+                    .suffix(3)
+                    .joined(separator: " ")
+
+                mentorTraceStatus =
+                    "Mentor sync başarısız: " +
+                    (compact.isEmpty
+                        ? "çıkış kodu \(result.0)"
+                        : compact)
+
+                log("Mentor sync başarısız")
+            }
         }
     }
 
