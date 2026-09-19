@@ -70,6 +70,7 @@ enum AgentStepState: String, Hashable {
     case pending
     case running
     case completed
+    case partial
     case attention
     case skipped
 
@@ -78,6 +79,7 @@ enum AgentStepState: String, Hashable {
         case .pending: return "circle"
         case .running: return "circle.dotted"
         case .completed: return "checkmark.circle.fill"
+        case .partial: return "exclamationmark.circle.fill"
         case .attention: return "exclamationmark.triangle.fill"
         case .skipped: return "minus.circle"
         }
@@ -120,6 +122,7 @@ enum AgentVerificationState: String, Hashable {
     case idle
     case checking
     case passed
+    case partial
     case attention
     case skipped
 
@@ -128,6 +131,7 @@ enum AgentVerificationState: String, Hashable {
         case .idle: return "circle"
         case .checking: return "magnifyingglass.circle"
         case .passed: return "checkmark.seal.fill"
+        case .partial: return "exclamationmark.circle.fill"
         case .attention: return "exclamationmark.triangle.fill"
         case .skipped: return "minus.circle"
         }
