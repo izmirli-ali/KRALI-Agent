@@ -266,6 +266,54 @@ struct AgentPlanner {
             fallback = decision.alternatives.first
         }
 
+        if goal.outcomes.contains(.analyze) &&
+           !steps.contains(where: {
+               normalizeStepTitle($0.title).contains("analiz")
+           }) {
+            let analysisStep = AgentExecutionStep(
+                title: "Analiz et",
+                detail: "Toplanan kanıtları, bağlamı ve kısıtları birlikte değerlendir; yalnızca yüzey özetleme yapma, neden-sonuç ilişkileri ve belirsizlikleri ayır.",
+                kind: .reasoning,
+                capabilityID: "core.reasoning"
+            )
+
+            if let responseIndex = steps.firstIndex(
+                where: { $0.kind == .response }
+            ) {
+                steps.insert(analysisStep, at: responseIndex)
+            } else if let verificationIndex = steps.firstIndex(
+                where: { $0.kind == .verification }
+            ) {
+                steps.insert(analysisStep, at: verificationIndex)
+            } else {
+                steps.append(analysisStep)
+            }
+        }
+
+        if goal.outcomes.contains(.ideate) &&
+           !steps.contains(where: {
+               normalizeStepTitle($0.title).contains("bagimsiz fikir")
+           }) {
+            let ideationStep = AgentExecutionStep(
+                title: "Bağımsız fikir üret",
+                detail: "Kullanıcının doğrudan söylediği maddeleri tekrar etmekle yetinme; kanıtlardan ve analizden türetilmiş yeni fırsatlar, alternatifler veya yaratıcı öneriler üret ve bunları gerekçelendir.",
+                kind: .reasoning,
+                capabilityID: "core.reasoning"
+            )
+
+            if let responseIndex = steps.firstIndex(
+                where: { $0.kind == .response }
+            ) {
+                steps.insert(ideationStep, at: responseIndex)
+            } else if let verificationIndex = steps.firstIndex(
+                where: { $0.kind == .verification }
+            ) {
+                steps.insert(ideationStep, at: verificationIndex)
+            } else {
+                steps.append(ideationStep)
+            }
+        }
+
         if goal.outcomes.contains(.research) &&
            !steps.contains(where: {
                $0.capabilityID == "research.web"
@@ -343,6 +391,20 @@ struct AgentPlanner {
             fallback: fallback,
             requiresVerification: requiresVerification
         )
+    }
+
+    private func normalizeStepTitle(
+        _ value: String
+    ) -> String {
+        value
+            .folding(
+                options: [
+                    .diacriticInsensitive,
+                    .caseInsensitive
+                ],
+                locale: Locale(identifier: "tr_TR")
+            )
+            .lowercased()
     }
 
     private func action(
