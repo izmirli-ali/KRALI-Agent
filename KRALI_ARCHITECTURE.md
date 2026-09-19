@@ -147,6 +147,10 @@ Genel analiz davranışına `analyze` ve `ideate` hedefleri eklendi. KRALİ yaln
 
 **v0.7.17 regression learning loop:** İlk Training Lab turunda 11/16 sonucu görülür ve failure seti doğrudan Core geliştirmesine çevrilir. Doğal dilde “fikri üret / özgün içerik fikri”, medya hakkında “yorum yap”, “sitesine gir” gibi browser ifadeleri ve “hangi yeteneğin eksik / öğrenme planı” gibi capability-gap görevleri Goal Interpreter ve Capability Router'a eklenir. Yeni app version'ı ilk açıldığında Training Lab otomatik regression turu çalıştırır; böylece kullanıcı aynı testleri elle tekrar etmek zorunda kalmaz.
 
+**v0.7.18 free local intelligence provider:** Training Lab'in 16/16 geçmesi routing/planning iskeletinin kendi sözleşmesini karşıladığını gösterir; bu tek başına gerçek dünya analiz kalitesi değildir. Bu nedenle Core'a ayrı bir generative synthesis provider eklenir. macOS 26+ ve uygun Apple Intelligence donanımında Apple `FoundationModels` / `SystemLanguageModel` kullanılarak araştırma kanıtları, analiz ve ideation hedefleri cihaz üzerinde sentezlenir. Provider runtime availability kontrolü yapar; model hazır değilse kural tabanlı Core'a fallback olur. Böylece ayrı OpenAI API, token veya ek AI aboneliği varsayılan bağımlılık değildir.
+
+Yerel modelin rolü Executor veya Verifier olmak değildir. Model; doğrulanmış evidence + Goal Contract + capability durumu + verifier sonucundan kullanıcıya yararlı analiz/sentez üretir. Bağlı olmayan capability'yi varmış gibi göstermemesi, kanıt ile çıkarımı ayırması ve kullanıcı tarafından söylenmeyen özgün fakat gerekçeli fikirleri kanıttan türetmesi temel prompt sözleşmesidir.
+
 ### 0.8.x — Memory
 Kısa süreli konuşma belleği ile kalıcı kullanıcı tercihlerini ayırma; bağlam özetleme.
 
