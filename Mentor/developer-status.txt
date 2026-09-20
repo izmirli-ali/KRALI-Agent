@@ -1,1 +1,1 @@
-sdk_session_running|Uygulama kontrolü (desktop.app) için model oturumu aktif|krali-dev-agent/20260920-214634|/Users/medusa/Developer/KRALI-Agent-Dev-20260920-214634|@meta|app=0.8.50|at=1789930014|run=20260920-214634
+no_change|Diagnostic yeşil; değişiklik gerekmedi|krali-dev-agent/20260920-214634|/Users/medusa/Developer/KRALI-Agent-Dev-20260920-214634|@meta|app=0.8.50|at=1789930020|run=20260920-214634
