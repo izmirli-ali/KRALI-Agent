@@ -1,12 +1,12 @@
 {
-  "appVersion" : "0.8.2",
-  "corePassed" : 17,
-  "coreTotal" : 17,
-  "createdAt" : "2026-09-20T08:42:32Z",
+  "appVersion" : "0.8.3",
+  "corePassed" : 18,
+  "coreTotal" : 18,
+  "createdAt" : "2026-09-20T08:46:52Z",
   "failed" : 0,
   "northStarPassed" : 4,
   "northStarTotal" : 4,
-  "passed" : 21,
+  "passed" : 22,
   "results" : [
     {
       "diagnostics" : [
@@ -244,6 +244,34 @@
       ],
       "tier" : "core",
       "title" : "Bilgi karşılaştırmasını yerel dosya aramasından ayırma",
+      "unavailableCapabilities" : [
+
+      ]
+    },
+    {
+      "diagnostics" : [
+
+      ],
+      "goal" : "bulguları analiz et → güncel kaynaklarla araştır → sonucu ve gerekçeyi açıkla",
+      "passed" : true,
+      "prompt" : "Sony A7 IV ile Fuji X-T5 arasında video açısından temel farklar neler?",
+      "route" : [
+        "Core",
+        "Goal",
+        "Context",
+        "Plan",
+        "Research",
+        "Verify",
+        "Response"
+      ],
+      "scenarioID" : "knowledge-comparison-with-stale-memory",
+      "selectedCapabilities" : [
+        "context.local",
+        "core.reasoning",
+        "research.web"
+      ],
+      "tier" : "core",
+      "title" : "Eski hafıza güncel karşılaştırmayı bastırmamalı",
       "unavailableCapabilities" : [
 
       ]
@@ -590,5 +618,5 @@
       ]
     }
   ],
-  "total" : 21
+  "total" : 22
 }
