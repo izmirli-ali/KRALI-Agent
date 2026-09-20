@@ -97,12 +97,6 @@ actor AgentDesktopControl {
             for: .milliseconds(700)
         )
 
-        let trusted =
-            await waitForAccessibilityTrust(
-                maxAttempts: 12,
-                delayMilliseconds: 500
-            )
-
         let after =
             NSWorkspace.shared.frontmostApplication?
                 .localizedName
@@ -212,6 +206,12 @@ actor AgentDesktopControl {
         try? await Task.sleep(
             for: .milliseconds(700)
         )
+
+        let trusted =
+            await waitForAccessibilityTrust(
+                maxAttempts: 12,
+                delayMilliseconds: 500
+            )
 
         let after =
             NSWorkspace.shared.frontmostApplication?
