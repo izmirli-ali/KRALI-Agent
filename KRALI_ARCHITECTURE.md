@@ -409,3 +409,16 @@ Runtime Screen Perception başarılı olduğunda rapor Mentor store'a kaydedilir
 Mission Contract Repair'e provider-neutral genel ekran gözlemi sınıfı eklendi: “ekrana bak”, “ekranda ne var”, “ekranı kontrol et”, “görsel olarak kontrol et” benzeri hedefler `perception.screen` ile `analyze + explain` sonucuna yönlenebilir. Arena 8'den 9 senaryoya genişletildi; yeni medya-dışı regression “ekrana bak ve hangi uygulamanın önde olduğunu söyle” görevidir. Böylece ekran algısı Premiere/Photoshop doğrulamasına özel bir capability'ye dönüşemez.
 
 Sonraki ana provider fazı: Accessibility/NSWorkspace tabanlı generic `desktop.control`. Önce Screen Perception runtime turu Mentor ile doğrulanmalı; ardından macOS uygulama açma, pencere odaklama ve AXUIElement tabanlı etkileşim eklenecektir.
+
+
+**v0.8.23 generic Desktop Control probe foundation:** v0.8.22 Mentor turunda Training Lab 30/30, Live Research Eval 2/2, KRALİ Arena 9/9 ve gerçek runtime Screen Perception görevi başarılı oldu. Kullanıcının “Ekrana bak ve şu anda ne gördüğünü söyle.” komutu `perception.screen` üzerinden yürütüldü; frontmost application `KRALİ` olarak gözlendi, execution step completed ve verification passed oldu. OCR içeriği ekrandaki ChatGPT metninden yeni hedef türetmeden yalnızca görsel kanıt olarak işlendi.
+
+Bu doğrulamadan sonra bir sonraki provider fazı başlatıldı: **generic macOS Desktop Control**. Yeni `AgentDesktopControl`, Apple'ın resmi `NSWorkspace` uygulama açma/aktivasyon API'sini ve Accessibility güven kontrolü için `AXIsProcessTrustedWithOptions` mekanizmasını kullanır. Accessibility izni kullanıcı tarafından verilmeden AX tabanlı UI kontrolü aktif edilmez.
+
+İlk Desktop Control sürümü manuel geliştirici probe'udur. Probe güvenli test hedefi olarak Apple Notes/Notlar uygulamasını bundle identifier `com.apple.Notes` ile çözer; uygulama zaten açıksa öne getirir, kapalıysa `NSWorkspace.openApplication` ile açar. Sonrasında mevcut Screen Perception provider'ı kullanılarak gerçekten frontmost olup olmadığı görsel/sistem kanıtıyla doğrulanır. Probe raporu uygulamanın önceki/sonraki frontmost durumunu, Accessibility trust durumunu, uygulamanın zaten çalışıp çalışmadığını, launch/activate sonucunu ve Screen Perception doğrulamasını kaydeder.
+
+Generic resolver yalnızca Notes'a özel değildir: `/Applications`, `/System/Applications`, `/System/Applications/Utilities` ve kullanıcı `~/Applications` alanlarında uygulama adını ve localized bundle display name'i çözebilir. Notes bundle ID sadece ilk güvenli probe'un deterministik olması için kullanılır.
+
+`desktop.control` capability bu sürümde hâlâ `isAvailable=false` kalır. Gerçek Mac probe'unda üç koşul doğrulanmadan runtime açılmaz: (1) uygulama açma/öne getirme başarılı, (2) Screen Perception frontmost durumu doğrular, (3) Accessibility trust izinli. Probe sonucu `Mentor/desktop-control-latest.json` ve `Mentor/desktop-control-status.txt` olarak Mentor paketine eklenir.
+
+Sonraki kapı: probe başarılı ve AX izinli ise `desktop.control` runtime provider olarak açılacak; ilk runtime operations yalnızca application open/focus gibi düşük riskli aksiyonlar olacak. AXUIElement ile button/menu/field etkileşimleri bundan sonra ayrı safety gate ile eklenecek.
