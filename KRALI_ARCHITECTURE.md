@@ -422,3 +422,16 @@ Generic resolver yalnızca Notes'a özel değildir: `/Applications`, `/System/Ap
 `desktop.control` capability bu sürümde hâlâ `isAvailable=false` kalır. Gerçek Mac probe'unda üç koşul doğrulanmadan runtime açılmaz: (1) uygulama açma/öne getirme başarılı, (2) Screen Perception frontmost durumu doğrular, (3) Accessibility trust izinli. Probe sonucu `Mentor/desktop-control-latest.json` ve `Mentor/desktop-control-status.txt` olarak Mentor paketine eklenir.
 
 Sonraki kapı: probe başarılı ve AX izinli ise `desktop.control` runtime provider olarak açılacak; ilk runtime operations yalnızca application open/focus gibi düşük riskli aksiyonlar olacak. AXUIElement ile button/menu/field etkileşimleri bundan sonra ayrı safety gate ile eklenecek.
+
+
+**v0.8.24 low-risk desktop.app runtime + deep AX separation:** v0.8.23 gerçek Desktop Control Probe'da Notlar uygulaması başarıyla açıldı/öne getirildi ve Screen Perception frontmost durumu doğruladı (`activate=true`, `screen=true`). Probe sırasında Accessibility izin penceresi sonradan onaylandığı için ilk raporda `ax=false` kaldı; bu, NSWorkspace app activation başarısını etkilemedi.
+
+Mimari bu sonuçla iki ayrı capability'ye bölündü. `desktop.app` düşük riskli uygulama keşfi/açma/öne getirme provider'ıdır; NSWorkspace üzerinden çalışır, Screen Perception ile frontmost sonucu doğrular ve runtime'da available'dır. `desktop.control` ise yalnızca Accessibility/AXUIElement tabanlı derin UI etkileşimi—menü, buton, alan, klavye, mouse, clipboard ve benzeri—içindir ve henüz unavailable kalır. Böylece KRALİ bir uygulamayı açabildiği için tüm macOS UI'sini kontrol edebildiğini iddia etmez.
+
+`AgentDesktopControl` generic installed-app resolver içerir. `/Applications`, `/System/Applications`, `/System/Applications/Utilities` ve `~/Applications` içindeki uygulama bundle adlarını/localized display name'leri indeksler; kullanıcı mesajındaki uygulama adıyla eşleştirir. Runtime `desktop.app` step'i uygulamayı açar veya öne getirir, ardından Screen Perception ile doğrular. Doğrulama başarısızsa step completed sayılmaz.
+
+Mission Contract Repair'de yalnız “uygulamayı aç / uygulamaya geç / pencereyi öne getir” hedefleri `desktop.app + open` sözleşmesine yönlenir ve gereksiz `desktop.control` kaldırılır. Tıklama, buton, menü, alan, yazma, sürükleme veya benzeri gerçek UI etkileşimi isteklerinde `desktop.control + perception.screen` tutulur ve capability bağlı olmadığı için dürüstçe blocked/partial kalır.
+
+Desktop Probe artık Accessibility trust durumunu prompt öncesi ve prompt sonrası ayrı izler. İzin penceresinden sonra trust yaklaşık 6 saniyeye kadar yeniden kontrol edilir; kullanıcının izin vermesi aynı turda yakalanabiliyorsa final `accessibilityTrusted=true` raporlanır.
+
+Arena'daki genel uygulama açma senaryosu artık `desktop.app` capability'sini bekler. Böylece düşük riskli app activation regression'ı, gelecekteki AX UI control geliştirmelerinden bağımsız test edilir.
