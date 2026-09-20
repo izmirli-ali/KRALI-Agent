@@ -1809,6 +1809,7 @@ final class AgentEngine: ObservableObject {
                 goal: goal,
                 plan: plan,
                 route: route,
+                semanticMission: currentSemanticMission,
                 capabilities: capabilities,
                 learningPlans: learningPlans,
                 executionSteps: executionSteps,
