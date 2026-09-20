@@ -67,6 +67,7 @@ final class AgentEngine: ObservableObject {
         worktree: nil
     )
     @Published var developerAgentBusy = false
+    @Published var learningQueueJobs: [AgentLearningJob] = []
     @Published var debugIncident: AgentDebugIncident?
     @Published var localIntelligenceState: LocalIntelligenceState = .checking
     @Published var intelligenceProviderStatus = "Sentez sağlayıcısı henüz kullanılmadı."
@@ -114,11 +115,13 @@ final class AgentEngine: ObservableObject {
     private let desktopControlStore = DesktopControlProbeStore()
     private let textFileWriter = AgentTextFileWriter()
     private let developerBridge = AgentDeveloperBridge()
+    private let learningQueueStore = AgentLearningQueueStore()
     private let debugRecoveryCenter = AgentDebugRecoveryCenter()
     private let localIntelligence = AgentLocalIntelligence()
     private let subscriptionIntelligence = AgentSubscriptionIntelligence()
     private let contextMemoryStore = AgentContextMemoryStore()
     private var lastDecision: AgentDecision?
+    private var activeLearningJobID: UUID?
 
     init() {
         if UserDefaults.standard.object(
@@ -251,6 +254,25 @@ final class AgentEngine: ObservableObject {
             )
         }
 
+        learningQueueJobs =
+            learningQueueStore
+                .recoverInterruptedJobs(
+                    learningQueueStore.load(),
+                    activeRunIsFresh:
+                        developerAgentStatus
+                            .isLearningActive
+                )
+
+        if let running =
+            learningQueueJobs.first(
+                where: {
+                    $0.state == .running
+                }
+            ) {
+            activeLearningJobID =
+                running.id
+        }
+
         let launchDiagnosticsCurrent =
             trainingLabReport?.appVersion ==
                 launchAppVersion &&
@@ -302,6 +324,8 @@ final class AgentEngine: ObservableObject {
                     recovered.message
                 )
             }
+
+            self.startNextLearningJobIfNeeded()
         }
     }
 
@@ -1135,14 +1159,28 @@ final class AgentEngine: ObservableObject {
             speech.speak(reply)
         }
 
-        if !currentCapabilityGaps.isEmpty &&
-           !developerAgentBusy {
+        if !currentCapabilityGaps.isEmpty {
+            learningQueueJobs =
+                learningQueueStore.enqueue(
+                    gaps:
+                        currentCapabilityGaps,
+                    sourceGoal: text,
+                    into:
+                        learningQueueJobs
+                )
+
+            let queuedCount =
+                learningQueueJobs.filter {
+                    $0.state == .queued
+                }.count
+
             log(
-                "Capability gap algılandı; Developer Agent izole candidate geliştirme için otomatik başlatılıyor"
+                "Capability gap Learning Queue'ya alındı • sırada=" +
+                String(queuedCount)
             )
-            runDeveloperAgent()
         }
 
+        startNextLearningJobIfNeeded()
     }
 
     private struct SemanticMissionExecutionResult {
