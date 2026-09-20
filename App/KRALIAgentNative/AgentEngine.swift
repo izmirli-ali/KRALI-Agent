@@ -419,37 +419,67 @@ final class AgentEngine: ObservableObject {
                     researchEvidence: webResearchEvidence,
                     contextMemory: activeContextMemories
                 ) {
-                    finalBaseReply = synthesized
-                    synthesisApplied = true
-                    intelligenceProvider = "Apple Foundation Models"
-                    intelligenceProviderStatus =
-                        "Apple yerel zeka sentezi kullanıldı."
-                    log("Yerel zeka sentezi uygulandı")
-                } else if let subscription = await subscriptionIntelligence.synthesize(
-                    userInput: text,
-                    goal: goalProfile.summary,
-                    draft: finalBaseReply,
-                    verification: finalVerification,
-                    capabilities: selectedCapabilities,
-                    researchEvidence: webResearchEvidence,
-                    contextMemory: activeContextMemories
-                ) {
-                    finalBaseReply = subscription.text
-                    synthesisApplied = true
-                    intelligenceProvider = subscription.provider
-                    intelligenceProviderStatus =
-                        "ChatGPT Subscription sentezi kullanıldı."
-                    log(
-                        "ChatGPT Subscription sentezi uygulandı"
-                    )
-                } else {
+                    if synthesisOutputMeetsGoal(
+                        userInput: text,
+                        goal: goalProfile,
+                        output: synthesized
+                    ) {
+                        finalBaseReply = synthesized
+                        synthesisApplied = true
+                        intelligenceProvider = "Apple Foundation Models"
+                        intelligenceProviderStatus =
+                            "Apple yerel zeka sentezi kullanıldı."
+                        log("Yerel zeka sentezi uygulandı")
+                    } else {
+                        log(
+                            "Yerel zeka çıktısı hedef biçimine uymadı; Subscription fallback denenecek"
+                        )
+                    }
+                }
+
+                if !synthesisApplied,
+                   let subscription = await subscriptionIntelligence.synthesize(
+                        userInput: text,
+                        goal: goalProfile.summary,
+                        draft: finalBaseReply,
+                        verification: finalVerification,
+                        capabilities: selectedCapabilities,
+                        researchEvidence: webResearchEvidence,
+                        contextMemory: activeContextMemories
+                   ) {
+                    if synthesisOutputMeetsGoal(
+                        userInput: text,
+                        goal: goalProfile,
+                        output: subscription.text
+                    ) {
+                        finalBaseReply = subscription.text
+                        synthesisApplied = true
+                        intelligenceProvider = subscription.provider
+                        intelligenceProviderStatus =
+                            "ChatGPT Subscription sentezi kullanıldı."
+                        log(
+                            "ChatGPT Subscription sentezi uygulandı"
+                        )
+                    } else {
+                        intelligenceProviderStatus =
+                            "Sentez üretildi ancak hedef biçimine uymadı."
+                        log(intelligenceProviderStatus)
+                    }
+                }
+
+                if !synthesisApplied {
                     let reason = await subscriptionIntelligence
                         .lastFailureReason()
 
-                    intelligenceProviderStatus =
-                        reason.map {
-                            "ChatGPT Subscription sentezi kullanılamadı: " + $0
-                        } ?? "Analiz/fikir sentezi sağlayıcısı kullanılamadı."
+                    if intelligenceProviderStatus ==
+                        "Sentez sağlayıcısı henüz kullanılmadı." ||
+                       intelligenceProviderStatus ==
+                        "Apple yerel zeka hazır" {
+                        intelligenceProviderStatus =
+                            reason.map {
+                                "ChatGPT Subscription sentezi kullanılamadı: " + $0
+                            } ?? "Analiz/dönüşüm sentezi sağlayıcısı kullanılamadı."
+                    }
 
                     log(intelligenceProviderStatus)
                 }
@@ -1487,6 +1517,73 @@ final class AgentEngine: ObservableObject {
                 log("Mentor sync başarısız")
             }
         }
+    }
+
+    private func synthesisOutputMeetsGoal(
+        userInput: String,
+        goal: AgentGoalProfile,
+        output: String
+    ) -> Bool {
+        guard goal.outcomes.contains(.transform) else {
+            return true
+        }
+
+        let input = normalize(userInput)
+        let response = normalize(output)
+
+        if containsAny(input, [
+            "senaryo", "senaryoya", "senaryosuna",
+            "çekim plan", "cekim plan"
+        ]) {
+            let hasScenarioShape = containsAny(response, [
+                "saniye", "sahne", "çekim", "cekim",
+                "0-", "0–", "0 -", "0 –"
+            ])
+
+            guard hasScenarioShape else {
+                return false
+            }
+        }
+
+        let durationPattern = #"([0-9]{1,3})\s*saniye"#
+
+        if let regex = try? NSRegularExpression(
+            pattern: durationPattern
+        ) {
+            let range = NSRange(
+                input.startIndex..<input.endIndex,
+                in: input
+            )
+
+            if let match = regex.firstMatch(
+                in: input,
+                range: range
+            ),
+            let durationRange = Range(
+                match.range(at: 1),
+                in: input
+            ) {
+                let duration = String(
+                    input[durationRange]
+                )
+
+                let hasRequestedDuration =
+                    response.contains(duration + " saniye") ||
+                    response.contains(duration + " saniyelik")
+
+                let hasTimeline =
+                    response.contains("0-") ||
+                    response.contains("0–") ||
+                    response.contains("0 -") ||
+                    response.contains("0 –")
+
+                if !hasRequestedDuration && !hasTimeline {
+                    return false
+                }
+            }
+        }
+
+        return true
     }
 
     private func shouldUseIntelligence(
