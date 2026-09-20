@@ -24,7 +24,17 @@ jobs:
             /bin/zsh -n "$script"
           done
 
-      - name: Compile KRALI without code signing
+      - name: Select newest Xcode
+        shell: bash
+        run: |
+          set -euo pipefail
+          LATEST_XCODE="$(find /Applications -maxdepth 1 -type d -name 'Xcode*.app' | sort | tail -n 1)"
+          if [ -n "$LATEST_XCODE" ]; then
+            sudo xcode-select -s "$LATEST_XCODE/Contents/Developer"
+          fi
+          xcodebuild -version
+
+      - name: Compile KRALI arm64 without code signing
         shell: bash
         run: |
           set -euo pipefail
@@ -33,6 +43,9 @@ jobs:
             -scheme KRALIAgentNative \
             -configuration Debug \
             -derivedDataPath .ci-build \
+            -destination 'platform=macOS,arch=arm64' \
+            ARCHS=arm64 \
+            ONLY_ACTIVE_ARCH=YES \
             CODE_SIGNING_ALLOWED=NO \
             CODE_SIGNING_REQUIRED=NO \
             build
