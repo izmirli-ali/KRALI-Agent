@@ -6,10 +6,12 @@ TRACE_SOURCE="$HOME/Library/Application Support/KRALI Agent/Mentor/latest.json"
 TRAINING_SOURCE="$HOME/Library/Application Support/KRALI Agent/Mentor/training-latest.json"
 LIVE_EVAL_SOURCE="$HOME/Library/Application Support/KRALI Agent/Mentor/live-eval-latest.json"
 ARENA_SOURCE="$HOME/Library/Application Support/KRALI Agent/Mentor/arena-latest.json"
+DEVELOPER_STATUS_SOURCE="$HOME/Library/Application Support/KRALI Agent/Developer/latest.txt"
 TRACE_DEST="$ROOT/Mentor/latest.json"
 TRAINING_DEST="$ROOT/Mentor/training-latest.json"
 LIVE_EVAL_DEST="$ROOT/Mentor/live-eval-latest.json"
 ARENA_DEST="$ROOT/Mentor/arena-latest.json"
+DEVELOPER_STATUS_DEST="$ROOT/Mentor/developer-status.txt"
 
 echo ""
 echo "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
@@ -65,6 +67,11 @@ fi
 if [ -f "$ARENA_SOURCE" ]; then
     cp "$ARENA_SOURCE" "$ARENA_DEST"
     FILES+=("Mentor/arena-latest.json")
+fi
+
+if [ -f "$DEVELOPER_STATUS_SOURCE" ]; then
+    cp "$DEVELOPER_STATUS_SOURCE" "$DEVELOPER_STATUS_DEST"
+    FILES+=("Mentor/developer-status.txt")
 fi
 
 if [ -z "$(git status --porcelain -- ${FILES[@]})" ]; then
