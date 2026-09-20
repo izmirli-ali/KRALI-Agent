@@ -51,6 +51,7 @@ final class AgentEngine: ObservableObject {
     )
     @Published var developerAgentBusy = false
     @Published var localIntelligenceState: LocalIntelligenceState = .checking
+    @Published var intelligenceProviderStatus = "Sentez sağlayıcısı henüz kullanılmadı."
 
     @Published var voiceOutputEnabled = true {
         didSet {
@@ -85,6 +86,7 @@ final class AgentEngine: ObservableObject {
     private let liveResearchEvalStore = LiveResearchEvalStore()
     private let developerBridge = AgentDeveloperBridge()
     private let localIntelligence = AgentLocalIntelligence()
+    private let subscriptionIntelligence = AgentSubscriptionIntelligence()
     private var lastDecision: AgentDecision?
 
     init() {
@@ -364,21 +366,79 @@ final class AgentEngine: ObservableObject {
                 }
             }
 
+            var intelligenceProvider: String?
+            var synthesisApplied = false
+
             if shouldUseLocalIntelligence(
                 goal: goalProfile,
                 verification: finalVerification
-            ),
-               let synthesized = await localIntelligence.synthesize(
-                   userInput: text,
-                   goal: goalProfile.summary,
-                   draft: finalBaseReply,
-                   verification: finalVerification,
-                   capabilities: capabilities,
-                   researchEvidence: webResearchEvidence
-               ) {
-                finalBaseReply = synthesized
+            ) {
+                if let synthesized = await localIntelligence.synthesize(
+                    userInput: text,
+                    goal: goalProfile.summary,
+                    draft: finalBaseReply,
+                    verification: finalVerification,
+                    capabilities: capabilities,
+                    researchEvidence: webResearchEvidence
+                ) {
+                    finalBaseReply = synthesized
+                    synthesisApplied = true
+                    intelligenceProvider = "Apple Foundation Models"
+                    intelligenceProviderStatus =
+                        "Apple yerel zeka sentezi kullanıldı."
+                    log("Yerel zeka sentezi uygulandı")
+                } else if let subscription = await subscriptionIntelligence.synthesize(
+                    userInput: text,
+                    goal: goalProfile.summary,
+                    draft: finalBaseReply,
+                    verification: finalVerification,
+                    capabilities: capabilities,
+                    researchEvidence: webResearchEvidence
+                ) {
+                    finalBaseReply = subscription.text
+                    synthesisApplied = true
+                    intelligenceProvider = subscription.provider
+                    intelligenceProviderStatus =
+                        "ChatGPT Subscription sentezi kullanıldı."
+                    log(
+                        "ChatGPT Subscription sentezi uygulandı"
+                    )
+                } else {
+                    intelligenceProviderStatus =
+                        "Analiz/fikir sentezi sağlayıcısı kullanılamadı."
+                    log(
+                        "Analiz/fikir sentezi sağlayıcısı kullanılamadı"
+                    )
+                }
 
-                if !activeRoute.contains("Intelligence") {
+                completeSynthesisSteps(
+                    success: synthesisApplied
+                )
+
+                finalVerification = enforceGoalCompletion(
+                    goal: goalProfile,
+                    verification: finalVerification,
+                    synthesisApplied: synthesisApplied
+                )
+
+                verificationState = finalVerification.state
+                verificationSummary = finalVerification.summary
+
+                switch finalVerification.state {
+                case .passed:
+                    setVerificationStep(.completed)
+                case .partial:
+                    setVerificationStep(.partial)
+                case .attention:
+                    setVerificationStep(.attention)
+                case .skipped:
+                    setVerificationStep(.skipped)
+                case .idle, .checking:
+                    break
+                }
+
+                if synthesisApplied &&
+                   !activeRoute.contains("Intelligence") {
                     if let verifyIndex = activeRoute.firstIndex(
                         of: "Verify"
                     ) {
@@ -397,8 +457,6 @@ final class AgentEngine: ObservableObject {
                         activeRoute.append("Intelligence")
                     }
                 }
-
-                log("Yerel zeka sentezi uygulandı")
             }
 
             let replyWithSuggestion = appendSuggestion(
@@ -424,6 +482,7 @@ final class AgentEngine: ObservableObject {
                 capabilities: capabilities,
                 learningPlans: learningPlans,
                 verification: finalVerification,
+                intelligenceProvider: intelligenceProvider,
                 finalResponse: reply
             )
 
@@ -597,7 +656,12 @@ final class AgentEngine: ObservableObject {
         for index in executionSteps.indices {
             switch executionSteps[index].kind {
             case .reasoning:
-                executionSteps[index].state = .completed
+                executionSteps[index].state =
+                    isSynthesisReasoningStep(
+                        executionSteps[index]
+                    )
+                    ? .pending
+                    : .completed
 
             case .action:
                 if isStepCapabilityAvailable(executionSteps[index]) {
@@ -643,6 +707,71 @@ final class AgentEngine: ObservableObject {
         ) {
             executionSteps[response].state = .completed
         }
+    }
+
+    private func completeSynthesisSteps(
+        success: Bool
+    ) {
+        for index in executionSteps.indices {
+            guard
+                executionSteps[index].kind == .reasoning,
+                isSynthesisReasoningStep(
+                    executionSteps[index]
+                )
+            else {
+                continue
+            }
+
+            executionSteps[index].state =
+                success ? .completed : .partial
+        }
+    }
+
+    private func isSynthesisReasoningStep(
+        _ step: AgentExecutionStep
+    ) -> Bool {
+        let normalized = step.title
+            .folding(
+                options: [
+                    .diacriticInsensitive,
+                    .caseInsensitive
+                ],
+                locale: Locale(identifier: "tr_TR")
+            )
+            .lowercased()
+
+        return normalized.contains("analiz et") ||
+            normalized.contains("bagimsiz fikir")
+    }
+
+    private func enforceGoalCompletion(
+        goal: AgentGoalProfile,
+        verification: AgentVerificationResult,
+        synthesisApplied: Bool
+    ) -> AgentVerificationResult {
+        let needsSynthesis =
+            goal.outcomes.contains(.analyze) ||
+            goal.outcomes.contains(.ideate)
+
+        guard needsSynthesis else {
+            return verification
+        }
+
+        guard !synthesisApplied else {
+            return verification
+        }
+
+        if verification.state == .attention {
+            return verification
+        }
+
+        return AgentVerificationResult(
+            state: .partial,
+            summary:
+                verification.summary +
+                " Araştırma/araç kısmı doğrulandı; ancak istenen analiz ve bağımsız fikir üretimi için güvenilir sentez sağlayıcısı kullanılamadığı için hedefin tamamı doğrulanmadı.",
+            fallback: nil
+        )
     }
 
     private func isStepCapabilityAvailable(
@@ -897,6 +1026,7 @@ final class AgentEngine: ObservableObject {
         capabilities: [AgentCapability],
         learningPlans: [CapabilityLearningPlan],
         verification: AgentVerificationResult,
+        intelligenceProvider: String?,
         finalResponse: String
     ) {
         do {
@@ -910,6 +1040,7 @@ final class AgentEngine: ObservableObject {
                 learningPlans: learningPlans,
                 executionSteps: executionSteps,
                 verification: verification,
+                intelligenceProvider: intelligenceProvider,
                 fallbackPlan: fallbackPlan,
                 finalResponse: finalResponse,
                 researchSources: webResearchResults,
