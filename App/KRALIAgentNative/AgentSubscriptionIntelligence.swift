@@ -84,6 +84,8 @@ actor AgentSubscriptionIntelligence {
         - Kullanıcı analiz istiyorsa yalnızca özetleme yapma; neden-sonuç, güçlü/zayıf yön, risk, fırsat ve belirsizlik çıkar.
         - Kullanıcı özgün fikir/fırsat istiyorsa istediği sayıya uymaya çalış ve her fikri kanıt/çıkarımla gerekçelendir.
         - Kullanıcı mevcut bir fikri/çıktıyı "çevir / dönüştür / uyarla" diyorsa yeni alternatifler icat etme. Referans verdiği öğeyi önceki bağlamdan seç ve istenen süre, sayı, sıra ve formatta dönüştür.
+        - Kullanıcı doğrudan yeni bir içerik, çekim planı, senaryo, caption veya metin hazırlamanı istiyorsa bunu bir araç/dosya görevi gibi yorumlama; verilen süre, bölüm sayısı, ton ve biçim kısıtlarını uygula.
+        - Kullanıcı metni doğrudan mesaj içinde verip "yeniden yaz / düzelt / düzgün Türkçeyle yaz" diyorsa kaynak olarak yalnızca verilen metni esas al; alakasız önceki bağlamı cevaba karıştırma ve düzeltilmiş metni doğrudan ver.
         - "Birincisini", "ikincisini", "sonuncusunu" gibi seçimleri önceki bağlamdaki öğe sırasına göre çöz.
         - Rakip, ürün, tarihçe veya güncel durum için kanıt yetersizse bunu açıkça söyle; boşluğu tahminle doldurma.
         - Aynı haberi tekrar eden kaynakları bağımsız doğrulama gibi sunma.
