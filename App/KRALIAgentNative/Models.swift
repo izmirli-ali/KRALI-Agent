@@ -142,6 +142,14 @@ struct AgentSemanticMissionStep: Codable, Hashable {
     let dependsOn: [Int]
 }
 
+struct AgentMissionReview: Codable, Hashable {
+    let passed: Bool
+    let summary: String
+    let missingCapabilityIDs: [String]
+    let unnecessaryCapabilityIDs: [String]
+    let riskNotes: [String]
+}
+
 enum AgentVerificationState: String, Hashable {
     case idle
     case checking
