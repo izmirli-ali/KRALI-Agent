@@ -28,6 +28,8 @@ final class AgentEngine: ObservableObject {
     @Published var currentAlternatives: [String] = []
     @Published var currentSemanticMission: AgentSemanticMission?
     @Published var currentSemanticPlannerProvider: String?
+    @Published var currentTaskGraph: AgentTaskGraph?
+    @Published var taskGraphStatus = "Henüz görev grafiği yok."
     @Published var executionSteps: [AgentExecutionStep] = []
     @Published var verificationState: AgentVerificationState = .idle
     @Published var verificationSummary = "Henüz doğrulama yapılmadı."
@@ -84,6 +86,7 @@ final class AgentEngine: ObservableObject {
     private let fileManager = FileManager.default
     private let brain = AgentBrain()
     private let planner = AgentPlanner()
+    private let taskOrchestrator = AgentTaskOrchestrator()
     private let verifier = AgentVerifier()
     private let capabilityRegistry = AgentCapabilityRegistry()
     private let goalInterpreter = AgentGoalInterpreter()
