@@ -6,6 +6,12 @@ struct ResearchFacet: Hashable {
     let query: String
 }
 
+struct ResearchDirectCandidate: Hashable {
+    let title: String
+    let url: URL
+    let domain: String
+}
+
 struct ResearchQueryPlan: Hashable {
     let original: String
     let variants: [String]
@@ -14,6 +20,7 @@ struct ResearchQueryPlan: Hashable {
     let preferredDomains: [String]
     let entityTerms: [String]
     let facets: [ResearchFacet]
+    let directCandidates: [ResearchDirectCandidate]
 
     var isEntityResearch: Bool {
         !entityTerms.isEmpty
@@ -148,7 +155,20 @@ struct AgentResearchQueryPlanner {
             entityTerms: [
                 normalizedHandle
             ],
-            facets: facets
+            facets: facets,
+            directCandidates: canonicalSocialURL(
+                platform: platform.name,
+                domain: platform.domain,
+                handle: normalizedHandle
+            ).map {
+                [
+                    ResearchDirectCandidate(
+                        title: "@\(normalizedHandle) — \(platform.name) profil adayı",
+                        url: $0,
+                        domain: $0.host ?? platform.domain
+                    )
+                ]
+            } ?? []
         )
     }
 
@@ -210,6 +230,40 @@ struct AgentResearchQueryPlanner {
         }
 
         return nil
+    }
+
+    private func canonicalSocialURL(
+        platform: String,
+        domain: String,
+        handle: String
+    ) -> URL? {
+        let clean = handle
+            .trimmingCharacters(
+                in: CharacterSet(
+                    charactersIn: "@/"
+                )
+            )
+
+        guard !clean.isEmpty else {
+            return nil
+        }
+
+        switch platform {
+        case "instagram":
+            return URL(
+                string: "https://www.instagram.com/\(clean)/"
+            )
+        case "tiktok":
+            return URL(
+                string: "https://www.tiktok.com/@\(clean)"
+            )
+        case "youtube":
+            return URL(
+                string: "https://www.youtube.com/@\(clean)"
+            )
+        default:
+            return nil
+        }
     }
 
     private func brandPlan(
@@ -287,7 +341,8 @@ struct AgentResearchQueryPlanner {
             ],
             preferredDomains: [],
             entityTerms: entityGroup,
-            facets: facets
+            facets: facets,
+            directCandidates: []
         )
     }
 
@@ -455,7 +510,8 @@ struct AgentResearchQueryPlanner {
                 Set(preferredDomains)
             ).sorted(),
             entityTerms: [],
-            facets: []
+            facets: [],
+            directCandidates: []
         )
     }
 
