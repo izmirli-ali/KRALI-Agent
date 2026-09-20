@@ -419,6 +419,33 @@ struct AgentNaturalLanguageResolver: Sendable {
         return score >= 0.88
     }
 
+    func mergedAliases(
+        _ groups: [[String]]
+    ) -> [String] {
+        var seen = Set<String>()
+
+        return groups
+            .flatMap { $0 }
+            .filter {
+                let value =
+                    $0.trimmingCharacters(
+                        in: .whitespacesAndNewlines
+                    )
+                let key =
+                    normalized(value)
+
+                guard
+                    !value.isEmpty,
+                    !key.isEmpty,
+                    seen.insert(key).inserted
+                else {
+                    return false
+                }
+
+                return true
+            }
+    }
+
     private func wordVariants(
         _ raw: String
     ) -> [String] {
