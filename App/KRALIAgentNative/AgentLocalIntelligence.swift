@@ -787,6 +787,84 @@ actor AgentLocalIntelligence {
         return String(raw[start...end])
     }
 
+    func summarizeScreenState(
+        goal: String,
+        visibleApplications: [String],
+        visibleWindows: [String],
+        recognizedText: [String]
+    ) async -> String? {
+        #if canImport(FoundationModels)
+        if #available(macOS 26.0, *) {
+            let model = SystemLanguageModel.default
+            guard model.isAvailable else {
+                return nil
+            }
+
+            let apps = visibleApplications
+                .prefix(12)
+                .joined(separator: ", ")
+
+            let windows = visibleWindows
+                .prefix(20)
+                .joined(separator: "\n")
+
+            let text = recognizedText
+                .prefix(80)
+                .joined(separator: "\n")
+
+            let instructions = """
+            Sen KRALİ'nin Screen Perception yorumlama katmanısın.
+            Sana ekran görüntüsünden çıkarılmış pencere başlıkları, açık uygulamalar ve Vision ile okunan ekran metni verilecek.
+            Yalnızca verilen kanıta dayan.
+            Görmediğin buton, nesne, durum veya işlem sonucu uydurma.
+            Kullanıcının hedefiyle ilgili aktif uygulamayı, görünen durumu ve güvenilir bir sonraki gözlemi kısa Türkçe özetle.
+            Bir işlemin başarıyla tamamlandığını ancak ekrandaki kanıt bunu açıkça destekliyorsa söyle.
+            """
+            
+            let prompt = """
+            Kullanıcı/hedef:
+            \(goal)
+
+            Açık uygulamalar:
+            \(apps.isEmpty ? "Bilinmiyor" : apps)
+
+            Görünen pencere başlıkları:
+            \(windows.isEmpty ? "Bilinmiyor" : windows)
+
+            Ekranda okunan metin:
+            \(text.isEmpty ? "Metin okunamadı" : text)
+
+            3 kısa bölüm üret:
+            1. Ekran durumu
+            2. Hedefle ilgili kanıt
+            3. Doğrulama / sonraki güvenli adım
+            """
+
+            do {
+                let session = LanguageModelSession(
+                    model: model,
+                    instructions: instructions
+                )
+
+                let response = try await session.respond(
+                    to: prompt
+                )
+
+                let value = response.content
+                    .trimmingCharacters(
+                        in: .whitespacesAndNewlines
+                    )
+
+                return value.isEmpty ? nil : value
+            } catch {
+                return nil
+            }
+        }
+        #endif
+
+        return nil
+    }
+
     func reviewMission(
         userInput: String,
         mission: AgentSemanticMission,
