@@ -125,37 +125,165 @@ struct AgentNaturalLanguageResolver: Sendable {
     func applicationTargetPhrase(
         from raw: String
     ) -> String? {
-        let words = tokens(raw)
-
-        guard
-            let appIndex = words.firstIndex(
-                where: {
-                    $0 == "uygulama" ||
-                    $0.hasPrefix("uygulama")
+        let clauses = raw
+            .split(
+                whereSeparator: {
+                    ".!?;\n".contains($0)
                 }
-            ),
-            appIndex > 0
-        else {
-            return nil
-        }
+            )
+            .map(String.init)
 
-        let prefix = words[..<appIndex]
-            .filter {
-                !commandNoise.contains($0) &&
-                !openVerbs.contains($0)
+        for clause in clauses {
+            let words = tokens(clause)
+
+            guard !words.isEmpty else {
+                continue
             }
 
-        guard !prefix.isEmpty else {
-            return nil
+            let endIndex: Int?
+            if let appIndex =
+                words.firstIndex(
+                    where: {
+                        $0 == "uygulama" ||
+                        $0.hasPrefix("uygulama")
+                    }
+                ),
+               appIndex > 0 {
+                endIndex = appIndex
+            } else if let openIndex =
+                words.firstIndex(
+                    where: {
+                        openVerbs.contains($0)
+                    }
+                ),
+                openIndex > 0 {
+                endIndex = openIndex
+            } else {
+                endIndex = nil
+            }
+
+            guard let endIndex else {
+                continue
+            }
+
+            let detachedCaseTokens = Set([
+                "yi", "yi", "yu", "yu",
+                "i", "i", "u", "u",
+                "ni", "ni", "nu", "nu"
+            ])
+
+            let prefix =
+                words[..<endIndex]
+                    .filter {
+                        !commandNoise.contains($0) &&
+                        !openVerbs.contains($0) &&
+                        !detachedCaseTokens.contains($0) &&
+                        !nonAppObjectWords.contains($0)
+                    }
+
+            guard !prefix.isEmpty else {
+                continue
+            }
+
+            let phrase =
+                prefix.suffix(4)
+                    .joined(separator: " ")
+
+            if !phrase.isEmpty {
+                return phrase
+            }
         }
 
-        let phrase =
-            prefix.suffix(4)
-                .joined(separator: " ")
+        return nil
+    }
 
-        return phrase.isEmpty
-            ? nil
-            : phrase
+    func hasApplicationOpenIntent(
+        _ raw: String
+    ) -> Bool {
+        guard
+            applicationTargetPhrase(
+                from: raw
+            ) != nil
+        else {
+            return false
+        }
+
+        let firstClause =
+            raw.split(
+                whereSeparator: {
+                    ".!?;\n".contains($0)
+                }
+            )
+            .first
+            .map(String.init) ?? raw
+
+        let words = Set(
+            tokens(firstClause)
+        )
+
+        return !words.intersection(
+            openVerbs
+        ).isEmpty ||
+        (
+            words.contains("one") &&
+            words.contains("getir")
+        )
+    }
+
+    func requestsBrowserWorkflow(
+        _ raw: String
+    ) -> Bool {
+        let value = normalized(raw)
+
+        if containsWebAddress(raw) {
+            return true
+        }
+
+        let signals = [
+            "adresine git",
+            "adresine gir",
+            "siteye git",
+            "siteye gir",
+            "sitesine git",
+            "sitesine gir",
+            "web sitesi",
+            "web sitesine",
+            "sayfaya git",
+            "sayfayi ac",
+            "sayfayi incele",
+            "yeni sekme",
+            "tarayicida",
+            "tarayici"
+        ]
+
+        return signals.contains {
+            value.contains($0)
+        }
+    }
+
+    private func containsWebAddress(
+        _ raw: String
+    ) -> Bool {
+        let pattern =
+            #"(?i)\b(?:https?://)?(?:www\.)?[a-z0-9][a-z0-9-]*(?:\.[a-z0-9-]+)+(?:/[^\s]*)?"#
+
+        guard let regex =
+            try? NSRegularExpression(
+                pattern: pattern
+            )
+        else {
+            return false
+        }
+
+        let range = NSRange(
+            raw.startIndex..<raw.endIndex,
+            in: raw
+        )
+
+        return regex.firstMatch(
+            in: raw,
+            range: range
+        ) != nil
     }
 
     func targetTokens(
@@ -178,39 +306,69 @@ struct AgentNaturalLanguageResolver: Sendable {
         input raw: String,
         aliases: [String]
     ) -> Double {
+        let normalizedInput =
+            normalized(raw)
         let targets = targetTokens(raw)
 
         guard !targets.isEmpty else {
             return 0
         }
 
-        let aliasVariants =
+        let normalizedAliases =
             aliases
-                .flatMap {
-                    let normalizedAlias =
-                        normalized($0)
+                .map(normalized)
+                .filter {
+                    !$0.isEmpty
+                }
+                .uniqued()
 
-                    return
-                        [normalizedAlias] +
-                        normalizedAlias
-                            .split(separator: " ")
-                            .flatMap {
-                                wordVariants(
-                                    String($0)
-                                )
-                            }
+        for alias in normalizedAliases {
+            if normalizedInput == alias {
+                return 1.0
+            }
+        }
+
+        var best =
+            normalizedAliases
+                .map {
+                    similarity(
+                        normalizedInput,
+                        $0
+                    )
+                }
+                .max() ?? 0
+
+        let aliasVariants =
+            normalizedAliases
+                .flatMap {
+                    [$0] +
+                    $0.split(separator: " ")
+                        .flatMap {
+                            wordVariants(
+                                String($0)
+                            )
+                        }
                 }
                 .filter {
                     !$0.isEmpty
                 }
                 .uniqued()
 
-        var best = 0.0
+        let multiTokenInput =
+            normalizedInput
+                .split(separator: " ")
+                .count > 1
 
         for target in targets {
             for alias in aliasVariants {
                 if target == alias {
-                    return 1.0
+                    best = max(
+                        best,
+                        multiTokenInput
+                            ? 0.88
+                            : 1.0
+                    )
+                    continue
                 }
 
                 if target.count >= 4,
@@ -219,7 +377,12 @@ struct AgentNaturalLanguageResolver: Sendable {
                     target.contains(alias) ||
                     alias.contains(target)
                    ) {
-                    best = max(best, 0.94)
+                    best = max(
+                        best,
+                        multiTokenInput
+                            ? 0.86
+                            : 0.94
+                    )
                     continue
                 }
 

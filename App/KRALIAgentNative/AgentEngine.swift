@@ -552,6 +552,46 @@ final class AgentEngine: ObservableObject {
                     subscriptionMission.provider
             }
 
+            if plannedMission == nil {
+                let actionableCapabilities =
+                    goalProfile
+                        .requiredCapabilityIDs
+                        .subtracting(
+                            Set([
+                                "core.reasoning",
+                                "context.local"
+                            ])
+                        )
+
+                if !actionableCapabilities.isEmpty {
+                    plannedMission =
+                        AgentSemanticMission(
+                            objective: text,
+                            outcomes:
+                                goalProfile
+                                    .outcomes
+                                    .map(\.rawValue)
+                                    .sorted(),
+                            steps: [],
+                            requiredCapabilityIDs:
+                                Array(
+                                    goalProfile
+                                        .requiredCapabilityIDs
+                                )
+                                .sorted(),
+                            requiresUserInput: false,
+                            userInputReason: nil,
+                            confidence: 0.6
+                        )
+                    plannerProvider =
+                        "Deterministic Capability Contract"
+
+                    log(
+                        "Semantic planner fallback: goal contract'tan deterministic mission üretildi"
+                    )
+                }
+            }
+
             if let rawMission = plannedMission {
                 let mission =
                     missionNormalizer.normalize(
@@ -747,6 +787,39 @@ final class AgentEngine: ObservableObject {
                 result.executedCapabilityIDs
             completedSemanticStepIndexes =
                 result.completedStepIndexes
+
+            if let graph =
+                currentTaskGraph {
+                let runtimeGaps =
+                    capabilityGapResolver
+                        .resolveRuntimeFailures(
+                            graph: graph,
+                            completedStepIndexes:
+                                result
+                                    .completedStepIndexes,
+                            capabilities:
+                                capabilityRegistry.all
+                        )
+
+                for gap in runtimeGaps
+                    where !currentCapabilityGaps
+                        .contains(
+                            where: {
+                                $0.capabilityID ==
+                                    gap.capabilityID
+                            }
+                        ) {
+                    currentCapabilityGaps
+                        .append(gap)
+
+                    log(
+                        "Runtime Capability Gap: " +
+                        gap.capabilityID +
+                        " • " +
+                        gap.reason
+                    )
+                }
+            }
         } else if resolvedGoal.outcomes.contains(.research),
                   resolvedCapabilities.contains(where: {
                       $0.id == "research.web" && $0.isAvailable
