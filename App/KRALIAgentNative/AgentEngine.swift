@@ -459,6 +459,43 @@ final class AgentEngine: ObservableObject {
                     goal: resolvedGoal
                 )
 
+                let compiledTaskGraph =
+                    taskOrchestrator.compile(
+                        mission: mission,
+                        capabilities:
+                            capabilityRegistry.all
+                    )
+
+                currentTaskGraph =
+                    compiledTaskGraph
+
+                let blocked =
+                    compiledTaskGraph
+                        .blockedCapabilityIDs
+                let approvals =
+                    compiledTaskGraph
+                        .approvalStepIndexes
+
+                taskGraphStatus =
+                    String(
+                        compiledTaskGraph.steps.count
+                    ) +
+                    " adım" +
+                    (blocked.isEmpty
+                        ? ""
+                        : " • blocked: " +
+                            blocked.joined(
+                                separator: ", "
+                            )) +
+                    (approvals.isEmpty
+                        ? ""
+                        : " • onay: " +
+                            approvals
+                                .map(String.init)
+                                .joined(
+                                    separator: ", "
+                                ))
+
                 currentGoal = resolvedGoal.summary
                 currentPlan = mission.steps
                     .map(\.title)
@@ -489,6 +526,35 @@ final class AgentEngine: ObservableObject {
                     "Semantic capability planı: " +
                     mission.requiredCapabilityIDs.joined(separator: ", ")
                 )
+                log(
+                    "Task Graph: " +
+                    compiledTaskGraph.steps
+                        .map {
+                            String($0.index) +
+                            ":" +
+                            $0.capabilityID +
+                            "[" +
+                            $0.role.rawValue +
+                            "]"
+                        }
+                        .joined(separator: " → ")
+                )
+                if !blocked.isEmpty {
+                    log(
+                        "Task Graph blocked capability: " +
+                        blocked.joined(
+                            separator: ", "
+                        )
+                    )
+                }
+                if !approvals.isEmpty {
+                    log(
+                        "Task Graph kullanıcı onayı bekleyen step: " +
+                        approvals
+                            .map(String.init)
+                            .joined(separator: ", ")
+                    )
+                }
                 log(
                     "Semantic rota: " +
                     activeRoute.joined(separator: " → ")
