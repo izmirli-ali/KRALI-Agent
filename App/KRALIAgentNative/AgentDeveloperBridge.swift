@@ -5,6 +5,54 @@ struct DeveloperAgentStatus: Hashable {
     let message: String
     let branch: String?
     let worktree: String?
+    let appVersion: String?
+    let updatedAt: Date?
+    let runID: String?
+
+    init(
+        state: String,
+        message: String,
+        branch: String?,
+        worktree: String?,
+        appVersion: String? = nil,
+        updatedAt: Date? = nil,
+        runID: String? = nil
+    ) {
+        self.state = state
+        self.message = message
+        self.branch = branch
+        self.worktree = worktree
+        self.appVersion = appVersion
+        self.updatedAt = updatedAt
+        self.runID = runID
+    }
+
+    func freshForApp(
+        _ currentAppVersion: String,
+        maxHeartbeatAge: TimeInterval = 300
+    ) -> DeveloperAgentStatus {
+        guard isLearningActive else {
+            return self
+        }
+
+        guard appVersion == currentAppVersion,
+              let updatedAt,
+              Date().timeIntervalSince(updatedAt) <=
+                maxHeartbeatAge else {
+            return DeveloperAgentStatus(
+                state: "stale_run",
+                message:
+                    "Önceki Developer Agent oturumu aktif değil veya bu sürüme ait değil.",
+                branch: branch,
+                worktree: worktree,
+                appVersion: currentAppVersion,
+                updatedAt: Date(),
+                runID: runID
+            )
+        }
+
+        return self
+    }
 
     var isReadyForReview: Bool {
         state == "ready_for_review" ||
@@ -44,6 +92,7 @@ struct DeveloperAgentStatus: Hashable {
             "sdk_provider_failed",
             "sdk_failed",
             "sdk_watchdog_timeout",
+            "stale_run",
             "failed"
         ].contains(state)
     }
@@ -100,6 +149,8 @@ struct DeveloperAgentStatus: Hashable {
             return "SDK öğrenmesi durdu"
         case "sdk_watchdog_timeout":
             return "SDK oturumu takıldı"
+        case "stale_run":
+            return "Önceki öğrenme oturumu"
         case "failed":
             return "Öğrenme durdu"
         default:
@@ -401,7 +452,7 @@ struct AgentDeveloperBridge {
             )
         }
 
-        let parts = text
+        let rawParts = text
             .trimmingCharacters(
                 in: .whitespacesAndNewlines
             )
@@ -410,6 +461,50 @@ struct AgentDeveloperBridge {
                 omittingEmptySubsequences: false
             )
             .map(String.init)
+
+        let metaIndex =
+            rawParts.firstIndex(
+                of: "@meta"
+            )
+
+        let parts =
+            metaIndex.map {
+                Array(
+                    rawParts.prefix($0)
+                )
+            } ?? rawParts
+
+        var appVersion: String?
+        var updatedAt: Date?
+        var runID: String?
+
+        if let metaIndex {
+            for item in rawParts.dropFirst(
+                metaIndex + 1
+            ) {
+                if item.hasPrefix("app=") {
+                    appVersion =
+                        String(
+                            item.dropFirst(4)
+                        )
+                } else if item.hasPrefix("at="),
+                          let seconds =
+                            TimeInterval(
+                                item.dropFirst(3)
+                            ) {
+                    updatedAt =
+                        Date(
+                            timeIntervalSince1970:
+                                seconds
+                        )
+                } else if item.hasPrefix("run=") {
+                    runID =
+                        String(
+                            item.dropFirst(4)
+                        )
+                }
+            }
+        }
 
         return DeveloperAgentStatus(
             state: parts.indices.contains(0)
@@ -425,7 +520,10 @@ struct AgentDeveloperBridge {
             worktree: parts.indices.contains(3) &&
                 !parts[3].isEmpty
                 ? parts[3]
-                : nil
+                : nil,
+            appVersion: appVersion,
+            updatedAt: updatedAt,
+            runID: runID
         )
     }
 
@@ -440,11 +538,31 @@ struct AgentDeveloperBridge {
             withIntermediateDirectories: true
         )
 
+        let currentVersion =
+            Bundle.main.object(
+                forInfoDictionaryKey:
+                    "CFBundleShortVersionString"
+            ) as? String ?? "unknown"
+
         let value = [
             status.state,
             status.message,
             status.branch ?? "",
-            status.worktree ?? ""
+            status.worktree ?? "",
+            "@meta",
+            "app=" +
+                (status.appVersion ??
+                    currentVersion),
+            "at=" +
+                String(
+                    Int(
+                        (status.updatedAt ??
+                            Date())
+                            .timeIntervalSince1970
+                    )
+                ),
+            "run=" +
+                (status.runID ?? "")
         ]
         .joined(separator: "|")
 
