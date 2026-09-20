@@ -223,21 +223,9 @@ final class AgentEngine: ObservableObject {
 
         developerAgentStatus = developerBridge.readStatus()
 
-        let currentVersion = Bundle.main.object(
-            forInfoDictionaryKey: "CFBundleShortVersionString"
-        ) as? String ?? "unknown"
-
-        let shouldAutoRunTrainingLab =
-            trainingLabReport?.appVersion != currentVersion
-
-        let shouldAutoRunLiveResearchEval =
-            liveResearchEvalReport?.appVersion != currentVersion
-
-        let shouldAutoRunArena =
-            arenaReport?.appVersion != currentVersion
-
         log("KRALİ Core hazır")
         log("Dinamik hedef ve kabiliyet yönlendirme aktif")
+        log("Ağır geliştirici testleri normal açılışta otomatik çalıştırılmıyor")
         restoreSelectedFolder()
 
         Task { @MainActor [weak self] in
@@ -245,33 +233,6 @@ final class AgentEngine: ObservableObject {
             let state = await self.localIntelligence.availability()
             self.localIntelligenceState = state
             self.log(state.title)
-        }
-
-        if shouldAutoRunTrainingLab {
-            Task { @MainActor [weak self] in
-                try? await Task.sleep(
-                    for: .milliseconds(650)
-                )
-                self?.runTrainingLab()
-            }
-        }
-
-        if shouldAutoRunLiveResearchEval {
-            Task { @MainActor [weak self] in
-                try? await Task.sleep(
-                    for: .seconds(2)
-                )
-                self?.runLiveResearchEval()
-            }
-        }
-
-        if shouldAutoRunArena {
-            Task { @MainActor [weak self] in
-                try? await Task.sleep(
-                    for: .seconds(3)
-                )
-                self?.runArena()
-            }
         }
     }
 
@@ -283,6 +244,10 @@ final class AgentEngine: ObservableObject {
     ) {
         let text = raw.trimmingCharacters(in: .whitespacesAndNewlines)
         guard !text.isEmpty else { return }
+        guard !busy else {
+            log("Yeni görev alınmadı: KRALİ mevcut görevi tamamlıyor")
+            return
+        }
 
         if source == .text {
             speech.stopSpeaking()
