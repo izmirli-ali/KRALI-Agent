@@ -1,120 +1,120 @@
-KRALI_STAGE sdk_provider_ready • Yerel Ollama provider hazır: qwen2.5-coder:14b-instruct
-KRALI_STAGE sdk_runtime_starting • ClineCore local runtime başlatılıyor
-KRALI_STAGE sdk_runtime_ready • ClineCore runtime hazır; agent session başlatılıyor
-KRALI_STAGE sdk_session_starting • Tarayıcı kontrolü (browser.control) için ClineCore session isteği gönderildi
-KRALI_STAGE sdk_session_running • Tarayıcı kontrolü (browser.control) için model oturumu aktif
-KRALI_STAGE sdk_session_completed • Tarayıcı kontrolü (browser.control) SDK oturumu tamamlandı; candidate değişiklikler kontrol ediliyor
-```json
-{
-  "name": "read_files",
-  "arguments": {
-    "files": [
-      {
-        "path": "/path/to/rg/grep/registry"
-      },
-      {
-        "path": "/path/to/rg/grep/resolver"
-      },
-      {
-        "path": "/path/to/rg/grep/executor"
-      },
-      {
-        "path": "/path/to/rg/grep/verifier"
-      }
-    ]
-  }
-}
-```
-✅ Developer Agent değişiklik gerektirmedi.
-
-━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
- KRALİ DEVELOPER AGENT
- 20260920-214634
-━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-⚠️ Global Node.js v26 Cline bağımlılıklarıyla uyumlu değil; izole Node 22 runtime hazırlanıyor.
-✅ Developer Agent runtime: v22.23.2
-Yerel model seçimi: qwen2.5-coder:14b-instruct • RAM≈24GB
-✅ Yerel Developer AI hazır: qwen2.5-coder:14b-instruct
-From https://github.com/izmirli-ali/KRALI-Agent
- * branch            main       -> FETCH_HEAD
-Already up to date.
-Learning Queue job brief bulundu; mutable Mentor latest yerine immutable job kullanılacak.
-Preparing worktree (new branch 'krali-dev-agent/20260920-214634')
-branch 'krali-dev-agent/20260920-214634' set up to track 'origin/main'.
-HEAD is now at bab0f69 Sync KRALI mentor diagnostics
-Developer prompt mode: gap • 2952 bytes
-KRALI_STAGE sdk_importing • Uygulama kontrolü (desktop.app) için Cline SDK yükleniyor
-KRALI_STAGE sdk_import_ready • Cline SDK yüklendi; provider ayarları doğrulanıyor
-KRALI_STAGE sdk_provider_ready • Yerel Ollama provider hazır: qwen2.5-coder:14b-instruct
-KRALI_STAGE sdk_runtime_starting • ClineCore local runtime başlatılıyor
-KRALI_STAGE sdk_runtime_ready • ClineCore runtime hazır; agent session başlatılıyor
-KRALI_STAGE sdk_session_starting • Uygulama kontrolü (desktop.app) için ClineCore session isteği gönderildi
-KRALI_STAGE sdk_session_running • Uygulama kontrolü (desktop.app) için model oturumu aktif
-KRALI_STAGE sdk_session_completed • Uygulama kontrolü (desktop.app) SDK oturumu tamamlandı; candidate değişiklikler kontrol ediliyor
-```json
-{
-  "name": "read_files",
-  "arguments": {
-    "files": [
-      {
-        "path": "workspace/desktop.app/registry.json",
-        "start_line": null,
-        "end_line": null
-      },
-      {
-        "path": "workspace/desktop.app/resolver.json",
-        "start_line": null,
-        "end_line": null
-      },
-      {
-        "path": "workspace/desktop.app/executor.json",
-        "start_line": null,
-        "end_line": null
-      },
-      {
-        "path": "workspace/desktop.app/verifier.json",
-        "start_line": null,
-        "end_line": null
-      }
-    ]
-  }
-}
-```
-KRALI_STAGE sdk_importing • Uygulama kontrolü (desktop.app) için Cline SDK yükleniyor
-KRALI_STAGE sdk_import_ready • Cline SDK yüklendi; provider ayarları doğrulanıyor
-KRALI_STAGE sdk_provider_ready • Yerel Ollama provider hazır: qwen2.5-coder:14b-instruct
-KRALI_STAGE sdk_runtime_starting • ClineCore local runtime başlatılıyor
-KRALI_STAGE sdk_runtime_ready • ClineCore runtime hazır; agent session başlatılıyor
-KRALI_STAGE sdk_session_starting • Uygulama kontrolü (desktop.app) için ClineCore session isteği gönderildi
-KRALI_STAGE sdk_session_running • Uygulama kontrolü (desktop.app) için model oturumu aktif
-KRALI_STAGE sdk_session_completed • Uygulama kontrolü (desktop.app) SDK oturumu tamamlandı; candidate değişiklikler kontrol ediliyor
-```json
-{
-  "name": "read_files",
-  "arguments": {
-    "files": [
-      {
-        "path": "workspace/desktop.app/registry.json",
-        "start_line": null,
-        "end_line": null
-      },
-      {
-        "path": "workspace/desktop.app/resolver.json",
-        "start_line": null,
-        "end_line": null
-      },
-      {
-        "path": "workspace/desktop.app/executor.json",
-        "start_line": null,
-        "end_line": null
-      },
-      {
-        "path": "workspace/desktop.app/verifier.json",
-        "start_line": null,
-        "end_line": null
-      }
-    ]
-  }
-}
-```
-✅ Developer Agent değişiklik gerektirmedi.
+pulling a3de86cd1c13:  76% ▕█████████████     ▏ 4.0 GB/5.2 GB   96 MB/s     13s[K[?25h[?2026l[?2026h[?25l[A[1Gpulling manifest [K
+pulling a3de86cd1c13:  76% ▕█████████████     ▏ 4.0 GB/5.2 GB   96 MB/s     13s[K[?25h[?2026l[?2026h[?25l[A[1Gpulling manifest [K
+pulling a3de86cd1c13:  76% ▕█████████████     ▏ 4.0 GB/5.2 GB   96 MB/s     12s[K[?25h[?2026l[?2026h[?25l[A[1Gpulling manifest [K
+pulling a3de86cd1c13:  76% ▕█████████████     ▏ 4.0 GB/5.2 GB   96 MB/s     12s[K[?25h[?2026l[?2026h[?25l[A[1Gpulling manifest [K
+pulling a3de86cd1c13:  77% ▕█████████████     ▏ 4.0 GB/5.2 GB   96 MB/s     12s[K[?25h[?2026l[?2026h[?25l[A[1Gpulling manifest [K
+pulling a3de86cd1c13:  77% ▕█████████████     ▏ 4.0 GB/5.2 GB   96 MB/s     12s[K[?25h[?2026l[?2026h[?25l[A[1Gpulling manifest [K
+pulling a3de86cd1c13:  77% ▕█████████████     ▏ 4.0 GB/5.2 GB   96 MB/s     12s[K[?25h[?2026l[?2026h[?25l[A[1Gpulling manifest [K
+pulling a3de86cd1c13:  77% ▕█████████████     ▏ 4.0 GB/5.2 GB   96 MB/s     12s[K[?25h[?2026l[?2026h[?25l[A[1Gpulling manifest [K
+pulling a3de86cd1c13:  77% ▕█████████████     ▏ 4.0 GB/5.2 GB   96 MB/s     12s[K[?25h[?2026l[?2026h[?25l[A[1Gpulling manifest [K
+pulling a3de86cd1c13:  77% ▕█████████████     ▏ 4.0 GB/5.2 GB   96 MB/s     12s[K[?25h[?2026l[?2026h[?25l[A[1Gpulling manifest [K
+pulling a3de86cd1c13:  78% ▕█████████████     ▏ 4.1 GB/5.2 GB   96 MB/s     12s[K[?25h[?2026l[?2026h[?25l[A[1Gpulling manifest [K
+pulling a3de86cd1c13:  78% ▕█████████████     ▏ 4.1 GB/5.2 GB   96 MB/s     12s[K[?25h[?2026l[?2026h[?25l[A[1Gpulling manifest [K
+pulling a3de86cd1c13:  78% ▕██████████████    ▏ 4.1 GB/5.2 GB   96 MB/s     12s[K[?25h[?2026l[?2026h[?25l[A[1Gpulling manifest [K
+pulling a3de86cd1c13:  78% ▕██████████████    ▏ 4.1 GB/5.2 GB   96 MB/s     11s[K[?25h[?2026l[?2026h[?25l[A[1Gpulling manifest [K
+pulling a3de86cd1c13:  78% ▕██████████████    ▏ 4.1 GB/5.2 GB   96 MB/s     11s[K[?25h[?2026l[?2026h[?25l[A[1Gpulling manifest [K
+pulling a3de86cd1c13:  78% ▕██████████████    ▏ 4.1 GB/5.2 GB   96 MB/s     11s[K[?25h[?2026l[?2026h[?25l[A[1Gpulling manifest [K
+pulling a3de86cd1c13:  79% ▕██████████████    ▏ 4.1 GB/5.2 GB   96 MB/s     11s[K[?25h[?2026l[?2026h[?25l[A[1Gpulling manifest [K
+pulling a3de86cd1c13:  79% ▕██████████████    ▏ 4.1 GB/5.2 GB   96 MB/s     11s[K[?25h[?2026l[?2026h[?25l[A[1Gpulling manifest [K
+pulling a3de86cd1c13:  79% ▕██████████████    ▏ 4.1 GB/5.2 GB   96 MB/s     11s[K[?25h[?2026l[?2026h[?25l[A[1Gpulling manifest [K
+pulling a3de86cd1c13:  79% ▕██████████████    ▏ 4.1 GB/5.2 GB   96 MB/s     11s[K[?25h[?2026l[?2026h[?25l[A[1Gpulling manifest [K
+pulling a3de86cd1c13:  79% ▕██████████████    ▏ 4.1 GB/5.2 GB   96 MB/s     11s[K[?25h[?2026l[?2026h[?25l[A[1Gpulling manifest [K
+pulling a3de86cd1c13:  79% ▕██████████████    ▏ 4.2 GB/5.2 GB   96 MB/s     11s[K[?25h[?2026l[?2026h[?25l[A[1Gpulling manifest [K
+pulling a3de86cd1c13:  80% ▕██████████████    ▏ 4.2 GB/5.2 GB   96 MB/s     11s[K[?25h[?2026l[?2026h[?25l[A[1Gpulling manifest [K
+pulling a3de86cd1c13:  80% ▕██████████████    ▏ 4.2 GB/5.2 GB   96 MB/s     10s[K[?25h[?2026l[?2026h[?25l[A[1Gpulling manifest [K
+pulling a3de86cd1c13:  80% ▕██████████████    ▏ 4.2 GB/5.2 GB   96 MB/s     10s[K[?25h[?2026l[?2026h[?25l[A[1Gpulling manifest [K
+pulling a3de86cd1c13:  80% ▕██████████████    ▏ 4.2 GB/5.2 GB   96 MB/s     10s[K[?25h[?2026l[?2026h[?25l[A[1Gpulling manifest [K
+pulling a3de86cd1c13:  80% ▕██████████████    ▏ 4.2 GB/5.2 GB   96 MB/s     10s[K[?25h[?2026l[?2026h[?25l[A[1Gpulling manifest [K
+pulling a3de86cd1c13:  81% ▕██████████████    ▏ 4.2 GB/5.2 GB   96 MB/s     10s[K[?25h[?2026l[?2026h[?25l[A[1Gpulling manifest [K
+pulling a3de86cd1c13:  81% ▕██████████████    ▏ 4.2 GB/5.2 GB   96 MB/s     10s[K[?25h[?2026l[?2026h[?25l[A[1Gpulling manifest [K
+pulling a3de86cd1c13:  81% ▕██████████████    ▏ 4.2 GB/5.2 GB   96 MB/s     10s[K[?25h[?2026l[?2026h[?25l[A[1Gpulling manifest [K
+pulling a3de86cd1c13:  81% ▕██████████████    ▏ 4.2 GB/5.2 GB   96 MB/s     10s[K[?25h[?2026l[?2026h[?25l[A[1Gpulling manifest [K
+pulling a3de86cd1c13:  81% ▕██████████████    ▏ 4.2 GB/5.2 GB   96 MB/s     10s[K[?25h[?2026l[?2026h[?25l[A[1Gpulling manifest [K
+pulling a3de86cd1c13:  81% ▕██████████████    ▏ 4.3 GB/5.2 GB   96 MB/s     10s[K[?25h[?2026l[?2026h[?25l[A[1Gpulling manifest [K
+pulling a3de86cd1c13:  82% ▕██████████████    ▏ 4.3 GB/5.2 GB   96 MB/s      9s[K[?25h[?2026l[?2026h[?25l[A[1Gpulling manifest [K
+pulling a3de86cd1c13:  82% ▕██████████████    ▏ 4.3 GB/5.2 GB   96 MB/s      9s[K[?25h[?2026l[?2026h[?25l[A[1Gpulling manifest [K
+pulling a3de86cd1c13:  82% ▕██████████████    ▏ 4.3 GB/5.2 GB   96 MB/s      9s[K[?25h[?2026l[?2026h[?25l[A[1Gpulling manifest [K
+pulling a3de86cd1c13:  82% ▕██████████████    ▏ 4.3 GB/5.2 GB   96 MB/s      9s[K[?25h[?2026l[?2026h[?25l[A[1Gpulling manifest [K
+pulling a3de86cd1c13:  82% ▕██████████████    ▏ 4.3 GB/5.2 GB   96 MB/s      9s[K[?25h[?2026l[?2026h[?25l[A[1Gpulling manifest [K
+pulling a3de86cd1c13:  82% ▕██████████████    ▏ 4.3 GB/5.2 GB   96 MB/s      9s[K[?25h[?2026l[?2026h[?25l[A[1Gpulling manifest [K
+pulling a3de86cd1c13:  83% ▕██████████████    ▏ 4.3 GB/5.2 GB   96 MB/s      9s[K[?25h[?2026l[?2026h[?25l[A[1Gpulling manifest [K
+pulling a3de86cd1c13:  83% ▕██████████████    ▏ 4.3 GB/5.2 GB   96 MB/s      9s[K[?25h[?2026l[?2026h[?25l[A[1Gpulling manifest [K
+pulling a3de86cd1c13:  83% ▕██████████████    ▏ 4.3 GB/5.2 GB   96 MB/s      9s[K[?25h[?2026l[?2026h[?25l[A[1Gpulling manifest [K
+pulling a3de86cd1c13:  83% ▕██████████████    ▏ 4.3 GB/5.2 GB   96 MB/s      9s[K[?25h[?2026l[?2026h[?25l[A[1Gpulling manifest [K
+pulling a3de86cd1c13:  83% ▕███████████████   ▏ 4.4 GB/5.2 GB   96 MB/s      8s[K[?25h[?2026l[?2026h[?25l[A[1Gpulling manifest [K
+pulling a3de86cd1c13:  84% ▕███████████████   ▏ 4.4 GB/5.2 GB   96 MB/s      8s[K[?25h[?2026l[?2026h[?25l[A[1Gpulling manifest [K
+pulling a3de86cd1c13:  84% ▕███████████████   ▏ 4.4 GB/5.2 GB   96 MB/s      8s[K[?25h[?2026l[?2026h[?25l[A[1Gpulling manifest [K
+pulling a3de86cd1c13:  84% ▕███████████████   ▏ 4.4 GB/5.2 GB   96 MB/s      8s[K[?25h[?2026l[?2026h[?25l[A[1Gpulling manifest [K
+pulling a3de86cd1c13:  84% ▕███████████████   ▏ 4.4 GB/5.2 GB   96 MB/s      8s[K[?25h[?2026l[?2026h[?25l[A[1Gpulling manifest [K
+pulling a3de86cd1c13:  84% ▕███████████████   ▏ 4.4 GB/5.2 GB   96 MB/s      8s[K[?25h[?2026l[?2026h[?25l[A[1Gpulling manifest [K
+pulling a3de86cd1c13:  84% ▕███████████████   ▏ 4.4 GB/5.2 GB   96 MB/s      8s[K[?25h[?2026l[?2026h[?25l[A[1Gpulling manifest [K
+pulling a3de86cd1c13:  85% ▕███████████████   ▏ 4.4 GB/5.2 GB   96 MB/s      8s[K[?25h[?2026l[?2026h[?25l[A[1Gpulling manifest [K
+pulling a3de86cd1c13:  85% ▕███████████████   ▏ 4.4 GB/5.2 GB   96 MB/s      8s[K[?25h[?2026l[?2026h[?25l[A[1Gpulling manifest [K
+pulling a3de86cd1c13:  85% ▕███████████████   ▏ 4.4 GB/5.2 GB   96 MB/s      8s[K[?25h[?2026l[?2026h[?25l[A[1Gpulling manifest [K
+pulling a3de86cd1c13:  85% ▕███████████████   ▏ 4.4 GB/5.2 GB   96 MB/s      8s[K[?25h[?2026l[?2026h[?25l[A[1Gpulling manifest [K
+pulling a3de86cd1c13:  85% ▕███████████████   ▏ 4.5 GB/5.2 GB   94 MB/s      8s[K[?25h[?2026l[?2026h[?25l[A[1Gpulling manifest [K
+pulling a3de86cd1c13:  86% ▕███████████████   ▏ 4.5 GB/5.2 GB   94 MB/s      7s[K[?25h[?2026l[?2026h[?25l[A[1Gpulling manifest [K
+pulling a3de86cd1c13:  86% ▕███████████████   ▏ 4.5 GB/5.2 GB   94 MB/s      7s[K[?25h[?2026l[?2026h[?25l[A[1Gpulling manifest [K
+pulling a3de86cd1c13:  86% ▕███████████████   ▏ 4.5 GB/5.2 GB   94 MB/s      7s[K[?25h[?2026l[?2026h[?25l[A[1Gpulling manifest [K
+pulling a3de86cd1c13:  86% ▕███████████████   ▏ 4.5 GB/5.2 GB   94 MB/s      7s[K[?25h[?2026l[?2026h[?25l[A[1Gpulling manifest [K
+pulling a3de86cd1c13:  86% ▕███████████████   ▏ 4.5 GB/5.2 GB   94 MB/s      7s[K[?25h[?2026l[?2026h[?25l[A[1Gpulling manifest [K
+pulling a3de86cd1c13:  86% ▕███████████████   ▏ 4.5 GB/5.2 GB   94 MB/s      7s[K[?25h[?2026l[?2026h[?25l[A[1Gpulling manifest [K
+pulling a3de86cd1c13:  87% ▕███████████████   ▏ 4.5 GB/5.2 GB   94 MB/s      7s[K[?25h[?2026l[?2026h[?25l[A[1Gpulling manifest [K
+pulling a3de86cd1c13:  87% ▕███████████████   ▏ 4.5 GB/5.2 GB   94 MB/s      7s[K[?25h[?2026l[?2026h[?25l[A[1Gpulling manifest [K
+pulling a3de86cd1c13:  87% ▕███████████████   ▏ 4.5 GB/5.2 GB   94 MB/s      7s[K[?25h[?2026l[?2026h[?25l[A[1Gpulling manifest [K
+pulling a3de86cd1c13:  87% ▕███████████████   ▏ 4.5 GB/5.2 GB   93 MB/s      7s[K[?25h[?2026l[?2026h[?25l[A[1Gpulling manifest [K
+pulling a3de86cd1c13:  87% ▕███████████████   ▏ 4.6 GB/5.2 GB   93 MB/s      7s[K[?25h[?2026l[?2026h[?25l[A[1Gpulling manifest [K
+pulling a3de86cd1c13:  87% ▕███████████████   ▏ 4.6 GB/5.2 GB   93 MB/s      7s[K[?25h[?2026l[?2026h[?25l[A[1Gpulling manifest [K
+pulling a3de86cd1c13:  87% ▕███████████████   ▏ 4.6 GB/5.2 GB   93 MB/s      6s[K[?25h[?2026l[?2026h[?25l[A[1Gpulling manifest [K
+pulling a3de86cd1c13:  87% ▕███████████████   ▏ 4.6 GB/5.2 GB   93 MB/s      6s[K[?25h[?2026l[?2026h[?25l[A[1Gpulling manifest [K
+pulling a3de86cd1c13:  88% ▕███████████████   ▏ 4.6 GB/5.2 GB   93 MB/s      6s[K[?25h[?2026l[?2026h[?25l[A[1Gpulling manifest [K
+pulling a3de86cd1c13:  88% ▕███████████████   ▏ 4.6 GB/5.2 GB   93 MB/s      6s[K[?25h[?2026l[?2026h[?25l[A[1Gpulling manifest [K
+pulling a3de86cd1c13:  88% ▕███████████████   ▏ 4.6 GB/5.2 GB   93 MB/s      6s[K[?25h[?2026l[?2026h[?25l[A[1Gpulling manifest [K
+pulling a3de86cd1c13:  88% ▕███████████████   ▏ 4.6 GB/5.2 GB   93 MB/s      6s[K[?25h[?2026l[?2026h[?25l[A[1Gpulling manifest [K
+pulling a3de86cd1c13:  88% ▕███████████████   ▏ 4.6 GB/5.2 GB   93 MB/s      6s[K[?25h[?2026l[?2026h[?25l[A[1Gpulling manifest [K
+pulling a3de86cd1c13:  89% ▕███████████████   ▏ 4.6 GB/5.2 GB   93 MB/s      6s[K[?25h[?2026l[?2026h[?25l[A[1Gpulling manifest [K
+pulling a3de86cd1c13:  89% ▕███████████████   ▏ 4.6 GB/5.2 GB   92 MB/s      6s[K[?25h[?2026l[?2026h[?25l[A[1Gpulling manifest [K
+pulling a3de86cd1c13:  89% ▕████████████████  ▏ 4.7 GB/5.2 GB   92 MB/s      6s[K[?25h[?2026l[?2026h[?25l[A[1Gpulling manifest [K
+pulling a3de86cd1c13:  89% ▕████████████████  ▏ 4.7 GB/5.2 GB   92 MB/s      6s[K[?25h[?2026l[?2026h[?25l[A[1Gpulling manifest [K
+pulling a3de86cd1c13:  89% ▕████████████████  ▏ 4.7 GB/5.2 GB   92 MB/s      6s[K[?25h[?2026l[?2026h[?25l[A[1Gpulling manifest [K
+pulling a3de86cd1c13:  90% ▕████████████████  ▏ 4.7 GB/5.2 GB   92 MB/s      5s[K[?25h[?2026l[?2026h[?25l[A[1Gpulling manifest [K
+pulling a3de86cd1c13:  90% ▕████████████████  ▏ 4.7 GB/5.2 GB   92 MB/s      5s[K[?25h[?2026l[?2026h[?25l[A[1Gpulling manifest [K
+pulling a3de86cd1c13:  90% ▕████████████████  ▏ 4.7 GB/5.2 GB   92 MB/s      5s[K[?25h[?2026l[?2026h[?25l[A[1Gpulling manifest [K
+pulling a3de86cd1c13:  90% ▕████████████████  ▏ 4.7 GB/5.2 GB   92 MB/s      5s[K[?25h[?2026l[?2026h[?25l[A[1Gpulling manifest [K
+pulling a3de86cd1c13:  90% ▕████████████████  ▏ 4.7 GB/5.2 GB   92 MB/s      5s[K[?25h[?2026l[?2026h[?25l[A[1Gpulling manifest [K
+pulling a3de86cd1c13:  90% ▕████████████████  ▏ 4.7 GB/5.2 GB   92 MB/s      5s[K[?25h[?2026l[?2026h[?25l[A[1Gpulling manifest [K
+pulling a3de86cd1c13:  90% ▕████████████████  ▏ 4.7 GB/5.2 GB   90 MB/s      5s[K[?25h[?2026l[?2026h[?25l[A[1Gpulling manifest [K
+pulling a3de86cd1c13:  90% ▕████████████████  ▏ 4.7 GB/5.2 GB   90 MB/s      5s[K[?25h[?2026l[?2026h[?25l[A[1Gpulling manifest [K
+pulling a3de86cd1c13:  90% ▕████████████████  ▏ 4.7 GB/5.2 GB   90 MB/s      5s[K[?25h[?2026l[?2026h[?25l[A[1Gpulling manifest [K
+pulling a3de86cd1c13:  90% ▕████████████████  ▏ 4.7 GB/5.2 GB   90 MB/s      5s[K[?25h[?2026l[?2026h[?25l[A[1Gpulling manifest [K
+pulling a3de86cd1c13:  90% ▕████████████████  ▏ 4.7 GB/5.2 GB   90 MB/s      5s[K[?25h[?2026l[?2026h[?25l[A[1Gpulling manifest [K
+pulling a3de86cd1c13:  90% ▕████████████████  ▏ 4.7 GB/5.2 GB   90 MB/s      5s[K[?25h[?2026l[?2026h[?25l[A[1Gpulling manifest [K
+pulling a3de86cd1c13:  91% ▕████████████████  ▏ 4.7 GB/5.2 GB   90 MB/s      5s[K[?25h[?2026l[?2026h[?25l[A[1Gpulling manifest [K
+pulling a3de86cd1c13:  91% ▕████████████████  ▏ 4.7 GB/5.2 GB   90 MB/s      5s[K[?25h[?2026l[?2026h[?25l[A[1Gpulling manifest [K
+pulling a3de86cd1c13:  91% ▕████████████████  ▏ 4.7 GB/5.2 GB   90 MB/s      5s[K[?25h[?2026l[?2026h[?25l[A[1Gpulling manifest [K
+pulling a3de86cd1c13:  91% ▕████████████████  ▏ 4.7 GB/5.2 GB   90 MB/s      5s[K[?25h[?2026l[?2026h[?25l[A[1Gpulling manifest [K
+pulling a3de86cd1c13:  91% ▕████████████████  ▏ 4.7 GB/5.2 GB   84 MB/s      5s[K[?25h[?2026l[?2026h[?25l[A[1Gpulling manifest [K
+pulling a3de86cd1c13:  91% ▕████████████████  ▏ 4.7 GB/5.2 GB   84 MB/s      5s[K[?25h[?2026l[?2026h[?25l[A[1Gpulling manifest [K
+pulling a3de86cd1c13:  91% ▕████████████████  ▏ 4.8 GB/5.2 GB   84 MB/s      5s[K[?25h[?2026l[?2026h[?25l[A[1Gpulling manifest [K
+pulling a3de86cd1c13:  91% ▕████████████████  ▏ 4.8 GB/5.2 GB   84 MB/s      5s[K[?25h[?2026l[?2026h[?25l[A[1Gpulling manifest [K
+pulling a3de86cd1c13:  91% ▕████████████████  ▏ 4.8 GB/5.2 GB   84 MB/s      5s[K[?25h[?2026l[?2026h[?25l[A[1Gpulling manifest [K
+pulling a3de86cd1c13:  91% ▕████████████████  ▏ 4.8 GB/5.2 GB   84 MB/s      5s[K[?25h[?2026l[?2026h[?25l[A[1Gpulling manifest [K
+pulling a3de86cd1c13:  91% ▕████████████████  ▏ 4.8 GB/5.2 GB   84 MB/s      5s[K[?25h[?2026l[?2026h[?25l[A[1Gpulling manifest [K
+pulling a3de86cd1c13:  91% ▕████████████████  ▏ 4.8 GB/5.2 GB   84 MB/s      5s[K[?25h[?2026l[?2026h[?25l[A[1Gpulling manifest [K
+pulling a3de86cd1c13:  91% ▕████████████████  ▏ 4.8 GB/5.2 GB   84 MB/s      5s[K[?25h[?2026l[?2026h[?25l[A[1Gpulling manifest [K
+pulling a3de86cd1c13:  91% ▕████████████████  ▏ 4.8 GB/5.2 GB   84 MB/s      5s[K[?25h[?2026l[?2026h[?25l[A[1Gpulling manifest [K
+pulling a3de86cd1c13:  92% ▕████████████████  ▏ 4.8 GB/5.2 GB   77 MB/s      5s[K[?25h[?2026l[?2026h[?25l[A[1Gpulling manifest [K
+pulling a3de86cd1c13:  92% ▕████████████████  ▏ 4.8 GB/5.2 GB   77 MB/s      5s[K[?25h[?2026l[?2026h[?25l[A[1Gpulling manifest [K
+pulling a3de86cd1c13:  92% ▕████████████████  ▏ 4.8 GB/5.2 GB   77 MB/s      5s[K[?25h[?2026l[?2026h[?25l[A[1Gpulling manifest [K
+pulling a3de86cd1c13:  92% ▕████████████████  ▏ 4.8 GB/5.2 GB   77 MB/s      5s[K[?25h[?2026l[?2026h[?25l[A[1Gpulling manifest [K
+pulling a3de86cd1c13:  92% ▕████████████████  ▏ 4.8 GB/5.2 GB   77 MB/s      5s[K[?25h[?2026l[?2026h[?25l[A[1Gpulling manifest [K
+pulling a3de86cd1c13:  92% ▕████████████████  ▏ 4.8 GB/5.2 GB   77 MB/s      5s[K[?25h[?2026l[?2026h[?25l[A[1Gpulling manifest [K
+pulling a3de86cd1c13:  92% ▕████████████████  ▏ 4.8 GB/5.2 GB   77 MB/s      5s[K[?25h[?2026l[?2026h[?25l[A[1Gpulling manifest [K
+pulling a3de86cd1c13:  92% ▕████████████████  ▏ 4.8 GB/5.2 GB   77 MB/s      5s[K[?25h[?2026l[?2026h[?25l[A[1Gpulling manifest [K
+pulling a3de86cd1c13:  92% ▕████████████████  ▏ 4.8 GB/5.2 GB   77 MB/s      5s[K[?25h[?2026l[?2026h[?25l[A[1Gpulling manifest [K
+pulling a3de86cd1c13:  92% ▕████████████████  ▏ 4.8 GB/5.2 GB   77 MB/s      5s[K[?25h[?2026l[?2026h[?25l[A[1Gpulling manifest [K
+pulling a3de86cd1c13:  92% ▕████████████████  ▏ 4.8 GB/5.2 GB   71 MB/s      5s[K[?25h[?2026l[?2026h[?25l[A[1Gpulling manifest [K
+pulling a3de86cd1c13:  92% ▕████████████████  ▏ 4.8 GB/5.2 GB   71 MB/s      5s[K[?25h[?2026l
+Error: write /Users/medusa/.ollama/models/blobs/sha256-a3de86cd1c132c822487ededd47a324c50491393e6565cd14bafa40d0b8e686f-partial: no space left on device
+🧩 Cline hata verdi ancak candidate değişiklik üretti; recovery başlatılıyor.
+❌ Cline görevi başarısız oldu (exit 25, 85s): KRALI SDK local tool protocol failed: no real tool event
