@@ -84,7 +84,7 @@ actor AgentLocalIntelligence {
             Örnek: "son çekimle ilgili kurgu yapmamız gerekiyor" => son çekimleri bul, medyayı değerlendir, kurgu uygulamasında düzenle, sonucu doğrula.
             Örnek: "X markası için tasarım hazırlamak istiyorum" => markayı araştır, görsel standartları analiz et, tasarım uygulamasında üret, ekran sonucunu doğrula.
             Gereksiz soru sorma. Makul ve geri alınabilir varsayımla ilerlenebiliyorsa requiresUserInput=false yap.
-            Ancak sonucu kökten değiştirecek zorunlu bilgi yoksa ve güvenilir varsayım yapılamıyorsa requiresUserInput=true yap.
+            Ancak sonucu kökten değiştirecek zorunlu bilgi varsa ve güvenilir varsayım yapılamıyorsa requiresUserInput=true yap.
             Capability kullanılamıyor olsa bile görev için gerçekten gerekiyorsa requiredCapabilityIDs içine koy.
             Marka özelindeki hafızayı başka markalara taşımayı önleyen kullanıcı kurallarına uy.
             JSON dışında hiçbir metin üretme.
