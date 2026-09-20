@@ -277,6 +277,30 @@ actor AgentScreenPerception {
 struct ScreenPerceptionStore {
     private let fileManager = FileManager.default
 
+    var statusURL: URL {
+        fileManager.homeDirectoryForCurrentUser
+            .appendingPathComponent(
+                "Library/Application Support/KRALI Agent/Mentor/screen-perception-status.txt",
+                isDirectory: false
+            )
+    }
+
+    func saveStatus(_ value: String) {
+        let directory = statusURL
+            .deletingLastPathComponent()
+
+        try? fileManager.createDirectory(
+            at: directory,
+            withIntermediateDirectories: true
+        )
+
+        try? value.write(
+            to: statusURL,
+            atomically: true,
+            encoding: .utf8
+        )
+    }
+
     var outputURL: URL {
         fileManager.homeDirectoryForCurrentUser
             .appendingPathComponent(
