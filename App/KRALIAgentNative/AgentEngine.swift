@@ -611,7 +611,8 @@ final class AgentEngine: ObservableObject {
             }
 
             if let learningSummary = await researchCapabilityGapIfNeeded(
-                plans: resolvedLearningPlans
+                plans: resolvedLearningPlans,
+                userInput: text
             ) {
                 baseReply += "\n\nÖğrenme araştırması: " + learningSummary
             }
@@ -2433,8 +2434,37 @@ final class AgentEngine: ObservableObject {
     }
 
     private func researchCapabilityGapIfNeeded(
-        plans: [CapabilityLearningPlan]
+        plans: [CapabilityLearningPlan],
+        userInput: String
     ) async -> String? {
+        let corpus =
+            normalizeSemanticText(
+                userInput
+            )
+
+        let explicitLearningRequest =
+            containsSemanticAny(
+                corpus,
+                [
+                    "hangi yetenek eksik",
+                    "hangi yetenegin eksik",
+                    "nasıl yapıldığını öğren",
+                    "nasil yapildigini ogren",
+                    "kendine öğren",
+                    "kendine ogren",
+                    "öğrenme planı",
+                    "ogrenme plani",
+                    "bu yeteneği geliştir",
+                    "bu yetenegi gelistir",
+                    "capability geliştir",
+                    "capability gelistir"
+                ]
+            )
+
+        guard explicitLearningRequest else {
+            return nil
+        }
+
         guard let plan = plans.first(where: {
             $0.canResearchAutonomously
         }) else {
