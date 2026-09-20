@@ -1,12 +1,12 @@
 {
-  "appVersion" : "0.8.0",
-  "corePassed" : 14,
-  "coreTotal" : 15,
-  "createdAt" : "2026-09-20T01:00:29Z",
-  "failed" : 1,
+  "appVersion" : "0.8.2",
+  "corePassed" : 17,
+  "coreTotal" : 17,
+  "createdAt" : "2026-09-20T08:42:32Z",
+  "failed" : 0,
   "northStarPassed" : 4,
   "northStarTotal" : 4,
-  "passed" : 18,
+  "passed" : 21,
   "results" : [
     {
       "diagnostics" : [
@@ -174,11 +174,10 @@
     },
     {
       "diagnostics" : [
-        "Eksik hedef sonuçları: ideate",
-        "Plan adımı eksik: Bağımsız fikir üret"
+
       ],
-      "goal" : "sonucu ve gerekçeyi açıkla",
-      "passed" : false,
+      "goal" : "bağımsız fikir ve çıkarım üret → sonucu ve gerekçeyi açıkla",
+      "passed" : true,
       "prompt" : "bu hesap için az önce söylediklerinden 3 reels fikri çıkar",
       "route" : [
         "Core",
@@ -193,6 +192,58 @@
       ],
       "tier" : "core",
       "title" : "Önceki araştırmadan devam etme",
+      "unavailableCapabilities" : [
+
+      ]
+    },
+    {
+      "diagnostics" : [
+
+      ],
+      "goal" : "bağımsız fikir ve çıkarım üret",
+      "passed" : true,
+      "prompt" : "şimdi Estafiz'e dön, az önceki Reels fikirlerinden birincisini 30 saniyelik çekim senaryosuna çevir",
+      "route" : [
+        "Core",
+        "Goal",
+        "Context",
+        "Response"
+      ],
+      "scenarioID" : "context-memory-transform",
+      "selectedCapabilities" : [
+        "context.local",
+        "core.reasoning"
+      ],
+      "tier" : "core",
+      "title" : "Önceki fikri yeni formata dönüştürme",
+      "unavailableCapabilities" : [
+
+      ]
+    },
+    {
+      "diagnostics" : [
+
+      ],
+      "goal" : "bulguları analiz et → güncel kaynaklarla araştır → sonucu ve gerekçeyi açıkla",
+      "passed" : true,
+      "prompt" : "Sony A7 IV ile Fuji X-T5 arasında video açısından temel farklar neler?",
+      "route" : [
+        "Core",
+        "Goal",
+        "Context",
+        "Plan",
+        "Research",
+        "Verify",
+        "Response"
+      ],
+      "scenarioID" : "knowledge-comparison-not-file-search",
+      "selectedCapabilities" : [
+        "context.local",
+        "core.reasoning",
+        "research.web"
+      ],
+      "tier" : "core",
+      "title" : "Bilgi karşılaştırmasını yerel dosya aramasından ayırma",
       "unavailableCapabilities" : [
 
       ]
@@ -539,5 +590,5 @@
       ]
     }
   ],
-  "total" : 19
+  "total" : 21
 }
