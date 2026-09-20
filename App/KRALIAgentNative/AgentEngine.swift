@@ -230,6 +230,37 @@ final class AgentEngine: ObservableObject {
 
         developerAgentStatus = developerBridge.readStatus()
 
+        let launchAppVersion =
+            Bundle.main.object(
+                forInfoDictionaryKey:
+                    "CFBundleShortVersionString"
+            ) as? String ?? "unknown"
+
+        let launchDiagnosticsCurrent =
+            trainingLabReport?.appVersion ==
+                launchAppVersion &&
+            liveResearchEvalReport?.appVersion ==
+                launchAppVersion &&
+            arenaReport?.appVersion ==
+                launchAppVersion
+
+        if developerAgentStatus.state == "no_change" &&
+           !launchDiagnosticsCurrent {
+            let staleStatus =
+                DeveloperAgentStatus(
+                    state: "stale_diagnostics",
+                    message:
+                        "Önceki no_change kararı bu sürüm için geçerli değil. Güncel Training, Live ve Arena diagnostic'leri gerekiyor.",
+                    branch: nil,
+                    worktree: nil
+                )
+
+            developerAgentStatus = staleStatus
+            developerBridge.writeStatus(
+                staleStatus
+            )
+        }
+
         log("KRALİ Core hazır")
         log("Dinamik hedef ve kabiliyet yönlendirme aktif")
         log("Ağır geliştirici testleri normal açılışta otomatik çalıştırılmıyor")
@@ -943,6 +974,14 @@ final class AgentEngine: ObservableObject {
 
             if source == .voice && voiceOutputEnabled {
                 speech.speak(reply)
+            }
+
+            if !currentCapabilityGaps.isEmpty &&
+               !developerAgentBusy {
+                log(
+                    "Capability gap algılandı; Developer Agent izole candidate geliştirme için otomatik başlatılıyor"
+                )
+                runDeveloperAgent()
             }
         }
     }
