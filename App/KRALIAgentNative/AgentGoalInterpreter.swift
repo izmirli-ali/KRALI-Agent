@@ -200,7 +200,17 @@ struct AgentGoalInterpreter {
                 "dönüştür", "donustur"
             ])
 
-        if isContextualTransformation {
+        let asksTextRewrite = containsAny(text, [
+            "yeniden yaz", "tekrar yaz",
+            "düzgün türkçeyle", "duzgun turkceyle",
+            "düzgün türkçe", "duzgun turkce",
+            "yazım hatalarını düzelt", "yazim hatalarini duzelt",
+            "imla hatalarını düzelt", "imla hatalarini duzelt",
+            "metni düzelt", "metni duzelt",
+            "proofread", "rewrite"
+        ])
+
+        if isContextualTransformation || asksTextRewrite {
             outcomes.insert(.transform)
         }
 
@@ -300,7 +310,7 @@ struct AgentGoalInterpreter {
             parts.append("bağımsız fikir ve çıkarım üret")
         }
         if outcomes.contains(.transform) {
-            parts.append("önceki çıktıyı istenen formata dönüştür")
+            parts.append("verilen veya önceki çıktıyı istenen formata dönüştür")
         }
         if outcomes.contains(.organize) {
             parts.append("güvenli biçimde düzenle")
