@@ -45,6 +45,10 @@ enum DesktopControlError: LocalizedError {
 actor AgentDesktopControl {
     private let fileManager = FileManager.default
     private let screenPerception = AgentScreenPerception()
+    private let languageResolver =
+        AgentNaturalLanguageResolver()
+    private var cachedApplicationCandidates:
+        [ApplicationCandidate]?
 
     func accessibilityTrusted(
         promptIfNeeded: Bool
@@ -301,56 +305,37 @@ actor AgentDesktopControl {
     private func resolveRequestedApplication(
         from userText: String
     ) -> ApplicationCandidate? {
-        let corpus = normalize(userText)
-        let candidates = installedApplicationCandidates()
-
-        let exact = candidates
-            .filter { candidate in
-                candidate.aliases.contains { alias in
-                    let normalized =
-                        normalize(alias)
-
-                    return
-                        !normalized.isEmpty &&
-                        corpus.contains(normalized)
-                }
-            }
-            .sorted {
-                let lhs = $0.aliases
-                    .map { normalize($0).count }
-                    .max() ?? 0
-                let rhs = $1.aliases
-                    .map { normalize($0).count }
-                    .max() ?? 0
-                return lhs > rhs
-            }
-
-        if let candidate = exact.first {
+        if let candidate =
+            bestApplicationCandidate(
+                from: userText,
+                candidates:
+                    installedApplicationCandidates()
+            ) {
             return candidate
         }
 
-        let tokens = Set(
-            corpus.split(separator: " ")
-                .map(String.init)
-                .filter { $0.count >= 3 }
+        cachedApplicationCandidates = nil
+
+        return bestApplicationCandidate(
+            from: userText,
+            candidates:
+                installedApplicationCandidates()
         )
+    }
 
-        return candidates
+    private func bestApplicationCandidate(
+        from userText: String,
+        candidates: [ApplicationCandidate]
+    ) -> ApplicationCandidate? {
+        let ranked = candidates
             .map { candidate in
-                let nameTokens = Set(
-                    candidate.aliases
-                        .flatMap {
-                            normalize($0)
-                                .split(separator: " ")
-                                .map(String.init)
-                        }
-                )
-
-                return (
+                (
                     candidate,
-                    tokens.intersection(
-                        nameTokens
-                    ).count
+                    languageResolver.bestAliasScore(
+                        input: userText,
+                        aliases:
+                            candidate.aliases
+                    )
                 )
             }
             .filter { $0.1 > 0 }
@@ -363,12 +348,39 @@ actor AgentDesktopControl {
 
                 return $0.1 > $1.1
             }
-            .first?
-            .0
+
+        guard let best = ranked.first else {
+            return nil
+        }
+
+        guard
+            languageResolver
+                .isConfidentAliasMatch(
+                    score: best.1,
+                    input: userText
+                )
+        else {
+            return nil
+        }
+
+        if ranked.count > 1 {
+            let second = ranked[1]
+
+            if best.1 < 0.94,
+               best.1 - second.1 < 0.08 {
+                return nil
+            }
+        }
+
+        return best.0
     }
 
     private func installedApplicationCandidates()
         -> [ApplicationCandidate] {
+        if let cachedApplicationCandidates {
+            return cachedApplicationCandidates
+        }
+
         let roots = [
             URL(fileURLWithPath: "/Applications"),
             URL(fileURLWithPath: "/System/Applications"),
@@ -460,6 +472,9 @@ actor AgentDesktopControl {
                 )
             }
         }
+
+        cachedApplicationCandidates =
+            results
 
         return results
     }
