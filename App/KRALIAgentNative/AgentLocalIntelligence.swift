@@ -55,6 +55,48 @@ actor AgentLocalIntelligence {
         capabilities: [AgentCapability],
         hasWorkspace: Bool
     ) async -> AgentSemanticMission? {
+        let normalizedInput =
+            normalizeMissionText(userInput)
+
+        let simpleAppOpen =
+            containsMissionConcept(
+                normalizedInput,
+                [
+                    "uygulamasini ac",
+                    "uygulamayi ac",
+                    "uygulamayı aç",
+                    "uygulamasını aç",
+                    "uygulama ac",
+                    "uygulama aç",
+                    "pencereyi one getir",
+                    "pencereyi öne getir",
+                    "uygulamaya gec",
+                    "uygulamaya geç",
+                    "uygulamayi one getir",
+                    "uygulamayı öne getir"
+                ]
+            ) &&
+            !containsMissionConcept(
+                normalizedInput,
+                [
+                    "tikla", "tıkla",
+                    "buton", "menu", "menü",
+                    "alana yaz", "metin yaz",
+                    "surukle", "sürükle",
+                    "dosya", "pdf", "klasor",
+                    "klasör", "web", "site",
+                    "internet", "analiz et",
+                    "incele"
+                ]
+            )
+
+        if simpleAppOpen {
+            return contractFallbackMission(
+                userInput: userInput,
+                capabilities: capabilities
+            )
+        }
+
         #if canImport(FoundationModels)
         if #available(macOS 26.0, *) {
             let model = SystemLanguageModel.default
