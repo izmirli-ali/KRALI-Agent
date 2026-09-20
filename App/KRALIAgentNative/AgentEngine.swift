@@ -392,7 +392,23 @@ final class AgentEngine: ObservableObject {
                    ) {
                     plannedMission = localMission
                     plannerProvider =
-                        "Apple Foundation Models"
+                        localMission.steps.contains(
+                            where: {
+                                $0.operation ==
+                                    "semantic.fallback"
+                            }
+                        )
+                            ? "Local Contract Repair"
+                            : (
+                                localMission.steps.contains(
+                                    where: {
+                                        $0.operation ==
+                                            "capability.contract"
+                                    }
+                                )
+                                    ? "Apple + Contract Repair"
+                                    : "Apple Foundation Models"
+                            )
                 } else if let subscriptionMission =
                     await subscriptionIntelligence.planMission(
                         userInput: text,
