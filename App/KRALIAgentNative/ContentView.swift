@@ -761,7 +761,7 @@ struct ContentView: View {
 
                             Spacer()
 
-                            Button("Çalıştır") {
+                            Button("Test") {
                                 engine.runScreenPerceptionProbe()
                             }
                             .controlSize(.small)
@@ -780,7 +780,7 @@ struct ContentView: View {
 
                             Spacer()
 
-                            Button("Çalıştır") {
+                            Button("Test") {
                                 engine.runDesktopControlProbe()
                             }
                             .controlSize(.small)
@@ -805,6 +805,12 @@ struct ContentView: View {
                             .controlSize(.small)
                             .disabled(engine.developerAgentBusy)
                         }
+
+                        Text(
+                            "Bu butonlar yalnız geliştirici testi / tanısı içindir. Günlük KRALİ kullanımı doğal dil komutlarıyla yapılır; capability'ler için ayrı kullanıcı butonları gerekmez."
+                        )
+                        .font(.caption2)
+                        .foregroundStyle(.secondary)
 
                         Text(
                             "Mentor gönderimi üst çubuktaki Mentor düğmesinden yapılır."
