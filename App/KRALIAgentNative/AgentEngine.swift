@@ -833,7 +833,11 @@ final class AgentEngine: ObservableObject {
                 webResearchResults.map {
                     $0.domain.lowercased()
                 }
-            ).count
+            ).count,
+            webResearchCanonicalEvidenceCount:
+                webResearchEvidence.filter {
+                    !$0.source.evidenceEligible
+                }.count
         )
     }
 
