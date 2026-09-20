@@ -108,6 +108,9 @@ CLINE_SETTINGS="${CLINE_PROVIDER_SETTINGS_PATH:-$HOME/.cline/data/settings/provi
 USE_SDK_FALLBACK=0
 SDK_HOST="$STATUS_DIR/cline-sdk-host"
 NATIVE_CLINE_BINARY=""
+TOOL_MODEL_CACHE="$STATUS_DIR/tool-model-cache.txt"
+TOOL_MODEL_CACHE_TTL="${KRALI_TOOL_MODEL_CACHE_TTL:-7200}"
+MODEL_PROBE_CACHED=0
 
 cline_probe() {
     CLINE_PROBE_OUTPUT=""
@@ -252,6 +255,41 @@ probe_ollama_model() {
     "$NODE_BIN" "$ROOT/Scripts/ollama-tool-probe.mjs" >>"$LOG" 2>&1
 }
 
+remember_tool_model() {
+    local proven_model="$1"
+    printf "%s|%s\n" "$proven_model" "$(/bin/date +%s)" > "$TOOL_MODEL_CACHE"
+}
+
+use_cached_tool_model() {
+    [ -f "$TOOL_MODEL_CACHE" ] || return 1
+
+    local raw cached_model cached_at now age
+    raw="$(/bin/cat "$TOOL_MODEL_CACHE" 2>/dev/null || true)"
+    cached_model="${raw%%|*}"
+    cached_at="${raw#*|}"
+
+    case "$cached_at" in
+        ''|*[!0-9]*) return 1 ;;
+    esac
+
+    now="$(/bin/date +%s)"
+    age="$(( now - cached_at ))"
+
+    if [ "$age" -lt 0 ] || [ "$age" -gt "$TOOL_MODEL_CACHE_TTL" ]; then
+        return 1
+    fi
+
+    if [ -n "$cached_model" ] &&
+       "$OLLAMA_BIN" show "$cached_model" >/dev/null 2>&1; then
+        MODEL="$cached_model"
+        MODEL_PROBE_CACHED=1
+        echo "⚡ Tool-capable model cache kullanılıyor: $MODEL • yaş=${age}s" | tee -a "$LOG"
+        return 0
+    fi
+
+    return 1
+}
+
 select_existing_local_model() {
     local candidates=()
 
@@ -265,6 +303,7 @@ select_existing_local_model() {
         )
     elif [ "$MEMORY_GB" -ge 20 ]; then
         candidates=(
+            "devstral:24b"
             "qwen2.5-coder:14b-instruct"
             "qwen3:8b"
             "qwen2.5-coder:7b-instruct"
@@ -367,11 +406,13 @@ prepare_ollama_runtime() {
     MEMORY_GB="$(( MEMORY_BYTES / 1024 / 1024 / 1024 ))"
 
     if [ -z "$MODEL" ]; then
-        if ! select_existing_local_model; then
-            if [ "$MEMORY_GB" -ge 20 ]; then
-                MODEL="qwen2.5-coder:14b-instruct"
-            else
-                MODEL="qwen2.5-coder:7b-instruct"
+        if ! use_cached_tool_model; then
+            if ! select_existing_local_model; then
+                if [ "$MEMORY_GB" -ge 20 ]; then
+                    MODEL="qwen2.5-coder:14b-instruct"
+                else
+                    MODEL="qwen2.5-coder:7b-instruct"
+                fi
             fi
         fi
 
@@ -383,7 +424,9 @@ prepare_ollama_runtime() {
         return 1
     fi
 
-    if ! probe_ollama_model "$MODEL"; then
+    if [ "$MODEL_PROBE_CACHED" -eq 1 ]; then
+        write_status "local_ai_ready|Önceden doğrulanmış yerel Developer AI cache'den hazır: $MODEL"
+    elif ! probe_ollama_model "$MODEL"; then
         echo "⚠️ $MODEL native tool-call probe geçmedi; yalnız kurulu alternatifler deneniyor." | tee -a "$LOG"
 
         if ! select_installed_tool_fallback "$MODEL"; then
@@ -393,6 +436,9 @@ prepare_ollama_runtime() {
 
         MODEL="$FALLBACK_MODEL"
         write_status "local_model_fallback|Kurulu tool-capable yerel modele geçildi: $MODEL"
+        remember_tool_model "$MODEL"
+    else
+        remember_tool_model "$MODEL"
     fi
 
     write_status "local_ai_ready|Ücretsiz yerel Developer AI hazır ve tool-call doğrulandı: $MODEL"
@@ -838,9 +884,13 @@ if [ "$PROVIDER" = "ollama" ] &&
     KRALI_APP_VERSION="$(/bin/cat "$ROOT/VERSION" 2>/dev/null | /usr/bin/tr -d '[:space:]')" \
     KRALI_RUN_ID="$STAMP" \
     KRALI_REQUIRE_CHANGE="$([ "$GAP_MODE" = "gap" ] && echo 1 || echo 0)" \
-    KRALI_LOCAL_AGENT_MAX_COMPLETION_REJECTIONS="4" \
-    KRALI_LOCAL_AGENT_MAX_STRUCTURED_ACTIONS="12" \
-    KRALI_LOCAL_AGENT_MAX_ITERATIONS="36" \
+    KRALI_LOCAL_AGENT_MAX_COMPLETION_REJECTIONS="3" \
+    KRALI_LOCAL_AGENT_MAX_STRUCTURED_ACTIONS="8" \
+    KRALI_LOCAL_AGENT_MAX_INSPECTIONS="6" \
+    KRALI_LOCAL_AGENT_MAX_ITERATIONS="16" \
+    KRALI_LOCAL_AGENT_TIMEOUT_MS="300000" \
+    KRALI_LOCAL_AGENT_REQUEST_TIMEOUT_MS="60000" \
+    KRALI_LOCAL_AGENT_STRUCTURED_TIMEOUT_MS="45000" \
     "$NODE_BIN" "$ROOT/Scripts/ollama-developer-agent.mjs" \
         > >(tee "$CLINE_RUN_LOG" >>"$LOG") \
         2> >(tee -a "$CLINE_RUN_LOG" >>"$LOG" >&2)
