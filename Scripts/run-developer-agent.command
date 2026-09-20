@@ -59,8 +59,12 @@ if [ "$NODE_MAJOR" -lt 20 ]; then
 fi
 
 CLINE_BIN="$(command -v cline || true)"
+PROVIDER="${KRALI_DEV_PROVIDER:-openai-codex}"
+MODEL="${KRALI_DEV_MODEL:-}"
+CLINE_SETTINGS="${CLINE_PROVIDER_SETTINGS_PATH:-$HOME/.cline/data/settings/providers.json}"
+
 if [ -n "$CLINE_BIN" ]; then
-    echo "Cline version: $("$CLINE_BIN" --version 2>&1 || true)" | tee -a "$LOG"
+    echo "Cline version: $("$CLINE_BIN" version 2>&1 || "$CLINE_BIN" --version 2>&1 || true)" | tee -a "$LOG"
     echo "Cline doctor:" | tee -a "$LOG"
     "$CLINE_BIN" doctor >>"$LOG" 2>&1 || true
 fi
@@ -69,8 +73,52 @@ if [ -z "$CLINE_BIN" ]; then
     write_status "setup_cline|Cline CLI bulunamadı|npm install -g cline"
     echo "❌ Cline CLI bulunamadı." | tee -a "$LOG"
     echo "Kurulum: npm install -g cline" | tee -a "$LOG"
-    echo "Ardından: cline auth → Sign in with ChatGPT" | tee -a "$LOG"
+    echo "Ardından: cline auth openai-codex" | tee -a "$LOG"
     exit 11
+fi
+
+if [ "$PROVIDER" = "openai-codex" ]; then
+    CLINE_AUTH_STATE="$("$NODE_BIN" - "$CLINE_SETTINGS" "$PROVIDER" <<'NODE'
+const fs = require("fs");
+
+const file = process.argv[2];
+const providerId = process.argv[3];
+
+function containsReadyProvider(value) {
+  if (!value || typeof value !== "object") return false;
+
+  if (
+    value.provider === providerId &&
+    value.auth &&
+    typeof value.auth === "object" &&
+    typeof value.auth.accessToken === "string" &&
+    value.auth.accessToken.trim().length > 0
+  ) {
+    return true;
+  }
+
+  if (Array.isArray(value)) {
+    return value.some(containsReadyProvider);
+  }
+
+  return Object.values(value).some(containsReadyProvider);
+}
+
+try {
+  const parsed = JSON.parse(fs.readFileSync(file, "utf8"));
+  process.stdout.write(containsReadyProvider(parsed) ? "ready" : "missing");
+} catch {
+  process.stdout.write("missing");
+}
+NODE
+)"
+
+    if [ "$CLINE_AUTH_STATE" != "ready" ]; then
+        write_status "setup_cline_auth|ChatGPT Subscription için Cline OAuth doğrulaması gerekli|cline auth openai-codex"
+        echo "❌ Cline openai-codex OAuth hazır değil." | tee -a "$LOG"
+        echo "Terminal: cline auth openai-codex" | tee -a "$LOG"
+        exit 11
+    fi
 fi
 
 cd "$ROOT"
@@ -243,9 +291,6 @@ write_status "running|Cline Developer Agent çalışıyor"
 
 export CLINE_COMMAND_PERMISSIONS='{"allow":["git status*","git diff*","git log*","git show*","xcodebuild *","xcrun *","swift *","grep *","rg *","find *","cat *","head *","tail *","sed *","ls *"],"deny":["sudo *","rm -rf *","git push*","git reset --hard*","git clean*","open *","osascript *"]}'
 
-PROVIDER="${KRALI_DEV_PROVIDER:-openai-codex}"
-MODEL="${KRALI_DEV_MODEL:-}"
-
 CLINE_ARGS=(
     --json
     --auto-approve true
@@ -262,10 +307,29 @@ if [ -n "$MODEL" ]; then
     CLINE_ARGS+=(--model "$MODEL")
 fi
 
-if ! "$CLINE_BIN" "${CLINE_ARGS[@]}"     "$(cat "$PROMPT_FILE")" >>"$LOG" 2>&1
-then
-    write_status "failed|Cline görevi başarısız oldu; Mentor developer-log-tail.txt ayrıntısını incele|$BRANCH|$WORKTREE"
-    echo "❌ Cline görevi başarısız oldu." | tee -a "$LOG"
+CLINE_RUN_LOG="$LOG_DIR/KRALI-Developer-Agent-Cline-$STAMP.log"
+
+"$CLINE_BIN" "${CLINE_ARGS[@]}" "$(cat "$PROMPT_FILE")" >"$CLINE_RUN_LOG" 2>&1
+CLINE_EXIT=$?
+
+cat "$CLINE_RUN_LOG" >>"$LOG"
+
+if [ "$CLINE_EXIT" -ne 0 ]; then
+    CLINE_ERROR="$(
+        tail -n 40 "$CLINE_RUN_LOG" 2>/dev/null |
+        grep -Eai 'auth|oauth|error|failed|provider|model|login|sign in' |
+        tail -n 1 |
+        tr '\n|' '  ' |
+        sed -E 's/[[:space:]]+/ /g; s/^ //; s/ $//' |
+        cut -c1-280
+    )"
+
+    if [ -z "$CLINE_ERROR" ]; then
+        CLINE_ERROR="ayrıntılı hata satırı üretilemedi"
+    fi
+
+    write_status "failed|Cline exit $CLINE_EXIT: $CLINE_ERROR|$BRANCH|$WORKTREE"
+    echo "❌ Cline görevi başarısız oldu (exit $CLINE_EXIT): $CLINE_ERROR" | tee -a "$LOG"
     exit 20
 fi
 
