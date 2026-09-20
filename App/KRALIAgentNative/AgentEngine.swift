@@ -759,7 +759,11 @@ final class AgentEngine: ObservableObject {
     ) -> AgentVerificationResult {
         let needsSynthesis =
             goal.outcomes.contains(.analyze) ||
-            goal.outcomes.contains(.ideate)
+            goal.outcomes.contains(.ideate) ||
+            (
+                goal.outcomes.contains(.research) &&
+                goal.outcomes.contains(.explain)
+            )
 
         guard needsSynthesis else {
             return verification
@@ -824,7 +828,12 @@ final class AgentEngine: ObservableObject {
                 selectedCapabilities.map(\.id)
             ),
             webResearchResultCount: webResearchResults.count,
-            webResearchEvidenceCount: webResearchEvidence.count
+            webResearchEvidenceCount: webResearchEvidence.count,
+            webResearchUniqueDomainCount: Set(
+                webResearchResults.map {
+                    $0.domain.lowercased()
+                }
+            ).count
         )
     }
 
