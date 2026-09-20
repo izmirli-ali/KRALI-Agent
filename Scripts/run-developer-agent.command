@@ -59,6 +59,12 @@ if [ "$NODE_MAJOR" -lt 20 ]; then
 fi
 
 CLINE_BIN="$(command -v cline || true)"
+if [ -n "$CLINE_BIN" ]; then
+    echo "Cline version: $("$CLINE_BIN" --version 2>&1 || true)" | tee -a "$LOG"
+    echo "Cline doctor:" | tee -a "$LOG"
+    "$CLINE_BIN" doctor >>"$LOG" 2>&1 || true
+fi
+
 if [ -z "$CLINE_BIN" ]; then
     write_status "setup_cline|Cline CLI bulunamadı|npm install -g cline"
     echo "❌ Cline CLI bulunamadı." | tee -a "$LOG"
@@ -239,7 +245,7 @@ fi
 
 if ! "$CLINE_BIN" "${CLINE_ARGS[@]}"     "$(cat "$PROMPT_FILE")" >>"$LOG" 2>&1
 then
-    write_status "failed|Cline görevi başarısız oldu|$BRANCH|$WORKTREE"
+    write_status "failed|Cline görevi başarısız oldu; Mentor developer-log-tail.txt ayrıntısını incele|$BRANCH|$WORKTREE"
     echo "❌ Cline görevi başarısız oldu." | tee -a "$LOG"
     exit 20
 fi
