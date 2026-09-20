@@ -725,18 +725,6 @@ struct AgentDeveloperBridge {
                 scriptPath
             ]
 
-            if let learningJobBriefURL {
-                var environment =
-                    ProcessInfo.processInfo
-                        .environment
-                environment[
-                    "KRALI_LEARNING_JOB_FILE"
-                ] =
-                    learningJobBriefURL.path
-                process.environment =
-                    environment
-            }
-
             process.standardOutput = pipe
             process.standardError = pipe
 
@@ -789,6 +777,19 @@ struct AgentDeveloperBridge {
             process.arguments = [
                 scriptPath
             ]
+
+            if let learningJobBriefURL {
+                var environment =
+                    ProcessInfo.processInfo
+                        .environment
+                environment[
+                    "KRALI_LEARNING_JOB_FILE"
+                ] =
+                    learningJobBriefURL.path
+                process.environment =
+                    environment
+            }
+
             process.standardOutput = pipe
             process.standardError = pipe
 
