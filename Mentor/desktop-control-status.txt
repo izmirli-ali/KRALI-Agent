@@ -1,1 +1,1 @@
-running|Accessibility kontrolü ve uygulama açma testi çalışıyor.
+success|activate=true|ax=true|screen=true

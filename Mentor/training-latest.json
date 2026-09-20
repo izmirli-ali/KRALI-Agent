@@ -1,9 +1,9 @@
 {
-  "appVersion" : "0.8.24",
+  "appVersion" : "0.8.26",
   "corePassed" : 26,
-  "coreTotal" : 26,
-  "createdAt" : "2026-09-20T12:06:54Z",
-  "failed" : 0,
+  "coreTotal" : 27,
+  "createdAt" : "2026-09-20T12:32:24Z",
+  "failed" : 1,
   "northStarPassed" : 4,
   "northStarTotal" : 4,
   "passed" : 30,
@@ -806,7 +806,29 @@
       "unavailableCapabilities" : [
 
       ]
+    },
+    {
+      "diagnostics" : [
+        "desktop.app yürütülmeden verifier passed/partial verdi."
+      ],
+      "goal" : "Kullanıcının hedefini anlamlandır ve uygulanabilir bir sonraki adımı seç",
+      "passed" : false,
+      "prompt" : "Notlar uygulamasını aç.",
+      "route" : [
+
+      ],
+      "scenarioID" : "semantic-required-action-execution",
+      "selectedCapabilities" : [
+        "core.reasoning",
+        "context.local",
+        "desktop.app"
+      ],
+      "tier" : "core",
+      "title" : "Verifier yürütülmeyen semantic action'ı başarılı saymamalı",
+      "unavailableCapabilities" : [
+
+      ]
     }
   ],
-  "total" : 30
+  "total" : 31
 }
