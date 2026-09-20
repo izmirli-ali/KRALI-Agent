@@ -1189,6 +1189,62 @@ final class AgentEngine: ObservableObject {
                     completedStepIndexes.insert(stepIndex)
                 }
 
+            case "desktop.app":
+                do {
+                    let result =
+                        try await desktopControl
+                            .openOrFocusApplication(
+                                from: userInput
+                            )
+
+                    let verified =
+                        result.launchOrActivateSucceeded &&
+                        result.screenVerifiedFrontmost
+
+                    desktopControlStatus =
+                        result.resolvedApplicationName +
+                        (verified
+                            ? " açıldı/öne geldi • Screen doğrulandı"
+                            : " açıldı fakat Screen doğrulaması eksik")
+
+                    desktopControlStore.saveStatus(
+                        "runtime|app=" +
+                        result.resolvedApplicationName +
+                        "|activate=" +
+                        String(
+                            result.launchOrActivateSucceeded
+                        ) +
+                        "|screen=" +
+                        String(
+                            result.screenVerifiedFrontmost
+                        )
+                    )
+
+                    outputs.append(
+                        verified
+                            ? result.resolvedApplicationName +
+                                " uygulamasını açtım ve öne geldiğini ekran üzerinden doğruladım."
+                            : result.resolvedApplicationName +
+                                " uygulamasını açmayı denedim; ekran doğrulaması tamamlanmadı."
+                    )
+
+                    if verified {
+                        executed.insert("desktop.app")
+                        completedStepIndexes.insert(
+                            stepIndex
+                        )
+                    }
+                } catch {
+                    desktopControlStatus =
+                        "Uygulama kontrolü başarısız: " +
+                        error.localizedDescription
+                    desktopControlStore.saveStatus(
+                        "runtime_failed|" +
+                        error.localizedDescription
+                    )
+                    log(desktopControlStatus)
+                }
+
             case "perception.screen":
                 guard !didScreenObserve else {
                     executed.insert("perception.screen")
