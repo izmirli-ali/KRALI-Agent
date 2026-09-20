@@ -647,6 +647,16 @@ actor AgentLocalIntelligence {
             outcomes.insert("open")
             requiredIDs.insert("desktop.app")
 
+            if explicitAppAnalysisTask {
+                outcomes.formUnion([
+                    "analyze",
+                    "explain"
+                ])
+                requiredIDs.insert(
+                    "perception.screen"
+                )
+            }
+
             if !deepDesktopInteractionTask {
                 requiredIDs.remove("desktop.control")
             }
@@ -689,6 +699,22 @@ actor AgentLocalIntelligence {
             requiredIDs.insert(
                 "files.write.text"
             )
+
+            if containsMissionConcept(
+                corpus,
+                [
+                    "klasor", "klasör",
+                    "folder", "masaustu",
+                    "masaüstü", "indirilenler"
+                ]
+            ) {
+                outcomes.insert(
+                    "locate"
+                )
+                requiredIDs.insert(
+                    "files.search"
+                )
+            }
         }
 
         if genericFileOpenTask {
@@ -934,6 +960,7 @@ actor AgentLocalIntelligence {
 
         if outcomes.contains("organize") {
             guard ids.contains("files.move.reversible") ||
+                  ids.contains("files.write.text") ||
                   ids.contains("desktop.control")
             else {
                 return false
