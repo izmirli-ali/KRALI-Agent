@@ -7,6 +7,21 @@ struct WebResearchResult: Identifiable, Hashable {
     let url: URL
     let domain: String
     let snippet: String?
+    let evidenceEligible: Bool
+
+    init(
+        title: String,
+        url: URL,
+        domain: String,
+        snippet: String?,
+        evidenceEligible: Bool = true
+    ) {
+        self.title = title
+        self.url = url
+        self.domain = domain
+        self.snippet = snippet
+        self.evidenceEligible = evidenceEligible
+    }
 }
 
 struct WebResearchReport: Hashable {
@@ -108,6 +123,42 @@ actor AgentWebResearchService {
         var providerNames: [String] = []
         var candidates: [ScoredResult] = []
         var seenURLs = Set<String>()
+
+        for direct in queryPlan.directCandidates {
+            let result = WebResearchResult(
+                title: direct.title,
+                url: direct.url,
+                domain: direct.domain,
+                snippet: nil,
+                evidenceEligible: false
+            )
+
+            let evaluation = relevanceEvaluation(
+                result,
+                conceptGroups: queryPlan.conceptGroups,
+                mandatoryConceptGroups: queryPlan.mandatoryConceptGroups,
+                preferredDomains: queryPlan.preferredDomains,
+                entityTerms: queryPlan.entityTerms
+            )
+
+            if evaluation.mandatorySatisfied {
+                let key = canonicalURLKey(result.url)
+                if !seenURLs.contains(key) {
+                    seenURLs.insert(key)
+                    candidates.append(
+                        ScoredResult(
+                            result: result,
+                            score: max(6, evaluation.score),
+                            conceptCoverage: max(1, evaluation.coverage)
+                        )
+                    )
+                }
+            }
+        }
+
+        if !queryPlan.directCandidates.isEmpty {
+            providerNames.append("Direct Resolver")
+        }
 
         for (variantIndex, variant) in variants.enumerated() {
             for provider in Provider.allCases {
