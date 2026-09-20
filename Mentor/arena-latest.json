@@ -1,15 +1,15 @@
 {
-  "appVersion" : "0.8.17",
-  "createdAt" : "2026-09-20T11:11:07Z",
-  "failed" : 4,
-  "passed" : 2,
+  "appVersion" : "0.8.18",
+  "createdAt" : "2026-09-20T11:18:55Z",
+  "failed" : 3,
+  "passed" : 3,
   "results" : [
     {
       "diagnostics" : [
 
       ],
       "mission" : {
-        "confidence" : 0.8,
+        "confidence" : 0.9,
         "objective" : "Aynı hareket, üç farklı beden serisini 45 saniyelik, enerjik bir Reels çekim senaryosuna dönüştürmek.",
         "outcomes" : [
           "analyze",
@@ -34,32 +34,41 @@
             "dependsOn" : [
 
             ],
-            "operation" : "capability.contract",
-            "purpose" : "Mission hedefini uçtan uca tamamlamak için gerekli capability sözleşmesi.",
-            "title" : "Akıl yürütme"
+            "operation" : "hareketin farklı bedenlerdeki yapısal ve görsel özelliklerini karşılaştırarak temel senaryo yapısını kur",
+            "purpose" : "Analiz edilen hareket varyasyonlarını görsel tutarlılık, açı ve tempo açısından değerlendirerek temel yapı belirlemek.",
+            "title" : "hareketin yapısal ve görsel analizini gerçekleştirmek"
+          },
+          {
+            "capabilityID" : "files.search",
+            "dependsOn" : [
+
+            ],
+            "operation" : "çalışma alanındaki ilgili dosyaları filtreleyerek görsel referansları ve hareket örneklerini topla",
+            "purpose" : "Analiz sırasında kullanılan verileri ve görsel referansları yerel dosya sisteminde bulup erişilebilir hale getirmek.",
+            "title" : "gerekli dosyaları ve kaynakları konumlandırmak"
+          },
+          {
+            "capabilityID" : "core.reasoning",
+            "dependsOn" : [
+
+            ],
+            "operation" : "toplanan verileri kullanarak hareketin üç farklı yorumunu birleştir, tempo ve görsel akışı kontrol ederek 45 saniyelik senaryoyu oluştur",
+            "purpose" : "Analiz edilen hareket varyasyonlarını başlangıç seviyesi, masa çalışması ve düzenli egzersiz aşamalarına göre birleştirerek tam bir Reels senaryosu üretmek.",
+            "title" : "hareket senaryosunu bütüncül olarak oluşturmak"
           },
           {
             "capabilityID" : "context.local",
             "dependsOn" : [
-              0
+              2
             ],
             "operation" : "capability.contract",
             "purpose" : "Mission hedefini uçtan uca tamamlamak için gerekli capability sözleşmesi.",
             "title" : "Bağlam"
           },
           {
-            "capabilityID" : "files.search",
-            "dependsOn" : [
-              1
-            ],
-            "operation" : "capability.contract",
-            "purpose" : "Mission hedefini uçtan uca tamamlamak için gerekli capability sözleşmesi.",
-            "title" : "Dosya arama"
-          },
-          {
             "capabilityID" : "files.metadata",
             "dependsOn" : [
-              2
+              3
             ],
             "operation" : "capability.contract",
             "purpose" : "Mission hedefini uçtan uca tamamlamak için gerekli capability sözleşmesi.",
@@ -68,7 +77,7 @@
           {
             "capabilityID" : "perception.media",
             "dependsOn" : [
-              3
+              4
             ],
             "operation" : "capability.contract",
             "purpose" : "Mission hedefini uçtan uca tamamlamak için gerekli capability sözleşmesi.",
@@ -77,7 +86,7 @@
           {
             "capabilityID" : "premiere.control",
             "dependsOn" : [
-              4
+              5
             ],
             "operation" : "capability.contract",
             "purpose" : "Mission hedefini uçtan uca tamamlamak için gerekli capability sözleşmesi.",
@@ -86,7 +95,7 @@
           {
             "capabilityID" : "perception.screen",
             "dependsOn" : [
-              5
+              6
             ],
             "operation" : "capability.contract",
             "purpose" : "Mission hedefini uçtan uca tamamlamak için gerekli capability sözleşmesi.",
@@ -102,15 +111,11 @@
       ],
       "reviewerPassed" : true,
       "reviewerRiskNotes" : [
-        "Yerel dosya işi için gereksiz web araştırması",
-        "Gerçek kurgu/tasarım hedefinde uygulama provider'ının olmaması",
-        "Dosya bulma gereken işte files.search eksikliği",
-        "Medya içeriğini değerlendiren işte perception eksikliği",
-        "Uygulama sonucunu doğrulaması gereken işte perception.screen eksikliği",
-        "Yeni marka görevine alakasız eski marka bağlamı taşınması",
-        "Kullanıcıdan gereksiz bilgi isteme"
+        "Yerel dosya işi için gereksiz web araştırması yapıldı.",
+        "Gerçek kurgu/tasarım hedefinde uygulama provider'ının olmaması.",
+        "Dosya bulma gereken işte files.search eksikliği."
       ],
-      "reviewerSummary" : "Kısa değerlendirme",
+      "reviewerSummary" : "kısa değerlendirme",
       "reviewerUnnecessaryCapabilityIDs" : [
 
       ],
@@ -153,7 +158,7 @@
 
       ],
       "mission" : {
-        "confidence" : 0.98,
+        "confidence" : 0.92,
         "objective" : "Masaüstündeki ekran görüntülerini toparlayıp ayrı bir klasöre düzenlemek",
         "outcomes" : [
           "edit",
@@ -174,26 +179,26 @@
             "dependsOn" : [
 
             ],
-            "operation" : "salt-okunur tarama ve filtreleme",
-            "purpose" : "Masaüstünde bulunan ekran görüntülerini sistematik olarak tespit etmek ve erişilebilir hale getirmek için gerekli",
+            "operation" : "seçili çalışma alanını salt-okunur tarar ve filtreler",
+            "purpose" : "Masaüstü çalışma alanında ekran görüntülerini tespit etmek ve filtrelemek",
             "title" : "ekran görüntülerini bul"
-          },
-          {
-            "capabilityID" : "files.reveal",
-            "dependsOn" : [
-              0
-            ],
-            "operation" : "dosya veya klasörün Finder'da açılması",
-            "purpose" : "Bulunan görüntüleri kullanıcıya görsel olarak sunmak ve düzenleme sürecine başlamak için doğrudan araçla göstermek",
-            "title" : "dosyaları Finder'da göster"
           },
           {
             "capabilityID" : "files.move.reversible",
             "dependsOn" : [
+              0
+            ],
+            "operation" : "seçili alan içindeki izinli dosyaları çakışma güvenliğiyle taşır",
+            "purpose" : "Bulunan ekran görüntülerini sistemden güvenli şekilde hareket ettirmek",
+            "title" : "dosyaları topla"
+          },
+          {
+            "capabilityID" : "files.reveal",
+            "dependsOn" : [
               1
             ],
-            "operation" : "isteğe bağlı izinli dosyaların güvenli taşınması",
-            "purpose" : "Seçilen görüntüleri yeni bir klasöre taşıyarak düzenlemek ve yapısal bir düzen oluşturmak için güvenli taşıma işlemi gerçekleştirmek",
+            "operation" : "çözülen dosya veya klasörü Finder'da gösterir",
+            "purpose" : "Düzenli bir yapıya kavuşturarak ayrı bir klasöre aktarmak",
             "title" : "dosyaları düzenle"
           },
           {
@@ -201,9 +206,9 @@
             "dependsOn" : [
               2
             ],
-            "operation" : "mission hedefini uçtan uca tamamlama analizi",
-            "purpose" : "Tüm adımların birbiriyle uyumlu şekilde çalıştığını ve hedefin tam olarak gerçekleştirilebileceğini doğrulayan sistematik değerlendirme",
-            "title" : "akıl yürütme"
+            "operation" : "capability.contract",
+            "purpose" : "Mission hedefini uçtan uca tamamlamak için gerekli capability sözleşmesi.",
+            "title" : "Akıl yürütme"
           },
           {
             "capabilityID" : "context.local",
@@ -224,10 +229,15 @@
       ],
       "reviewerPassed" : true,
       "reviewerRiskNotes" : [
-        "Yerel dosya işi için gereksiz web araştırması yapıldı.",
-        "Gerçek kurgu/tasarım hedefinde uygulama provider'ının olmaması."
+        "Yerel dosya işi için gereksiz web araştırması (research.web) yapıldı.",
+        "Gerçek kurgu/tasarım hedefinde uygulama provider'ının olmaması.",
+        "Dosya bulma gereken işte files.search eksik.",
+        "Medya içeriğini değerlendiren işte perception eksik.",
+        "Uygulama sonucunu doğrulaması gereken işte perception.screen eksik.",
+        "Yeni marka görevine alakasız eski marka bağlamı taşınması.",
+        "Kullanıcıdan gereksiz bilgi isteme."
       ],
-      "reviewerSummary" : "Masaüstündeki ekran görüntülerini toparlayıp ayrı bir klasöre düzenleme görevi, dosyaları bulma ve düzenleme adımlarında gerekli olan dosya tarama ve taşıma yetenekleri kullanılmış ancak yerel dosya işi için gereksiz web araştırması yapılmamış. Gerçek kurgu/tasarım hedefinde uygulama provider'ının olmaması nedeniyle medya içeriği değerlendirme yeteneği (perception.media) eksik. Dosya bulma gereken işte files.search eksik. Medya içeriğini değerlendiren işte perception eksik. Uygulama sonucunu doğrulaması gereken işte perception.screen eksik. Yeni marka görevine alakasız eski marka bağlamı taşınması. Kullanıcıdan gereksiz bilgi isteme yok.",
+      "reviewerSummary" : "Masaüstündeki ekran görüntülerini toparlama ve düzenleme görevi tamamlanmadı. files.search ile ekran görüntüleri tespit edildi, ancak dosyaları güvenli şekilde taşımak için files.move.reversible kullanılmadı. files.reveal ile düzenleme işlemi gerçekleştirildi ancak gerçek kurgu/tasarım hedefinde uygulama provider'ının olmaması ve medya içeriğinin değerlendirilmemesi (perception.media) nedeniyle hedef tam olarak uçtan uca tamamlanmadı. Dosya bulma gerektiren iş için files.search eksik, ayrıca perception.screen ile uygulama sonucunu doğrulaması gereken iş için perception.screen eksik. Yeni marka görevine alakasız eski marka bağlamı taşınması ve kullanıcıdan gereksiz bilgi isteme durumu da mevcut.",
       "reviewerUnnecessaryCapabilityIDs" : [
 
       ],
@@ -243,13 +253,15 @@
     },
     {
       "diagnostics" : [
-        "Gereksiz / yasak capability: files.reveal, files.search"
+
       ],
       "mission" : {
-        "confidence" : 0.78,
-        "objective" : "Kullanıcı, bir firmanın iletişim bilgilerini bulma ve çıkarma görevini yerine getirmek istiyor. Ancak mevcut görev sadece video bulma ve Reels fikirleri üretmeyi hedefliyor.",
+        "confidence" : 0.7,
+        "objective" : "Firmanın iletişim bilgilerini bulmak için sitede gezinme ve iletişim sayfasını tespit etme",
         "outcomes" : [
           "analyze",
+          "compose",
+          "explain",
           "research"
         ],
         "requiredCapabilityIDs" : [
@@ -260,36 +272,18 @@
         "requiresUserInput" : false,
         "steps" : [
           {
-            "capabilityID" : "files.search",
-            "dependsOn" : [
-
-            ],
-            "operation" : "Mevcut dosya listesini tarayarak video varlığını belirle",
-            "purpose" : "Masaüstündeki videoları bulmak için gerekli olan dosya tarama işlemi.",
-            "title" : "Dosyaları tarayarak tespit et"
-          },
-          {
-            "capabilityID" : "files.reveal",
-            "dependsOn" : [
-
-            ],
-            "operation" : "Çözülen dosyaları Finder içinde görüntüle",
-            "purpose" : "Bulunan videoları kullanıcıya görsel olarak sunmak için.",
-            "title" : "Dosyaları Finder'da göster"
-          },
-          {
             "capabilityID" : "core.reasoning",
             "dependsOn" : [
 
             ],
-            "operation" : "Web yapısı ve iletişim sayfasının konumunu belirleyerek iletişim bilgileri için alternatif yolları değerlendir",
-            "purpose" : "Firmanın iletişim bilgilerini çıkarmak için mevcut web yapısı ve erişim noktalarını inceleme.",
-            "title" : "Firmanın iletişim kanallarını analiz et"
+            "operation" : "capability.contract",
+            "purpose" : "Mission hedefini uçtan uca tamamlamak için gerekli capability sözleşmesi.",
+            "title" : "Akıl yürütme"
           },
           {
             "capabilityID" : "context.local",
             "dependsOn" : [
-              2
+              0
             ],
             "operation" : "capability.contract",
             "purpose" : "Mission hedefini uçtan uca tamamlamak için gerekli capability sözleşmesi.",
@@ -298,7 +292,7 @@
           {
             "capabilityID" : "browser.control",
             "dependsOn" : [
-              3
+              1
             ],
             "operation" : "capability.contract",
             "purpose" : "Mission hedefini uçtan uca tamamlamak için gerekli capability sözleşmesi.",
@@ -306,15 +300,23 @@
           }
         ]
       },
-      "passed" : false,
+      "passed" : true,
       "plannerProvider" : "Apple Foundation Models",
       "prompt" : "Bu firmanın sitesine girip iletişim sayfasını bul ve iletişim bilgilerini çıkar.",
       "reviewerMissingCapabilityIDs" : [
 
       ],
+      "reviewerPassed" : true,
       "reviewerRiskNotes" : [
-
+        "Yerel dosya işi için gereksiz web araştırması",
+        "Gerçek kurgu/tasarım hedefinde uygulama provider'ının olmaması",
+        "Dosya bulma gereken işte files.search eksik",
+        "Medya içeriğini değerlendiren işte perception eksik",
+        "Uygulama sonucunu doğrulaması gereken işte perception.screen eksik",
+        "Yeni marka görevine alakasız eski marka bağlamı taşınması",
+        "Kullanıcıdan gereksiz bilgi isteme"
       ],
+      "reviewerSummary" : "Yerel dosya işi için gereksiz web araştırması yapıldı. Gerçek kurgu/tasarım hedefinde uygulama provider'ının olmaması nedeniyle perception.screen eksik. Dosya bulma gereken işte files.search eksik.",
       "reviewerUnnecessaryCapabilityIDs" : [
 
       ],
@@ -322,9 +324,7 @@
       "selectedCapabilityIDs" : [
         "browser.control",
         "context.local",
-        "core.reasoning",
-        "files.reveal",
-        "files.search"
+        "core.reasoning"
       ],
       "title" : "Etkileşimli web görevi"
     },
