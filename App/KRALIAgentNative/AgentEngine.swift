@@ -1184,8 +1184,8 @@ final class AgentEngine: ObservableObject {
                     desktopControlStatus =
                         result.resolvedApplicationName +
                         (verified
-                            ? " açıldı/öne geldi • Screen doğrulandı"
-                            : " açıldı fakat Screen doğrulaması eksik")
+                            ? " açıldı/öne geldi • ön plan doğrulandı"
+                            : " açıldı fakat ön plan doğrulaması eksik")
 
                     desktopControlStore.saveStatus(
                         "runtime|app=" +
@@ -1207,7 +1207,7 @@ final class AgentEngine: ObservableObject {
                             ? result.resolvedApplicationName +
                                 " uygulamasını açtım ve öne geldiğini doğruladım."
                             : result.resolvedApplicationName +
-                                " uygulamasını açmayı denedim; ekran doğrulaması tamamlanmadı."
+                                " uygulamasını açmayı denedim; ön plan doğrulaması tamamlanmadı."
                     )
 
                     if verified {
