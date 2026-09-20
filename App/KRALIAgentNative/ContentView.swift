@@ -1185,7 +1185,7 @@ struct ContentView: View {
                 }
 
                 Text(
-                    "v0.7.28: Public profile/resource araştırmasında arama motoruna bağımlılık azaltıldı. KRALİ handle + platformdan doğrudan kanonik hedef adresi çözebiliyor; çözülen URL doğrulanmış kanıt sayılmıyor. Sayfa canlı içeriğini statik istekle açmıyorsa “profil yok” demek yerine hedefi çözdüğünü, veriyi doğrulayamadığını söylüyor ve browser.control yetkinliğini öğrenme kuyruğuna ekliyor."
+                    "v0.7.29: Doğrulama artık kaynak sayısından önce kaynak otoritesini dikkate alıyor. Kanonik/resmi bir profil gerçekten okunmuş ve entity kanıtı çıkarılmışsa, o profilin kendi canlı profil bilgileri için ikinci bir bağımsız domain zorunlu tutulmuyor. Mentor trace kaynakların “canonical-direct” veya “search-result” olduğunu ayrı kaydediyor."
                 )
                 .font(.caption2)
                 .foregroundStyle(.orange)
