@@ -1,127 +1,127 @@
 {
   "activityTail" : [
     {
-      "date" : "2026-09-20T13:39:35Z",
-      "text" : "6 ekran görüntüsü adayı bulundu"
+      "date" : "2026-09-20T14:01:45Z",
+      "text" : "Görev tamamlandı • 41.28 sn"
     },
     {
-      "date" : "2026-09-20T13:39:35Z",
-      "text" : "1772 dosya ve 68 klasör indekslendi"
-    },
-    {
-      "date" : "2026-09-20T13:39:35Z",
-      "text" : "Semantic rota: Core → Goal → Context → Plan → Desktop → Files → Screen → Learn → Verify → Response"
-    },
-    {
-      "date" : "2026-09-20T13:39:35Z",
-      "text" : "Task Graph blocked capability: files.write.text"
-    },
-    {
-      "date" : "2026-09-20T13:39:35Z",
-      "text" : "Task Graph: 0:files.search[retrieve] → 1:perception.screen[observe] → 2:core.reasoning[transform] → 3:files.write.text[persist] → 4:context.local[reason] → 5:desktop.app[verify] → 6:files.move.reversible[persist] → 7:files.reveal[act]"
-    },
-    {
-      "date" : "2026-09-20T13:39:35Z",
-      "text" : "Semantic capability planı: context.local, core.reasoning, desktop.app, files.move.reversible, files.reveal, files.search, files.write.text, perception.screen"
-    },
-    {
-      "date" : "2026-09-20T13:39:35Z",
-      "text" : "Semantic planner sağlayıcısı: Apple + Contract Repair"
-    },
-    {
-      "date" : "2026-09-20T13:39:35Z",
-      "text" : "Semantic Mission: Spotify uygulamasını aç, şu anda açık olan şarkıyı bul, şarkının sözlerini araştır, sözleri analiz et ve masaüstündeki 9 eylül klasörüne analizle birlikte txt dosyası olarak kaydet."
-    },
-    {
-      "date" : "2026-09-20T13:39:15Z",
-      "text" : "Seçilen kabiliyetler: Akıl yürütme, Bağlam, Dosya metadata, Dosya arama, Web araştırma"
-    },
-    {
-      "date" : "2026-09-20T13:39:15Z",
-      "text" : "Otomatik rota: Core → Goal → Context → Plan → Files → Research → Verify → Response"
-    },
-    {
-      "date" : "2026-09-20T13:39:15Z",
-      "text" : "Seçilen plan: Seçili çalışma alanını salt-okunur tara, filtreleri uygula ve en uygun sonuçları göster"
-    },
-    {
-      "date" : "2026-09-20T13:39:15Z",
-      "text" : "KRALİ Core hedef sözleşmesi: klasörleri bul → bulguları analiz et → güncel kaynaklarla araştır"
-    },
-    {
-      "date" : "2026-09-20T13:39:15Z",
-      "text" : "Bağlam hafızası: mail uygulamasını aç son gelen maili kontrol et ve bana içeriği özetle • Masaüstündeki videoları bul. • Ekrana bak ve şu anda ne gördüğünü söyle."
-    },
-    {
-      "date" : "2026-09-20T13:38:09Z",
-      "text" : "Görev tamamlandı • 8.91 sn"
-    },
-    {
-      "date" : "2026-09-20T13:38:09Z",
+      "date" : "2026-09-20T14:01:45Z",
       "text" : "Mentor trace yerel olarak kaydedildi"
     },
     {
-      "date" : "2026-09-20T13:38:09Z",
+      "date" : "2026-09-20T14:01:45Z",
       "text" : "Yerel zeka sentezi uygulandı"
     },
     {
-      "date" : "2026-09-20T13:38:00Z",
-      "text" : "Mail görevi planlandı; gönderim onay gerektiriyor"
+      "date" : "2026-09-20T14:01:39Z",
+      "text" : "Plan B de hedefi doğrulayamadı"
     },
     {
-      "date" : "2026-09-20T13:38:00Z",
-      "text" : "Yetkinlik öğrenme planı: Mail → Entegrasyon gerekli"
+      "date" : "2026-09-20T14:01:39Z",
+      "text" : "1 klasör eşleşmesi bulundu"
     },
     {
-      "date" : "2026-09-20T13:38:00Z",
-      "text" : "Seçilen kabiliyetler: Akıl yürütme, Bağlam, Mail [bekliyor]"
+      "date" : "2026-09-20T14:01:39Z",
+      "text" : "Yerel klasör araması: Daha geniş kapsamda klasörleri 9 Eylül filtresiyle bul"
     },
     {
-      "date" : "2026-09-20T13:38:00Z",
-      "text" : "Otomatik rota: Core → Goal → Context → Plan → Mail → Learn → Verify → Response"
-    },
-    {
-      "date" : "2026-09-20T13:38:00Z",
-      "text" : "Seçilen plan: Kaynağı belirle, taslağı hazırla ve gönderimden önce onay iste"
-    },
-    {
-      "date" : "2026-09-20T13:38:00Z",
-      "text" : "KRALİ Core hedef sözleşmesi: iletişim görevini yürüt → sonucu ve gerekçeyi açıkla"
-    },
-    {
-      "date" : "2026-09-20T13:38:00Z",
-      "text" : "Bağlam hafızası: Son çekimle ilgili bir kurgu yapmamız gerekiyor."
-    },
-    {
-      "date" : "2026-09-20T13:37:36Z",
-      "text" : "Apple yerel zeka hazır"
-    },
-    {
-      "date" : "2026-09-20T13:37:36Z",
-      "text" : "Çalışma klasörü geri yüklendi: Desktop"
-    },
-    {
-      "date" : "2026-09-20T13:37:36Z",
+      "date" : "2026-09-20T14:01:39Z",
       "text" : "6 ekran görüntüsü adayı bulundu"
     },
     {
-      "date" : "2026-09-20T13:37:36Z",
+      "date" : "2026-09-20T14:01:39Z",
       "text" : "1772 dosya ve 68 klasör indekslendi"
     },
     {
-      "date" : "2026-09-20T13:37:36Z",
+      "date" : "2026-09-20T14:01:39Z",
+      "text" : "Plan B deneniyor: arama kapsamı güvenli biçimde genişletiliyor"
+    },
+    {
+      "date" : "2026-09-20T14:01:39Z",
+      "text" : "1 klasör eşleşmesi bulundu"
+    },
+    {
+      "date" : "2026-09-20T14:01:39Z",
+      "text" : "Yerel klasör araması: Spotify uygulamasını aç, şu anda açık olan şarkıyı bul, şarkı hakkında araştırma yap, içeriğini ve anlamını analiz et ve masaüstündeki 9 eylül klasörüne analizle birlikte txt dosyası olarak kaydet."
+    },
+    {
+      "date" : "2026-09-20T14:01:39Z",
+      "text" : "6 ekran görüntüsü adayı bulundu"
+    },
+    {
+      "date" : "2026-09-20T14:01:39Z",
+      "text" : "1772 dosya ve 68 klasör indekslendi"
+    },
+    {
+      "date" : "2026-09-20T14:01:24Z",
+      "text" : "Semantic rota: Core → Goal → Context → Plan → Desktop → Files → Screen → Research → Verify → Response"
+    },
+    {
+      "date" : "2026-09-20T14:01:24Z",
+      "text" : "Task Graph: 0:context.local[reason] → 1:desktop.app[act] → 2:perception.screen[observe] → 3:research.web[retrieve] → 4:core.reasoning[transform] → 5:files.search[retrieve] → 6:files.write.text[persist]"
+    },
+    {
+      "date" : "2026-09-20T14:01:24Z",
+      "text" : "Semantic capability planı: context.local, core.reasoning, desktop.app, files.search, files.write.text, perception.screen, research.web"
+    },
+    {
+      "date" : "2026-09-20T14:01:24Z",
+      "text" : "Semantic planner sağlayıcısı: Apple Foundation Models"
+    },
+    {
+      "date" : "2026-09-20T14:01:24Z",
+      "text" : "Semantic Mission: Spotify uygulamasını aç, şu anda açık olan şarkıyı bul, şarkı hakkında araştırma yap, içeriğini ve anlamını analiz et ve masaüstündeki 9 eylül klasörüne analizle birlikte txt dosyası olarak kaydet."
+    },
+    {
+      "date" : "2026-09-20T14:01:04Z",
+      "text" : "Seçilen kabiliyetler: Akıl yürütme, Bağlam, Dosya metadata, Dosya arama, Web araştırma"
+    },
+    {
+      "date" : "2026-09-20T14:01:04Z",
+      "text" : "Otomatik rota: Core → Goal → Context → Plan → Files → Research → Verify → Response"
+    },
+    {
+      "date" : "2026-09-20T14:01:04Z",
+      "text" : "Seçilen plan: Seçili çalışma alanını salt-okunur tara, filtreleri uygula ve en uygun sonuçları göster"
+    },
+    {
+      "date" : "2026-09-20T14:01:04Z",
+      "text" : "KRALİ Core hedef sözleşmesi: klasörleri bul → bulguları analiz et → güncel kaynaklarla araştır"
+    },
+    {
+      "date" : "2026-09-20T14:01:04Z",
+      "text" : "Bağlam hafızası: Spotify uygulamasını aç, şu anda açık olan şarkıyı bul, şarkının sözl… • Masaüstündeki videoları bul. • mail uygulamasını aç son gelen maili kontrol et ve bana içeriği özetle • Ekrana bak ve şu anda ne gördüğünü söyle."
+    },
+    {
+      "date" : "2026-09-20T13:57:29Z",
+      "text" : "Apple yerel zeka hazır"
+    },
+    {
+      "date" : "2026-09-20T13:57:28Z",
+      "text" : "Çalışma klasörü geri yüklendi: Desktop"
+    },
+    {
+      "date" : "2026-09-20T13:57:28Z",
+      "text" : "6 ekran görüntüsü adayı bulundu"
+    },
+    {
+      "date" : "2026-09-20T13:57:28Z",
+      "text" : "1772 dosya ve 68 klasör indekslendi"
+    },
+    {
+      "date" : "2026-09-20T13:57:28Z",
       "text" : "Ağır geliştirici testleri normal açılışta otomatik çalıştırılmıyor"
     },
     {
-      "date" : "2026-09-20T13:37:36Z",
+      "date" : "2026-09-20T13:57:28Z",
       "text" : "Dinamik hedef ve kabiliyet yönlendirme aktif"
     },
     {
-      "date" : "2026-09-20T13:37:36Z",
+      "date" : "2026-09-20T13:57:28Z",
       "text" : "KRALİ Core hazır"
     }
   ],
-  "appVersion" : "0.8.31",
+  "appVersion" : "0.8.32",
   "capabilities" : [
     {
       "available" : true,
@@ -142,34 +142,23 @@
       "risk" : "external"
     },
     {
-      "available" : true,
-      "id" : "files.move.reversible",
-      "name" : "Geri alınabilir dosya işlemi",
-      "risk" : "reversibleWrite"
-    },
-    {
-      "available" : true,
-      "id" : "files.reveal",
-      "name" : "Finder",
-      "risk" : "readOnly"
-    },
-    {
-      "available" : true,
-      "id" : "files.search",
-      "name" : "Dosya arama",
-      "risk" : "readOnly"
-    },
-    {
       "available" : false,
-      "id" : "files.write.text",
-      "name" : "Metin dosyası yazma",
-      "risk" : "reversibleWrite"
-    },
+      "id" : "mail.work",
+      "name" : "Mail",
+      "risk" : "external"
+    }
+  ],
+  "capabilityGaps" : [
     {
-      "available" : true,
-      "id" : "perception.screen",
-      "name" : "Ekran algısı",
-      "risk" : "readOnly"
+      "candidateCapabilityIDs" : [
+
+      ],
+      "capabilityID" : "mail.work",
+      "capabilityName" : "Mail",
+      "developerBrief" : "KRALİ Capability Gap Developer Brief\n\nKullanıcı hedefi:\nMail uygulamasını aç, son gelen maili incele, ne yapmamız gerektiğini analiz et, uygun cevap taslağını hazırla ama göndermeden önce benden onay iste.\n\nEksik capability:\nmail.work — Mail\n\nGap türü:\nintegration\n\nBlocked step:\n2: İletiyi oku\nOperation: mail.read\nRole: communicate\n\nMevcut strategy adayları:\nYok\n\nTasarım kuralları:\n- Uygulama/marka adına hard-code yazma; mümkün olduğunca generic capability veya strategy geliştir.\n- Mevcut provider başka bir işi yapılmış gibi göstermesin.\n- Dış dünyaya commit eden eylemlerde kullanıcı onay kapısı korunmalı.\n- Başarı gerçek observation/verification ile kanıtlanmalı.\n- Ana branch üzerinde doğrudan self-modification yapma; candidate branch/worktree kullan.\n- Build + Training Lab + ilgili runtime probe geçmeden capability available yapılmamalı.\n\nKabul kriteri:\nBlocked step gerçek provider/strategy ile tamamlanmalı, evidence downstream step'e aktarılmalı ve verifier sahte PASS üretmemeli.",
+      "kind" : "integration",
+      "reason" : "Task Graph step 'İletiyi oku' için mail.work gerekiyor ancak provider available değil.",
+      "researchGoal" : "Mail için resmi API/entegrasyon veya generic UI bridge seçeneklerini araştır; izin, güvenlik ve doğrulama sınırlarını çıkar."
     }
   ],
   "contextMemory" : [
@@ -180,75 +169,67 @@
       "title" : "mail uygulamasını aç son gelen maili kontrol et ve bana içeriği özetle"
     },
     {
-      "createdAt" : "2026-09-20T09:47:36Z",
-      "kind" : "task",
-      "summary" : "463 eşleşme buldum: DSCF9724.MOV, DSCF9725.MOV, DSCF9726.MOV, DSCF9727.MOV, DSCF9728.MOV ve 458 dosya daha. Sağdaki sonuçlardan istediğini Finder'da gösterebilirsin.",
-      "title" : "Masaüstündeki videoları bul."
+      "createdAt" : "2026-09-20T10:18:26Z",
+      "kind" : "research",
+      "summary" : "Görevin yapabildiğim kısmını tamamladım. **Son çekim için kurgu üretilemez** Mevcut kaynaklar, doğrudan video içeriğine erişim sağlamaz. Kanıtlar yalnızca araçların işlevlerini, kullanım adımlarını ve teknik detayları içerir. **Fırsat** Görsel ve video analiz araçlarının yapısal özellikleri, kurgu için yeni anlatı yapıları inşa etme potansiyeli sunar. Contextual Frame Analysis yöntemi, sahne bazlı gelişimi anlamlandırmak için kullanılabilir. **Risk** Araçlar gerçek video verisiyle entegre değil. Bu nedenle kurgunun doğruluğu belirsizdir. Olası anlatılar, mevcut teknik sınırlara dayanmalıdır. **Özgün fikirler** - **Sahne bazlı anlatı döngüsü:** Her sahne, önceki sahnenin bağlamıyla birlikte analiz edilerek bir hikâye örgüsü oluşturulabilir. - **Dilsel dönüşüm aracı:** Video analiz araçlarının sunduğu anlatı özetleri, yeni bir hikâye anlatım biçimine dönüştürülebilir. - **Veri odaklı karakter gelişimi:** Araçların tespit ettiği görsel unsurlar (yüzler, etiketler), karakter gelişiminde sembolik olarak kullanılabilir. **Sonuç** Mevcut kaynaklarla doğrudan bir kurgu üretilemez. Araçların yapısal imkânları, yeni bir anlatı için temel oluşturabilir. Kısmi doğrulama: Web araştırması 4 alak",
+      "title" : "Son çekimle ilgili bir kurgu yapmamız gerekiyor."
     },
     {
-      "createdAt" : "2026-09-20T11:55:16Z",
+      "createdAt" : "2026-09-20T14:01:45Z",
       "kind" : "task",
-      "summary" : "**Ekran durumu** KRALİ uygulaması önde konumda. Pencere başlıkları ve uygulama isimleri ekranın üzerinde açık. ChatGPT, Bildirim Merkezi ve diğer uygulamalar açık ama önde değil. KRALİ — KRALİ başlığı açık.",
-      "title" : "Ekrana bak ve şu anda ne gördüğünü söyle."
+      "summary" : "**Ekran durumu** KRALİ uygulaması önde konumda. Pencere başlıkları ve uygulama isimleri ekranın üzerinde açık. KRALİ — KRALİ başlığı açık. **Nihai çıktı** Mevcut sistem, görsel ve video içeriğine doğrudan erişim sağlamıyor. Bu nedenle ekran görüntüsünü analiz etmek veya ilgili klasörü Finder’da açmak mümkün değil. **Fırsat** Görsel ve video analiz araçlarının yapısal özellikleri, yeni anlatı yapıları inşa etme potansiyeli sunar. Contextual Frame Analysis yöntemi, sahne bazlı gelişimi anlamlandırmak için kullanılabilir. **Risk** Araçlar gerçek video verisiyle entegre değil. Bu nedenle kurgunun doğruluğu belirsizdir. Olası anlatılar, mevcut teknik sınırlara dayanmalıdır. **Sonuç** Mevcut kaynaklarla doğrudan bir kurgu üretilemez. Araçların yapısal imkânları, yeni bir anlatı için temel oluşturabilir. Doğrulama: Doğrulama durduruldu: seçilen dosya arama hedefi mevcut kullanıcı girdisiyle uyuşmuyor. Alternatif plan: Mevcut kullanıcı girdisinden hedefi yeniden türet; önceki turun goal / plan state'ini bu tura taşıma.",
+      "title" : "Spotify uygulamasını aç, şu anda açık olan şarkıyı bul, şarkı hakkınd…"
+    },
+    {
+      "createdAt" : "2026-09-20T13:40:09Z",
+      "kind" : "task",
+      "summary" : "**Hedef gerçekleştirilemez** Mevcut sistem, görsel ve video içeriğine doğrudan erişim sağlayamıyor. Spotify uygulamasında açık olan şarkıyı tespit etmek veya sözlerini araştırmak için gerekli teknik yetenekler mevcut değil. Sözlerin analiz edilmesi ve sonuçların masaüstündeki 9 Eylül klasörüne txt dosyası olarak kaydedilmesi, metin dosyası yazma yeteneğiyle sınırlı. Bu özellik doğrudan desteklenmiyor. **Fırsat** Görsel ve video analiz araçlarının yapısal özellikleri, yeni anlatı yapıları inşa etme potansiyeli sunar. Contextual Frame Analysis yöntemi, sahne bazlı gelişimi anlamlandırmak için kullanılabilir. **Risk** Araçlar gerçek video verisiyle entegre değil. Bu nedenle kurgunun doğruluğu belirsizdir. Olası anlatılar, mevcut teknik sınırlara dayanmalıdır. **Sonuç** Mevcut kaynaklarla doğrudan bir kurgu üretilemez. Araçların yapısal imkânları, yeni bir anlatı için temel oluşturabilir. Doğrulama: Doğrulama durduruldu: seçilen dosya arama hedefi mevcut kullanıcı girdisiyle uyuşmuyor. Alternatif plan: Mevcut kullanıcı girdisinden hedefi yeniden türet; önceki turun goal / plan state'ini bu tura taşıma. Yetkinlik kazanma planı: Resmi kaynakları araştır → geri alınabilir prototip oluştur",
+      "title" : "Spotify uygulamasını aç, şu anda açık olan şarkıyı bul, şarkının sözl…"
     }
   ],
-  "createdAt" : "2026-09-20T13:40:09Z",
+  "createdAt" : "2026-09-20T14:05:18Z",
   "executionSteps" : [
     {
-      "capabilityID" : "files.search",
-      "detail" : "Çalışma alanındaki dosyaları tarayarak ilgili içerikleri belirlemek için gerekli Operation: files.search: Çalışma alanı içinde salt-okunur tarama ve filtreleme",
-      "kind" : "action",
-      "state" : "completed",
-      "title" : "Masaüstünde videoları bul"
-    },
-    {
-      "capabilityID" : "perception.screen",
-      "detail" : "Açık uygulamaları ve ekran içeriğini analiz ederek hangi şarkının çalındığını tespit etmek için gerekli Operation: perception.screen: Ekranın salt-okunur gözlemlenmesi, uygulama ve pencere durumu analizi",
-      "kind" : "action",
-      "state" : "completed",
-      "title" : "Ekranı gözlemle ve mevcut durumu belirle"
-    },
-    {
-      "capabilityID" : "core.reasoning",
-      "detail" : "Toplanan metni derinlemesine inceleyerek içerik analizi yapmak için gerekli Operation: core.reasoning: Araştırma çıktısının içeriğinin analizi ve anlamlandırılması",
-      "kind" : "reasoning",
-      "state" : "completed",
-      "title" : "Sözleri analiz et"
-    },
-    {
-      "capabilityID" : "files.write.text",
-      "detail" : "Analiz sonucunu masaüstündeki 9 eylül klasörüne yeni bir dosya olarak yazmak için gerekli Operation: files.write.text: Son analiz çıktısının yeni bir txt dosyasına yazılması",
-      "kind" : "action",
-      "state" : "blocked",
-      "title" : "Analizi txt dosyası olarak kaydet"
-    },
-    {
       "capabilityID" : "context.local",
-      "detail" : "Mission hedefini uçtan uca tamamlamak için gerekli capability sözleşmesi. Ön koşul adımları: 4. Operation: capability.contract",
+      "detail" : "Yalnızca bu kullanıcı hedefiyle ilgili bağlamı hazırla; eski görev hedeflerini yeni göreve taşıma. Operation: context.resolve",
       "kind" : "reasoning",
       "state" : "completed",
-      "title" : "Bağlam"
+      "title" : "Görev bağlamını hazırla"
     },
     {
       "capabilityID" : "desktop.app",
-      "detail" : "Mission hedefini uçtan uca tamamlamak için gerekli capability sözleşmesi. Ön koşul adımları: 5. Operation: capability.contract",
+      "detail" : "Kullanıcının adlandırdığı uygulamayı çöz ve görünür foreground durumuna getir. Ön koşul adımları: 1. Operation: app.open",
       "kind" : "action",
       "state" : "partial",
-      "title" : "Uygulama kontrolü"
+      "title" : "Kaynak uygulamayı aç veya öne getir"
     },
     {
-      "capabilityID" : "files.move.reversible",
-      "detail" : "Mission hedefini uçtan uca tamamlamak için gerekli capability sözleşmesi. Ön koşul adımları: 6. Operation: capability.contract",
+      "capabilityID" : "mail.work",
+      "detail" : "Kullanıcının istediği mail içeriğini salt-okunur biçimde al. Ön koşul adımları: 2. Operation: mail.read",
       "kind" : "action",
-      "state" : "partial",
-      "title" : "Geri alınabilir dosya işlemi"
+      "state" : "blocked",
+      "title" : "İletiyi oku"
     },
     {
-      "capabilityID" : "files.reveal",
-      "detail" : "Mission hedefini uçtan uca tamamlamak için gerekli capability sözleşmesi. Ön koşul adımları: 7. Operation: capability.contract",
+      "capabilityID" : "core.reasoning",
+      "detail" : "Önceki adımların gerçek çıktısını birlikte değerlendir ve sonraki adımın kullanabileceği sonucu üret. Ön koşul adımları: 3. Operation: content.analyze",
+      "kind" : "reasoning",
+      "state" : "completed",
+      "title" : "Toplanan veriyi analiz et"
+    },
+    {
+      "capabilityID" : "mail.work",
+      "detail" : "Analiz sonucuna uygun bir cevap taslağı hazırla; henüz dış dünyaya gönderme. Ön koşul adımları: 4. Operation: mail.draft",
       "kind" : "action",
-      "state" : "partial",
-      "title" : "Finder"
+      "state" : "blocked",
+      "title" : "Cevap taslağı oluştur"
+    },
+    {
+      "capabilityID" : "mail.work",
+      "detail" : "Hazırlanan taslağı yalnız kullanıcı onayından sonra dış dünyaya gönder. Ön koşul adımları: 5. Operation: mail.send",
+      "kind" : "action",
+      "state" : "blocked",
+      "title" : "Gönder"
     },
     {
       "capabilityID" : "core.reasoning",
@@ -264,21 +245,21 @@
       "title" : "Sonucu kullanıcıya aktar"
     }
   ],
-  "fallbackPlan" : "Mevcut kullanıcı girdisinden hedefi yeniden türet; önceki turun goal / plan state'ini bu tura taşıma.",
-  "finalResponse" : "**Hedef gerçekleştirilemez**\n\nMevcut sistem, görsel ve video içeriğine doğrudan erişim sağlayamıyor. Spotify uygulamasında açık olan şarkıyı tespit etmek veya sözlerini araştırmak için gerekli teknik yetenekler mevcut değil. Sözlerin analiz edilmesi ve sonuçların masaüstündeki 9 Eylül klasörüne txt dosyası olarak kaydedilmesi, metin dosyası yazma yeteneğiyle sınırlı. Bu özellik doğrudan desteklenmiyor.\n\n**Fırsat**  \nGörsel ve video analiz araçlarının yapısal özellikleri, yeni anlatı yapıları inşa etme potansiyeli sunar. Contextual Frame Analysis yöntemi, sahne bazlı gelişimi anlamlandırmak için kullanılabilir.\n\n**Risk**  \nAraçlar gerçek video verisiyle entegre değil. Bu nedenle kurgunun doğruluğu belirsizdir. Olası anlatılar, mevcut teknik sınırlara dayanmalıdır.\n\n**Sonuç**  \nMevcut kaynaklarla doğrudan bir kurgu üretilemez. Araçların yapısal imkânları, yeni bir anlatı için temel oluşturabilir.\n\nDoğrulama: Doğrulama durduruldu: seçilen dosya arama hedefi mevcut kullanıcı girdisiyle uyuşmuyor.\nAlternatif plan: Mevcut kullanıcı girdisinden hedefi yeniden türet; önceki turun goal / plan state'ini bu tura taşıma.\nYetkinlik kazanma planı: Resmi kaynakları araştır → geri alınabilir prototip oluştur → test et → yazma izinlerini ve geri alma davranışını kullanıcıya göster → onaydan sonra etkinleştir.",
-  "goal" : "Spotify uygulamasını aç, şu anda açık olan şarkıyı bul, şarkının sözlerini araştır, sözleri analiz et ve masaüstündeki 9 eylül klasörüne analizle birlikte txt dosyası olarak kaydet.",
+  "fallbackPlan" : "Tamamlanmayan action step'ini yeniden planla; yürütülmeyen işi başarılı sayma.",
+  "finalResponse" : "**Mail uygulaması doğrudan erişilemiyor.**  \nMevcut sistem, görsel ve video içeriğine doğrudan erişim sağlamıyor. Bu nedenle Mail uygulamasını açma ve son gelen maili inceleme işlemi gerçekleştirilemiyor.  \n\n**Fırsat**  \nGörsel ve video analiz araçlarının yapısal özellikleri, yeni anlatı yapıları inşa etme potansiyeli sunar. Contextual Frame Analysis yöntemi, sahne bazlı gelişimi anlamlandırmak için kullanılabilir.  \n\n**Risk**  \nAraçlar gerçek video verisiyle entegre değil. Bu nedenle kurgunun doğruluğu belirsizdir. Olası anlatılar, mevcut teknik sınırlara dayanmalıdır.  \n\n**Sonuç**  \nMevcut kaynaklarla doğrudan bir kurgu üretilemez. Araçların yapısal imkânları, yeni bir anlatı için temel oluşturabilir.  \n\n**Not:** Mail yetkinliği tam olarak desteklenmiyor. Bu nedenle Mail uygulamasını açma ve uygun cevap taslağı hazırlama isteği yerine getirilemiyor.\n\nDoğrulama: Semantic mission içindeki zorunlu action step'lerinden bazıları tamamlanmadı: desktop.app, mail.work\nAlternatif plan: Tamamlanmayan action step'ini yeniden planla; yürütülmeyen işi başarılı sayma.\nYetkinlik kazanma planı: Resmi API/entegrasyonu araştır → gereken hesap/izinleri çıkar → bağlantıyı sandbox/test ortamında doğrula → kullanıcı onayından sonra etkinleştir.",
+  "goal" : "Mail uygulamasını aç, son gelen maili incele, ne yapmamız gerektiğini analiz et, uygun cevap taslağını hazırla ama göndermeden önce benden onay iste.",
   "inputSource" : "text",
   "intelligenceProvider" : "Apple Foundation Models",
   "learningPlans" : [
     {
-      "capabilityID" : "files.write.text",
-      "capabilityName" : "Metin dosyası yazma",
-      "nextStep" : "Resmi kaynakları araştır → geri alınabilir prototip oluştur → test et → yazma izinlerini ve geri alma davranışını kullanıcıya göster → onaydan sonra etkinleştir.",
-      "researchGoal" : "Metin dosyası yazma yeteneğini kazanmak için resmi dokümantasyon, güvenli entegrasyon seçenekleri ve test yöntemlerini araştır.",
-      "state" : "readyToResearch"
+      "capabilityID" : "mail.work",
+      "capabilityName" : "Mail",
+      "nextStep" : "Resmi API/entegrasyonu araştır → gereken hesap/izinleri çıkar → bağlantıyı sandbox/test ortamında doğrula → kullanıcı onayından sonra etkinleştir.",
+      "researchGoal" : "Mail okuma/taslak/gönderim için sağlayıcı API'leri, OAuth izin kapsamları ve gönderim öncesi onay modelini araştır.",
+      "state" : "integrationRequired"
     }
   ],
-  "plan" : "Masaüstünde videoları bul → Ekranı gözlemle ve mevcut durumu belirle → Sözleri analiz et → Analizi txt dosyası olarak kaydet → Bağlam → Uygulama kontrolü → Geri alınabilir dosya işlemi → Finder",
+  "plan" : "Görev bağlamını hazırla → Kaynak uygulamayı aç veya öne getir → İletiyi oku → Toplanan veriyi analiz et → Cevap taslağı oluştur → Gönder",
   "researchEvidence" : [
 
   ],
@@ -291,219 +272,169 @@
     "Context",
     "Plan",
     "Desktop",
-    "Files",
-    "Screen",
+    "Mail",
     "Learn",
     "Intelligence",
     "Verify",
     "Response"
   ],
   "semanticMission" : {
-    "confidence" : 0.85,
-    "objective" : "Spotify uygulamasını aç, şu anda açık olan şarkıyı bul, şarkının sözlerini araştır, sözleri analiz et ve masaüstündeki 9 eylül klasörüne analizle birlikte txt dosyası olarak kaydet.",
+    "confidence" : 0.95,
+    "objective" : "Mail uygulamasını aç, son gelen maili incele, ne yapmamız gerektiğini analiz et, uygun cevap taslağını hazırla ama göndermeden önce benden onay iste.",
     "outcomes" : [
       "analyze",
+      "communicate",
       "compose",
       "explain",
-      "locate",
-      "open",
-      "organize"
+      "open"
     ],
     "requiredCapabilityIDs" : [
       "context.local",
       "core.reasoning",
       "desktop.app",
-      "files.move.reversible",
-      "files.reveal",
-      "files.search",
-      "files.write.text",
-      "perception.screen"
+      "mail.work"
     ],
     "requiresUserInput" : false,
     "steps" : [
       {
-        "capabilityID" : "files.search",
-        "dependsOn" : [
-
-        ],
-        "operation" : "files.search: Çalışma alanı içinde salt-okunur tarama ve filtreleme",
-        "purpose" : "Çalışma alanındaki dosyaları tarayarak ilgili içerikleri belirlemek için gerekli",
-        "title" : "Masaüstünde videoları bul"
-      },
-      {
-        "capabilityID" : "perception.screen",
-        "dependsOn" : [
-
-        ],
-        "operation" : "perception.screen: Ekranın salt-okunur gözlemlenmesi, uygulama ve pencere durumu analizi",
-        "purpose" : "Açık uygulamaları ve ekran içeriğini analiz ederek hangi şarkının çalındığını tespit etmek için gerekli",
-        "title" : "Ekranı gözlemle ve mevcut durumu belirle"
-      },
-      {
-        "capabilityID" : "core.reasoning",
-        "dependsOn" : [
-
-        ],
-        "operation" : "core.reasoning: Araştırma çıktısının içeriğinin analizi ve anlamlandırılması",
-        "purpose" : "Toplanan metni derinlemesine inceleyerek içerik analizi yapmak için gerekli",
-        "title" : "Sözleri analiz et"
-      },
-      {
-        "capabilityID" : "files.write.text",
-        "dependsOn" : [
-
-        ],
-        "operation" : "files.write.text: Son analiz çıktısının yeni bir txt dosyasına yazılması",
-        "purpose" : "Analiz sonucunu masaüstündeki 9 eylül klasörüne yeni bir dosya olarak yazmak için gerekli",
-        "title" : "Analizi txt dosyası olarak kaydet"
-      },
-      {
         "capabilityID" : "context.local",
         "dependsOn" : [
-          3
+
         ],
-        "operation" : "capability.contract",
-        "purpose" : "Mission hedefini uçtan uca tamamlamak için gerekli capability sözleşmesi.",
-        "title" : "Bağlam"
+        "operation" : "context.resolve",
+        "purpose" : "Yalnızca bu kullanıcı hedefiyle ilgili bağlamı hazırla; eski görev hedeflerini yeni göreve taşıma.",
+        "title" : "Görev bağlamını hazırla"
       },
       {
         "capabilityID" : "desktop.app",
         "dependsOn" : [
+          0
+        ],
+        "operation" : "app.open",
+        "purpose" : "Kullanıcının adlandırdığı uygulamayı çöz ve görünür foreground durumuna getir.",
+        "title" : "Kaynak uygulamayı aç veya öne getir"
+      },
+      {
+        "capabilityID" : "mail.work",
+        "dependsOn" : [
+          1
+        ],
+        "operation" : "mail.read",
+        "purpose" : "Kullanıcının istediği mail içeriğini salt-okunur biçimde al.",
+        "title" : "İletiyi oku"
+      },
+      {
+        "capabilityID" : "core.reasoning",
+        "dependsOn" : [
+          2
+        ],
+        "operation" : "content.analyze",
+        "purpose" : "Önceki adımların gerçek çıktısını birlikte değerlendir ve sonraki adımın kullanabileceği sonucu üret.",
+        "title" : "Toplanan veriyi analiz et"
+      },
+      {
+        "capabilityID" : "mail.work",
+        "dependsOn" : [
+          3
+        ],
+        "operation" : "mail.draft",
+        "purpose" : "Analiz sonucuna uygun bir cevap taslağı hazırla; henüz dış dünyaya gönderme.",
+        "title" : "Cevap taslağı oluştur"
+      },
+      {
+        "capabilityID" : "mail.work",
+        "dependsOn" : [
           4
         ],
-        "operation" : "capability.contract",
-        "purpose" : "Mission hedefini uçtan uca tamamlamak için gerekli capability sözleşmesi.",
-        "title" : "Uygulama kontrolü"
-      },
-      {
-        "capabilityID" : "files.move.reversible",
-        "dependsOn" : [
-          5
-        ],
-        "operation" : "capability.contract",
-        "purpose" : "Mission hedefini uçtan uca tamamlamak için gerekli capability sözleşmesi.",
-        "title" : "Geri alınabilir dosya işlemi"
-      },
-      {
-        "capabilityID" : "files.reveal",
-        "dependsOn" : [
-          6
-        ],
-        "operation" : "capability.contract",
-        "purpose" : "Mission hedefini uçtan uca tamamlamak için gerekli capability sözleşmesi.",
-        "title" : "Finder"
+        "operation" : "mail.send",
+        "purpose" : "Hazırlanan taslağı yalnız kullanıcı onayından sonra dış dünyaya gönder.",
+        "title" : "Gönder"
       }
     ]
   },
-  "semanticPlannerProvider" : "Apple + Contract Repair",
+  "semanticPlannerProvider" : "Apple Foundation Models",
   "taskGraph" : [
-    {
-      "available" : true,
-      "capabilityID" : "files.search",
-      "dependsOn" : [
-
-      ],
-      "index" : 0,
-      "operation" : "files.search: Çalışma alanı içinde salt-okunur tarama ve filtreleme",
-      "requiresApproval" : false,
-      "risk" : "readOnly",
-      "role" : "retrieve",
-      "title" : "Masaüstünde videoları bul"
-    },
-    {
-      "available" : true,
-      "capabilityID" : "perception.screen",
-      "dependsOn" : [
-
-      ],
-      "index" : 1,
-      "operation" : "perception.screen: Ekranın salt-okunur gözlemlenmesi, uygulama ve pencere durumu analizi",
-      "requiresApproval" : false,
-      "risk" : "readOnly",
-      "role" : "observe",
-      "title" : "Ekranı gözlemle ve mevcut durumu belirle"
-    },
-    {
-      "available" : true,
-      "capabilityID" : "core.reasoning",
-      "dependsOn" : [
-
-      ],
-      "index" : 2,
-      "operation" : "core.reasoning: Araştırma çıktısının içeriğinin analizi ve anlamlandırılması",
-      "requiresApproval" : false,
-      "risk" : "reasoning",
-      "role" : "transform",
-      "title" : "Sözleri analiz et"
-    },
-    {
-      "available" : false,
-      "capabilityID" : "files.write.text",
-      "dependsOn" : [
-
-      ],
-      "index" : 3,
-      "operation" : "files.write.text: Son analiz çıktısının yeni bir txt dosyasına yazılması",
-      "requiresApproval" : false,
-      "risk" : "reversibleWrite",
-      "role" : "persist",
-      "title" : "Analizi txt dosyası olarak kaydet"
-    },
     {
       "available" : true,
       "capabilityID" : "context.local",
       "dependsOn" : [
-        3
+
       ],
-      "index" : 4,
-      "operation" : "capability.contract",
+      "index" : 0,
+      "operation" : "context.resolve",
       "requiresApproval" : false,
       "risk" : "reasoning",
       "role" : "reason",
-      "title" : "Bağlam"
+      "title" : "Görev bağlamını hazırla"
     },
     {
       "available" : true,
       "capabilityID" : "desktop.app",
       "dependsOn" : [
+        0
+      ],
+      "index" : 1,
+      "operation" : "app.open",
+      "requiresApproval" : false,
+      "risk" : "external",
+      "role" : "act",
+      "title" : "Kaynak uygulamayı aç veya öne getir"
+    },
+    {
+      "available" : false,
+      "capabilityID" : "mail.work",
+      "dependsOn" : [
+        1
+      ],
+      "index" : 2,
+      "operation" : "mail.read",
+      "requiresApproval" : false,
+      "risk" : "external",
+      "role" : "communicate",
+      "title" : "İletiyi oku"
+    },
+    {
+      "available" : true,
+      "capabilityID" : "core.reasoning",
+      "dependsOn" : [
+        2
+      ],
+      "index" : 3,
+      "operation" : "content.analyze",
+      "requiresApproval" : false,
+      "risk" : "reasoning",
+      "role" : "transform",
+      "title" : "Toplanan veriyi analiz et"
+    },
+    {
+      "available" : false,
+      "capabilityID" : "mail.work",
+      "dependsOn" : [
+        3
+      ],
+      "index" : 4,
+      "operation" : "mail.draft",
+      "requiresApproval" : true,
+      "risk" : "external",
+      "role" : "communicate",
+      "title" : "Cevap taslağı oluştur"
+    },
+    {
+      "available" : false,
+      "capabilityID" : "mail.work",
+      "dependsOn" : [
         4
       ],
       "index" : 5,
-      "operation" : "capability.contract",
-      "requiresApproval" : false,
+      "operation" : "mail.send",
+      "requiresApproval" : true,
       "risk" : "external",
-      "role" : "verify",
-      "title" : "Uygulama kontrolü"
-    },
-    {
-      "available" : true,
-      "capabilityID" : "files.move.reversible",
-      "dependsOn" : [
-        5
-      ],
-      "index" : 6,
-      "operation" : "capability.contract",
-      "requiresApproval" : false,
-      "risk" : "reversibleWrite",
-      "role" : "persist",
-      "title" : "Geri alınabilir dosya işlemi"
-    },
-    {
-      "available" : true,
-      "capabilityID" : "files.reveal",
-      "dependsOn" : [
-        6
-      ],
-      "index" : 7,
-      "operation" : "capability.contract",
-      "requiresApproval" : false,
-      "risk" : "readOnly",
-      "role" : "act",
-      "title" : "Finder"
+      "role" : "communicate",
+      "title" : "Gönder"
     }
   ],
-  "traceID" : "601E6531-13E6-42FF-B084-F78F0D88886E",
-  "userInput" : "Spotify uygulamasını aç, şu anda açık olan şarkıyı bul, şarkının sözlerini araştır, sözleri analiz et ve masaüstündeki 9 eylül klasörüne analizle birlikte txt dosyası olarak kaydet.",
+  "traceID" : "C1B469E1-633F-46C0-904E-09279B6E8AF3",
+  "userInput" : "Mail uygulamasını aç, son gelen maili incele, ne yapmamız gerektiğini analiz et, uygun cevap taslağını hazırla ama göndermeden önce benden onay iste.",
   "verificationState" : "attention",
-  "verificationSummary" : "Doğrulama durduruldu: seçilen dosya arama hedefi mevcut kullanıcı girdisiyle uyuşmuyor."
+  "verificationSummary" : "Semantic mission içindeki zorunlu action step'lerinden bazıları tamamlanmadı: desktop.app, mail.work"
 }
