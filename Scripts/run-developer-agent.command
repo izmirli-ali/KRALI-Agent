@@ -115,6 +115,7 @@ function readText(file) {
 const version = readText(path.join(root, "VERSION"));
 const training = readJSON(path.join(localMentor, "training-latest.json"));
 const live = readJSON(path.join(localMentor, "live-eval-latest.json"));
+const arena = readJSON(path.join(localMentor, "arena-latest.json"));
 const mentor = readJSON(path.join(localMentor, "latest.json"));
 
 const trainingGreen =
@@ -129,12 +130,19 @@ const liveGreen =
   Number(live.failed || 0) === 0 &&
   Number(live.passed || 0) === Number(live.total || -1);
 
+const arenaGreen =
+  arena &&
+  arena.appVersion === version &&
+  Number(arena.failed || 0) === 0 &&
+  Number(arena.passed || 0) === Number(arena.total || -1) &&
+  Number(arena.reviewerFlagged || 0) === 0;
+
 const mentorCurrent = mentor && mentor.appVersion === version;
 const mentorNeedsAttention =
   mentorCurrent &&
   !["passed", "skipped"].includes(String(mentor.verificationState || ""));
 
-if (trainingGreen && liveGreen && !mentorNeedsAttention) {
+if (trainingGreen && liveGreen && arenaGreen && !mentorNeedsAttention) {
   process.stdout.write("green");
 } else {
   process.stdout.write("run");
@@ -162,11 +170,13 @@ Sen KRALİ projesinin Developer Agent'ısın.
 - Mentor/training-latest.json (varsa)
 - Mentor/live-eval-latest.json (varsa)
 - Mentor/latest.json (varsa)
+- Mentor/arena-latest.json (varsa)
 - VERSION
 - Yerel güncel diagnostic'ler için gerekirse shell ile şu dosyaları da oku:
   ~/Library/Application Support/KRALI Agent/Mentor/training-latest.json
   ~/Library/Application Support/KRALI Agent/Mentor/live-eval-latest.json
   ~/Library/Application Support/KRALI Agent/Mentor/latest.json
+  ~/Library/Application Support/KRALI Agent/Mentor/arena-latest.json
 
 Amaç:
 KRALİ'nin kullanıcının hedeflediği genel yapay zeka/asistan iskeletini güvenilir biçimde geliştirmek.
@@ -178,17 +188,25 @@ Değişmez kurallar:
 4. Mentor JSON dosyalarını değiştirme.
 5. İnternetten rastgele kod indirip çalıştırma.
 6. Kanıtı olmayan büyük refactor yapma.
-7. Training Lab ve Live Research Eval tamamen yeşilse sırf değişiklik yapmak için kod değiştirme.
+7. Training Lab, Live Research Eval ve KRALİ Arena tamamen yeşilse sırf değişiklik yapmak için kod değiştirme.
 8. Mentor/latest.json daha eski appVersion'a aitse ve daha yeni Live Eval/Training raporları ilgili problemi geçmiş gösteriyorsa eski hatayı yeniden düzeltme.
 9. Bir değişiklik yaparsan önce nedeni açıkça tanımla, minimum dosyayı değiştir ve regression riskini düşük tut.
 10. İşin sonunda Scripts/build-check.command çalıştır. Build geçmiyorsa düzeltmeye devam et; geçiremiyorsan durumu açıkça raporla.
 
 Öncelik sırası:
+- KRALİ Arena açık-dünya semantic planning / reviewer başarısızlıkları
 - Gerçek Live Eval başarısızlıkları
 - Güncel mentor trace başarısızlıkları
 - Training Lab regression'ları
 - Açık capability gap'leri
 - Son olarak açık ve düşük riskli kalite iyileştirmeleri
+
+Arena ilkeleri:
+- arena-latest.json içindeki deterministic diagnostic ile AI Reviewer görüşünü ayır.
+- Tek bir prompt kalıbına özel patch yazma; failure cluster'ın kök nedenini düzelt.
+- Reviewer görüşü deterministic sözleşmeyle çelişiyorsa güvenlik ve gerçek capability durumunu esas al.
+- Capability bağlı değilse mission'dan silme; blocked/partial olarak dürüstçe taşı.
+- Candidate değişiklik yeni hardcoded marka/isim/tek cümle özel-case'i eklememeli.
 
 KRALİ'nin North Star'ı:
 Doğal dili anlayan, araştırabilen, kaynakları doğrulayan, içeriğe göre analiz ve yorum üreten, kullanıcı söylemeden gerekçeli fikirler ekleyebilen, eksik yeteneğini fark edip araştırma/öğrenme planı kurabilen ve araçları güvenli biçimde kullanan genel amaçlı kişisel ajan.
