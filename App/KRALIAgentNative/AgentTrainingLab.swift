@@ -354,6 +354,21 @@ struct AgentTrainingLab {
                 minimumMandatoryResearchConceptGroups: 0
             ),
             TrainingScenario(
+                id: "local-business-detailed-research",
+                title: "Doğal dilde detaylı yerel işletme araştırması",
+                tier: .core,
+                prompt: "Estafiz adında bir pilates salonu var onu detaylı araştırır mısın?",
+                context: empty,
+                requiredOutcomes: [.research, .explain],
+                requiredCapabilities: ["research.web", "core.reasoning"],
+                forbiddenCapabilities: ["files.search"],
+                requiredRouteStages: ["Research", "Verify"],
+                requiredStepTitles: ["Web'de araştır", "Kaynakları oku"],
+                requiredLearningCapabilities: [],
+                minimumResearchConceptGroups: 2,
+                minimumMandatoryResearchConceptGroups: 1
+            ),
+            TrainingScenario(
                 id: "local-file-search",
                 title: "Yerel dosya araması",
                 tier: .core,
