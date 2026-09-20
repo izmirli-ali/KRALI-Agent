@@ -24,7 +24,7 @@ struct AgentNaturalLanguageResolver: Sendable {
 
     private let nonAppObjectWords = Set([
         "dosya", "pdf", "belge", "klasor",
-        "finder", "indirilenler", "masaustu",
+        "indirilenler", "masaustu",
         "web", "site", "internet", "tarayici",
         "url", "sayfa"
     ])
@@ -86,6 +86,12 @@ struct AgentNaturalLanguageResolver: Sendable {
             wordSet.contains("gec")
 
         guard hasOpenIntent else {
+            return false
+        }
+
+        let normalizedRaw = normalized(raw)
+        if normalizedRaw.contains("finder da") ||
+           normalizedRaw.contains("finderda") {
             return false
         }
 
