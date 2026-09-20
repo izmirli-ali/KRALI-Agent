@@ -104,9 +104,19 @@ final class AgentEngine: ObservableObject {
 
         loadMemory()
         contextMemoryEntries = contextMemoryStore.load()
+
+        for rule in memories {
+            contextMemoryEntries = contextMemoryStore.upsertRule(
+                rule,
+                in: contextMemoryEntries
+            )
+        }
+
+        contextMemoryStore.save(contextMemoryEntries)
         contextMemoryStatus = contextMemoryEntries.isEmpty
             ? "Henüz görev bağlamı yok."
             : "\(contextMemoryEntries.count) bağlam kaydı hazır."
+
         capabilityLearningBacklog = learningStore.load()
         mentorTraceReady = fileManager.fileExists(
             atPath: mentorTraceStore.latestURL.path
