@@ -264,6 +264,7 @@ actor AgentDesktopControl {
 
     private struct ApplicationCandidate {
         let name: String
+        let aliases: [String]
         let bundleIdentifier: String?
         let url: URL
     }
@@ -275,16 +276,24 @@ actor AgentDesktopControl {
         let candidates = installedApplicationCandidates()
 
         let exact = candidates
-            .filter {
-                let normalized =
-                    normalize($0.name)
-                return
-                    corpus.contains(normalized) &&
-                    !normalized.isEmpty
+            .filter { candidate in
+                candidate.aliases.contains { alias in
+                    let normalized =
+                        normalize(alias)
+
+                    return
+                        !normalized.isEmpty &&
+                        corpus.contains(normalized)
+                }
             }
             .sorted {
-                normalize($0.name).count >
-                    normalize($1.name).count
+                let lhs = $0.aliases
+                    .map { normalize($0).count }
+                    .max() ?? 0
+                let rhs = $1.aliases
+                    .map { normalize($0).count }
+                    .max() ?? 0
+                return lhs > rhs
             }
 
         if let candidate = exact.first {
@@ -300,9 +309,12 @@ actor AgentDesktopControl {
         return candidates
             .map { candidate in
                 let nameTokens = Set(
-                    normalize(candidate.name)
-                        .split(separator: " ")
-                        .map(String.init)
+                    candidate.aliases
+                        .flatMap {
+                            normalize($0)
+                                .split(separator: " ")
+                                .map(String.init)
+                        }
                 )
 
                 return (
@@ -382,9 +394,31 @@ actor AgentDesktopControl {
                 }
 
                 seen.insert(key)
+                let finderDisplayName =
+                    fileManager.displayName(
+                        atPath: url.path
+                    )
+
+                let aliases = Array(
+                    Set([
+                        baseName,
+                        localizedName,
+                        finderDisplayName
+                    ])
+                )
+                .filter {
+                    !$0.trimmingCharacters(
+                        in: .whitespacesAndNewlines
+                    ).isEmpty
+                }
+
                 results.append(
                     ApplicationCandidate(
-                        name: localizedName,
+                        name:
+                            finderDisplayName.isEmpty
+                                ? localizedName
+                                : finderDisplayName,
+                        aliases: aliases,
                         bundleIdentifier:
                             bundleID,
                         url: url
