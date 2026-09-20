@@ -18,6 +18,8 @@ const branchName = process.env.KRALI_BRANCH || "";
 const gapLabel = process.env.KRALI_GAP_LABEL || "Capability";
 const appVersion = process.env.KRALI_APP_VERSION || "unknown";
 const runID = process.env.KRALI_RUN_ID || "";
+const requireToolUse =
+  process.env.KRALI_REQUIRE_TOOL_USE === "1";
 const timeoutMs = Number(process.env.KRALI_SDK_TIMEOUT_MS || "480000");
 
 let currentState = "sdk_fallback_running";
@@ -159,9 +161,14 @@ let providerId = requestedProvider;
 let providerSettings = null;
 let modelId = requestedModel;
 let providerBaseUrl = undefined;
+let providerApiKey = undefined;
 
 if (providerId === "ollama") {
-  providerBaseUrl = ollamaBaseUrl;
+  providerId = "openai-compatible";
+  providerBaseUrl =
+    ollamaBaseUrl.replace(/\/$/, "") +
+    "/v1";
+  providerApiKey = "ollama";
 
   if (!modelId) {
     setStage(
@@ -176,7 +183,8 @@ if (providerId === "ollama") {
 
   setStage(
     "sdk_provider_ready",
-    "Yerel Ollama provider hazır: " + modelId
+    "Yerel Ollama OpenAI-compatible adapter hazır: " +
+      modelId
   );
 } else {
   try {
@@ -211,6 +219,10 @@ if (providerId === "ollama") {
   providerBaseUrl =
     providerSettings?.baseUrl ||
     providerSettings?.apiBaseUrl ||
+    undefined;
+  providerApiKey =
+    providerSettings?.apiKey ||
+    providerSettings?.key ||
     undefined;
 
   setStage(
@@ -411,13 +423,18 @@ try {
     config: {
       providerId,
       modelId,
+      ...(providerApiKey ? { apiKey: providerApiKey } : {}),
       ...(providerBaseUrl ? { baseUrl: providerBaseUrl } : {}),
       cwd: worktree,
       workspaceRoot: worktree,
       mode: "act",
       maxIterations: Number(
         process.env.KRALI_SDK_MAX_ITERATIONS ||
-          "24"
+          (
+            requestedProvider === "ollama"
+              ? "36"
+              : "24"
+          )
       ),
       enableTools: true,
       enableSpawnAgent: false,
@@ -441,23 +458,57 @@ try {
 
   const result = session?.result;
 
-  setStage(
-    "sdk_session_completed",
-    gapLabel +
-      " SDK oturumu tamamlandı; candidate değişiklikler kontrol ediliyor"
-  );
-
   if (result?.text) {
     process.stdout.write(result.text + "\n");
   }
 
-  const finishReason = String(result?.finishReason || "");
-  if (!result || ["error", "aborted", "mistake_limit"].includes(finishReason)) {
+  const finishReason =
+    String(result?.finishReason || "");
+
+  if (
+    !result ||
+    ["error", "aborted", "mistake_limit"].includes(
+      finishReason
+    )
+  ) {
+    setStage(
+      "sdk_failed",
+      gapLabel +
+        " SDK oturumu başarısız: " +
+        (finishReason || "unknown")
+    );
     console.error(
       "KRALI SDK fallback başarısız. finishReason=" +
         (finishReason || "unknown")
     );
     process.exitCode = 20;
+  } else if (
+    requireToolUse &&
+    !sawToolEvent
+  ) {
+    const echoedToolJSON =
+      /"name"\s*:\s*"(?:read_files|search_codebase|run_commands|apply_patch|editor)"/i
+        .test(String(result?.text || ""));
+
+    setStage(
+      "sdk_tool_protocol_failed",
+      gapLabel +
+        " model gerçek tool event üretmedi" +
+        (echoedToolJSON
+          ? "; tool çağrısını metin/JSON olarak taklit etti"
+          : "")
+    );
+
+    console.error(
+      "KRALI SDK local tool protocol failed: no real tool event"
+    );
+    process.exitCode = 25;
+  } else {
+    setStage(
+      "sdk_session_completed",
+      gapLabel +
+        " SDK oturumu gerçek tool akışıyla tamamlandı; candidate değişiklikler kontrol ediliyor"
+    );
   }
 } catch (error) {
   const message =

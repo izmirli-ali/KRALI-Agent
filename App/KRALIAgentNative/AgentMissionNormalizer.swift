@@ -200,37 +200,35 @@ struct AgentMissionNormalizer {
             ) ||
             browserWorkflow
 
+        let affirmativeWorkflowCorpus =
+            languageResolver
+                .affirmativeWorkflowText(
+                    userInput
+                )
+
         let genericAppWorkflow =
             appOpen &&
             !specializedAppDomain &&
             containsAny(
-                corpus,
+                affirmativeWorkflowCorpus,
                 [
                     "bul",
                     "oku",
                     "incele",
                     "listele",
                     "soyle",
-                    "söyle",
                     "goster",
-                    "göster",
                     "sec",
-                    "seç",
                     "ekle",
                     "hazirla",
-                    "hazırla",
                     "ayarla",
                     "degistir",
-                    "değiştir",
                     "hatirlatma",
-                    "hatırlatma",
                     "etkinlik",
                     "randevu",
                     "mesaj",
                     "sarki",
-                    "şarkı",
-                    "bolumune git",
-                    "bölümüne git"
+                    "bolumune git"
                 ]
             )
 

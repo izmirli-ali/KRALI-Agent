@@ -73,6 +73,8 @@ struct DeveloperAgentStatus: Hashable {
             "local_ai_installing",
             "local_ai_starting",
             "local_model_downloading",
+            "local_tool_probe",
+            "local_model_fallback",
             "local_ai_ready",
             "sdk_fallback_preparing",
             "sdk_fallback_running",
@@ -101,6 +103,9 @@ struct DeveloperAgentStatus: Hashable {
             "setup_local_ai",
             "local_ai_failed",
             "local_model_failed",
+            "local_tool_probe_failed",
+            "sdk_tool_protocol_failed",
+            "no_change_unverified",
             "sdk_provider_failed",
             "sdk_failed",
             "sdk_watchdog_timeout",
@@ -134,6 +139,10 @@ struct DeveloperAgentStatus: Hashable {
             return "Yerel AI başlatılıyor"
         case "local_model_downloading":
             return "Yerel model indiriliyor"
+        case "local_tool_probe":
+            return "Yerel model araç kullanımı doğrulanıyor"
+        case "local_model_fallback":
+            return "Alternatif yerel model deneniyor"
         case "local_ai_ready":
             return "Ücretsiz yerel AI hazır"
         case "setup_local_ai":
@@ -142,6 +151,12 @@ struct DeveloperAgentStatus: Hashable {
             return "Yerel AI başlatılamadı"
         case "local_model_failed":
             return "Yerel model indirilemedi"
+        case "local_tool_probe_failed":
+            return "Yerel model tool-call testi başarısız"
+        case "sdk_tool_protocol_failed":
+            return "Yerel model araç protokolü başarısız"
+        case "no_change_unverified":
+            return "Öğrenme kanıt üretmedi"
         case "provider_platform_bug":
             return "Provider platform hatası bulundu"
         case "sdk_fallback_preparing":
@@ -270,6 +285,8 @@ struct DeveloperAgentStatus: Hashable {
              "local_ai_installing",
              "local_ai_starting",
              "local_model_downloading",
+             "local_tool_probe",
+             "local_model_fallback",
              "local_ai_ready",
              "sdk_fallback_preparing",
              "sdk_importing",

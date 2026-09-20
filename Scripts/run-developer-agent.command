@@ -201,6 +201,53 @@ prepare_sdk_fallback() {
     return 0
 }
 
+ensure_ollama_model() {
+    local requested_model="$1"
+
+    if "$OLLAMA_BIN" show "$requested_model" >/dev/null 2>&1; then
+        return 0
+    fi
+
+    write_status "local_model_downloading|Yerel model indiriliyor: $requested_model"
+    echo "Yerel model indiriliyor: $requested_model" | tee -a "$LOG"
+
+    "$OLLAMA_BIN" pull "$requested_model" >>"$LOG" 2>&1
+}
+
+probe_ollama_model() {
+    local requested_model="$1"
+
+    write_status "local_tool_probe|Yerel model tool calling doğrulanıyor: $requested_model"
+    echo "Yerel tool-call probe: $requested_model" | tee -a "$LOG"
+
+    KRALI_OLLAMA_BASE_URL="$OLLAMA_BASE_URL" \
+    KRALI_DEV_MODEL="$requested_model" \
+    "$NODE_BIN" "$ROOT/Scripts/ollama-tool-probe.mjs" >>"$LOG" 2>&1
+}
+
+select_tool_fallback_model() {
+    local current_model="$1"
+
+    if [ "$MEMORY_GB" -ge 32 ] &&
+       [ "$current_model" != "qwen3-coder:30b" ]; then
+        printf '%s' "qwen3-coder:30b"
+        return 0
+    fi
+
+    if [ "$MEMORY_GB" -ge 20 ] &&
+       [ "$current_model" != "devstral:24b" ]; then
+        printf '%s' "devstral:24b"
+        return 0
+    fi
+
+    if [ "$current_model" != "qwen3:8b" ]; then
+        printf '%s' "qwen3:8b"
+        return 0
+    fi
+
+    return 1
+}
+
 prepare_ollama_runtime() {
     write_status "local_ai_checking|Yerel Developer AI hazırlanıyor"
 
@@ -251,10 +298,10 @@ prepare_ollama_runtime() {
         fi
     fi
 
-    if [ -z "$MODEL" ]; then
-        MEMORY_BYTES="$(/usr/sbin/sysctl -n hw.memsize 2>/dev/null || echo 0)"
-        MEMORY_GB="$(( MEMORY_BYTES / 1024 / 1024 / 1024 ))"
+    MEMORY_BYTES="$(/usr/sbin/sysctl -n hw.memsize 2>/dev/null || echo 0)"
+    MEMORY_GB="$(( MEMORY_BYTES / 1024 / 1024 / 1024 ))"
 
+    if [ -z "$MODEL" ]; then
         if [ "$MEMORY_GB" -ge 32 ]; then
             MODEL="devstral:24b"
         elif [ "$MEMORY_GB" -ge 20 ]; then
@@ -266,18 +313,37 @@ prepare_ollama_runtime() {
         echo "Yerel model seçimi: $MODEL • RAM≈${MEMORY_GB}GB" | tee -a "$LOG"
     fi
 
-    if ! "$OLLAMA_BIN" show "$MODEL" >/dev/null 2>&1; then
-        write_status "local_model_downloading|Yerel model indiriliyor: $MODEL"
-        echo "Yerel model indiriliyor: $MODEL" | tee -a "$LOG"
-
-        if ! "$OLLAMA_BIN" pull "$MODEL" >>"$LOG" 2>&1; then
-            write_status "local_model_failed|Yerel model indirilemedi: $MODEL"
-            return 1
-        fi
+    if ! ensure_ollama_model "$MODEL"; then
+        write_status "local_model_failed|Yerel model indirilemedi: $MODEL"
+        return 1
     fi
 
-    write_status "local_ai_ready|Ücretsiz yerel Developer AI hazır: $MODEL"
-    echo "✅ Yerel Developer AI hazır: $MODEL" | tee -a "$LOG"
+    if ! probe_ollama_model "$MODEL"; then
+        echo "⚠️ $MODEL native tool-call probe geçmedi." | tee -a "$LOG"
+
+        FALLBACK_MODEL="$(select_tool_fallback_model "$MODEL" || true)"
+        if [ -z "$FALLBACK_MODEL" ]; then
+            write_status "local_tool_probe_failed|Yerel model native tool-call probe geçemedi: $MODEL"
+            return 1
+        fi
+
+        write_status "local_model_fallback|Tool-capable yerel modele geçiliyor: $FALLBACK_MODEL"
+
+        if ! ensure_ollama_model "$FALLBACK_MODEL"; then
+            write_status "local_model_failed|Fallback yerel model indirilemedi: $FALLBACK_MODEL"
+            return 1
+        fi
+
+        if ! probe_ollama_model "$FALLBACK_MODEL"; then
+            write_status "local_tool_probe_failed|Yerel modeller native tool-call probe geçemedi"
+            return 1
+        fi
+
+        MODEL="$FALLBACK_MODEL"
+    fi
+
+    write_status "local_ai_ready|Ücretsiz yerel Developer AI hazır ve tool-call doğrulandı: $MODEL"
+    echo "✅ Yerel Developer AI hazır + tool-call doğrulandı: $MODEL" | tee -a "$LOG"
     return 0
 }
 
@@ -715,6 +781,7 @@ if [ "$USE_SDK_FALLBACK" -eq 1 ]; then
         KRALI_APP_VERSION="$(/bin/cat "$ROOT/VERSION" 2>/dev/null | /usr/bin/tr -d '[:space:]')" \
         KRALI_RUN_ID="$STAMP" \
         KRALI_SDK_TIMEOUT_MS="480000" \
+        KRALI_REQUIRE_TOOL_USE="$([ "$GAP_MODE" = "gap" ] && echo 1 || echo 0)" \
         "$NODE_BIN" "$ROOT/Scripts/cline-sdk-fallback.mjs" \
             > >(tee "$CLINE_RUN_LOG" >>"$LOG") \
             2> >(tee -a "$CLINE_RUN_LOG" >>"$LOG" >&2)
@@ -734,6 +801,43 @@ fi
 CLINE_DURATION="$(( $(date +%s) - CLINE_STARTED_AT ))"
 
 cat "$CLINE_RUN_LOG" >>"$LOG"
+
+if [ "$CLINE_EXIT" -eq 25 ] &&
+   [ "$PROVIDER" = "ollama" ]; then
+    FALLBACK_MODEL="$(select_tool_fallback_model "$MODEL" || true)"
+
+    if [ -n "$FALLBACK_MODEL" ]; then
+        echo "⚠️ Cline local tool protocol doğrulanmadı; $FALLBACK_MODEL ile tek kontrollü retry." | tee -a "$LOG"
+        write_status "local_model_fallback|Cline tool protocol için fallback model hazırlanıyor: $FALLBACK_MODEL|$BRANCH|$WORKTREE"
+    fi
+
+    if [ -n "$FALLBACK_MODEL" ] &&
+       ensure_ollama_model "$FALLBACK_MODEL" &&
+       probe_ollama_model "$FALLBACK_MODEL"; then
+        MODEL="$FALLBACK_MODEL"
+        TOOL_RETRY_LOG="$LOG_DIR/KRALI-Developer-Agent-Cline-$STAMP-tool-retry.log"
+
+        KRALI_CLINE_SDK_HOST="$SDK_HOST" \
+        KRALI_WORKTREE="$WORKTREE" \
+        KRALI_PROMPT_FILE="$PROMPT_FILE" \
+        KRALI_CLINE_SETTINGS="$CLINE_SETTINGS" \
+        KRALI_DEV_PROVIDER="$PROVIDER" \
+        KRALI_DEV_MODEL="$MODEL" \
+        KRALI_OLLAMA_BASE_URL="$OLLAMA_BASE_URL" \
+        KRALI_STATUS_FILE="$STATUS" \
+        KRALI_BRANCH="$BRANCH" \
+        KRALI_GAP_LABEL="$GAP_LABEL" \
+        KRALI_APP_VERSION="$(/bin/cat "$ROOT/VERSION" 2>/dev/null | /usr/bin/tr -d '[:space:]')" \
+        KRALI_RUN_ID="$STAMP" \
+        KRALI_SDK_TIMEOUT_MS="480000" \
+        KRALI_REQUIRE_TOOL_USE="1" \
+        "$NODE_BIN" "$ROOT/Scripts/cline-sdk-fallback.mjs" \
+            > >(tee "$TOOL_RETRY_LOG" >>"$LOG") \
+            2> >(tee -a "$TOOL_RETRY_LOG" >>"$LOG" >&2)
+        CLINE_EXIT=$?
+        cat "$TOOL_RETRY_LOG" >>"$LOG"
+    fi
+fi
 
 if [ "$CLINE_EXIT" -eq 137 ] &&
    [ "$GAP_MODE" = "gap" ] &&
@@ -761,7 +865,9 @@ fi
 
 if [ "$CLINE_EXIT" -ne 0 ]; then
     ERROR_SOURCE="$CLINE_RUN_LOG"
-    if [ -f "$LOG_DIR/KRALI-Developer-Agent-Cline-$STAMP-retry.log" ]; then
+    if [ -f "$LOG_DIR/KRALI-Developer-Agent-Cline-$STAMP-tool-retry.log" ]; then
+        ERROR_SOURCE="$LOG_DIR/KRALI-Developer-Agent-Cline-$STAMP-tool-retry.log"
+    elif [ -f "$LOG_DIR/KRALI-Developer-Agent-Cline-$STAMP-retry.log" ]; then
         ERROR_SOURCE="$LOG_DIR/KRALI-Developer-Agent-Cline-$STAMP-retry.log"
     fi
 
@@ -824,6 +930,16 @@ rm -f "$PROMPT_FILE"
 cd "$WORKTREE"
 
 if [ -z "$(git status --porcelain)" ]; then
+    if [ "$GAP_MODE" = "gap" ]; then
+        write_status "no_change_unverified|Aktif capability gap için doğrulanmış candidate üretilmedi|$BRANCH|$WORKTREE"
+        echo "❌ Capability gap devam ederken kanıtsız no_change kabul edilmedi." | tee -a "$LOG"
+
+        cd "$ROOT"
+        git worktree remove "$WORKTREE" --force >>"$LOG" 2>&1 || true
+        git branch -D "$BRANCH" >>"$LOG" 2>&1 || true
+        exit 26
+    fi
+
     write_status "no_change|Diagnostic yeşil; değişiklik gerekmedi|$BRANCH|$WORKTREE"
     echo "✅ Developer Agent değişiklik gerektirmedi." | tee -a "$LOG"
     exit 0

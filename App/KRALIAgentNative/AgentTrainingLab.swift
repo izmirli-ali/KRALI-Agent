@@ -156,6 +156,12 @@ struct AgentTrainingLab {
             typoAppNameLanguageResult()
         )
         results.append(
+            duplicateApplicationAliasMergeResult()
+        )
+        results.append(
+            prohibitedAppMutationDoesNotAddWorkflowResult()
+        )
+        results.append(
             appOpenIntentRoutingResult(
                 id: "mail-app-open-routing",
                 title: "Mail uygulaması açma intent ayrımı",
@@ -713,6 +719,157 @@ struct AgentTrainingLab {
                 ? []
                 : [
                     "Yakın yazım hatası güven eşiğini geçemedi."
+                ]
+        )
+    }
+
+    private func duplicateApplicationAliasMergeResult()
+        -> TrainingScenarioResult {
+        let aliases =
+            languageResolver
+                .mergedAliases(
+                    [
+                        ["Example", "Example"],
+                        ["Örnek", " example "]
+                    ]
+                )
+
+        let score =
+            languageResolver
+                .bestAliasScore(
+                    input:
+                        "örnek uygulamasını aç",
+                    aliases: aliases
+                )
+
+        let passed =
+            aliases.contains("Example") &&
+            aliases.contains("Örnek") &&
+            aliases.count == 2 &&
+            languageResolver
+                .isConfidentAliasMatch(
+                    score: score,
+                    input: "örnek"
+                )
+
+        return TrainingScenarioResult(
+            scenarioID:
+                "duplicate-application-localized-alias-merge",
+            title:
+                "Aynı bundle için yerelleştirilmiş uygulama aliaslarını koruma",
+            tier: .core,
+            prompt:
+                "Örnek uygulamasını aç",
+            passed: passed,
+            goal:
+                "Çalışan uygulama ve disk kaynaklarından gelen aynı bundle aliaslarını kaybetmeden birleştir",
+            route: [
+                "Core",
+                "Desktop"
+            ],
+            selectedCapabilities: [
+                "desktop.app"
+            ],
+            unavailableCapabilities: [],
+            diagnostics: passed
+                ? []
+                : [
+                    "Duplicate bundle birleştirmesi yerelleştirilmiş aliası kaybetti."
+                ]
+        )
+    }
+
+    private func prohibitedAppMutationDoesNotAddWorkflowResult()
+        -> TrainingScenarioResult {
+        let prompt =
+            "Sistem Ayarları uygulamasını aç ve gerçekten ön planda olduğunu doğrula. Herhangi bir ayarı değiştirme."
+
+        let snapshot =
+            context(
+                hasWorkspace: true,
+                videoCount: 0
+            )
+
+        let decision =
+            brain.analyze(
+                prompt,
+                context: snapshot
+            )
+
+        let goal =
+            goalInterpreter.interpret(
+                prompt,
+                decision: decision,
+                context: snapshot
+            )
+
+        let rawMission =
+            AgentSemanticMission(
+                objective: prompt,
+                outcomes:
+                    goal.outcomes
+                        .map(\.rawValue)
+                        .sorted(),
+                steps: [],
+                requiredCapabilityIDs:
+                    Array(
+                        goal.requiredCapabilityIDs
+                    )
+                    .sorted(),
+                requiresUserInput: false,
+                userInputReason: nil,
+                confidence: 0.9
+            )
+
+        let normalized =
+            missionNormalizer.normalize(
+                rawMission,
+                userInput: prompt,
+                capabilities:
+                    capabilityRegistry.all
+            )
+
+        let required =
+            Set(
+                normalized
+                    .requiredCapabilityIDs
+            )
+
+        let passed =
+            required.contains(
+                "desktop.app"
+            ) &&
+            !required.contains(
+                "app.workflow"
+            ) &&
+            !normalized.steps.contains {
+                $0.capabilityID ==
+                    "app.workflow"
+            }
+
+        return TrainingScenarioResult(
+            scenarioID:
+                "prohibited-app-mutation-no-workflow",
+            title:
+                "Negatif uygulama talimatını workflow isteği saymama",
+            tier: .core,
+            prompt: prompt,
+            passed: passed,
+            goal:
+                "Yalnız uygulamayı aç ve foreground doğrula; yasaklanan değişikliği capability isteği sayma",
+            route: [
+                "Core",
+                "Goal",
+                "Desktop"
+            ],
+            selectedCapabilities:
+                normalized
+                    .requiredCapabilityIDs,
+            unavailableCapabilities: [],
+            diagnostics: passed
+                ? []
+                : [
+                    "Negatif 'değiştirme' talimatı app.workflow capability'sini yanlışlıkla ekledi."
                 ]
         )
     }

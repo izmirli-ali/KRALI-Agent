@@ -474,7 +474,6 @@ actor AgentDesktopControl {
         ]
 
         var results: [ApplicationCandidate] = []
-        var seen = Set<String>()
 
         for app in NSWorkspace.shared.runningApplications {
             guard
@@ -502,15 +501,6 @@ actor AgentDesktopControl {
             let bundleID =
                 app.bundleIdentifier ??
                 bundle?.bundleIdentifier
-            let key =
-                (bundleID ?? url.path)
-                    .lowercased()
-
-            guard !seen.contains(key) else {
-                continue
-            }
-
-            seen.insert(key)
 
             let aliases = Array(
                 Set(
@@ -581,15 +571,6 @@ actor AgentDesktopControl {
                 let bundleID =
                     bundle?.bundleIdentifier
 
-                let key =
-                    (bundleID ?? url.path)
-                        .lowercased()
-
-                guard !seen.contains(key) else {
-                    continue
-                }
-
-                seen.insert(key)
                 let finderDisplayName =
                     fileManager.displayName(
                         atPath: url.path
@@ -635,10 +616,15 @@ actor AgentDesktopControl {
             }
         }
 
-        cachedApplicationCandidates =
-            results
+        let merged =
+            mergeCandidates(
+                results
+            )
 
-        return results
+        cachedApplicationCandidates =
+            merged
+
+        return merged
     }
 
     private func nestedApplicationCandidates()
@@ -737,7 +723,7 @@ actor AgentDesktopControl {
     private func mergeCandidates(
         _ candidates: [ApplicationCandidate]
     ) -> [ApplicationCandidate] {
-        var seen = Set<String>()
+        var indexes: [String: Int] = [:]
         var merged: [ApplicationCandidate] = []
 
         for candidate in candidates {
@@ -748,12 +734,38 @@ actor AgentDesktopControl {
                 )
                 .lowercased()
 
-            guard !seen.contains(key) else {
+            guard let existingIndex =
+                indexes[key]
+            else {
+                indexes[key] =
+                    merged.count
+                merged.append(candidate)
                 continue
             }
 
-            seen.insert(key)
-            merged.append(candidate)
+            let existing =
+                merged[existingIndex]
+            let aliases =
+                languageResolver
+                    .mergedAliases(
+                        [
+                            existing.aliases,
+                            candidate.aliases
+                        ]
+                    )
+
+            merged[existingIndex] =
+                ApplicationCandidate(
+                    name:
+                        existing.name.isEmpty
+                            ? candidate.name
+                            : existing.name,
+                    aliases: aliases,
+                    bundleIdentifier:
+                        existing.bundleIdentifier ??
+                        candidate.bundleIdentifier,
+                    url: existing.url
+                )
         }
 
         return merged
