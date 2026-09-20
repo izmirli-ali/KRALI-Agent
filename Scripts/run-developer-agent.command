@@ -261,78 +261,111 @@ if ! git worktree add -b "$BRANCH" "$WORKTREE" origin/main >>"$LOG" 2>&1; then
 fi
 
 PROMPT_FILE="$WORKTREE/.krali-developer-agent-prompt.txt"
+
+GAP_MODE="$("$NODE_BIN" - "$LOCAL_MENTOR_DIR/latest.json" "$PROMPT_FILE" <<'NODE'
+const fs = require("fs");
+
+const source = process.argv[2];
+const target = process.argv[3];
+
+let mentor = null;
+try { mentor = JSON.parse(fs.readFileSync(source, "utf8")); } catch {}
+
+const gaps = mentor && Array.isArray(mentor.capabilityGaps) ? mentor.capabilityGaps : [];
+if (gaps.length === 0) {
+  process.stdout.write("full");
+  process.exit(0);
+}
+
+const gap = gaps[0];
+const candidates = Array.isArray(gap.candidateCapabilityIDs) && gap.candidateCapabilityIDs.length > 0
+  ? gap.candidateCapabilityIDs.join(", ")
+  : "Yok";
+
+const prompt = [
+  "Sen KRALİ projesinin Developer Agent\'ısın.",
+  "",
+  "Bu çalışma LIGHTWEIGHT CAPABILITY GAP modudur.",
+  "Training/Live/Arena JSON dosyalarını topluca okuma. Önce yalnız bu brief\'i ve ilgili kaynak kodunu incele.",
+  "",
+  "Capability:",
+  String(gap.capabilityID || "unknown") + " — " + String(gap.capabilityName || "unknown"),
+  "",
+  "Gap türü:", String(gap.kind || "unknown"),
+  "",
+  "Neden:", String(gap.reason || ""),
+  "",
+  "Araştırma hedefi:", String(gap.researchGoal || ""),
+  "",
+  "Mevcut strategy adayları:", candidates,
+  "",
+  "Developer Brief:", String(gap.developerBrief || ""),
+  "",
+  "Kurallar:",
+  "- Önce rg/grep ile bu capability\'nin registry, resolver, executor ve verifier bağlantılarını bul.",
+  "- Tek uygulama/marka adına özel hard-code yazma; generic provider/strategy tasarla.",
+  "- Ücretli API veya yeni abonelik bağımlılığı ekleme.",
+  "- Dış dünyaya commit eden aksiyonlarda kullanıcı onayı korunmalı.",
+  "- Gerçek observation/evidence olmadan PASS üretme.",
+  "- VERSION, updater, signing, bundle/team ve Mentor JSON dosyalarını değiştirme.",
+  "- Main\'e push/merge yapma; yalnız bu worktree\'de candidate üret.",
+  "- Gereksiz geniş refactor yapma; minimum güvenli değişiklik yap.",
+  "- İş sonunda /bin/zsh Scripts/build-check.command çalıştır.",
+  "",
+  "Yalnız ihtiyaç duyduğun kaynak dosyalarını oku. Büyük diagnostic JSON\'larını açma."
+].join("\n");
+
+fs.writeFileSync(target, prompt, "utf8");
+process.stdout.write("gap");
+NODE
+)"
+
+if [ "$GAP_MODE" = "full" ]; then
 cat > "$PROMPT_FILE" <<'EOF'
 Sen KRALİ projesinin Developer Agent'ısın.
 
-Önce şunları oku:
-- KRALI_ARCHITECTURE.md
-- Mentor/training-latest.json (varsa)
-- Mentor/live-eval-latest.json (varsa)
-- Mentor/latest.json (varsa)
-- Mentor/arena-latest.json (varsa)
-- VERSION
-- Yerel güncel diagnostic'ler için gerekirse shell ile şu dosyaları da oku:
-  ~/Library/Application Support/KRALI Agent/Mentor/training-latest.json
-  ~/Library/Application Support/KRALI Agent/Mentor/live-eval-latest.json
-  ~/Library/Application Support/KRALI Agent/Mentor/latest.json
-  ~/Library/Application Support/KRALI Agent/Mentor/arena-latest.json
+Önce KRALI_ARCHITECTURE.md, VERSION ve güncel Mentor diagnostic'lerini incele.
+Ama yalnız başarısız/attention alanlarla ilgili minimum dosyaları aç; büyük JSON'ları gereksiz yere tekrar tekrar okuma.
 
-Amaç:
-KRALİ'nin kullanıcının hedeflediği genel yapay zeka/asistan iskeletini güvenilir biçimde geliştirmek.
-
-Değişmez kurallar:
+Kurallar:
 1. Ücretli API, ücretli servis veya yeni abonelik bağımlılığı ekleme.
 2. Main branch'e push/merge yapma. Yalnızca bu izole worktree içinde çalış.
 3. VERSION, updater, signing kimliği ve bundle/team ayarlarını değiştirme.
 4. Mentor JSON dosyalarını değiştirme.
-5. İnternetten rastgele kod indirip çalıştırma.
-6. Kanıtı olmayan büyük refactor yapma.
-7. Training Lab, Live Research Eval ve KRALİ Arena tamamen yeşilse sırf değişiklik yapmak için kod değiştirme.
-8. Mentor/latest.json daha eski appVersion'a aitse ve daha yeni Live Eval/Training raporları ilgili problemi geçmiş gösteriyorsa eski hatayı yeniden düzeltme.
-9. Bir değişiklik yaparsan önce nedeni açıkça tanımla, minimum dosyayı değiştir ve regression riskini düşük tut.
-10. İşin sonunda Scripts/build-check.command çalıştır. Build geçmiyorsa düzeltmeye devam et; geçiremiyorsan durumu açıkça raporla.
+5. Kanıtı olmayan büyük refactor yapma.
+6. Tek marka/uygulama/prompt örneğine hard-code yazma.
+7. Gerçek capability yoksa yapılmış gibi gösterme.
+8. İş sonunda /bin/zsh Scripts/build-check.command çalıştır.
 
-Öncelik sırası:
-- Mentor/latest.json içindeki capabilityGaps ve her gap'in developerBrief alanı
-- KRALİ Arena açık-dünya semantic planning / reviewer başarısızlıkları
-- Gerçek Live Eval başarısızlıkları
-- Güncel mentor trace başarısızlıkları
-- Training Lab regression'ları
-- Son olarak açık ve düşük riskli kalite iyileştirmeleri
-
-Capability Gap kuralları:
-- capabilityGaps boş değilse, testler yeşil olsa bile gap'i "değişiklik gerekmedi" diye atlama.
-- Önce candidateCapabilityIDs ile mevcut generic strategy gerçekten yeterli mi değerlendir.
-- Strategy yeterliyse yeni provider yazmadan generic recipe/strategy geliştir.
-- Yeni kod gerekiyorsa developerBrief kabul kriterlerini esas al.
-- Tek uygulama/marka/örneğe özel hard-code yazma.
-- Main branch'e merge/push yapma; yalnız candidate branch/worktree.
-
-Arena ilkeleri:
-- arena-latest.json içindeki deterministic diagnostic ile AI Reviewer görüşünü ayır.
-- Tek bir prompt kalıbına özel patch yazma; failure cluster'ın kök nedenini düzelt.
-- Reviewer görüşü deterministic sözleşmeyle çelişiyorsa güvenlik ve gerçek capability durumunu esas al.
-- Capability bağlı değilse mission'dan silme; blocked/partial olarak dürüstçe taşı.
-- Candidate değişiklik yeni hardcoded marka/isim/tek cümle özel-case'i eklememeli.
-
-KRALİ'nin North Star'ı:
-Doğal dili anlayan, araştırabilen, kaynakları doğrulayan, içeriğe göre analiz ve yorum üreten, kullanıcı söylemeden gerekçeli fikirler ekleyebilen, eksik yeteneğini fark edip araştırma/öğrenme planı kurabilen ve araçları güvenli biçimde kullanan genel amaçlı kişisel ajan.
-
-Şimdi mevcut diagnostic'leri incele. Gerekliyse minimum güvenli düzeltmeleri yap; gereksizse kodu değiştirmeden neden değişiklik gerekmediğini raporla.
+Öncelik:
+capability gap → Arena failure → Live Eval failure → güncel Mentor failure → Training regression.
 EOF
+fi
+
+echo "Developer prompt mode: $GAP_MODE • $(wc -c < "$PROMPT_FILE" | tr -d ' ') bytes" | tee -a "$LOG"
 
 write_status "running|Cline Developer Agent çalışıyor"
 
 export CLINE_COMMAND_PERMISSIONS='{"allow":["git status*","git diff*","git log*","git show*","xcodebuild *","xcrun *","swift *","grep *","rg *","find *","cat *","head *","tail *","sed *","ls *"],"deny":["sudo *","rm -rf *","git push*","git reset --hard*","git clean*","open *","osascript *"]}'
+
+THINKING_LEVEL="medium"
+RETRY_COUNT="2"
+TIMEOUT_SECONDS="900"
+
+if [ "$GAP_MODE" = "gap" ]; then
+    THINKING_LEVEL="low"
+    RETRY_COUNT="1"
+    TIMEOUT_SECONDS="600"
+fi
 
 CLINE_ARGS=(
     --json
     --auto-approve true
     --provider "$PROVIDER"
     --cwd "$WORKTREE"
-    --thinking medium
-    --retries 2
-    --timeout 900
+    --thinking "$THINKING_LEVEL"
+    --retries "$RETRY_COUNT"
+    --timeout "$TIMEOUT_SECONDS"
 )
 
 # Model boş bırakılırsa "cline auth" sırasında bu provider için seçilen model kullanılır.
@@ -343,15 +376,43 @@ fi
 
 CLINE_RUN_LOG="$LOG_DIR/KRALI-Developer-Agent-Cline-$STAMP.log"
 
+CLINE_STARTED_AT="$(date +%s)"
 "$CLINE_BIN" "${CLINE_ARGS[@]}" "$(cat "$PROMPT_FILE")" >"$CLINE_RUN_LOG" 2>&1
 CLINE_EXIT=$?
+CLINE_DURATION="$(( $(date +%s) - CLINE_STARTED_AT ))"
 
 cat "$CLINE_RUN_LOG" >>"$LOG"
 
+if [ "$CLINE_EXIT" -eq 137 ] && [ "$GAP_MODE" = "gap" ]; then
+    echo "⚠️ Cline SIGKILL/137 aldı; ultra-light retry deneniyor." | tee -a "$LOG"
+    write_status "retrying|Cline kaynak baskısı nedeniyle daha hafif modda yeniden deneniyor|$BRANCH|$WORKTREE"
+
+    RETRY_LOG="$LOG_DIR/KRALI-Developer-Agent-Cline-$STAMP-retry.log"
+    RETRY_ARGS=(
+        --json
+        --auto-approve true
+        --provider "$PROVIDER"
+        --cwd "$WORKTREE"
+        --thinking none
+        --retries 0
+        --timeout 420
+    )
+
+    if [ -n "$MODEL" ]; then
+        RETRY_ARGS+=(--model "$MODEL")
+    fi
+
+    RETRY_STARTED_AT="$(date +%s)"
+    "$CLINE_BIN" "${RETRY_ARGS[@]}" "$(cat "$PROMPT_FILE")" >"$RETRY_LOG" 2>&1
+    CLINE_EXIT=$?
+    CLINE_DURATION="$(( CLINE_DURATION + $(date +%s) - RETRY_STARTED_AT ))"
+    cat "$RETRY_LOG" >>"$LOG"
+fi
+
 if [ "$CLINE_EXIT" -ne 0 ]; then
     CLINE_ERROR="$(
-        tail -n 40 "$CLINE_RUN_LOG" 2>/dev/null |
-        grep -Eai 'auth|oauth|error|failed|provider|model|login|sign in' |
+        tail -n 60 "$LOG" 2>/dev/null |
+        grep -Eai 'auth|oauth|error|failed|provider|model|login|sign in|killed|memory|resource' |
         tail -n 1 |
         tr '\n|' '  ' |
         sed -E 's/[[:space:]]+/ /g; s/^ //; s/ $//' |
@@ -359,11 +420,20 @@ if [ "$CLINE_EXIT" -ne 0 ]; then
     )"
 
     if [ -z "$CLINE_ERROR" ]; then
-        CLINE_ERROR="ayrıntılı hata satırı üretilemedi"
+        if [ "$CLINE_EXIT" -eq 137 ]; then
+            CLINE_ERROR="process SIGKILL aldı; kaynak baskısı veya işletim sistemi sonlandırması"
+        else
+            CLINE_ERROR="ayrıntılı hata satırı üretilemedi"
+        fi
     fi
 
-    write_status "failed|Cline exit $CLINE_EXIT: $CLINE_ERROR|$BRANCH|$WORKTREE"
-    echo "❌ Cline görevi başarısız oldu (exit $CLINE_EXIT): $CLINE_ERROR" | tee -a "$LOG"
+    if [ -z "$(git -C "$WORKTREE" status --porcelain 2>/dev/null)" ]; then
+        git -C "$ROOT" worktree remove "$WORKTREE" --force >>"$LOG" 2>&1 || true
+        git -C "$ROOT" branch -D "$BRANCH" >>"$LOG" 2>&1 || true
+    fi
+
+    write_status "failed|Cline exit $CLINE_EXIT (${CLINE_DURATION}s): $CLINE_ERROR|$BRANCH|$WORKTREE"
+    echo "❌ Cline görevi başarısız oldu (exit $CLINE_EXIT, ${CLINE_DURATION}s): $CLINE_ERROR" | tee -a "$LOG"
     exit 20
 fi
 
