@@ -242,3 +242,14 @@ Aynı turda “Estafiz'e dön, az önceki Reels fikirlerinden birincisini 30 san
 Memory store ayrıca düşük kaliteli generic fallback cevaplarını kalıcı göreve dönüştürmez. Önceki sürümden kalmış “hedefi analiz ettim fakat ... eşleştiremedim / şu an en güvenli planım ...” türü task kayıtları load sırasında elenir ve tekrar kaydedilmez. Non-continuation topic recall için tek ortak kelime yeterli değildir; task/research kayıtlarında daha güçlü lexical eşleşme aranır. Böylece konu değişimlerinde yalnızca “video” gibi genel bir sözcük yüzünden Estafiz bağlamının Sony/Fuji karşılaştırmasına sızması azaltılır.
 
 Training Lab'e iki regression eklenir: `context-memory-transform` ve `knowledge-comparison-not-file-search`.
+
+
+**v0.8.3 topical recall + stale-memory freshness:** Gerçek 0.8.2 Mentor trace iki önemli davranışı doğruladı: Training Lab 21/21 ve Live Research Eval 2/2 geçti; Estafiz follow-up'ı artık Intelligence katmanına girip gerçek 30 saniyelik senaryo üretti. Buna rağmen trace, iki daha ince memory problemi gösterdi.
+
+Birincisi, standalone bilgi karşılaştırması için geçmişte aynı soruya ait bir memory bulunması güncel research ihtiyacını yanlışlıkla bastırabiliyordu. Bu nedenle bilgi/ürün karşılaştırmalarında karar artık `relevantMemoryCount` yerine gerçek intent'e bağlıdır: görev genel bilgi karşılaştırmasıysa `research.web` yine çalışır; yalnızca açık yerel/file task'larda araştırma eklenmez. Böylece eski veya hatalı bir memory, yeni doğrulanabilir bilgi isteğinin önüne geçmez.
+
+İkincisi, `Estafiz'e dön` gibi açık topic switch follow-up'larında continuation bonus'u tüm yakın geçmiş görevleri aday yapabildiği için alakasız Sony/Fuji memory'si de synthesis context'ine girebiliyordu. Memory retrieval artık önce mevcut sorguyla en güçlü topical token örtüşmesini hesaplar. Continuation içinde gerçekten eşleşen bir konu/varlık varsa sadece o konuyla eşleşen task/research kayıtları aday olur; hiç topical ipucu yoksa `devam et` gibi saf referanslarda recency fallback korunur.
+
+Aynı kullanıcı isteği daha sonra daha kaliteli bir `research` kaydıyla yeniden çalıştırılırsa, eski `task` kaydı türü farklı olsa bile duplicate kabul edilip yenisiyle değiştirilir. Böylece eski yanlış cevapların kalıcı bağlamda yan yana birikmesi azaltılır.
+
+Training Lab'e `knowledge-comparison-with-stale-memory` regression senaryosu eklenir; eski eşleşen memory mevcut olsa bile standalone Sony/Fuji karşılaştırmasının Research + Verify rotasına gitmesi zorunlu tutulur.
