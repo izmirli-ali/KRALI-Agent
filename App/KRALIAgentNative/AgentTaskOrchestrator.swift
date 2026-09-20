@@ -177,6 +177,11 @@ struct AgentTaskOrchestrator {
             return .communicate
         }
 
+        if step.capabilityID ==
+            "app.workflow" {
+            return .act
+        }
+
         if corpus.contains("verify") ||
            corpus.contains("dogrula") ||
            corpus.contains("kontrol") {
@@ -206,14 +211,16 @@ struct AgentTaskOrchestrator {
             return false
         }
 
-        let corpus = normalize(
+        let actionCorpus = normalize(
             [
                 step.operation,
-                step.title,
-                step.purpose
+                step.title
             ]
             .joined(separator: " ")
         )
+
+        let purposeCorpus =
+            normalize(step.purpose)
 
         let commitTerms = [
             "send", "gonder",
@@ -225,8 +232,36 @@ struct AgentTaskOrchestrator {
             "commit"
         ]
 
+        if commitTerms.contains(
+            where: {
+                actionCorpus.contains($0)
+            }
+        ) {
+            return true
+        }
+
+        let explicitNonCommitTerms = [
+            "gondermeden",
+            "gonderme",
+            "commit etmeden",
+            "onay almadan",
+            "degisiklik yapma",
+            "yalniz hazirla",
+            "sadece hazirla",
+            "henüz dis dunyaya",
+            "henuz dis dunyaya"
+        ]
+
+        if explicitNonCommitTerms.contains(
+            where: {
+                purposeCorpus.contains($0)
+            }
+        ) {
+            return false
+        }
+
         return commitTerms.contains {
-            corpus.contains($0)
+            purposeCorpus.contains($0)
         }
     }
 
