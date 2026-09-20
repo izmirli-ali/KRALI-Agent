@@ -193,7 +193,8 @@ struct AgentBrain {
         }
 
         if context.relevantMemoryCount > 0 &&
-           hasContextReference(text) {
+           hasContextReference(text) &&
+           !isExplicitNewTopicIntroduction(text) {
             return decision(
                 intent: .general,
                 route: ["Core", "Context", "Planner"],
@@ -446,6 +447,36 @@ struct AgentBrain {
             "toparla", "taşı", "tasi", "klasöre", "klasore", "düzenle", "duzenle"
         ])
         return screenshot && action
+    }
+
+    private func isExplicitNewTopicIntroduction(
+        _ text: String
+    ) -> Bool {
+        let normalized = normalize(text)
+
+        return [
+            "adında bir marka",
+            "adinda bir marka",
+            "adlı bir marka",
+            "adli bir marka",
+            "diye bir marka",
+            "isminde bir marka",
+            "adında bir şirket",
+            "adinda bir sirket",
+            "adlı bir şirket",
+            "adli bir sirket",
+            "diye bir şirket",
+            "isminde bir şirket",
+            "adında bir işletme",
+            "adinda bir isletme",
+            "adlı bir işletme",
+            "adli bir isletme",
+            "diye bir işletme",
+            "isminde bir işletme"
+        ]
+        .contains {
+            normalized.contains($0)
+        }
     }
 
     private func hasContextReference(_ text: String) -> Bool {
