@@ -1,8 +1,8 @@
 {
-  "appVersion" : "0.8.3",
+  "appVersion" : "0.8.4",
   "corePassed" : 18,
   "coreTotal" : 18,
-  "createdAt" : "2026-09-20T08:46:52Z",
+  "createdAt" : "2026-09-20T08:51:55Z",
   "failed" : 0,
   "northStarPassed" : 4,
   "northStarTotal" : 4,
@@ -200,7 +200,7 @@
       "diagnostics" : [
 
       ],
-      "goal" : "bağımsız fikir ve çıkarım üret",
+      "goal" : "önceki çıktıyı istenen formata dönüştür",
       "passed" : true,
       "prompt" : "şimdi Estafiz'e dön, az önceki Reels fikirlerinden birincisini 30 saniyelik çekim senaryosuna çevir",
       "route" : [
