@@ -17,7 +17,17 @@ export PATH="/opt/homebrew/bin:/usr/local/bin:$HOME/.npm-global/bin:/usr/bin:/bi
 mkdir -p "$LOG_DIR" "$STATUS_DIR"
 
 write_status() {
-    printf "%s\n" "$1" > "$STATUS"
+    APP_VERSION="$(
+        /bin/cat "$ROOT/VERSION" 2>/dev/null |
+        /usr/bin/tr -d '[:space:]'
+    )"
+    NOW_EPOCH="$(/bin/date +%s)"
+
+    printf "%s|@meta|app=%s|at=%s|run=%s\n" \
+        "$1" \
+        "${APP_VERSION:-unknown}" \
+        "$NOW_EPOCH" \
+        "$STAMP" > "$STATUS"
 }
 
 echo "" | tee -a "$LOG"
@@ -562,6 +572,8 @@ if [ "$USE_SDK_FALLBACK" -eq 1 ]; then
         KRALI_STATUS_FILE="$STATUS" \
         KRALI_BRANCH="$BRANCH" \
         KRALI_GAP_LABEL="$GAP_LABEL" \
+        KRALI_APP_VERSION="$(/bin/cat "$ROOT/VERSION" 2>/dev/null | /usr/bin/tr -d '[:space:]')" \
+        KRALI_RUN_ID="$STAMP" \
         KRALI_SDK_TIMEOUT_MS="480000" \
         "$NODE_BIN" "$ROOT/Scripts/cline-sdk-fallback.mjs" \
             > >(tee "$CLINE_RUN_LOG" >>"$LOG") \

@@ -230,13 +230,25 @@ final class AgentEngine: ObservableObject {
             )
         }
 
-        developerAgentStatus = developerBridge.readStatus()
-
         let launchAppVersion =
             Bundle.main.object(
                 forInfoDictionaryKey:
                     "CFBundleShortVersionString"
             ) as? String ?? "unknown"
+
+        developerAgentStatus =
+            developerBridge
+                .readStatus()
+                .freshForApp(
+                    launchAppVersion
+                )
+
+        if developerAgentStatus.state ==
+            "stale_run" {
+            developerBridge.writeStatus(
+                developerAgentStatus
+            )
+        }
 
         let launchDiagnosticsCurrent =
             trainingLabReport?.appVersion ==
@@ -3303,6 +3315,9 @@ final class AgentEngine: ObservableObject {
             message: "Developer Agent diagnostic'leri inceliyor…",
             branch: nil,
             worktree: nil
+        )
+        developerBridge.writeStatus(
+            developerAgentStatus
         )
 
         log("Developer Agent başlatıldı")
