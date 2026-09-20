@@ -51,6 +51,9 @@ final class AgentEngine: ObservableObject {
     @Published var arenaReport: AgentArenaReport?
     @Published var arenaStatus = "Henüz KRALİ Arena çalıştırılmadı."
     @Published var arenaBusy = false
+    @Published var screenPerceptionReport: ScreenPerceptionReport?
+    @Published var screenPerceptionStatus = "Henüz Screen Perception Probe çalıştırılmadı."
+    @Published var screenPerceptionBusy = false
     @Published var developerAgentStatus = DeveloperAgentStatus(
         state: "idle",
         message: "Developer Agent henüz çalıştırılmadı.",
@@ -94,6 +97,8 @@ final class AgentEngine: ObservableObject {
     private let liveResearchEvalStore = LiveResearchEvalStore()
     private let arena = AgentArena()
     private let arenaStore = AgentArenaStore()
+    private let screenPerception = AgentScreenPerception()
+    private let screenPerceptionStore = ScreenPerceptionStore()
     private let developerBridge = AgentDeveloperBridge()
     private let localIntelligence = AgentLocalIntelligence()
     private let subscriptionIntelligence = AgentSubscriptionIntelligence()
@@ -161,6 +166,18 @@ final class AgentEngine: ObservableObject {
             arenaStatus =
                 "Son Arena: \(report.passed)/\(report.total) geçti • " +
                 "Reviewer \(report.reviewerFlagged) işaret"
+            mentorTraceReady = true
+        }
+
+        screenPerceptionReport =
+            screenPerceptionStore.load()
+        if let report = screenPerceptionReport {
+            screenPerceptionStatus =
+                "Son Screen Probe: " +
+                String(report.recognizedText.count) +
+                " metin satırı • " +
+                String(report.visibleWindows.count) +
+                " pencere"
             mentorTraceReady = true
         }
 
@@ -2225,6 +2242,56 @@ final class AgentEngine: ObservableObject {
                 )
                 runDeveloperAgent()
             }
+        }
+    }
+
+    func runScreenPerceptionProbe() {
+        guard !screenPerceptionBusy else { return }
+
+        screenPerceptionBusy = true
+        screenPerceptionStatus =
+            "Ekran yakalanıyor ve yerel olarak analiz ediliyor…"
+        log("Screen Perception Probe başladı")
+
+        Task {
+            do {
+                let report =
+                    try await screenPerception.observe(
+                        goal:
+                            "Aktif ekrandaki uygulama durumunu, görünen ana içeriği ve güvenilir doğrulama sinyallerini açıkla."
+                    )
+
+                screenPerceptionReport = report
+                try screenPerceptionStore.save(report)
+
+                screenPerceptionStatus =
+                    String(report.recognizedText.count) +
+                    " metin satırı • " +
+                    String(report.visibleWindows.count) +
+                    " pencere • probe başarılı"
+
+                mentorTraceReady = true
+                mentorTraceStatus =
+                    "Screen Perception raporu hazır • Mentora gönderilebilir"
+
+                log(
+                    "Screen Perception Probe tamamlandı: " +
+                    String(report.pixelWidth) +
+                    "×" +
+                    String(report.pixelHeight) +
+                    " • " +
+                    String(report.recognizedText.count) +
+                    " metin satırı"
+                )
+            } catch {
+                screenPerceptionStatus =
+                    "Screen Perception başarısız: " +
+                    error.localizedDescription
+
+                log(screenPerceptionStatus)
+            }
+
+            screenPerceptionBusy = false
         }
     }
 
