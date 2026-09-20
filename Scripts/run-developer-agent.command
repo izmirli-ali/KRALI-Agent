@@ -344,40 +344,53 @@ fi
 
 echo "Developer prompt mode: $GAP_MODE • $(wc -c < "$PROMPT_FILE" | tr -d ' ') bytes" | tee -a "$LOG"
 
-write_status "running|Cline Developer Agent çalışıyor"
+GAP_LABEL="$("$NODE_BIN" - "$LOCAL_MENTOR_DIR/latest.json" <<'NODE'
+const fs = require("fs");
+const file = process.argv[2];
+try {
+  const mentor = JSON.parse(fs.readFileSync(file, "utf8"));
+  const gap = Array.isArray(mentor.capabilityGaps) ? mentor.capabilityGaps[0] : null;
+  if (gap) {
+    process.stdout.write(
+      String(gap.capabilityName || gap.capabilityID || "Capability") +
+      " (" + String(gap.capabilityID || "unknown") + ")"
+    );
+  }
+} catch {}
+NODE
+)"
+
+if [ "$GAP_MODE" = "gap" ] && [ -n "$GAP_LABEL" ]; then
+    write_status "learning|$GAP_LABEL için provider/strategy öğreniliyor|$BRANCH|$WORKTREE"
+else
+    write_status "running|Developer Agent diagnostic'leri inceliyor|$BRANCH|$WORKTREE"
+fi
 
 export CLINE_COMMAND_PERMISSIONS='{"allow":["git status*","git diff*","git log*","git show*","xcodebuild *","xcrun *","swift *","grep *","rg *","find *","cat *","head *","tail *","sed *","ls *"],"deny":["sudo *","rm -rf *","git push*","git reset --hard*","git clean*","open *","osascript *"]}'
 
-THINKING_LEVEL="medium"
-RETRY_COUNT="2"
 TIMEOUT_SECONDS="900"
-
 if [ "$GAP_MODE" = "gap" ]; then
-    THINKING_LEVEL="low"
-    RETRY_COUNT="1"
     TIMEOUT_SECONDS="600"
 fi
 
+# Güncel Cline CLI sözleşmesi:
+# --json, --auto-approve, --provider ve --timeout.
+# Çalışma klasörü --cwd ile değil process working directory ile verilir.
+# Model, "cline auth" sırasında provider ayarına kaydedilir.
 CLINE_ARGS=(
     --json
     --auto-approve true
     --provider "$PROVIDER"
-    --cwd "$WORKTREE"
-    --thinking "$THINKING_LEVEL"
-    --retries "$RETRY_COUNT"
     --timeout "$TIMEOUT_SECONDS"
 )
-
-# Model boş bırakılırsa "cline auth" sırasında bu provider için seçilen model kullanılır.
-# Böylece ChatGPT Subscription model seçimi tek yerde yönetilir.
-if [ -n "$MODEL" ]; then
-    CLINE_ARGS+=(--model "$MODEL")
-fi
 
 CLINE_RUN_LOG="$LOG_DIR/KRALI-Developer-Agent-Cline-$STAMP.log"
 
 CLINE_STARTED_AT="$(date +%s)"
-"$CLINE_BIN" "${CLINE_ARGS[@]}" "$(cat "$PROMPT_FILE")" >"$CLINE_RUN_LOG" 2>&1
+(
+    cd "$WORKTREE" &&
+    "$CLINE_BIN" "${CLINE_ARGS[@]}" "$(cat "$PROMPT_FILE")"
+) >"$CLINE_RUN_LOG" 2>&1
 CLINE_EXIT=$?
 CLINE_DURATION="$(( $(date +%s) - CLINE_STARTED_AT ))"
 
@@ -392,27 +405,28 @@ if [ "$CLINE_EXIT" -eq 137 ] && [ "$GAP_MODE" = "gap" ]; then
         --json
         --auto-approve true
         --provider "$PROVIDER"
-        --cwd "$WORKTREE"
-        --thinking none
-        --retries 0
         --timeout 420
     )
 
-    if [ -n "$MODEL" ]; then
-        RETRY_ARGS+=(--model "$MODEL")
-    fi
-
     RETRY_STARTED_AT="$(date +%s)"
-    "$CLINE_BIN" "${RETRY_ARGS[@]}" "$(cat "$PROMPT_FILE")" >"$RETRY_LOG" 2>&1
+    (
+        cd "$WORKTREE" &&
+        "$CLINE_BIN" "${RETRY_ARGS[@]}" "$(cat "$PROMPT_FILE")"
+    ) >"$RETRY_LOG" 2>&1
     CLINE_EXIT=$?
     CLINE_DURATION="$(( CLINE_DURATION + $(date +%s) - RETRY_STARTED_AT ))"
     cat "$RETRY_LOG" >>"$LOG"
 fi
 
 if [ "$CLINE_EXIT" -ne 0 ]; then
+    ERROR_SOURCE="$CLINE_RUN_LOG"
+    if [ -f "$LOG_DIR/KRALI-Developer-Agent-Cline-$STAMP-retry.log" ]; then
+        ERROR_SOURCE="$LOG_DIR/KRALI-Developer-Agent-Cline-$STAMP-retry.log"
+    fi
+
     CLINE_ERROR="$(
-        tail -n 60 "$LOG" 2>/dev/null |
-        grep -Eai 'auth|oauth|error|failed|provider|model|login|sign in|killed|memory|resource' |
+        tail -n 80 "$ERROR_SOURCE" 2>/dev/null |
+        grep -Eai 'auth|oauth|error|failed|provider|model|login|sign in|killed|memory|resource|unknown option|invalid option' |
         tail -n 1 |
         tr '\n|' '  ' |
         sed -E 's/[[:space:]]+/ /g; s/^ //; s/ $//' |
@@ -447,7 +461,7 @@ if [ -z "$(git status --porcelain)" ]; then
     exit 0
 fi
 
-write_status "verifying|Aday değişiklik build ediliyor|$BRANCH|$WORKTREE"
+write_status "verifying|$GAP_LABEL için aday değişiklik doğrulanıyor ve build ediliyor|$BRANCH|$WORKTREE"
 
 if ! /bin/zsh "$WORKTREE/Scripts/build-check.command" "$WORKTREE" >>"$LOG" 2>&1; then
     git add -A
@@ -469,6 +483,6 @@ if ! git push -u origin "$BRANCH" >>"$LOG" 2>&1; then
     exit 23
 fi
 
-write_status "ready_for_review|Build geçti; aday branch Mentor incelemesine hazır|$BRANCH|$WORKTREE"
+write_status "ready_for_review|$GAP_LABEL öğrenme adayı hazır; build geçti ve incelemeye hazır|$BRANCH|$WORKTREE"
 echo "✅ Developer Agent adayı hazır: $BRANCH" | tee -a "$LOG"
 echo "ℹ️ Main branch değiştirilmedi." | tee -a "$LOG"
