@@ -1866,6 +1866,21 @@ final class AgentEngine: ObservableObject {
             ),
             executedCapabilityIDs:
                 executedCapabilityIDs,
+            incompleteRequiredActionCapabilityIDs:
+                Set(
+                    executionSteps.compactMap { step in
+                        guard
+                            step.kind == .action,
+                            let capabilityID =
+                                step.capabilityID,
+                            step.state != .completed
+                        else {
+                            return nil
+                        }
+
+                        return capabilityID
+                    }
+                ),
             webResearchResultCount: webResearchResults.count,
             webResearchEvidenceCount: webResearchEvidence.count,
             webResearchUniqueDomainCount: Set(
