@@ -121,7 +121,7 @@ struct AgentContextMemoryStore {
 
         let summary = compactSummary(
             reply,
-            maximumCharacters: 900
+            maximumCharacters: 1800
         )
 
         let urls = Array(
