@@ -1339,8 +1339,7 @@ actor AgentArena {
         let reviewerFlagged = results.filter {
             $0.reviewerPassed == false ||
             !$0.reviewerMissingCapabilityIDs.isEmpty ||
-            !$0.reviewerUnnecessaryCapabilityIDs.isEmpty ||
-            !$0.reviewerRiskNotes.isEmpty
+            !$0.reviewerUnnecessaryCapabilityIDs.isEmpty
         }
         .count
 
