@@ -282,6 +282,34 @@ struct AgentGoalInterpreter {
             capabilityIDs.insert("mail.work")
         }
 
+        let asksGenericAppWorkflow =
+            containsAny(text, [
+                "uygulamasını aç",
+                "uygulamasini ac",
+                "uygulamayı aç",
+                "uygulamayi ac"
+            ]) &&
+            containsAny(text, [
+                "bul", "oku", "incele", "listele",
+                "söyle", "soyle", "göster", "goster",
+                "seç", "sec", "ekle", "hazırla", "hazirla",
+                "ayarla", "değiştir", "degistir",
+                "hatırlatma", "hatirlatma",
+                "etkinlik", "randevu", "mesaj", "şarkı", "sarki"
+            ])
+
+        let specializedAppDomain =
+            containsAny(text, [
+                "mail", "gmail", "e-posta", "eposta",
+                "premiere", "photoshop",
+                "tarayıcı", "tarayici", "web sitesi", "siteye gir"
+            ])
+
+        if asksGenericAppWorkflow &&
+           !specializedAppDomain {
+            capabilityIDs.insert("app.workflow")
+        }
+
         if containsAny(text, [
             "siteye gir", "sitesine gir", "resmi sitesine gir",
             "web sitesine gir", "web sitesini aç", "web sitesini ac",
