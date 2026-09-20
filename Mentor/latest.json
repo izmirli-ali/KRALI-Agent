@@ -1,83 +1,79 @@
 {
   "activityTail" : [
     {
-      "date" : "2026-09-19T23:59:06Z",
+      "date" : "2026-09-20T00:10:32Z",
+      "text" : "Analiz/fikir sentezi sağlayıcısı kullanılamadı"
+    },
+    {
+      "date" : "2026-09-20T00:08:54Z",
       "text" : "Web Research tamamlandı: 4 kaynak, 4 kaynak okundu"
     },
     {
-      "date" : "2026-09-19T23:59:03Z",
+      "date" : "2026-09-20T00:08:51Z",
       "text" : "Web Research başladı"
     },
     {
-      "date" : "2026-09-19T23:59:03Z",
+      "date" : "2026-09-20T00:08:51Z",
       "text" : "Seçilen kabiliyetler: Akıl yürütme, Bağlam, Web araştırma"
     },
     {
-      "date" : "2026-09-19T23:59:03Z",
+      "date" : "2026-09-20T00:08:51Z",
       "text" : "Otomatik rota: Core → Goal → Context → Plan → Research → Verify → Response"
     },
     {
-      "date" : "2026-09-19T23:59:03Z",
+      "date" : "2026-09-20T00:08:51Z",
       "text" : "Seçilen plan: Bağlamı incele; doğrudan araç eşleşmesi yoksa güvenli alternatifler üret"
     },
     {
-      "date" : "2026-09-19T23:59:03Z",
+      "date" : "2026-09-20T00:08:51Z",
       "text" : "KRALİ Core hedef sözleşmesi: bulguları analiz et → bağımsız fikir ve çıkarım üret → güncel kaynaklarla araştır → sonucu ve gerekçeyi açıkla"
     },
     {
-      "date" : "2026-09-19T23:58:13Z",
-      "text" : "Developer Agent değişiklik gerekmedi sonucuna vardı"
-    },
-    {
-      "date" : "2026-09-19T23:58:11Z",
-      "text" : "Developer Agent başlatıldı"
-    },
-    {
-      "date" : "2026-09-19T23:57:38Z",
+      "date" : "2026-09-20T00:08:43Z",
       "text" : "Live Research Eval tamamlandı: 2/2"
     },
     {
-      "date" : "2026-09-19T23:57:27Z",
+      "date" : "2026-09-20T00:08:33Z",
       "text" : "Live Research Eval başladı"
     },
     {
-      "date" : "2026-09-19T23:57:26Z",
+      "date" : "2026-09-20T00:08:31Z",
       "text" : "Training Lab tamamlandı: 16/16"
     },
     {
-      "date" : "2026-09-19T23:57:26Z",
+      "date" : "2026-09-20T00:08:31Z",
       "text" : "Training Lab başladı"
     },
     {
-      "date" : "2026-09-19T23:57:25Z",
+      "date" : "2026-09-20T00:08:31Z",
       "text" : "Yerel zeka kullanılamıyor: Apple Intelligence modeli bu Mac'te hazır değil"
     },
     {
-      "date" : "2026-09-19T23:57:25Z",
+      "date" : "2026-09-20T00:08:30Z",
       "text" : "Çalışma klasörü geri yüklendi: Desktop"
     },
     {
-      "date" : "2026-09-19T23:57:25Z",
+      "date" : "2026-09-20T00:08:30Z",
       "text" : "11 ekran görüntüsü adayı bulundu"
     },
     {
-      "date" : "2026-09-19T23:57:25Z",
+      "date" : "2026-09-20T00:08:30Z",
       "text" : "4640 dosya ve 360 klasör indekslendi"
     },
     {
-      "date" : "2026-09-19T23:57:25Z",
+      "date" : "2026-09-20T00:08:30Z",
       "text" : "İndeks güvenlik sınırına ulaştı: 5000 öğe"
     },
     {
-      "date" : "2026-09-19T23:57:25Z",
+      "date" : "2026-09-20T00:08:30Z",
       "text" : "Dinamik hedef ve kabiliyet yönlendirme aktif"
     },
     {
-      "date" : "2026-09-19T23:57:25Z",
+      "date" : "2026-09-20T00:08:30Z",
       "text" : "KRALİ Core hazır"
     }
   ],
-  "appVersion" : "0.7.23",
+  "appVersion" : "0.7.24",
   "capabilities" : [
     {
       "available" : true,
@@ -98,7 +94,7 @@
       "risk" : "external"
     }
   ],
-  "createdAt" : "2026-09-19T23:59:06Z",
+  "createdAt" : "2026-09-20T00:10:32Z",
   "executionSteps" : [
     {
       "capabilityID" : "core.reasoning",
@@ -132,7 +128,7 @@
       "capabilityID" : "core.reasoning",
       "detail" : "Toplanan kanıtları, bağlamı ve kısıtları birlikte değerlendir; yalnızca yüzey özetleme yapma, neden-sonuç ilişkileri ve belirsizlikleri ayır.",
       "kind" : "reasoning",
-      "state" : "completed",
+      "state" : "partial",
       "title" : "Analiz et"
     },
     {
@@ -151,12 +147,12 @@
     {
       "detail" : "Web araştırmasının alakalı sonuç üretip üretmediğini ve en az iki kaynaktan sayfa içeriği kanıtı çıkarılıp çıkarılmadığını doğrula.",
       "kind" : "verification",
-      "state" : "completed",
+      "state" : "partial",
       "title" : "Doğrula"
     }
   ],
   "fallbackPlan" : "Çalışma alanını incele",
-  "finalResponse" : "Web'de araştırdım ve 4 alakalı kaynak buldum.\n\nKaynakların içine girip okuduğum kanıtlar:\n• HABAŞ SINAİ VE TIBBİ GAZLAR İSTİHSAL ENDÜSTRİSİ A.Ş.: Detaylı Bilgi LPG HABAŞ 1972 Yılından bug&uuml;ne kadar LPG (Sıvılaştırılmış Petrol Gazı) satış ve dağıtımında &Uuml;lkemizin &Ouml;nc&uuml; Firmasıdır. Kişiselleştir T&#252;m&#252;n&#252; reddet T&#252;m &#231;erezleri kabul et Site İ&#231;i Arama Anasayfa KURUMSAL HAKKIMIZDA KURUCUMUZ DEĞERLER KİLOMETRE TAŞLARI FAALİYET ALANLARI SINAİ VE TIBBİ GAZLAR DEMİR &#199;ELİK FİNANS OTOMOTİV AĞIR MAKİNE İMALATI ENERJİ DOĞAL GAZ LPG GEMİ İNŞAA HABAŞ LİMANI KARİYER MEDYA Tanıtım Filmi İLETİŞİM Sınai ve Tıbbi Gazlar Kurulduğu 1956&rsquo;dan bug&uuml;ne kadar sınai ve tıbbi gazlar sekt&ouml;r&uuml;nde &Uuml;lkemizin ve bulunduğumuz coğrafyanın Lider Firmasıdır. İlk yola çıktığı Sınai Gaz üretiminde bir çok ilklere imza atan Habaş , 1987 yılında Aliağa / İzmir’ de Demir Çelik Tesislerini işletmeye alarak, çelik üretim teknolojisindeki gelişmeler doğrultusunda yaptığı yatırımlarla, Demir Çelik Tesisl\n• HABAŞ yerli otomobilinde sona yaklaşıyor: 2026'da tanıtılacak: Türkiye'nin ikinci yerli otomobil markası HABAŞ, Gebze'deki eski Honda fabrikasında geliştirdiği sedan ve crossover modellerini yıl sonuna kadar tanıtmaya hazırlanıyor. 2026 - 16:45 Türkiye'nin ikinci yerli otomobil markası HABAŞ, Gebze'deki eski Honda fabrikasında geliştirdiği sedan ve crossover modellerini yıl sonuna kadar tanıtmaya hazırlanıyor. Türkiye 'nin yüzde 100 yerli sermayeli ikinci binek otomobil markası olarak öne çıkan HABAŞ, Honda'nın Gebze 'deki eski fabrikasında geliştirdiği yerli otomobil projesinde sona yaklaşıyor\n• HABAŞ Yerli Otomobil Üretimine Başlıyor - Son Dakika: HABAŞ'ın binek otomobil planının ana hatları daha önce şirket yönetimi tarafından açıklanmıştı. Sanayi, enerji ve finans başta olmak üzere birçok sektörde faaliyet gösteren HABAŞ, Honda'nın Türkiye'de otomobil üretimini sonlandırmasının ardından devraldığı Şekerpınar. HABAŞ Yerli Otomobil Üretimine Başlıyor - Son Dakika --> HABAŞ Yerli Otomobil Üretimine Başlıyor - Son Dakika Üye Girişi Politika Finans Teknoloji Kültür Sanat Kadın Moda Otomobil Yaşam Sağlık Turizm Eğitim 3\n\nKaynaklar:\n1. HABAŞ SINAİ VE TIBBİ GAZLAR İSTİHSAL ENDÜSTRİSİ A.Ş. — www.habas.com.tr\n2. HABAŞ yerli otomobilinde sona yaklaşıyor: 2026'da tanıtılacak — www.haberler.com\n3. HABAŞ Yerli Otomobil Üretimine Başlıyor - Son Dakika — www.sondakika.com\n4. Togg’dan sonra ikinci yerli otomobil geliyor: HABAŞ | DonanımHaber — www.donanimhaber.com",
+  "finalResponse" : "Görevin yapabildiğim kısmını tamamladım.\n\nWeb'de araştırdım ve 4 alakalı kaynak buldum.\n\nKaynakların içine girip okuduğum kanıtlar:\n• Togg’dan sonra ikinci yerli otomobil geliyor: HABAŞ | DonanımHaber: Sedan ve crossover olmak üzere iki model geliyor Türkiye’nin yüzde 100 yerli sermayeli ikinci binek otomobil markası olmaya hazırlanan HABAŞ, ilk aşamada sedan ve crossover olmak üzere iki farklı model geliştiriyor. Togg’dan sonra ikinci yerli otomobil geliyor: HABAŞ | DonanımHaber. Yerli cep telefonu üretiminde alarm: 3-4 firma üretimi bıraktı 1 gün Tümünü Göster Teknoloji Editörü Bildirimi Aç Bildirim Açık a')\n• HABAŞ SINAİ VE TIBBİ GAZLAR İSTİHSAL ENDÜSTRİSİ A.Ş.: Detaylı Bilgi LPG HABAŞ 1972 Yılından bugüne kadar LPG (Sıvılaştırılmış Petrol Gazı) satış ve dağıtımında Ülkemizin Öncü Firmasıdır. İlk yola çıktığı Sınai Gaz üretiminde bir çok ilklere imza atan Habaş , 1987 yılında Aliağa / İzmir’ de Demir Çelik Tesislerini işletmeye alarak, çelik üretim teknolojisindeki gelişmeler doğrultusunda yaptığı yatırımlarla, Demir Çelik Tesislerini modern bir çelik üretim üssüne dönüştürmüştür. Detaylı Bilgi Demir Çelik İlk yola çıktığı Sınai Gaz üretiminde bir çok ilklere imza atan Habaş , 1987 yılında Aliağa / İzmir&rsquo; de Demir Çelik Tesislerini işletmeye alarak, çelik üretim teknolojisindeki gelişmeler doğrultusunda yaptığı yatırımlarla, Demir Çelik Tesislerini modern bir çelik üretim üssüne dönüştürmüştür\n• HABAŞ yerli otomobilinde sona yaklaşıyor: 2026'da tanıtılacak: Türkiye'nin ikinci yerli otomobil markası HABAŞ, Gebze'deki eski Honda fabrikasında geliştirdiği sedan ve crossover modellerini yıl sonuna kadar tanıtmaya hazırlanıyor. 2026 - 16:45 Türkiye'nin ikinci yerli otomobil markası HABAŞ, Gebze'deki eski Honda fabrikasında geliştirdiği sedan ve crossover modellerini yıl sonuna kadar tanıtmaya hazırlanıyor. Türkiye 'nin yüzde 100 yerli sermayeli ikinci binek otomobil markası olarak öne çıkan HABAŞ, Honda'nın Gebze 'deki eski fabrikasında geliştirdiği yerli otomobil projesinde sona yaklaşıyor\n\nKaynaklar:\n1. Togg’dan sonra ikinci yerli otomobil geliyor: HABAŞ | DonanımHaber — www.donanimhaber.com\n2. HABAŞ SINAİ VE TIBBİ GAZLAR İSTİHSAL ENDÜSTRİSİ A.Ş. — www.habas.com.tr\n3. HABAŞ yerli otomobilinde sona yaklaşıyor: 2026'da tanıtılacak — www.haberler.com\n4. HABAŞ Yerli Otomobil Üretimine Başlıyor - Son Dakika — www.sondakika.com\n\nKısmi doğrulama: Web araştırması doğrulandı: 4 alakalı kaynak, 4 kaynak derin okundu. Araştırma/araç kısmı doğrulandı; ancak istenen analiz ve bağımsız fikir üretimi için güvenilir sentez sağlayıcısı kullanılamadığı için hedefin tamamı doğrulanmadı.",
   "goal" : "bulguları analiz et → bağımsız fikir ve çıkarım üret → güncel kaynaklarla araştır → sonucu ve gerekçeyi açıkla",
   "inputSource" : "text",
   "learningPlans" : [
@@ -165,9 +161,21 @@
   "plan" : "Bağlamı incele; doğrudan araç eşleşmesi yoksa güvenli alternatifler üret",
   "researchEvidence" : [
     {
+      "conceptCoverage" : 3,
+      "domain" : "www.donanimhaber.com",
+      "excerpt" : "Sedan ve crossover olmak üzere iki model geliyor Türkiye’nin yüzde 100 yerli sermayeli ikinci binek otomobil markası olmaya hazırlanan HABAŞ, ilk aşamada sedan ve crossover olmak üzere iki farklı model geliştiriyor. Togg’dan sonra ikinci yerli otomobil geliyor: HABAŞ | DonanımHaber. Yerli cep telefonu üretiminde alarm: 3-4 firma üretimi bıraktı 1 gün Tümünü Göster Teknoloji Editörü Bildirimi Aç Bildirim Açık a')",
+      "matchedConcepts" : [
+        "habas",
+        "marka",
+        "firma"
+      ],
+      "title" : "Togg’dan sonra ikinci yerli otomobil geliyor: HABAŞ | DonanımHaber",
+      "url" : "https://www.donanimhaber.com/togg-dan-sonra-ikinci-yerli-otomobil-geliyor-habas--209439"
+    },
+    {
       "conceptCoverage" : 2,
       "domain" : "www.habas.com.tr",
-      "excerpt" : "Detaylı Bilgi LPG HABAŞ 1972 Yılından bug&uuml;ne kadar LPG (Sıvılaştırılmış Petrol Gazı) satış ve dağıtımında &Uuml;lkemizin &Ouml;nc&uuml; Firmasıdır. Kişiselleştir T&#252;m&#252;n&#252; reddet T&#252;m &#231;erezleri kabul et Site İ&#231;i Arama Anasayfa KURUMSAL HAKKIMIZDA KURUCUMUZ DEĞERLER KİLOMETRE TAŞLARI FAALİYET ALANLARI SINAİ VE TIBBİ GAZLAR DEMİR &#199;ELİK FİNANS OTOMOTİV AĞIR MAKİNE İMALATI ENERJİ DOĞAL GAZ LPG GEMİ İNŞAA HABAŞ LİMANI KARİYER MEDYA Tanıtım Filmi İLETİŞİM Sınai ve Tıbbi Gazlar Kurulduğu 1956&rsquo;dan bug&uuml;ne kadar sınai ve tıbbi gazlar sekt&ouml;r&uuml;nde &Uuml;lkemizin ve bulunduğumuz coğrafyanın Lider Firmasıdır. İlk yola çıktığı Sınai Gaz üretiminde bir çok ilklere imza atan Habaş , 1987 yılında Aliağa / İzmir’ de Demir Çelik Tesislerini işletmeye alarak, çelik üretim teknolojisindeki gelişmeler doğrultusunda yaptığı yatırımlarla, Demir Çelik Tesisl",
+      "excerpt" : "Detaylı Bilgi LPG HABAŞ 1972 Yılından bugüne kadar LPG (Sıvılaştırılmış Petrol Gazı) satış ve dağıtımında Ülkemizin Öncü Firmasıdır. İlk yola çıktığı Sınai Gaz üretiminde bir çok ilklere imza atan Habaş , 1987 yılında Aliağa / İzmir’ de Demir Çelik Tesislerini işletmeye alarak, çelik üretim teknolojisindeki gelişmeler doğrultusunda yaptığı yatırımlarla, Demir Çelik Tesislerini modern bir çelik üretim üssüne dönüştürmüştür. Detaylı Bilgi Demir Çelik İlk yola çıktığı Sınai Gaz üretiminde bir çok ilklere imza atan Habaş , 1987 yılında Aliağa / İzmir&rsquo; de Demir Çelik Tesislerini işletmeye alarak, çelik üretim teknolojisindeki gelişmeler doğrultusunda yaptığı yatırımlarla, Demir Çelik Tesislerini modern bir çelik üretim üssüne dönüştürmüştür",
       "matchedConcepts" : [
         "habas",
         "firma"
@@ -189,27 +197,22 @@
     {
       "conceptCoverage" : 2,
       "domain" : "www.sondakika.com",
-      "excerpt" : "HABAŞ'ın binek otomobil planının ana hatları daha önce şirket yönetimi tarafından açıklanmıştı. Sanayi, enerji ve finans başta olmak üzere birçok sektörde faaliyet gösteren HABAŞ, Honda'nın Türkiye'de otomobil üretimini sonlandırmasının ardından devraldığı Şekerpınar. HABAŞ Yerli Otomobil Üretimine Başlıyor - Son Dakika --> HABAŞ Yerli Otomobil Üretimine Başlıyor - Son Dakika Üye Girişi Politika Finans Teknoloji Kültür Sanat Kadın Moda Otomobil Yaşam Sağlık Turizm Eğitim 3",
+      "excerpt" : "HABAŞ'ın binek otomobil planının ana hatları daha önce şirket yönetimi tarafından açıklanmıştı. Sanayi, enerji ve finans başta olmak üzere birçok sektörde faaliyet gösteren HABAŞ, Honda'nın Türkiye'de otomobil üretimini sonlandırmasının ardından devraldığı Şekerpınar. Sayfa Döviz Kuru Namaz Vakitleri Hakkımızda İletişim Künye Giriş Yap HABAŞ Yerli Otomobil Üretimine Başlıyor Google algoritmasına bırakmayın, okuyacağınız haberi siz seçin",
       "matchedConcepts" : [
         "habas",
         "sirket"
       ],
       "title" : "HABAŞ Yerli Otomobil Üretimine Başlıyor - Son Dakika",
       "url" : "https://www.sondakika.com/otomobil/haber-habas-yerli-otomobil-uretimine-basliyor-20153935/"
-    },
-    {
-      "conceptCoverage" : 2,
-      "domain" : "www.donanimhaber.com",
-      "excerpt" : "Sedan ve crossover olmak üzere iki model geliyor Türkiye’nin yüzde 100 yerli sermayeli ikinci binek otomobil markası olmaya hazırlanan HABAŞ, ilk aşamada sedan ve crossover olmak üzere iki farklı model geliştiriyor. Togg’dan sonra ikinci yerli otomobil geliyor: HABAŞ | DonanımHaber. &#199;inli markaların \"hibrit\" sığınağı &#231;&#246;kt&#252;:",
-      "matchedConcepts" : [
-        "habas",
-        "marka"
-      ],
-      "title" : "Togg’dan sonra ikinci yerli otomobil geliyor: HABAŞ | DonanımHaber",
-      "url" : "https://www.donanimhaber.com/togg-dan-sonra-ikinci-yerli-otomobil-geliyor-habas--209439"
     }
   ],
   "researchSources" : [
+    {
+      "domain" : "www.donanimhaber.com",
+      "snippet" : "Togg’dan sonra Türkiye’nin ikinci yüzde 100 yerli sermayeli otomobili geliyor. HABAŞ’ın yeni otomobili yıl sonunda tanıtılacak. Aracın tasarımcısı ise Frank Stephenson.",
+      "title" : "Togg’dan sonra ikinci yerli otomobil geliyor: HABAŞ | DonanımHaber",
+      "url" : "https://www.donanimhaber.com/togg-dan-sonra-ikinci-yerli-otomobil-geliyor-habas--209439"
+    },
     {
       "domain" : "www.habas.com.tr",
       "snippet" : "İlk yola çıktığı Sınai Gaz üretiminde bir çok ilklere imza atan Habaş , 1987 yılında Aliağa / İzmir’ de Demir Çelik Tesislerini işletmeye alarak, çelik üretim teknolojisindeki gelişmeler doğrultusunda yaptığı yatırımlarla, Demir Çelik Tesislerini modern bir çelik üretim üssüne dönüştürmüştür.",
@@ -227,12 +230,6 @@
       "snippet" : "Türkiye'nin yerli otomobil pazarında Togg'un ardından yeni bir oyuncu sahneye çıkmaya hazırlanıyor. Sanayi, enerji ve finans başta olmak üzere birçok sektörde faaliyet gösteren HABAŞ, Honda'nın Türkiye'de otomobil üretimini sonlandırmasının ardından devraldığı Şekerpınar ...",
       "title" : "HABAŞ Yerli Otomobil Üretimine Başlıyor - Son Dakika",
       "url" : "https://www.sondakika.com/otomobil/haber-habas-yerli-otomobil-uretimine-basliyor-20153935/"
-    },
-    {
-      "domain" : "www.donanimhaber.com",
-      "snippet" : "Togg’dan sonra Türkiye’nin ikinci yüzde 100 yerli sermayeli otomobili geliyor. HABAŞ’ın yeni otomobili yıl sonunda tanıtılacak. Aracın tasarımcısı ise Frank Stephenson.",
-      "title" : "Togg’dan sonra ikinci yerli otomobil geliyor: HABAŞ | DonanımHaber",
-      "url" : "https://www.donanimhaber.com/togg-dan-sonra-ikinci-yerli-otomobil-geliyor-habas--209439"
     }
   ],
   "route" : [
@@ -244,8 +241,8 @@
     "Verify",
     "Response"
   ],
-  "traceID" : "E7767B90-9F78-44A4-8AE2-D4A7CFA6DF4C",
+  "traceID" : "7CFFBC55-14F3-4DC4-924E-B71427C1F276",
   "userInput" : "HABAŞ markasını detaylı araştır. Tarihçesini, ürünlerini, güncel durumunu ve rakiplerini güvenilir kaynaklarla doğrula. Güçlü ve zayıf yönlerini analiz et. Ardından benim söylemediğim 5 özgün fırsat veya fikir üret ve bunları nedenleriyle açıkla.",
-  "verificationState" : "passed",
-  "verificationSummary" : "Web araştırması doğrulandı: 4 alakalı kaynak, 4 kaynak derin okundu."
+  "verificationState" : "partial",
+  "verificationSummary" : "Web araştırması doğrulandı: 4 alakalı kaynak, 4 kaynak derin okundu. Araştırma/araç kısmı doğrulandı; ancak istenen analiz ve bağımsız fikir üretimi için güvenilir sentez sağlayıcısı kullanılamadığı için hedefin tamamı doğrulanmadı."
 }
