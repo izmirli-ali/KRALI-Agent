@@ -112,6 +112,7 @@ struct DeveloperAgentStatus: Hashable {
             "local_agent_failed",
             "local_agent_tool_protocol_failed",
             "local_agent_iteration_limit",
+            "local_agent_watchdog_timeout",
             "sdk_tool_protocol_failed",
             "no_change_unverified",
             "sdk_provider_failed",
@@ -177,6 +178,8 @@ struct DeveloperAgentStatus: Hashable {
             return "Native tool-call protokolü başarısız"
         case "local_agent_iteration_limit":
             return "Native yerel agent adım sınırına ulaştı"
+        case "local_agent_watchdog_timeout":
+            return "Native yerel agent zaman aşımına uğradı"
         case "sdk_tool_protocol_failed":
             return "Yerel model araç protokolü başarısız"
         case "no_change_unverified":
