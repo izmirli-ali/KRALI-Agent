@@ -79,6 +79,22 @@ function safeRelativePath(input = "") {
   return { absolute: candidate, relative };
 }
 
+function assertMutablePath(relative) {
+  const normalized = String(relative || "")
+    .replace(/\\/g, "/")
+    .replace(/^\.\//, "");
+
+  if (
+    normalized === "VERSION" ||
+    normalized.startsWith("Mentor/") ||
+    normalized.startsWith(".git/")
+  ) {
+    throw new Error(
+      "Korunan proje alanına yazma reddedildi: " + normalized
+    );
+  }
+}
+
 function truncate(value, limit = 16000) {
   const text = String(value ?? "");
   return text.length <= limit
@@ -193,7 +209,7 @@ function executeTool(name, args = {}) {
         "-n",
         "-I",
         "-F",
-        "--",
+        "-e",
         query,
       ];
 
@@ -270,6 +286,7 @@ function executeTool(name, args = {}) {
     case "replace_text": {
       const { absolute, relative } =
         safeRelativePath(args.path);
+      assertMutablePath(relative);
       const oldText = String(args.old_text ?? "");
       const newText = String(args.new_text ?? "");
 
@@ -313,6 +330,7 @@ function executeTool(name, args = {}) {
     case "write_file": {
       const { absolute, relative } =
         safeRelativePath(args.path);
+      assertMutablePath(relative);
       const content = String(args.content ?? "");
 
       if (content.length > 600000) {
@@ -359,6 +377,18 @@ function executeTool(name, args = {}) {
           return {
             ok: false,
             error: "Worktree dışı patch yolu reddedildi: " + value,
+          };
+        }
+
+        try {
+          assertMutablePath(value);
+        } catch (error) {
+          return {
+            ok: false,
+            error:
+              error instanceof Error
+                ? error.message
+                : String(error),
           };
         }
       }
