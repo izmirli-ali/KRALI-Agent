@@ -6,6 +6,7 @@ TRACE_SOURCE="$HOME/Library/Application Support/KRALI Agent/Mentor/latest.json"
 TRAINING_SOURCE="$HOME/Library/Application Support/KRALI Agent/Mentor/training-latest.json"
 LIVE_EVAL_SOURCE="$HOME/Library/Application Support/KRALI Agent/Mentor/live-eval-latest.json"
 ARENA_SOURCE="$HOME/Library/Application Support/KRALI Agent/Mentor/arena-latest.json"
+ARENA_PROGRESS_SOURCE="$HOME/Library/Application Support/KRALI Agent/Mentor/arena-progress.txt"
 SCREEN_SOURCE="$HOME/Library/Application Support/KRALI Agent/Mentor/screen-perception-latest.json"
 SCREEN_STATUS_SOURCE="$HOME/Library/Application Support/KRALI Agent/Mentor/screen-perception-status.txt"
 DESKTOP_SOURCE="$HOME/Library/Application Support/KRALI Agent/Mentor/desktop-control-latest.json"
@@ -17,6 +18,7 @@ TRACE_DEST="$ROOT/Mentor/latest.json"
 TRAINING_DEST="$ROOT/Mentor/training-latest.json"
 LIVE_EVAL_DEST="$ROOT/Mentor/live-eval-latest.json"
 ARENA_DEST="$ROOT/Mentor/arena-latest.json"
+ARENA_PROGRESS_DEST="$ROOT/Mentor/arena-progress.txt"
 SCREEN_DEST="$ROOT/Mentor/screen-perception-latest.json"
 SCREEN_STATUS_DEST="$ROOT/Mentor/screen-perception-status.txt"
 DESKTOP_DEST="$ROOT/Mentor/desktop-control-latest.json"
@@ -79,6 +81,11 @@ fi
 if [ -f "$ARENA_SOURCE" ]; then
     cp "$ARENA_SOURCE" "$ARENA_DEST"
     FILES+=("Mentor/arena-latest.json")
+fi
+
+if [ -f "$ARENA_PROGRESS_SOURCE" ]; then
+    cp "$ARENA_PROGRESS_SOURCE" "$ARENA_PROGRESS_DEST"
+    FILES+=("Mentor/arena-progress.txt")
 fi
 
 if [ -f "$SCREEN_SOURCE" ]; then
