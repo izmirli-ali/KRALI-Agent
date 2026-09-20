@@ -40,6 +40,7 @@
 		A10000000000000000000031 /* AgentMissionNormalizer.swift in Sources */ = {isa = PBXBuildFile; fileRef = B10000000000000000000031 /* AgentMissionNormalizer.swift */; };
 		A10000000000000000000032 /* AgentTextFileWriter.swift in Sources */ = {isa = PBXBuildFile; fileRef = B10000000000000000000032 /* AgentTextFileWriter.swift */; };
 		A10000000000000000000033 /* AgentCapabilityGapResolver.swift in Sources */ = {isa = PBXBuildFile; fileRef = B10000000000000000000033 /* AgentCapabilityGapResolver.swift */; };
+		A10000000000000000000034 /* AgentAppWorkflowStrategy.swift in Sources */ = {isa = PBXBuildFile; fileRef = B10000000000000000000034 /* AgentAppWorkflowStrategy.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
@@ -77,6 +78,7 @@
 		B10000000000000000000031 /* AgentMissionNormalizer.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AgentMissionNormalizer.swift; sourceTree = "<group>"; };
 		B10000000000000000000032 /* AgentTextFileWriter.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AgentTextFileWriter.swift; sourceTree = "<group>"; };
 		B10000000000000000000033 /* AgentCapabilityGapResolver.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AgentCapabilityGapResolver.swift; sourceTree = "<group>"; };
+		B10000000000000000000034 /* AgentAppWorkflowStrategy.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AgentAppWorkflowStrategy.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -134,6 +136,7 @@
 				B10000000000000000000031 /* AgentMissionNormalizer.swift */,
 				B10000000000000000000032 /* AgentTextFileWriter.swift */,
 				B10000000000000000000033 /* AgentCapabilityGapResolver.swift */,
+				B10000000000000000000034 /* AgentAppWorkflowStrategy.swift */,
 			);
 			path = KRALIAgentNative;
 			sourceTree = "<group>";
@@ -248,6 +251,7 @@
 				A10000000000000000000031 /* AgentMissionNormalizer.swift in Sources */,
 				A10000000000000000000032 /* AgentTextFileWriter.swift in Sources */,
 				A10000000000000000000033 /* AgentCapabilityGapResolver.swift in Sources */,
+				A10000000000000000000034 /* AgentAppWorkflowStrategy.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
