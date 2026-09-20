@@ -356,3 +356,14 @@ Perception roadmap'inin ilk gerçek provider temeli eklendi. Yeni `AgentScreenPe
 Screen Perception ilk sürümde yalnızca manuel geliştirici probe'udur; `perception.screen` capability henüz available yapılmaz ve semantic executor'a bağlanmaz. Böylece gerçek Mac'te Screen Recording izni, capture doğruluğu, Vision metin çıkarımı ve semantic özet Mentor raporuyla doğrulanmadan runtime kendisini ekranı görebiliyor saymaz.
 
 Geliştirici araçlarına **Screen Perception Probe** düğmesi eklendi. Sonuç `~/Library/Application Support/KRALI Agent/Mentor/screen-perception-latest.json` olarak kaydedilir ve Mentor Sync ile `Mentor/screen-perception-latest.json` dosyasına taşınır. Xcode target Info.plist üretimine `NSScreenCaptureUsageDescription` eklenmiştir. Sonraki kapı: gerçek probe başarılıysa dependency-aware semantic execution ile `perception.screen` runtime capability'sini açmak; ardından Accessibility tabanlı macOS Desktop Control provider'ına geçmek.
+
+
+**v0.8.18 semantic planner resilience after Screen Probe integration:** v0.8.17 Mentor turunda Training Lab 30/30 ve Live Research Eval 2/2 yeşil kalırken Arena sonucu 2/6 oldu. Bu durum Screen Perception provider'ının kendisinden değil, Semantic Planner'ın Foundation Models çağrılarındaki hata toleransından kaynaklandı. Apple planner'ın ikinci self-review çağrısı geçici hata verdiğinde, daha önce deterministic contract repair ile oluşturulmuş geçerli mission da kaybedilip nil dönüyordu. Ayrıca browser görevinde contract repair stale Files capability'lerini required set'ten çıkarsa bile eski model step'leri listede kalabiliyor ve Arena bunları hâlâ seçilmiş capability sayıyordu.
+
+Semantic planner artık self-review'ı advisory kabul eder. İlk/repaired mission geçerliyse ikinci Foundation Models çağrısı hata verse bile mission korunur. Apple'ın ilk planner çağrısı tamamen başarısız olsa, model kullanılamasa veya yapılandırılmış mission üretilemese dahi current user input'tan deterministic `contractFallbackMission` denenir. Bu fallback yalnızca tanınan görev ailesinde non-core capability ve operational-completeness sözleşmesi oluşuyorsa kabul edilir.
+
+Mission Contract Repair artık required capability set'inden çıkarılan stale capability'lere ait eski step'leri de temizler. Böylece web görevinde eski `files.search/files.reveal` step'leri mission içinde kalamaz. Repair kararları yine yalnızca güncel kullanıcı mesajından türetilir.
+
+Arena sonuç metni tamamlanmış test ile devam eden testi karıştırmayacak biçimde değiştirildi: `X/6 geçti • Y başarısız • Reviewer Z işaret`. Böylece örneğin 2/6 sonucu artık UI'da takılmış gibi görünmez; 2 pass + 4 fail olduğu açıkça anlaşılır.
+
+Screen Perception Probe v0.8.17'de olduğu gibi manuel probe olarak kalır; `perception.screen` runtime capability'si henüz açılmaz. Önce Arena yeniden kararlı hale getirilecek, ardından gerçek screen-perception raporu doğrulanacaktır.
