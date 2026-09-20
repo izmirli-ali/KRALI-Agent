@@ -1,99 +1,99 @@
-pulling a3de86cd1c13:  89% ▕████████████████  ▏ 4.7 GB/5.2 GB   92 MB/s      6s[K[?25h[?2026l[?2026h[?25l[A[1Gpulling manifest [K
-pulling a3de86cd1c13:  89% ▕████████████████  ▏ 4.7 GB/5.2 GB   92 MB/s      6s[K[?25h[?2026l[?2026h[?25l[A[1Gpulling manifest [K
-pulling a3de86cd1c13:  89% ▕████████████████  ▏ 4.7 GB/5.2 GB   92 MB/s      6s[K[?25h[?2026l[?2026h[?25l[A[1Gpulling manifest [K
-pulling a3de86cd1c13:  90% ▕████████████████  ▏ 4.7 GB/5.2 GB   92 MB/s      5s[K[?25h[?2026l[?2026h[?25l[A[1Gpulling manifest [K
-pulling a3de86cd1c13:  90% ▕████████████████  ▏ 4.7 GB/5.2 GB   92 MB/s      5s[K[?25h[?2026l[?2026h[?25l[A[1Gpulling manifest [K
-pulling a3de86cd1c13:  90% ▕████████████████  ▏ 4.7 GB/5.2 GB   92 MB/s      5s[K[?25h[?2026l[?2026h[?25l[A[1Gpulling manifest [K
-pulling a3de86cd1c13:  90% ▕████████████████  ▏ 4.7 GB/5.2 GB   92 MB/s      5s[K[?25h[?2026l[?2026h[?25l[A[1Gpulling manifest [K
-pulling a3de86cd1c13:  90% ▕████████████████  ▏ 4.7 GB/5.2 GB   92 MB/s      5s[K[?25h[?2026l[?2026h[?25l[A[1Gpulling manifest [K
-pulling a3de86cd1c13:  90% ▕████████████████  ▏ 4.7 GB/5.2 GB   92 MB/s      5s[K[?25h[?2026l[?2026h[?25l[A[1Gpulling manifest [K
-pulling a3de86cd1c13:  90% ▕████████████████  ▏ 4.7 GB/5.2 GB   90 MB/s      5s[K[?25h[?2026l[?2026h[?25l[A[1Gpulling manifest [K
-pulling a3de86cd1c13:  90% ▕████████████████  ▏ 4.7 GB/5.2 GB   90 MB/s      5s[K[?25h[?2026l[?2026h[?25l[A[1Gpulling manifest [K
-pulling a3de86cd1c13:  90% ▕████████████████  ▏ 4.7 GB/5.2 GB   90 MB/s      5s[K[?25h[?2026l[?2026h[?25l[A[1Gpulling manifest [K
-pulling a3de86cd1c13:  90% ▕████████████████  ▏ 4.7 GB/5.2 GB   90 MB/s      5s[K[?25h[?2026l[?2026h[?25l[A[1Gpulling manifest [K
-pulling a3de86cd1c13:  90% ▕████████████████  ▏ 4.7 GB/5.2 GB   90 MB/s      5s[K[?25h[?2026l[?2026h[?25l[A[1Gpulling manifest [K
-pulling a3de86cd1c13:  90% ▕████████████████  ▏ 4.7 GB/5.2 GB   90 MB/s      5s[K[?25h[?2026l[?2026h[?25l[A[1Gpulling manifest [K
-pulling a3de86cd1c13:  91% ▕████████████████  ▏ 4.7 GB/5.2 GB   90 MB/s      5s[K[?25h[?2026l[?2026h[?25l[A[1Gpulling manifest [K
-pulling a3de86cd1c13:  91% ▕████████████████  ▏ 4.7 GB/5.2 GB   90 MB/s      5s[K[?25h[?2026l[?2026h[?25l[A[1Gpulling manifest [K
-pulling a3de86cd1c13:  91% ▕████████████████  ▏ 4.7 GB/5.2 GB   90 MB/s      5s[K[?25h[?2026l[?2026h[?25l[A[1Gpulling manifest [K
-pulling a3de86cd1c13:  91% ▕████████████████  ▏ 4.7 GB/5.2 GB   90 MB/s      5s[K[?25h[?2026l[?2026h[?25l[A[1Gpulling manifest [K
-pulling a3de86cd1c13:  91% ▕████████████████  ▏ 4.7 GB/5.2 GB   84 MB/s      5s[K[?25h[?2026l[?2026h[?25l[A[1Gpulling manifest [K
-pulling a3de86cd1c13:  91% ▕████████████████  ▏ 4.7 GB/5.2 GB   84 MB/s      5s[K[?25h[?2026l[?2026h[?25l[A[1Gpulling manifest [K
-pulling a3de86cd1c13:  91% ▕████████████████  ▏ 4.8 GB/5.2 GB   84 MB/s      5s[K[?25h[?2026l[?2026h[?25l[A[1Gpulling manifest [K
-pulling a3de86cd1c13:  91% ▕████████████████  ▏ 4.8 GB/5.2 GB   84 MB/s      5s[K[?25h[?2026l[?2026h[?25l[A[1Gpulling manifest [K
-pulling a3de86cd1c13:  91% ▕████████████████  ▏ 4.8 GB/5.2 GB   84 MB/s      5s[K[?25h[?2026l[?2026h[?25l[A[1Gpulling manifest [K
-pulling a3de86cd1c13:  91% ▕████████████████  ▏ 4.8 GB/5.2 GB   84 MB/s      5s[K[?25h[?2026l[?2026h[?25l[A[1Gpulling manifest [K
-pulling a3de86cd1c13:  91% ▕████████████████  ▏ 4.8 GB/5.2 GB   84 MB/s      5s[K[?25h[?2026l[?2026h[?25l[A[1Gpulling manifest [K
-pulling a3de86cd1c13:  91% ▕████████████████  ▏ 4.8 GB/5.2 GB   84 MB/s      5s[K[?25h[?2026l[?2026h[?25l[A[1Gpulling manifest [K
-pulling a3de86cd1c13:  91% ▕████████████████  ▏ 4.8 GB/5.2 GB   84 MB/s      5s[K[?25h[?2026l[?2026h[?25l[A[1Gpulling manifest [K
-pulling a3de86cd1c13:  91% ▕████████████████  ▏ 4.8 GB/5.2 GB   84 MB/s      5s[K[?25h[?2026l[?2026h[?25l[A[1Gpulling manifest [K
-pulling a3de86cd1c13:  92% ▕████████████████  ▏ 4.8 GB/5.2 GB   77 MB/s      5s[K[?25h[?2026l[?2026h[?25l[A[1Gpulling manifest [K
-pulling a3de86cd1c13:  92% ▕████████████████  ▏ 4.8 GB/5.2 GB   77 MB/s      5s[K[?25h[?2026l[?2026h[?25l[A[1Gpulling manifest [K
-pulling a3de86cd1c13:  92% ▕████████████████  ▏ 4.8 GB/5.2 GB   77 MB/s      5s[K[?25h[?2026l[?2026h[?25l[A[1Gpulling manifest [K
-pulling a3de86cd1c13:  92% ▕████████████████  ▏ 4.8 GB/5.2 GB   77 MB/s      5s[K[?25h[?2026l[?2026h[?25l[A[1Gpulling manifest [K
-pulling a3de86cd1c13:  92% ▕████████████████  ▏ 4.8 GB/5.2 GB   77 MB/s      5s[K[?25h[?2026l[?2026h[?25l[A[1Gpulling manifest [K
-pulling a3de86cd1c13:  92% ▕████████████████  ▏ 4.8 GB/5.2 GB   77 MB/s      5s[K[?25h[?2026l[?2026h[?25l[A[1Gpulling manifest [K
-pulling a3de86cd1c13:  92% ▕████████████████  ▏ 4.8 GB/5.2 GB   77 MB/s      5s[K[?25h[?2026l[?2026h[?25l[A[1Gpulling manifest [K
-pulling a3de86cd1c13:  92% ▕████████████████  ▏ 4.8 GB/5.2 GB   77 MB/s      5s[K[?25h[?2026l[?2026h[?25l[A[1Gpulling manifest [K
-pulling a3de86cd1c13:  92% ▕████████████████  ▏ 4.8 GB/5.2 GB   77 MB/s      5s[K[?25h[?2026l[?2026h[?25l[A[1Gpulling manifest [K
-pulling a3de86cd1c13:  92% ▕████████████████  ▏ 4.8 GB/5.2 GB   77 MB/s      5s[K[?25h[?2026l[?2026h[?25l[A[1Gpulling manifest [K
-pulling a3de86cd1c13:  92% ▕████████████████  ▏ 4.8 GB/5.2 GB   71 MB/s      5s[K[?25h[?2026l[?2026h[?25l[A[1Gpulling manifest [K
-pulling a3de86cd1c13:  92% ▕████████████████  ▏ 4.8 GB/5.2 GB   71 MB/s      5s[K[?25h[?2026l
-Error: write /Users/medusa/.ollama/models/blobs/sha256-a3de86cd1c132c822487ededd47a324c50491393e6565cd14bafa40d0b8e686f-partial: no space left on device
-🧩 Cline hata verdi ancak candidate değişiklik üretti; recovery başlatılıyor.
-❌ Cline görevi başarısız oldu (exit 25, 85s): KRALI SDK local tool protocol failed: no real tool event
+It looks like you've shared a snippet of code written in Swift. This code defines a set of agent capabilities and includes a function to select and resolve these capabilities based on certain conditions. Here's a breakdown of the key components:
 
-━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
- KRALİ DEVELOPER AGENT
- 20260920-222155
-━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-⚠️ Global Node.js v26 Cline bağımlılıklarıyla uyumlu değil; izole Node 22 runtime hazırlanıyor.
-✅ Developer Agent runtime: v22.23.2
-Yerel model seçimi: qwen2.5-coder:14b-instruct • RAM≈24GB
-Yerel tool-call probe: qwen2.5-coder:14b-instruct
-KRALI local tool probe: native tool_call görülmedi • text={"name": "krali_tool_probe", "arguments": {}}
-⚠️ qwen2.5-coder:14b-instruct native tool-call probe geçmedi; yalnız kurulu alternatifler deneniyor.
-Yerel tool-call probe: devstral:24b
-tool_call_ok|devstral:24b
-✅ Yerel Developer AI hazır + tool-call doğrulandı: devstral:24b
-From https://github.com/izmirli-ali/KRALI-Agent
- * branch            main       -> FETCH_HEAD
-Already up to date.
-Learning Queue job brief bulundu; mutable Mentor latest yerine immutable job kullanılacak.
-Preparing worktree (new branch 'krali-dev-agent/20260920-222155')
-branch 'krali-dev-agent/20260920-222155' set up to track 'origin/main'.
-HEAD is now at 3696b90 v0.8.52 native local agent and LaunchServices resolver
-Developer prompt mode: gap • 3248 bytes
-KRALI_LOCAL_STAGE local_agent_starting • Uygulama kontrolü (desktop.app) native Ollama agent başlatılıyor: devstral:24b
-KRALI_LOCAL_STAGE local_agent_running • Uygulama kontrolü (desktop.app) yerel model çalışıyor • adım 1/36
-KRALI_LOCAL_STAGE local_agent_tool • Uygulama kontrolü (desktop.app) araç çalışıyor: search_codebase
-KRALI_LOCAL_STAGE local_agent_running • Uygulama kontrolü (desktop.app) yerel model çalışıyor • adım 2/36
-KRALI_LOCAL_STAGE local_agent_tool • Uygulama kontrolü (desktop.app) araç çalışıyor: read_file
-KRALI_LOCAL_STAGE local_agent_running • Uygulama kontrolü (desktop.app) yerel model çalışıyor • adım 3/36
-KRALI_LOCAL_STAGE local_agent_tool • Uygulama kontrolü (desktop.app) araç çalışıyor: search_codebase
-KRALI_LOCAL_STAGE local_agent_running • Uygulama kontrolü (desktop.app) yerel model çalışıyor • adım 4/36
-KRALI_LOCAL_STAGE local_agent_tool • Uygulama kontrolü (desktop.app) araç çalışıyor: read_file
-KRALI_LOCAL_STAGE local_agent_running • Uygulama kontrolü (desktop.app) yerel model çalışıyor • adım 5/36
-I see the issue. The `openOrFocusApplication` method is not verifying if the application is truly frontmost after attempting to focus it. Let me check the `focusCandidate` method to see if it's properly verifying the frontmost status.
-KRALI_LOCAL_STAGE local_agent_completed • Uygulama kontrolü (desktop.app) native local agent tamamlandı
-KRALI_LOCAL_STAGE local_agent_starting • Uygulama kontrolü (desktop.app) native Ollama agent başlatılıyor: devstral:24b
-KRALI_LOCAL_STAGE local_agent_running • Uygulama kontrolü (desktop.app) yerel model çalışıyor • adım 1/36
-KRALI_LOCAL_STAGE local_agent_tool • Uygulama kontrolü (desktop.app) araç çalışıyor: search_codebase
-KRALI_LOCAL_STAGE local_agent_running • Uygulama kontrolü (desktop.app) yerel model çalışıyor • adım 2/36
-KRALI_LOCAL_STAGE local_agent_tool • Uygulama kontrolü (desktop.app) araç çalışıyor: read_file
-KRALI_LOCAL_STAGE local_agent_running • Uygulama kontrolü (desktop.app) yerel model çalışıyor • adım 3/36
-KRALI_LOCAL_STAGE local_agent_tool • Uygulama kontrolü (desktop.app) araç çalışıyor: search_codebase
-KRALI_LOCAL_STAGE local_agent_running • Uygulama kontrolü (desktop.app) yerel model çalışıyor • adım 4/36
-KRALI_LOCAL_STAGE local_agent_tool • Uygulama kontrolü (desktop.app) araç çalışıyor: read_file
-KRALI_LOCAL_STAGE local_agent_running • Uygulama kontrolü (desktop.app) yerel model çalışıyor • adım 5/36
-I see the issue. The `openOrFocusApplication` method is not verifying if the application is truly frontmost after attempting to focus it. Let me check the `focusCandidate` method to see if it's properly verifying the frontmost status.
-KRALI_LOCAL_STAGE local_agent_completed • Uygulama kontrolü (desktop.app) native local agent tamamlandı
+### Agent Capabilities
+The code defines several agent capabilities, each with an ID, name, summary, risk level, availability, and workspace requirement. Some of the capabilities include:
+- `core.reasoning`
+- `context.local`
+- `files.search`
+- `files.metadata`
+- `perception.media`
+- `files.reveal`
+- `files.move.reversible`
+- `memory.local`
+- `mail.work`
+- `premiere.control`
+- `research.web`
+- `browser.control`
+
+### `select` Function
+The `select` function determines which capabilities are needed based on the input text, decision, context, and goal. It normalizes the input text and then adds specific capability IDs to a list based on the decision intent. For example:
+- For `.fileSearch` and `.compoundFileTask`, it adds `files.search` and `files.metadata`.
+- For `.openPreviousResult`, it adds `files.reveal`.
+- For `.remember`, it adds `memory.local`.
+- For `.workMail`, it adds `mail.work`.
+- For `.futureCapability`, it conditionally adds capabilities like `premiere.control`, `research.web`, `browser.control`, and `mail.work` based on the presence of certain keywords in the text.
+
+### `resolve` Function
+The `resolve` function takes a list of capability IDs and returns the corresponding `AgentCapability` objects. It ensures that each capability is only included once.
+
+### Helper Functions
+- `normalize`: Converts the input text to lowercase and trims whitespace.
+- `containsAny`: Checks if the input text contains any of the specified values.
+
+### Example Usage
+To use this code, you would call the `select` function with the appropriate parameters and then call the `resolve` function with the resulting list of capability IDs to get the actual capabilities.
+
+```swift
+let capabilities = select(for: "some input text", decision: someDecision, context: someContext, goal: someGoal)
+let resolvedCapabilities = resolve(ids: capabilities)
+```
+
+This code is designed to be flexible and extensible, allowing for the addition of new capabilities and decision intents as needed.
+KRALI_LOCAL_STAGE local_agent_completed • Tarayıcı kontrolü (browser.control) native local agent tamamlandı
+KRALI_LOCAL_STAGE local_agent_starting • Tarayıcı kontrolü (browser.control) native Ollama agent başlatılıyor: devstral:24b
+KRALI_LOCAL_STAGE local_agent_running • Tarayıcı kontrolü (browser.control) yerel model çalışıyor • adım 1/36
+KRALI_LOCAL_STAGE local_agent_tool • Tarayıcı kontrolü (browser.control) araç çalışıyor: search_codebase
+KRALI_LOCAL_STAGE local_agent_running • Tarayıcı kontrolü (browser.control) yerel model çalışıyor • adım 2/36
+KRALI_LOCAL_STAGE local_agent_tool • Tarayıcı kontrolü (browser.control) araç çalışıyor: read_file
+KRALI_LOCAL_STAGE local_agent_running • Tarayıcı kontrolü (browser.control) yerel model çalışıyor • adım 3/36
+It looks like you've shared a snippet of code written in Swift. This code defines a set of agent capabilities and includes a function to select and resolve these capabilities based on certain conditions. Here's a breakdown of the key components:
+
+### Agent Capabilities
+The code defines several agent capabilities, each with an ID, name, summary, risk level, availability, and workspace requirement. Some of the capabilities include:
+- `core.reasoning`
+- `context.local`
+- `files.search`
+- `files.metadata`
+- `perception.media`
+- `files.reveal`
+- `files.move.reversible`
+- `memory.local`
+- `mail.work`
+- `premiere.control`
+- `research.web`
+- `browser.control`
+
+### `select` Function
+The `select` function determines which capabilities are needed based on the input text, decision, context, and goal. It normalizes the input text and then adds specific capability IDs to a list based on the decision intent. For example:
+- For `.fileSearch` and `.compoundFileTask`, it adds `files.search` and `files.metadata`.
+- For `.openPreviousResult`, it adds `files.reveal`.
+- For `.remember`, it adds `memory.local`.
+- For `.workMail`, it adds `mail.work`.
+- For `.futureCapability`, it conditionally adds capabilities like `premiere.control`, `research.web`, `browser.control`, and `mail.work` based on the presence of certain keywords in the text.
+
+### `resolve` Function
+The `resolve` function takes a list of capability IDs and returns the corresponding `AgentCapability` objects. It ensures that each capability is only included once.
+
+### Helper Functions
+- `normalize`: Converts the input text to lowercase and trims whitespace.
+- `containsAny`: Checks if the input text contains any of the specified values.
+
+### Example Usage
+To use this code, you would call the `select` function with the appropriate parameters and then call the `resolve` function with the resulting list of capability IDs to get the actual capabilities.
+
+```swift
+let capabilities = select(for: "some input text", decision: someDecision, context: someContext, goal: someGoal)
+let resolvedCapabilities = resolve(ids: capabilities)
+```
+
+This code is designed to be flexible and extensible, allowing for the addition of new capabilities and decision intents as needed.
+KRALI_LOCAL_STAGE local_agent_completed • Tarayıcı kontrolü (browser.control) native local agent tamamlandı
 ❌ Capability gap devam ederken kanıtsız no_change kabul edilmedi.
-Deleted branch krali-dev-agent/20260920-222155 (was 3696b90).
+Deleted branch krali-dev-agent/20260920-222608 (was 2d8763f).
 
 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
  KRALİ DEVELOPER AGENT
- 20260920-222608
+ 20260920-223138
 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 ⚠️ Global Node.js v26 Cline bağımlılıklarıyla uyumlu değil; izole Node 22 runtime hazırlanıyor.
 ✅ Developer Agent runtime: v22.23.2
@@ -108,10 +108,10 @@ From https://github.com/izmirli-ali/KRALI-Agent
  * branch            main       -> FETCH_HEAD
 Already up to date.
 Learning Queue job brief bulundu; mutable Mentor latest yerine immutable job kullanılacak.
-Preparing worktree (new branch 'krali-dev-agent/20260920-222608')
-branch 'krali-dev-agent/20260920-222608' set up to track 'origin/main'.
-HEAD is now at 2d8763f Sync KRALI mentor diagnostics
-Developer prompt mode: gap • 2667 bytes
+Preparing worktree (new branch 'krali-dev-agent/20260920-223138')
+branch 'krali-dev-agent/20260920-223138' set up to track 'origin/main'.
+HEAD is now at 10e9e6d Sync KRALI mentor diagnostics
+Developer prompt mode: gap • 2669 bytes
 KRALI_LOCAL_STAGE local_agent_starting • Tarayıcı kontrolü (browser.control) native Ollama agent başlatılıyor: devstral:24b
 KRALI_LOCAL_STAGE local_agent_running • Tarayıcı kontrolü (browser.control) yerel model çalışıyor • adım 1/36
 KRALI_LOCAL_STAGE local_agent_tool • Tarayıcı kontrolü (browser.control) araç çalışıyor: search_codebase

@@ -1,1 +1,1 @@
-local_agent_running|Tarayıcı kontrolü (browser.control) yerel model çalışıyor • adım 3/36|krali-dev-agent/20260920-222608|/Users/medusa/Developer/KRALI-Agent-Dev-20260920-222608|@meta|app=0.8.52|at=1789932450|run=20260920-222608
+local_agent_running|Tarayıcı kontrolü (browser.control) yerel model çalışıyor • adım 3/36|krali-dev-agent/20260920-223138|/Users/medusa/Developer/KRALI-Agent-Dev-20260920-223138|@meta|app=0.8.52|at=1789932761|run=20260920-223138
