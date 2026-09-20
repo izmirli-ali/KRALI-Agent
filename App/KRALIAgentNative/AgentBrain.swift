@@ -117,6 +117,16 @@ struct AgentBrain {
             )
         }
 
+        if isRememberIntent(text) {
+            return decision(
+                intent: .remember,
+                route: ["Core", "Intent", "Learning"],
+                goal: "Kullanıcının açık çalışma kuralını hafızaya al",
+                plan: "Genellenebilir çalışma kuralını marka / konu özelindeki ayrıntılardan ayır ve yerel hafızaya kaydet",
+                alternatives: ["Kuralı daha sonra düzenle", "Yeni bir çalışma kuralı ekle"]
+            )
+        }
+
         let hasPreviousResults =
             context.previousFileResultCount > 0 ||
             context.previousFolderResultCount > 0
@@ -231,16 +241,6 @@ struct AgentBrain {
                 plan: "Önce sadece oku; durumu özetle, alternatifleri karşılaştır ve değişiklik yapmadan öner",
                 alternatives: alternatives,
                 suggestion: suggestion
-            )
-        }
-
-        if isRememberIntent(text) {
-            return decision(
-                intent: .remember,
-                route: ["Core", "Intent", "Learning"],
-                goal: "Kullanıcının açık çalışma kuralını hafızaya al",
-                plan: "Kuralı temizle, sakla ve sonraki görevlerde bağlam olarak kullan",
-                alternatives: ["Kuralı sadece bu oturum için uygula"]
             )
         }
 
@@ -405,10 +405,37 @@ struct AgentBrain {
     }
 
     private func isRememberIntent(_ text: String) -> Bool {
-        containsAny(text, [
+        if containsAny(text, [
             "öğret:", "ogret:", "bunu unutma", "aklında tut", "aklinda tut",
             "bunu hatırla", "bunu hatirla", "bundan sonra"
+        ]) {
+            return true
+        }
+
+        let workflowReference = containsAny(text, [
+            "çalışma biçimini", "calisma bicimini",
+            "çalışma şeklini", "calisma seklini",
+            "bu yöntemi", "bu yontemi",
+            "bu düzeni", "bu duzeni",
+            "bu yaklaşımı", "bu yaklasimi"
         ])
+
+        let futureReuse = containsAny(text, [
+            "ileride", "benzer", "bundan böyle", "bundan boyle",
+            "için de kullan", "icin de kullan",
+            "aynı şekilde kullan", "ayni sekilde kullan"
+        ])
+
+        let scopeBoundary = containsAny(text, [
+            "başka markalara", "baska markalara",
+            "başka markaya", "baska markaya",
+            "otomatik uygulama", "otomatik taşıma", "otomatik tasima",
+            "yalnızca bu marka", "yalnizca bu marka",
+            "markaya özel", "markaya ozel"
+        ])
+
+        return (workflowReference && futureReuse) ||
+            (workflowReference && scopeBoundary)
     }
 
     private func isScreenshotOrganizeIntent(_ text: String) -> Bool {
