@@ -5,9 +5,11 @@ ROOT="${KRALI_REPO_ROOT:-$HOME/Developer/KRALI-Agent}"
 TRACE_SOURCE="$HOME/Library/Application Support/KRALI Agent/Mentor/latest.json"
 TRAINING_SOURCE="$HOME/Library/Application Support/KRALI Agent/Mentor/training-latest.json"
 LIVE_EVAL_SOURCE="$HOME/Library/Application Support/KRALI Agent/Mentor/live-eval-latest.json"
+ARENA_SOURCE="$HOME/Library/Application Support/KRALI Agent/Mentor/arena-latest.json"
 TRACE_DEST="$ROOT/Mentor/latest.json"
 TRAINING_DEST="$ROOT/Mentor/training-latest.json"
 LIVE_EVAL_DEST="$ROOT/Mentor/live-eval-latest.json"
+ARENA_DEST="$ROOT/Mentor/arena-latest.json"
 
 echo ""
 echo "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
@@ -21,8 +23,8 @@ if [ ! -d "$ROOT/.git" ]; then
     exit 10
 fi
 
-if [ ! -f "$TRACE_SOURCE" ] && [ ! -f "$TRAINING_SOURCE" ] && [ ! -f "$LIVE_EVAL_SOURCE" ]; then
-    echo "❌ Gönderilecek mentor trace, Training Lab veya Live Research Eval raporu yok."
+if [ ! -f "$TRACE_SOURCE" ] && [ ! -f "$TRAINING_SOURCE" ] && [ ! -f "$LIVE_EVAL_SOURCE" ] && [ ! -f "$ARENA_SOURCE" ]; then
+    echo "❌ Gönderilecek mentor trace, Training Lab, Live Research Eval veya Arena raporu yok."
     exit 11
 fi
 
@@ -58,6 +60,11 @@ fi
 if [ -f "$LIVE_EVAL_SOURCE" ]; then
     cp "$LIVE_EVAL_SOURCE" "$LIVE_EVAL_DEST"
     FILES+=("Mentor/live-eval-latest.json")
+fi
+
+if [ -f "$ARENA_SOURCE" ]; then
+    cp "$ARENA_SOURCE" "$ARENA_DEST"
+    FILES+=("Mentor/arena-latest.json")
 fi
 
 if [ -z "$(git status --porcelain -- ${FILES[@]})" ]; then
