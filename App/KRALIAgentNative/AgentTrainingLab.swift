@@ -119,6 +119,10 @@ struct AgentTrainingLab {
             results.append(result)
         }
 
+        results.append(
+            memoryTransformSourceResolutionResult()
+        )
+
         let core = results.filter { $0.tier == .core }
         let northStar = results.filter { $0.tier == .northStar }
 
@@ -135,6 +139,96 @@ struct AgentTrainingLab {
             northStarPassed: northStar.filter(\.passed).count,
             northStarTotal: northStar.count,
             results: results
+        )
+    }
+
+    private func memoryTransformSourceResolutionResult()
+        -> TrainingScenarioResult {
+        let store = AgentContextMemoryStore()
+
+        let research = AgentContextMemoryEntry(
+            kind: .research,
+            title: "estafizsym instagram sayfasını incele",
+            summary:
+                "@estafizsym Reformer ve Klinik Pilates hesabı için doğrulanmış araştırma özeti.",
+            userInput:
+                "estafizsym instagram sayfasını incele ve bana detaylı bir rapor sun",
+            goal:
+                "güncel kaynaklarla araştır → sonucu ve gerekçeyi açıkla"
+        )
+
+        let ideas = AgentContextMemoryEntry(
+            kind: .task,
+            title: "3 özgün Reels fikri",
+            summary:
+                "1. Aynı hareket, üç farklı beden. 2. Vücudunun küçük sinyalleri. 3. Reformer dedektifi.",
+            userInput:
+                "bu hesap için az önce söylediklerinden 3 özgün reels fikri çıkar",
+            goal:
+                "bağımsız fikir ve çıkarım üret"
+        )
+
+        let priorTransform = AgentContextMemoryEntry(
+            kind: .task,
+            title: "önceki dönüşüm denemesi",
+            summary:
+                "Birden çok alternatif fikir üretildi; tek fikrin senaryoya dönüşümü tamamlanmadı.",
+            userInput:
+                "şimdi Estafiz'e dön, az önceki Reels fikirlerinden birincisini 30 saniyelik çekim senaryosuna çevir",
+            goal:
+                "önceki çıktıyı istenen formata dönüştür"
+        )
+
+        let query =
+            "şimdi Estafiz'e dön, az önceki Reels fikirlerinden birincisini 30 saniyelik çekim senaryosuna çevir"
+
+        let selected = store.relevant(
+            to: query,
+            from: [
+                priorTransform,
+                research,
+                ideas
+            ],
+            limit: 3
+        )
+
+        var diagnostics: [String] = []
+
+        if selected.first?.id != ideas.id {
+            diagnostics.append(
+                "Dönüşüm için kaynak fikir listesi ilk bağlam olarak seçilmedi."
+            )
+        }
+
+        if selected.contains(
+            where: { $0.id == priorTransform.id }
+        ) {
+            diagnostics.append(
+                "Önceki dönüşüm denemesi kaynak bağlama yeniden sızdı."
+            )
+        }
+
+        return TrainingScenarioResult(
+            scenarioID:
+                "context-transform-source-resolution",
+            title:
+                "Dönüşüm kaynağını doğru hafızadan seçme",
+            tier: .core,
+            prompt: query,
+            passed: diagnostics.isEmpty,
+            goal:
+                "referans verilen önceki fikir listesini kaynak olarak seç",
+            route: [
+                "Core",
+                "Context",
+                "Memory"
+            ],
+            selectedCapabilities: [
+                "context.local",
+                "core.reasoning"
+            ],
+            unavailableCapabilities: [],
+            diagnostics: diagnostics
         )
     }
 
