@@ -3720,7 +3720,8 @@ final class AgentEngine: ObservableObject {
                  "setup_node_supported",
                  "setup_cline",
                  "setup_cline_repair",
-                 "setup_cline_auth":
+                 "setup_cline_auth",
+                 "setup_local_ai":
                 registerDebugIncident(
                     source: "Developer Agent",
                     message: status.message,
@@ -3748,6 +3749,11 @@ final class AgentEngine: ObservableObject {
             case "failed",
                  "sdk_failed",
                  "sdk_watchdog_timeout",
+                 "sdk_tool_protocol_failed",
+                 "local_tool_probe_failed",
+                 "local_ai_failed",
+                 "local_model_failed",
+                 "no_change_unverified",
                  "candidate_recovery_failed":
                 registerDebugIncident(
                     source: "Developer Agent",
