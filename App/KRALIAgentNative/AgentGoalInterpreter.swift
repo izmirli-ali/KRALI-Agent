@@ -96,6 +96,35 @@ struct AgentGoalInterpreter {
             break
         }
 
+        let appOpenIntent =
+            languageResolver
+                .hasApplicationOpenIntent(
+                    rawText
+                )
+
+        let browserWorkflow =
+            languageResolver
+                .requestsBrowserWorkflow(
+                    rawText
+                )
+
+        if appOpenIntent {
+            outcomes.insert(.open)
+            capabilityIDs.insert(
+                "desktop.app"
+            )
+        }
+
+        if browserWorkflow {
+            outcomes.formUnion([
+                .research,
+                .explain
+            ])
+            capabilityIDs.insert(
+                "browser.control"
+            )
+        }
+
         let mentionsMedia = containsAny(text, [
             "video", "görsel", "gorsel", "görüntü", "goruntu",
             "fotoğraf", "fotograf", "kadraj", "netlik", "hareket"
@@ -283,41 +312,29 @@ struct AgentGoalInterpreter {
         }
 
         let asksGenericAppWorkflow =
-            containsAny(text, [
-                "uygulamasını aç",
-                "uygulamasini ac",
-                "uygulamayı aç",
-                "uygulamayi ac"
-            ]) &&
+            appOpenIntent &&
             containsAny(text, [
                 "bul", "oku", "incele", "listele",
                 "söyle", "soyle", "göster", "goster",
                 "seç", "sec", "ekle", "hazırla", "hazirla",
                 "ayarla", "değiştir", "degistir",
                 "hatırlatma", "hatirlatma",
-                "etkinlik", "randevu", "mesaj", "şarkı", "sarki"
+                "etkinlik", "randevu", "mesaj", "şarkı", "sarki",
+                "bölümüne git", "bolumune git"
             ])
 
         let specializedAppDomain =
             containsAny(text, [
                 "mail", "gmail", "e-posta", "eposta",
-                "premiere", "photoshop",
-                "tarayıcı", "tarayici", "web sitesi", "siteye gir"
-            ])
+                "premiere", "photoshop"
+            ]) ||
+            browserWorkflow
 
         if asksGenericAppWorkflow &&
            !specializedAppDomain {
-            capabilityIDs.insert("app.workflow")
-        }
-
-        if containsAny(text, [
-            "siteye gir", "sitesine gir", "resmi sitesine gir",
-            "web sitesine gir", "web sitesini aç", "web sitesini ac",
-            "sayfayı aç", "sayfayi ac", "tarayıcıda", "tarayicida",
-            "tıkla", "tikla", "formu doldur", "sayfaları incele",
-            "sayfalari incele", "ürün sayfalarını incele", "urun sayfalarini incele"
-        ]) {
-            capabilityIDs.insert("browser.control")
+            capabilityIDs.insert(
+                "app.workflow"
+            )
         }
 
         if containsAny(text, ["aç", "ac", "finder'da", "finderda"]) &&
