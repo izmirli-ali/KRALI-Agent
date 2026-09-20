@@ -48,6 +48,9 @@ final class AgentEngine: ObservableObject {
     @Published var liveResearchEvalReport: LiveResearchEvalReport?
     @Published var liveResearchEvalStatus = "Henüz gerçek internet kalite testi yapılmadı."
     @Published var liveResearchEvalBusy = false
+    @Published var arenaReport: AgentArenaReport?
+    @Published var arenaStatus = "Henüz KRALİ Arena çalıştırılmadı."
+    @Published var arenaBusy = false
     @Published var developerAgentStatus = DeveloperAgentStatus(
         state: "idle",
         message: "Developer Agent henüz çalıştırılmadı.",
@@ -89,6 +92,8 @@ final class AgentEngine: ObservableObject {
     private let trainingLabStore = TrainingLabStore()
     private let liveResearchEval = AgentLiveResearchEval()
     private let liveResearchEvalStore = LiveResearchEvalStore()
+    private let arena = AgentArena()
+    private let arenaStore = AgentArenaStore()
     private let developerBridge = AgentDeveloperBridge()
     private let localIntelligence = AgentLocalIntelligence()
     private let subscriptionIntelligence = AgentSubscriptionIntelligence()
@@ -151,6 +156,14 @@ final class AgentEngine: ObservableObject {
             mentorTraceReady = true
         }
 
+        arenaReport = arenaStore.load()
+        if let report = arenaReport {
+            arenaStatus =
+                "Son Arena: \(report.passed)/\(report.total) geçti • " +
+                "Reviewer \(report.reviewerFlagged) işaret"
+            mentorTraceReady = true
+        }
+
         developerAgentStatus = developerBridge.readStatus()
 
         let currentVersion = Bundle.main.object(
@@ -162,6 +175,9 @@ final class AgentEngine: ObservableObject {
 
         let shouldAutoRunLiveResearchEval =
             liveResearchEvalReport?.appVersion != currentVersion
+
+        let shouldAutoRunArena =
+            arenaReport?.appVersion != currentVersion
 
         log("KRALİ Core hazır")
         log("Dinamik hedef ve kabiliyet yönlendirme aktif")
@@ -189,6 +205,15 @@ final class AgentEngine: ObservableObject {
                     for: .seconds(2)
                 )
                 self?.runLiveResearchEval()
+            }
+        }
+
+        if shouldAutoRunArena {
+            Task { @MainActor [weak self] in
+                try? await Task.sleep(
+                    for: .seconds(3)
+                )
+                self?.runArena()
             }
         }
     }
@@ -2066,6 +2091,88 @@ final class AgentEngine: ObservableObject {
             }
 
             liveResearchEvalBusy = false
+        }
+    }
+
+    func runArena() {
+        guard !arenaBusy else { return }
+
+        arenaBusy = true
+        arenaStatus =
+            "KRALİ açık-dünya görevlerini planner + reviewer ile test ediyor…"
+        log("KRALİ Arena başladı")
+
+        Task {
+            let report = await arena.run()
+            arenaReport = report
+
+            do {
+                try arenaStore.save(report)
+
+                arenaStatus =
+                    "\(report.passed)/\(report.total) Arena görevi geçti • " +
+                    "Reviewer \(report.reviewerFlagged) işaret"
+
+                mentorTraceReady = true
+                mentorTraceStatus =
+                    "Arena raporu hazır • Mentora gönderilebilir"
+
+                log(
+                    "KRALİ Arena tamamlandı: " +
+                    String(report.passed) +
+                    "/" +
+                    String(report.total) +
+                    " • Reviewer işaret: " +
+                    String(report.reviewerFlagged)
+                )
+
+                for result in report.results where
+                    !result.passed ||
+                    result.reviewerPassed == false ||
+                    !result.reviewerMissingCapabilityIDs.isEmpty ||
+                    !result.reviewerUnnecessaryCapabilityIDs.isEmpty ||
+                    !result.reviewerRiskNotes.isEmpty {
+                    var detail = result.diagnostics
+                    if let summary = result.reviewerSummary,
+                       !summary.isEmpty {
+                        detail.append(
+                            "Reviewer: " + summary
+                        )
+                    }
+
+                    if !result.reviewerMissingCapabilityIDs.isEmpty {
+                        detail.append(
+                            "Reviewer eksik: " +
+                            result.reviewerMissingCapabilityIDs
+                                .joined(separator: ", ")
+                        )
+                    }
+
+                    if !result.reviewerUnnecessaryCapabilityIDs.isEmpty {
+                        detail.append(
+                            "Reviewer gereksiz: " +
+                            result.reviewerUnnecessaryCapabilityIDs
+                                .joined(separator: ", ")
+                        )
+                    }
+
+                    log(
+                        "Arena REVIEW [\(result.scenarioID)] " +
+                        result.plannerProvider +
+                        " • " +
+                        (detail.isEmpty
+                            ? "Ek tanı yok"
+                            : detail.joined(separator: " | "))
+                    )
+                }
+            } catch {
+                arenaStatus =
+                    "Arena tamamlandı fakat rapor kaydedilemedi: " +
+                    error.localizedDescription
+                log("Arena raporu kaydedilemedi")
+            }
+
+            arenaBusy = false
         }
     }
 
