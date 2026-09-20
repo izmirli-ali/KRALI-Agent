@@ -111,6 +111,10 @@ actor AgentWebSourceReader {
                 let http = response as? HTTPURLResponse,
                 (200..<400).contains(http.statusCode)
             else {
+                if !source.evidenceEligible {
+                    return nil
+                }
+
                 return fallbackEvidence(
                     source,
                     plan: plan,
@@ -132,14 +136,30 @@ actor AgentWebSourceReader {
             pageText = nil
         }
 
-        let candidateText = [
-            source.title,
-            source.snippet ?? "",
-            source.domain,
-            pageText ?? ""
-        ]
-        .filter { !$0.isEmpty }
-        .joined(separator: ". ")
+        if !source.evidenceEligible,
+           (pageText ?? "").trimmingCharacters(
+               in: .whitespacesAndNewlines
+           ).isEmpty {
+            return nil
+        }
+
+        let candidateParts: [String]
+        if source.evidenceEligible {
+            candidateParts = [
+                source.title,
+                source.snippet ?? "",
+                source.domain,
+                pageText ?? ""
+            ]
+        } else {
+            candidateParts = [
+                pageText ?? ""
+            ]
+        }
+
+        let candidateText = candidateParts
+            .filter { !$0.isEmpty }
+            .joined(separator: ". ")
 
         let selected = bestEvidence(
             in: candidateText,
@@ -199,6 +219,11 @@ actor AgentWebSourceReader {
             ),
             entitySatisfied(
                 in: selected.excerpt,
+                source: source,
+                plan: plan
+            ),
+            directEvidenceEntitySatisfied(
+                selected.excerpt,
                 source: source,
                 plan: plan
             )
@@ -327,6 +352,31 @@ actor AgentWebSourceReader {
             coverage: uniqueMatches.count,
             matches: uniqueMatches
         )
+    }
+
+    private func directEvidenceEntitySatisfied(
+        _ excerpt: String,
+        source: WebResearchResult,
+        plan: ResearchQueryPlan
+    ) -> Bool {
+        guard !source.evidenceEligible else {
+            return true
+        }
+
+        guard !plan.entityTerms.isEmpty else {
+            return !excerpt.isEmpty
+        }
+
+        let normalizedExcerpt = normalize(
+            excerpt
+        )
+
+        return plan.entityTerms
+            .map(normalize)
+            .contains {
+                !$0.isEmpty &&
+                normalizedExcerpt.contains($0)
+            }
     }
 
     private func entitySatisfied(
