@@ -1,6 +1,46 @@
 {
   "activityTail" : [
     {
+      "date" : "2026-09-20T17:31:51Z",
+      "text" : "Semantic planner sağlayıcısı: Apple Foundation Models"
+    },
+    {
+      "date" : "2026-09-20T17:31:51Z",
+      "text" : "Semantic Mission: Sistem Ayarları uygulamasını aç. Bluetooth bölümüne git ve şu anda bağlı olan cihazları bulup bana listele. Ardından Bluetooth’u kapatma işlemini hazırla ama benden onay almadan hiçbir ayarı değiştirme."
+    },
+    {
+      "date" : "2026-09-20T17:31:51Z",
+      "text" : "Seçilen kabiliyetler: Akıl yürütme, Bağlam, Uygulama kontrolü"
+    },
+    {
+      "date" : "2026-09-20T17:31:51Z",
+      "text" : "Otomatik rota: Core → Goal → Context → Plan → Desktop → Response"
+    },
+    {
+      "date" : "2026-09-20T17:31:51Z",
+      "text" : "Seçilen plan: Uygulama adını çöz, uygulamayı aç veya öne getir ve sonucu doğrula"
+    },
+    {
+      "date" : "2026-09-20T17:31:51Z",
+      "text" : "KRALİ Core hedef sözleşmesi: istenen uygulamayı aç veya öne getir"
+    },
+    {
+      "date" : "2026-09-20T17:31:51Z",
+      "text" : "Bağlam hafızası: Çalışma kuralı"
+    },
+    {
+      "date" : "2026-09-20T17:29:08Z",
+      "text" : "Mentor trace GitHub'a senkronlandı"
+    },
+    {
+      "date" : "2026-09-20T17:28:20Z",
+      "text" : "Görev tamamlandı • 18.14 sn"
+    },
+    {
+      "date" : "2026-09-20T17:28:20Z",
+      "text" : "Mentor trace yerel olarak kaydedildi"
+    },
+    {
       "date" : "2026-09-20T17:28:20Z",
       "text" : "Uygulama kontrolü başarısız: Uygulama bulunamadı: takvim"
     },
@@ -112,9 +152,14 @@
 
   ],
   "contextMemory" : [
-
+    {
+      "createdAt" : "2026-09-20T01:00:28Z",
+      "kind" : "userRule",
+      "summary" : "Ana projeyi doğrudan değiştirme; çalışma kopyasında ilerle.",
+      "title" : "Çalışma kuralı"
+    }
   ],
-  "createdAt" : "2026-09-20T17:28:20Z",
+  "createdAt" : "2026-09-20T17:32:14Z",
   "executionSteps" : [
     {
       "capabilityID" : "context.local",
@@ -152,8 +197,8 @@
     }
   ],
   "fallbackPlan" : "Tamamlanmayan action step'ini yeniden planla; yürütülmeyen işi başarılı sayma.",
-  "finalResponse" : "Hedefi “Takvim uygulamasını aç. Yarınki ilk etkinliği bul, başlığını ve saatini bana söyle. Ardından bu etkinlik için 15 dakika öncesine bir hatırlatma eklemeyi hazırla ama benden onay almadan hiçbir değişiklik yapma.” olarak çözdüm ve mevcut capability'lerle uygulanabilir adımları yürüttüm.\n\nDoğrulama: Semantic mission içindeki zorunlu action step'lerinden bazıları tamamlanmadı: app.workflow, desktop.app\nAlternatif plan: Tamamlanmayan action step'ini yeniden planla; yürütülmeyen işi başarılı sayma.",
-  "goal" : "Takvim uygulamasını aç. Yarınki ilk etkinliği bul, başlığını ve saatini bana söyle. Ardından bu etkinlik için 15 dakika öncesine bir hatırlatma eklemeyi hazırla ama benden onay almadan hiçbir değişiklik yapma.",
+  "finalResponse" : "Bluetooth File Exchange uygulamasını açmayı/öne getirmeyi denedim ancak görünür biçimde öne geldiğini doğrulayamadım.\n\nDoğrulama: Semantic mission içindeki zorunlu action step'lerinden bazıları tamamlanmadı: app.workflow, desktop.app\nAlternatif plan: Tamamlanmayan action step'ini yeniden planla; yürütülmeyen işi başarılı sayma.",
+  "goal" : "Sistem Ayarları uygulamasını aç. Bluetooth bölümüne git ve şu anda bağlı olan cihazları bulup bana listele. Ardından Bluetooth’u kapatma işlemini hazırla ama benden onay almadan hiçbir ayarı değiştirme.",
   "inputSource" : "text",
   "learningPlans" : [
 
@@ -175,8 +220,8 @@
     "Response"
   ],
   "semanticMission" : {
-    "confidence" : 0.9,
-    "objective" : "Takvim uygulamasını aç. Yarınki ilk etkinliği bul, başlığını ve saatini bana söyle. Ardından bu etkinlik için 15 dakika öncesine bir hatırlatma eklemeyi hazırla ama benden onay almadan hiçbir değişiklik yapma.",
+    "confidence" : 0.88,
+    "objective" : "Sistem Ayarları uygulamasını aç. Bluetooth bölümüne git ve şu anda bağlı olan cihazları bulup bana listele. Ardından Bluetooth’u kapatma işlemini hazırla ama benden onay almadan hiçbir ayarı değiştirme.",
     "outcomes" : [
       "analyze",
       "open"
@@ -260,8 +305,8 @@
       "title" : "Uygulama içi hedefi yürüt"
     }
   ],
-  "traceID" : "AE7A07A2-2642-4DFF-83A9-E776017A72F9",
-  "userInput" : "Takvim uygulamasını aç. Yarınki ilk etkinliği bul, başlığını ve saatini bana söyle. Ardından bu etkinlik için 15 dakika öncesine bir hatırlatma eklemeyi hazırla ama benden onay almadan hiçbir değişiklik yapma.",
+  "traceID" : "FAFC1DF7-D4D1-46CB-A10A-2BCC051B1615",
+  "userInput" : "Sistem Ayarları uygulamasını aç. Bluetooth bölümüne git ve şu anda bağlı olan cihazları bulup bana listele. Ardından Bluetooth’u kapatma işlemini hazırla ama benden onay almadan hiçbir ayarı değiştirme.",
   "verificationState" : "attention",
   "verificationSummary" : "Semantic mission içindeki zorunlu action step'lerinden bazıları tamamlanmadı: app.workflow, desktop.app"
 }

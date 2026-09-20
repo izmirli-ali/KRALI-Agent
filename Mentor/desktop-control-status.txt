@@ -1,1 +1,1 @@
-runtime_failed|Uygulama bulunamadı: takvim
+runtime|app=Bluetooth File Exchange|activate=false|frontmost=false|source=unverified
