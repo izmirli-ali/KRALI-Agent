@@ -753,8 +753,11 @@ actor AgentLocalIntelligence {
 
         var repairedSteps: [AgentSemanticMissionStep] = []
         var represented = Set<String>()
+        var repairedIndexByOriginalIndex:
+            [Int: Int] = [:]
 
-        for step in mission.steps.prefix(10) {
+        for (originalIndex, step) in
+            mission.steps.prefix(10).enumerated() {
             guard
                 knownIDs.contains(step.capabilityID),
                 requiredIDs.contains(step.capabilityID)
@@ -762,15 +765,37 @@ actor AgentLocalIntelligence {
                 continue
             }
 
-            let dependencies = Array(
-                Set(
-                    step.dependsOn.filter {
-                        $0 >= 0 &&
-                        $0 < repairedSteps.count
-                    }
+            let validOriginalDependencies =
+                Array(
+                    Set(
+                        step.dependsOn.filter {
+                            $0 >= 0 &&
+                            $0 < originalIndex
+                        }
+                    )
                 )
-            )
-            .sorted()
+                .sorted()
+
+            let dependencies =
+                validOriginalDependencies
+                    .compactMap {
+                        repairedIndexByOriginalIndex[
+                            $0
+                        ]
+                    }
+
+            guard
+                dependencies.count ==
+                    validOriginalDependencies.count
+            else {
+                // Bir önkoşul repair sırasında elendiyse dependent step'i
+                // serbest bırakma. Güvenli fallback bu capability'yi
+                // yeniden zincire ekleyebilir.
+                continue
+            }
+
+            let repairedIndex =
+                repairedSteps.count
 
             repairedSteps.append(
                 AgentSemanticMissionStep(
@@ -781,7 +806,13 @@ actor AgentLocalIntelligence {
                     dependsOn: dependencies
                 )
             )
-            represented.insert(step.capabilityID)
+
+            repairedIndexByOriginalIndex[
+                originalIndex
+            ] = repairedIndex
+            represented.insert(
+                step.capabilityID
+            )
         }
 
         let orderedMissing = requiredIDs
