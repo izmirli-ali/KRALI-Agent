@@ -101,21 +101,28 @@ actor AgentScreenPerception {
             .sorted()
 
         let visibleWindows = content.windows
-            .filter {
-                $0.isOnScreen &&
-                !$0.title.isEmpty
-            }
-            .prefix(40)
-            .map {
+            .compactMap { window -> String? in
+                guard
+                    window.isOnScreen,
+                    let title = window.title?
+                        .trimmingCharacters(
+                            in: .whitespacesAndNewlines
+                        ),
+                    !title.isEmpty
+                else {
+                    return nil
+                }
+
                 let appName =
-                    $0.owningApplication?
+                    window.owningApplication?
                         .applicationName ??
                     "Bilinmeyen uygulama"
 
                 return appName +
                     " — " +
-                    $0.title
+                    title
             }
+            .prefix(40)
 
         let semanticSummary =
             await localIntelligence
