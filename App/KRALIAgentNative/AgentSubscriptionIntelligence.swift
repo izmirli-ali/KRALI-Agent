@@ -7,6 +7,11 @@ struct SubscriptionIntelligenceResult: Sendable {
 
 actor AgentSubscriptionIntelligence {
     private let fileManager = FileManager.default
+    private var failureReason: String?
+
+    func lastFailureReason() -> String? {
+        failureReason
+    }
 
     func synthesize(
         userInput: String,
@@ -16,7 +21,10 @@ actor AgentSubscriptionIntelligence {
         capabilities: [AgentCapability],
         researchEvidence: [WebSourceEvidence]
     ) async -> SubscriptionIntelligenceResult? {
+        failureReason = nil
+
         guard let clinePath = clineExecutablePath() else {
+            failureReason = "Cline CLI bulunamadı."
             return nil
         }
 
@@ -32,6 +40,9 @@ actor AgentSubscriptionIntelligence {
                 withIntermediateDirectories: true
             )
         } catch {
+            failureReason =
+                "Sentez çalışma alanı hazırlanamadı: " +
+                error.localizedDescription
             return nil
         }
 
@@ -93,14 +104,29 @@ actor AgentSubscriptionIntelligence {
         """
 
         let process = Process()
-        let outputPipe = Pipe()
+        let outputURL = workspace.appendingPathComponent(
+            "cline-synthesis-output.ndjson",
+            isDirectory: false
+        )
+
+        fileManager.createFile(
+            atPath: outputURL.path,
+            contents: nil
+        )
+
+        guard let outputHandle = try? FileHandle(
+            forWritingTo: outputURL
+        ) else {
+            failureReason = "Cline çıktı dosyası açılamadı."
+            return nil
+        }
 
         process.executableURL = URL(
             fileURLWithPath: clinePath
         )
         process.arguments = [
             "--json",
-            "--auto-approve", "false",
+            "--auto-approve", "true",
             "--provider", "openai-codex",
             "--thinking", "medium",
             "--retries", "1",
@@ -109,8 +135,8 @@ actor AgentSubscriptionIntelligence {
             "--system", systemPrompt,
             prompt
         ]
-        process.standardOutput = outputPipe
-        process.standardError = outputPipe
+        process.standardOutput = outputHandle
+        process.standardError = outputHandle
 
         var environment = ProcessInfo.processInfo.environment
         environment["PATH"] =
@@ -122,29 +148,46 @@ actor AgentSubscriptionIntelligence {
         do {
             try process.run()
             process.waitUntilExit()
+            try? outputHandle.close()
         } catch {
+            try? outputHandle.close()
+            failureReason =
+                "Cline başlatılamadı: " +
+                error.localizedDescription
             return nil
         }
+
+        let rawOutput = (
+            try? String(
+                contentsOf: outputURL,
+                encoding: .utf8
+            )
+        ) ?? ""
+
+        try? fileManager.removeItem(
+            at: outputURL
+        )
 
         guard process.terminationStatus == 0 else {
-            return nil
-        }
-
-        let outputData = outputPipe.fileHandleForReading
-            .readDataToEndOfFile()
-
-        guard let rawOutput = String(
-            data: outputData,
-            encoding: .utf8
-        ) else {
+            let tail = String(
+                rawOutput.suffix(1400)
+            )
+            failureReason =
+                "Cline sentez süreci hata kodu " +
+                String(process.terminationStatus) +
+                (tail.isEmpty ? "." : ": " + tail)
             return nil
         }
 
         guard let text = finalText(
             fromNDJSON: rawOutput
         ) else {
+            failureReason =
+                "Cline tamamlandı ancak kullanılabilir nihai metin üretmedi."
             return nil
         }
+
+        failureReason = nil
 
         return SubscriptionIntelligenceResult(
             text: text,
