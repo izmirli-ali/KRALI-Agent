@@ -173,7 +173,14 @@ actor AgentLocalIntelligence {
                         encoding: .utf8
                     )
                 else {
-                    return mission
+                    let repaired = repairMission(
+                        mission,
+                        userInput: userInput,
+                        capabilities: capabilities
+                    )
+                    return isOperationallyComplete(repaired)
+                        ? repaired
+                        : nil
                 }
 
                 let reviewPrompt = """
@@ -216,6 +223,7 @@ actor AgentLocalIntelligence {
                         in: .whitespacesAndNewlines
                     )
 
+                let reviewCandidate: AgentSemanticMission
                 if let reviewedJSON =
                     extractJSONObject(from: reviewedRaw),
                    let reviewedData =
@@ -228,15 +236,23 @@ actor AgentLocalIntelligence {
                    validateMission(
                         reviewedMission,
                         knownCapabilityIDs: knownIDs
-                   ),
-                   isOperationallyComplete(
-                        reviewedMission
                    ) {
-                    return reviewedMission
+                    reviewCandidate = reviewedMission
+                } else {
+                    reviewCandidate = mission
                 }
 
-                return isOperationallyComplete(mission)
-                    ? mission
+                let repaired = repairMission(
+                    reviewCandidate,
+                    userInput: userInput,
+                    capabilities: capabilities
+                )
+
+                return validateMission(
+                    repaired,
+                    knownCapabilityIDs: knownIDs
+                ) && isOperationallyComplete(repaired)
+                    ? repaired
                     : nil
             } catch {
                 return nil
@@ -245,6 +261,314 @@ actor AgentLocalIntelligence {
         #endif
 
         return nil
+    }
+
+    private func repairMission(
+        _ mission: AgentSemanticMission,
+        userInput: String,
+        capabilities: [AgentCapability]
+    ) -> AgentSemanticMission {
+        let knownIDs = Set(capabilities.map(\.id))
+        let corpus = normalizeMissionText(
+            (
+                [userInput, mission.objective] +
+                mission.steps.flatMap {
+                    [$0.title, $0.purpose, $0.operation]
+                }
+            )
+            .joined(separator: " ")
+        )
+
+        var outcomes = Set(mission.outcomes)
+        var requiredIDs = Set(
+            mission.requiredCapabilityIDs +
+            mission.steps.map(\.capabilityID)
+        )
+
+        requiredIDs.insert("core.reasoning")
+        requiredIDs.insert("context.local")
+
+        if requiredIDs.contains("files.search") {
+            outcomes.insert("locate")
+        }
+
+        if requiredIDs.contains("files.move.reversible") {
+            outcomes.insert("organize")
+        }
+
+        if requiredIDs.contains("perception.media") {
+            outcomes.insert("assessContent")
+        }
+
+        if requiredIDs.contains("research.web") {
+            outcomes.insert("research")
+        }
+
+        if requiredIDs.contains("mail.work") {
+            outcomes.insert("communicate")
+        }
+
+        if !requiredIDs.intersection(
+            Set([
+                "premiere.control",
+                "photoshop.control",
+                "desktop.control"
+            ])
+        ).isEmpty {
+            outcomes.insert("edit")
+        }
+
+        let videoEditTask = containsMissionConcept(
+            corpus,
+            [
+                "kurgu", "montaj", "timeline", "sequence",
+                "premiere", "video edit", "videoyu duzenle",
+                "videoları duzenle", "videolari duzenle",
+                "cekimlerden", "çekimlerden"
+            ]
+        )
+
+        let designTask = containsMissionConcept(
+            corpus,
+            [
+                "tasarim", "tasarım", "photoshop", "instagram post",
+                "sosyal medya tasar", "afis", "afiş", "banner",
+                "gorsel hazir", "görsel hazır"
+            ]
+        )
+
+        let webTask = containsMissionConcept(
+            corpus,
+            [
+                "siteye gir", "sitesine gir", "web sitesi",
+                "web sites", "tarayici", "tarayıcı", "url",
+                "iletisim sayfasi", "iletişim sayfası",
+                "form doldur", "sayfaya gir"
+            ]
+        )
+
+        let mailTask = containsMissionConcept(
+            corpus,
+            [
+                "mail", "e-posta", "eposta", "gmail",
+                "müdürüme", "mudurume", "gondermek icin",
+                "göndermek için"
+            ]
+        )
+
+        let organizeTask =
+            containsMissionConcept(
+                corpus,
+                [
+                    "toparla", "duzenle", "düzenle",
+                    "ayri klasor", "ayrı klasör",
+                    "masaustu", "masaüstü"
+                ]
+            ) &&
+            containsMissionConcept(
+                corpus,
+                [
+                    "dosya", "ekran gorunt", "ekran görünt",
+                    "screenshot", "klasor", "klasör"
+                ]
+            )
+
+        let newBrandDesignTask =
+            designTask &&
+            containsMissionConcept(
+                corpus,
+                [
+                    "marka", "sirket", "şirket",
+                    "isletme", "işletme"
+                ]
+            )
+
+        if videoEditTask {
+            outcomes.formUnion([
+                "locate",
+                "assessContent",
+                "edit"
+            ])
+            requiredIDs.formUnion([
+                "files.search",
+                "files.metadata",
+                "perception.media",
+                "premiere.control",
+                "perception.screen"
+            ])
+
+            let explicitlyNeedsWeb =
+                containsMissionConcept(
+                    corpus,
+                    [
+                        "internetten", "webde", "web'de",
+                        "arastir", "araştır", "site"
+                    ]
+                )
+
+            if !explicitlyNeedsWeb {
+                requiredIDs.remove("research.web")
+                outcomes.remove("research")
+            }
+        }
+
+        if designTask {
+            outcomes.insert("edit")
+            requiredIDs.formUnion([
+                "photoshop.control",
+                "perception.screen"
+            ])
+
+            if newBrandDesignTask {
+                outcomes.formUnion([
+                    "research",
+                    "analyze"
+                ])
+                requiredIDs.insert("research.web")
+            }
+        }
+
+        if webTask {
+            outcomes.insert("research")
+            requiredIDs.insert("browser.control")
+        }
+
+        if mailTask {
+            outcomes.insert("communicate")
+            requiredIDs.insert("mail.work")
+        }
+
+        if organizeTask {
+            outcomes.formUnion([
+                "locate",
+                "organize"
+            ])
+            requiredIDs.formUnion([
+                "files.search",
+                "files.move.reversible"
+            ])
+            requiredIDs.remove("research.web")
+            outcomes.remove("research")
+        }
+
+        requiredIDs = requiredIDs.intersection(knownIDs)
+
+        var repairedSteps: [AgentSemanticMissionStep] = []
+        var represented = Set<String>()
+
+        for (index, step) in mission.steps.enumerated() {
+            guard knownIDs.contains(step.capabilityID) else {
+                continue
+            }
+
+            let dependencies = Array(
+                Set(
+                    step.dependsOn.filter {
+                        $0 >= 0 && $0 < index
+                    }
+                )
+            )
+            .sorted()
+
+            repairedSteps.append(
+                AgentSemanticMissionStep(
+                    title: step.title,
+                    purpose: step.purpose,
+                    capabilityID: step.capabilityID,
+                    operation: step.operation,
+                    dependsOn: dependencies
+                )
+            )
+            represented.insert(step.capabilityID)
+        }
+
+        let orderedMissing = requiredIDs
+            .subtracting(represented)
+            .sorted {
+                capabilityPriority($0) <
+                    capabilityPriority($1)
+            }
+
+        for capabilityID in orderedMissing {
+            guard let capability = capabilities.first(
+                where: { $0.id == capabilityID }
+            ) else {
+                continue
+            }
+
+            let dependency = repairedSteps.isEmpty
+                ? []
+                : [repairedSteps.count - 1]
+
+            repairedSteps.append(
+                AgentSemanticMissionStep(
+                    title: capability.name,
+                    purpose:
+                        "Mission hedefini uçtan uca tamamlamak için gerekli capability sözleşmesi.",
+                    capabilityID: capabilityID,
+                    operation: "capability.contract",
+                    dependsOn: dependency
+                )
+            )
+        }
+
+        return AgentSemanticMission(
+            objective: mission.objective,
+            outcomes: outcomes.sorted(),
+            steps: repairedSteps,
+            requiredCapabilityIDs:
+                Array(requiredIDs).sorted(),
+            requiresUserInput: mission.requiresUserInput,
+            userInputReason: mission.userInputReason,
+            confidence: mission.confidence
+        )
+    }
+
+    private func capabilityPriority(
+        _ capabilityID: String
+    ) -> Int {
+        switch capabilityID {
+        case "core.reasoning": return 0
+        case "context.local": return 1
+        case "research.web": return 2
+        case "browser.control": return 3
+        case "files.search": return 4
+        case "files.metadata": return 5
+        case "perception.media": return 6
+        case "desktop.control": return 7
+        case "premiere.control",
+             "photoshop.control": return 8
+        case "files.move.reversible",
+             "mail.work": return 9
+        case "perception.screen": return 10
+        default: return 20
+        }
+    }
+
+    private func normalizeMissionText(
+        _ value: String
+    ) -> String {
+        value
+            .folding(
+                options: [
+                    .diacriticInsensitive,
+                    .caseInsensitive
+                ],
+                locale: Locale(identifier: "tr_TR")
+            )
+            .lowercased()
+            .replacingOccurrences(of: "ı", with: "i")
+    }
+
+    private func containsMissionConcept(
+        _ corpus: String,
+        _ concepts: [String]
+    ) -> Bool {
+        concepts.contains {
+            corpus.contains(
+                normalizeMissionText($0)
+            )
+        }
     }
 
     private func validateMission(
