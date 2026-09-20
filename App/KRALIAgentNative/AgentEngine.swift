@@ -244,6 +244,7 @@ final class AgentEngine: ObservableObject {
     ) {
         let text = raw.trimmingCharacters(in: .whitespacesAndNewlines)
         guard !text.isEmpty else { return }
+        let taskStartedAt = Date()
         guard !busy else {
             log("Yeni görev alınmadı: KRALİ mevcut görevi tamamlıyor")
             return
@@ -366,8 +367,6 @@ final class AgentEngine: ObservableObject {
         busy = true
 
         Task {
-            try? await Task.sleep(for: .milliseconds(180))
-
             var resolvedGoal = goalProfile
             var resolvedCapabilities = capabilities
             var resolvedLearningPlans = learningPlans
@@ -812,6 +811,19 @@ final class AgentEngine: ObservableObject {
             }
 
             messages.append(ChatMessage(role: .assistant, text: reply))
+
+            let elapsed =
+                Date().timeIntervalSince(
+                    taskStartedAt
+                )
+            log(
+                String(
+                    format:
+                        "Görev tamamlandı • %.2f sn",
+                    elapsed
+                )
+            )
+
             busy = false
 
             if source == .voice && voiceOutputEnabled {
