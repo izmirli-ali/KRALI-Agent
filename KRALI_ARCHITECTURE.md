@@ -276,3 +276,18 @@ Training Lab'e `context-transform-source-resolution` regression kontrolü ekleni
 Bu sürüm yanıt kalitesini ve okunabilirliği iyileştirir. Chat balonundaki assistant metni artık düz string olarak değil, hafif Markdown-aware bir renderer ile gösterilir: başlıklar semibold ve daha büyük, gövde normal ağırlıkta, listeler hizalı, blockquote'lar ayrık, yatay ayraçlar gerçek divider olarak çizilir ve **bold / inline code** işaretleri görsel biçime dönüşür. Kullanıcı balonları daha kompakt orta ağırlıkta kalır. Sağdaki Bağlam önizlemesinde ham `##`, `**` ve benzeri işaretler temizlenir.
 
 Local Intelligence ve ChatGPT Subscription sentez sözleşmelerine Türkçe yazım/noktalama son kontrolü, doğal Türkiye Türkçesi, kısa başlık + normal gövde düzeni ve gereksiz kalın metinden kaçınma kuralları eklenir. Response Composer ayrıca sık görülen birkaç yazım hatasını (`şuan → şu an`, `birşey → bir şey`, `yada → ya da`, `yanlız → yalnız`, `herkez → herkes`, `kapanışda → kapanışta`) deterministic olarak temizler ve gereksiz üçlü boş satırları iki satıra indirir.
+
+
+**v0.8.7 content creation + rewrite routing:** 0.8.6 ekran testi, yeni Markdown-aware tipografinin görsel olarak belirgin biçimde iyileştiğini doğruladı: başlıklar ve önemli etiketler daha güçlü, gövde metni daha hafif, listeler hizalı ve ham Markdown işaretleri görünmüyor. Ancak aynı test iki semantik açığı ortaya çıkardı.
+
+“Estafiz için 30 saniyelik bir Reels çekim planı hazırla” isteği, `çekim` kelimesi ve kısa substring eşleşmeleri nedeniyle yanlışlıkla yerel video dosyası aramasına gidebiliyordu. Bu da 463 yerel dosya sonucu üretip daha sonra Sony/Fuji gibi alakasız geçmiş bağlamların içerik cevabına sızmasına yol açtı. File-search routing artık `çekim planı hazırla / senaryo hazırla / metin hazırla / yeniden yaz / düzgün Türkçeyle` gibi içerik üretimi ve dil dönüşümü kalıplarını yerel dosya aramasından ayırır.
+
+Yeni `AgentGoalOutcome.compose` genel içerik üretimini ayrı bir hedef olarak modeller. Planner `İçeriği oluştur` adımı ekler; Engine bunu gerçek synthesis gerektiren hedef sayar. Böylece içerik planı, senaryo, caption veya metin oluşturma görevleri “araç eşleşmedi” fallback'i yerine doğrudan Intelligence katmanına gider.
+
+Standalone rewrite/proofreading istekleri de `transform` olarak sınıflandırılır. Kaynak metin kullanıcı mesajında doğrudan tırnak içinde verildiyse structured memory retrieval eski görev bağlamını geri çağırmaz; inline metin tek kaynak kabul edilir. Local ve Subscription synthesis sözleşmeleri de bu davranışı açıkça zorunlu kılar.
+
+Memory relevance, non-continuation görevlerde yalnızca summary kelime benzerliğine yaslanmaz; başlık + orijinal userInput kimliğiyle de eşleşme arar. Açıkça “Estafiz” denilen bir görevde Sony/Fuji gibi yalnızca genel kelimeler üzerinden eşleşen kayıtlar elenir.
+
+Synthesis fidelity gate artık generic fallback metinlerini reddeder; üç bölümlü içerik isteklerinde beklenen Açılış / Ana Mesaj / Kapanış yapısını ve Türkçe rewrite testinde bilinen hatalı biçimlerin düzeltilmiş olmasını kontrol eder. Uymayan Apple Foundation Models çıktısı kullanıcıya verilmeden Subscription fallback'e geçer.
+
+Training Lab'e `content-plan-not-file-search`, `inline-turkish-rewrite` ve gerçek memory retrieval için `named-topic-memory-isolation` regresyonları eklenir.
