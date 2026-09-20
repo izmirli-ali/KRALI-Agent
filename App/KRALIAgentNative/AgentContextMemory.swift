@@ -236,6 +236,24 @@ struct AgentContextMemoryStore {
             let tokenOverlap = queryTokens
                 .intersection(corpusTokens)
                 .count
+            let exactMatch =
+                !query.isEmpty &&
+                corpus.contains(query)
+
+            let isRelevant: Bool
+            if entry.kind == .userRule {
+                isRelevant = tokenOverlap > 0 || exactMatch
+            } else if continuation {
+                isRelevant = true
+            } else {
+                isRelevant =
+                    tokenOverlap >= 2 ||
+                    exactMatch
+            }
+
+            guard isRelevant else {
+                continue
+            }
 
             score += tokenOverlap * 4
 
@@ -244,8 +262,7 @@ struct AgentContextMemoryStore {
                 score += 3
             }
 
-            if !query.isEmpty,
-               corpus.contains(query) {
+            if exactMatch {
                 score += 8
             }
 
@@ -372,6 +389,7 @@ struct AgentContextMemoryStore {
             "bunlardan", "bunlari", "bunları",
             "buna gore", "buna göre",
             "devam et", "devam edelim",
+            "geri dön", "geri don", "dönelim", "donelim",
             "soylediklerinden", "söylediklerinden"
         ]
         .contains {
