@@ -9,6 +9,33 @@ const settingsFile =
   process.env.KRALI_CLINE_SETTINGS ||
   path.join(process.env.HOME || "", ".cline/data/settings/providers.json");
 const requestedModel = process.env.KRALI_DEV_MODEL || "";
+const statusFile = process.env.KRALI_STATUS_FILE || "";
+const branchName = process.env.KRALI_BRANCH || "";
+const gapLabel = process.env.KRALI_GAP_LABEL || "Capability";
+const timeoutMs = Number(process.env.KRALI_SDK_TIMEOUT_MS || "480000");
+
+function setStage(state, message) {
+  const line =
+    state + "|" + message + "|" + branchName + "|" + worktree + "\n";
+
+  if (statusFile) {
+    try {
+      fs.writeFileSync(statusFile, line, "utf8");
+    } catch {}
+  }
+
+  process.stdout.write(
+    "KRALI_STAGE " + state + " • " + message + "\n"
+  );
+}
+
+let watchdog = setTimeout(() => {
+  setStage(
+    "sdk_watchdog_timeout",
+    gapLabel + " SDK oturumu zaman sınırını aştı; recovery gerekiyor"
+  );
+  process.exit(124);
+}, Math.max(60000, timeoutMs));
 
 if (!sdkHost || !worktree || !promptFile) {
   console.error("KRALI SDK fallback: gerekli environment bilgisi eksik.");
@@ -31,7 +58,17 @@ if (!fs.existsSync(sdkEntry)) {
   process.exit(3);
 }
 
+setStage(
+  "sdk_importing",
+  gapLabel + " için Cline SDK yükleniyor"
+);
+
 const { ClineCore } = await import(pathToFileURL(sdkEntry).href);
+
+setStage(
+  "sdk_import_ready",
+  "Cline SDK yüklendi; provider ayarları doğrulanıyor"
+);
 
 function findProvider(value, providerId) {
   if (!value || typeof value !== "object") return null;
@@ -74,12 +111,21 @@ const modelId =
   "";
 
 if (!modelId) {
+  setStage(
+    "sdk_provider_failed",
+    "openai-codex için kayıtlı model bulunamadı"
+  );
   console.error(
     "KRALI SDK fallback: openai-codex için kayıtlı model bulunamadı. " +
       "Provider settings içinde model/modelId bekleniyor."
   );
   process.exit(4);
 }
+
+setStage(
+  "sdk_provider_ready",
+  "openai-codex provider ve model ayarı hazır"
+);
 
 const prompt = fs.readFileSync(promptFile, "utf8");
 
@@ -141,6 +187,11 @@ function isSafeApproval(request) {
   return true;
 }
 
+setStage(
+  "sdk_runtime_starting",
+  "ClineCore local runtime başlatılıyor"
+);
+
 const cline = await ClineCore.create({
   clientName: "krali-developer-agent",
   backendMode: "local",
@@ -151,7 +202,53 @@ const cline = await ClineCore.create({
   },
 });
 
+setStage(
+  "sdk_runtime_ready",
+  "ClineCore runtime hazır; agent session başlatılıyor"
+);
+
+let sawAgentEvent = false;
+let sawToolEvent = false;
+
+const unsubscribe = cline.subscribe((event) => {
+  try {
+    if (!sawAgentEvent && event?.type === "agent_event") {
+      sawAgentEvent = true;
+      setStage(
+        "sdk_session_running",
+        gapLabel + " için model oturumu aktif"
+      );
+    }
+
+    if (!sawToolEvent && event?.type === "hook") {
+      sawToolEvent = true;
+      setStage(
+        "sdk_tools_running",
+        gapLabel + " için araçlar/worktree işlemleri çalışıyor"
+      );
+    }
+
+    const innerType = String(event?.payload?.event?.type || "");
+    if (
+      !sawToolEvent &&
+      event?.type === "agent_event" &&
+      innerType.toLowerCase().includes("tool")
+    ) {
+      sawToolEvent = true;
+      setStage(
+        "sdk_tools_running",
+        gapLabel + " için araçlar/worktree işlemleri çalışıyor"
+      );
+    }
+  } catch {}
+});
+
 try {
+  setStage(
+    "sdk_session_starting",
+    gapLabel + " için ClineCore session isteği gönderildi"
+  );
+
   const session = await cline.start({
     prompt,
     interactive: false,
@@ -178,6 +275,13 @@ try {
   });
 
   const result = session?.result;
+
+  setStage(
+    "sdk_session_completed",
+    gapLabel +
+      " SDK oturumu tamamlandı; candidate değişiklikler kontrol ediliyor"
+  );
+
   if (result?.text) {
     process.stdout.write(result.text + "\n");
   }
@@ -191,11 +295,22 @@ try {
     process.exitCode = 20;
   }
 } catch (error) {
+  const message =
+    error instanceof Error ? error.message : String(error);
+
+  setStage(
+    "sdk_failed",
+    "ClineCore SDK hatası: " + message.slice(0, 180)
+  );
+
   console.error(
-    "KRALI SDK fallback exception: " +
-      (error instanceof Error ? error.message : String(error))
+    "KRALI SDK fallback exception: " + message
   );
   process.exitCode = 20;
 } finally {
+  clearTimeout(watchdog);
+  try {
+    unsubscribe();
+  } catch {}
   await cline.dispose("KRALI Developer Agent finished");
 }
