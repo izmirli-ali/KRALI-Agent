@@ -45,7 +45,7 @@ struct AgentResponseComposer {
                 reply += "\nYetkinlik kazanma planı: " + learning.nextStep
             }
 
-            return reply
+            return polish(reply)
 
         case .passed, .skipped:
             return polish(baseReply)
