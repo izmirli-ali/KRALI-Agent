@@ -1,127 +1,111 @@
 {
   "activityTail" : [
     {
-      "date" : "2026-09-20T10:18:45Z",
+      "date" : "2026-09-20T10:27:59Z",
+      "text" : "Semantic planner geçerli mission üretemedi: Semantic planner fallback hata kodu 9: "
+    },
+    {
+      "date" : "2026-09-20T10:27:48Z",
       "text" : "Seçilen kabiliyetler: Akıl yürütme, Bağlam"
     },
     {
-      "date" : "2026-09-20T10:18:45Z",
+      "date" : "2026-09-20T10:27:48Z",
       "text" : "Otomatik rota: Core → Goal → Context → Response"
     },
     {
-      "date" : "2026-09-20T10:18:45Z",
+      "date" : "2026-09-20T10:27:48Z",
       "text" : "Seçilen plan: Bağlamı incele; doğrudan araç eşleşmesi yoksa güvenli alternatifler üret"
     },
     {
-      "date" : "2026-09-20T10:18:45Z",
+      "date" : "2026-09-20T10:27:48Z",
       "text" : "KRALİ Core hedef sözleşmesi: Kullanıcının hedefini anlamlandır ve uygulanabilir bir sonraki adımı seç"
     },
     {
-      "date" : "2026-09-20T10:18:45Z",
+      "date" : "2026-09-20T10:27:48Z",
       "text" : "Bağlam hafızası: Çalışma kuralı • Çalışma kuralı"
     },
     {
-      "date" : "2026-09-20T10:18:26Z",
+      "date" : "2026-09-20T10:25:58Z",
       "text" : "Mentor trace yerel olarak kaydedildi"
     },
     {
-      "date" : "2026-09-20T10:18:26Z",
-      "text" : "Yerel zeka sentezi uygulandı"
+      "date" : "2026-09-20T10:25:58Z",
+      "text" : "Yetkinlik araştırması başarısız: Web araştırması yeterince alakalı sonuç üretmedi."
     },
     {
-      "date" : "2026-09-20T10:18:14Z",
-      "text" : "Yetkinlik araştırması kaynak buldu: Görsel / video algısı"
+      "date" : "2026-09-20T10:25:54Z",
+      "text" : "Yetkinlik araştırması başladı: Premiere kontrolü"
     },
     {
-      "date" : "2026-09-20T10:18:12Z",
-      "text" : "Yetkinlik araştırması başladı: Görsel / video algısı"
+      "date" : "2026-09-20T10:25:54Z",
+      "text" : "Semantic planner geçerli mission üretemedi: Semantic planner fallback hata kodu 9: "
     },
     {
-      "date" : "2026-09-20T10:18:12Z",
-      "text" : "Web Research tamamlandı: 4 kaynak, 4 kaynak okundu"
-    },
-    {
-      "date" : "2026-09-20T10:18:07Z",
-      "text" : "Web Research başladı"
-    },
-    {
-      "date" : "2026-09-20T10:18:07Z",
-      "text" : "Semantic rota: Core → Goal → Context → Plan → Research → Perception → Learn → Verify → Response"
-    },
-    {
-      "date" : "2026-09-20T10:18:07Z",
-      "text" : "Semantic capability planı: research.web, perception.media, core.reasoning"
-    },
-    {
-      "date" : "2026-09-20T10:18:07Z",
-      "text" : "Semantic Mission: Son çekimle ilgili bir kurgu oluşturmak için gerekli araştırma ve içerik düzenleme sürecini başlatmak, mevcut bilgiyle medya analizi ve içerik senteziyle desteklenmek."
-    },
-    {
-      "date" : "2026-09-20T10:17:49Z",
+      "date" : "2026-09-20T10:25:24Z",
       "text" : "Live Research Eval tamamlandı: 2/2"
     },
     {
-      "date" : "2026-09-20T10:17:45Z",
+      "date" : "2026-09-20T10:25:20Z",
       "text" : "Yetkinlik öğrenme planı: Premiere kontrolü → Entegrasyon gerekli"
     },
     {
-      "date" : "2026-09-20T10:17:45Z",
+      "date" : "2026-09-20T10:25:20Z",
       "text" : "Seçilen kabiliyetler: Akıl yürütme, Bağlam, Premiere kontrolü [bekliyor]"
     },
     {
-      "date" : "2026-09-20T10:17:45Z",
+      "date" : "2026-09-20T10:25:20Z",
       "text" : "Otomatik rota: Core → Goal → Context → Plan → Premiere → Learn → Verify → Response"
     },
     {
-      "date" : "2026-09-20T10:17:45Z",
+      "date" : "2026-09-20T10:25:20Z",
       "text" : "Seçilen plan: Bağlamı incele; doğrudan araç eşleşmesi yoksa güvenli alternatifler üret"
     },
     {
-      "date" : "2026-09-20T10:17:45Z",
+      "date" : "2026-09-20T10:25:20Z",
       "text" : "KRALİ Core hedef sözleşmesi: uygulamada işle"
     },
     {
-      "date" : "2026-09-20T10:17:45Z",
+      "date" : "2026-09-20T10:25:20Z",
       "text" : "Bağlam hafızası: Son çekimle ilgili bir kurgu yapmamız gerekiyor."
     },
     {
-      "date" : "2026-09-20T10:17:36Z",
+      "date" : "2026-09-20T10:25:14Z",
       "text" : "Live Research Eval başladı"
     },
     {
-      "date" : "2026-09-20T10:17:35Z",
+      "date" : "2026-09-20T10:25:12Z",
       "text" : "Training Lab tamamlandı: 30/30"
     },
     {
-      "date" : "2026-09-20T10:17:35Z",
+      "date" : "2026-09-20T10:25:12Z",
       "text" : "Training Lab başladı"
     },
     {
-      "date" : "2026-09-20T10:17:34Z",
+      "date" : "2026-09-20T10:25:12Z",
       "text" : "Apple yerel zeka hazır"
     },
     {
-      "date" : "2026-09-20T10:17:34Z",
+      "date" : "2026-09-20T10:25:12Z",
       "text" : "Çalışma klasörü geri yüklendi: Desktop"
     },
     {
-      "date" : "2026-09-20T10:17:34Z",
+      "date" : "2026-09-20T10:25:12Z",
       "text" : "6 ekran görüntüsü adayı bulundu"
     },
     {
-      "date" : "2026-09-20T10:17:34Z",
+      "date" : "2026-09-20T10:25:12Z",
       "text" : "1772 dosya ve 68 klasör indekslendi"
     },
     {
-      "date" : "2026-09-20T10:17:34Z",
+      "date" : "2026-09-20T10:25:11Z",
       "text" : "Dinamik hedef ve kabiliyet yönlendirme aktif"
     },
     {
-      "date" : "2026-09-20T10:17:34Z",
+      "date" : "2026-09-20T10:25:11Z",
       "text" : "KRALİ Core hazır"
     }
   ],
-  "appVersion" : "0.8.12",
+  "appVersion" : "0.8.13",
   "capabilities" : [
     {
       "available" : true,
@@ -150,7 +134,7 @@
       "title" : "Çalışma kuralı"
     }
   ],
-  "createdAt" : "2026-09-20T10:18:55Z",
+  "createdAt" : "2026-09-20T10:27:59Z",
   "executionSteps" : [
     {
       "capabilityID" : "core.reasoning",
@@ -193,8 +177,8 @@
     "Context",
     "Response"
   ],
-  "traceID" : "B6C7C87C-CF31-4ED4-8252-9767AC8D6539",
-  "userInput" : "tavukçu veli adında bir markamız var. Bu marka hakkında bir sosyal medya tasarımı hazırlamak istiyorum.",
+  "traceID" : "94A7485E-66C6-4022-94F8-E4BDB90AD36E",
+  "userInput" : "Tavukçu Veli adında bir markamız var. Bu marka hakkında bir sosyal medya tasarımı hazırlamak istiyorum.",
   "verificationState" : "skipped",
   "verificationSummary" : "Bu turda doğrulanacak gerçek araç işlemi yok."
 }
