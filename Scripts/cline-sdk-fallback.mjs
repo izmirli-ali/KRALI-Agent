@@ -29,13 +29,42 @@ function setStage(state, message) {
   );
 }
 
-let watchdog = setTimeout(() => {
+const idleTimeoutMs = Math.min(
+  Math.max(90000, Math.floor(timeoutMs / 3)),
+  180000
+);
+const hardTimeoutMs = Math.max(timeoutMs, 720000);
+
+let idleWatchdog = null;
+let hardWatchdog = null;
+
+function armIdleWatchdog() {
+  if (idleWatchdog) clearTimeout(idleWatchdog);
+
+  idleWatchdog = setTimeout(() => {
+    setStage(
+      "sdk_watchdog_timeout",
+      gapLabel +
+        " SDK oturumunda uzun süre etkinlik görülmedi; recovery gerekiyor"
+    );
+    process.exit(124);
+  }, idleTimeoutMs);
+}
+
+function touchActivity() {
+  armIdleWatchdog();
+}
+
+armIdleWatchdog();
+
+hardWatchdog = setTimeout(() => {
   setStage(
     "sdk_watchdog_timeout",
-    gapLabel + " SDK oturumu zaman sınırını aştı; recovery gerekiyor"
+    gapLabel +
+      " SDK oturumu toplam zaman sınırını aştı; recovery gerekiyor"
   );
   process.exit(124);
-}, Math.max(60000, timeoutMs));
+}, hardTimeoutMs);
 
 if (!sdkHost || !worktree || !promptFile) {
   console.error("KRALI SDK fallback: gerekli environment bilgisi eksik.");
@@ -212,32 +241,96 @@ let sawToolEvent = false;
 
 const unsubscribe = cline.subscribe((event) => {
   try {
-    if (!sawAgentEvent && event?.type === "agent_event") {
-      sawAgentEvent = true;
-      setStage(
-        "sdk_session_running",
-        gapLabel + " için model oturumu aktif"
-      );
-    }
+    touchActivity();
 
-    if (!sawToolEvent && event?.type === "hook") {
-      sawToolEvent = true;
-      setStage(
-        "sdk_tools_running",
-        gapLabel + " için araçlar/worktree işlemleri çalışıyor"
-      );
-    }
-
-    const innerType = String(event?.payload?.event?.type || "");
     if (
-      !sawToolEvent &&
-      event?.type === "agent_event" &&
-      innerType.toLowerCase().includes("tool")
+      event?.type === "chunk" &&
+      (event?.payload?.type === "text" ||
+       event?.payload?.type === "reasoning")
     ) {
-      sawToolEvent = true;
+      return;
+    }
+
+    if (event?.type === "agent_event") {
+      const inner = event?.payload?.event;
+
+      if (!sawAgentEvent) {
+        sawAgentEvent = true;
+        setStage(
+          "sdk_session_running",
+          gapLabel + " için model oturumu aktif"
+        );
+      }
+
+      if (
+        inner?.type === "content_start" &&
+        inner?.contentType === "tool"
+      ) {
+        sawToolEvent = true;
+        setStage(
+          "sdk_tools_running",
+          gapLabel +
+            " için araç çalışıyor: " +
+            String(inner?.toolName || "tool")
+        );
+        return;
+      }
+
+      if (
+        inner?.type === "content_update" &&
+        inner?.contentType === "tool"
+      ) {
+        if (!sawToolEvent) {
+          sawToolEvent = true;
+        }
+        setStage(
+          "sdk_tools_running",
+          gapLabel +
+            " araç çıktısı güncelleniyor: " +
+            String(inner?.toolName || "tool")
+        );
+        return;
+      }
+
+      if (
+        inner?.type === "content_end" &&
+        inner?.contentType === "tool"
+      ) {
+        setStage(
+          "sdk_tool_completed",
+          gapLabel +
+            " araç adımı tamamlandı: " +
+            String(inner?.toolName || "tool")
+        );
+        return;
+      }
+
+      if (inner?.type === "error") {
+        setStage(
+          "sdk_failed",
+          "ClineCore agent hatası: " +
+            String(inner?.error?.message || "unknown").slice(0, 180)
+        );
+      }
+    }
+
+    if (event?.type === "hook") {
+      if (!sawToolEvent) {
+        sawToolEvent = true;
+        setStage(
+          "sdk_tools_running",
+          gapLabel + " için tool hook çalışıyor"
+        );
+      }
+      return;
+    }
+
+    if (event?.type === "ended") {
       setStage(
-        "sdk_tools_running",
-        gapLabel + " için araçlar/worktree işlemleri çalışıyor"
+        "sdk_session_ended",
+        gapLabel +
+          " SDK session sona erdi: " +
+          String(event?.payload?.finishReason || "unknown")
       );
     }
   } catch {}
@@ -257,13 +350,17 @@ try {
       modelId,
       cwd: worktree,
       workspaceRoot: worktree,
+      mode: "act",
+      maxIterations: 14,
       enableTools: true,
       enableSpawnAgent: false,
       enableAgentTeams: false,
+      disableMcpSettingsTools: true,
       systemPrompt:
         "You are KRALI Developer Agent. Work only inside the supplied candidate worktree. Never push or merge main. Prefer minimum generic fixes. Do not modify VERSION, updater/signing settings or Mentor JSON files. Preserve user approval gates and objective verification.",
     },
     toolPolicies: {
+      "*": { autoApprove: false },
       read_files: { autoApprove: true },
       search_codebase: { autoApprove: true },
       fetch_web_content: { autoApprove: true },
@@ -308,7 +405,8 @@ try {
   );
   process.exitCode = 20;
 } finally {
-  clearTimeout(watchdog);
+  if (idleWatchdog) clearTimeout(idleWatchdog);
+  if (hardWatchdog) clearTimeout(hardWatchdog);
   try {
     unsubscribe();
   } catch {}
