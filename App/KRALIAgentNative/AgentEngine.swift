@@ -3495,68 +3495,213 @@ final class AgentEngine: ObservableObject {
         }
     }
 
-    func runDeveloperAgent() {
-        guard !developerAgentBusy else { return }
+    private func startNextLearningJobIfNeeded() {
+        guard !developerAgentBusy else {
+            return
+        }
+
+        guard let next =
+            learningQueueStore.nextQueued(
+                from: learningQueueJobs
+            )
+        else {
+            return
+        }
+
+        guard let briefURL =
+            learningQueueStore
+                .materializeBrief(
+                    for: next
+                )
+        else {
+            if let index =
+                learningQueueJobs.firstIndex(
+                    where: {
+                        $0.id == next.id
+                    }
+                ) {
+                learningQueueJobs[index]
+                    .state = .failed
+                learningQueueJobs[index]
+                    .updatedAt = Date()
+                learningQueueJobs[index]
+                    .lastStatus =
+                        "Immutable öğrenme brief'i oluşturulamadı."
+                learningQueueStore.save(
+                    learningQueueJobs
+                )
+            }
+
+            log(
+                "Learning Queue brief oluşturulamadı: " +
+                next.capabilityID
+            )
+            return
+        }
+
+        if let index =
+            learningQueueJobs.firstIndex(
+                where: {
+                    $0.id == next.id
+                }
+            ) {
+            learningQueueJobs[index]
+                .state = .running
+            learningQueueJobs[index]
+                .updatedAt = Date()
+            learningQueueJobs[index]
+                .lastStatus =
+                    "Developer Agent worker'a verildi."
+            learningQueueStore.save(
+                learningQueueJobs
+            )
+        }
+
+        activeLearningJobID = next.id
+
+        log(
+            "Learning Queue worker başlatılıyor • " +
+            next.capabilityID +
+            " • job=" +
+            next.shortID
+        )
+
+        runDeveloperAgent(
+            learningJob: next,
+            learningJobBriefURL:
+                briefURL
+        )
+    }
+
+    func runDeveloperAgent(
+        learningJob: AgentLearningJob? = nil,
+        learningJobBriefURL: URL? = nil
+    ) {
+        guard !developerAgentBusy else {
+            if let learningJob {
+                log(
+                    "Developer Agent meşgul; job sırada kalıyor • " +
+                    learningJob.shortID
+                )
+            }
+            return
+        }
 
         developerAgentBusy = true
-        developerAgentStatus = DeveloperAgentStatus(
-            state: "running",
-            message: "Developer Agent diagnostic'leri inceliyor…",
-            branch: nil,
-            worktree: nil
-        )
+
+        let initialMessage: String
+        if let learningJob {
+            initialMessage =
+                learningJob.capabilityName +
+                " için öğrenme işi başlatılıyor • job=" +
+                learningJob.shortID
+        } else {
+            initialMessage =
+                "Developer Agent diagnostic'leri inceliyor…"
+        }
+
+        developerAgentStatus =
+            DeveloperAgentStatus(
+                state: "running",
+                message:
+                    initialMessage,
+                branch: nil,
+                worktree: nil
+            )
+
         developerBridge.writeStatus(
             developerAgentStatus
         )
 
-        log("Developer Agent başlatıldı")
+        log(
+            learningJob == nil
+                ? "Developer Agent başlatıldı"
+                : "Developer Agent Learning Queue job'u başlatıldı"
+        )
 
         Task {
-            let monitor = Task { @MainActor [weak self] in
+            let monitor = Task {
+                @MainActor [weak self] in
+
                 while !Task.isCancelled {
-                    guard let self, self.developerAgentBusy else {
+                    guard
+                        let self,
+                        self.developerAgentBusy
+                    else {
                         break
                     }
 
-                    let liveStatus = self.developerBridge.readStatus()
-                    if liveStatus.state != "idle" {
-                        self.developerAgentStatus = liveStatus
+                    let liveStatus =
+                        self.developerBridge
+                            .readStatus()
 
-                        if liveStatus.state == "repairing_cline" ||
-                           liveStatus.state == "repairing_runtime" ||
-                           liveStatus.state == "provider_platform_bug" ||
-                           liveStatus.state == "sdk_fallback_preparing" ||
-                           liveStatus.state == "sdk_fallback_running" {
+                    if liveStatus.state != "idle" {
+                        self.developerAgentStatus =
+                            liveStatus
+
+                        self.updateRunningLearningJob(
+                            with: liveStatus
+                        )
+
+                        if liveStatus.state ==
+                            "repairing_cline" ||
+                           liveStatus.state ==
+                            "repairing_runtime" ||
+                           liveStatus.state ==
+                            "provider_platform_bug" ||
+                           liveStatus.state ==
+                            "sdk_fallback_preparing" ||
+                           liveStatus.state ==
+                            "sdk_fallback_running" {
                             self.registerDebugIncident(
-                                source: "Developer Agent",
-                                message: liveStatus.message,
-                                evidence: liveStatus.state,
-                                progress: .recovering
+                                source:
+                                    "Developer Agent",
+                                message:
+                                    liveStatus.message,
+                                evidence:
+                                    liveStatus.state,
+                                progress:
+                                    .recovering
                             )
                         }
                     }
 
                     try? await Task.sleep(
-                        for: .milliseconds(700)
+                        for: .milliseconds(
+                            700
+                        )
                     )
                 }
             }
 
-            let status = await developerBridge.run()
+            let status =
+                await developerBridge.run(
+                    learningJobBriefURL:
+                        learningJobBriefURL
+                )
+
             monitor.cancel()
 
-            developerAgentStatus = status
-            developerAgentBusy = false
+            developerAgentStatus =
+                status
+            developerAgentBusy =
+                false
+
+            finishActiveLearningJob(
+                with: status
+            )
 
             switch status.state {
-            case "ready_for_review":
+            case "ready_for_review",
+                 "recovered_candidate_ready":
                 resolveDebugIncident(
                     summary:
                         "Developer Agent recovery/öğrenme adayını build doğrulamasından geçirdi."
                 )
                 log(
                     "Developer Agent adayı incelemeye hazır: " +
-                    (status.branch ?? "branch bilinmiyor")
+                    (status.branch ??
+                        "branch bilinmiyor")
                 )
 
             case "no_change":
@@ -3564,7 +3709,9 @@ final class AgentEngine: ObservableObject {
                     summary:
                         "Diagnostic recovery gerektirmedi; mevcut sistem sağlıklı."
                 )
-                log("Developer Agent değişiklik gerekmedi sonucuna vardı")
+                log(
+                    "Developer Agent değişiklik gerekmedi sonucuna vardı"
+                )
 
             case "setup_required",
                  "setup_node",
@@ -3580,9 +3727,12 @@ final class AgentEngine: ObservableObject {
                     evidence: status.state,
                     progress: .escalated
                 )
-                log("Developer Agent kurulumu/recovery tamamlanmalı")
+                log(
+                    "Developer Agent kurulumu/recovery tamamlanmalı"
+                )
 
-            case "build_failed":
+            case "build_failed",
+                 "recovered_candidate_build_failed":
                 registerDebugIncident(
                     source: "Developer Agent",
                     message: status.message,
@@ -3591,26 +3741,131 @@ final class AgentEngine: ObservableObject {
                 )
                 log(
                     "Developer Agent adayı build geçmedi: " +
-                    (status.branch ?? "branch bilinmiyor")
+                    (status.branch ??
+                        "branch bilinmiyor")
                 )
 
-            case "failed":
+            case "failed",
+                 "sdk_failed",
+                 "sdk_watchdog_timeout",
+                 "candidate_recovery_failed":
                 registerDebugIncident(
                     source: "Developer Agent",
                     message: status.message,
                     evidence: status.state,
                     exitCode:
-                        status.message.contains("137")
+                        status.message
+                            .contains("137")
                             ? 137
                             : nil,
                     progress: .escalated
                 )
-                log("Developer Agent durumu: " + status.message)
+                log(
+                    "Developer Agent durumu: " +
+                    status.message
+                )
 
             default:
-                log("Developer Agent durumu: " + status.message)
+                log(
+                    "Developer Agent durumu: " +
+                    status.message
+                )
             }
+
+            startNextLearningJobIfNeeded()
         }
+    }
+
+    private func updateRunningLearningJob(
+        with status: DeveloperAgentStatus
+    ) {
+        guard
+            let activeLearningJobID,
+            let index =
+                learningQueueJobs
+                    .firstIndex(
+                        where: {
+                            $0.id ==
+                                activeLearningJobID
+                        }
+                    )
+        else {
+            return
+        }
+
+        learningQueueJobs[index]
+            .updatedAt = Date()
+        learningQueueJobs[index]
+            .branch = status.branch
+        learningQueueJobs[index]
+            .worktree = status.worktree
+        learningQueueJobs[index]
+            .lastStatus = status.message
+
+        learningQueueStore.save(
+            learningQueueJobs
+        )
+    }
+
+    private func finishActiveLearningJob(
+        with status: DeveloperAgentStatus
+    ) {
+        guard
+            let activeLearningJobID,
+            let index =
+                learningQueueJobs
+                    .firstIndex(
+                        where: {
+                            $0.id ==
+                                activeLearningJobID
+                        }
+                    )
+        else {
+            self.activeLearningJobID =
+                nil
+            return
+        }
+
+        let state:
+            AgentLearningJobState
+
+        switch status.state {
+        case "ready_for_review",
+             "recovered_candidate_ready":
+            state = .readyForReview
+
+        case "no_change":
+            state = .completed
+
+        default:
+            state = .failed
+        }
+
+        learningQueueJobs[index]
+            .state = state
+        learningQueueJobs[index]
+            .updatedAt = Date()
+        learningQueueJobs[index]
+            .branch = status.branch
+        learningQueueJobs[index]
+            .worktree = status.worktree
+        learningQueueJobs[index]
+            .lastStatus = status.message
+
+        learningQueueStore.save(
+            learningQueueJobs
+        )
+
+        log(
+            "Learning Queue job tamamlandı • " +
+            learningQueueJobs[index]
+                .capabilityID +
+            " • " +
+            state.title
+        )
+
+        self.activeLearningJobID =
+            nil
     }
 
     private func registerDebugIncident(
