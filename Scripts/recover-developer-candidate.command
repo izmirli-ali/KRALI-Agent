@@ -61,6 +61,7 @@ echo "=== $(date) ===" >>"$LOG"
 echo "Recovering $BRANCH at $WORKTREE" >>"$LOG"
 
 rm -f "$WORKTREE/.krali-developer-agent-prompt.txt"
+rm -rf "$WORKTREE/.build-check"
 
 CURRENT_BRANCH="$(git -C "$WORKTREE" branch --show-current 2>/dev/null || true)"
 if [ "$CURRENT_BRANCH" != "$BRANCH" ]; then
@@ -73,6 +74,12 @@ git -C "$WORKTREE" add -A >>"$LOG" 2>&1 || {
     write_status "candidate_recovery_failed|Candidate değişiklikleri stage edilemedi|$BRANCH|$WORKTREE"
     exit 32
 }
+
+if git -C "$WORKTREE" diff --cached --quiet; then
+    write_status "no_change|Recovery sonrası anlamlı kaynak değişikliği kalmadı|$BRANCH|$WORKTREE"
+    echo "Recovery sonrası yalnız geçici build artifact'ları vardı; candidate sayılmadı." >>"$LOG"
+    exit 0
+fi
 
 if ! git -C "$WORKTREE" diff --cached --quiet; then
     git -C "$WORKTREE" commit -m "Recovered Developer Agent candidate $RUN_ID" >>"$LOG" 2>&1 || {
