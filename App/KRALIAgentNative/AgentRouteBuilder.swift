@@ -54,6 +54,18 @@ struct AgentRouteBuilder {
             return "Browser"
         }
 
+        if capability.id == "perception.screen" {
+            return "Screen"
+        }
+
+        if capability.id == "desktop.control" {
+            return "Desktop"
+        }
+
+        if capability.id == "photoshop.control" {
+            return "Photoshop"
+        }
+
         if capability.id == "premiere.control" {
             return "Premiere"
         }
