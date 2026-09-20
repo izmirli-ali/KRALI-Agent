@@ -547,14 +547,47 @@ struct AgentMissionNormalizer {
             )
         }
 
-        let steps = mission.steps
-            .enumerated()
-            .filter {
+        var steps: [AgentSemanticMissionStep] = []
+        var remap: [Int: Int] = [:]
+
+        for (originalIndex, step) in
+            mission.steps.enumerated() {
+            guard
                 !forbidden.contains(
-                    $0.element.capabilityID
+                    step.capabilityID
                 )
+            else {
+                continue
             }
-            .map { $0.element }
+
+            let mappedDependencies =
+                step.dependsOn.compactMap {
+                    remap[$0]
+                }
+
+            guard
+                mappedDependencies.count ==
+                    step.dependsOn.count
+            else {
+                continue
+            }
+
+            let newIndex = steps.count
+            steps.append(
+                AgentSemanticMissionStep(
+                    title: step.title,
+                    purpose: step.purpose,
+                    capabilityID:
+                        step.capabilityID,
+                    operation:
+                        step.operation,
+                    dependsOn:
+                        mappedDependencies
+                )
+            )
+            remap[originalIndex] =
+                newIndex
+        }
 
         let required =
             mission.requiredCapabilityIDs
