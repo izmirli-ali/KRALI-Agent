@@ -16,6 +16,10 @@ const runID = process.env.KRALI_RUN_ID || "";
 const maxIterations = Number(
   process.env.KRALI_LOCAL_AGENT_MAX_ITERATIONS || "36"
 );
+const hardTimeoutMs = Number(
+  process.env.KRALI_LOCAL_AGENT_TIMEOUT_MS || "720000"
+);
+const startedAt = Date.now();
 
 function fail(message, code = 20, state = "local_agent_failed") {
   persistStatus(state, message);
@@ -635,6 +639,16 @@ stage(
 );
 
 for (let iteration = 1; iteration <= maxIterations; iteration++) {
+  const elapsed = Date.now() - startedAt;
+
+  if (elapsed >= hardTimeoutMs) {
+    fail(
+      gapLabel + " native local agent toplam zaman sınırına ulaştı.",
+      124,
+      "local_agent_watchdog_timeout"
+    );
+  }
+
   stage(
     "local_agent_running",
     gapLabel +
@@ -645,6 +659,16 @@ for (let iteration = 1; iteration <= maxIterations; iteration++) {
   );
 
   let response;
+  const remainingMs =
+    Math.max(
+      1000,
+      hardTimeoutMs - (Date.now() - startedAt)
+    );
+  const controller = new AbortController();
+  const requestTimer = setTimeout(
+    () => controller.abort(),
+    Math.min(180000, remainingMs)
+  );
 
   try {
     response = await fetch(baseUrl + "/api/chat", {
@@ -652,6 +676,7 @@ for (let iteration = 1; iteration <= maxIterations; iteration++) {
       headers: {
         "content-type": "application/json",
       },
+      signal: controller.signal,
       body: JSON.stringify({
         model,
         stream: false,
@@ -663,11 +688,26 @@ for (let iteration = 1; iteration <= maxIterations; iteration++) {
       }),
     });
   } catch (error) {
+    clearTimeout(requestTimer);
+
+    if (
+      error instanceof Error &&
+      error.name === "AbortError"
+    ) {
+      fail(
+        "Ollama native agent model isteği zaman aşımına uğradı.",
+        124,
+        "local_agent_watchdog_timeout"
+      );
+    }
+
     fail(
       "Ollama native agent bağlantı hatası: " +
         (error instanceof Error ? error.message : String(error))
     );
   }
+
+  clearTimeout(requestTimer);
 
   if (!response.ok) {
     fail(
@@ -744,6 +784,7 @@ for (let iteration = 1; iteration <= maxIterations; iteration++) {
 
     messages.push({
       role: "tool",
+      name,
       tool_name: name,
       content: JSON.stringify(result),
     });
