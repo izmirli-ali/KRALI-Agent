@@ -133,9 +133,9 @@ struct AgentCapabilityRegistry {
         AgentCapability(
             id: "app.workflow",
             name: "Uygulama içi iş akışı",
-            summary: "Özel provider tanımlı olmayan uygulamalarda veri okuma, seçim, hazırlama ve güvenli uygulama içi iş akışlarını temsil eden öğrenilebilir generic capability.",
-            risk: .external,
-            isAvailable: false,
+            summary: "Özel provider tanımlı olmayan uygulamalarda desktop.app sonrasında görünür ekranı salt-okunur gözlemler; hedefe uygun veriyi çıkarır ve değişiklik isteyen kısmı yalnız uygulanmamış hazırlık olarak üretir.",
+            risk: .readOnly,
+            isAvailable: true,
             requiresWorkspace: false
         ),
         AgentCapability(
