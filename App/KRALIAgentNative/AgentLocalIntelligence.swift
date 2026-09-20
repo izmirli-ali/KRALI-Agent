@@ -334,13 +334,7 @@ actor AgentLocalIntelligence {
     ) -> AgentSemanticMission {
         let knownIDs = Set(capabilities.map(\.id))
         let corpus = normalizeMissionText(
-            (
-                [userInput, mission.objective] +
-                mission.steps.flatMap {
-                    [$0.title, $0.purpose, $0.operation]
-                }
-            )
-            .joined(separator: " ")
+            userInput
         )
 
         var outcomes = Set(mission.outcomes)
@@ -541,7 +535,7 @@ actor AgentLocalIntelligence {
         var repairedSteps: [AgentSemanticMissionStep] = []
         var represented = Set<String>()
 
-        for (index, step) in mission.steps.enumerated() {
+        for step in mission.steps {
             guard knownIDs.contains(step.capabilityID) else {
                 continue
             }
