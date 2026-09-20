@@ -605,7 +605,10 @@ final class AgentEngine: ObservableObject {
                     currentUserInput: text,
                     goal: resolvedGoal,
                     semanticMission: semanticMission,
-                    snapshot: verificationSnapshot()
+                    snapshot: verificationSnapshot(
+                        executedCapabilityIDs:
+                            executedSemanticCapabilities
+                    )
                 )
 
                 verificationState = verification.state
@@ -1844,7 +1847,9 @@ final class AgentEngine: ObservableObject {
         }
     }
 
-    private func verificationSnapshot() -> AgentVerificationSnapshot {
+    private func verificationSnapshot(
+        executedCapabilityIDs: Set<String> = []
+    ) -> AgentVerificationSnapshot {
         AgentVerificationSnapshot(
             hasWorkspace: selectedRootURL != nil,
             fileResultCount: fileSearchResults.count,
@@ -1859,6 +1864,8 @@ final class AgentEngine: ObservableObject {
             selectedCapabilityIDs: Set(
                 selectedCapabilities.map(\.id)
             ),
+            executedCapabilityIDs:
+                executedCapabilityIDs,
             webResearchResultCount: webResearchResults.count,
             webResearchEvidenceCount: webResearchEvidence.count,
             webResearchUniqueDomainCount: Set(
