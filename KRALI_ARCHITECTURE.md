@@ -185,3 +185,10 @@ Deep-source kanıtlarında HTML entity çözümü ve sayfa boilerplate temizliğ
 **v0.7.25 subscription synthesis reliability:** İlk v0.7.24 gerçek görev trace'i hedef tamamlama doğrulamasının doğru biçimde `partial` verdiğini, ancak ChatGPT Subscription sentez subprocess'inin tamamlanamadığını gösterdi. Synthesis bridge bu nedenle pipe tabanlı stdout/stderr toplamak yerine scratch çalışma alanındaki geçici NDJSON dosyasına yazar; böylece uzun JSON akışında pipe-buffer kilitlenmesi engellenir. Cline güvenli scratch dizininde auto-approve ile çalışabilir fakat shell komut izinleri tamamen kapalı kalır. Non-zero exit ve parse hatalarının son bölümü artık activity/mentor diagnostic'e taşınır.
 
 Ayrıca Türkçe dotless-i normalizasyonu nedeniyle `Bağımsız fikir üret` reasoning adımının yanlışlıkla completed kalabildiği hata düzeltilir; synthesis başarısızsa analiz ve ideation adımlarının ikisi de partial olur.
+
+
+**v0.7.26 detailed research semantics:** Estafiz mentor trace'i, doğal dilde “detaylı araştırır mısın?” isteğinin yalnızca `research` olarak çözüldüğünü ve ham kanıt listesiyle `passed` sayılabildiğini gösterdi. Bu sürümde detaylı araştırma ifadeleri `research + explain` hedef sözleşmesine yükseltilir. Böyle bir görev güvenilir synthesis sonucu olmadan tam başarılı sayılmaz.
+
+Research Query Planner ayrıca “X adında bir salon/işletme/merkez...” kalıbından araştırılan varlığı çıkarabilir ve yerel işletmeleri entity-grounded çoklu sorgu akışına alabilir. Verifier kaynak sayısı ve deep-read yanında farklı domain sayısını da kontrol eder; tek domaine yığılmış çoklu sonuç sağlam araştırma sayılmaz.
+
+Training Lab'e Estafiz biçiminde doğal dilde detaylı yerel işletme araştırması regression senaryosu eklenir. Böylece bu davranış sonraki sürümlerde yeniden bozulursa otomatik test yakalar.
