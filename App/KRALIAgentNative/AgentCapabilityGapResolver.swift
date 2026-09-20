@@ -122,6 +122,158 @@ struct AgentCapabilityGapResolver {
         return results
     }
 
+    func resolveRuntimeFailures(
+        graph: AgentTaskGraph,
+        completedStepIndexes: Set<Int>,
+        capabilities: [AgentCapability]
+    ) -> [CapabilityGapResolution] {
+        let registry =
+            Dictionary(
+                uniqueKeysWithValues:
+                    capabilities.map {
+                        ($0.id, $0)
+                    }
+            )
+
+        let availableIDs =
+            Set(
+                capabilities
+                    .filter(\.isAvailable)
+                    .map(\.id)
+            )
+
+        var seen = Set<String>()
+        var results: [CapabilityGapResolution] = []
+
+        for step in graph.steps {
+            guard
+                step.isAvailable,
+                !completedStepIndexes.contains(
+                    step.index
+                ),
+                !step.requiresApproval,
+                step.role != .reason,
+                step.role != .verify
+            else {
+                continue
+            }
+
+            let dependenciesSatisfied =
+                step.dependsOn.allSatisfy {
+                    dependencyIndex in
+
+                    if completedStepIndexes
+                        .contains(
+                            dependencyIndex
+                        ) {
+                        return true
+                    }
+
+                    return graph.steps
+                        .first(
+                            where: {
+                                $0.index ==
+                                    dependencyIndex
+                            }
+                        )?
+                        .role == .reason
+                }
+
+            guard
+                dependenciesSatisfied,
+                !seen.contains(
+                    step.capabilityID
+                ),
+                let capability =
+                    registry[
+                        step.capabilityID
+                    ]
+            else {
+                continue
+            }
+
+            seen.insert(
+                step.capabilityID
+            )
+
+            let strategyCandidates =
+                candidateStrategies(
+                    for: step,
+                    availableIDs:
+                        availableIDs
+                )
+
+            let reason =
+                "Provider available olmasına rağmen runtime step tamamlanamadı veya postcondition doğrulanamadı: " +
+                step.capabilityID +
+                " • " +
+                step.operation
+
+            let researchGoal =
+                "Mevcut " +
+                capability.name +
+                " provider'ının neden runtime'da başarısız olduğunu kanıtla; önce mevcut provider/strategy'yi debug et, gerekirse generic recovery veya yeni provider stratejisi geliştir ve aynı postcondition'ı gerçek observation ile doğrula."
+
+            let strategies =
+                strategyCandidates.isEmpty
+                    ? "Yok"
+                    : strategyCandidates
+                        .joined(separator: ", ")
+
+            let developerBrief =
+                """
+                KRALİ Runtime Capability Failure Developer Brief
+
+                Kullanıcı hedefi:
+                \(graph.objective)
+
+                Runtime'da başarısız capability:
+                \(capability.id) — \(capability.name)
+
+                Step:
+                \(step.index): \(step.title)
+                Operation: \(step.operation)
+                Role: \(step.role.rawValue)
+
+                Mevcut strategy adayları:
+                \(strategies)
+
+                Sorun:
+                \(reason)
+
+                Tasarım kuralları:
+                - Capability zaten available ise önce mevcut provider'ı ve postcondition verifier'ı debug et.
+                - Uygulama/marka adına hard-code yazma; hatayı genel resolver/provider/strategy seviyesinde çöz.
+                - Başarı gerçek observation/verification ile kanıtlanmadan PASS üretme.
+                - Dış dünyaya commit eden eylemlerde kullanıcı onayı korunmalı.
+                - Candidate branch/worktree kullan; ana branch'i doğrudan değiştirme.
+                - Build + regression + mümkünse runtime probe geçmeden düzeltmeyi available/healthy sayma.
+
+                Kabul kriteri:
+                Aynı sınıftaki bilinmeyen hedeflerde de provider doğru hedefi çözebilmeli; başarısız runtime step tamamlanmalı ve verifier gerçek evidence ile PASS verebilmeli.
+                """
+
+            results.append(
+                CapabilityGapResolution(
+                    capabilityID:
+                        capability.id,
+                    capabilityName:
+                        capability.name,
+                    kind: .strategy,
+                    reason: reason,
+                    candidateCapabilityIDs:
+                        strategyCandidates,
+                    researchGoal:
+                        researchGoal,
+                    developerBrief:
+                        developerBrief
+                )
+            )
+        }
+
+        return results
+    }
+
     private func candidateStrategies(
         for step: AgentTaskGraphStep,
         availableIDs: Set<String>
