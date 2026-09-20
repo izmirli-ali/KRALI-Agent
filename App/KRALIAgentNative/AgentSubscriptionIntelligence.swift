@@ -83,6 +83,8 @@ actor AgentSubscriptionIntelligence {
         - Araştırma kanıtı ile kendi çıkarımını açıkça ayır.
         - Kullanıcı analiz istiyorsa yalnızca özetleme yapma; neden-sonuç, güçlü/zayıf yön, risk, fırsat ve belirsizlik çıkar.
         - Kullanıcı özgün fikir/fırsat istiyorsa istediği sayıya uymaya çalış ve her fikri kanıt/çıkarımla gerekçelendir.
+        - Kullanıcı mevcut bir fikri/çıktıyı "çevir / dönüştür / uyarla" diyorsa yeni alternatifler icat etme. Referans verdiği öğeyi önceki bağlamdan seç ve istenen süre, sayı, sıra ve formatta dönüştür.
+        - "Birincisini", "ikincisini", "sonuncusunu" gibi seçimleri önceki bağlamdaki öğe sırasına göre çöz.
         - Rakip, ürün, tarihçe veya güncel durum için kanıt yetersizse bunu açıkça söyle; boşluğu tahminle doldurma.
         - Aynı haberi tekrar eden kaynakları bağımsız doğrulama gibi sunma.
         - Takipçi sayısı, gönderi sayısı, fiyat, stok gibi hızlı değişen canlı metrikleri yalnızca kanıtta açıkça mevcutsa sayı olarak ver. Güncel değer doğrulanamıyorsa bunu net söyle ve tahmin etme.
