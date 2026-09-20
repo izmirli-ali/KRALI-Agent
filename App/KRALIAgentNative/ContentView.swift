@@ -1185,7 +1185,7 @@ struct ContentView: View {
                 }
 
                 Text(
-                    "v0.7.24: Mentor trace gerçek bir hedef-tamamlama açığı yakaladı. KRALİ artık yalnızca kaynak bulmayı “analiz tamamlandı” saymıyor; analiz/fikir görevlerinde Apple yerel modeline, o yoksa mevcut ChatGPT Subscription üzerinden Cline sentezine başvuruyor. Sentez yoksa görev kısmi doğrulanıyor. Kaynak kanıtlarındaki HTML/çerez gürültüsü de temizlendi."
+                    "v0.7.25: ChatGPT Subscription sentez köprüsü sağlamlaştırıldı. Cline çıktısı pipe yerine dosyaya akıtılarak kilitlenme riski azaltıldı; güvenli scratch çalışma alanında otomatik onay kullanılıyor ve shell komutları kapalı kalıyor. Başarısızlık nedeni artık Mentor/activity loguna açıkça yazılıyor. “Bağımsız fikir üret” adımındaki Türkçe ı/i eşleşme hatası da düzeltildi."
                 )
                 .font(.caption2)
                 .foregroundStyle(.orange)
