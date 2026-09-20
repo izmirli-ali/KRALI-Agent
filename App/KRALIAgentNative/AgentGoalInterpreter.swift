@@ -7,6 +7,7 @@ enum AgentGoalOutcome: String, Hashable {
     case assessContent
     case analyze
     case ideate
+    case transform
     case explain
     case organize
     case open
@@ -200,7 +201,7 @@ struct AgentGoalInterpreter {
             ])
 
         if isContextualTransformation {
-            outcomes.insert(.ideate)
+            outcomes.insert(.transform)
         }
 
         if mentionsSocialProfile &&
@@ -249,7 +250,7 @@ struct AgentGoalInterpreter {
         }
 
         let isCompound =
-            outcomes.subtracting([.converse, .explain, .ideate]).count > 1 ||
+            outcomes.subtracting([.converse, .explain, .ideate, .transform]).count > 1 ||
             decision.intent == .compoundFileTask
 
         return AgentGoalProfile(
@@ -297,6 +298,9 @@ struct AgentGoalInterpreter {
         }
         if outcomes.contains(.ideate) {
             parts.append("bağımsız fikir ve çıkarım üret")
+        }
+        if outcomes.contains(.transform) {
+            parts.append("önceki çıktıyı istenen formata dönüştür")
         }
         if outcomes.contains(.organize) {
             parts.append("güvenli biçimde düzenle")
