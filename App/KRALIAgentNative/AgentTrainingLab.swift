@@ -146,6 +146,27 @@ struct AgentTrainingLab {
         results.append(
             typoAppNameLanguageResult()
         )
+        results.append(
+            appOpenIntentRoutingResult(
+                id: "mail-app-open-routing",
+                title: "Mail uygulaması açma intent ayrımı",
+                prompt: "Mail'i aç",
+                forbiddenCapabilityID:
+                    "mail.work"
+            )
+        )
+        results.append(
+            appOpenIntentRoutingResult(
+                id: "finder-app-open-routing",
+                title: "Finder uygulaması açma intent ayrımı",
+                prompt: "Finder'ı aç",
+                forbiddenCapabilityID:
+                    "files.reveal"
+            )
+        )
+        results.append(
+            mailWorkflowRoutingResult()
+        )
 
         let core = results.filter { $0.tier == .core }
         let northStar = results.filter { $0.tier == .northStar }
@@ -557,6 +578,131 @@ struct AgentTrainingLab {
                 ? []
                 : [
                     "Yakın yazım hatası güven eşiğini geçemedi."
+                ]
+        )
+    }
+
+    private func appOpenIntentRoutingResult(
+        id: String,
+        title: String,
+        prompt: String,
+        forbiddenCapabilityID: String
+    ) -> TrainingScenarioResult {
+        let snapshot = context(
+            hasWorkspace: true,
+            videoCount: 0
+        )
+
+        let decision = brain.analyze(
+            prompt,
+            context: snapshot
+        )
+        let goal = goalInterpreter.interpret(
+            prompt,
+            decision: decision,
+            context: snapshot
+        )
+        let capabilities =
+            capabilityRegistry.select(
+                for: prompt,
+                decision: decision,
+                context: snapshot,
+                goal: goal
+            )
+        let ids = Set(
+            capabilities.map(\.id)
+        )
+
+        let passed =
+            ids.contains("desktop.app") &&
+            !ids.contains(
+                forbiddenCapabilityID
+            )
+
+        return TrainingScenarioResult(
+            scenarioID: id,
+            title: title,
+            tier: .core,
+            prompt: prompt,
+            passed: passed,
+            goal:
+                "uygulama açma isteğini uygulama capability'sine yönlendir",
+            route: [
+                "Core",
+                "Desktop"
+            ],
+            selectedCapabilities:
+                capabilities.map(\.id),
+            unavailableCapabilities:
+                capabilities
+                    .filter { !$0.isAvailable }
+                    .map(\.id),
+            diagnostics: passed
+                ? []
+                : [
+                    "App-open intent yanlış capability ailesine yönlendirildi: " +
+                    ids.sorted()
+                        .joined(separator: ", ")
+                ]
+        )
+    }
+
+    private func mailWorkflowRoutingResult()
+        -> TrainingScenarioResult {
+        let prompt =
+            "Bugün yaptıklarımı müdürüme göndermek için mail taslağı hazırla."
+        let snapshot = context(
+            hasWorkspace: true,
+            videoCount: 0
+        )
+        let decision = brain.analyze(
+            prompt,
+            context: snapshot
+        )
+        let goal = goalInterpreter.interpret(
+            prompt,
+            decision: decision,
+            context: snapshot
+        )
+        let capabilities =
+            capabilityRegistry.select(
+                for: prompt,
+                decision: decision,
+                context: snapshot,
+                goal: goal
+            )
+        let ids = Set(
+            capabilities.map(\.id)
+        )
+
+        let passed =
+            ids.contains("mail.work") &&
+            !ids.contains("desktop.app")
+
+        return TrainingScenarioResult(
+            scenarioID:
+                "mail-workflow-routing",
+            title:
+                "Mail uygulaması ile mail iş akışını ayırma",
+            tier: .core,
+            prompt: prompt,
+            passed: passed,
+            goal:
+                "mail taslağı isteğini iletişim capability'sine yönlendir",
+            route: [
+                "Core",
+                "Mail"
+            ],
+            selectedCapabilities:
+                capabilities.map(\.id),
+            unavailableCapabilities:
+                capabilities
+                    .filter { !$0.isAvailable }
+                    .map(\.id),
+            diagnostics: passed
+                ? []
+                : [
+                    "Mail workflow ile Mail.app açma intent'i ayrıştırılamadı."
                 ]
         )
     }
