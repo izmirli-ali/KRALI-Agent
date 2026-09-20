@@ -216,6 +216,8 @@ struct AgentContextMemoryStore {
         let query = normalize(rawQuery)
         let queryTokens = Set(tokens(query))
         let continuation = containsContinuationReference(query)
+        let explicitNewTopic =
+            isExplicitNewTopicIntroduction(query)
         let inlineSourceRewrite =
             isInlineSourceRewriteRequest(rawQuery)
         let transformation = isTransformationRequest(query)
@@ -327,6 +329,8 @@ struct AgentContextMemoryStore {
                         tokenOverlap >= 2 ||
                         exactMatch
                 }
+            } else if explicitNewTopic {
+                isRelevant = false
             } else if continuation {
                 if strongestContextOverlap > 0 {
                     isRelevant =
@@ -403,6 +407,36 @@ struct AgentContextMemoryStore {
             Array(contextual)
         )
         .map { $0.entry }
+    }
+
+    private func isExplicitNewTopicIntroduction(
+        _ text: String
+    ) -> Bool {
+        let normalized = normalize(text)
+
+        return [
+            "adında bir marka",
+            "adinda bir marka",
+            "adlı bir marka",
+            "adli bir marka",
+            "diye bir marka",
+            "isminde bir marka",
+            "adında bir şirket",
+            "adinda bir sirket",
+            "adlı bir şirket",
+            "adli bir sirket",
+            "diye bir şirket",
+            "isminde bir şirket",
+            "adında bir işletme",
+            "adinda bir isletme",
+            "adlı bir işletme",
+            "adli bir isletme",
+            "diye bir işletme",
+            "isminde bir işletme"
+        ]
+        .contains {
+            normalized.contains($0)
+        }
     }
 
     private func isLegacyMisroutedRuleTask(
