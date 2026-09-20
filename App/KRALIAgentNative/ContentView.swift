@@ -592,15 +592,23 @@ struct ContentView: View {
                                 } else {
                                     Image(
                                         systemName:
-                                            engine.developerAgentStatus.state ==
-                                                "ready_for_review"
+                                            engine.developerAgentStatus
+                                            .isReadyForReview &&
+                                        engine.developerAgentStatus.state !=
+                                            "build_failed" &&
+                                        engine.developerAgentStatus.state !=
+                                            "recovered_candidate_build_failed"
                                                 ? "checkmark.circle.fill"
                                                 : "exclamationmark.triangle.fill"
                                     )
                                     .font(.caption)
                                     .foregroundStyle(
-                                        engine.developerAgentStatus.state ==
-                                            "ready_for_review"
+                                        engine.developerAgentStatus
+                                            .isReadyForReview &&
+                                        engine.developerAgentStatus.state !=
+                                            "build_failed" &&
+                                        engine.developerAgentStatus.state !=
+                                            "recovered_candidate_build_failed"
                                             ? Color.green
                                             : Color.orange
                                     )
