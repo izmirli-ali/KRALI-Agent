@@ -816,7 +816,8 @@ final class AgentEngine: ObservableObject {
             )
 
         return normalized.contains("analiz et") ||
-            normalized.contains("bagimsiz fikir")
+            normalized.contains("bagimsiz fikir") ||
+            normalized.contains("istenen formata")
     }
 
     private func enforceGoalCompletion(
@@ -827,6 +828,7 @@ final class AgentEngine: ObservableObject {
         let needsSynthesis =
             goal.outcomes.contains(.analyze) ||
             goal.outcomes.contains(.ideate) ||
+            goal.outcomes.contains(.transform) ||
             (
                 goal.outcomes.contains(.research) &&
                 goal.outcomes.contains(.explain)
@@ -848,7 +850,7 @@ final class AgentEngine: ObservableObject {
             state: .partial,
             summary:
                 verification.summary +
-                " Araştırma/araç kısmı doğrulandı; ancak istenen analiz ve bağımsız fikir üretimi için güvenilir sentez sağlayıcısı kullanılamadığı için hedefin tamamı doğrulanmadı.",
+                " Araştırma/araç kısmı doğrulandı; ancak istenen analiz, dönüşüm veya bağımsız fikir üretimi için güvenilir sentez sağlayıcısı kullanılamadığı için hedefin tamamı doğrulanmadı.",
             fallback: nil
         )
     }
@@ -1493,6 +1495,7 @@ final class AgentEngine: ObservableObject {
     ) -> Bool {
         if goal.outcomes.contains(.analyze) ||
            goal.outcomes.contains(.ideate) ||
+           goal.outcomes.contains(.transform) ||
            goal.outcomes.contains(.research) {
             return true
         }
