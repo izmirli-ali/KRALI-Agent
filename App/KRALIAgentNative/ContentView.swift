@@ -139,18 +139,16 @@ struct ContentView: View {
                 inspectorVisible.toggle()
             } label: {
                 Image(
-                    systemName:
-                        inspectorVisible
-                        ? "sidebar.right"
-                        : "sidebar.right"
+                    systemName: "sidebar.right"
                 )
             }
-            .buttonStyle(
-                inspectorVisible
-                    ? .borderedProminent
-                    : .bordered
-            )
+            .buttonStyle(.bordered)
             .controlSize(.small)
+            .opacity(
+                inspectorVisible
+                    ? 1.0
+                    : 0.82
+            )
             .help("Durum ve geliştirici Inspector'ı")
         }
         .padding(.horizontal, 16)
@@ -1605,7 +1603,7 @@ private struct VoiceComposerView: View {
     let onSend: (String, ChatInputSource) -> Void
 
     var body: some View {
-        HStack(alignment: .bottom, spacing: 8) {
+        HStack(alignment: .bottom, spacing: 10) {
             Button {
                 speech.microphoneTapped { text in
                     prompt = ""
@@ -1618,39 +1616,77 @@ private struct VoiceComposerView: View {
                             ? Color.red
                             : Color.primary
                     )
-                    .frame(width: 26, height: 26)
+                    .frame(width: 30, height: 30)
+                    .contentShape(Circle())
             }
-            .buttonStyle(.bordered)
+            .buttonStyle(.plain)
             .disabled(speech.isBusy || isLocked)
             .help(micHelp)
 
             TextField(
                 isLocked
                     ? "KRALİ mevcut görevi tamamlıyor…"
-                    : "KRALİ'ye normal konuşur gibi görev ver…",
+                    : "KRALİ'ye bir şey sor veya görev ver…",
                 text: $prompt,
                 axis: .vertical
             )
-            .textFieldStyle(.roundedBorder)
-            .lineLimit(1...5)
+            .textFieldStyle(.plain)
+            .font(.system(size: 14.5))
+            .lineLimit(1...6)
             .disabled(isLocked)
+            .padding(.vertical, 7)
             .onSubmit {
                 sendPrompt()
             }
 
-            Button("Gönder") {
+            Button {
                 sendPrompt()
-            }
-            .buttonStyle(.borderedProminent)
-            .disabled(
-                isLocked ||
-                prompt
-                    .trimmingCharacters(
-                        in: .whitespacesAndNewlines
+            } label: {
+                Image(systemName: "arrow.up")
+                    .font(.system(size: 12, weight: .bold))
+                    .foregroundStyle(Color.white)
+                    .frame(width: 30, height: 30)
+                    .background(
+                        isSendDisabled
+                            ? Color.secondary.opacity(0.35)
+                            : Color.accentColor
                     )
-                    .isEmpty
-            )
+                    .clipShape(Circle())
+            }
+            .buttonStyle(.plain)
+            .disabled(isSendDisabled)
+            .help("Gönder")
         }
+        .padding(.horizontal, 12)
+        .padding(.vertical, 7)
+        .background(
+            Color(nsColor: .controlBackgroundColor)
+        )
+        .overlay(
+            RoundedRectangle(
+                cornerRadius: 18,
+                style: .continuous
+            )
+            .stroke(
+                Color.primary.opacity(0.08),
+                lineWidth: 1
+            )
+        )
+        .clipShape(
+            RoundedRectangle(
+                cornerRadius: 18,
+                style: .continuous
+            )
+        )
+    }
+
+    private var isSendDisabled: Bool {
+        isLocked ||
+        prompt
+            .trimmingCharacters(
+                in: .whitespacesAndNewlines
+            )
+            .isEmpty
     }
 
     private var micIcon: String {
