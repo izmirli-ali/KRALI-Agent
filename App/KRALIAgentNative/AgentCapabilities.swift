@@ -69,9 +69,9 @@ struct AgentCapabilityRegistry {
         AgentCapability(
             id: "files.write.text",
             name: "Metin dosyası yazma",
-            summary: "Görev çıktısını kullanıcının belirttiği veya çözülen çalışma alanı içindeki hedefe yeni bir metin dosyası olarak yazar; mevcut dosyayı sessizce ezmez.",
+            summary: "Görev çıktısını kullanıcının belirttiği veya çözülen çalışma alanı içindeki hedefe yeni bir metin dosyası olarak atomik yazar; mevcut dosyayı sessizce ezmez ve çalışma alanı dışına çıkmaz.",
             risk: .reversibleWrite,
-            isAvailable: false,
+            isAvailable: true,
             requiresWorkspace: true
         ),
         AgentCapability(
