@@ -12,3 +12,6 @@ Backups/*
 
 # Generated KRALİ app icon rasters
 App/KRALIAgentNative/Assets.xcassets/AppIcon.appiconset/*.png
+
+# Local build verification cache
+.build-check/

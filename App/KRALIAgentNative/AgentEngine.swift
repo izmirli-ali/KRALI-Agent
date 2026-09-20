@@ -108,6 +108,7 @@ final class AgentEngine: ObservableObject {
     private let arena = AgentArena()
     private let arenaStore = AgentArenaStore()
     private let screenPerception = AgentScreenPerception()
+    private let appWorkflowStrategy = AgentAppWorkflowStrategy()
     private let screenPerceptionStore = ScreenPerceptionStore()
     private let desktopControl = AgentDesktopControl()
     private let desktopControlStore = DesktopControlProbeStore()
@@ -1908,6 +1909,48 @@ final class AgentEngine: ObservableObject {
                     log(
                         screenPerceptionStatus
                     )
+                }
+
+            case "app.workflow":
+                do {
+                    let result = try await appWorkflowStrategy.execute(
+                        objective: mission.objective,
+                        stepTitle: step.title,
+                        stepPurpose: step.purpose,
+                        dependencyEvidence: dependencyEvidence
+                    )
+
+                    let evidence = [
+                        "Öndeki uygulama: " +
+                            result.frontmostApplication,
+                        result.observationEvidence,
+                        "Hazırlık çıktısı:\n" +
+                            result.workflowOutput,
+                        "Dış değişiklik uygulandı: hayır"
+                    ]
+                    .joined(separator: "\n\n")
+
+                    stepEvidence[stepIndex] = evidence
+                    outputs.append(result.workflowOutput)
+                    executed.insert("app.workflow")
+                    completedStepIndexes.insert(stepIndex)
+                    log(
+                        "App workflow strategy tamamlandı • frontmost=" +
+                            result.frontmostApplication +
+                            " • commit=false"
+                    )
+                } catch {
+                    let message =
+                        "Uygulama içi iş akışı doğrulanamadı: " +
+                        error.localizedDescription
+                    outputs.append(message)
+                    registerDebugIncident(
+                        source: "app.workflow",
+                        message: message,
+                        evidence: dependencyEvidence,
+                        progress: .investigating
+                    )
+                    log(message)
                 }
 
             default:
