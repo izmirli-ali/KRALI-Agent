@@ -529,12 +529,21 @@ final class AgentEngine: ObservableObject {
                 finalResponse: reply
             )
 
-            if let memoryEntry = contextMemoryStore.captureTask(
-                userInput: text,
-                goal: goalProfile.summary,
-                response: reply,
-                researchEvidence: webResearchEvidence
-            ) {
+            let shouldPersistTaskContext =
+                synthesisApplied ||
+                !webResearchEvidence.isEmpty ||
+                (
+                    finalVerification.state == .passed &&
+                    decision.intent != .general
+                )
+
+            if shouldPersistTaskContext,
+               let memoryEntry = contextMemoryStore.captureTask(
+                    userInput: text,
+                    goal: goalProfile.summary,
+                    response: reply,
+                    researchEvidence: webResearchEvidence
+               ) {
                 contextMemoryEntries = contextMemoryStore.append(
                     memoryEntry,
                     to: contextMemoryEntries
