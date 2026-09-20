@@ -184,7 +184,7 @@ diagnose_native_cline_platform() {
 }
 
 prepare_sdk_fallback() {
-    write_status "sdk_fallback_preparing|Cline native CLI platform hatası nedeniyle Node SDK fallback hazırlanıyor"
+    write_status "sdk_fallback_preparing|ClineCore SDK runtime hazırlanıyor"
 
     mkdir -p "$SDK_HOST"
     if [ ! -f "$SDK_HOST/package.json" ]; then
