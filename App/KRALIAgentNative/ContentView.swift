@@ -184,6 +184,7 @@ struct ContentView: View {
             VoiceComposerView(
                 speech: engine.speech,
                 prompt: $prompt,
+                isLocked: engine.busy,
                 onSend: { text, source in
                     engine.send(text, source: source)
                 }
@@ -290,6 +291,7 @@ struct ContentView: View {
         }
         .buttonStyle(.bordered)
         .controlSize(.small)
+        .disabled(engine.busy)
     }
 
     private var sidePane: some View {
@@ -1172,6 +1174,7 @@ private struct VoiceStatusView: View {
 private struct VoiceComposerView: View {
     @ObservedObject var speech: SpeechController
     @Binding var prompt: String
+    let isLocked: Bool
     let onSend: (String, ChatInputSource) -> Void
 
     var body: some View {
@@ -1191,16 +1194,19 @@ private struct VoiceComposerView: View {
                     .frame(width: 26, height: 26)
             }
             .buttonStyle(.bordered)
-            .disabled(speech.isBusy)
+            .disabled(speech.isBusy || isLocked)
             .help(micHelp)
 
             TextField(
-                "KRALİ'ye normal konuşur gibi görev ver…",
+                isLocked
+                    ? "KRALİ mevcut görevi tamamlıyor…"
+                    : "KRALİ'ye normal konuşur gibi görev ver…",
                 text: $prompt,
                 axis: .vertical
             )
             .textFieldStyle(.roundedBorder)
             .lineLimit(1...5)
+            .disabled(isLocked)
             .onSubmit {
                 sendPrompt()
             }
@@ -1210,6 +1216,7 @@ private struct VoiceComposerView: View {
             }
             .buttonStyle(.borderedProminent)
             .disabled(
+                isLocked ||
                 prompt
                     .trimmingCharacters(
                         in: .whitespacesAndNewlines
