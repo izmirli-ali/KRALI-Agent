@@ -29,6 +29,8 @@ enum LocalIntelligenceState: Hashable {
 }
 
 actor AgentLocalIntelligence {
+    private let languageResolver =
+        AgentNaturalLanguageResolver()
     func availability() -> LocalIntelligenceState {
         #if canImport(FoundationModels)
         if #available(macOS 26.0, *) {
@@ -59,36 +61,10 @@ actor AgentLocalIntelligence {
             normalizeMissionText(userInput)
 
         let simpleAppOpen =
-            containsMissionConcept(
-                normalizedInput,
-                [
-                    "uygulamasini ac",
-                    "uygulamayi ac",
-                    "uygulamayı aç",
-                    "uygulamasını aç",
-                    "uygulama ac",
-                    "uygulama aç",
-                    "pencereyi one getir",
-                    "pencereyi öne getir",
-                    "uygulamaya gec",
-                    "uygulamaya geç",
-                    "uygulamayi one getir",
-                    "uygulamayı öne getir"
-                ]
-            ) &&
-            !containsMissionConcept(
-                normalizedInput,
-                [
-                    "tikla", "tıkla",
-                    "buton", "menu", "menü",
-                    "alana yaz", "metin yaz",
-                    "surukle", "sürükle",
-                    "dosya", "pdf", "klasor",
-                    "klasör", "web", "site",
-                    "internet", "analiz et",
-                    "incele"
-                ]
-            )
+            languageResolver
+                .isSimpleOpenCommand(
+                    userInput
+                )
 
         if simpleAppOpen {
             return contractFallbackMission(
@@ -422,6 +398,10 @@ actor AgentLocalIntelligence {
         )
 
         let genericDesktopOpenTask =
+            languageResolver
+                .isSimpleOpenCommand(
+                    userInput
+                ) ||
             containsMissionConcept(
                 corpus,
                 [
@@ -429,8 +409,6 @@ actor AgentLocalIntelligence {
                     "uygulamayi ac",
                     "uygulamayı aç",
                     "uygulamasını aç",
-                    "uygulama ac",
-                    "uygulama aç",
                     "pencereyi one getir",
                     "pencereyi öne getir",
                     "uygulamaya gec",
