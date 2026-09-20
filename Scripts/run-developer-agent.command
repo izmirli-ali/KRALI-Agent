@@ -225,6 +225,29 @@ probe_ollama_model() {
     "$NODE_BIN" "$ROOT/Scripts/ollama-tool-probe.mjs" >>"$LOG" 2>&1
 }
 
+select_tool_fallback_model() {
+    local current_model="$1"
+
+    if [ "$MEMORY_GB" -ge 32 ] &&
+       [ "$current_model" != "qwen3-coder:30b" ]; then
+        printf '%s' "qwen3-coder:30b"
+        return 0
+    fi
+
+    if [ "$MEMORY_GB" -ge 20 ] &&
+       [ "$current_model" != "devstral:24b" ]; then
+        printf '%s' "devstral:24b"
+        return 0
+    fi
+
+    if [ "$current_model" != "qwen3:8b" ]; then
+        printf '%s' "qwen3:8b"
+        return 0
+    fi
+
+    return 1
+}
+
 prepare_ollama_runtime() {
     write_status "local_ai_checking|Yerel Developer AI hazırlanıyor"
 
@@ -298,26 +321,25 @@ prepare_ollama_runtime() {
     if ! probe_ollama_model "$MODEL"; then
         echo "⚠️ $MODEL native tool-call probe geçmedi." | tee -a "$LOG"
 
-        if [ "$MEMORY_GB" -ge 20 ] &&
-           [ "$MODEL" != "devstral:24b" ]; then
-            FALLBACK_MODEL="devstral:24b"
-            write_status "local_model_fallback|Tool-capable yerel modele geçiliyor: $FALLBACK_MODEL"
-
-            if ! ensure_ollama_model "$FALLBACK_MODEL"; then
-                write_status "local_model_failed|Fallback yerel model indirilemedi: $FALLBACK_MODEL"
-                return 1
-            fi
-
-            if ! probe_ollama_model "$FALLBACK_MODEL"; then
-                write_status "local_tool_probe_failed|Yerel modeller native tool-call probe geçemedi"
-                return 1
-            fi
-
-            MODEL="$FALLBACK_MODEL"
-        else
+        FALLBACK_MODEL="$(select_tool_fallback_model "$MODEL" || true)"
+        if [ -z "$FALLBACK_MODEL" ]; then
             write_status "local_tool_probe_failed|Yerel model native tool-call probe geçemedi: $MODEL"
             return 1
         fi
+
+        write_status "local_model_fallback|Tool-capable yerel modele geçiliyor: $FALLBACK_MODEL"
+
+        if ! ensure_ollama_model "$FALLBACK_MODEL"; then
+            write_status "local_model_failed|Fallback yerel model indirilemedi: $FALLBACK_MODEL"
+            return 1
+        fi
+
+        if ! probe_ollama_model "$FALLBACK_MODEL"; then
+            write_status "local_tool_probe_failed|Yerel modeller native tool-call probe geçemedi"
+            return 1
+        fi
+
+        MODEL="$FALLBACK_MODEL"
     fi
 
     write_status "local_ai_ready|Ücretsiz yerel Developer AI hazır ve tool-call doğrulandı: $MODEL"
@@ -781,13 +803,16 @@ CLINE_DURATION="$(( $(date +%s) - CLINE_STARTED_AT ))"
 cat "$CLINE_RUN_LOG" >>"$LOG"
 
 if [ "$CLINE_EXIT" -eq 25 ] &&
-   [ "$PROVIDER" = "ollama" ] &&
-   [ "$MODEL" != "devstral:24b" ]; then
-    FALLBACK_MODEL="devstral:24b"
-    echo "⚠️ Cline local tool protocol doğrulanmadı; $FALLBACK_MODEL ile tek kontrollü retry." | tee -a "$LOG"
-    write_status "local_model_fallback|Cline tool protocol için fallback model hazırlanıyor: $FALLBACK_MODEL|$BRANCH|$WORKTREE"
+   [ "$PROVIDER" = "ollama" ]; then
+    FALLBACK_MODEL="$(select_tool_fallback_model "$MODEL" || true)"
 
-    if ensure_ollama_model "$FALLBACK_MODEL" &&
+    if [ -n "$FALLBACK_MODEL" ]; then
+        echo "⚠️ Cline local tool protocol doğrulanmadı; $FALLBACK_MODEL ile tek kontrollü retry." | tee -a "$LOG"
+        write_status "local_model_fallback|Cline tool protocol için fallback model hazırlanıyor: $FALLBACK_MODEL|$BRANCH|$WORKTREE"
+    fi
+
+    if [ -n "$FALLBACK_MODEL" ] &&
+       ensure_ollama_model "$FALLBACK_MODEL" &&
        probe_ollama_model "$FALLBACK_MODEL"; then
         MODEL="$FALLBACK_MODEL"
         TOOL_RETRY_LOG="$LOG_DIR/KRALI-Developer-Agent-Cline-$STAMP-tool-retry.log"
