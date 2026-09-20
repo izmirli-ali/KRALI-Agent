@@ -272,7 +272,11 @@ struct AgentContextMemoryStore {
             }
             .prefix(max(0, limit - rules.count))
 
-        return Array(rules + contextual)
+        return (
+            Array(rules) +
+            Array(contextual)
+        )
+        .map(\.entry)
     }
 
     private func trimmed(
