@@ -32,6 +32,7 @@
 		A10000000000000000000023 /* AgentLiveResearchEval.swift in Sources */ = {isa = PBXBuildFile; fileRef = B10000000000000000000023 /* AgentLiveResearchEval.swift */; };
 		A10000000000000000000024 /* AgentDeveloperBridge.swift in Sources */ = {isa = PBXBuildFile; fileRef = B10000000000000000000024 /* AgentDeveloperBridge.swift */; };
 		A10000000000000000000025 /* AgentSubscriptionIntelligence.swift in Sources */ = {isa = PBXBuildFile; fileRef = B10000000000000000000025 /* AgentSubscriptionIntelligence.swift */; };
+		A10000000000000000000026 /* AgentContextMemory.swift in Sources */ = {isa = PBXBuildFile; fileRef = B10000000000000000000026 /* AgentContextMemory.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
@@ -61,6 +62,7 @@
 		B10000000000000000000023 /* AgentLiveResearchEval.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AgentLiveResearchEval.swift; sourceTree = "<group>"; };
 		B10000000000000000000024 /* AgentDeveloperBridge.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AgentDeveloperBridge.swift; sourceTree = "<group>"; };
 		B10000000000000000000025 /* AgentSubscriptionIntelligence.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AgentSubscriptionIntelligence.swift; sourceTree = "<group>"; };
+		B10000000000000000000026 /* AgentContextMemory.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AgentContextMemory.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -110,6 +112,7 @@
 				B10000000000000000000023 /* AgentLiveResearchEval.swift */,
 				B10000000000000000000024 /* AgentDeveloperBridge.swift */,
 				B10000000000000000000025 /* AgentSubscriptionIntelligence.swift */,
+				B10000000000000000000026 /* AgentContextMemory.swift */,
 			);
 			path = KRALIAgentNative;
 			sourceTree = "<group>";
@@ -216,6 +219,7 @@
 				A10000000000000000000023 /* AgentLiveResearchEval.swift in Sources */,
 				A10000000000000000000024 /* AgentDeveloperBridge.swift in Sources */,
 				A10000000000000000000025 /* AgentSubscriptionIntelligence.swift in Sources */,
+				A10000000000000000000026 /* AgentContextMemory.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -253,7 +257,7 @@
 				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
 				CODE_SIGN_STYLE = Automatic;
 				COMBINE_HIDPI_IMAGES = YES;
-				CURRENT_PROJECT_VERSION = 49;
+				CURRENT_PROJECT_VERSION = 50;
 				DEVELOPMENT_TEAM = 65244UMFCK;
 				ENABLE_HARDENED_RUNTIME = NO;
 				ENABLE_PREVIEWS = YES;
@@ -268,7 +272,7 @@
 					"@executable_path/../Frameworks",
 				);
 				MACOSX_DEPLOYMENT_TARGET = 14.0;
-				MARKETING_VERSION = 0.7.29;
+				MARKETING_VERSION = 0.8.0;
 				PRODUCT_BUNDLE_IDENTIFIER = com.aliihsancanuysal.kraliagent;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				SDKROOT = macosx;
@@ -284,7 +288,7 @@
 				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
 				CODE_SIGN_STYLE = Automatic;
 				COMBINE_HIDPI_IMAGES = YES;
-				CURRENT_PROJECT_VERSION = 49;
+				CURRENT_PROJECT_VERSION = 50;
 				DEVELOPMENT_TEAM = 65244UMFCK;
 				ENABLE_HARDENED_RUNTIME = NO;
 				GENERATE_INFOPLIST_FILE = YES;
@@ -298,7 +302,7 @@
 					"@executable_path/../Frameworks",
 				);
 				MACOSX_DEPLOYMENT_TARGET = 14.0;
-				MARKETING_VERSION = 0.7.29;
+				MARKETING_VERSION = 0.8.0;
 				PRODUCT_BUNDLE_IDENTIFIER = com.aliihsancanuysal.kraliagent;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				SDKROOT = macosx;
