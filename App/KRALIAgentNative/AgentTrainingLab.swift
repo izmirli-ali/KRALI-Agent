@@ -1178,3 +1178,404 @@ struct TrainingLabStore {
         )
     }
 }
+
+
+struct AgentArenaScenarioResult: Identifiable, Codable, Hashable {
+    var id: String { scenarioID }
+
+    let scenarioID: String
+    let title: String
+    let prompt: String
+    let passed: Bool
+    let plannerProvider: String
+    let mission: AgentSemanticMission?
+    let selectedCapabilityIDs: [String]
+    let diagnostics: [String]
+    let reviewerPassed: Bool?
+    let reviewerSummary: String?
+    let reviewerMissingCapabilityIDs: [String]
+    let reviewerUnnecessaryCapabilityIDs: [String]
+    let reviewerRiskNotes: [String]
+}
+
+struct AgentArenaReport: Codable, Hashable {
+    let createdAt: Date
+    let appVersion: String
+    let total: Int
+    let passed: Int
+    let failed: Int
+    let reviewerFlagged: Int
+    let results: [AgentArenaScenarioResult]
+}
+
+private struct AgentArenaScenario {
+    let id: String
+    let title: String
+    let prompt: String
+    let requiredCapabilities: Set<String>
+    let forbiddenCapabilities: Set<String>
+    let requiredOutcomes: Set<String>
+    let shouldNotRequireUserInput: Bool
+}
+
+actor AgentArena {
+    private let localIntelligence = AgentLocalIntelligence()
+    private let subscriptionIntelligence =
+        AgentSubscriptionIntelligence()
+    private let capabilityRegistry = AgentCapabilityRegistry()
+    private let memoryStore = AgentContextMemoryStore()
+
+    func run() async -> AgentArenaReport {
+        let scenarios = makeScenarios()
+        let allCapabilities = capabilityRegistry.all
+        let memories = memoryStore.load()
+        var results: [AgentArenaScenarioResult] = []
+
+        for scenario in scenarios {
+            let relevantMemory = memoryStore.relevant(
+                to: scenario.prompt,
+                from: memories,
+                limit: 4
+            )
+
+            var selectedMission: AgentSemanticMission?
+            var provider = "none"
+            var diagnostics: [String] = []
+
+            if let localMission =
+                await localIntelligence.planMission(
+                    userInput: scenario.prompt,
+                    contextMemory: relevantMemory,
+                    capabilities: allCapabilities,
+                    hasWorkspace: true
+                ) {
+                let localDiagnostics = evaluate(
+                    scenario,
+                    mission: localMission
+                )
+
+                selectedMission = localMission
+                provider = "Apple Foundation Models"
+                diagnostics = localDiagnostics
+            }
+
+            if selectedMission == nil ||
+               !diagnostics.isEmpty {
+                if let fallback =
+                    await subscriptionIntelligence.planMission(
+                        userInput: scenario.prompt,
+                        contextMemory: relevantMemory,
+                        capabilities: allCapabilities,
+                        hasWorkspace: true
+                    ) {
+                    let fallbackDiagnostics = evaluate(
+                        scenario,
+                        mission: fallback.mission
+                    )
+
+                    if selectedMission == nil ||
+                       fallbackDiagnostics.count <
+                        diagnostics.count {
+                        selectedMission = fallback.mission
+                        provider = fallback.provider
+                        diagnostics = fallbackDiagnostics
+                    }
+                }
+            }
+
+            if selectedMission == nil {
+                diagnostics = [
+                    "Hiçbir semantic planner geçerli mission üretemedi."
+                ]
+            }
+
+            let review: AgentMissionReview?
+            if let selectedMission {
+                review = await localIntelligence.reviewMission(
+                    userInput: scenario.prompt,
+                    mission: selectedMission,
+                    capabilities: allCapabilities
+                )
+            } else {
+                review = nil
+            }
+
+            let selectedIDs = selectedMission.map {
+                Array(
+                    Set(
+                        $0.requiredCapabilityIDs +
+                        $0.steps.map(\.capabilityID)
+                    )
+                )
+                .sorted()
+            } ?? []
+
+            results.append(
+                AgentArenaScenarioResult(
+                    scenarioID: scenario.id,
+                    title: scenario.title,
+                    prompt: scenario.prompt,
+                    passed: diagnostics.isEmpty,
+                    plannerProvider: provider,
+                    mission: selectedMission,
+                    selectedCapabilityIDs: selectedIDs,
+                    diagnostics: diagnostics,
+                    reviewerPassed: review?.passed,
+                    reviewerSummary: review?.summary,
+                    reviewerMissingCapabilityIDs:
+                        review?.missingCapabilityIDs ?? [],
+                    reviewerUnnecessaryCapabilityIDs:
+                        review?.unnecessaryCapabilityIDs ?? [],
+                    reviewerRiskNotes:
+                        review?.riskNotes ?? []
+                )
+            )
+        }
+
+        let reviewerFlagged = results.filter {
+            $0.reviewerPassed == false ||
+            !$0.reviewerMissingCapabilityIDs.isEmpty ||
+            !$0.reviewerUnnecessaryCapabilityIDs.isEmpty ||
+            !$0.reviewerRiskNotes.isEmpty
+        }
+        .count
+
+        return AgentArenaReport(
+            createdAt: Date(),
+            appVersion: Bundle.main.object(
+                forInfoDictionaryKey:
+                    "CFBundleShortVersionString"
+            ) as? String ?? "unknown",
+            total: results.count,
+            passed: results.filter(\.passed).count,
+            failed: results.filter { !$0.passed }.count,
+            reviewerFlagged: reviewerFlagged,
+            results: results
+        )
+    }
+
+    private func evaluate(
+        _ scenario: AgentArenaScenario,
+        mission: AgentSemanticMission
+    ) -> [String] {
+        let selected = Set(
+            mission.requiredCapabilityIDs +
+            mission.steps.map(\.capabilityID)
+        )
+        let outcomes = Set(mission.outcomes)
+        var diagnostics: [String] = []
+
+        let missingCapabilities =
+            scenario.requiredCapabilities
+                .subtracting(selected)
+                .sorted()
+
+        if !missingCapabilities.isEmpty {
+            diagnostics.append(
+                "Eksik capability: " +
+                missingCapabilities.joined(
+                    separator: ", "
+                )
+            )
+        }
+
+        let forbidden =
+            scenario.forbiddenCapabilities
+                .intersection(selected)
+                .sorted()
+
+        if !forbidden.isEmpty {
+            diagnostics.append(
+                "Gereksiz / yasak capability: " +
+                forbidden.joined(separator: ", ")
+            )
+        }
+
+        let missingOutcomes =
+            scenario.requiredOutcomes
+                .subtracting(outcomes)
+                .sorted()
+
+        if !missingOutcomes.isEmpty {
+            diagnostics.append(
+                "Eksik outcome: " +
+                missingOutcomes.joined(separator: ", ")
+            )
+        }
+
+        if scenario.shouldNotRequireUserInput &&
+           mission.requiresUserInput {
+            diagnostics.append(
+                "Görev makul varsayımla ilerleyebilecekken gereksiz kullanıcı girdisi istendi."
+            )
+        }
+
+        return diagnostics
+    }
+
+    private func makeScenarios() -> [AgentArenaScenario] {
+        [
+            AgentArenaScenario(
+                id: "open-world-video-edit",
+                title: "Doğal dilden uçtan uca video kurgu mission'ı",
+                prompt:
+                    "Son çekimlerden hızlı ve enerjik bir kurgu çıkarmamız gerekiyor.",
+                requiredCapabilities: [
+                    "files.search",
+                    "files.metadata",
+                    "perception.media",
+                    "premiere.control",
+                    "perception.screen"
+                ],
+                forbiddenCapabilities: [
+                    "research.web"
+                ],
+                requiredOutcomes: [
+                    "locate",
+                    "assessContent",
+                    "edit"
+                ],
+                shouldNotRequireUserInput: true
+            ),
+            AgentArenaScenario(
+                id: "new-brand-social-design",
+                title: "Yeni markayı araştırıp tasarıma dönüştürme",
+                prompt:
+                    "Köfteci Tame adında bir markamız var. Marka için sosyal medya tasarımı hazırlayalım.",
+                requiredCapabilities: [
+                    "research.web",
+                    "photoshop.control",
+                    "perception.screen"
+                ],
+                forbiddenCapabilities: [],
+                requiredOutcomes: [
+                    "research",
+                    "analyze",
+                    "edit"
+                ],
+                shouldNotRequireUserInput: true
+            ),
+            AgentArenaScenario(
+                id: "desktop-cleanup",
+                title: "Yerel masaüstü düzenleme",
+                prompt:
+                    "Masaüstündeki ekran görüntülerini toparlayıp ayrı bir klasöre düzenle.",
+                requiredCapabilities: [
+                    "files.search",
+                    "files.move.reversible"
+                ],
+                forbiddenCapabilities: [
+                    "research.web",
+                    "browser.control"
+                ],
+                requiredOutcomes: [
+                    "locate",
+                    "organize"
+                ],
+                shouldNotRequireUserInput: true
+            ),
+            AgentArenaScenario(
+                id: "browser-contact-task",
+                title: "Etkileşimli web görevi",
+                prompt:
+                    "Bu firmanın sitesine girip iletişim sayfasını bul ve iletişim bilgilerini çıkar.",
+                requiredCapabilities: [
+                    "browser.control"
+                ],
+                forbiddenCapabilities: [],
+                requiredOutcomes: [
+                    "research"
+                ],
+                shouldNotRequireUserInput: false
+            ),
+            AgentArenaScenario(
+                id: "work-mail-task",
+                title: "İş maili orkestrasyonu",
+                prompt:
+                    "Bugün yaptığım işleri toparla ve müdürüme göndermek için mail taslağını hazırla.",
+                requiredCapabilities: [
+                    "context.local",
+                    "mail.work"
+                ],
+                forbiddenCapabilities: [
+                    "premiere.control",
+                    "photoshop.control"
+                ],
+                requiredOutcomes: [
+                    "communicate"
+                ],
+                shouldNotRequireUserInput: false
+            ),
+            AgentArenaScenario(
+                id: "research-to-design",
+                title: "Araştırmadan Photoshop üretimine zincir",
+                prompt:
+                    "Yeni açılan bir kahve markasını araştırıp görsel dilini analiz edelim ve Photoshop'ta örnek bir Instagram postu hazırlayalım.",
+                requiredCapabilities: [
+                    "research.web",
+                    "photoshop.control",
+                    "perception.screen"
+                ],
+                forbiddenCapabilities: [],
+                requiredOutcomes: [
+                    "research",
+                    "analyze",
+                    "edit"
+                ],
+                shouldNotRequireUserInput: true
+            )
+        ]
+    }
+}
+
+struct AgentArenaStore {
+    private let fileManager = FileManager.default
+
+    var outputURL: URL {
+        fileManager.homeDirectoryForCurrentUser
+            .appendingPathComponent(
+                "Library/Application Support/KRALI Agent/Mentor/arena-latest.json",
+                isDirectory: false
+            )
+    }
+
+    func save(_ report: AgentArenaReport) throws {
+        let directory = outputURL
+            .deletingLastPathComponent()
+
+        try fileManager.createDirectory(
+            at: directory,
+            withIntermediateDirectories: true
+        )
+
+        let encoder = JSONEncoder()
+        encoder.outputFormatting = [
+            .prettyPrinted,
+            .sortedKeys,
+            .withoutEscapingSlashes
+        ]
+        encoder.dateEncodingStrategy = .iso8601
+
+        let data = try encoder.encode(report)
+        try data.write(
+            to: outputURL,
+            options: .atomic
+        )
+    }
+
+    func load() -> AgentArenaReport? {
+        guard
+            let data = try? Data(contentsOf: outputURL)
+        else {
+            return nil
+        }
+
+        let decoder = JSONDecoder()
+        decoder.dateDecodingStrategy = .iso8601
+
+        return try? decoder.decode(
+            AgentArenaReport.self,
+            from: data
+        )
+    }
+}
