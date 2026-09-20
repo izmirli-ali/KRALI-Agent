@@ -1,0 +1,204 @@
+{
+  "appVersion" : "0.8.14",
+  "createdAt" : "2026-09-20T10:39:44Z",
+  "failed" : 6,
+  "passed" : 0,
+  "results" : [
+    {
+      "diagnostics" : [
+        "Hiçbir semantic planner geçerli mission üretemedi."
+      ],
+      "passed" : false,
+      "plannerProvider" : "none",
+      "prompt" : "Son çekimlerden hızlı ve enerjik bir kurgu çıkarmamız gerekiyor.",
+      "reviewerMissingCapabilityIDs" : [
+
+      ],
+      "reviewerRiskNotes" : [
+
+      ],
+      "reviewerUnnecessaryCapabilityIDs" : [
+
+      ],
+      "scenarioID" : "open-world-video-edit",
+      "selectedCapabilityIDs" : [
+
+      ],
+      "title" : "Doğal dilden uçtan uca video kurgu mission'ı"
+    },
+    {
+      "diagnostics" : [
+        "Hiçbir semantic planner geçerli mission üretemedi."
+      ],
+      "passed" : false,
+      "plannerProvider" : "none",
+      "prompt" : "Köfteci Tame adında bir markamız var. Marka için sosyal medya tasarımı hazırlayalım.",
+      "reviewerMissingCapabilityIDs" : [
+
+      ],
+      "reviewerRiskNotes" : [
+
+      ],
+      "reviewerUnnecessaryCapabilityIDs" : [
+
+      ],
+      "scenarioID" : "new-brand-social-design",
+      "selectedCapabilityIDs" : [
+
+      ],
+      "title" : "Yeni markayı araştırıp tasarıma dönüştürme"
+    },
+    {
+      "diagnostics" : [
+        "Eksik outcome: locate"
+      ],
+      "mission" : {
+        "confidence" : 0.98,
+        "objective" : "Masaüstündeki ekran görüntülerini toparlayıp ayrı bir klasöre düzenlemek",
+        "outcomes" : [
+          "organize"
+        ],
+        "requiredCapabilityIDs" : [
+          "files.search",
+          "files.metadata",
+          "files.reveal",
+          "files.move.reversible"
+        ],
+        "requiresUserInput" : false,
+        "steps" : [
+          {
+            "capabilityID" : "files.search",
+            "dependsOn" : [
+              0
+            ],
+            "operation" : "seçili çalışma alanını tarayarak görsel dosyaları listele",
+            "purpose" : "Masaüstü alanındaki görsel dosyaları sistematik olarak toplamalıyız",
+            "title" : "ekran görüntülerini topla"
+          },
+          {
+            "capabilityID" : "files.metadata",
+            "dependsOn" : [
+              1
+            ],
+            "operation" : "dosyaların metadata bilgilerini inceleyerek doğru kategorilendirmeyi gerçekleştir",
+            "purpose" : "Her görselin türünü, konumunu ve tarihini analiz ederek doğru sınıflandırmayı yapmalıyız",
+            "title" : "dosyaları değerlendir"
+          },
+          {
+            "capabilityID" : "files.reveal",
+            "dependsOn" : [
+              2
+            ],
+            "operation" : "seçilen görsel dosyaları Finder'da göstererek görsel kontrolü yap",
+            "purpose" : "Seçilen görsel dosyaları Finder'da göstererek görsel kontrolü sağla",
+            "title" : "dosyaları göster"
+          },
+          {
+            "capabilityID" : "files.move.reversible",
+            "dependsOn" : [
+              3
+            ],
+            "operation" : "seçili dosyaları izinli taşıma yöntemiyle yeni bir klasöre aktar",
+            "purpose" : "Organize edilmiş bir yapı oluşturmak için görsel dosyaları yeni bir klasöre taşımalıyız",
+            "title" : "klasörü düzenle"
+          }
+        ]
+      },
+      "passed" : false,
+      "plannerProvider" : "Apple Foundation Models",
+      "prompt" : "Masaüstündeki ekran görüntülerini toparlayıp ayrı bir klasöre düzenle.",
+      "reviewerMissingCapabilityIDs" : [
+        "perception.media"
+      ],
+      "reviewerPassed" : false,
+      "reviewerRiskNotes" : [
+        "Dosya bulma işlemi için files.search eksik. Yerel dosya işi için gereksiz web araştırması yapıldı.",
+        "Gerçek kurgu/tasarım hedefinde uygulama provider'ının olmaması.",
+        "Dosya bulma gereken işte files.search eksik.",
+        "Medya içeriğini değerlendiren işte perception eksikliği.",
+        "Uygulama sonucunu doğrulaması gereken işte perception.screen eksikliği.",
+        "Yeni marka görevine alakasız eski marka bağlamı taşınması."
+      ],
+      "reviewerSummary" : "Hedef: Masaüstündeki ekran görüntülerini toparlayıp ayrı bir klasöre düzenlemek. Gerçek kurgu/tasarım hedefinde uygulama provider'ının olmaması ve dosya bulma gereken işte files.search eksikliği nedeniyle tam olarak gerçekleştirilemedi. Perception eksikliği medya içeriğini değerlendirme işini engelledi.",
+      "reviewerUnnecessaryCapabilityIDs" : [
+        "research.web"
+      ],
+      "scenarioID" : "desktop-cleanup",
+      "selectedCapabilityIDs" : [
+        "files.metadata",
+        "files.move.reversible",
+        "files.reveal",
+        "files.search"
+      ],
+      "title" : "Yerel masaüstü düzenleme"
+    },
+    {
+      "diagnostics" : [
+        "Hiçbir semantic planner geçerli mission üretemedi."
+      ],
+      "passed" : false,
+      "plannerProvider" : "none",
+      "prompt" : "Bu firmanın sitesine girip iletişim sayfasını bul ve iletişim bilgilerini çıkar.",
+      "reviewerMissingCapabilityIDs" : [
+
+      ],
+      "reviewerRiskNotes" : [
+
+      ],
+      "reviewerUnnecessaryCapabilityIDs" : [
+
+      ],
+      "scenarioID" : "browser-contact-task",
+      "selectedCapabilityIDs" : [
+
+      ],
+      "title" : "Etkileşimli web görevi"
+    },
+    {
+      "diagnostics" : [
+        "Hiçbir semantic planner geçerli mission üretemedi."
+      ],
+      "passed" : false,
+      "plannerProvider" : "none",
+      "prompt" : "Bugün yaptığım işleri toparla ve müdürüme göndermek için mail taslağını hazırla.",
+      "reviewerMissingCapabilityIDs" : [
+
+      ],
+      "reviewerRiskNotes" : [
+
+      ],
+      "reviewerUnnecessaryCapabilityIDs" : [
+
+      ],
+      "scenarioID" : "work-mail-task",
+      "selectedCapabilityIDs" : [
+
+      ],
+      "title" : "İş maili orkestrasyonu"
+    },
+    {
+      "diagnostics" : [
+        "Hiçbir semantic planner geçerli mission üretemedi."
+      ],
+      "passed" : false,
+      "plannerProvider" : "none",
+      "prompt" : "Yeni açılan bir kahve markasını araştırıp görsel dilini analiz edelim ve Photoshop'ta örnek bir Instagram postu hazırlayalım.",
+      "reviewerMissingCapabilityIDs" : [
+
+      ],
+      "reviewerRiskNotes" : [
+
+      ],
+      "reviewerUnnecessaryCapabilityIDs" : [
+
+      ],
+      "scenarioID" : "research-to-design",
+      "selectedCapabilityIDs" : [
+
+      ],
+      "title" : "Araştırmadan Photoshop üretimine zincir"
+    }
+  ],
+  "reviewerFlagged" : 1,
+  "total" : 6
+}
