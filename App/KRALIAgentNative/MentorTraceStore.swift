@@ -58,6 +58,7 @@ struct MentorTrace: Codable {
     let executionSteps: [MentorTraceStep]
     let verificationState: String
     let verificationSummary: String
+    let intelligenceProvider: String?
     let fallbackPlan: String?
     let finalResponse: String
     let researchSources: [MentorTraceResearchSource]
@@ -93,6 +94,7 @@ struct MentorTraceStore {
         learningPlans: [CapabilityLearningPlan],
         executionSteps: [AgentExecutionStep],
         verification: AgentVerificationResult,
+        intelligenceProvider: String?,
         fallbackPlan: String?,
         finalResponse: String,
         researchSources: [WebResearchResult],
@@ -154,6 +156,7 @@ struct MentorTraceStore {
             },
             verificationState: verification.state.rawValue,
             verificationSummary: verification.summary,
+            intelligenceProvider: intelligenceProvider,
             fallbackPlan: fallbackPlan,
             finalResponse: finalResponse,
             researchSources: researchSources.map {
