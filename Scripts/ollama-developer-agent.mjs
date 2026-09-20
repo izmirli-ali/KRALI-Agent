@@ -683,7 +683,15 @@ for (let iteration = 1; iteration <= maxIterations; iteration++) {
 
   for (const call of calls) {
     const name = String(call?.function?.name || "");
-    const args = call?.function?.arguments || {};
+    let args = call?.function?.arguments || {};
+
+    if (typeof args === "string") {
+      try {
+        args = JSON.parse(args);
+      } catch {
+        args = {};
+      }
+    }
 
     stage(
       "local_agent_tool",
