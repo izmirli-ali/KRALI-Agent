@@ -59,6 +59,8 @@ struct AgentTrainingLab {
     private let routeBuilder = AgentRouteBuilder()
     private let researchQueryPlanner = AgentResearchQueryPlanner()
     private let verifier = AgentVerifier()
+    private let languageResolver =
+        AgentNaturalLanguageResolver()
 
     func run() -> TrainingLabReport {
         let scenarios = makeScenarios()
@@ -134,6 +136,15 @@ struct AgentTrainingLab {
         )
         results.append(
             semanticExecutionVerifierResult()
+        )
+        results.append(
+            shortAppOpenLanguageResult()
+        )
+        results.append(
+            inflectedAppNameLanguageResult()
+        )
+        results.append(
+            typoAppNameLanguageResult()
         )
 
         let core = results.filter { $0.tier == .core }
@@ -424,6 +435,129 @@ struct AgentTrainingLab {
             ],
             unavailableCapabilities: [],
             diagnostics: diagnostics
+        )
+    }
+
+    private func shortAppOpenLanguageResult()
+        -> TrainingScenarioResult {
+        let prompt = "spotifyı aç"
+        let score =
+            languageResolver.bestAliasScore(
+                input: prompt,
+                aliases: ["Spotify"]
+            )
+        let passed =
+            languageResolver.isSimpleOpenCommand(
+                prompt
+            ) &&
+            languageResolver
+                .isConfidentAliasMatch(
+                    score: score,
+                    input: prompt
+                )
+
+        return TrainingScenarioResult(
+            scenarioID:
+                "natural-language-short-app-open",
+            title:
+                "Kısa uygulama açma komutunu algılama",
+            tier: .core,
+            prompt: prompt,
+            passed: passed,
+            goal:
+                "uygulama kelimesi olmadan hedef uygulamayı aç",
+            route: ["Core", "Desktop"],
+            selectedCapabilities: [
+                "desktop.app"
+            ],
+            unavailableCapabilities: [],
+            diagnostics: passed
+                ? []
+                : [
+                    "Kısa app-open komutu güvenilir biçimde çözülemedi."
+                ]
+        )
+    }
+
+    private func inflectedAppNameLanguageResult()
+        -> TrainingScenarioResult {
+        let prompt = "takvimi aç"
+        let score =
+            languageResolver.bestAliasScore(
+                input: prompt,
+                aliases: ["Takvim"]
+            )
+        let passed =
+            languageResolver.isSimpleOpenCommand(
+                prompt
+            ) &&
+            languageResolver
+                .isConfidentAliasMatch(
+                    score: score,
+                    input: prompt
+                )
+
+        return TrainingScenarioResult(
+            scenarioID:
+                "natural-language-inflected-app-name",
+            title:
+                "Türkçe ekli uygulama adını çözme",
+            tier: .core,
+            prompt: prompt,
+            passed: passed,
+            goal:
+                "Türkçe belirtme ekini uygulama adından ayır",
+            route: ["Core", "Desktop"],
+            selectedCapabilities: [
+                "desktop.app"
+            ],
+            unavailableCapabilities: [],
+            diagnostics: passed
+                ? []
+                : [
+                    "Türkçe ekli uygulama adı normalize edilemedi."
+                ]
+        )
+    }
+
+    private func typoAppNameLanguageResult()
+        -> TrainingScenarioResult {
+        let prompt = "spotfiy aç"
+        let score =
+            languageResolver.bestAliasScore(
+                input: prompt,
+                aliases: ["Spotify"]
+            )
+        let passed =
+            languageResolver.isSimpleOpenCommand(
+                prompt
+            ) &&
+            languageResolver
+                .isConfidentAliasMatch(
+                    score: score,
+                    input: prompt
+                )
+
+        return TrainingScenarioResult(
+            scenarioID:
+                "natural-language-typo-app-name",
+            title:
+                "Küçük yazım hatalı uygulama adını çözme",
+            tier: .core,
+            prompt: prompt,
+            passed: passed,
+            goal:
+                "küçük yazım hatasını güvenli fuzzy eşleşmeyle düzelt",
+            route: ["Core", "Desktop"],
+            selectedCapabilities: [
+                "desktop.app"
+            ],
+            unavailableCapabilities: [],
+            diagnostics: passed
+                ? []
+                : [
+                    "Yakın yazım hatası güven eşiğini geçemedi."
+                ]
         )
     }
 
