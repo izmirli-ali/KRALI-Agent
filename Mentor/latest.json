@@ -137,68 +137,42 @@
     },
     {
       "available" : true,
-      "id" : "files.metadata",
-      "name" : "Dosya metadata",
-      "risk" : "readOnly"
-    },
-    {
-      "available" : true,
-      "id" : "files.reveal",
-      "name" : "Finder",
-      "risk" : "readOnly"
-    },
-    {
-      "available" : true,
-      "id" : "files.search",
-      "name" : "Dosya arama",
-      "risk" : "readOnly"
+      "id" : "desktop.app",
+      "name" : "Uygulama kontrolü",
+      "risk" : "external"
     }
   ],
   "contextMemory" : [
 
   ],
-  "createdAt" : "2026-09-20T13:01:57Z",
+  "createdAt" : "2026-09-20T13:02:29Z",
   "executionSteps" : [
     {
       "capabilityID" : "core.reasoning",
-      "detail" : "finder'ı doğrudan açmak, çalışma alanı bağlamını ve mevcut durumu kontrol etmek için gerekli Operation: finder uygulamasını başlat ve çalışma alanı bağlamını analiz et",
+      "detail" : "Semantic model geçici olarak mission üretemedi; capability contract güncel kullanıcı mesajından güvenli fallback oluşturuyor. Operation: semantic.fallback",
       "kind" : "reasoning",
       "state" : "completed",
-      "title" : "finder'ı açmak"
-    },
-    {
-      "capabilityID" : "files.search",
-      "detail" : "açılan ortamda çalışma alanını salt-okunur taramak ve ilgili dosyaları tanımlamak için gerekli Operation: seçili çalışma alanında dosyaları filtreleyerek listele",
-      "kind" : "action",
-      "state" : "completed",
-      "title" : "dosyaları keşfetmek"
-    },
-    {
-      "capabilityID" : "files.metadata",
-      "detail" : "keşfedilen dosyaların türünü, yolunu ve tarihini doğrulayarak çalışma alanının bütünlüğünü teyit etmek için gerekli Operation: seçilen dosyaların meta verilerini analiz ederek doğrula",
-      "kind" : "action",
-      "state" : "completed",
-      "title" : "dosya bilgilerini doğrulamak"
-    },
-    {
-      "capabilityID" : "files.reveal",
-      "detail" : "doğrulanan dosyaları doğrudan erişilebilir hale getirerek kullanıcıya sunmak için gerekli Operation: keşfedilen ve doğrulanmış dosyaları Finder'da göster",
-      "kind" : "action",
-      "state" : "partial",
-      "title" : "dosyaları göstermek"
+      "title" : "Hedefi çöz"
     },
     {
       "capabilityID" : "context.local",
-      "detail" : "Mission hedefini uçtan uca tamamlamak için gerekli capability sözleşmesi. Ön koşul adımları: 4. Operation: capability.contract",
+      "detail" : "Mission hedefini uçtan uca tamamlamak için gerekli capability sözleşmesi. Ön koşul adımları: 1. Operation: capability.contract",
       "kind" : "reasoning",
       "state" : "completed",
       "title" : "Bağlam"
     },
     {
+      "capabilityID" : "desktop.app",
+      "detail" : "Mission hedefini uçtan uca tamamlamak için gerekli capability sözleşmesi. Ön koşul adımları: 2. Operation: capability.contract",
+      "kind" : "action",
+      "state" : "completed",
+      "title" : "Uygulama kontrolü"
+    },
+    {
       "capabilityID" : "core.reasoning",
       "detail" : "Gerçekleşen adımları hedefle, capability durumuyla ve üretilen sonuçla karşılaştır.",
       "kind" : "verification",
-      "state" : "attention",
+      "state" : "completed",
       "title" : "Mission sonucunu doğrula"
     },
     {
@@ -208,14 +182,14 @@
       "title" : "Sonucu kullanıcıya aktar"
     }
   ],
-  "fallbackPlan" : "Tamamlanmayan action step'ini yeniden planla; yürütülmeyen işi başarılı sayma.",
-  "finalResponse" : "“finder'ı aç” araması için eşleşme bulamadım.\n\nDoğrulama: Semantic mission içindeki zorunlu action step'lerinden bazıları tamamlanmadı: files.reveal\nAlternatif plan: Tamamlanmayan action step'ini yeniden planla; yürütülmeyen işi başarılı sayma.",
-  "goal" : "finder'ı aç",
+  "fallbackPlan" : "Eksik capability veya başarısız adımı yeniden planla; tamamlanmayan işi yapılmış gibi gösterme.",
+  "finalResponse" : "Spotify uygulamasını açtım ve öne geldiğini doğruladım.",
+  "goal" : "spotfiyı aç",
   "inputSource" : "text",
   "learningPlans" : [
 
   ],
-  "plan" : "finder'ı açmak → dosyaları keşfetmek → dosya bilgilerini doğrulamak → dosyaları göstermek → Bağlam",
+  "plan" : "Hedefi çöz → Bağlam → Uygulama kontrolü",
   "researchEvidence" : [
 
   ],
@@ -227,23 +201,20 @@
     "Goal",
     "Context",
     "Plan",
-    "Files",
+    "Desktop",
     "Verify",
     "Response"
   ],
   "semanticMission" : {
-    "confidence" : 0.8,
-    "objective" : "finder'ı aç",
+    "confidence" : 0.65,
+    "objective" : "spotfiyı aç",
     "outcomes" : [
-      "locate",
       "open"
     ],
     "requiredCapabilityIDs" : [
       "context.local",
       "core.reasoning",
-      "files.metadata",
-      "files.reveal",
-      "files.search"
+      "desktop.app"
     ],
     "requiresUserInput" : false,
     "steps" : [
@@ -252,51 +223,33 @@
         "dependsOn" : [
 
         ],
-        "operation" : "finder uygulamasını başlat ve çalışma alanı bağlamını analiz et",
-        "purpose" : "finder'ı doğrudan açmak, çalışma alanı bağlamını ve mevcut durumu kontrol etmek için gerekli",
-        "title" : "finder'ı açmak"
-      },
-      {
-        "capabilityID" : "files.search",
-        "dependsOn" : [
-
-        ],
-        "operation" : "seçili çalışma alanında dosyaları filtreleyerek listele",
-        "purpose" : "açılan ortamda çalışma alanını salt-okunur taramak ve ilgili dosyaları tanımlamak için gerekli",
-        "title" : "dosyaları keşfetmek"
-      },
-      {
-        "capabilityID" : "files.metadata",
-        "dependsOn" : [
-
-        ],
-        "operation" : "seçilen dosyaların meta verilerini analiz ederek doğrula",
-        "purpose" : "keşfedilen dosyaların türünü, yolunu ve tarihini doğrulayarak çalışma alanının bütünlüğünü teyit etmek için gerekli",
-        "title" : "dosya bilgilerini doğrulamak"
-      },
-      {
-        "capabilityID" : "files.reveal",
-        "dependsOn" : [
-
-        ],
-        "operation" : "keşfedilen ve doğrulanmış dosyaları Finder'da göster",
-        "purpose" : "doğrulanan dosyaları doğrudan erişilebilir hale getirerek kullanıcıya sunmak için gerekli",
-        "title" : "dosyaları göstermek"
+        "operation" : "semantic.fallback",
+        "purpose" : "Semantic model geçici olarak mission üretemedi; capability contract güncel kullanıcı mesajından güvenli fallback oluşturuyor.",
+        "title" : "Hedefi çöz"
       },
       {
         "capabilityID" : "context.local",
         "dependsOn" : [
-          3
+          0
         ],
         "operation" : "capability.contract",
         "purpose" : "Mission hedefini uçtan uca tamamlamak için gerekli capability sözleşmesi.",
         "title" : "Bağlam"
+      },
+      {
+        "capabilityID" : "desktop.app",
+        "dependsOn" : [
+          1
+        ],
+        "operation" : "capability.contract",
+        "purpose" : "Mission hedefini uçtan uca tamamlamak için gerekli capability sözleşmesi.",
+        "title" : "Uygulama kontrolü"
       }
     ]
   },
-  "semanticPlannerProvider" : "Apple + Contract Repair",
-  "traceID" : "E9FD43F8-3306-4D6F-84F2-5D3BA13EC145",
-  "userInput" : "finder'ı aç",
-  "verificationState" : "attention",
-  "verificationSummary" : "Semantic mission içindeki zorunlu action step'lerinden bazıları tamamlanmadı: files.reveal"
+  "semanticPlannerProvider" : "Local Contract Repair",
+  "traceID" : "459241A5-837A-422F-AFC3-98411465A6C7",
+  "userInput" : "spotfiyı aç",
+  "verificationState" : "passed",
+  "verificationSummary" : "Semantic mission ile seçilen mevcut capability adımları yürütüldü ve hedefle uyumlu sonuç doğrulandı."
 }
