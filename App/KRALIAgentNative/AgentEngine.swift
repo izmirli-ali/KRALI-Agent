@@ -847,6 +847,7 @@ final class AgentEngine: ObservableObject {
 
         return normalized.contains("analiz et") ||
             normalized.contains("bagimsiz fikir") ||
+            normalized.contains("icerigi olustur") ||
             normalized.contains("istenen formata")
     }
 
@@ -858,6 +859,7 @@ final class AgentEngine: ObservableObject {
         let needsSynthesis =
             goal.outcomes.contains(.analyze) ||
             goal.outcomes.contains(.ideate) ||
+            goal.outcomes.contains(.compose) ||
             goal.outcomes.contains(.transform) ||
             (
                 goal.outcomes.contains(.research) &&
@@ -1592,6 +1594,7 @@ final class AgentEngine: ObservableObject {
     ) -> Bool {
         if goal.outcomes.contains(.analyze) ||
            goal.outcomes.contains(.ideate) ||
+           goal.outcomes.contains(.compose) ||
            goal.outcomes.contains(.transform) ||
            goal.outcomes.contains(.research) {
             return true
