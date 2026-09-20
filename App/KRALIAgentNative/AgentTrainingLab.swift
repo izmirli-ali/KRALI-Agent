@@ -1592,7 +1592,45 @@ actor AgentArena {
                 ],
                 shouldNotRequireUserInput: true
             )
-        ]
+,
+            AgentArenaScenario(
+                id: "generic-desktop-app-open",
+                title: "Genel masaüstü uygulama kontrolü",
+                prompt:
+                    "Notlar uygulamasını aç ve pencereyi öne getir.",
+                requiredCapabilities: [
+                    "desktop.control"
+                ],
+                forbiddenCapabilities: [
+                    "premiere.control",
+                    "photoshop.control",
+                    "research.web"
+                ],
+                requiredOutcomes: [
+                    "open"
+                ],
+                shouldNotRequireUserInput: true
+            ),
+            AgentArenaScenario(
+                id: "generic-pdf-open",
+                title: "Genel dosya bulma ve açma",
+                prompt:
+                    "İndirilenler klasöründeki en son PDF dosyasını bul ve Finder'da aç.",
+                requiredCapabilities: [
+                    "files.search",
+                    "files.reveal"
+                ],
+                forbiddenCapabilities: [
+                    "premiere.control",
+                    "photoshop.control",
+                    "research.web"
+                ],
+                requiredOutcomes: [
+                    "locate",
+                    "open"
+                ],
+                shouldNotRequireUserInput: true
+            )        ]
     }
 }
 
