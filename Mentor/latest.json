@@ -1,6 +1,66 @@
 {
   "activityTail" : [
     {
+      "date" : "2026-09-20T18:41:07Z",
+      "text" : "KRALİ Core hedef sözleşmesi: istenen uygulamayı aç veya öne getir"
+    },
+    {
+      "date" : "2026-09-20T18:41:07Z",
+      "text" : "Bağlam hafızası: Çalışma kuralı • Çalışma kuralı"
+    },
+    {
+      "date" : "2026-09-20T18:41:04Z",
+      "text" : "Developer candidate recovery: Kurtarılan öğrenme adayı build geçti ve incelemeye hazır"
+    },
+    {
+      "date" : "2026-09-20T18:40:59Z",
+      "text" : "Capability gap Learning Queue'ya alındı • sırada=1"
+    },
+    {
+      "date" : "2026-09-20T18:40:59Z",
+      "text" : "Görev tamamlandı • 0.32 sn"
+    },
+    {
+      "date" : "2026-09-20T18:40:59Z",
+      "text" : "Mentor trace yerel olarak kaydedildi"
+    },
+    {
+      "date" : "2026-09-20T18:40:59Z",
+      "text" : "Runtime Capability Gap: desktop.app • Provider available olmasına rağmen runtime step tamamlanamadı veya postcondition doğrulanamadı: desktop.app • app.open"
+    },
+    {
+      "date" : "2026-09-20T18:40:59Z",
+      "text" : "Uygulama kontrolü başarısız: Uygulama bulunamadı: hesap makinesi"
+    },
+    {
+      "date" : "2026-09-20T18:40:59Z",
+      "text" : "Debug/Recovery: Bilinmeyen hata • Hata ayıklanıyor • desktop.app"
+    },
+    {
+      "date" : "2026-09-20T18:40:59Z",
+      "text" : "Semantic rota: Core → Goal → Context → Plan → Desktop → Verify → Response"
+    },
+    {
+      "date" : "2026-09-20T18:40:59Z",
+      "text" : "Task Graph: 0:context.local[reason] → 1:desktop.app[act] → 2:app.workflow[act]"
+    },
+    {
+      "date" : "2026-09-20T18:40:59Z",
+      "text" : "Semantic capability planı: app.workflow, context.local, core.reasoning, desktop.app"
+    },
+    {
+      "date" : "2026-09-20T18:40:59Z",
+      "text" : "Semantic planner sağlayıcısı: Apple Foundation Models"
+    },
+    {
+      "date" : "2026-09-20T18:40:59Z",
+      "text" : "Semantic Mission: Hesap Makinesi uygulamasını aç. Ekranda şu anda görünen değeri bana söyle. Yeni bir hesaplama yapma."
+    },
+    {
+      "date" : "2026-09-20T18:40:59Z",
+      "text" : "Seçilen kabiliyetler: Akıl yürütme, Bağlam, Uygulama kontrolü"
+    },
+    {
       "date" : "2026-09-20T18:40:59Z",
       "text" : "Otomatik rota: Core → Goal → Context → Plan → Desktop → Response"
     },
@@ -59,66 +119,6 @@
     {
       "date" : "2026-09-20T18:40:47Z",
       "text" : "Task Graph: 0:context.local[reason] → 1:desktop.app[act] → 2:app.workflow[act]"
-    },
-    {
-      "date" : "2026-09-20T18:40:47Z",
-      "text" : "Semantic capability planı: app.workflow, context.local, core.reasoning, desktop.app"
-    },
-    {
-      "date" : "2026-09-20T18:40:47Z",
-      "text" : "Semantic planner sağlayıcısı: Apple Foundation Models"
-    },
-    {
-      "date" : "2026-09-20T18:40:47Z",
-      "text" : "Semantic Mission: Notlar uygulamasını aç. Şu anda açık olan notun başlığını ve ekranda görünen ilk iki satırı bana söyle. Hiçbir şeyi değiştirme."
-    },
-    {
-      "date" : "2026-09-20T18:40:47Z",
-      "text" : "Seçilen kabiliyetler: Akıl yürütme, Bağlam, Uygulama kontrolü"
-    },
-    {
-      "date" : "2026-09-20T18:40:47Z",
-      "text" : "Otomatik rota: Core → Goal → Context → Plan → Desktop → Response"
-    },
-    {
-      "date" : "2026-09-20T18:40:47Z",
-      "text" : "Seçilen plan: Uygulama adını çöz, uygulamayı aç veya öne getir ve sonucu doğrula"
-    },
-    {
-      "date" : "2026-09-20T18:40:47Z",
-      "text" : "KRALİ Core hedef sözleşmesi: istenen uygulamayı aç veya öne getir"
-    },
-    {
-      "date" : "2026-09-20T18:40:47Z",
-      "text" : "Bağlam hafızası: Çalışma kuralı"
-    },
-    {
-      "date" : "2026-09-20T18:40:33Z",
-      "text" : "Apple yerel zeka hazır"
-    },
-    {
-      "date" : "2026-09-20T18:40:33Z",
-      "text" : "Çalışma klasörü geri yüklendi: Desktop"
-    },
-    {
-      "date" : "2026-09-20T18:40:33Z",
-      "text" : "0 ekran görüntüsü adayı bulundu"
-    },
-    {
-      "date" : "2026-09-20T18:40:33Z",
-      "text" : "1766 dosya ve 68 klasör indekslendi"
-    },
-    {
-      "date" : "2026-09-20T18:40:33Z",
-      "text" : "Ağır geliştirici testleri normal açılışta otomatik çalıştırılmıyor"
-    },
-    {
-      "date" : "2026-09-20T18:40:33Z",
-      "text" : "Dinamik hedef ve kabiliyet yönlendirme aktif"
-    },
-    {
-      "date" : "2026-09-20T18:40:33Z",
-      "text" : "KRALİ Core hazır"
     }
   ],
   "appVersion" : "0.8.50",
@@ -155,16 +155,21 @@
       ],
       "capabilityID" : "desktop.app",
       "capabilityName" : "Uygulama kontrolü",
-      "developerBrief" : "KRALİ Runtime Capability Failure Developer Brief\n\nKullanıcı hedefi:\nHatırlatıcılar uygulamasını aç. Bugünkü görevleri bana özetle. Ardından ‘KRALI 850 testi’ adında yeni bir hatırlatıcı eklemeyi hazırla ama benden onay almadan oluşturma.\n\nRuntime'da başarısız capability:\ndesktop.app — Uygulama kontrolü\n\nStep:\n1: Kaynak uygulamayı aç veya öne getir\nOperation: app.open\nRole: act\n\nMevcut strategy adayları:\nYok\n\nSorun:\nProvider available olmasına rağmen runtime step tamamlanamadı veya postcondition doğrulanamadı: desktop.app • app.open\n\nTasarım kuralları:\n- Capability zaten available ise önce mevcut provider'ı ve postcondition verifier'ı debug et.\n- Uygulama/marka adına hard-code yazma; hatayı genel resolver/provider/strategy seviyesinde çöz.\n- Başarı gerçek observation/verification ile kanıtlanmadan PASS üretme.\n- Dış dünyaya commit eden eylemlerde kullanıcı onayı korunmalı.\n- Candidate branch/worktree kullan; ana branch'i doğrudan değiştirme.\n- Build + regression + mümkünse runtime probe geçmeden düzeltmeyi available/healthy sayma.\n\nKabul kriteri:\nAynı sınıftaki bilinmeyen hedeflerde de provider doğru hedefi çözebilmeli; başarısız runtime step tamamlanmalı ve verifier gerçek evidence ile PASS verebilmeli.",
+      "developerBrief" : "KRALİ Runtime Capability Failure Developer Brief\n\nKullanıcı hedefi:\nSistem Ayarları uygulamasını aç ve gerçekten ön planda olduğunu doğrula. Herhangi bir ayarı değiştirme.\n\nRuntime'da başarısız capability:\ndesktop.app — Uygulama kontrolü\n\nStep:\n1: Kaynak uygulamayı aç veya öne getir\nOperation: app.open\nRole: act\n\nMevcut strategy adayları:\nYok\n\nSorun:\nProvider available olmasına rağmen runtime step tamamlanamadı veya postcondition doğrulanamadı: desktop.app • app.open\n\nTasarım kuralları:\n- Capability zaten available ise önce mevcut provider'ı ve postcondition verifier'ı debug et.\n- Uygulama/marka adına hard-code yazma; hatayı genel resolver/provider/strategy seviyesinde çöz.\n- Başarı gerçek observation/verification ile kanıtlanmadan PASS üretme.\n- Dış dünyaya commit eden eylemlerde kullanıcı onayı korunmalı.\n- Candidate branch/worktree kullan; ana branch'i doğrudan değiştirme.\n- Build + regression + mümkünse runtime probe geçmeden düzeltmeyi available/healthy sayma.\n\nKabul kriteri:\nAynı sınıftaki bilinmeyen hedeflerde de provider doğru hedefi çözebilmeli; başarısız runtime step tamamlanmalı ve verifier gerçek evidence ile PASS verebilmeli.",
       "kind" : "strategy",
       "reason" : "Provider available olmasına rağmen runtime step tamamlanamadı veya postcondition doğrulanamadı: desktop.app • app.open",
       "researchGoal" : "Mevcut Uygulama kontrolü provider'ının neden runtime'da başarısız olduğunu kanıtla; önce mevcut provider/strategy'yi debug et, gerekirse generic recovery veya yeni provider stratejisi geliştir ve aynı postcondition'ı gerçek observation ile doğrula."
     }
   ],
   "contextMemory" : [
-
+    {
+      "createdAt" : "2026-09-20T01:00:28Z",
+      "kind" : "userRule",
+      "summary" : "Ana projeyi doğrudan değiştirme; çalışma kopyasında ilerle.",
+      "title" : "Çalışma kuralı"
+    }
   ],
-  "createdAt" : "2026-09-20T18:42:07Z",
+  "createdAt" : "2026-09-20T18:46:34Z",
   "executionSteps" : [
     {
       "capabilityID" : "context.local",
@@ -189,13 +194,6 @@
     },
     {
       "capabilityID" : "core.reasoning",
-      "detail" : "Önceki adımların gerçek çıktısını birlikte değerlendir ve sonraki adımın kullanabileceği sonucu üret. Ön koşul adımları: 3. Operation: content.analyze",
-      "kind" : "reasoning",
-      "state" : "pending",
-      "title" : "Toplanan veriyi analiz et"
-    },
-    {
-      "capabilityID" : "core.reasoning",
       "detail" : "Gerçekleşen adımları hedefle, capability durumuyla ve üretilen sonuçla karşılaştır.",
       "kind" : "verification",
       "state" : "attention",
@@ -209,13 +207,13 @@
     }
   ],
   "fallbackPlan" : "Tamamlanmayan action step'ini yeniden planla; yürütülmeyen işi başarılı sayma.",
-  "finalResponse" : "Hedefi “Hatırlatıcılar uygulamasını aç. Bugünkü görevleri bana özetle. Ardından ‘KRALI 850 testi’ adında yeni bir hatırlatıcı eklemeyi hazırla ama benden onay almadan oluşturma.” olarak çözdüm ve mevcut capability'lerle uygulanabilir adımları yürüttüm.\n\nDoğrulama: Semantic mission içindeki zorunlu action step'lerinden bazıları tamamlanmadı: app.workflow, desktop.app\nAlternatif plan: Tamamlanmayan action step'ini yeniden planla; yürütülmeyen işi başarılı sayma.",
-  "goal" : "Hatırlatıcılar uygulamasını aç. Bugünkü görevleri bana özetle. Ardından ‘KRALI 850 testi’ adında yeni bir hatırlatıcı eklemeyi hazırla ama benden onay almadan oluşturma.",
+  "finalResponse" : "Hedefi “Sistem Ayarları uygulamasını aç ve gerçekten ön planda olduğunu doğrula. Herhangi bir ayarı değiştirme.” olarak çözdüm ve mevcut capability'lerle uygulanabilir adımları yürüttüm.\n\nDoğrulama: Semantic mission içindeki zorunlu action step'lerinden bazıları tamamlanmadı: app.workflow, desktop.app\nAlternatif plan: Tamamlanmayan action step'ini yeniden planla; yürütülmeyen işi başarılı sayma.",
+  "goal" : "Sistem Ayarları uygulamasını aç ve gerçekten ön planda olduğunu doğrula. Herhangi bir ayarı değiştirme.",
   "inputSource" : "text",
   "learningPlans" : [
 
   ],
-  "plan" : "Görev bağlamını hazırla → Kaynak uygulamayı aç veya öne getir → Uygulama içi hedefi yürüt → Toplanan veriyi analiz et",
+  "plan" : "Görev bağlamını hazırla → Kaynak uygulamayı aç veya öne getir → Uygulama içi hedefi yürüt",
   "researchEvidence" : [
 
   ],
@@ -232,11 +230,10 @@
     "Response"
   ],
   "semanticMission" : {
-    "confidence" : 0.95,
-    "objective" : "Hatırlatıcılar uygulamasını aç. Bugünkü görevleri bana özetle. Ardından ‘KRALI 850 testi’ adında yeni bir hatırlatıcı eklemeyi hazırla ama benden onay almadan oluşturma.",
+    "confidence" : 0.88,
+    "objective" : "Sistem Ayarları uygulamasını aç ve gerçekten ön planda olduğunu doğrula. Herhangi bir ayarı değiştirme.",
     "outcomes" : [
       "analyze",
-      "explain",
       "open"
     ],
     "requiredCapabilityIDs" : [
@@ -273,15 +270,6 @@
         "operation" : "app.workflow.execute",
         "purpose" : "Uygulamayı açmanın ötesindeki kullanıcı hedefini çöz: gerekli veriyi oku/bul, sonucu doğrula ve istenen değişiklik yalnız hazırlık düzeyindeyse dış dünyaya commit etmeden hazırla. Özel provider yoksa bu generic contract yeni strategy/provider öğrenimini tetiklemeli.",
         "title" : "Uygulama içi hedefi yürüt"
-      },
-      {
-        "capabilityID" : "core.reasoning",
-        "dependsOn" : [
-          2
-        ],
-        "operation" : "content.analyze",
-        "purpose" : "Önceki adımların gerçek çıktısını birlikte değerlendir ve sonraki adımın kullanabileceği sonucu üret.",
-        "title" : "Toplanan veriyi analiz et"
       }
     ]
   },
@@ -325,23 +313,10 @@
       "risk" : "readOnly",
       "role" : "act",
       "title" : "Uygulama içi hedefi yürüt"
-    },
-    {
-      "available" : true,
-      "capabilityID" : "core.reasoning",
-      "dependsOn" : [
-        2
-      ],
-      "index" : 3,
-      "operation" : "content.analyze",
-      "requiresApproval" : false,
-      "risk" : "reasoning",
-      "role" : "transform",
-      "title" : "Toplanan veriyi analiz et"
     }
   ],
-  "traceID" : "D2CA5BBD-9420-4499-92A5-AD1025CB3781",
-  "userInput" : "Hatırlatıcılar uygulamasını aç. Bugünkü görevleri bana özetle. Ardından ‘KRALI 850 testi’ adında yeni bir hatırlatıcı eklemeyi hazırla ama benden onay almadan oluşturma.",
+  "traceID" : "41B1E594-224F-4EF4-B84F-F2E79B9FF7B5",
+  "userInput" : "Sistem Ayarları uygulamasını aç ve gerçekten ön planda olduğunu doğrula. Herhangi bir ayarı değiştirme.",
   "verificationState" : "attention",
   "verificationSummary" : "Semantic mission içindeki zorunlu action step'lerinden bazıları tamamlanmadı: app.workflow, desktop.app"
 }
