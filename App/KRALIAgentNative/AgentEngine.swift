@@ -204,6 +204,8 @@ final class AgentEngine: ObservableObject {
             speech.stopSpeaking()
         }
 
+        resetTransientTaskStateForNewInput()
+
         activeContextMemories = contextMemoryStore.relevant(
             to: text,
             from: contextMemoryEntries,
@@ -348,6 +350,8 @@ final class AgentEngine: ObservableObject {
 
                 verification = verifier.verify(
                     decision: decision,
+                    currentUserInput: text,
+                    goal: goalProfile,
                     snapshot: verificationSnapshot()
                 )
 
@@ -380,7 +384,8 @@ final class AgentEngine: ObservableObject {
             if verification.state == .attention,
                let recovery = attemptSafeRecovery(
                     for: text,
-                    decision: decision
+                    decision: decision,
+                    goal: goalProfile
                ) {
                 finalBaseReply = "İlk plan sonuç vermedi. Güvenli Plan B'yi otomatik denedim.\n\n" + recovery.reply
                 finalVerification = recovery.verification
@@ -615,11 +620,26 @@ final class AgentEngine: ObservableObject {
             return assessWorkspace()
 
         case .remember:
-            if let explicitRule = memoryIntent(from: text) {
-                addMemory(explicitRule)
-                return "Kaydettim: “\(explicitRule)”. Uygun görevlerde bunu otomatik uygulayacağım."
+            let explicitRules = memoryIntents(from: text)
+
+            guard !explicitRules.isEmpty else {
+                return "Bunu bir çalışma kuralı olarak algıladım fakat kaydedilecek kısmı net çıkaramadım."
             }
-            return "Bunu bir çalışma kuralı olarak algıladım fakat kaydedilecek kısmı net çıkaramadım."
+
+            for rule in explicitRules {
+                addMemory(rule)
+            }
+
+            if explicitRules.count == 1,
+               let rule = explicitRules.first {
+                return "Kaydettim: “\(rule)”. Uygun görevlerde bunu otomatik uygulayacağım."
+            }
+
+            let listedRules = explicitRules
+                .map { "• " + $0 }
+                .joined(separator: "\n")
+
+            return "İki ayrı kural olarak kaydettim:\n" + listedRules
 
         case .organizeScreenshots:
             return prepareScreenshotOrganizeAction()
@@ -663,6 +683,21 @@ final class AgentEngine: ObservableObject {
         }
     }
 
+    private func resetTransientTaskStateForNewInput() {
+        activeRoute = ["Core"]
+        selectedCapabilities = []
+        capabilityLearningPlans = []
+        executionSteps = []
+        verificationState = .idle
+        verificationSummary = "Yeni görev için doğrulama bekleniyor."
+        fallbackPlan = nil
+        recoverySummary = nil
+        webResearchResults = []
+        webResearchEvidence = []
+        webResearchStatus = "Bu tur için araştırma henüz başlamadı."
+        intelligenceProviderStatus = "Sentez sağlayıcısı henüz kullanılmadı."
+    }
+
     private func brainContext() -> AgentContextSnapshot {
         AgentContextSnapshot(
             hasWorkspace: selectedRootURL != nil,
@@ -693,7 +728,8 @@ final class AgentEngine: ObservableObject {
 
     private func attemptSafeRecovery(
         for text: String,
-        decision: AgentDecision
+        decision: AgentDecision,
+        goal: AgentGoalProfile
     ) -> RecoveryAttempt? {
         guard decision.intent == .fileSearch ||
               decision.intent == .compoundFileTask else {
@@ -743,6 +779,8 @@ final class AgentEngine: ObservableObject {
 
         let verification = verifier.verify(
             decision: recoveryDecision,
+            currentUserInput: text,
+            goal: goal,
             snapshot: verificationSnapshot()
         )
 
@@ -2518,7 +2556,7 @@ final class AgentEngine: ObservableObject {
         log("Yeni çalışma kuralı yapılandırılmış hafızaya kaydedildi")
     }
 
-    private func memoryIntent(from text: String) -> String? {
+    private func memoryIntents(from text: String) -> [String] {
         let trimmed = text.trimmingCharacters(in: .whitespacesAndNewlines)
 
         if let range = trimmed.range(
@@ -2526,6 +2564,7 @@ final class AgentEngine: ObservableObject {
             options: [.caseInsensitive, .diacriticInsensitive]
         ) {
             return cleanedMemory(String(trimmed[range.upperBound...]))
+                .map { [$0] } ?? []
         }
 
         let lower = normalize(trimmed)
@@ -2551,14 +2590,62 @@ final class AgentEngine: ObservableObject {
                 )
             }
 
-            return cleanedMemory(rule)
+            return cleanedMemory(rule).map { [$0] } ?? []
         }
 
         if lower.hasPrefix("bundan sonra ") {
-            return cleanedMemory(String(trimmed.dropFirst("bundan sonra ".count)))
+            return cleanedMemory(
+                String(trimmed.dropFirst("bundan sonra ".count))
+            ).map { [$0] } ?? []
         }
 
-        return nil
+        let workflowRule =
+            containsAny(lower, [
+                "çalışma biçimini", "calisma bicimini",
+                "çalışma şeklini", "calisma seklini",
+                "bu yöntemi", "bu yontemi",
+                "bu düzeni", "bu duzeni",
+                "bu yaklaşımı", "bu yaklasimi"
+            ]) &&
+            containsAny(lower, [
+                "ileride", "benzer", "için de kullan",
+                "icin de kullan", "aynı şekilde kullan",
+                "ayni sekilde kullan"
+            ])
+
+        let scopeRule =
+            containsAny(lower, [
+                "başka markalara", "baska markalara",
+                "başka markaya", "baska markaya",
+                "otomatik uygulama", "markaya özel",
+                "markaya ozel"
+            ])
+
+        guard workflowRule || scopeRule else {
+            return []
+        }
+
+        let normalizedSeparators = trimmed
+            .replacingOccurrences(
+                of: ". Ama ",
+                with: ".",
+                options: [.caseInsensitive, .diacriticInsensitive]
+            )
+            .replacingOccurrences(
+                of: ". Fakat ",
+                with: ".",
+                options: [.caseInsensitive, .diacriticInsensitive]
+            )
+
+        return normalizedSeparators
+            .components(separatedBy: ".")
+            .map {
+                $0.trimmingCharacters(
+                    in: .whitespacesAndNewlines
+                )
+            }
+            .compactMap(cleanedMemory)
+            .filter { !$0.isEmpty }
     }
 
     private func cleanedMemory(_ raw: String) -> String? {
