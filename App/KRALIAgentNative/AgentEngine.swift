@@ -787,6 +787,39 @@ final class AgentEngine: ObservableObject {
                 result.executedCapabilityIDs
             completedSemanticStepIndexes =
                 result.completedStepIndexes
+
+            if let graph =
+                currentTaskGraph {
+                let runtimeGaps =
+                    capabilityGapResolver
+                        .resolveRuntimeFailures(
+                            graph: graph,
+                            completedStepIndexes:
+                                result
+                                    .completedStepIndexes,
+                            capabilities:
+                                capabilityRegistry.all
+                        )
+
+                for gap in runtimeGaps
+                    where !currentCapabilityGaps
+                        .contains(
+                            where: {
+                                $0.capabilityID ==
+                                    gap.capabilityID
+                            }
+                        ) {
+                    currentCapabilityGaps
+                        .append(gap)
+
+                    log(
+                        "Runtime Capability Gap: " +
+                        gap.capabilityID +
+                        " • " +
+                        gap.reason
+                    )
+                }
+            }
         } else if resolvedGoal.outcomes.contains(.research),
                   resolvedCapabilities.contains(where: {
                       $0.id == "research.web" && $0.isAvailable
