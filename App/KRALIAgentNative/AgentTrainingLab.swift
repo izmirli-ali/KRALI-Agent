@@ -189,6 +189,9 @@ struct AgentTrainingLab {
             compoundMissionNormalizationResult()
         )
         results.append(
+            genericAppWorkflowGapResult()
+        )
+        results.append(
             capabilityGapClassificationResult()
         )
 
@@ -1229,6 +1232,137 @@ struct AgentTrainingLab {
                 ? []
                 : [
                     "Current-goal mission normalizer capability veya operation zincirini yanlış kurdu."
+                ]
+        )
+    }
+
+    private func genericAppWorkflowGapResult()
+        -> TrainingScenarioResult {
+        let prompt =
+            "Takvim uygulamasını aç. Yarınki ilk etkinliği bul, başlığını ve saatini bana söyle. Ardından bu etkinlik için 15 dakika öncesine bir hatırlatma eklemeyi hazırla ama benden onay almadan hiçbir değişiklik yapma."
+
+        let snapshot = context(
+            hasWorkspace: false
+        )
+
+        let decision = brain.analyze(
+            prompt,
+            context: snapshot
+        )
+
+        let goal = goalInterpreter.interpret(
+            prompt,
+            decision: decision,
+            context: snapshot
+        )
+
+        let rawMission = AgentSemanticMission(
+            objective: prompt,
+            outcomes: ["open"],
+            steps: [
+                AgentSemanticMissionStep(
+                    title: "Uygulamayı aç",
+                    purpose: "Takvim uygulamasını görünür hale getir.",
+                    capabilityID: "desktop.app",
+                    operation: "app.open",
+                    dependsOn: []
+                )
+            ],
+            requiredCapabilityIDs: [
+                "desktop.app"
+            ],
+            requiresUserInput: false,
+            userInputReason: nil,
+            confidence: 0.5
+        )
+
+        let normalized =
+            missionNormalizer.normalize(
+                rawMission,
+                userInput: prompt,
+                capabilities:
+                    capabilityRegistry.all
+            )
+
+        let graph =
+            taskOrchestrator.compile(
+                mission: normalized,
+                capabilities:
+                    capabilityRegistry.all
+            )
+
+        let gaps =
+            capabilityGapResolver.resolve(
+                graph: graph,
+                capabilities:
+                    capabilityRegistry.all
+            )
+
+        let normalizedIDs =
+            Set(
+                normalized
+                    .requiredCapabilityIDs
+            )
+
+        let selected =
+            Set(
+                capabilityRegistry.select(
+                    for: prompt,
+                    decision: decision,
+                    context: snapshot,
+                    goal: goal
+                )
+                .map(\.id)
+            )
+
+        let passed =
+            selected.contains(
+                "app.workflow"
+            ) &&
+            normalizedIDs.contains(
+                "app.workflow"
+            ) &&
+            normalized.steps.contains {
+                $0.capabilityID ==
+                    "app.workflow" &&
+                $0.operation ==
+                    "app.workflow.execute"
+            } &&
+            graph.blockedCapabilityIDs
+                .contains(
+                    "app.workflow"
+                ) &&
+            gaps.contains {
+                $0.capabilityID ==
+                    "app.workflow"
+            }
+
+        return TrainingScenarioResult(
+            scenarioID:
+                "generic-app-workflow-gap",
+            title:
+                "Bilinmeyen uygulama içi işi generic capability gap'e dönüştürme",
+            tier: .core,
+            prompt: prompt,
+            passed: passed,
+            goal:
+                "Özel provider bilinmese de açma dışındaki uygulama içi hedefi Learn hattına taşı",
+            route: [
+                "Core",
+                "Desktop",
+                "Learn",
+                "GapResolver"
+            ],
+            selectedCapabilities:
+                normalized
+                    .requiredCapabilityIDs,
+            unavailableCapabilities:
+                graph
+                    .blockedCapabilityIDs,
+            diagnostics: passed
+                ? []
+                : [
+                    "Compound uygulama görevi app.workflow capability gap üretmedi."
                 ]
         )
     }

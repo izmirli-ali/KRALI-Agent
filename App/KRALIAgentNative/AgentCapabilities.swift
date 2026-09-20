@@ -131,6 +131,14 @@ struct AgentCapabilityRegistry {
             requiresWorkspace: false
         ),
         AgentCapability(
+            id: "app.workflow",
+            name: "Uygulama içi iş akışı",
+            summary: "Özel provider tanımlı olmayan uygulamalarda veri okuma, seçim, hazırlama ve güvenli uygulama içi iş akışlarını temsil eden öğrenilebilir generic capability.",
+            risk: .external,
+            isAvailable: false,
+            requiresWorkspace: false
+        ),
+        AgentCapability(
             id: "desktop.control",
             name: "macOS UI kontrolü",
             summary: "Accessibility / AXUIElement ile menü, buton, alan, klavye, mouse, clipboard ve sistem arayüzü etkileşimlerini yürütür.",
