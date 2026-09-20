@@ -17,7 +17,8 @@ struct DeveloperAgentStatus: Hashable {
             "running",
             "retrying",
             "verifying",
-            "repairing_cline"
+            "repairing_cline",
+            "repairing_runtime"
         ].contains(state)
     }
 
@@ -42,6 +43,8 @@ struct DeveloperAgentStatus: Hashable {
             return "Adayı doğruluyor"
         case "repairing_cline":
             return "Cline onarılıyor"
+        case "repairing_runtime":
+            return "Runtime hazırlanıyor"
         case "ready_for_review":
             return "Öğrenme adayı hazır"
         case "build_failed":
@@ -60,6 +63,7 @@ struct DeveloperAgentStatus: Hashable {
             "setup_homebrew",
             "setup_node_upgrade",
             "setup_cline",
+            "setup_node_supported",
             "setup_cline_repair",
             "setup_cline_auth",
             "waiting_cline_auth"
@@ -74,6 +78,8 @@ struct DeveloperAgentStatus: Hashable {
             return "Önce Homebrew kur; ardından brew install node"
         case "setup_node_upgrade":
             return "Node.js 20+ gerekiyor; Homebrew kullanıyorsan brew upgrade node"
+        case "setup_node_supported":
+            return "Developer Agent için desteklenen Node.js runtime hazırlanamadı."
         case "waiting_cline_auth":
             return "Cline giriş penceresi otomatik açıldı; tarayıcıdaki girişi tamamla."
         case "setup_cline_repair":
