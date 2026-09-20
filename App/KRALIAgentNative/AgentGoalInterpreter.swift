@@ -156,7 +156,18 @@ struct AgentGoalInterpreter {
             "incele", "neler", "bio"
         ])
 
-        if mentionsSocialProfile && asksSocialProfileFacts {
+        let isContextualCreativeFollowup =
+            context.relevantMemoryCount > 0 &&
+            containsAny(text, [
+                "fikir", "öneri", "oneri", "strateji",
+                "çıkar", "cikar", "üret", "uret",
+                "devam et", "devam edelim",
+                "az önce", "az once", "bunlardan"
+            ])
+
+        if mentionsSocialProfile &&
+           asksSocialProfileFacts &&
+           !isContextualCreativeFollowup {
             outcomes.formUnion([.research, .explain])
             capabilityIDs.insert("research.web")
         }
