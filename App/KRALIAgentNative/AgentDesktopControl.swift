@@ -73,7 +73,12 @@ actor AgentDesktopControl {
             )
         else {
             throw DesktopControlError
-                .applicationNotFound(userText)
+                .applicationNotFound(
+                    languageResolver
+                        .applicationTargetPhrase(
+                            from: userText
+                        ) ?? userText
+                )
         }
 
         let runningBefore =
@@ -310,13 +315,21 @@ actor AgentDesktopControl {
     private func resolveRequestedApplication(
         from userText: String
     ) -> ApplicationCandidate? {
-        if let candidate =
-            bestApplicationCandidate(
-                from: userText,
-                candidates:
-                    installedApplicationCandidates()
-            ) {
-            return candidate
+        let queries = applicationResolutionQueries(
+            from: userText
+        )
+
+        let installed =
+            installedApplicationCandidates()
+
+        for query in queries {
+            if let candidate =
+                bestApplicationCandidate(
+                    from: query,
+                    candidates: installed
+                ) {
+                return candidate
+            }
         }
 
         cachedApplicationCandidates = nil
@@ -324,12 +337,14 @@ actor AgentDesktopControl {
         let refreshed =
             installedApplicationCandidates()
 
-        if let candidate =
-            bestApplicationCandidate(
-                from: userText,
-                candidates: refreshed
-            ) {
-            return candidate
+        for query in queries {
+            if let candidate =
+                bestApplicationCandidate(
+                    from: query,
+                    candidates: refreshed
+                ) {
+                return candidate
+            }
         }
 
         let expanded =
@@ -341,10 +356,49 @@ actor AgentDesktopControl {
         cachedApplicationCandidates =
             expanded
 
-        return bestApplicationCandidate(
-            from: userText,
-            candidates: expanded
-        )
+        for query in queries {
+            if let candidate =
+                bestApplicationCandidate(
+                    from: query,
+                    candidates: expanded
+                ) {
+                return candidate
+            }
+        }
+
+        return nil
+    }
+
+    private func applicationResolutionQueries(
+        from userText: String
+    ) -> [String] {
+        var values: [String] = []
+
+        if let extracted =
+            languageResolver
+                .applicationTargetPhrase(
+                    from: userText
+                ) {
+            values.append(extracted)
+        }
+
+        values.append(userText)
+
+        var seen = Set<String>()
+
+        return values.filter {
+            let key =
+                languageResolver.normalized($0)
+
+            guard
+                !key.isEmpty,
+                seen.insert(key).inserted
+            else {
+                return false
+            }
+
+            return true
+        }
     }
 
     private func bestApplicationCandidate(
