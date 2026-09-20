@@ -61,19 +61,24 @@ struct ConversationStore {
             )
 
             if overflowCount > 0 {
-                archive(
-                    Array(active.prefix(overflowCount))
+                let overflow = Array(
+                    active.prefix(overflowCount)
                 )
-                active = Array(
-                    active.suffix(retainedAfterArchive)
-                )
+
+                if archive(overflow) {
+                    active = Array(
+                        active.suffix(retainedAfterArchive)
+                    )
+                }
             }
         }
 
-        write(
+        guard write(
             active,
             to: activeURL
-        )
+        ) else {
+            return messages
+        }
 
         return active
     }
@@ -103,9 +108,9 @@ struct ConversationStore {
 
     private func archive(
         _ messages: [ChatMessage]
-    ) {
+    ) -> Bool {
         guard !messages.isEmpty else {
-            return
+            return true
         }
 
         ensureDirectories()
@@ -124,29 +129,35 @@ struct ConversationStore {
             isDirectory: false
         )
 
-        write(
+        return write(
             messages,
             to: url
         )
     }
 
+    @discardableResult
     private func write(
         _ messages: [ChatMessage],
         to url: URL
-    ) {
+    ) -> Bool {
         let encoder = JSONEncoder()
         encoder.dateEncodingStrategy = .iso8601
 
         guard
             let data = try? encoder.encode(messages)
         else {
-            return
+            return false
         }
 
-        try? data.write(
-            to: url,
-            options: .atomic
-        )
+        do {
+            try data.write(
+                to: url,
+                options: .atomic
+            )
+            return true
+        } catch {
+            return false
+        }
     }
 
     private func ensureDirectories() {
