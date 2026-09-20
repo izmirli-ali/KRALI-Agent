@@ -107,6 +107,7 @@ final class AgentEngine: ObservableObject {
     private let screenPerceptionStore = ScreenPerceptionStore()
     private let desktopControl = AgentDesktopControl()
     private let desktopControlStore = DesktopControlProbeStore()
+    private let textFileWriter = AgentTextFileWriter()
     private let developerBridge = AgentDeveloperBridge()
     private let localIntelligence = AgentLocalIntelligence()
     private let subscriptionIntelligence = AgentSubscriptionIntelligence()
@@ -1419,6 +1420,105 @@ final class AgentEngine: ObservableObject {
                     )
                     completedStepIndexes.insert(
                         stepIndex
+                    )
+                }
+
+            case "files.write.text":
+                let targetFolder =
+                    folderSearchResults.first?.url
+
+                guard let targetFolder else {
+                    outputs.append(
+                        "Metin dosyası yazılamadı: hedef klasör güvenilir biçimde çözülemedi."
+                    )
+                    continue
+                }
+
+                let contentDependencies =
+                    step.dependsOn.compactMap {
+                        dependencyIndex -> String? in
+
+                        guard
+                            mission.steps.indices
+                                .contains(
+                                    dependencyIndex
+                                )
+                        else {
+                            return nil
+                        }
+
+                        let dependencyStep =
+                            mission.steps[
+                                dependencyIndex
+                            ]
+
+                        if dependencyStep.capabilityID ==
+                            "files.search" ||
+                           dependencyStep.capabilityID ==
+                            "context.local" ||
+                           dependencyStep.capabilityID ==
+                            "desktop.app" {
+                            return nil
+                        }
+
+                        return stepEvidence[
+                            dependencyIndex
+                        ]
+                    }
+                    .filter {
+                        !$0.trimmingCharacters(
+                            in:
+                                .whitespacesAndNewlines
+                        ).isEmpty
+                    }
+
+                let textContent =
+                    contentDependencies
+                        .joined(
+                            separator: "\n\n"
+                        )
+
+                do {
+                    let result =
+                        try await textFileWriter.write(
+                            content:
+                                textContent,
+                            to:
+                                targetFolder,
+                            workspaceRoot:
+                                selectedRootURL,
+                            preferredStem:
+                                step.title
+                        )
+
+                    let evidence =
+                        "Metin dosyası yazıldı: " +
+                        result.url.path +
+                        " • " +
+                        String(
+                            result.byteCount
+                        ) +
+                        " byte"
+
+                    stepEvidence[stepIndex] =
+                        evidence
+                    outputs.append(
+                        evidence
+                    )
+                    executed.insert(
+                        "files.write.text"
+                    )
+                    completedStepIndexes.insert(
+                        stepIndex
+                    )
+                } catch {
+                    outputs.append(
+                        "Metin dosyası yazılamadı: " +
+                        error.localizedDescription
+                    )
+                    log(
+                        "Text File Writer başarısız: " +
+                        error.localizedDescription
                     )
                 }
 
