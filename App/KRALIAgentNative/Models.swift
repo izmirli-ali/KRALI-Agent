@@ -120,7 +120,7 @@ struct AgentExecutionPlan {
     let requiresVerification: Bool
 }
 
-struct AgentSemanticMission: Codable, Hashable {
+struct AgentSemanticMission: Codable, Hashable, Sendable {
     let objective: String
     let outcomes: [String]
     let steps: [AgentSemanticMissionStep]
@@ -134,7 +134,7 @@ struct AgentSemanticMission: Codable, Hashable {
     }
 }
 
-struct AgentSemanticMissionStep: Codable, Hashable {
+struct AgentSemanticMissionStep: Codable, Hashable, Sendable {
     let title: String
     let purpose: String
     let capabilityID: String
@@ -142,7 +142,7 @@ struct AgentSemanticMissionStep: Codable, Hashable {
     let dependsOn: [Int]
 }
 
-struct AgentMissionReview: Codable, Hashable {
+struct AgentMissionReview: Codable, Hashable, Sendable {
     let passed: Bool
     let summary: String
     let missingCapabilityIDs: [String]
