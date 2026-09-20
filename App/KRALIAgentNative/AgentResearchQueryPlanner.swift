@@ -27,6 +27,13 @@ struct AgentResearchQueryPlanner {
         )
         let normalized = normalize(query)
 
+        if let socialPlan = socialProfilePlan(
+            original: query,
+            normalized: normalized
+        ) {
+            return socialPlan
+        }
+
         let entity = extractEntity(
             from: query,
             normalized: normalized
@@ -52,6 +59,156 @@ struct AgentResearchQueryPlanner {
             original: query,
             normalized: normalized
         )
+    }
+
+    private func socialProfilePlan(
+        original: String,
+        normalized: String
+    ) -> ResearchQueryPlan? {
+        let platforms: [(name: String, domain: String)] = [
+            ("instagram", "instagram.com"),
+            ("tiktok", "tiktok.com"),
+            ("linkedin", "linkedin.com"),
+            ("youtube", "youtube.com")
+        ]
+
+        guard
+            let platform = platforms.first(
+                where: { normalized.contains($0.name) }
+            ),
+            let handle = extractSocialHandle(
+                from: original,
+                platform: platform.name
+            )
+        else {
+            return nil
+        }
+
+        let normalizedHandle = normalize(handle)
+            .replacingOccurrences(of: "@", with: "")
+
+        guard normalizedHandle.count >= 2 else {
+            return nil
+        }
+
+        let facets = [
+            ResearchFacet(
+                id: "profile",
+                title: "Resmi profil",
+                query: "site:\(platform.domain) \(normalizedHandle)"
+            ),
+            ResearchFacet(
+                id: "audience",
+                title: "Takipçi / kitle",
+                query: "\"\(normalizedHandle)\" \(platform.name) followers takipçi"
+            ),
+            ResearchFacet(
+                id: "content",
+                title: "İçerik türleri",
+                query: "\"\(normalizedHandle)\" \(platform.name) reels posts içerik paylaşım"
+            )
+        ]
+
+        var variants = facets.map(\.query)
+        variants.append(
+            contentsOf: [
+                original,
+                "\"\(normalizedHandle)\" \(platform.name)",
+                "site:\(platform.domain) \(normalizedHandle)"
+            ]
+        )
+
+        var seen = Set<String>()
+        variants = variants.filter {
+            let key = normalize($0)
+            guard !seen.contains(key) else {
+                return false
+            }
+            seen.insert(key)
+            return true
+        }
+
+        return ResearchQueryPlan(
+            original: original,
+            variants: variants,
+            conceptGroups: [
+                [normalizedHandle],
+                [
+                    platform.name, "profile", "profil",
+                    "followers", "takipci", "reels",
+                    "posts", "icerik", "paylasim"
+                ]
+            ],
+            mandatoryConceptGroups: [
+                [normalizedHandle]
+            ],
+            preferredDomains: [
+                platform.domain
+            ],
+            entityTerms: [
+                normalizedHandle
+            ],
+            facets: facets
+        )
+    }
+
+    private func extractSocialHandle(
+        from original: String,
+        platform: String
+    ) -> String? {
+        let escapedPlatform = NSRegularExpression
+            .escapedPattern(
+                for: platform
+            )
+
+        let patterns = [
+            #"(?i)(?:@)?([A-Z0-9._]{2,})\s+"# +
+                escapedPlatform,
+            escapedPlatform +
+                #"(?i)\s+(?:hesab(?:ı|i|ının|inin)?\s+|profil(?:i)?\s+)?(?:@)?([A-Z0-9._]{2,})"#
+        ]
+
+        for pattern in patterns {
+            guard
+                let regex = try? NSRegularExpression(
+                    pattern: pattern
+                )
+            else {
+                continue
+            }
+
+            let range = NSRange(
+                original.startIndex..<original.endIndex,
+                in: original
+            )
+
+            guard
+                let match = regex.firstMatch(
+                    in: original,
+                    range: range
+                ),
+                match.numberOfRanges > 1,
+                let handleRange = Range(
+                    match.range(at: 1),
+                    in: original
+                )
+            else {
+                continue
+            }
+
+            let handle = String(
+                original[handleRange]
+            )
+            .trimmingCharacters(
+                in: .whitespacesAndNewlines
+            )
+
+            if !handle.isEmpty {
+                return handle
+            }
+        }
+
+        return nil
     }
 
     private func brandPlan(
