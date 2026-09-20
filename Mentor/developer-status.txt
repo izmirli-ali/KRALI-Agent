@@ -1,1 +1,1 @@
-local_tool_probe|Yerel model tool calling doğrulanıyor: qwen2.5-coder:14b-instruct|@meta|app=0.8.54|at=1789936455|run=20260920-233414
+local_agent_running|Tarayıcı kontrolü (browser.control) yerel model çalışıyor • adım 4/36|krali-dev-agent/20260920-233414|/Users/medusa/Developer/KRALI-Agent-Dev-20260920-233414|@meta|app=0.8.54|at=1789936698|run=20260920-233414
