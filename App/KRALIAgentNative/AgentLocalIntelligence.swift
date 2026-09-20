@@ -387,6 +387,8 @@ actor AgentLocalIntelligence {
                     "uygulamayi ac",
                     "uygulamayı aç",
                     "uygulamasını aç",
+                    "uygulama ac",
+                    "uygulama aç",
                     "pencereyi one getir",
                     "pencereyi öne getir",
                     "uygulamaya gec",
