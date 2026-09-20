@@ -412,376 +412,434 @@ final class AgentEngine: ObservableObject {
         busy = true
 
         Task {
-            var resolvedGoal = goalProfile
-            var resolvedCapabilities = capabilities
-            var resolvedLearningPlans = learningPlans
-            var resolvedExecutionPlan = executionPlan
-            var semanticMission: AgentSemanticMission?
-            var executedSemanticCapabilities = Set<String>()
-            var completedSemanticStepIndexes = Set<Int>()
-
-            if shouldUseSemanticMission(
+            await executeTaskPipeline(
+                text: text,
+                source: source,
+                taskStartedAt: taskStartedAt,
                 decision: decision,
-                goal: resolvedGoal
-            ) {
-                var plannedMission: AgentSemanticMission?
-                var plannerProvider: String?
+                goalProfile: goalProfile,
+                capabilities: capabilities,
+                learningPlans: learningPlans,
+                executionPlan: executionPlan,
+                executionContextMemories:
+                    executionContextMemories,
+                webResearchAvailable:
+                    webResearchAvailable
+            )
+        }
+    }
 
-                if let localMission =
-                    await localIntelligence.planMission(
-                        userInput: text,
-                        contextMemory: executionContextMemories,
-                        capabilities: capabilityRegistry.all,
-                        hasWorkspace: selectedRootURL != nil
-                    ),
-                   localMission.normalizedConfidence >= 0.45,
-                   semanticMissionCoverageIsValid(
-                        localMission,
-                        fallbackGoal: goalProfile
-                   ) {
-                    plannedMission = localMission
-                    plannerProvider =
-                        localMission.steps.contains(
-                            where: {
-                                $0.operation ==
-                                    "semantic.fallback"
-                            }
-                        )
-                            ? "Local Contract Repair"
-                            : (
-                                localMission.steps.contains(
-                                    where: {
-                                        $0.operation ==
-                                            "capability.contract"
-                                    }
-                                )
-                                    ? "Apple + Contract Repair"
-                                    : "Apple Foundation Models"
-                            )
-                } else if let subscriptionMission =
-                    await subscriptionIntelligence.planMission(
-                        userInput: text,
-                        contextMemory: executionContextMemories,
-                        capabilities: capabilityRegistry.all,
-                        hasWorkspace: selectedRootURL != nil
-                    ),
-                    subscriptionMission.mission
-                        .normalizedConfidence >= 0.45,
-                    semanticMissionCoverageIsValid(
-                        subscriptionMission.mission,
-                        fallbackGoal: goalProfile
-                    ) {
-                    plannedMission =
-                        subscriptionMission.mission
-                    plannerProvider =
-                        subscriptionMission.provider
-                }
+    private func executeTaskPipeline(
+        text: String,
+        source: ChatInputSource,
+        taskStartedAt: Date,
+        decision: AgentDecision,
+        goalProfile: AgentGoalProfile,
+        capabilities: [AgentCapability],
+        learningPlans: [CapabilityLearningPlan],
+        executionPlan: AgentExecutionPlan,
+        executionContextMemories:
+            [AgentContextMemoryEntry],
+        webResearchAvailable: Bool
+    ) async {
+        var resolvedGoal = goalProfile
+        var resolvedCapabilities = capabilities
+        var resolvedLearningPlans = learningPlans
+        var resolvedExecutionPlan = executionPlan
+        var semanticMission: AgentSemanticMission?
+        var executedSemanticCapabilities = Set<String>()
+        var completedSemanticStepIndexes = Set<Int>()
 
-                if let rawMission = plannedMission {
-                    let mission =
-                        missionNormalizer.normalize(
-                            rawMission,
-                            userInput: text,
-                            capabilities:
-                                capabilityRegistry.all
-                        )
+        if shouldUseSemanticMission(
+            decision: decision,
+            goal: resolvedGoal
+        ) {
+            var plannedMission: AgentSemanticMission?
+            var plannerProvider: String?
 
-                    semanticMission = mission
-                    currentSemanticMission = mission
-                    currentSemanticPlannerProvider =
-                        plannerProvider
-
-                    resolvedGoal = semanticGoalProfile(
-                        from: mission,
-                        fallback: goalProfile
-                    )
-                resolvedCapabilities = semanticCapabilities(
-                    from: mission,
-                    fallback: capabilities
-                )
-                resolvedLearningPlans = capabilityLearner.makePlans(
-                    for: resolvedCapabilities,
-                    webResearchAvailable: webResearchAvailable
-                )
-                resolvedExecutionPlan = semanticExecutionPlan(
-                    mission,
-                    capabilities: resolvedCapabilities,
-                    goal: resolvedGoal
-                )
-
-                let compiledTaskGraph =
-                    taskOrchestrator.compile(
-                        mission: mission,
-                        capabilities:
-                            capabilityRegistry.all
-                    )
-
-                currentTaskGraph =
-                    compiledTaskGraph
-
-                currentCapabilityGaps =
-                    capabilityGapResolver.resolve(
-                        graph:
-                            compiledTaskGraph,
-                        capabilities:
-                            capabilityRegistry.all
-                    )
-
-                let blocked =
-                    compiledTaskGraph
-                        .blockedCapabilityIDs
-                let approvals =
-                    compiledTaskGraph
-                        .approvalStepIndexes
-
-                taskGraphStatus =
-                    String(
-                        compiledTaskGraph.steps.count
-                    ) +
-                    " adım" +
-                    (blocked.isEmpty
-                        ? ""
-                        : " • blocked: " +
-                            blocked.joined(
-                                separator: ", "
-                            )) +
-                    (approvals.isEmpty
-                        ? ""
-                        : " • onay: " +
-                            approvals
-                                .map(String.init)
-                                .joined(
-                                    separator: ", "
-                                ))
-
-                currentGoal = resolvedGoal.summary
-                currentPlan = mission.steps
-                    .map(\.title)
-                    .joined(separator: " → ")
-                selectedCapabilities = resolvedCapabilities
-                capabilityLearningPlans = resolvedLearningPlans
-                capabilityLearningBacklog = learningStore.merge(
-                    existing: capabilityLearningBacklog,
-                    plans: resolvedLearningPlans,
-                    capabilities: resolvedCapabilities
-                )
-                executionSteps = resolvedExecutionPlan.steps
-                activeRoute = routeBuilder.build(
-                    goal: resolvedGoal,
-                    capabilities: resolvedCapabilities,
-                    learningPlans: resolvedLearningPlans,
-                    requiresVerification: resolvedExecutionPlan.requiresVerification
-                )
-                fallbackPlan = resolvedExecutionPlan.fallback
-                prepareExecutionSteps()
-
-                log("Semantic Mission: \(mission.objective)")
-                log(
-                    "Semantic planner sağlayıcısı: " +
-                    (plannerProvider ?? "Bilinmiyor")
-                )
-                log(
-                    "Semantic capability planı: " +
-                    mission.requiredCapabilityIDs.joined(separator: ", ")
-                )
-                log(
-                    "Task Graph: " +
-                    compiledTaskGraph.steps
-                        .map {
-                            String($0.index) +
-                            ":" +
-                            $0.capabilityID +
-                            "[" +
-                            $0.role.rawValue +
-                            "]"
+            if let localMission =
+                await localIntelligence.planMission(
+                    userInput: text,
+                    contextMemory: executionContextMemories,
+                    capabilities: capabilityRegistry.all,
+                    hasWorkspace: selectedRootURL != nil
+                ),
+               localMission.normalizedConfidence >= 0.45,
+               semanticMissionCoverageIsValid(
+                    localMission,
+                    fallbackGoal: goalProfile
+               ) {
+                plannedMission = localMission
+                plannerProvider =
+                    localMission.steps.contains(
+                        where: {
+                            $0.operation ==
+                                "semantic.fallback"
                         }
-                        .joined(separator: " → ")
+                    )
+                        ? "Local Contract Repair"
+                        : (
+                            localMission.steps.contains(
+                                where: {
+                                    $0.operation ==
+                                        "capability.contract"
+                                }
+                            )
+                                ? "Apple + Contract Repair"
+                                : "Apple Foundation Models"
+                        )
+            } else if let subscriptionMission =
+                await subscriptionIntelligence.planMission(
+                    userInput: text,
+                    contextMemory: executionContextMemories,
+                    capabilities: capabilityRegistry.all,
+                    hasWorkspace: selectedRootURL != nil
+                ),
+                subscriptionMission.mission
+                    .normalizedConfidence >= 0.45,
+                semanticMissionCoverageIsValid(
+                    subscriptionMission.mission,
+                    fallbackGoal: goalProfile
+                ) {
+                plannedMission =
+                    subscriptionMission.mission
+                plannerProvider =
+                    subscriptionMission.provider
+            }
+
+            if let rawMission = plannedMission {
+                let mission =
+                    missionNormalizer.normalize(
+                        rawMission,
+                        userInput: text,
+                        capabilities:
+                            capabilityRegistry.all
+                    )
+
+                semanticMission = mission
+                currentSemanticMission = mission
+                currentSemanticPlannerProvider =
+                    plannerProvider
+
+                resolvedGoal = semanticGoalProfile(
+                    from: mission,
+                    fallback: goalProfile
                 )
-                if !blocked.isEmpty {
-                    log(
-                        "Task Graph blocked capability: " +
+            resolvedCapabilities = semanticCapabilities(
+                from: mission,
+                fallback: capabilities
+            )
+            resolvedLearningPlans = capabilityLearner.makePlans(
+                for: resolvedCapabilities,
+                webResearchAvailable: webResearchAvailable
+            )
+            resolvedExecutionPlan = semanticExecutionPlan(
+                mission,
+                capabilities: resolvedCapabilities,
+                goal: resolvedGoal
+            )
+
+            let compiledTaskGraph =
+                taskOrchestrator.compile(
+                    mission: mission,
+                    capabilities:
+                        capabilityRegistry.all
+                )
+
+            currentTaskGraph =
+                compiledTaskGraph
+
+            currentCapabilityGaps =
+                capabilityGapResolver.resolve(
+                    graph:
+                        compiledTaskGraph,
+                    capabilities:
+                        capabilityRegistry.all
+                )
+
+            let blocked =
+                compiledTaskGraph
+                    .blockedCapabilityIDs
+            let approvals =
+                compiledTaskGraph
+                    .approvalStepIndexes
+
+            taskGraphStatus =
+                String(
+                    compiledTaskGraph.steps.count
+                ) +
+                " adım" +
+                (blocked.isEmpty
+                    ? ""
+                    : " • blocked: " +
                         blocked.joined(
                             separator: ", "
-                        )
-                    )
-                }
-                for gap in currentCapabilityGaps {
-                    log(
-                        "Capability Gap: " +
-                        gap.capabilityID +
-                        " • " +
-                        gap.kind.rawValue +
-                        " • strategy=" +
-                        (
-                            gap.candidateCapabilityIDs
-                                .isEmpty
-                                ? "yok"
-                                : gap.candidateCapabilityIDs
-                                    .joined(
-                                        separator: ","
-                                    )
-                        )
-                    )
-                }
-                if !approvals.isEmpty {
-                    log(
-                        "Task Graph kullanıcı onayı bekleyen step: " +
+                        )) +
+                (approvals.isEmpty
+                    ? ""
+                    : " • onay: " +
                         approvals
                             .map(String.init)
-                            .joined(separator: ", ")
-                    )
-                }
-                log(
-                    "Semantic rota: " +
-                    activeRoute.joined(separator: " → ")
-                )
-                } else {
-                    let plannerFailure =
-                        await subscriptionIntelligence
-                            .lastFailureReason()
+                            .joined(
+                                separator: ", "
+                            ))
 
-                    if let plannerFailure,
-                       !plannerFailure.isEmpty {
-                        log(
-                            "Semantic planner geçerli mission üretemedi: " +
-                            plannerFailure
-                        )
-                    } else {
-                        log(
-                            "Semantic planner geçerli mission üretemedi; deterministic fallback korunuyor"
-                        )
-                    }
-                }
-            }
-
-            var baseReply: String
-
-            if let mission = semanticMission {
-                let result = await executeAvailableSemanticMission(
-                    mission,
-                    userInput: text
-                )
-                baseReply = result.reply
-                .trimmingCharacters(
-                    in: .whitespacesAndNewlines
-                )
-                .isEmpty
-                    ? semanticMissionStatusReply(mission)
-                    : result.reply
-                executedSemanticCapabilities =
-                    result.executedCapabilityIDs
-                completedSemanticStepIndexes =
-                    result.completedStepIndexes
-            } else if resolvedGoal.outcomes.contains(.research),
-                      resolvedCapabilities.contains(where: {
-                          $0.id == "research.web" && $0.isAvailable
-                      }) {
-                baseReply = await performWebResearch(
-                    query: webResearchQuery(from: text)
-                )
-            } else {
-                baseReply = makeReply(
-                    for: text,
-                    decision: decision
-                )
-            }
-
-            if let learningSummary = await researchCapabilityGapIfNeeded(
+            currentGoal = resolvedGoal.summary
+            currentPlan = mission.steps
+                .map(\.title)
+                .joined(separator: " → ")
+            selectedCapabilities = resolvedCapabilities
+            capabilityLearningPlans = resolvedLearningPlans
+            capabilityLearningBacklog = learningStore.merge(
+                existing: capabilityLearningBacklog,
                 plans: resolvedLearningPlans,
-                userInput: text
-            ) {
-                baseReply += "\n\nÖğrenme araştırması: " + learningSummary
-            }
+                capabilities: resolvedCapabilities
+            )
+            executionSteps = resolvedExecutionPlan.steps
+            activeRoute = routeBuilder.build(
+                goal: resolvedGoal,
+                capabilities: resolvedCapabilities,
+                learningPlans: resolvedLearningPlans,
+                requiresVerification: resolvedExecutionPlan.requiresVerification
+            )
+            fallbackPlan = resolvedExecutionPlan.fallback
+            prepareExecutionSteps()
 
-            if semanticMission != nil {
-                completeSemanticActionSteps(
-                    executedCapabilityIDs:
-                        executedSemanticCapabilities,
-                    completedMissionStepIndexes:
-                        completedSemanticStepIndexes
-                )
-            } else {
-                completeActionSteps()
-            }
-
-            let verification: AgentVerificationResult
-            if resolvedExecutionPlan.requiresVerification {
-                setVerificationStep(.running)
-                verificationState = .checking
-                verificationSummary = "Sonuç kontrol ediliyor…"
-
-                verification = verifier.verify(
-                    decision: decision,
-                    currentUserInput: text,
-                    goal: resolvedGoal,
-                    semanticMission: semanticMission,
-                    snapshot: verificationSnapshot(
-                        executedCapabilityIDs:
-                            executedSemanticCapabilities
+            log("Semantic Mission: \(mission.objective)")
+            log(
+                "Semantic planner sağlayıcısı: " +
+                (plannerProvider ?? "Bilinmiyor")
+            )
+            log(
+                "Semantic capability planı: " +
+                mission.requiredCapabilityIDs.joined(separator: ", ")
+            )
+            log(
+                "Task Graph: " +
+                compiledTaskGraph.steps
+                    .map {
+                        String($0.index) +
+                        ":" +
+                        $0.capabilityID +
+                        "[" +
+                        $0.role.rawValue +
+                        "]"
+                    }
+                    .joined(separator: " → ")
+            )
+            if !blocked.isEmpty {
+                log(
+                    "Task Graph blocked capability: " +
+                    blocked.joined(
+                        separator: ", "
                     )
                 )
-
-                verificationState = verification.state
-                verificationSummary = verification.summary
-
-                if verification.state == .attention {
-                    setVerificationStep(.attention)
-                    fallbackPlan = verification.fallback ?? resolvedExecutionPlan.fallback
-                } else if verification.state == .partial {
-                    setVerificationStep(.partial)
-                    fallbackPlan = nil
-                } else {
-                    setVerificationStep(.completed)
-                }
-            } else {
-                setVerificationStep(.skipped)
-                verification = AgentVerificationResult(
-                    state: .skipped,
-                    summary: "Bu turda doğrulanacak gerçek araç işlemi yok.",
-                    fallback: nil
+            }
+            for gap in currentCapabilityGaps {
+                log(
+                    "Capability Gap: " +
+                    gap.capabilityID +
+                    " • " +
+                    gap.kind.rawValue +
+                    " • strategy=" +
+                    (
+                        gap.candidateCapabilityIDs
+                            .isEmpty
+                            ? "yok"
+                            : gap.candidateCapabilityIDs
+                                .joined(
+                                    separator: ","
+                                )
+                    )
                 )
-                verificationState = .skipped
-                verificationSummary = verification.summary
             }
+            if !approvals.isEmpty {
+                log(
+                    "Task Graph kullanıcı onayı bekleyen step: " +
+                    approvals
+                        .map(String.init)
+                        .joined(separator: ", ")
+                )
+            }
+            log(
+                "Semantic rota: " +
+                activeRoute.joined(separator: " → ")
+            )
+            } else {
+                let plannerFailure =
+                    await subscriptionIntelligence
+                        .lastFailureReason()
 
-            var finalBaseReply = baseReply
-            var finalVerification = verification
-
-            if verification.state == .attention,
-               let recovery = attemptSafeRecovery(
-                    for: text,
-                    decision: decision,
-                    goal: resolvedGoal
-               ) {
-                finalBaseReply = "İlk plan sonuç vermedi. Güvenli Plan B'yi otomatik denedim.\n\n" + recovery.reply
-                finalVerification = recovery.verification
-                verificationState = recovery.verification.state
-                verificationSummary = recovery.verification.summary
-                recoverySummary = recovery.summary
-
-                if recovery.verification.state == .passed {
-                    setVerificationStep(.completed)
-                    fallbackPlan = nil
-                    log("Plan B başarılı: \(recovery.summary)")
-                } else if recovery.verification.state == .partial {
-                    setVerificationStep(.partial)
-                    fallbackPlan = nil
-                    log("Plan B kısmi sonuç verdi: \(recovery.summary)")
+                if let plannerFailure,
+                   !plannerFailure.isEmpty {
+                    log(
+                        "Semantic planner geçerli mission üretemedi: " +
+                        plannerFailure
+                    )
                 } else {
-                    setVerificationStep(.attention)
-                    fallbackPlan = recovery.verification.fallback ?? fallbackPlan
-                    log("Plan B de hedefi doğrulayamadı")
+                    log(
+                        "Semantic planner geçerli mission üretemedi; deterministic fallback korunuyor"
+                    )
+                }
+            }
+        }
+
+        var baseReply: String
+
+        if let mission = semanticMission {
+            let result = await executeAvailableSemanticMission(
+                mission,
+                userInput: text
+            )
+            baseReply = result.reply
+            .trimmingCharacters(
+                in: .whitespacesAndNewlines
+            )
+            .isEmpty
+                ? semanticMissionStatusReply(mission)
+                : result.reply
+            executedSemanticCapabilities =
+                result.executedCapabilityIDs
+            completedSemanticStepIndexes =
+                result.completedStepIndexes
+        } else if resolvedGoal.outcomes.contains(.research),
+                  resolvedCapabilities.contains(where: {
+                      $0.id == "research.web" && $0.isAvailable
+                  }) {
+            baseReply = await performWebResearch(
+                query: webResearchQuery(from: text)
+            )
+        } else {
+            baseReply = makeReply(
+                for: text,
+                decision: decision
+            )
+        }
+
+        if let learningSummary = await researchCapabilityGapIfNeeded(
+            plans: resolvedLearningPlans,
+            userInput: text
+        ) {
+            baseReply += "\n\nÖğrenme araştırması: " + learningSummary
+        }
+
+        if semanticMission != nil {
+            completeSemanticActionSteps(
+                executedCapabilityIDs:
+                    executedSemanticCapabilities,
+                completedMissionStepIndexes:
+                    completedSemanticStepIndexes
+            )
+        } else {
+            completeActionSteps()
+        }
+
+        let verification: AgentVerificationResult
+        if resolvedExecutionPlan.requiresVerification {
+            setVerificationStep(.running)
+            verificationState = .checking
+            verificationSummary = "Sonuç kontrol ediliyor…"
+
+            verification = verifier.verify(
+                decision: decision,
+                currentUserInput: text,
+                goal: resolvedGoal,
+                semanticMission: semanticMission,
+                snapshot: verificationSnapshot(
+                    executedCapabilityIDs:
+                        executedSemanticCapabilities
+                )
+            )
+
+            verificationState = verification.state
+            verificationSummary = verification.summary
+
+            if verification.state == .attention {
+                setVerificationStep(.attention)
+                fallbackPlan = verification.fallback ?? resolvedExecutionPlan.fallback
+            } else if verification.state == .partial {
+                setVerificationStep(.partial)
+                fallbackPlan = nil
+            } else {
+                setVerificationStep(.completed)
+            }
+        } else {
+            setVerificationStep(.skipped)
+            verification = AgentVerificationResult(
+                state: .skipped,
+                summary: "Bu turda doğrulanacak gerçek araç işlemi yok.",
+                fallback: nil
+            )
+            verificationState = .skipped
+            verificationSummary = verification.summary
+        }
+
+        var finalBaseReply = baseReply
+        var finalVerification = verification
+
+        if verification.state == .attention,
+           let recovery = attemptSafeRecovery(
+                for: text,
+                decision: decision,
+                goal: resolvedGoal
+           ) {
+            finalBaseReply = "İlk plan sonuç vermedi. Güvenli Plan B'yi otomatik denedim.\n\n" + recovery.reply
+            finalVerification = recovery.verification
+            verificationState = recovery.verification.state
+            verificationSummary = recovery.verification.summary
+            recoverySummary = recovery.summary
+
+            if recovery.verification.state == .passed {
+                setVerificationStep(.completed)
+                fallbackPlan = nil
+                log("Plan B başarılı: \(recovery.summary)")
+            } else if recovery.verification.state == .partial {
+                setVerificationStep(.partial)
+                fallbackPlan = nil
+                log("Plan B kısmi sonuç verdi: \(recovery.summary)")
+            } else {
+                setVerificationStep(.attention)
+                fallbackPlan = recovery.verification.fallback ?? fallbackPlan
+                log("Plan B de hedefi doğrulayamadı")
+            }
+        }
+
+        var intelligenceProvider: String?
+        var synthesisApplied = false
+
+        if shouldUseIntelligence(
+            goal: resolvedGoal,
+            verification: finalVerification
+        ) {
+            if let synthesized = await localIntelligence.synthesize(
+                userInput: text,
+                goal: resolvedGoal.summary,
+                draft: finalBaseReply,
+                verification: finalVerification,
+                capabilities: selectedCapabilities,
+                researchEvidence: webResearchEvidence,
+                contextMemory: executionContextMemories
+            ) {
+                if synthesisOutputMeetsGoal(
+                    userInput: text,
+                    goal: resolvedGoal,
+                    output: synthesized
+                ) {
+                    finalBaseReply = synthesized
+                    synthesisApplied = true
+                    intelligenceProvider = "Apple Foundation Models"
+                    intelligenceProviderStatus =
+                        "Apple yerel zeka sentezi kullanıldı."
+                    log("Yerel zeka sentezi uygulandı")
+                } else {
+                    log(
+                        "Yerel zeka çıktısı hedef biçimine uymadı; Subscription fallback denenecek"
+                    )
                 }
             }
 
-            var intelligenceProvider: String?
-            var synthesisApplied = false
-
-            if shouldUseIntelligence(
-                goal: resolvedGoal,
-                verification: finalVerification
-            ) {
-                if let synthesized = await localIntelligence.synthesize(
+            if !synthesisApplied,
+               let subscription = await subscriptionIntelligence.synthesize(
                     userInput: text,
                     goal: resolvedGoal.summary,
                     draft: finalBaseReply,
@@ -789,201 +847,173 @@ final class AgentEngine: ObservableObject {
                     capabilities: selectedCapabilities,
                     researchEvidence: webResearchEvidence,
                     contextMemory: executionContextMemories
+               ) {
+                if synthesisOutputMeetsGoal(
+                    userInput: text,
+                    goal: resolvedGoal,
+                    output: subscription.text
                 ) {
-                    if synthesisOutputMeetsGoal(
-                        userInput: text,
-                        goal: resolvedGoal,
-                        output: synthesized
-                    ) {
-                        finalBaseReply = synthesized
-                        synthesisApplied = true
-                        intelligenceProvider = "Apple Foundation Models"
-                        intelligenceProviderStatus =
-                            "Apple yerel zeka sentezi kullanıldı."
-                        log("Yerel zeka sentezi uygulandı")
-                    } else {
-                        log(
-                            "Yerel zeka çıktısı hedef biçimine uymadı; Subscription fallback denenecek"
-                        )
-                    }
-                }
-
-                if !synthesisApplied,
-                   let subscription = await subscriptionIntelligence.synthesize(
-                        userInput: text,
-                        goal: resolvedGoal.summary,
-                        draft: finalBaseReply,
-                        verification: finalVerification,
-                        capabilities: selectedCapabilities,
-                        researchEvidence: webResearchEvidence,
-                        contextMemory: executionContextMemories
-                   ) {
-                    if synthesisOutputMeetsGoal(
-                        userInput: text,
-                        goal: resolvedGoal,
-                        output: subscription.text
-                    ) {
-                        finalBaseReply = subscription.text
-                        synthesisApplied = true
-                        intelligenceProvider = subscription.provider
-                        intelligenceProviderStatus =
-                            "ChatGPT Subscription sentezi kullanıldı."
-                        log(
-                            "ChatGPT Subscription sentezi uygulandı"
-                        )
-                    } else {
-                        intelligenceProviderStatus =
-                            "Sentez üretildi ancak hedef biçimine uymadı."
-                        log(intelligenceProviderStatus)
-                    }
-                }
-
-                if !synthesisApplied {
-                    let reason = await subscriptionIntelligence
-                        .lastFailureReason()
-
-                    if intelligenceProviderStatus ==
-                        "Sentez sağlayıcısı henüz kullanılmadı." ||
-                       intelligenceProviderStatus ==
-                        "Apple yerel zeka hazır" {
-                        intelligenceProviderStatus =
-                            reason.map {
-                                "ChatGPT Subscription sentezi kullanılamadı: " + $0
-                            } ?? "Analiz/dönüşüm sentezi sağlayıcısı kullanılamadı."
-                    }
-
+                    finalBaseReply = subscription.text
+                    synthesisApplied = true
+                    intelligenceProvider = subscription.provider
+                    intelligenceProviderStatus =
+                        "ChatGPT Subscription sentezi kullanıldı."
+                    log(
+                        "ChatGPT Subscription sentezi uygulandı"
+                    )
+                } else {
+                    intelligenceProviderStatus =
+                        "Sentez üretildi ancak hedef biçimine uymadı."
                     log(intelligenceProviderStatus)
                 }
-
-                completeSynthesisSteps(
-                    success: synthesisApplied
-                )
-
-                finalVerification = enforceGoalCompletion(
-                    goal: resolvedGoal,
-                    verification: finalVerification,
-                    synthesisApplied: synthesisApplied
-                )
-
-                verificationState = finalVerification.state
-                verificationSummary = finalVerification.summary
-
-                switch finalVerification.state {
-                case .passed:
-                    setVerificationStep(.completed)
-                case .partial:
-                    setVerificationStep(.partial)
-                case .attention:
-                    setVerificationStep(.attention)
-                case .skipped:
-                    setVerificationStep(.skipped)
-                case .idle, .checking:
-                    break
-                }
-
-                if synthesisApplied &&
-                   !activeRoute.contains("Intelligence") {
-                    if let verifyIndex = activeRoute.firstIndex(
-                        of: "Verify"
-                    ) {
-                        activeRoute.insert(
-                            "Intelligence",
-                            at: verifyIndex
-                        )
-                    } else if let responseIndex = activeRoute.firstIndex(
-                        of: "Response"
-                    ) {
-                        activeRoute.insert(
-                            "Intelligence",
-                            at: responseIndex
-                        )
-                    } else {
-                        activeRoute.append("Intelligence")
-                    }
-                }
             }
 
-            let replyWithSuggestion = appendSuggestion(
-                to: finalBaseReply,
-                suggestion: decision.proactiveSuggestion
+            if !synthesisApplied {
+                let reason = await subscriptionIntelligence
+                    .lastFailureReason()
+
+                if intelligenceProviderStatus ==
+                    "Sentez sağlayıcısı henüz kullanılmadı." ||
+                   intelligenceProviderStatus ==
+                    "Apple yerel zeka hazır" {
+                    intelligenceProviderStatus =
+                        reason.map {
+                            "ChatGPT Subscription sentezi kullanılamadı: " + $0
+                        } ?? "Analiz/dönüşüm sentezi sağlayıcısı kullanılamadı."
+                }
+
+                log(intelligenceProviderStatus)
+            }
+
+            completeSynthesisSteps(
+                success: synthesisApplied
             )
 
-            let reply = responseComposer.compose(
-                baseReply: replyWithSuggestion,
-                verification: finalVerification,
+            finalVerification = enforceGoalCompletion(
                 goal: resolvedGoal,
-                capabilities: selectedCapabilities,
-                learningPlans: capabilityLearningPlans,
-                fallbackPlan: fallbackPlan
-            )
-
-            recordMentorTrace(
-                input: text,
-                source: source,
-                goal: resolvedGoal.summary,
-                plan: semanticMission.map {
-                    $0.steps.map(\.title).joined(separator: " → ")
-                } ?? decision.selectedPlan,
-                route: activeRoute,
-                capabilities: selectedCapabilities,
-                learningPlans: capabilityLearningPlans,
                 verification: finalVerification,
-                intelligenceProvider: intelligenceProvider,
-                finalResponse: reply
+                synthesisApplied: synthesisApplied
             )
 
-            let shouldPersistTaskContext =
-                finalVerification.state == .passed &&
-                (
-                    synthesisApplied ||
-                    !webResearchEvidence.isEmpty ||
-                    decision.intent != .general
-                )
+            verificationState = finalVerification.state
+            verificationSummary = finalVerification.summary
 
-            if shouldPersistTaskContext,
-               let memoryEntry = contextMemoryStore.captureTask(
-                    userInput: text,
-                    goal: resolvedGoal.summary,
-                    response: reply,
-                    researchEvidence: webResearchEvidence
-               ) {
-                contextMemoryEntries = contextMemoryStore.append(
-                    memoryEntry,
-                    to: contextMemoryEntries
-                )
-                contextMemoryStore.save(contextMemoryEntries)
-                contextMemoryStatus =
-                    "\(contextMemoryEntries.count) bağlam kaydı hazır."
+            switch finalVerification.state {
+            case .passed:
+                setVerificationStep(.completed)
+            case .partial:
+                setVerificationStep(.partial)
+            case .attention:
+                setVerificationStep(.attention)
+            case .skipped:
+                setVerificationStep(.skipped)
+            case .idle, .checking:
+                break
             }
 
-            messages.append(ChatMessage(role: .assistant, text: reply))
-
-            let elapsed =
-                Date().timeIntervalSince(
-                    taskStartedAt
-                )
-            log(
-                String(
-                    format:
-                        "Görev tamamlandı • %.2f sn",
-                    elapsed
-                )
-            )
-
-            busy = false
-
-            if source == .voice && voiceOutputEnabled {
-                speech.speak(reply)
-            }
-
-            if !currentCapabilityGaps.isEmpty &&
-               !developerAgentBusy {
-                log(
-                    "Capability gap algılandı; Developer Agent izole candidate geliştirme için otomatik başlatılıyor"
-                )
-                runDeveloperAgent()
+            if synthesisApplied &&
+               !activeRoute.contains("Intelligence") {
+                if let verifyIndex = activeRoute.firstIndex(
+                    of: "Verify"
+                ) {
+                    activeRoute.insert(
+                        "Intelligence",
+                        at: verifyIndex
+                    )
+                } else if let responseIndex = activeRoute.firstIndex(
+                    of: "Response"
+                ) {
+                    activeRoute.insert(
+                        "Intelligence",
+                        at: responseIndex
+                    )
+                } else {
+                    activeRoute.append("Intelligence")
+                }
             }
         }
+
+        let replyWithSuggestion = appendSuggestion(
+            to: finalBaseReply,
+            suggestion: decision.proactiveSuggestion
+        )
+
+        let reply = responseComposer.compose(
+            baseReply: replyWithSuggestion,
+            verification: finalVerification,
+            goal: resolvedGoal,
+            capabilities: selectedCapabilities,
+            learningPlans: capabilityLearningPlans,
+            fallbackPlan: fallbackPlan
+        )
+
+        recordMentorTrace(
+            input: text,
+            source: source,
+            goal: resolvedGoal.summary,
+            plan: semanticMission.map {
+                $0.steps.map(\.title).joined(separator: " → ")
+            } ?? decision.selectedPlan,
+            route: activeRoute,
+            capabilities: selectedCapabilities,
+            learningPlans: capabilityLearningPlans,
+            verification: finalVerification,
+            intelligenceProvider: intelligenceProvider,
+            finalResponse: reply
+        )
+
+        let shouldPersistTaskContext =
+            finalVerification.state == .passed &&
+            (
+                synthesisApplied ||
+                !webResearchEvidence.isEmpty ||
+                decision.intent != .general
+            )
+
+        if shouldPersistTaskContext,
+           let memoryEntry = contextMemoryStore.captureTask(
+                userInput: text,
+                goal: resolvedGoal.summary,
+                response: reply,
+                researchEvidence: webResearchEvidence
+           ) {
+            contextMemoryEntries = contextMemoryStore.append(
+                memoryEntry,
+                to: contextMemoryEntries
+            )
+            contextMemoryStore.save(contextMemoryEntries)
+            contextMemoryStatus =
+                "\(contextMemoryEntries.count) bağlam kaydı hazır."
+        }
+
+        messages.append(ChatMessage(role: .assistant, text: reply))
+
+        let elapsed =
+            Date().timeIntervalSince(
+                taskStartedAt
+            )
+        log(
+            String(
+                format:
+                    "Görev tamamlandı • %.2f sn",
+                elapsed
+            )
+        )
+
+        busy = false
+
+        if source == .voice && voiceOutputEnabled {
+            speech.speak(reply)
+        }
+
+        if !currentCapabilityGaps.isEmpty &&
+           !developerAgentBusy {
+            log(
+                "Capability gap algılandı; Developer Agent izole candidate geliştirme için otomatik başlatılıyor"
+            )
+            runDeveloperAgent()
+        }
+
     }
 
     private struct SemanticMissionExecutionResult {
