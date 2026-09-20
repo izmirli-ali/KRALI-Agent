@@ -192,7 +192,8 @@ struct AgentContextMemoryStore {
 
         if let duplicateIndex = updated.firstIndex(
             where: {
-                $0.kind == entry.kind &&
+                $0.kind != .userRule &&
+                entry.kind != .userRule &&
                 normalize($0.userInput ?? "") ==
                     normalize(entry.userInput ?? "") &&
                 entry.userInput?.isEmpty == false &&
@@ -215,6 +216,29 @@ struct AgentContextMemoryStore {
         let queryTokens = Set(tokens(query))
         let continuation = containsContinuationReference(query)
 
+        func overlapCount(
+            for entry: AgentContextMemoryEntry
+        ) -> Int {
+            let corpus = normalize(
+                [
+                    entry.title,
+                    entry.summary,
+                    entry.userInput ?? "",
+                    entry.goal ?? ""
+                ]
+                .joined(separator: " ")
+            )
+
+            return queryTokens
+                .intersection(Set(tokens(corpus)))
+                .count
+        }
+
+        let strongestContextOverlap = entries
+            .filter { $0.kind != .userRule }
+            .map(overlapCount)
+            .max() ?? 0
+
         var scored: [
             (entry: AgentContextMemoryEntry, score: Int)
         ] = []
@@ -232,19 +256,26 @@ struct AgentContextMemoryStore {
                 .joined(separator: " ")
             )
 
-            let corpusTokens = Set(tokens(corpus))
-            let tokenOverlap = queryTokens
-                .intersection(corpusTokens)
-                .count
+            let tokenOverlap = overlapCount(
+                for: entry
+            )
             let exactMatch =
                 !query.isEmpty &&
                 corpus.contains(query)
 
             let isRelevant: Bool
             if entry.kind == .userRule {
-                isRelevant = tokenOverlap > 0 || exactMatch
+                isRelevant =
+                    tokenOverlap > 0 ||
+                    exactMatch
             } else if continuation {
-                isRelevant = true
+                if strongestContextOverlap > 0 {
+                    isRelevant =
+                        tokenOverlap > 0 ||
+                        exactMatch
+                } else {
+                    isRelevant = true
+                }
             } else {
                 isRelevant =
                     tokenOverlap >= 2 ||
