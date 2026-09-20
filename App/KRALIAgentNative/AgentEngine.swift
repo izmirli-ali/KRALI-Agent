@@ -10,6 +10,9 @@ final class AgentEngine: ObservableObject {
     @Published var activities: [ActivityItem] = []
     @Published var activeRoute: [String] = ["Core"]
     @Published var memories: [String] = []
+    @Published var contextMemoryEntries: [AgentContextMemoryEntry] = []
+    @Published var activeContextMemories: [AgentContextMemoryEntry] = []
+    @Published var contextMemoryStatus = "Henüz görev bağlamı yok."
 
     @Published var selectedRootURL: URL?
     @Published var indexedFiles: [FileRecord] = []
@@ -87,6 +90,7 @@ final class AgentEngine: ObservableObject {
     private let developerBridge = AgentDeveloperBridge()
     private let localIntelligence = AgentLocalIntelligence()
     private let subscriptionIntelligence = AgentSubscriptionIntelligence()
+    private let contextMemoryStore = AgentContextMemoryStore()
     private var lastDecision: AgentDecision?
 
     init() {
@@ -99,6 +103,10 @@ final class AgentEngine: ObservableObject {
         }
 
         loadMemory()
+        contextMemoryEntries = contextMemoryStore.load()
+        contextMemoryStatus = contextMemoryEntries.isEmpty
+            ? "Henüz görev bağlamı yok."
+            : "\(contextMemoryEntries.count) bağlam kaydı hazır."
         capabilityLearningBacklog = learningStore.load()
         mentorTraceReady = fileManager.fileExists(
             atPath: mentorTraceStore.latestURL.path
@@ -184,6 +192,25 @@ final class AgentEngine: ObservableObject {
 
         if source == .text {
             speech.stopSpeaking()
+        }
+
+        activeContextMemories = contextMemoryStore.relevant(
+            to: text,
+            from: contextMemoryEntries,
+            limit: 4
+        )
+
+        if !activeContextMemories.isEmpty {
+            contextMemoryStatus =
+                "\(activeContextMemories.count) ilgili önceki bağlam geri çağrıldı."
+            log(
+                "Bağlam hafızası: " +
+                activeContextMemories
+                    .map(\.title)
+                    .joined(separator: " • ")
+            )
+        } else {
+            contextMemoryStatus = "Bu tur için ilgili önceki bağlam bulunmadı."
         }
 
         messages.append(ChatMessage(role: .user, text: text))
@@ -379,7 +406,8 @@ final class AgentEngine: ObservableObject {
                     draft: finalBaseReply,
                     verification: finalVerification,
                     capabilities: selectedCapabilities,
-                    researchEvidence: webResearchEvidence
+                    researchEvidence: webResearchEvidence,
+                    contextMemory: activeContextMemories
                 ) {
                     finalBaseReply = synthesized
                     synthesisApplied = true
@@ -393,7 +421,8 @@ final class AgentEngine: ObservableObject {
                     draft: finalBaseReply,
                     verification: finalVerification,
                     capabilities: selectedCapabilities,
-                    researchEvidence: webResearchEvidence
+                    researchEvidence: webResearchEvidence,
+                    contextMemory: activeContextMemories
                 ) {
                     finalBaseReply = subscription.text
                     synthesisApplied = true
@@ -490,6 +519,21 @@ final class AgentEngine: ObservableObject {
                 finalResponse: reply
             )
 
+            if let memoryEntry = contextMemoryStore.captureTask(
+                userInput: text,
+                goal: goalProfile.summary,
+                response: reply,
+                researchEvidence: webResearchEvidence
+            ) {
+                contextMemoryEntries = contextMemoryStore.append(
+                    memoryEntry,
+                    to: contextMemoryEntries
+                )
+                contextMemoryStore.save(contextMemoryEntries)
+                contextMemoryStatus =
+                    "\(contextMemoryEntries.count) bağlam kaydı hazır."
+            }
+
             messages.append(ChatMessage(role: .assistant, text: reply))
             busy = false
 
@@ -584,7 +628,11 @@ final class AgentEngine: ObservableObject {
             previousFileResultCount: fileSearchResults.count,
             previousFolderResultCount: folderSearchResults.count,
             lastTarget: lastDecision?.target,
-            lastGoal: lastDecision?.goal
+            lastGoal: lastDecision?.goal,
+            relevantMemoryCount: activeContextMemories.count,
+            lastMemoryGoal: activeContextMemories
+                .first(where: { $0.goal != nil })?
+                .goal
         )
     }
 
@@ -2291,9 +2339,20 @@ final class AgentEngine: ObservableObject {
         let text = raw.trimmingCharacters(in: .whitespacesAndNewlines)
         guard !text.isEmpty else { return }
 
-        memories.append(text)
-        saveMemory()
-        log("Yeni çalışma kuralı hafızaya kaydedildi")
+        if !memories.contains(text) {
+            memories.append(text)
+            saveMemory()
+        }
+
+        contextMemoryEntries = contextMemoryStore.upsertRule(
+            text,
+            in: contextMemoryEntries
+        )
+        contextMemoryStore.save(contextMemoryEntries)
+        contextMemoryStatus =
+            "\(contextMemoryEntries.count) bağlam kaydı hazır."
+
+        log("Yeni çalışma kuralı yapılandırılmış hafızaya kaydedildi")
     }
 
     private func memoryIntent(from text: String) -> String? {
