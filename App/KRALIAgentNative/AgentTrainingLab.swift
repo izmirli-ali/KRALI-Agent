@@ -207,6 +207,9 @@ struct AgentTrainingLab {
             runtimeProviderFailureEscalationResult()
         )
         results.append(
+            learningQueueDeduplicationResult()
+        )
+        results.append(
             nonCommitWorkflowApprovalResult()
         )
         results.append(
@@ -1770,6 +1773,120 @@ struct AgentTrainingLab {
                 ? []
                 : [
                     "Runtime'da başarısız desktop.app provider'ı tek root gap olarak üretilmedi."
+                ]
+        )
+    }
+
+    private func learningQueueDeduplicationResult()
+        -> TrainingScenarioResult {
+        let store =
+            AgentLearningQueueStore()
+
+        let desktopGap =
+            CapabilityGapResolution(
+                capabilityID:
+                    "desktop.app",
+                capabilityName:
+                    "Uygulama kontrolü",
+                kind: .strategy,
+                reason:
+                    "Provider available olmasına rağmen runtime step tamamlanamadı veya postcondition doğrulanamadı: desktop.app • app.open",
+                candidateCapabilityIDs: [],
+                researchGoal:
+                    "Generic desktop resolver/provider hatasını araştır.",
+                developerBrief:
+                    "Tek uygulamaya hard-code yazmadan desktop.app provider'ını düzelt."
+            )
+
+        let browserGap =
+            CapabilityGapResolution(
+                capabilityID:
+                    "browser.control",
+                capabilityName:
+                    "Tarayıcı kontrolü",
+                kind: .integration,
+                reason:
+                    "Task Graph step 'Web hedefini tarayıcıda yürüt' için browser.control gerekiyor ancak provider available değil.",
+                candidateCapabilityIDs: [],
+                researchGoal:
+                    "Generic browser provider araştır.",
+                developerBrief:
+                    "Generic browser.control provider geliştir."
+            )
+
+        var jobs =
+            store.enqueue(
+                gaps: [desktopGap],
+                sourceGoal:
+                    "Notlar uygulamasını aç.",
+                into: [],
+                persist: false
+            )
+
+        jobs =
+            store.enqueue(
+                gaps: [desktopGap],
+                sourceGoal:
+                    "Hesap Makinesi uygulamasını aç.",
+                into: jobs,
+                persist: false
+            )
+
+        jobs =
+            store.enqueue(
+                gaps: [browserGap],
+                sourceGoal:
+                    "Safari ile example.com adresine git.",
+                into: jobs,
+                persist: false
+            )
+
+        let desktopJobs =
+            jobs.filter {
+                $0.capabilityID ==
+                    "desktop.app"
+            }
+
+        let next =
+            store.nextQueued(
+                from: jobs
+            )
+
+        let passed =
+            jobs.count == 2 &&
+            desktopJobs.count == 1 &&
+            desktopJobs.first?
+                .evidenceCount == 2 &&
+            desktopJobs.first?
+                .sourceGoals.count == 2 &&
+            next?.capabilityID ==
+                "desktop.app"
+
+        return TrainingScenarioResult(
+            scenarioID:
+                "learning-queue-deduplication",
+            title:
+                "Aynı kök öğrenme hatasını birleştir, farklı capability'yi sıraya al",
+            tier: .core,
+            prompt:
+                "Arka arkaya bağımsız görevlerden aynı desktop.app hatası ve ayrı browser.control gap'i üret.",
+            passed: passed,
+            goal:
+                "Tek writer worker için fingerprint/dedupe kuyruğu oluştur",
+            route: [
+                "Debug",
+                "LearningQueue",
+                "DeveloperAgent"
+            ],
+            selectedCapabilities:
+                jobs.map(
+                    \.capabilityID
+                ),
+            unavailableCapabilities: [],
+            diagnostics: passed
+                ? []
+                : [
+                    "Learning Queue aynı desktop.app kök hatasını birleştirmedi veya farklı browser gap'ini ayrı iş olarak korumadı."
                 ]
         )
     }
