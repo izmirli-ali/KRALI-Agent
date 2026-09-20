@@ -33,6 +33,7 @@
 		A10000000000000000000024 /* AgentDeveloperBridge.swift in Sources */ = {isa = PBXBuildFile; fileRef = B10000000000000000000024 /* AgentDeveloperBridge.swift */; };
 		A10000000000000000000025 /* AgentSubscriptionIntelligence.swift in Sources */ = {isa = PBXBuildFile; fileRef = B10000000000000000000025 /* AgentSubscriptionIntelligence.swift */; };
 		A10000000000000000000026 /* AgentContextMemory.swift in Sources */ = {isa = PBXBuildFile; fileRef = B10000000000000000000026 /* AgentContextMemory.swift */; };
+		A10000000000000000000027 /* AgentScreenPerception.swift in Sources */ = {isa = PBXBuildFile; fileRef = B10000000000000000000027 /* AgentScreenPerception.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
@@ -63,6 +64,7 @@
 		B10000000000000000000024 /* AgentDeveloperBridge.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AgentDeveloperBridge.swift; sourceTree = "<group>"; };
 		B10000000000000000000025 /* AgentSubscriptionIntelligence.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AgentSubscriptionIntelligence.swift; sourceTree = "<group>"; };
 		B10000000000000000000026 /* AgentContextMemory.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AgentContextMemory.swift; sourceTree = "<group>"; };
+		B10000000000000000000027 /* AgentScreenPerception.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AgentScreenPerception.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -113,6 +115,7 @@
 				B10000000000000000000024 /* AgentDeveloperBridge.swift */,
 				B10000000000000000000025 /* AgentSubscriptionIntelligence.swift */,
 				B10000000000000000000026 /* AgentContextMemory.swift */,
+				B10000000000000000000027 /* AgentScreenPerception.swift */,
 			);
 			path = KRALIAgentNative;
 			sourceTree = "<group>";
@@ -220,6 +223,7 @@
 				A10000000000000000000024 /* AgentDeveloperBridge.swift in Sources */,
 				A10000000000000000000025 /* AgentSubscriptionIntelligence.swift in Sources */,
 				A10000000000000000000026 /* AgentContextMemory.swift in Sources */,
+				A10000000000000000000027 /* AgentScreenPerception.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -266,6 +270,7 @@
 				INFOPLIST_KEY_CFBundleName = "KRALİ";
 				INFOPLIST_KEY_LSApplicationCategoryType = "public.app-category.productivity";
 				INFOPLIST_KEY_NSMicrophoneUsageDescription = "KRALİ sesli komut kaydetmek için mikrofon erişimi kullanır.";
+				INFOPLIST_KEY_NSScreenCaptureUsageDescription = "KRALİ ekrandaki uygulama durumunu okuyup yaptığı işlemleri doğrulamak için ekran kaydı erişimini kullanır.";
 				INFOPLIST_KEY_NSSpeechRecognitionUsageDescription = "KRALİ kaydettiğiniz Türkçe sesli komutları yazıya çevirmek için konuşma tanıma kullanır.";
 				LD_RUNPATH_SEARCH_PATHS = (
 					"$(inherited)",
@@ -296,6 +301,7 @@
 				INFOPLIST_KEY_CFBundleName = "KRALİ";
 				INFOPLIST_KEY_LSApplicationCategoryType = "public.app-category.productivity";
 				INFOPLIST_KEY_NSMicrophoneUsageDescription = "KRALİ sesli komut kaydetmek için mikrofon erişimi kullanır.";
+				INFOPLIST_KEY_NSScreenCaptureUsageDescription = "KRALİ ekrandaki uygulama durumunu okuyup yaptığı işlemleri doğrulamak için ekran kaydı erişimini kullanır.";
 				INFOPLIST_KEY_NSSpeechRecognitionUsageDescription = "KRALİ kaydettiğiniz Türkçe sesli komutları yazıya çevirmek için konuşma tanıma kullanır.";
 				LD_RUNPATH_SEARCH_PATHS = (
 					"$(inherited)",
