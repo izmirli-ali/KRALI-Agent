@@ -1,1 +1,1 @@
-sdk_tool_completed|Uygulama içi iş akışı (app.workflow) araç adımı tamamlandı: search_codebase|krali-dev-agent/20260920-200243|/Users/medusa/Developer/KRALI-Agent-Dev-20260920-200243|@meta|app=0.8.44|at=1789923938|run=20260920-200243
+sdk_session_completed|Uygulama içi iş akışı (app.workflow) SDK oturumu tamamlandı; candidate değişiklikler kontrol ediliyor|krali-dev-agent/20260920-200243|/Users/medusa/Developer/KRALI-Agent-Dev-20260920-200243|@meta|app=0.8.44|at=1789924122|run=20260920-200243
