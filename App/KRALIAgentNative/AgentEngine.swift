@@ -2286,6 +2286,9 @@ final class AgentEngine: ObservableObject {
         screenPerceptionBusy = true
         screenPerceptionStatus =
             "Ekran yakalanıyor ve yerel olarak analiz ediliyor…"
+        screenPerceptionStore.saveStatus(
+            "running|Ekran yakalanıyor ve yerel olarak analiz ediliyor…"
+        )
         log("Screen Perception Probe başladı")
 
         Task {
@@ -2305,6 +2308,14 @@ final class AgentEngine: ObservableObject {
                     String(report.visibleWindows.count) +
                     " pencere • probe başarılı"
 
+                screenPerceptionStore.saveStatus(
+                    "success|" +
+                    String(report.recognizedText.count) +
+                    " metin satırı|" +
+                    String(report.visibleWindows.count) +
+                    " pencere"
+                )
+
                 mentorTraceReady = true
                 mentorTraceStatus =
                     "Screen Perception raporu hazır • Mentora gönderilebilir"
@@ -2322,6 +2333,15 @@ final class AgentEngine: ObservableObject {
                 screenPerceptionStatus =
                     "Screen Perception başarısız: " +
                     error.localizedDescription
+
+                screenPerceptionStore.saveStatus(
+                    "failed|" +
+                    error.localizedDescription
+                )
+
+                mentorTraceReady = true
+                mentorTraceStatus =
+                    "Screen Perception hata raporu hazır • Mentora gönderilebilir"
 
                 log(screenPerceptionStatus)
             }
