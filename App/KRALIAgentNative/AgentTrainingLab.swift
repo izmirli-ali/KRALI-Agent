@@ -192,6 +192,12 @@ struct AgentTrainingLab {
             genericAppWorkflowGapResult()
         )
         results.append(
+            compoundAppTargetExtractionResult()
+        )
+        results.append(
+            nonCommitWorkflowApprovalResult()
+        )
+        results.append(
             capabilityGapClassificationResult()
         )
 
@@ -1363,6 +1369,124 @@ struct AgentTrainingLab {
                 ? []
                 : [
                     "Compound uygulama görevi app.workflow capability gap üretmedi."
+                ]
+        )
+    }
+
+    private func compoundAppTargetExtractionResult()
+        -> TrainingScenarioResult {
+        let prompt =
+            "Takvim uygulamasını aç. Yarınki ilk etkinliği bul, başlığını ve saatini bana söyle."
+
+        let extracted =
+            languageResolver
+                .applicationTargetPhrase(
+                    from: prompt
+                )
+
+        let passed =
+            extracted ==
+                "takvim"
+
+        return TrainingScenarioResult(
+            scenarioID:
+                "compound-app-target-extraction",
+            title:
+                "Karmaşık komuttan uygulama hedefini ayırma",
+            tier: .core,
+            prompt: prompt,
+            passed: passed,
+            goal:
+                "Desktop provider'a tüm görev yerine yalnız hedef uygulama adını gönder",
+            route: [
+                "Core",
+                "Goal",
+                "Desktop"
+            ],
+            selectedCapabilities: [
+                "desktop.app"
+            ],
+            unavailableCapabilities: [],
+            diagnostics: passed
+                ? []
+                : [
+                    "Beklenen uygulama hedefi 'takvim', bulunan: " +
+                    (extracted ?? "nil")
+                ]
+        )
+    }
+
+    private func nonCommitWorkflowApprovalResult()
+        -> TrainingScenarioResult {
+        let mission =
+            AgentSemanticMission(
+                objective:
+                    "Takvimde hatırlatmayı hazırla ama onay almadan hiçbir değişiklik yapma.",
+                outcomes: [
+                    "analyze"
+                ],
+                steps: [
+                    AgentSemanticMissionStep(
+                        title:
+                            "Uygulama içi hedefi yürüt",
+                        purpose:
+                            "Hatırlatmayı yalnız hazırlık düzeyinde hazırla; kullanıcı onayı almadan dış dünyaya commit etmeden bekle.",
+                        capabilityID:
+                            "app.workflow",
+                        operation:
+                            "app.workflow.execute",
+                        dependsOn: []
+                    )
+                ],
+                requiredCapabilityIDs: [
+                    "app.workflow"
+                ],
+                requiresUserInput: false,
+                userInputReason: nil,
+                confidence: 1
+            )
+
+        let graph =
+            taskOrchestrator.compile(
+                mission: mission,
+                capabilities:
+                    capabilityRegistry.all
+            )
+
+        let step =
+            graph.steps.first
+
+        let passed =
+            step?.requiresApproval ==
+                false &&
+            step?.role == .act
+
+        return TrainingScenarioResult(
+            scenarioID:
+                "non-commit-workflow-approval",
+            title:
+                "Hazırlık görevini dış dünya commit'i gibi onaya sokmama",
+            tier: .core,
+            prompt:
+                mission.objective,
+            passed: passed,
+            goal:
+                "Sadece gerçek commit eylemlerinde approval gate aç",
+            route: [
+                "Core",
+                "Plan",
+                "Approval"
+            ],
+            selectedCapabilities: [
+                "app.workflow"
+            ],
+            unavailableCapabilities: [
+                "app.workflow"
+            ],
+            diagnostics: passed
+                ? []
+                : [
+                    "app.workflow hazırlık step'i yanlışlıkla approval bekliyor veya verify rolüne düştü."
                 ]
         )
     }
