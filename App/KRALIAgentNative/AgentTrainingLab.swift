@@ -138,6 +138,9 @@ struct AgentTrainingLab {
             newBrandIntroductionIsolationResult()
         )
         results.append(
+            executionContextFirewallResult()
+        )
+        results.append(
             staleGoalVerifierIsolationResult()
         )
         results.append(
@@ -296,6 +299,93 @@ struct AgentTrainingLab {
                 "Core",
                 "Context",
                 "Memory"
+            ],
+            selectedCapabilities: [
+                "context.local",
+                "core.reasoning"
+            ],
+            unavailableCapabilities: [],
+            diagnostics: diagnostics
+        )
+    }
+
+    private func executionContextFirewallResult()
+        -> TrainingScenarioResult {
+        let store = AgentContextMemoryStore()
+
+        let staleTask = AgentContextMemoryEntry(
+            kind: .task,
+            title:
+                "mail uygulamasını aç son gelen maili kontrol et",
+            summary:
+                "Önceki görevden kalmış, bu yeni görev için güvenilir olmayan sentez metni.",
+            userInput:
+                "mail uygulamasını aç son gelen maili kontrol et",
+            goal:
+                "önceki mail görevini yürüt"
+        )
+
+        let persistentRule = AgentContextMemoryEntry(
+            kind: .userRule,
+            title: "Çalışma kuralı",
+            summary:
+                "Mail gönderiminde dış dünyaya göndermeden önce kullanıcı onayı iste."
+        )
+
+        let query =
+            "Mail uygulamasını aç, son gelen maili incele ve cevap taslağı hazırla."
+
+        let recalled = store.relevant(
+            to: query,
+            from: [
+                staleTask,
+                persistentRule
+            ],
+            limit: 4
+        )
+
+        let executionContext =
+            store.executionContext(
+                to: query,
+                from: recalled,
+                limit: 4
+            )
+
+        var diagnostics: [String] = []
+
+        if executionContext.contains(
+            where: { $0.id == staleTask.id }
+        ) {
+            diagnostics.append(
+                "Bağımsız yeni görevde önceki task metni execution/synthesis bağlamına sızdı."
+            )
+        }
+
+        if recalled.contains(
+            where: { $0.id == persistentRule.id }
+        ) &&
+           !executionContext.contains(
+                where: { $0.id == persistentRule.id }
+           ) {
+            diagnostics.append(
+                "Kalıcı kullanıcı kuralı execution bağlamından yanlışlıkla çıkarıldı."
+            )
+        }
+
+        return TrainingScenarioResult(
+            scenarioID:
+                "execution-context-firewall",
+            title:
+                "Yeni görev sentezini eski task metninden ayırma",
+            tier: .core,
+            prompt: query,
+            passed: diagnostics.isEmpty,
+            goal:
+                "Yalnız açık devam referansında önceki task/research metnini taşı",
+            route: [
+                "Core",
+                "Context",
+                "Verify"
             ],
             selectedCapabilities: [
                 "context.local",

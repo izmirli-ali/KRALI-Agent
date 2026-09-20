@@ -230,6 +230,37 @@ final class AgentEngine: ObservableObject {
 
         developerAgentStatus = developerBridge.readStatus()
 
+        let launchAppVersion =
+            Bundle.main.object(
+                forInfoDictionaryKey:
+                    "CFBundleShortVersionString"
+            ) as? String ?? "unknown"
+
+        let launchDiagnosticsCurrent =
+            trainingLabReport?.appVersion ==
+                launchAppVersion &&
+            liveResearchEvalReport?.appVersion ==
+                launchAppVersion &&
+            arenaReport?.appVersion ==
+                launchAppVersion
+
+        if developerAgentStatus.state == "no_change" &&
+           !launchDiagnosticsCurrent {
+            let staleStatus =
+                DeveloperAgentStatus(
+                    state: "stale_diagnostics",
+                    message:
+                        "Önceki no_change kararı bu sürüm için geçerli değil. Güncel Training, Live ve Arena diagnostic'leri gerekiyor.",
+                    branch: nil,
+                    worktree: nil
+                )
+
+            developerAgentStatus = staleStatus
+            developerBridge.writeStatus(
+                staleStatus
+            )
+        }
+
         log("KRALİ Core hazır")
         log("Dinamik hedef ve kabiliyet yönlendirme aktif")
         log("Ağır geliştirici testleri normal açılışta otomatik çalıştırılmıyor")
@@ -268,6 +299,13 @@ final class AgentEngine: ObservableObject {
             from: contextMemoryEntries,
             limit: 4
         )
+
+        let executionContextMemories =
+            contextMemoryStore.executionContext(
+                to: text,
+                from: activeContextMemories,
+                limit: 4
+            )
 
         if !activeContextMemories.isEmpty {
             contextMemoryStatus =
@@ -392,7 +430,7 @@ final class AgentEngine: ObservableObject {
                 if let localMission =
                     await localIntelligence.planMission(
                         userInput: text,
-                        contextMemory: activeContextMemories,
+                        contextMemory: executionContextMemories,
                         capabilities: capabilityRegistry.all,
                         hasWorkspace: selectedRootURL != nil
                     ),
@@ -423,7 +461,7 @@ final class AgentEngine: ObservableObject {
                 } else if let subscriptionMission =
                     await subscriptionIntelligence.planMission(
                         userInput: text,
-                        contextMemory: activeContextMemories,
+                        contextMemory: executionContextMemories,
                         capabilities: capabilityRegistry.all,
                         hasWorkspace: selectedRootURL != nil
                     ),
@@ -750,7 +788,7 @@ final class AgentEngine: ObservableObject {
                     verification: finalVerification,
                     capabilities: selectedCapabilities,
                     researchEvidence: webResearchEvidence,
-                    contextMemory: activeContextMemories
+                    contextMemory: executionContextMemories
                 ) {
                     if synthesisOutputMeetsGoal(
                         userInput: text,
@@ -778,7 +816,7 @@ final class AgentEngine: ObservableObject {
                         verification: finalVerification,
                         capabilities: selectedCapabilities,
                         researchEvidence: webResearchEvidence,
-                        contextMemory: activeContextMemories
+                        contextMemory: executionContextMemories
                    ) {
                     if synthesisOutputMeetsGoal(
                         userInput: text,
@@ -895,10 +933,10 @@ final class AgentEngine: ObservableObject {
             )
 
             let shouldPersistTaskContext =
-                synthesisApplied ||
-                !webResearchEvidence.isEmpty ||
+                finalVerification.state == .passed &&
                 (
-                    finalVerification.state == .passed &&
+                    synthesisApplied ||
+                    !webResearchEvidence.isEmpty ||
                     decision.intent != .general
                 )
 
@@ -936,6 +974,14 @@ final class AgentEngine: ObservableObject {
 
             if source == .voice && voiceOutputEnabled {
                 speech.speak(reply)
+            }
+
+            if !currentCapabilityGaps.isEmpty &&
+               !developerAgentBusy {
+                log(
+                    "Capability gap algılandı; Developer Agent izole candidate geliştirme için otomatik başlatılıyor"
+                )
+                runDeveloperAgent()
             }
         }
     }
@@ -1385,9 +1431,9 @@ final class AgentEngine: ObservableObject {
                 )
 
             case "files.search":
-                let searchInput =
+                let scopedSearchInput =
                     [
-                        userInput,
+                        step.title,
                         step.purpose,
                         dependencyEvidence
                     ]
@@ -1398,6 +1444,11 @@ final class AgentEngine: ObservableObject {
                         ).isEmpty
                     }
                     .joined(separator: "\n")
+
+                let searchInput =
+                    scopedSearchInput.isEmpty
+                        ? userInput
+                        : scopedSearchInput
 
                 let searchDecision =
                     semanticFileSearchDecision(
@@ -2942,15 +2993,27 @@ final class AgentEngine: ObservableObject {
                 report.failed > 0 ||
                 report.reviewerFlagged > 0
 
+            let currentAppVersion =
+                Bundle.main.object(
+                    forInfoDictionaryKey:
+                        "CFBundleShortVersionString"
+                ) as? String ?? "unknown"
+
+            let arenaCurrent =
+                report.appVersion ==
+                    currentAppVersion
+
             let trainingGreen =
+                arenaCurrent &&
                 trainingLabReport?.failed == 0 &&
                 trainingLabReport?.appVersion ==
-                    report.appVersion
+                    currentAppVersion
 
             let liveGreen =
+                arenaCurrent &&
                 liveResearchEvalReport?.failed == 0 &&
                 liveResearchEvalReport?.appVersion ==
-                    report.appVersion
+                    currentAppVersion
 
             if arenaNeedsDevelopment &&
                trainingGreen &&
@@ -2960,15 +3023,39 @@ final class AgentEngine: ObservableObject {
                     "Arena açık-dünya problemi buldu; Developer Agent candidate düzeltme için otomatik başlatılıyor"
                 )
                 runDeveloperAgent()
+            } else if !arenaCurrent ||
+                      !trainingGreen ||
+                      !liveGreen {
+                let staleStatus =
+                    DeveloperAgentStatus(
+                        state: "stale_diagnostics",
+                        message:
+                            "Developer kararı için güncel sürüm diagnostic'leri gerekli. App: " +
+                            currentAppVersion +
+                            " • Arena: " +
+                            report.appVersion +
+                            " • Training: " +
+                            (trainingLabReport?.appVersion ?? "yok") +
+                            " • Live: " +
+                            (liveResearchEvalReport?.appVersion ?? "yok"),
+                        branch: nil,
+                        worktree: nil
+                    )
+
+                developerAgentStatus = staleStatus
+                developerBridge.writeStatus(
+                    staleStatus
+                )
+                log(
+                    "Developer Agent no_change kapısı reddedildi: diagnostic sürümleri güncel değil"
+                )
             } else if !arenaNeedsDevelopment &&
-                      trainingGreen &&
-                      liveGreen &&
                       !developerAgentBusy {
                 let greenStatus =
                     DeveloperAgentStatus(
                         state: "no_change",
                         message:
-                            "Training, Live Research ve Arena yeşil; candidate değişiklik gerekmiyor.",
+                            "Training, Live Research ve Arena güncel sürümde yeşil; candidate değişiklik gerekmiyor.",
                         branch: nil,
                         worktree: nil
                     )
@@ -3401,6 +3488,10 @@ final class AgentEngine: ObservableObject {
         goal: AgentGoalProfile,
         verification: AgentVerificationResult
     ) -> Bool {
+        guard verification.state != .attention else {
+            return false
+        }
+
         if goal.outcomes.contains(.analyze) ||
            goal.outcomes.contains(.ideate) ||
            goal.outcomes.contains(.compose) ||
