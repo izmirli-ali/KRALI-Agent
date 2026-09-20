@@ -372,17 +372,18 @@ actor AgentDesktopControl {
     private func applicationResolutionQueries(
         from userText: String
     ) -> [String] {
-        var values: [String] = []
-
-        if let extracted =
+        let explicitTarget =
             languageResolver
                 .applicationTargetPhrase(
                     from: userText
-                ) {
-            values.append(extracted)
-        }
+                )
 
-        values.append(userText)
+        // A user-named application target is authoritative. Falling back to
+        // the entire compound command can accidentally match a secondary
+        // noun (for example a section/device name) to another application.
+        let values =
+            explicitTarget.map { [$0] } ??
+            [userText]
 
         var seen = Set<String>()
 
@@ -518,7 +519,14 @@ actor AgentDesktopControl {
                         localizedName,
                         fileManager.displayName(
                             atPath: url.path
-                        )
+                        ),
+                        (
+                            try? url.resourceValues(
+                                forKeys: [
+                                    .localizedNameKey
+                                ]
+                            )
+                        )?.localizedName ?? ""
                     ] +
                     localizedBundleAliases(
                         bundle
@@ -592,7 +600,14 @@ actor AgentDesktopControl {
                         [
                             baseName,
                             localizedName,
-                            finderDisplayName
+                            finderDisplayName,
+                            (
+                                try? url.resourceValues(
+                                    forKeys: [
+                                        .localizedNameKey
+                                    ]
+                                )
+                            )?.localizedName ?? ""
                         ] +
                         localizedBundleAliases(
                             bundle
