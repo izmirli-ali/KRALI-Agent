@@ -192,3 +192,10 @@ Ayrıca Türkçe dotless-i normalizasyonu nedeniyle `Bağımsız fikir üret` re
 Research Query Planner ayrıca “X adında bir salon/işletme/merkez...” kalıbından araştırılan varlığı çıkarabilir ve yerel işletmeleri entity-grounded çoklu sorgu akışına alabilir. Verifier kaynak sayısı ve deep-read yanında farklı domain sayısını da kontrol eder; tek domaine yığılmış çoklu sonuç sağlam araştırma sayılmaz.
 
 Training Lab'e Estafiz biçiminde doğal dilde detaylı yerel işletme araştırması regression senaryosu eklenir. Böylece bu davranış sonraki sürümlerde yeniden bozulursa otomatik test yakalar.
+
+
+**v0.7.27 public social profile research:** Gerçek kullanımda “estafizsym instagram hesabının kaç takipçisi var, içerikleri neler bakabilir misin” gibi bir istek explicit “araştır/web” kelimesi içermediği için Core fallback'e düşebiliyordu. Goal Interpreter artık Instagram/TikTok/LinkedIn/YouTube gibi public social profile sorularında takipçi, içerik, paylaşım, gönderi, reels, bio veya inceleme niyetini görürse bunu `research + explain` olarak sınıflandırır ve `research.web` capability'sini seçer.
+
+Research Query Planner handle + platform ikilisini çıkarır; resmi profil, takipçi/kitle ve içerik türleri için ayrı facet sorguları üretir. Sonuçlar handle ile entity-grounded kalır ve platform domainine öncelik verilir. Canlı takipçi/gönderi gibi hızlı değişen metrikler yalnızca doğrulanmış evidence içinde açıkça varsa sayı olarak verilir; aksi durumda KRALİ doğrulanamadığını söyler, tahmin üretmez.
+
+Training Lab'e aynı Estafiz Instagram cümlesi regression senaryosu olarak eklenir.
