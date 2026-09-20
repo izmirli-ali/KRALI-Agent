@@ -424,11 +424,11 @@ struct AgentTrainingLab {
                 tier: .core,
                 prompt: "şimdi Estafiz'e dön, az önceki Reels fikirlerinden birincisini 30 saniyelik çekim senaryosuna çevir",
                 context: rememberedResearch,
-                requiredOutcomes: [.ideate],
+                requiredOutcomes: [.transform],
                 requiredCapabilities: ["core.reasoning", "context.local"],
                 forbiddenCapabilities: ["research.web", "files.search"],
                 requiredRouteStages: ["Context"],
-                requiredStepTitles: ["Bağımsız fikir üret"],
+                requiredStepTitles: ["İstenen formata dönüştür"],
                 requiredLearningCapabilities: [],
                 minimumResearchConceptGroups: 0,
                 minimumMandatoryResearchConceptGroups: 0
