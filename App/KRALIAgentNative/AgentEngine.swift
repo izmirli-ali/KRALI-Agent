@@ -26,6 +26,7 @@ final class AgentEngine: ObservableObject {
     @Published var currentGoal = "Hazır"
     @Published var currentPlan = "Yeni görevi bekliyor"
     @Published var currentAlternatives: [String] = []
+    @Published var currentSemanticMission: AgentSemanticMission?
     @Published var executionSteps: [AgentExecutionStep] = []
     @Published var verificationState: AgentVerificationState = .idle
     @Published var verificationSummary = "Henüz doğrulama yapılmadı."
@@ -319,11 +320,97 @@ final class AgentEngine: ObservableObject {
         Task {
             try? await Task.sleep(for: .milliseconds(180))
 
+            var resolvedGoal = goalProfile
+            var resolvedCapabilities = capabilities
+            var resolvedLearningPlans = learningPlans
+            var resolvedExecutionPlan = executionPlan
+            var semanticMission: AgentSemanticMission?
+            var executedSemanticCapabilities = Set<String>()
+
+            if shouldUseSemanticMission(
+                decision: decision,
+                goal: resolvedGoal
+            ),
+               let mission = await localIntelligence.planMission(
+                    userInput: text,
+                    contextMemory: activeContextMemories,
+                    capabilities: capabilityRegistry.all,
+                    hasWorkspace: selectedRootURL != nil
+               ),
+               mission.normalizedConfidence >= 0.45 {
+                semanticMission = mission
+                currentSemanticMission = mission
+
+                resolvedGoal = semanticGoalProfile(
+                    from: mission,
+                    fallback: goalProfile
+                )
+                resolvedCapabilities = semanticCapabilities(
+                    from: mission,
+                    fallback: capabilities
+                )
+                resolvedLearningPlans = capabilityLearner.makePlans(
+                    for: resolvedCapabilities,
+                    webResearchAvailable: webResearchAvailable
+                )
+                resolvedExecutionPlan = semanticExecutionPlan(
+                    mission,
+                    capabilities: resolvedCapabilities,
+                    goal: resolvedGoal
+                )
+
+                currentGoal = resolvedGoal.summary
+                currentPlan = mission.steps
+                    .map(\.title)
+                    .joined(separator: " → ")
+                selectedCapabilities = resolvedCapabilities
+                capabilityLearningPlans = resolvedLearningPlans
+                capabilityLearningBacklog = learningStore.merge(
+                    existing: capabilityLearningBacklog,
+                    plans: resolvedLearningPlans,
+                    capabilities: resolvedCapabilities
+                )
+                executionSteps = resolvedExecutionPlan.steps
+                activeRoute = routeBuilder.build(
+                    goal: resolvedGoal,
+                    capabilities: resolvedCapabilities,
+                    learningPlans: resolvedLearningPlans,
+                    requiresVerification: resolvedExecutionPlan.requiresVerification
+                )
+                fallbackPlan = resolvedExecutionPlan.fallback
+                prepareExecutionSteps()
+
+                log("Semantic Mission: \(mission.objective)")
+                log(
+                    "Semantic capability planı: " +
+                    mission.requiredCapabilityIDs.joined(separator: ", ")
+                )
+                log(
+                    "Semantic rota: " +
+                    activeRoute.joined(separator: " → ")
+                )
+            }
+
             var baseReply: String
-            if goalProfile.outcomes.contains(.research),
-               capabilities.contains(where: {
-                   $0.id == "research.web" && $0.isAvailable
-               }) {
+
+            if let mission = semanticMission {
+                let result = await executeAvailableSemanticMission(
+                    mission,
+                    userInput: text
+                )
+                baseReply = result.reply
+                .trimmingCharacters(
+                    in: .whitespacesAndNewlines
+                )
+                .isEmpty
+                    ? semanticMissionStatusReply(mission)
+                    : result.reply
+                executedSemanticCapabilities =
+                    result.executedCapabilityIDs
+            } else if resolvedGoal.outcomes.contains(.research),
+                      resolvedCapabilities.contains(where: {
+                          $0.id == "research.web" && $0.isAvailable
+                      }) {
                 baseReply = await performWebResearch(
                     query: webResearchQuery(from: text)
                 )
@@ -335,15 +422,22 @@ final class AgentEngine: ObservableObject {
             }
 
             if let learningSummary = await researchCapabilityGapIfNeeded(
-                plans: capabilityLearningPlans
+                plans: resolvedLearningPlans
             ) {
                 baseReply += "\n\nÖğrenme araştırması: " + learningSummary
             }
 
-            completeActionSteps()
+            if semanticMission != nil {
+                completeSemanticActionSteps(
+                    executedCapabilityIDs:
+                        executedSemanticCapabilities
+                )
+            } else {
+                completeActionSteps()
+            }
 
             let verification: AgentVerificationResult
-            if executionPlan.requiresVerification {
+            if resolvedExecutionPlan.requiresVerification {
                 setVerificationStep(.running)
                 verificationState = .checking
                 verificationSummary = "Sonuç kontrol ediliyor…"
@@ -351,7 +445,7 @@ final class AgentEngine: ObservableObject {
                 verification = verifier.verify(
                     decision: decision,
                     currentUserInput: text,
-                    goal: goalProfile,
+                    goal: resolvedGoal,
                     snapshot: verificationSnapshot()
                 )
 
@@ -360,7 +454,7 @@ final class AgentEngine: ObservableObject {
 
                 if verification.state == .attention {
                     setVerificationStep(.attention)
-                    fallbackPlan = verification.fallback ?? executionPlan.fallback
+                    fallbackPlan = verification.fallback ?? resolvedExecutionPlan.fallback
                 } else if verification.state == .partial {
                     setVerificationStep(.partial)
                     fallbackPlan = nil
@@ -385,7 +479,7 @@ final class AgentEngine: ObservableObject {
                let recovery = attemptSafeRecovery(
                     for: text,
                     decision: decision,
-                    goal: goalProfile
+                    goal: resolvedGoal
                ) {
                 finalBaseReply = "İlk plan sonuç vermedi. Güvenli Plan B'yi otomatik denedim.\n\n" + recovery.reply
                 finalVerification = recovery.verification
@@ -412,12 +506,12 @@ final class AgentEngine: ObservableObject {
             var synthesisApplied = false
 
             if shouldUseIntelligence(
-                goal: goalProfile,
+                goal: resolvedGoal,
                 verification: finalVerification
             ) {
                 if let synthesized = await localIntelligence.synthesize(
                     userInput: text,
-                    goal: goalProfile.summary,
+                    goal: resolvedGoal.summary,
                     draft: finalBaseReply,
                     verification: finalVerification,
                     capabilities: selectedCapabilities,
@@ -426,7 +520,7 @@ final class AgentEngine: ObservableObject {
                 ) {
                     if synthesisOutputMeetsGoal(
                         userInput: text,
-                        goal: goalProfile,
+                        goal: resolvedGoal,
                         output: synthesized
                     ) {
                         finalBaseReply = synthesized
@@ -445,7 +539,7 @@ final class AgentEngine: ObservableObject {
                 if !synthesisApplied,
                    let subscription = await subscriptionIntelligence.synthesize(
                         userInput: text,
-                        goal: goalProfile.summary,
+                        goal: resolvedGoal.summary,
                         draft: finalBaseReply,
                         verification: finalVerification,
                         capabilities: selectedCapabilities,
@@ -454,7 +548,7 @@ final class AgentEngine: ObservableObject {
                    ) {
                     if synthesisOutputMeetsGoal(
                         userInput: text,
-                        goal: goalProfile,
+                        goal: resolvedGoal,
                         output: subscription.text
                     ) {
                         finalBaseReply = subscription.text
@@ -494,7 +588,7 @@ final class AgentEngine: ObservableObject {
                 )
 
                 finalVerification = enforceGoalCompletion(
-                    goal: goalProfile,
+                    goal: resolvedGoal,
                     verification: finalVerification,
                     synthesisApplied: synthesisApplied
                 )
@@ -545,7 +639,7 @@ final class AgentEngine: ObservableObject {
             let reply = responseComposer.compose(
                 baseReply: replyWithSuggestion,
                 verification: finalVerification,
-                goal: goalProfile,
+                goal: resolvedGoal,
                 capabilities: selectedCapabilities,
                 learningPlans: capabilityLearningPlans,
                 fallbackPlan: fallbackPlan
@@ -554,8 +648,10 @@ final class AgentEngine: ObservableObject {
             recordMentorTrace(
                 input: text,
                 source: source,
-                goal: goalProfile.summary,
-                plan: decision.selectedPlan,
+                goal: resolvedGoal.summary,
+                plan: semanticMission.map {
+                    $0.steps.map(\.title).joined(separator: " → ")
+                } ?? decision.selectedPlan,
                 route: activeRoute,
                 capabilities: selectedCapabilities,
                 learningPlans: capabilityLearningPlans,
@@ -575,7 +671,7 @@ final class AgentEngine: ObservableObject {
             if shouldPersistTaskContext,
                let memoryEntry = contextMemoryStore.captureTask(
                     userInput: text,
-                    goal: goalProfile.summary,
+                    goal: resolvedGoal.summary,
                     response: reply,
                     researchEvidence: webResearchEvidence
                ) {
@@ -684,6 +780,7 @@ final class AgentEngine: ObservableObject {
     }
 
     private func resetTransientTaskStateForNewInput() {
+        currentSemanticMission = nil
         activeRoute = ["Core"]
         selectedCapabilities = []
         capabilityLearningPlans = []
