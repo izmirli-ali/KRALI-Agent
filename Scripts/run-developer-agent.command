@@ -151,7 +151,7 @@ NODE
 )"
 
 if [ "$DIAGNOSTIC_DECISION" = "green" ]; then
-    write_status "no_change|Training Lab ve Live Research Eval güncel sürümde yeşil; Developer Agent çalıştırılmadı"
+    write_status "no_change|Training Lab, Live Research Eval ve Arena güncel sürümde yeşil; Developer Agent çalıştırılmadı"
     echo "✅ Güncel diagnostic'ler yeşil. Cline çağrısı gereksiz olduğu için atlandı." | tee -a "$LOG"
     exit 0
 fi
