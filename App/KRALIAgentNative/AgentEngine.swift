@@ -694,6 +694,429 @@ final class AgentEngine: ObservableObject {
         }
     }
 
+    private struct SemanticMissionExecutionResult {
+        let reply: String
+        let executedCapabilityIDs: Set<String>
+    }
+
+    private func shouldUseSemanticMission(
+        decision: AgentDecision,
+        goal: AgentGoalProfile
+    ) -> Bool {
+        switch decision.intent {
+        case .approve, .reject, .undo, .remember,
+             .conversation, .openPreviousResult:
+            return false
+
+        case .general, .futureCapability:
+            return true
+
+        default:
+            return goal.isCompound ||
+                goal.outcomes.contains(.edit)
+        }
+    }
+
+    private func semanticGoalProfile(
+        from mission: AgentSemanticMission,
+        fallback: AgentGoalProfile
+    ) -> AgentGoalProfile {
+        let parsedOutcomes = Set(
+            mission.outcomes.compactMap {
+                AgentGoalOutcome(rawValue: $0)
+            }
+        )
+
+        let outcomes = parsedOutcomes.isEmpty
+            ? fallback.outcomes
+            : parsedOutcomes
+
+        var capabilityIDs = Set(
+            mission.requiredCapabilityIDs
+        )
+        capabilityIDs.insert("core.reasoning")
+        capabilityIDs.insert("context.local")
+
+        return AgentGoalProfile(
+            summary: mission.objective,
+            outcomes: outcomes,
+            requiredCapabilityIDs: capabilityIDs,
+            isCompound:
+                mission.steps.count > 2 ||
+                capabilityIDs
+                    .subtracting([
+                        "core.reasoning",
+                        "context.local"
+                    ])
+                    .count > 1
+        )
+    }
+
+    private func semanticCapabilities(
+        from mission: AgentSemanticMission,
+        fallback: [AgentCapability]
+    ) -> [AgentCapability] {
+        var ids = [
+            "core.reasoning",
+            "context.local"
+        ]
+        ids += mission.requiredCapabilityIDs
+
+        let resolved = capabilityRegistry.resolve(ids: ids)
+
+        return resolved.isEmpty ? fallback : resolved
+    }
+
+    private func semanticExecutionPlan(
+        _ mission: AgentSemanticMission,
+        capabilities: [AgentCapability],
+        goal: AgentGoalProfile
+    ) -> AgentExecutionPlan {
+        var steps: [AgentExecutionStep] = []
+
+        for (index, missionStep) in mission.steps.enumerated() {
+            let kind: AgentExecutionStepKind =
+                missionStep.capabilityID == "core.reasoning" ||
+                missionStep.capabilityID == "context.local"
+                    ? .reasoning
+                    : .action
+
+            let dependencyText: String
+            if missionStep.dependsOn.isEmpty {
+                dependencyText = ""
+            } else {
+                let dependencies = missionStep.dependsOn
+                    .filter { $0 >= 0 && $0 < index }
+                    .map { String($0 + 1) }
+                    .joined(separator: ", ")
+
+                dependencyText = dependencies.isEmpty
+                    ? ""
+                    : " Ön koşul adımları: " + dependencies + "."
+            }
+
+            steps.append(
+                AgentExecutionStep(
+                    title: missionStep.title,
+                    detail:
+                        missionStep.purpose +
+                        dependencyText +
+                        " Operation: " +
+                        missionStep.operation,
+                    kind: kind,
+                    capabilityID: missionStep.capabilityID
+                )
+            )
+        }
+
+        let actionIDs = Set(
+            mission.steps
+                .map(\.capabilityID)
+                .filter {
+                    $0 != "core.reasoning" &&
+                    $0 != "context.local"
+                }
+        )
+
+        let requiresVerification =
+            !actionIDs.isEmpty ||
+            mission.requiresUserInput ||
+            capabilities.contains(where: {
+                !$0.isAvailable
+            })
+
+        if requiresVerification {
+            steps.append(
+                AgentExecutionStep(
+                    title: "Mission sonucunu doğrula",
+                    detail: "Gerçekleşen adımları hedefle, capability durumuyla ve üretilen sonuçla karşılaştır.",
+                    kind: .verification,
+                    capabilityID: "core.reasoning"
+                )
+            )
+        }
+
+        steps.append(
+            AgentExecutionStep(
+                title: "Sonucu kullanıcıya aktar",
+                detail: "Tamamlanan, bekleyen ve kullanıcı bilgisi gerektiren kısımları birbirinden ayır.",
+                kind: .response
+            )
+        )
+
+        return AgentExecutionPlan(
+            goal: goal.summary,
+            steps: steps,
+            fallback: mission.requiresUserInput
+                ? mission.userInputReason
+                : "Eksik capability veya başarısız adımı yeniden planla; tamamlanmayan işi yapılmış gibi gösterme.",
+            requiresVerification: requiresVerification
+        )
+    }
+
+    private func executeAvailableSemanticMission(
+        _ mission: AgentSemanticMission,
+        userInput: String
+    ) async -> SemanticMissionExecutionResult {
+        if mission.requiresUserInput {
+            return SemanticMissionExecutionResult(
+                reply:
+                    mission.userInputReason ??
+                    "Bu görevi güvenilir biçimde ilerletmek için zorunlu bir bilgi eksik.",
+                executedCapabilityIDs: [
+                    "core.reasoning",
+                    "context.local"
+                ]
+            )
+        }
+
+        var outputs: [String] = []
+        var executed = Set([
+            "core.reasoning",
+            "context.local"
+        ])
+        var didResearch = false
+        var didFileSearch = false
+
+        for step in mission.steps {
+            guard let capability = selectedCapabilities.first(
+                where: { $0.id == step.capabilityID }
+            ),
+            capability.isAvailable else {
+                continue
+            }
+
+            switch step.capabilityID {
+            case "core.reasoning", "context.local":
+                executed.insert(step.capabilityID)
+
+            case "research.web":
+                guard !didResearch else {
+                    executed.insert("research.web")
+                    continue
+                }
+
+                outputs.append(
+                    await performWebResearch(
+                        query: mission.objective
+                    )
+                )
+                executed.insert("research.web")
+                didResearch = true
+
+            case "files.search":
+                guard !didFileSearch else {
+                    executed.insert("files.search")
+                    continue
+                }
+
+                let searchDecision =
+                    semanticFileSearchDecision(
+                        mission: mission,
+                        userInput: userInput
+                    )
+
+                let searchReply: String
+                if searchDecision.target == .folder {
+                    searchReply = searchIndexedFolders(
+                        for: userInput,
+                        decision: searchDecision
+                    )
+                } else {
+                    searchReply = searchIndexedFiles(
+                        for: userInput,
+                        decision: searchDecision
+                    )
+                }
+
+                outputs.append(searchReply)
+
+                if selectedRootURL != nil {
+                    executed.insert("files.search")
+                }
+
+                didFileSearch = true
+
+            case "files.metadata":
+                if didFileSearch {
+                    executed.insert("files.metadata")
+                }
+
+            default:
+                // v0.8.11 semantic executor intentionally runs only
+                // verified read-only primitives. Other capabilities stay
+                // blocked/partial until their provider is connected.
+                break
+            }
+        }
+
+        return SemanticMissionExecutionResult(
+            reply: outputs.joined(separator: "\n\n"),
+            executedCapabilityIDs: executed
+        )
+    }
+
+    private func semanticFileSearchDecision(
+        mission: AgentSemanticMission,
+        userInput: String
+    ) -> AgentDecision {
+        let corpus = normalizeSemanticText(
+            (
+                [userInput, mission.objective] +
+                mission.steps.flatMap {
+                    [$0.title, $0.purpose, $0.operation]
+                }
+            )
+            .joined(separator: " ")
+        )
+
+        let target: AgentTargetKind
+        if containsSemanticAny(
+            corpus,
+            [
+                "video", "cekim", "kurgu", "reels",
+                "premiere", "klip"
+            ]
+        ) {
+            target = .video
+        } else if containsSemanticAny(
+            corpus,
+            [
+                "gorsel", "fotograf", "resim", "logo",
+                "tasarim", "photoshop"
+            ]
+        ) {
+            target = .image
+        } else if corpus.contains("pdf") {
+            target = .pdf
+        } else if containsSemanticAny(
+            corpus,
+            ["proje", "project"]
+        ) {
+            target = .project
+        } else if containsSemanticAny(
+            corpus,
+            ["belge", "dokuman", "document"]
+        ) {
+            target = .document
+        } else if containsSemanticAny(
+            corpus,
+            ["klasor", "folder"]
+        ) {
+            target = .folder
+        } else {
+            target = .any
+        }
+
+        let newest = containsSemanticAny(
+            corpus,
+            [
+                "son cekim", "en yeni", "en son", "latest",
+                "recent", "dunku", "bugunku", "yeni cekim"
+            ]
+        )
+
+        return AgentDecision(
+            intent: .fileSearch,
+            target: target,
+            dateRange: nil,
+            dateField: .either,
+            sortMode: newest ? .newestFirst : .relevance,
+            route: ["Core", "Goal", "Context", "Files"],
+            goal: mission.objective,
+            selectedPlan:
+                "Semantic mission için gerekli yerel dosya kapsamını salt-okunur tara.",
+            alternatives: [],
+            proactiveSuggestion: nil,
+            usePreviousResults: false,
+            resultSelection: nil
+        )
+    }
+
+    private func semanticMissionStatusReply(
+        _ mission: AgentSemanticMission
+    ) -> String {
+        let blocked = selectedCapabilities
+            .filter {
+                mission.requiredCapabilityIDs.contains($0.id) &&
+                !$0.isAvailable
+            }
+            .map(\.name)
+
+        if blocked.isEmpty {
+            return "Hedefi “\(mission.objective)” olarak çözdüm ve mevcut capability'lerle uygulanabilir adımları yürüttüm."
+        }
+
+        return "Hedefi “\(mission.objective)” olarak çözdüm. Mevcut adımları yürüttüm; şu capability'ler henüz bağlı olmadığı için mission tamamlanamadı: " +
+            blocked.joined(separator: ", ") + "."
+    }
+
+    private func completeSemanticActionSteps(
+        executedCapabilityIDs: Set<String>
+    ) {
+        for index in executionSteps.indices {
+            switch executionSteps[index].kind {
+            case .reasoning:
+                if !isSynthesisReasoningStep(
+                    executionSteps[index]
+                ) {
+                    executionSteps[index].state = .completed
+                }
+
+            case .action:
+                guard let capabilityID =
+                    executionSteps[index].capabilityID else {
+                    executionSteps[index].state = .partial
+                    continue
+                }
+
+                if !isStepCapabilityAvailable(
+                    executionSteps[index]
+                ) {
+                    executionSteps[index].state = .blocked
+                } else if executedCapabilityIDs.contains(
+                    capabilityID
+                ) {
+                    executionSteps[index].state = .completed
+                } else {
+                    executionSteps[index].state = .partial
+                }
+
+            case .response:
+                executionSteps[index].state = .completed
+
+            case .verification:
+                break
+            }
+        }
+    }
+
+    private func normalizeSemanticText(
+        _ value: String
+    ) -> String {
+        value
+            .folding(
+                options: [
+                    .diacriticInsensitive,
+                    .caseInsensitive
+                ],
+                locale: Locale(identifier: "tr_TR")
+            )
+            .lowercased()
+            .replacingOccurrences(of: "ı", with: "i")
+    }
+
+    private func containsSemanticAny(
+        _ text: String,
+        _ values: [String]
+    ) -> Bool {
+        values.contains {
+            text.contains(
+                normalizeSemanticText($0)
+            )
+        }
+    }
+
     private func makeReply(
         for text: String,
         decision: AgentDecision
