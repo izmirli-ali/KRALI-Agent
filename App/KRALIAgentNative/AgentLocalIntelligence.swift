@@ -279,44 +279,64 @@ actor AgentLocalIntelligence {
                 Aynı JSON şemasıyla düzeltilmiş mission'ı döndür.
                 """
 
-                let reviewedResponse = try await session.respond(
-                    to: reviewPrompt
-                )
-                let reviewedRaw = reviewedResponse.content
-                    .trimmingCharacters(
-                        in: .whitespacesAndNewlines
+                do {
+                    let reviewedResponse = try await session.respond(
+                        to: reviewPrompt
+                    )
+                    let reviewedRaw = reviewedResponse.content
+                        .trimmingCharacters(
+                            in: .whitespacesAndNewlines
+                        )
+
+                    let reviewCandidate: AgentSemanticMission
+                    if let reviewedJSON =
+                        extractJSONObject(from: reviewedRaw),
+                       let reviewedData =
+                        reviewedJSON.data(using: .utf8),
+                       let reviewedMission =
+                        try? JSONDecoder().decode(
+                            AgentSemanticMission.self,
+                            from: reviewedData
+                        ),
+                       validateMission(
+                            reviewedMission,
+                            knownCapabilityIDs: knownIDs
+                       ) {
+                        reviewCandidate = reviewedMission
+                    } else {
+                        reviewCandidate = mission
+                    }
+
+                    let repaired = repairMission(
+                        reviewCandidate,
+                        userInput: userInput,
+                        capabilities: capabilities
                     )
 
-                let reviewCandidate: AgentSemanticMission
-                if let reviewedJSON =
-                    extractJSONObject(from: reviewedRaw),
-                   let reviewedData =
-                    reviewedJSON.data(using: .utf8),
-                   let reviewedMission =
-                    try? JSONDecoder().decode(
-                        AgentSemanticMission.self,
-                        from: reviewedData
-                    ),
-                   validateMission(
-                        reviewedMission,
+                    if validateMission(
+                        repaired,
                         knownCapabilityIDs: knownIDs
-                   ) {
-                    reviewCandidate = reviewedMission
-                } else {
-                    reviewCandidate = mission
+                    ) && isOperationallyComplete(repaired) {
+                        return repaired
+                    }
+                } catch {
+                    // Self-review is advisory. A valid repaired mission
+                    // must survive temporary Foundation Models failures.
                 }
 
-                let repaired = repairMission(
-                    reviewCandidate,
+                let fallbackRepaired = repairMission(
+                    mission,
                     userInput: userInput,
                     capabilities: capabilities
                 )
 
                 return validateMission(
-                    repaired,
+                    fallbackRepaired,
                     knownCapabilityIDs: knownIDs
-                ) && isOperationallyComplete(repaired)
-                    ? repaired
+                ) && isOperationallyComplete(
+                    fallbackRepaired
+                )
+                    ? fallbackRepaired
                     : nil
             } catch {
                 return nil
@@ -536,7 +556,10 @@ actor AgentLocalIntelligence {
         var represented = Set<String>()
 
         for step in mission.steps.prefix(10) {
-            guard knownIDs.contains(step.capabilityID) else {
+            guard
+                knownIDs.contains(step.capabilityID),
+                requiredIDs.contains(step.capabilityID)
+            else {
                 continue
             }
 
