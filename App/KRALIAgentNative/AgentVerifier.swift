@@ -10,6 +10,7 @@ struct AgentVerificationSnapshot {
     let selectedCapabilityIDs: Set<String>
     let webResearchResultCount: Int
     let webResearchEvidenceCount: Int
+    let webResearchUniqueDomainCount: Int
 }
 
 struct AgentVerifier {
@@ -181,6 +182,14 @@ struct AgentVerifier {
                     return AgentVerificationResult(
                         state: .partial,
                         summary: "Alakalı kaynaklar bulundu fakat en az 2 kaynağın sayfa içeriğinden kanıt çıkarılamadı. Araştırma keşif seviyesinde kaldı.",
+                        fallback: nil
+                    )
+                }
+
+                if snapshot.webResearchUniqueDomainCount < 2 {
+                    return AgentVerificationResult(
+                        state: .partial,
+                        summary: "Araştırma birden fazla sonuç buldu ancak kaynaklar tek domaine yığıldı. Bağımsız kaynak çeşitliliği yetersiz.",
                         fallback: nil
                     )
                 }
