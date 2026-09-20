@@ -387,3 +387,12 @@ Capability→outcome türetimi de provider-neutral hale getirildi. `desktop.cont
 KRALİ Arena 6 senaryodan 8 senaryoya genişletildi. Mevcut video edit, marka tasarımı, desktop cleanup, browser, mail ve research-to-design görevlerine iki medya-dışı genel bilgisayar görevi eklendi: Notlar uygulamasını açıp öne getirme (`desktop.control`) ve İndirilenler'deki en son PDF'i bulup Finder'da açma (`files.search + files.reveal`). Böylece gelecekteki değişiklikler KRALİ'yi Premiere/medya ajanına daraltırsa Arena bunu regression olarak yakalar.
 
 Screen Perception Probe artık yalnızca başarı JSON'u üretmez; `screen-perception-status.txt` dosyasına running/success/failed durumu da yazar ve Mentor Sync bu tanıyı GitHub'a taşır. Capture başarısızsa bir sonraki Mentor turunda macOS izin/capture hatası doğrudan görülebilir.
+
+
+**v0.8.21 generic desktop contract + explicit Screen Probe state:** v0.8.20 Mentor turunda Training Lab 30/30, Live Research Eval 2/2 ve genişletilmiş KRALİ Arena 7/8 geçti. Video edit, yeni marka tasarımı, desktop cleanup, browser, mail, research-to-design ve genel PDF/Finder açma senaryoları başarılı oldu. Tek failure medya-dışı genel bilgisayar görevi olan “Notlar uygulamasını aç ve pencereyi öne getir” idi.
+
+Düzeltme uygulama adı özel-case'i olarak yapılmadı. Mission Contract Repair artık **generic desktop application open/focus** sınıfını tanır: kullanıcının mesajı herhangi bir uygulamayı açma, uygulamaya geçme veya pencereyi öne getirme hedefi içeriyorsa `desktop.control` capability'si ve `open` outcome'u eklenir. Bu sözleşme Notlar, Takvim, TextEdit, Finder veya gelecekteki başka bir macOS uygulaması için aynı şekilde çalışır.
+
+Aynı katmana generic file-open sözleşmesi de eklendi. Kullanıcı bir dosya/PDF/belge/klasörü bulup Finder'da açmayı istediğinde `files.search + files.reveal`, `locate + open` sözleşmesi local fallback tarafından da üretilebilir. Böylece genel bilgisayar görevleri yalnızca Apple planner başarılı olduğunda çalışmak zorunda değildir.
+
+Screen Perception Mentor tanısı artık probe hiç çalıştırılmadığında da sessiz kalmaz. Uygulama açılışında önceki Screen Perception raporu veya status yoksa `not_run|Screen Perception Probe henüz çalıştırılmadı.` durumu kaydedilir. Probe çalışırsa status `running/success/failed` olarak güncellenir. Böylece Mentor paketi rapor yokluğunu izin/capture hatasıyla karıştırmaz.
