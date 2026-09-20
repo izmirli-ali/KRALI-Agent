@@ -86,6 +86,9 @@ actor AgentLocalIntelligence {
             Gereksiz soru sorma. Makul ve geri alınabilir varsayımla ilerlenebiliyorsa requiresUserInput=false yap.
             Ancak sonucu kökten değiştirecek zorunlu bilgi varsa ve güvenilir varsayım yapılamıyorsa requiresUserInput=true yap.
             Capability kullanılamıyor olsa bile görev için gerçekten gerekiyorsa requiredCapabilityIDs içine koy.
+            Kullanıcı gerçek bir dijital çıktı, dosya, tasarım, kurgu, uygulama işlemi, web işlemi veya medya üzerinde çalışma istiyorsa yalnızca core.reasoning/context.local ile yetinme; hedefi gerçekten uygulayacak capability'leri ekle.
+            Uygulama veya araç capability'si unavailable görünse bile görevin doğal olarak ihtiyacı varsa mission'a dahil et; availability planlama kararını bastırmamalı.
+            Son adıma kadar düşün: yalnızca hazırlık/analiz değil, üretim/uygulama ve mümkünse sonucu doğrulama adımlarını da planla.
             Marka özelindeki hafızayı başka markalara taşımayı önleyen kullanıcı kurallarına uy.
             JSON dışında hiçbir metin üretme.
             """
@@ -152,18 +155,79 @@ actor AgentLocalIntelligence {
                 }
 
                 let knownIDs = Set(capabilities.map(\.id))
-                guard !mission.objective.trimmingCharacters(
-                    in: .whitespacesAndNewlines
-                ).isEmpty,
-                !mission.steps.isEmpty,
-                mission.steps.count <= 10,
-                mission.steps.allSatisfy({
-                    knownIDs.contains($0.capabilityID)
-                }),
-                mission.requiredCapabilityIDs.allSatisfy({
-                    knownIDs.contains($0)
-                }) else {
+                guard validateMission(
+                    mission,
+                    knownCapabilityIDs: knownIDs
+                ) else {
                     return nil
+                }
+
+                let encoder = JSONEncoder()
+                encoder.outputFormatting = [.sortedKeys]
+
+                guard
+                    let missionData = try? encoder.encode(mission),
+                    let missionJSON = String(
+                        data: missionData,
+                        encoding: .utf8
+                    )
+                else {
+                    return mission
+                }
+
+                let reviewPrompt = """
+                İlk mission taslağını şimdi eleştirel olarak denetle.
+
+                Orijinal kullanıcı mesajı:
+                (userInput)
+
+                İlk mission:
+                (missionJSON)
+
+                Capability kataloğu:
+                (capabilityCatalog)
+
+                Denetim kuralları:
+                - Mission kullanıcının nihai hedefini gerçekten uçtan uca tamamlıyor mu?
+                - Kullanıcı bir gerçek dünya/dijital iş istiyorsa yalnızca reasoning/context adımları yeterli değildir.
+                - Dosya bulma gerekiyorsa files.search/files.metadata ekle.
+                - Medyanın içeriğini görmeden karar verilecekse perception.media ekle.
+                - macOS uygulama açma/pencere/klavye/mouse etkileşimi gerekiyorsa desktop.control ekle.
+                - Web arayüzünde gezinme veya oturumlu işlem gerekiyorsa browser.control ekle.
+                - Premiere içinde gerçek kurgu gerekiyorsa premiere.control ekle.
+                - Photoshop içinde gerçek tasarım gerekiyorsa photoshop.control ekle.
+                - Ekrandaki sonucu görsel olarak kontrol etmek gerekiyorsa perception.screen ekle.
+                - Marka/şirket hakkında güncel veya bilinmeyen bilgi gerekiyorsa research.web ekle.
+                - Capability unavailable olsa bile görev gerektiriyorsa mission'a dahil et.
+                - Gereksiz capability ekleme.
+                - Gerekli adımları bağımlılık sırasına koy.
+                - JSON dışında hiçbir şey döndürme.
+
+                Aynı JSON şemasıyla düzeltilmiş mission'ı döndür.
+                """
+
+                let reviewedResponse = try await session.respond(
+                    to: reviewPrompt
+                )
+                let reviewedRaw = reviewedResponse.content
+                    .trimmingCharacters(
+                        in: .whitespacesAndNewlines
+                    )
+
+                if let reviewedJSON =
+                    extractJSONObject(from: reviewedRaw),
+                   let reviewedData =
+                    reviewedJSON.data(using: .utf8),
+                   let reviewedMission =
+                    try? JSONDecoder().decode(
+                        AgentSemanticMission.self,
+                        from: reviewedData
+                    ),
+                   validateMission(
+                        reviewedMission,
+                        knownCapabilityIDs: knownIDs
+                   ) {
+                    return reviewedMission
                 }
 
                 return mission
@@ -174,6 +238,51 @@ actor AgentLocalIntelligence {
         #endif
 
         return nil
+    }
+
+    private func validateMission(
+        _ mission: AgentSemanticMission,
+        knownCapabilityIDs: Set<String>
+    ) -> Bool {
+        guard
+            !mission.objective.trimmingCharacters(
+                in: .whitespacesAndNewlines
+            ).isEmpty,
+            !mission.steps.isEmpty,
+            mission.steps.count <= 10,
+            mission.steps.allSatisfy({
+                knownCapabilityIDs.contains(
+                    $0.capabilityID
+                )
+            }),
+            mission.requiredCapabilityIDs.allSatisfy({
+                knownCapabilityIDs.contains($0)
+            })
+        else {
+            return false
+        }
+
+        let allowedOutcomes = Set([
+            "converse",
+            "locate",
+            "shortlist",
+            "assessContent",
+            "analyze",
+            "ideate",
+            "compose",
+            "transform",
+            "explain",
+            "organize",
+            "open",
+            "remember",
+            "research",
+            "edit",
+            "communicate"
+        ])
+
+        return mission.outcomes.allSatisfy {
+            allowedOutcomes.contains($0)
+        }
     }
 
     private func extractJSONObject(
