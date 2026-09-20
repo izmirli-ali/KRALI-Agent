@@ -175,6 +175,9 @@ struct AgentTrainingLab {
         results.append(
             externalCommitApprovalGraphResult()
         )
+        results.append(
+            compoundCommandBypassesFastPathResult()
+        )
 
         let core = results.filter { $0.tier == .core }
         let northStar = results.filter { $0.tier == .northStar }
@@ -955,6 +958,41 @@ struct AgentTrainingLab {
                 ? []
                 : [
                     "External commit approval gate yanlış step'e uygulandı."
+                ]
+        )
+    }
+
+    private func compoundCommandBypassesFastPathResult()
+        -> TrainingScenarioResult {
+        let prompt =
+            "Mail uygulamasını aç, son gelen maili incele, ne yapmamız gerektiğini analiz et ve cevap taslağı hazırla."
+
+        let passed =
+            !languageResolver
+                .isSimpleOpenCommand(
+                    prompt
+                )
+
+        return TrainingScenarioResult(
+            scenarioID:
+                "compound-command-bypasses-app-fast-path",
+            title:
+                "Karmaşık komutu basit app-open'dan ayırma",
+            tier: .core,
+            prompt: prompt,
+            passed: passed,
+            goal:
+                "Çok adımlı hedefi semantic task graph planner'a bırak",
+            route: [
+                "Core",
+                "Plan"
+            ],
+            selectedCapabilities: [],
+            unavailableCapabilities: [],
+            diagnostics: passed
+                ? []
+                : [
+                    "Karmaşık görev yanlışlıkla basit app-open fast path'e düştü."
                 ]
         )
     }
