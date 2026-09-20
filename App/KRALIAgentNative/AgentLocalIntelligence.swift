@@ -59,7 +59,10 @@ actor AgentLocalIntelligence {
         if #available(macOS 26.0, *) {
             let model = SystemLanguageModel.default
             guard model.isAvailable else {
-                return nil
+                return contractFallbackMission(
+                    userInput: userInput,
+                    capabilities: capabilities
+                )
             }
 
             let capabilityCatalog = capabilities
@@ -176,55 +179,16 @@ actor AgentLocalIntelligence {
 
                     mission = repaired
                 } else {
-                    let seed = AgentSemanticMission(
-                        objective: userInput,
-                        outcomes: [],
-                        steps: [
-                            AgentSemanticMissionStep(
-                                title: "Hedefi çöz",
-                                purpose:
-                                    "Yerel model yapılandırılmış mission üretemedi; capability contract güvenli fallback oluşturuyor.",
-                                capabilityID: "core.reasoning",
-                                operation: "semantic.fallback",
-                                dependsOn: []
-                            )
-                        ],
-                        requiredCapabilityIDs: [
-                            "core.reasoning",
-                            "context.local"
-                        ],
-                        requiresUserInput: false,
-                        userInputReason: nil,
-                        confidence: 0.35
-                    )
-
-                    let repaired = repairMission(
-                        seed,
-                        userInput: userInput,
-                        capabilities: capabilities
-                    )
-
-                    let nonCore = Set(
-                        repaired.requiredCapabilityIDs
-                    )
-                    .subtracting(
-                        Set([
-                            "core.reasoning",
-                            "context.local"
-                        ])
-                    )
-
-                    guard !nonCore.isEmpty,
-                          validateMission(
-                            repaired,
-                            knownCapabilityIDs: knownIDs
-                          ),
-                          isOperationallyComplete(repaired)
+                    guard let fallbackMission =
+                        contractFallbackMission(
+                            userInput: userInput,
+                            capabilities: capabilities
+                        )
                     else {
                         return nil
                     }
 
-                    mission = repaired
+                    mission = fallbackMission
                 }
 
                 let encoder = JSONEncoder()
@@ -339,12 +303,78 @@ actor AgentLocalIntelligence {
                     ? fallbackRepaired
                     : nil
             } catch {
-                return nil
+                return contractFallbackMission(
+                    userInput: userInput,
+                    capabilities: capabilities
+                )
             }
         }
         #endif
 
-        return nil
+        return contractFallbackMission(
+            userInput: userInput,
+            capabilities: capabilities
+        )
+    }
+
+    private func contractFallbackMission(
+        userInput: String,
+        capabilities: [AgentCapability]
+    ) -> AgentSemanticMission? {
+        let seed = AgentSemanticMission(
+            objective: userInput,
+            outcomes: [],
+            steps: [
+                AgentSemanticMissionStep(
+                    title: "Hedefi çöz",
+                    purpose:
+                        "Semantic model geçici olarak mission üretemedi; capability contract güncel kullanıcı mesajından güvenli fallback oluşturuyor.",
+                    capabilityID: "core.reasoning",
+                    operation: "semantic.fallback",
+                    dependsOn: []
+                )
+            ],
+            requiredCapabilityIDs: [
+                "core.reasoning",
+                "context.local"
+            ],
+            requiresUserInput: false,
+            userInputReason: nil,
+            confidence: 0.35
+        )
+
+        let repaired = repairMission(
+            seed,
+            userInput: userInput,
+            capabilities: capabilities
+        )
+
+        let knownIDs = Set(
+            capabilities.map(\.id)
+        )
+
+        let nonCore = Set(
+            repaired.requiredCapabilityIDs
+        )
+        .subtracting(
+            Set([
+                "core.reasoning",
+                "context.local"
+            ])
+        )
+
+        guard
+            !nonCore.isEmpty,
+            validateMission(
+                repaired,
+                knownCapabilityIDs: knownIDs
+            ),
+            isOperationallyComplete(repaired)
+        else {
+            return nil
+        }
+
+        return repaired
     }
 
     private func repairMission(
