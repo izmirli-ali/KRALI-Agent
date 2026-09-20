@@ -4,6 +4,19 @@ import AppKit
 @MainActor
 final class AgentEngine: ObservableObject {
     @Published var messages: [ChatMessage] = []
+    @Published var conversationHistory: [ConversationArchiveSegment] = []
+    @Published var selectedConversationArchiveID: String?
+    @Published var archivedConversationPreview: [ChatMessage] = []
+
+    var visibleConversationMessages: [ChatMessage] {
+        selectedConversationArchiveID == nil
+            ? messages
+            : archivedConversationPreview
+    }
+
+    var isViewingArchivedConversation: Bool {
+        selectedConversationArchiveID != nil
+    }
 
     @Published var activities: [ActivityItem] = []
     @Published var activeRoute: [String] = ["Core"]
@@ -136,10 +149,7 @@ final class AgentEngine: ObservableObject {
 
         if restoredMessages.isEmpty {
             messages = [
-                ChatMessage(
-                    role: .assistant,
-                    text: "Hazırım. Bana normal konuşur gibi hedefini söyle; gerekli kabiliyetleri seçip yolu kendim kuracağım."
-                )
+                starterConversationMessage()
             ]
             messages =
                 conversationStore.persistActive(
@@ -148,6 +158,9 @@ final class AgentEngine: ObservableObject {
         } else {
             messages = restoredMessages
         }
+
+        conversationHistory =
+            conversationStore.archiveSegments()
 
         loadMemory()
         contextMemoryEntries = contextMemoryStore.load()
@@ -352,10 +365,97 @@ final class AgentEngine: ObservableObject {
         _ message: ChatMessage
     ) {
         messages.append(message)
+
+        let beforePersistCount =
+            messages.count
+
         messages =
             conversationStore.persistActive(
                 messages
             )
+
+        if messages.count < beforePersistCount {
+            refreshConversationHistory()
+        }
+    }
+
+    func postAssistantMessage(
+        _ text: String
+    ) {
+        appendConversationMessage(
+            ChatMessage(
+                role: .assistant,
+                text: text
+            )
+        )
+    }
+
+    func startNewConversation() {
+        guard !busy else {
+            return
+        }
+
+        speech.stopSpeaking()
+
+        guard conversationStore
+            .archiveActiveConversation(
+                messages
+            )
+        else {
+            log(
+                "Yeni sohbet açılamadı: aktif konuşma güvenli şekilde arşivlenemedi"
+            )
+            return
+        }
+
+        messages = [
+            starterConversationMessage()
+        ]
+        messages =
+            conversationStore.persistActive(
+                messages
+            )
+
+        selectedConversationArchiveID = nil
+        archivedConversationPreview = []
+        refreshConversationHistory()
+
+        currentGoal = "Hazır"
+        currentPlan = "Yeni görevi bekliyor"
+        verificationState = .idle
+        verificationSummary =
+            "Henüz doğrulama yapılmadı."
+
+        log("Yeni sohbet başlatıldı")
+    }
+
+    func showActiveConversation() {
+        selectedConversationArchiveID = nil
+        archivedConversationPreview = []
+    }
+
+    func openConversationArchive(
+        _ segment: ConversationArchiveSegment
+    ) {
+        selectedConversationArchiveID =
+            segment.id
+        archivedConversationPreview =
+            conversationStore.loadArchive(
+                segment
+            )
+    }
+
+    private func refreshConversationHistory() {
+        conversationHistory =
+            conversationStore.archiveSegments()
+    }
+
+    private func starterConversationMessage()
+        -> ChatMessage {
+        ChatMessage(
+            role: .assistant,
+            text: "Hazırım. Bana normal konuşur gibi hedefini söyle; gerekli kabiliyetleri seçip yolu kendim kuracağım."
+        )
     }
 
     func send(
