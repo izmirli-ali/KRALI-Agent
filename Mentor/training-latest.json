@@ -1,12 +1,12 @@
 {
-  "appVersion" : "0.8.8",
-  "corePassed" : 22,
-  "coreTotal" : 22,
-  "createdAt" : "2026-09-20T09:28:46Z",
-  "failed" : 0,
+  "appVersion" : "0.8.9",
+  "corePassed" : 23,
+  "coreTotal" : 24,
+  "createdAt" : "2026-09-20T09:47:08Z",
+  "failed" : 1,
   "northStarPassed" : 4,
   "northStarTotal" : 4,
-  "passed" : 26,
+  "passed" : 27,
   "results" : [
     {
       "diagnostics" : [
@@ -420,6 +420,33 @@
       ],
       "goal" : "çalışma kuralını öğren",
       "passed" : true,
+      "prompt" : "Bu yaptığımız çalışma biçimini ileride benzer sosyal medya video işleri için de kullan. Ama Estafiz'e özel marka detaylarını başka markalara otomatik uygulama.",
+      "route" : [
+        "Core",
+        "Goal",
+        "Context",
+        "Plan",
+        "Memory",
+        "Response"
+      ],
+      "scenarioID" : "scoped-workflow-rule-after-file-search",
+      "selectedCapabilities" : [
+        "context.local",
+        "core.reasoning",
+        "memory.local"
+      ],
+      "tier" : "core",
+      "title" : "Eski dosya araması sonrası kapsamlı çalışma kuralı",
+      "unavailableCapabilities" : [
+
+      ]
+    },
+    {
+      "diagnostics" : [
+
+      ],
+      "goal" : "çalışma kuralını öğren",
+      "passed" : true,
       "prompt" : "bundan sonra konuşmalı Reels videolarında 35 saniyeyi geçme, bunu aklında tut",
       "route" : [
         "Core",
@@ -710,7 +737,29 @@
       "unavailableCapabilities" : [
 
       ]
+    },
+    {
+      "diagnostics" : [
+        "Verifier stale fileSearch hedefini mevcut memory komutundan ayıramadı."
+      ],
+      "goal" : "Yeni kullanıcı girdisini stale fileSearch goal'ünden ayır",
+      "passed" : false,
+      "prompt" : "Bu yaptığımız çalışma biçimini ileride benzer sosyal medya video işleri için de kullan. Ama Estafiz'e özel marka detaylarını başka markalara otomatik uygulama.",
+      "route" : [
+        "Core",
+        "Goal",
+        "Verify"
+      ],
+      "scenarioID" : "stale-goal-verifier-isolation",
+      "selectedCapabilities" : [
+        "core.reasoning"
+      ],
+      "tier" : "core",
+      "title" : "Verifier eski dosya hedefini reddetmeli",
+      "unavailableCapabilities" : [
+
+      ]
     }
   ],
-  "total" : 26
+  "total" : 28
 }

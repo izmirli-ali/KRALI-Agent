@@ -1,6 +1,6 @@
 {
-  "appVersion" : "0.8.8",
-  "createdAt" : "2026-09-20T09:28:58Z",
+  "appVersion" : "0.8.9",
+  "createdAt" : "2026-09-20T09:47:20Z",
   "failed" : 0,
   "passed" : 2,
   "probes" : [
@@ -21,14 +21,14 @@
       "diagnostics" : [
 
       ],
-      "evidenceCount" : 3,
+      "evidenceCount" : 4,
       "passed" : true,
       "probeID" : "technical-official",
       "provider" : "DuckDuckGo HTML",
       "query" : "Apple Developer Vision AVFoundation macOS video analysis framework official documentation",
-      "sourceCount" : 3,
+      "sourceCount" : 4,
       "title" : "Teknik araştırma / resmi kaynak",
-      "uniqueDomainCount" : 2
+      "uniqueDomainCount" : 3
     }
   ],
   "total" : 2
