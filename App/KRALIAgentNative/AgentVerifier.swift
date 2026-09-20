@@ -376,8 +376,31 @@ struct AgentVerifier {
             "klasor", "ekran görünt", "ekran gorunt", "ekran resmi"
         ]
 
-        return containsAny(text, actions) &&
-            containsAny(text, targets)
+        return containsWordOrPhrase(text, actions) &&
+            containsWordOrPhrase(text, targets)
+    }
+
+    private func containsWordOrPhrase(
+        _ text: String,
+        _ values: [String]
+    ) -> Bool {
+        let tokens = Set(
+            text.components(
+                separatedBy: CharacterSet
+                    .alphanumerics
+                    .inverted
+            )
+            .filter { !$0.isEmpty }
+        )
+
+        return values.contains { value in
+            if value.contains(" ") ||
+               value.contains("'") {
+                return text.contains(value)
+            }
+
+            return tokens.contains(value)
+        }
     }
 
     private func normalize(_ text: String) -> String {
