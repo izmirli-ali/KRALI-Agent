@@ -365,7 +365,8 @@ struct DeveloperAgentStatus: Hashable {
             "setup_cline_repair",
             "setup_cline_auth",
             "waiting_cline_auth",
-            "setup_local_ai"
+            "setup_local_ai",
+            "local_storage_low"
         ].contains(state)
     }
 
@@ -383,6 +384,8 @@ struct DeveloperAgentStatus: Hashable {
             return "Cline giriş penceresi otomatik açıldı; tarayıcıdaki girişi tamamla."
         case "setup_local_ai":
             return "Yerel Ollama runtime otomatik hazırlanamadı."
+        case "local_storage_low":
+            return "Diskte yeterli boş alan yok. KRALİ yeni büyük model indirmeyi durdurdu; mevcut kurulu model korunuyor."
         case "setup_cline_repair":
             return "Cline otomatik onarılamadı; Developer Agent logu incelenmeli."
         case "setup_cline_auth":
