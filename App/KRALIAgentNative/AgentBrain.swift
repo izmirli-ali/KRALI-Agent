@@ -427,6 +427,8 @@ struct AgentBrain {
             "bunlardan", "bunların", "bunlar", "onlardan", "onların",
             "şunlardan", "sunlardan", "sonuçlardan", "sonuclardan",
             "az önce", "az once", "az önceki", "az onceki",
+            "bu hesap", "bu marka", "bu şirket", "bu sirket",
+            "bu analiz", "bu rapor", "bu konu", "buna göre", "buna gore",
             "bulduklarından", "bulduklarindan", "gösterdiklerinden", "gosterdiklerinden"
         ])
     }
