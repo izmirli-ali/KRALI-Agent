@@ -49,6 +49,139 @@ actor AgentLocalIntelligence {
         )
     }
 
+    func planMission(
+        userInput: String,
+        contextMemory: [AgentContextMemoryEntry],
+        capabilities: [AgentCapability],
+        hasWorkspace: Bool
+    ) async -> AgentSemanticMission? {
+        #if canImport(FoundationModels)
+        if #available(macOS 26.0, *) {
+            let model = SystemLanguageModel.default
+            guard model.isAvailable else {
+                return nil
+            }
+
+            let capabilityCatalog = capabilities
+                .map {
+                    "- \($0.id): \($0.summary) [\($0.isAvailable ? "available" : "unavailable")]"
+                }
+                .joined(separator: "\n")
+
+            let memoryText = contextMemory
+                .prefix(5)
+                .map {
+                    "[\($0.kind.rawValue)] \($0.title): \($0.summary)"
+                }
+                .joined(separator: "\n")
+
+            let instructions = """
+            Sen KRALİ'nin semantic mission planner katmanısın.
+            Kullanıcının cümlesini anahtar kelime eşlemesiyle değil, gerçek dünyadaki nihai amacına göre yorumla.
+            Görevi hedefe ulaşmak için gereken alt işlere böl.
+            Her alt iş için yalnızca capability kataloğunda bulunan capabilityID değerlerinden birini seç.
+            Kullanıcı açıkça söylemese bile hedef doğal olarak araştırma, dosya bulma, uygulama açma, düzenleme veya doğrulama gerektiriyorsa bunları plana ekle.
+            Örnek: "son çekimle ilgili kurgu yapmamız gerekiyor" => son çekimleri bul, medyayı değerlendir, kurgu uygulamasında düzenle, sonucu doğrula.
+            Örnek: "X markası için tasarım hazırlamak istiyorum" => markayı araştır, görsel standartları analiz et, tasarım uygulamasında üret, ekran sonucunu doğrula.
+            Gereksiz soru sorma. Makul ve geri alınabilir varsayımla ilerlenebiliyorsa requiresUserInput=false yap.
+            Ancak sonucu kökten değiştirecek zorunlu bilgi yoksa ve güvenilir varsayım yapılamıyorsa requiresUserInput=true yap.
+            Capability kullanılamıyor olsa bile görev için gerçekten gerekiyorsa requiredCapabilityIDs içine koy.
+            Marka özelindeki hafızayı başka markalara taşımayı önleyen kullanıcı kurallarına uy.
+            JSON dışında hiçbir metin üretme.
+            """
+
+            let prompt = """
+            Kullanıcı mesajı:
+            \(userInput)
+
+            Çalışma alanı bağlı mı:
+            \(hasWorkspace ? "evet" : "hayır")
+
+            İlgili hafıza:
+            \(memoryText.isEmpty ? "Yok" : memoryText)
+
+            Capability kataloğu:
+            \(capabilityCatalog)
+
+            Şu JSON şemasını döndür:
+            {
+              "objective": "kullanıcının nihai hedefi",
+              "steps": [
+                {
+                  "title": "kısa adım adı",
+                  "purpose": "bu adım neden gerekli",
+                  "capabilityID": "catalogdaki.id",
+                  "operation": "kısa makine işlemi etiketi",
+                  "dependsOn": []
+                }
+              ],
+              "requiredCapabilityIDs": ["catalogdaki.id"],
+              "requiresUserInput": false,
+              "userInputReason": null,
+              "confidence": 0.0
+            }
+
+            Kurallar:
+            - 2 ile 10 arası anlamlı step üret; gerçekten tek adımlı doğal konuşmada 1 step olabilir.
+            - dependsOn dizisinde 0 tabanlı önceki step indekslerini kullan.
+            - requiredCapabilityIDs, steps içinde kullanılan capabilityID'lerin tekilleştirilmiş listesini içersin.
+            - confidence 0 ile 1 arasında olsun.
+            """
+
+            do {
+                let session = LanguageModelSession(
+                    model: model,
+                    instructions: instructions
+                )
+
+                let response = try await session.respond(to: prompt)
+                let raw = response.content.trimmingCharacters(
+                    in: .whitespacesAndNewlines
+                )
+
+                guard let json = extractJSONObject(from: raw),
+                      let data = json.data(using: .utf8),
+                      let mission = try? JSONDecoder().decode(
+                        AgentSemanticMission.self,
+                        from: data
+                      ) else {
+                    return nil
+                }
+
+                let knownIDs = Set(capabilities.map(\.id))
+                guard !mission.objective.trimmingCharacters(
+                    in: .whitespacesAndNewlines
+                ).isEmpty,
+                !mission.steps.isEmpty,
+                mission.steps.count <= 10,
+                mission.steps.allSatisfy({
+                    knownIDs.contains($0.capabilityID)
+                }) else {
+                    return nil
+                }
+
+                return mission
+            } catch {
+                return nil
+            }
+        }
+        #endif
+
+        return nil
+    }
+
+    private func extractJSONObject(
+        from raw: String
+    ) -> String? {
+        guard let start = raw.firstIndex(of: "{"),
+              let end = raw.lastIndex(of: "}"),
+              start <= end else {
+            return nil
+        }
+
+        return String(raw[start...end])
+    }
+
     func synthesize(
         userInput: String,
         goal: String,
