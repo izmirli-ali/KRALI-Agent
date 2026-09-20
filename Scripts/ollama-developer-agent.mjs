@@ -16,16 +16,25 @@ const runID = process.env.KRALI_RUN_ID || "";
 const requireChange =
   (process.env.KRALI_REQUIRE_CHANGE || "0") === "1";
 const maxCompletionRejections = Number(
-  process.env.KRALI_LOCAL_AGENT_MAX_COMPLETION_REJECTIONS || "4"
+  process.env.KRALI_LOCAL_AGENT_MAX_COMPLETION_REJECTIONS || "3"
 );
 const maxStructuredActions = Number(
-  process.env.KRALI_LOCAL_AGENT_MAX_STRUCTURED_ACTIONS || "12"
+  process.env.KRALI_LOCAL_AGENT_MAX_STRUCTURED_ACTIONS || "8"
+);
+const maxInspectionTools = Number(
+  process.env.KRALI_LOCAL_AGENT_MAX_INSPECTIONS || "6"
 );
 const maxIterations = Number(
-  process.env.KRALI_LOCAL_AGENT_MAX_ITERATIONS || "36"
+  process.env.KRALI_LOCAL_AGENT_MAX_ITERATIONS || "16"
 );
 const hardTimeoutMs = Number(
-  process.env.KRALI_LOCAL_AGENT_TIMEOUT_MS || "720000"
+  process.env.KRALI_LOCAL_AGENT_TIMEOUT_MS || "300000"
+);
+const requestTimeoutMs = Number(
+  process.env.KRALI_LOCAL_AGENT_REQUEST_TIMEOUT_MS || "60000"
+);
+const structuredRequestTimeoutMs = Number(
+  process.env.KRALI_LOCAL_AGENT_STRUCTURED_TIMEOUT_MS || "45000"
 );
 const startedAt = Date.now();
 
@@ -651,6 +660,26 @@ let buildCheckPassed = false;
 let completionRejections = 0;
 let structuredActions = 0;
 let inspectionToolCalls = 0;
+let implementationPhaseAnnounced = false;
+
+const inspectionToolNames = new Set([
+  "list_files",
+  "search_codebase",
+  "read_file",
+]);
+const mutationToolNames = new Set([
+  "replace_text",
+  "write_file",
+  "apply_patch",
+]);
+
+function developmentPhase() {
+  if (sawMutatingTool) return "verification";
+  if (requireChange && inspectionToolCalls >= maxInspectionTools) {
+    return "implementation";
+  }
+  return "inspection";
+}
 
 const promptRelative = path
   .relative(root, path.resolve(promptFile))
@@ -688,17 +717,28 @@ function candidateStatus() {
 
 
 function recordToolEvidence(name, result) {
-  if (
-    result?.ok &&
-    ["list_files", "search_codebase", "read_file"].includes(name)
-  ) {
+  if (result?.ok && inspectionToolNames.has(name)) {
     inspectionToolCalls += 1;
+
+    if (
+      requireChange &&
+      inspectionToolCalls >= maxInspectionTools &&
+      !sawMutatingTool &&
+      !implementationPhaseAnnounced
+    ) {
+      implementationPhaseAnnounced = true;
+      stage(
+        "local_agent_implementation_phase",
+        gapLabel +
+          " inspection bütçesi tamamlandı • implementation zorunlu • " +
+          inspectionToolCalls +
+          "/" +
+          maxInspectionTools
+      );
+    }
   }
 
-  if (
-    result?.ok &&
-    ["replace_text", "write_file", "apply_patch"].includes(name)
-  ) {
+  if (result?.ok && mutationToolNames.has(name)) {
     sawMutatingTool = true;
     sawGitDiff = false;
     buildCheckPassed = false;
@@ -722,11 +762,32 @@ async function requestStructuredToolDecision(
     return null;
   }
 
-  const toolContracts = tools.map((tool) => ({
-    name: tool.function.name,
-    description: tool.function.description,
-    parameters: tool.function.parameters,
-  }));
+  const phase = developmentPhase();
+
+  const toolContracts = tools
+    .filter((tool) => {
+      const name = tool.function.name;
+
+      if (phase === "implementation") {
+        return mutationToolNames.has(name);
+      }
+
+      if (phase === "verification") {
+        return (
+          mutationToolNames.has(name) ||
+          name === "git_diff" ||
+          name === "build_check" ||
+          name === "git_status"
+        );
+      }
+
+      return true;
+    })
+    .map((tool) => ({
+      name: tool.function.name,
+      description: tool.function.description,
+      parameters: tool.function.parameters,
+    }));
 
   const recentContext = messages
     .slice(-8)
@@ -745,7 +806,7 @@ async function requestStructuredToolDecision(
   const timer = setTimeout(
     () => controller.abort(),
     Math.min(
-      120000,
+      structuredRequestTimeoutMs,
       Math.max(1000, hardTimeoutMs - (Date.now() - startedAt))
     )
   );
@@ -773,9 +834,11 @@ async function requestStructuredToolDecision(
               "Do not claim success. Do not explain source code.",
               "Choose only from the supplied tool contracts.",
               "Arguments must satisfy that tool's schema.",
-              "If the assistant just said it needs to inspect/read/search something, select that actual inspection tool now.",
-              "If enough relevant code has already been inspected and an active gap still needs implementation, prefer a minimal mutation tool over more prose.",
-              "After mutation, prefer git_diff and then build_check.",
+              "Respect the supplied development phase and available tool contracts.",
+              "During inspection, select the minimum real inspection tool needed.",
+              "During implementation, inspection is closed: choose a minimal mutation tool now.",
+              "During verification, prefer git_diff and build_check; mutate again only if evidence shows a fix is needed.",
+              "Never request a tool that is absent from the supplied tool contracts.",
             ].join("\n"),
           },
           {
@@ -785,8 +848,10 @@ async function requestStructuredToolDecision(
               requireChange,
               blockers,
               assistantText: truncate(assistantText || "", 4000),
+              phase,
               evidence: {
                 inspectionToolCalls,
+                maxInspectionTools,
                 sawMutatingTool,
                 sawGitDiff,
                 buildCheckPassed,
@@ -847,8 +912,8 @@ async function requestStructuredToolDecision(
       ? decision.arguments
       : {};
 
-  const allowed = tools.some(
-    (tool) => tool.function.name === name
+  const allowed = toolContracts.some(
+    (tool) => tool.name === name
   );
 
   if (!allowed) {
@@ -937,7 +1002,7 @@ for (let iteration = 1; iteration <= maxIterations; iteration++) {
   const controller = new AbortController();
   const requestTimer = setTimeout(
     () => controller.abort(),
-    Math.min(180000, remainingMs)
+    Math.min(requestTimeoutMs, remainingMs)
   );
 
   try {
@@ -1125,16 +1190,35 @@ for (let iteration = 1; iteration <= maxIterations; iteration++) {
 
     let result;
 
-    try {
-      result = executeTool(name, args);
-    } catch (error) {
+    if (
+      requireChange &&
+      !sawMutatingTool &&
+      inspectionToolNames.has(name) &&
+      inspectionToolCalls >= maxInspectionTools
+    ) {
+      stage(
+        "local_agent_implementation_required",
+        gapLabel +
+          " inspection aracı reddedildi • implementation fazı aktif • " +
+          name
+      );
       result = {
         ok: false,
         error:
-          error instanceof Error
-            ? error.message
-            : String(error),
+          "Inspection budget exhausted. Implementation phase is active; use replace_text, write_file, or apply_patch.",
       };
+    } else {
+      try {
+        result = executeTool(name, args);
+      } catch (error) {
+        result = {
+          ok: false,
+          error:
+            error instanceof Error
+              ? error.message
+              : String(error),
+        };
+      }
     }
 
     recordToolEvidence(name, result);
