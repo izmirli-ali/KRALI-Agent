@@ -1,5 +1,14 @@
 import Foundation
 
+struct ConversationArchiveSegment: Identifiable, Hashable {
+    let id: String
+    let url: URL
+    let title: String
+    let subtitle: String
+    let messageCount: Int
+    let createdAt: Date
+}
+
 struct ConversationStore {
     private let fileManager = FileManager.default
 
@@ -29,21 +38,7 @@ struct ConversationStore {
     }
 
     func loadActive() -> [ChatMessage] {
-        guard
-            let data = try? Data(contentsOf: activeURL)
-        else {
-            return []
-        }
-
-        let decoder = JSONDecoder()
-        decoder.dateDecodingStrategy = .iso8601
-
-        return (
-            try? decoder.decode(
-                [ChatMessage].self,
-                from: data
-            )
-        ) ?? []
+        loadMessages(at: activeURL)
     }
 
     @discardableResult
@@ -83,27 +78,110 @@ struct ConversationStore {
         return active
     }
 
-    func archivedSegmentURLs() -> [URL] {
+    func archiveActiveConversation(
+        _ messages: [ChatMessage]
+    ) -> Bool {
+        let hasUserMessage = messages.contains {
+            $0.role == .user
+        }
+
+        guard hasUserMessage else {
+            return write([], to: activeURL)
+        }
+
+        guard archive(messages) else {
+            return false
+        }
+
+        return write([], to: activeURL)
+    }
+
+    func archiveSegments() -> [ConversationArchiveSegment] {
+        archivedSegmentURLs()
+            .compactMap { url in
+                let messages = loadMessages(at: url)
+                guard !messages.isEmpty else {
+                    return nil
+                }
+
+                let values = try? url.resourceValues(
+                    forKeys: [
+                        .creationDateKey,
+                        .contentModificationDateKey
+                    ]
+                )
+
+                let createdAt =
+                    values?.creationDate ??
+                    values?.contentModificationDate ??
+                    messages.first?.createdAt ??
+                    Date.distantPast
+
+                let rawTitle =
+                    messages.first(
+                        where: {
+                            $0.role == .user
+                        }
+                    )?.text ??
+                    "Geçmiş sohbet"
+
+                return ConversationArchiveSegment(
+                    id: url.lastPathComponent,
+                    url: url,
+                    title: compactTitle(rawTitle),
+                    subtitle: formattedDate(createdAt),
+                    messageCount: messages.count,
+                    createdAt: createdAt
+                )
+            }
+            .sorted {
+                $0.createdAt > $1.createdAt
+            }
+    }
+
+    func loadArchive(
+        _ segment: ConversationArchiveSegment
+    ) -> [ChatMessage] {
+        loadMessages(at: segment.url)
+    }
+
+    private func archivedSegmentURLs() -> [URL] {
         ensureDirectories()
 
         let urls = (
             try? fileManager.contentsOfDirectory(
                 at: archiveURL,
                 includingPropertiesForKeys: [
+                    .creationDateKey,
                     .contentModificationDateKey
                 ],
                 options: [.skipsHiddenFiles]
             )
         ) ?? []
 
-        return urls
-            .filter {
-                $0.pathExtension.lowercased() == "json"
-            }
-            .sorted {
-                $0.lastPathComponent >
-                    $1.lastPathComponent
-            }
+        return urls.filter {
+            $0.pathExtension.lowercased() == "json"
+        }
+    }
+
+    private func loadMessages(
+        at url: URL
+    ) -> [ChatMessage] {
+        guard
+            let data = try? Data(contentsOf: url)
+        else {
+            return []
+        }
+
+        let decoder = JSONDecoder()
+        decoder.dateDecodingStrategy = .iso8601
+
+        return (
+            try? decoder.decode(
+                [ChatMessage].self,
+                from: data
+            )
+        ) ?? []
     }
 
     private func archive(
@@ -140,6 +218,8 @@ struct ConversationStore {
         _ messages: [ChatMessage],
         to url: URL
     ) -> Bool {
+        ensureDirectories()
+
         let encoder = JSONEncoder()
         encoder.dateEncodingStrategy = .iso8601
 
@@ -158,6 +238,40 @@ struct ConversationStore {
         } catch {
             return false
         }
+    }
+
+    private func compactTitle(
+        _ value: String
+    ) -> String {
+        let flattened = value
+            .replacingOccurrences(
+                of: "\n",
+                with: " "
+            )
+            .split(
+                whereSeparator: {
+                    $0.isWhitespace
+                }
+            )
+            .joined(separator: " ")
+
+        guard flattened.count > 46 else {
+            return flattened
+        }
+
+        return String(flattened.prefix(43)) + "…"
+    }
+
+    private func formattedDate(
+        _ date: Date
+    ) -> String {
+        let formatter = DateFormatter()
+        formatter.locale = Locale(
+            identifier: "tr_TR"
+        )
+        formatter.dateStyle = .medium
+        formatter.timeStyle = .short
+        return formatter.string(from: date)
     }
 
     private func ensureDirectories() {
