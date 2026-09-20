@@ -499,10 +499,57 @@ struct ContentView: View {
                 }
 
                 if !engine.capabilityLearningPlans.isEmpty ||
-                   !engine.capabilityLearningBacklog.isEmpty {
+                   !engine.capabilityLearningBacklog.isEmpty ||
+                   engine.developerAgentStatus.shouldShowLearningStatus {
                     sectionTitle("Öğrenme")
 
                     VStack(alignment: .leading, spacing: 8) {
+                        if engine.developerAgentStatus.shouldShowLearningStatus {
+                            HStack(alignment: .top, spacing: 8) {
+                                if engine.developerAgentStatus.isLearningActive {
+                                    ProgressView()
+                                        .controlSize(.small)
+                                        .frame(width: 16, height: 16)
+                                } else {
+                                    Image(
+                                        systemName:
+                                            engine.developerAgentStatus.state ==
+                                                "ready_for_review"
+                                                ? "checkmark.circle.fill"
+                                                : "exclamationmark.triangle.fill"
+                                    )
+                                    .font(.caption)
+                                    .foregroundStyle(
+                                        engine.developerAgentStatus.state ==
+                                            "ready_for_review"
+                                            ? Color.green
+                                            : Color.orange
+                                    )
+                                    .frame(width: 16)
+                                }
+
+                                VStack(alignment: .leading, spacing: 2) {
+                                    Text(
+                                        engine.developerAgentStatus
+                                            .learningStageTitle
+                                    )
+                                    .font(.caption.weight(.semibold))
+
+                                    Text(engine.developerAgentStatus.message)
+                                        .font(.caption2)
+                                        .foregroundStyle(.secondary)
+                                        .lineLimit(3)
+                                }
+
+                                Spacer()
+                            }
+
+                            if !engine.capabilityLearningPlans.isEmpty ||
+                               !engine.capabilityLearningBacklog.isEmpty {
+                                Divider()
+                            }
+                        }
+
                         ForEach(
                             engine.capabilityLearningPlans.prefix(3)
                         ) { plan in
