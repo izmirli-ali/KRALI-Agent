@@ -58,7 +58,8 @@ struct AgentRouteBuilder {
             return "Screen"
         }
 
-        if capability.id == "desktop.control" {
+        if capability.id == "desktop.app" ||
+           capability.id == "desktop.control" {
             return "Desktop"
         }
 
