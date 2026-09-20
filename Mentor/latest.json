@@ -1,79 +1,111 @@
 {
   "activityTail" : [
     {
-      "date" : "2026-09-20T00:41:33Z",
+      "date" : "2026-09-20T01:03:31Z",
       "text" : "ChatGPT Subscription sentezi uygulandı"
     },
     {
-      "date" : "2026-09-20T00:39:57Z",
-      "text" : "Web Research tamamlandı: 2 kaynak, 2 kaynak okundu"
+      "date" : "2026-09-20T01:02:58Z",
+      "text" : "Seçilen kabiliyetler: Akıl yürütme, Bağlam"
     },
     {
-      "date" : "2026-09-20T00:39:51Z",
+      "date" : "2026-09-20T01:02:58Z",
+      "text" : "Otomatik rota: Core → Goal → Context → Response"
+    },
+    {
+      "date" : "2026-09-20T01:02:58Z",
+      "text" : "Seçilen plan: İlgili önceki görev bağlamını geri çağır; yeni isteği ona bağla ve gerekmedikçe aynı araştırmayı baştan yapma"
+    },
+    {
+      "date" : "2026-09-20T01:02:58Z",
+      "text" : "KRALİ Core hedef sözleşmesi: sonucu ve gerekçeyi açıkla"
+    },
+    {
+      "date" : "2026-09-20T01:02:58Z",
+      "text" : "Bağlam hafızası: Çalışma kuralı • Çalışma kuralı • estafizsym instagram sayfasını incele ve bana detaylı bir rapor sun"
+    },
+    {
+      "date" : "2026-09-20T01:02:49Z",
+      "text" : "Mentor trace yerel olarak kaydedildi"
+    },
+    {
+      "date" : "2026-09-20T01:02:49Z",
+      "text" : "ChatGPT Subscription sentezi uygulandı"
+    },
+    {
+      "date" : "2026-09-20T01:01:38Z",
+      "text" : "Web Research tamamlandı: 1 kaynak, 1 kaynak okundu"
+    },
+    {
+      "date" : "2026-09-20T01:01:32Z",
       "text" : "Web Research başladı"
     },
     {
-      "date" : "2026-09-20T00:39:50Z",
+      "date" : "2026-09-20T01:01:32Z",
       "text" : "Seçilen kabiliyetler: Akıl yürütme, Bağlam, Web araştırma"
     },
     {
-      "date" : "2026-09-20T00:39:50Z",
+      "date" : "2026-09-20T01:01:32Z",
       "text" : "Otomatik rota: Core → Goal → Context → Plan → Research → Verify → Response"
     },
     {
-      "date" : "2026-09-20T00:39:50Z",
+      "date" : "2026-09-20T01:01:32Z",
       "text" : "Seçilen plan: Bağlamı incele; doğrudan araç eşleşmesi yoksa güvenli alternatifler üret"
     },
     {
-      "date" : "2026-09-20T00:39:50Z",
+      "date" : "2026-09-20T01:01:32Z",
       "text" : "KRALİ Core hedef sözleşmesi: güncel kaynaklarla araştır → sonucu ve gerekçeyi açıkla"
     },
     {
-      "date" : "2026-09-20T00:37:57Z",
-      "text" : "Live Research Eval tamamlandı: 2/2"
+      "date" : "2026-09-20T01:01:32Z",
+      "text" : "Bağlam hafızası: Çalışma kuralı • Çalışma kuralı"
     },
     {
-      "date" : "2026-09-20T00:37:46Z",
+      "date" : "2026-09-20T01:00:40Z",
+      "text" : "Live Research Eval tamamlandı: 1/2"
+    },
+    {
+      "date" : "2026-09-20T01:00:31Z",
       "text" : "Live Research Eval başladı"
     },
     {
-      "date" : "2026-09-20T00:37:45Z",
-      "text" : "Training Lab tamamlandı: 18/18"
+      "date" : "2026-09-20T01:00:29Z",
+      "text" : "Training Lab tamamlandı: 18/19"
     },
     {
-      "date" : "2026-09-20T00:37:45Z",
+      "date" : "2026-09-20T01:00:29Z",
       "text" : "Training Lab başladı"
     },
     {
-      "date" : "2026-09-20T00:37:44Z",
+      "date" : "2026-09-20T01:00:29Z",
       "text" : "Yerel zeka kullanılamıyor: Apple Intelligence modeli bu Mac'te hazır değil"
     },
     {
-      "date" : "2026-09-20T00:37:44Z",
+      "date" : "2026-09-20T01:00:28Z",
       "text" : "Çalışma klasörü geri yüklendi: Desktop"
     },
     {
-      "date" : "2026-09-20T00:37:44Z",
+      "date" : "2026-09-20T01:00:28Z",
       "text" : "0 ekran görüntüsü adayı bulundu"
     },
     {
-      "date" : "2026-09-20T00:37:44Z",
+      "date" : "2026-09-20T01:00:28Z",
       "text" : "4640 dosya ve 360 klasör indekslendi"
     },
     {
-      "date" : "2026-09-20T00:37:44Z",
+      "date" : "2026-09-20T01:00:28Z",
       "text" : "İndeks güvenlik sınırına ulaştı: 5000 öğe"
     },
     {
-      "date" : "2026-09-20T00:37:44Z",
+      "date" : "2026-09-20T01:00:28Z",
       "text" : "Dinamik hedef ve kabiliyet yönlendirme aktif"
     },
     {
-      "date" : "2026-09-20T00:37:44Z",
+      "date" : "2026-09-20T01:00:28Z",
       "text" : "KRALİ Core hazır"
     }
   ],
-  "appVersion" : "0.7.29",
+  "appVersion" : "0.8.0",
   "capabilities" : [
     {
       "available" : true,
@@ -86,19 +118,33 @@
       "id" : "context.local",
       "name" : "Bağlam",
       "risk" : "reasoning"
-    },
-    {
-      "available" : true,
-      "id" : "research.web",
-      "name" : "Web araştırma",
-      "risk" : "external"
     }
   ],
-  "createdAt" : "2026-09-20T00:41:33Z",
+  "contextMemory" : [
+    {
+      "createdAt" : "2026-09-20T01:00:28Z",
+      "kind" : "userRule",
+      "summary" : "Basit işleri yerelde çöz; karmaşık problemde gerekirse güçlü modele danış.",
+      "title" : "Çalışma kuralı"
+    },
+    {
+      "createdAt" : "2026-09-20T01:00:28Z",
+      "kind" : "userRule",
+      "summary" : "Ana projeyi doğrudan değiştirme; çalışma kopyasında ilerle.",
+      "title" : "Çalışma kuralı"
+    },
+    {
+      "createdAt" : "2026-09-20T01:02:49Z",
+      "kind" : "research",
+      "summary" : "# @estafizsym Instagram Sayfası İnceleme Raporu ## 1. Yönetici özeti Doğrulanan profil: - **Kullanıcı adı:** `@estafizsym` - **Görünen ad:** **Estafiz SYM | Reformer | Klinik Pilates** - **Platform:** Instagram - **Temel faaliyet alanı:** Profil adlandırmasına göre reformer ve klinik pilates hizmetleri cite1 Hesap, görünen adında hem marka ismini hem de temel hizmetlerini açıkça belirtiyor. Bu, Instagram aramalarında ve profil ilk izleniminde kullanıcının faaliyet alanını hızlıca anlamasını sağlayabilecek olumlu bir tercih. Ancak erişilebilen doğrulanmış veri yalnızca profil kimliği ve görünen adla sınırlı. **Biyografi, konum, iletişim bilgileri, gönderiler, Reels içerikleri, takipçi sayısı, paylaşım sıklığı ve etkileşim oranı görüntülenemedi.** Dolayısıyla aşağıdaki çalışma, tam kapsamlı içerik ve performans denetimi değil; doğrulanabilen bilgiler üzerinden hazırlanmış bir **ön değerlendirmedir**. --- ## 2. Profil kimliği ve konumlandırma ### Doğrulanan bilgiler | Alan | Sonuç | |---|---| | Hesap | `@estafizsym` | | Görünen ad | Estafiz SYM \\| Reformer \\| Klinik Pilates | | Sektör | Pilates/egzersiz ve sağlıklı yaşam | | Belirtilen hizmetler | Reformer, klinik pilates | | Hesab",
+      "title" : "estafizsym instagram sayfasını incele ve bana detaylı bir rapor sun"
+    }
+  ],
+  "createdAt" : "2026-09-20T01:03:31Z",
   "executionSteps" : [
     {
       "capabilityID" : "core.reasoning",
-      "detail" : "Hedef sözleşmesi: güncel kaynaklarla araştır → sonucu ve gerekçeyi açıkla. Kısıtları ve mevcut bağlamı anlamlandır.",
+      "detail" : "Hedef sözleşmesi: sonucu ve gerekçeyi açıkla. Kısıtları ve mevcut bağlamı anlamlandır.",
       "kind" : "reasoning",
       "state" : "completed",
       "title" : "Hedefi çöz"
@@ -111,93 +157,36 @@
       "title" : "Gerekli yetenekleri tara"
     },
     {
-      "capabilityID" : "research.web",
-      "detail" : "Güncel web kaynaklarını bul, semantik olarak sırala ve güvenilir adayları Core'a getir.",
-      "kind" : "action",
-      "state" : "completed",
-      "title" : "Web'de araştır"
-    },
-    {
-      "capabilityID" : "research.web",
-      "detail" : "En alakalı kaynakların sayfa içeriğini aç, sorguyla ilgili kanıt cümlelerini çıkar ve yüzey başlık eşleşmesini gerçek içerikten ayır.",
-      "kind" : "action",
-      "state" : "completed",
-      "title" : "Kaynakları oku"
-    },
-    {
-      "detail" : "Bağlamı incele; doğrudan araç eşleşmesi yoksa güvenli alternatifler üret",
+      "detail" : "İlgili önceki görev bağlamını geri çağır; yeni isteği ona bağla ve gerekmedikçe aynı araştırmayı baştan yapma",
       "kind" : "response",
       "state" : "completed",
       "title" : "Uygulanabilir yolu açıkla"
-    },
-    {
-      "detail" : "Web araştırmasının alakalı sonuç üretip üretmediğini ve en az iki kaynaktan sayfa içeriği kanıtı çıkarılıp çıkarılmadığını doğrula.",
-      "kind" : "verification",
-      "state" : "completed",
-      "title" : "Doğrula"
     }
   ],
-  "fallbackPlan" : "Çalışma alanını incele",
-  "finalResponse" : "# @estafizsym Instagram Sayfası İnceleme Raporu\n\n## 1. Yönetici özeti\n\n**@estafizsym**, kendisini **“Estafiz SYM | Reformer | Klinik Pilates”** adıyla konumlandıran; fizyoterapi, reformer pilates ve klinik pilates hizmetlerini öne çıkaran bir Instagram hesabıdır. Profilde görünen **“Doğru analiz, doğru hareket, doğru sonuç”** ifadesi, markanın yalnızca egzersiz değil, değerlendirme ve kişiye uygun uygulama yaklaşımı sunduğu mesajını vermektedir.[1]\n\nHesabın öne çıkan başlıkları; bireysel ve grup seansları, hamile pilatesi, merkez/şube bilgileri ve danışan yorumları etrafında düzenlenmiştir. Profilde **“6 şube”** ve **“Yakında tüm Türkiye’de”** ifadelerinin bulunması, büyüme ve yaygınlaşma hedefinin iletişimde önemli bir yer tuttuğunu göstermektedir.[1]\n\n**Genel değerlendirme:** Profilin hizmet alanı ve temel değer önerisi anlaşılır. Buna karşılık erişilebilen kanıtlar gönderilerin ayrıntılı içeriklerini, paylaşım sıklığını, görüntülenme ve etkileşim verilerini göstermediği için içerik performansı hakkında kesin hüküm verilemez.\n\n---\n\n## 2. Doğrulanabilen profil bilgileri\n\n| Alan | Bulgular |\n|---|---|\n| Kullanıcı adı | **@estafizsym** |\n| Görünen profil adı | **Estafiz SYM \\| Reformer \\| Klinik Pilates** |\n| Hizmet alanları | Fizyoterapi, reformer pilates, klinik pilates |\n| Profil söylemi | **“Doğru analiz, doğru hareket, doğru sonuç.”** |\n| Ölçek mesajı | **“6 şube \\| Yakında tüm Türkiye’de”** |\n| Görünen bağlantı | Hızlı bağlantılar sayfasına yönlendirme |\n| Öne çıkan içerikler | Sunset Flow, bireysel seanslar, hamile pilatesi, grup seansları, yorumlar, merkez ve teşekkürler |\n| Görünen takipçi sayısı | İnceleme kanıtında **12,7 bin** |\n| Görünen takip edilen hesap sayısı | İnceleme kanıtında **682** |\n\nTakipçi ve takip edilen hesap sayıları hızlı değişen metriklerdir. Bu nedenle yukarıdaki rakamlar yalnızca kaynakta görülen inceleme anını temsil eder; güncel sabit değerler olarak değerlendirilmemelidir.[1][2]\n\n---\n\n## 3. Marka konumlandırması\n\n### Ana konumlandırma\n\nProfil üç farklı alanı aynı çatı altında toplamaktadır:\n\n1. **Fizyoterapi**\n2. **Reformer pilates**\n3. **Klinik pilates**\n\nBu birliktelik, markanın sıradan bir spor veya pilates stüdyosundan ziyade **analiz ve sağlık odaklı hareket merkezi** algısı oluşturmaya çalıştığını düşündürmektedir.\n\nBurada önemli bir ayrım vardır:\n\n- **Kanıt:** Profilde reformer, klinik pilates, fizyoterapi ve “doğru analiz” ifadeleri bulunuyor.[1][2]\n- **Çıkarım:** Bu ifadeler, uzmanlık ve kişiye özel yaklaşım üzerinden güven oluşturmayı amaçlayan bir marka stratejisine işaret ediyor.\n\n### Değer önerisi\n\n“Doğru analiz, doğru hareket, doğru sonuç” söylemi üç aşamalı bir hizmet mantığı kuruyor:\n\n- Önce kişinin ihtiyacını anlamak,\n- Sonra uygun hareket veya programı belirlemek,\n- Ardından sonuç üretmek.\n\nBu slogan kısa ve akılda kalıcıdır. Ayrıca sağlık/hareket hizmetlerinde önemli olan “herkese aynı program” algısından uzaklaşmaya yardımcı olabilir. Ancak profil sloganı, tek başına yöntemin nasıl uygulandığını açıklamıyor. Analizin kim tarafından, hangi ölçütlerle ve hangi sürecin sonunda yapıldığı içeriklerde somutlaştırılmalıdır.\n\n---\n\n## 4. Hedef kitle analizi\n\nProfilde görülen hizmet başlıklarına dayanarak hesabın muhtemel hedef kitleleri şunlardır:\n\n### Birincil hedef kitleler\n\n- Reformer pilatese başlamak isteyen yetişkinler\n- Bireysel seans tercih eden kişiler\n- Grup derslerine katılmak isteyenler\n- Klinik pilates yaklaşımı arayanlar\n- Fizyoterapi desteğine ihtiyaç duyan kişiler\n- Hamilelik dönemine uygun pilates arayan kadınlar\n\n### İkincil hedef kitleler\n\n- Mevcut üyeler ve danışanlar\n- Şubelerin yakınında yaşayan potansiyel müşteriler\n- Hareket, postür veya günlük yaşam konforuyla ilgilenen kişiler\n- Birden fazla lokasyonda hizmet almak isteyen kullanıcılar\n\n**Belirsizlik:** Kaynaklarda yaş, şehir, cinsiyet dağılımı veya takipçi demografisi bulunmadığı için gerçek takipçi kitlesinin yapısı doğrulanamamaktadır. Yukarıdaki maddeler, profilin açıkladığı hizmetlerden çıkarılan hedef kitle tahminleridir.\n\n---\n\n## 5. Profil ve içerik mimarisi\n\nProfilde görünen öne çıkan hikâye başlıkları şunlardır:\n\n- **Sunset Flow**\n- **Bireysel Seans**\n- **Hamile Pilatesi**\n- **Grup Seansları**\n- **Yorumlarınız**\n- **Merkez**\n- **Teşekkürler**\n\nBu yapı, ziyaretçinin birkaç temel sorusuna yanıt vermeyi amaçlıyor:\n\n- Hangi hizmetler var?\n- Bireysel ve grup seçenekleri bulunuyor mu?\n- Hamilelere yönelik program sunuluyor mu?\n- Merkez nerede?\n- Diğer danışanlar ne düşünüyor?\n\n### Güçlü tarafı\n\nÖne çıkanlar yalnızca hizmet tanıtımından oluşmuyor. **“Yorumlarınız”** ve **“Teşekkürler”** gibi başlıklar sosyal kanıt üretmeye; **“Merkez”** başlığı ise fiziksel işletme güvenilirliğini desteklemeye yardımcı olabilir.\n\n### Geliştirilmesi gereken tarafı\n\nBaşlıklarda “Bireysel Seans1”, “Bireysel Seans2” ve “Grup Seansları1/2/3” gibi tekrar eden isimler görülüyor.[1] Bunlar kullanıcı açısından:\n\n- Hangi başlığa önce bakılması gerektiğini belirsizleştirebilir,\n- Profilin görsel ve bilgi mimarisini dağınık gösterebilir,\n- Hizmetler arasında net ayrım kurulmasını zorlaştırabilir.\n\nBunların daha açıklayıcı kategoriler altında birleştirilmesi daha güçlü olabilir:\n\n- **Bireysel Seans**\n- **Grup Dersleri**\n- **Hamile Pilatesi**\n- **Fizyoterapi**\n- **Klinik Pilates**\n- **Şubeler**\n- **Danışan Yorumları**\n- **Sık Sorulanlar**\n- **İlk Seans**\n\n---\n\n## 6. Güçlü yönler\n\n### 6.1. Hizmet alanı hızlı anlaşılıyor\n\nProfil adında doğrudan “Reformer” ve “Klinik Pilates” ifadelerinin kullanılması, kullanıcıların hesabın faaliyet alanını anlamasını kolaylaştırmaktadır.[1]\n\n### 6.2. Sağlık ve hareket yaklaşımı birlikte sunuluyor\n\nFizyoterapi ile pilates hizmetlerinin aynı iletişim çatısı altında bulunması, doğru şekilde anlatılırsa hesabı yalnızca estetik veya spor motivasyonu paylaşan genel pilates hesaplarından ayrıştırabilir.\n\n### 6.3. Akılda kalıcı bir ana mesaj var\n\n“Doğru analiz, doğru hareket, doğru sonuç” ifadesi kısa, ritmik ve sonuç odaklıdır. Marka iletişimi için kullanılabilir bir çerçeve oluşturur.\n\n### 6.4. Hizmet çeşitliliği görünür\n\nBireysel seans, grup seansı ve hamile pilatesi başlıkları farklı ihtiyaçlara hitap edildiğini gösteriyor.[1]\n\n### 6.5. Sosyal kanıta yer veriliyor\n\nDanışan yorumları için özel bir alan bulunması, hizmet satın alma sürecinde güveni destekleyebilir. Bunun gerçek etkisini değerlendirmek için yorumların içeriğini, güncelliğini ve sunum biçimini görmek gerekir.\n\n### 6.6. Büyüme vizyonu açık\n\n“6 şube” ve “Yakında tüm Türkiye’de” söylemleri markanın tek lokasyonlu küçük bir stüdyodan daha geniş bir yapı olarak algılanmasını destekleyebilir.[1]\n\n---\n\n## 7. Zayıf yönler ve belirsizlikler\n\n### 7.1. Hizmet kapsamı geniş; odak bulanıklaşabilir\n\nFizyoterapi, klinik pilates, reformer, bireysel seans, grup seansı ve hamile pilatesi aynı anda sunuluyor. Bu çeşitlilik ticari açıdan avantajlı olsa da yeni ziyaretçi açısından şu soruyu doğurabilir:\n\n> “Bu hesap öncelikle bir fizyoterapi merkezi mi, klinik pilates merkezi mi, yoksa reformer stüdyosu mu?”\n\nAna uzmanlığın daha belirgin bir hiyerarşiyle anlatılması gerekir.\n\n### 7.2. Öne çıkan hikâye yapısında tekrar var\n\nNumaralandırılmış ve tekrar eden bireysel/grup seansı başlıkları, profil navigasyonunu gereksiz şekilde parçalayabilir.\n\n### 7.3. “Tüm Türkiye” vaadi açıklanmaya ihtiyaç duyuyor\n\n“Yakında tüm Türkiye’de” güçlü bir büyüme söylemidir; ancak erişilen kanıtta bunun:\n\n- Yeni şubeler,\n- Bayilik modeli,\n- İş ortaklıkları,\n- Çevrim içi hizmet,\n- Eğitim veya lisanslama\n\nyollarından hangisiyle gerçekleşeceği belirtilmiyor. Bu mesajın belirsiz kalması, güçlü bir vizyon sunarken aynı zamanda beklenti yönetimi riski yaratabilir.\n\n### 7.4. Uzmanlık kanıtları doğrulanamıyor\n\nErişilen profil verilerinde ekip üyelerinin eğitimleri, unvanları, yaklaşım biçimi veya seans prosedürleri hakkında ayrıntı bulunmuyor. Sağlıkla ilişkili hizmetlerde uzmanlık iddiasının ekip tanıtımları ve şeffaf süreç anlatımlarıyla desteklenmesi önemlidir.\n\n### 7.5. Performans analizi için veri yetersiz\n\nŞu metrikler kaynaklarda bulunmadığından doğrulanamamıştır:\n\n- Gönderi sayısı\n- Son paylaşım tarihi\n- Haftalık/aylık paylaşım sıklığı\n- Reels görüntülenmeleri\n- Beğeni ve yorum ortalamaları\n- Kaydetme ve paylaşma oranları\n- Takipçi büyüme hızı\n- Profil ziyaretinden randevuya dönüşüm\n- En başarılı içerik formatları\n\nDolayısıyla hesabın takipçi büyüklüğüne bakarak “yüksek etkileşimli” veya “başarılı içerik stratejisine sahip” olduğu söylenemez.\n\n---\n\n## 8. SWOT analizi\n\n### Güçlü yönler\n\n- Açık ve anlaşılır hizmet kategorileri\n- Fizyoterapi ile klinik pilatesi birleştiren uzmanlık algısı\n- Kısa ve sonuç odaklı marka sloganı\n- Bireysel, grup ve hamile pilatesi gibi farklı seçenekler\n- Danışan yorumlarına ayrılmış sosyal kanıt alanı\n- Altı şubeli yapı üzerinden ölçek algısı\n\n### Zayıf yönler\n\n- Birden fazla hizmet nedeniyle ana konumlandırmanın bulanıklaşma ihtimali\n- Tekrar eden öne çıkan hikâye başlıkları\n- “Doğru analiz” sürecinin profil düzeyinde açıklanmaması\n- Şube ve hizmet detaylarının erişilen kanıtta sınırlı olması\n- İçerik ve etkileşim performansının doğrulanamaması\n\n### Fırsatlar\n\n- Uzman fizyoterapist anlatımlarıyla güven inşa etmek\n- İlk değerlendirme sürecini içerik serisine dönüştürmek\n- Her şube için yerel içerik ve yerel arama görünürlüğü oluşturmak\n- Hamile pilatesi gibi özel programları ayrı içerik sütunlarıyla büyütmek\n- Danışan yolculuklarını etik ve izinli biçimde anlatmak\n- “Doğru analiz–hareket–sonuç” sloganını düzenli video formatına çevirmek\n- Türkiye çapında büyüme planını hikâyeleştirerek marka bilinirliği yaratmak\n\n### Tehditler ve riskler\n\n- Pilates sektöründeki yoğun rekabet\n- Sağlıkla ilişkili içeriklerde aşırı veya kesin sonuç vaat etme riski\n- Çok şubeli büyümede hizmet standardının farklılaşması\n- Danışan görüntüleri ve sağlık bilgilerinde mahremiyet riski\n- Genel egzersiz içeriği ile kişiye özel sağlık önerisinin birbirine karışması\n- “Klinik” ve “fizyoterapi” söylemlerinin yeterli uzmanlık kanıtıyla desteklenmemesi durumunda güven kaybı\n\n---\n\n## 9. İçerik stratejisi için öneriler\n\n### 9.1. İçerikleri beş ana sütuna ayırın\n\n**1. Eğitim içerikleri**\n\n- Klinik pilates ile standart reformer arasındaki fark\n- İlk seans öncesinde neler değerlendirilir?\n- Grup ve bireysel seans kimler için uygundur?\n- Hamile pilatesinde süreç nasıl ilerler?\n- Yanlış bilinen hareket alışkanlıkları\n\n**2. Uzmanlık ve güven içerikleri**\n\n- Fizyoterapist veya eğitmen tanıtımları\n- Uzmanların eğitim ve çalışma alanları\n- Merkezde kullanılan değerlendirme yaklaşımı\n- Bir seansın hazırlık ve planlama süreci\n\n**3. Hizmet içerikleri**\n\n- Bireysel seansın aşamaları\n- Grup derslerinin kişi sayısı ve yapısı\n- Hamile pilatesi programının genel çerçevesi\n- Şubeler ve ulaşım bilgileri\n- Randevu alma süreci\n\n**4. Sosyal kanıt**\n\n- İzinli danışan deneyimleri\n- Yazılı yorumlar\n- Sık karşılaşılan ihtiyaçlara ilişkin anonim vaka senaryoları\n- Üyelerin süreçle ilgili geri bildirimleri\n\n**5. Marka ve topluluk**\n\n- Sunset Flow gibi etkinlikler\n- Ekip içi içerikler\n- Şube açılışları\n- Topluluk buluşmaları\n- Markanın büyüme hikâyesi\n\n### 9.2. Sloganı seri formatına dönüştürün\n\nProfildeki slogan, üç aşamalı bir Reels serisi için uygundur:\n\n- **Doğru Analiz:** İlk değerlendirmede nelere bakılır?\n- **Doğru Hareket:** Hareket neden kişiye göre değiştirilir?\n- **Doğru Sonuç:** Süreç ve ilerleme nasıl takip edilir?\n\nBu yöntem sloganı yalnızca tanıtım cümlesi olmaktan çıkarıp markanın içerik sistemine dönüştürebilir.\n\n### 9.3. Reels videolarında konu başlığını ilk saniyelerde netleştirin\n\nÖrnek girişler:\n\n- “Reformer pilatese başlamadan önce bilmeniz gereken üç şey”\n- “Grup dersi mi, bireysel seans mı?”\n- “İlk değerlendirmede neden herkese aynı program verilmez?”\n- “Hamile pilatesine başlamadan önce süreç nasıl ilerler?”\n- “Klinik pilates hakkında en sık duyduğumuz yanlış bilgi”\n\nBu başlıklar bilgilendirici olmalı; tanı veya kişiye özel tedavi önerisi yerine genel farkındalık sağlamalıdır.\n\n### 9.4. Şubeleri ayrı ayrı görünür hâle getirin\n\nAltı şube söylemi güçlü bir kurumsal avantajdır. Her şube için düzenli olarak şu bilgiler paylaşılabilir:\n\n- Lokasyon\n- Ekip\n- Sunulan hizmetler\n- Çalışma saatleri\n- Ulaşım/park bilgileri\n- Şubeye özel etkinlikler\n- Randevu kanalı\n\nBöylece “altı şube” yalnızca sayısal bir iddia olmaktan çıkar ve kullanıcı için işlevsel bilgiye dönüşür.\n\n---\n\n## 10. Profil optimizasyonu\n\n### Biyografi\n\nMevcut biyografi marka vaadini iletiyor; ancak kullanıcı açısından üç bilgi daha belirgin hâle getirilebilir:\n\n1. Kimlere hizmet verildiği\n2. Hangi şehirlerde/şubelerde bulunulduğu\n3. Randevunun nasıl alınacağı\n\nÖrnek yapı:\n\n> Fizyoterapi • Klinik Pilates • Reformer  \n> Bireysel ve grup seansları  \n> 📍 6 şube  \n> İlk değerlendirme ve randevu ↓\n\nBu yalnızca bir iletişim önerisidir; gerçek hizmet ve randevu sürecine göre uyarlanmalıdır.\n\n### Öne çıkan hikâyeler\n\nÖnerilen sıralama:\n\n1. **İlk Kez Gelenler**\n2. **Hizmetler**\n3. **Şubeler**\n4. **Ekibimiz**\n5. **Bireysel**\n6. **Grup**\n7. **Hamile Pilatesi**\n8. **Yorumlar**\n9. **Sık Sorulanlar**\n10. **Etkinlikler**\n\nKapaklarda aynı renk ve ikon sistemi kullanılması, çok şubeli marka algısını güçlendirebilir.\n\n### Sabitlenmiş gönderiler\n\nProfilin üst kısmında şu üç gönderinin sabitlenmesi faydalı olabilir:\n\n1. **Estafiz SYM nedir ve kimlere hizmet verir?**\n2. **İlk değerlendirme ve seans süreci nasıl işler?**\n3. **Şubeler, iletişim ve randevu bilgileri**\n\n---\n\n## 11. Dönüşüm ve güven açısından değerlendirme\n\nProfil, ilk bakışta hizmet alanını anlatabiliyor. Ancak ziyaretçinin randevuya dönüşmesi için aşağıdaki yolculuğun eksiksiz kurulması gerekir:\n\n**İçerik → Profil → Hizmet açıklaması → Şube seçimi → Randevu**\n\nHer aşamada net bir çağrı bulunmalıdır:\n\n- “Size uygun seans türünü öğrenin”\n- “En yakın şubeyi inceleyin”\n- “İlk değerlendirme hakkında bilgi alın”\n- “Randevu için bağlantıyı kullanın”\n\nSağlıkla ilişkili iletişimde “kesin sonuç”, “garanti çözüm” veya herkese uygulanabilecek tedavi benzeri ifadelerden kaçınılması gerekir. Sonuç iletişiminde kişinin durumu, uzman değerlendirmesi ve süreç farklılıkları vurgulanmalıdır.\n\n---\n\n## 12. Ölçülmesi gereken temel göstergeler\n\nHesabın gerçek başarısını değerlendirmek için yalnızca takipçi sayısı yeterli değildir. Aylık olarak şu göstergeler izlenmelidir:\n\n- Reels başına erişim ve görüntülenme\n- Takipçi olmayan kullanıcılara erişim\n- Kaydetme ve paylaşma oranı\n- Profil ziyareti\n- Bağlantı tıklaması\n- DM veya WhatsApp üzerinden gelen talep\n- Şube bazında randevu talebi\n- İçerikten randevuya dönüşüm\n- Hangi hizmet içeriğinin daha fazla talep oluşturduğu\n- Danışanların hesabı hangi içerikle keşfettiği\n\nKaynaklarda bu veriler bulunmadığından mevcut hesabın performans puanı hesaplanamamaktadır.\n\n---\n\n## 13. Öncelikli aksiyon planı\n\n### İlk aşama\n\n- Tekrar eden öne çıkan hikâyeleri birleştirin.\n- Biyografide şehir/şube ve randevu adımını netleştirin.\n- Üç temel tanıtım gönderisini sabitleyin.\n- Her hizmet için kısa ve standart açıklamalar hazırlayın.\n\n### İkinci aşama\n\n- “Doğru analiz–doğru hareket–doğru sonuç” video serisini başlatın.\n- Uzman ve ekip tanıtımlarını düzenli hâle getirin.\n- Her şubeye özel içerik üretin.\n- Sık sorulan soruları Reels ve hikâye serilerine dönüştürün.\n\n### Üçüncü aşama\n\n- İçeriklerden gelen randevu taleplerini şube ve hizmet bazında ölçün.\n- En çok kaydedilen ve paylaşılan konuları belirleyin.\n- Düşük performanslı tanıtım içerikleri yerine yüksek niyetli soru-cevap içeriklerini artırın.\n- Türkiye çapındaki büyüme hedefinin kapsamını ve takvimini netleştirin.\n\n---\n\n## Sonuç\n\n@estafizsym’in en güçlü tarafı, **fizyoterapi ve klinik pilates yaklaşımını reformer hizmetiyle birleştiren, analiz odaklı bir marka anlatısına sahip olmasıdır**. Altı şube söylemi ve farklı seans seçenekleri de kurumsal ölçek algısını desteklemektedir.\n\nEn önemli gelişim alanı ise bu güçlü konumlandırmayı daha somut kanıtlarla desteklemektir: ekip uzmanlığı, değerlendirme süreci, şube bilgileri, hizmet farklılıkları ve danışan yolculuğu daha sistematik anlatılmalıdır. Ayrıca öne çıkan hikâyelerdeki tekrarların azaltılması, kullanıcıların doğru bilgiye daha hızlı ulaşmasını sağlayabilir.\n\nBununla birlikte, erişilebilen kanıtlar profil üst bilgileri ve görünen kategori başlıklarıyla sınırlıdır. Gönderilerin tek tek içeriği, görsel kalitesi, paylaşım düzeni ve etkileşim metrikleri doğrulanamadığı için bu rapor **profil konumlandırması ve içerik mimarisi analizi** niteliğindedir; tam kapsamlı performans denetimi değildir.\n\n### Kaynaklar\n\n[1] Instagram, **Estafiz SYM | Reformer | Klinik Pilates (@estafizsym)** — `instagram.com/estafizsym/`  \n[2] Instagram, **@estafizsym Reels bölümü** — `instagram.com/estafizsym/reels/`\n\n*Not: İki kaynak da aynı Instagram hesabına aittir; bu nedenle birbirinden bağımsız iki doğrulama olarak değerlendirilmemiştir.*",
-  "goal" : "güncel kaynaklarla araştır → sonucu ve gerekçeyi açıkla",
+  "fallbackPlan" : "Önceki sonucu genişlet",
+  "finalResponse" : "## @estafizsym için 3 özgün Reels fikri\n\n> Not: Hesabın mevcut paylaşımları ve performans verileri görüntülenemediği için fikirler, doğrulanabilen **“Reformer ve Klinik Pilates”** konumlandırması üzerinden geliştirildi.\n\n### 1. “Aynı hareket, üç farklı beden” serisi\n\n**Konsept:**  \nAynı reformer hareketinin üç farklı ihtiyaca göre nasıl uyarlanabildiğini gösterin:\n\n- Başlangıç seviyesi  \n- Masa başında çalışan biri  \n- Düzenli egzersiz yapan biri  \n\nEkran başlığı: **“Herkese aynı Pilates programı uygulanır mı?”**\n\nVideonun sonunda eğitmen kısa bir mesaj verir:  \n**“Hareket aynı görünebilir; direnç, açı ve hareket aralığı kişiye göre değişir.”**\n\n**Neden işe yarayabilir?**\n\n- Reformer ile klinik Pilates arasındaki uzmanlık farkını somutlaştırır.\n- “Bu hareketi ben yapabilir miyim?” kaygısını azaltır.\n- Hesabı yalnızca hareket gösteren bir sayfa değil, **kişiye özel yaklaşım sunan uzman bir merkez** olarak konumlandırır.\n- Seri formatına uygundur; farklı hareketlerle düzenli olarak tekrarlanabilir.\n\n**Önerilen kapanış:**  \n“Sen hangi seviyeden başlardın? Yorumlara 1, 2 veya 3 yaz.”\n\n---\n\n### 2. “Vücudunun gönderdiği küçük sinyaller” mini hikâyesi\n\n**Konsept:**  \nGünlük hayattan kısa bir sahneyle başlayın: Bir kişi bilgisayar başında çalışıyor, kalktığında belini tutuyor veya omuzlarını çeviriyor.\n\nEkranda şu ifadeler sırayla belirir:\n\n- “Sandalyeden kalkınca birkaç saniye doğrulamaya çalışıyor musun?”\n- “Günün sonunda omuzların öne mi düşüyor?”\n- “Sorun yalnızca ‘esnek olmamak’ olmayabilir.”\n\nArdından eğitmen, değerlendirme sonrasında seçilebilecek bir reformer egzersizini gösterir. Burada tanı veya kesin tedavi vaadi yerine, **kişiye özel değerlendirme ve kontrollü egzersiz** vurgulanmalıdır.\n\n**Neden işe yarayabilir?**\n\n- Hizmeti soyut biçimde anlatmak yerine izleyicinin günlük deneyimiyle ilişkilendirir.\n- İlk saniyelerde tanıdık bir sorun gösterildiği için izleyicinin videoda kalma ihtimalini artırabilir.\n- Klinik Pilates konumlandırmasını “sadece rahatsızlığı olanlara yönelik bir hizmet” gibi sunmadan açıklamaya yardımcı olur.\n- Kaydedilmeye ve benzer şikâyeti yaşayan bir arkadaşla paylaşılmaya uygun içeriktir.\n\n**Önerilen kapanış:**  \n“Bu sinyallerden hangisini gün içinde daha sık fark ediyorsun?”\n\n---\n\n### 3. “Reformer dedektifi: Hatayı bul” serisi\n\n**Konsept:**  \nAynı hareket önce küçük ama önemli bir uygulama hatasıyla, ardından doğru yönlendirmeyle gösterilir. İzleyiciden aradaki farkı bulması istenir.\n\nÖrnek bölüm:\n\n1. İlk görüntü: Omuzlar gereğinden fazla yükseliyor.  \n2. Ekran sorusu: **“Sence burada neyi değiştirmeliyiz?”**  \n3. Kısa bekleme veya geri sayım  \n4. Eğitmenin dokunsal/sözlü yönlendirmesi  \n5. Düzeltilmiş uygulama  \n6. Tek cümlelik açıklama: **“Amaç hareketi büyütmek değil, kontrolü korumak.”**\n\n**Neden işe yarayabilir?**\n\n- İzleyiciyi pasif seyirci olmaktan çıkarıp videoya zihinsel olarak dahil eder.\n- “Önce–sonra” karşılaştırması, uzman yönlendirmesinin değerini görünür kılar.\n- Eğitici olmasına rağmen sınav veya oyun hissi verdiği için kuru bir anatomi anlatımından daha ilgi çekici olabilir.\n- Yorum üretmeye uygundur: İzleyiciler cevabı açıklanmadan önce tahminlerini yazabilir.\n- Haftalık bir seriye dönüştürülerek hesabın tanınan içerik formatlarından biri hâline getirilebilir.\n\n**Önerilen kapanış:**  \n“Farkı ilk izleyişte yakaladın mı? Bir sonraki bölümde hangi hareketi inceleyelim?”\n\n## En güçlü tercih\n\nİlk olarak **“Aynı hareket, üç farklı beden”** fikrini öneririm. Çünkü hesabın doğrulanabilen iki temel hizmetini—reformer ve klinik Pilates—tek içerikte birleştiriyor ve **kişiye özel çalışma yaklaşımını** doğrudan gösterebiliyor. Ardından “Reformer dedektifi” düzenli bir seri hâline getirilerek eğitmenin uzmanlığı sürdürülebilir biçimde sergilenebilir.\n\n### Kaynaklar\n\n[1] Önceki araştırmada doğrulanan `@estafizsym` profil kimliği ve “Estafiz SYM | Reformer | Klinik Pilates” görünen adı. Mevcut içerikler ve performans metrikleri doğrulanamadığından öneriler konumlandırma temelli çıkarımlardır.",
+  "goal" : "sonucu ve gerekçeyi açıkla",
   "inputSource" : "text",
   "intelligenceProvider" : "ChatGPT Subscription / openai-codex",
   "learningPlans" : [
 
   ],
-  "plan" : "Bağlamı incele; doğrudan araç eşleşmesi yoksa güvenli alternatifler üret",
+  "plan" : "İlgili önceki görev bağlamını geri çağır; yeni isteği ona bağla ve gerekmedikçe aynı araştırmayı baştan yapma",
   "researchEvidence" : [
-    {
-      "conceptCoverage" : 2,
-      "domain" : "www.instagram.com",
-      "excerpt" : "Estafiz SYM | Reformer | Klinik Pilates (@estafizsym) • Instagram fotoğrafları ve videoları Giriş Yap Kaydol estafizsym 12,7 B takipçi 682 takip Estafiz SYM | Reformer | Klinik Pilates Doğru analiz, doğru hareket, doğru sonuç. com/hizli-linkler ve 1 diğer Sunset Flow Bireysel Seans1 Hamile Pilatesi Grup Seansları1 Grup Seansları2 Bireysel Seans2 Yorumlarınız ⭐️ Grup Seansları3 Merkez 📍 Teşekkürler 💙 estafizsym'in daha fazla gönderisini göster. 📍6 şube | Yakında tüm Türkiye’de",
-      "matchedConcepts" : [
-        "estafizsym",
-        "takipci"
-      ],
-      "sourceType" : "canonical-direct",
-      "title" : "@estafizsym — instagram profil adayı",
-      "url" : "https://www.instagram.com/estafizsym/"
-    },
-    {
-      "conceptCoverage" : 2,
-      "domain" : "www.instagram.com",
-      "excerpt" : "Estafiz SYM | Reformer | Klinik Pilates (@estafizsym) • Instagram fotoğrafları ve videoları Giriş Yap Kaydol estafizsym 12,7 B takipçi 682 takip Estafiz SYM | Reformer | Klinik Pilates Doğru analiz, doğru hareket, doğru sonuç. Fizyoterapi/ Reformer Pilates /Klinik Pilates (@estafizsym. com/hizli-linkler ve 1 diğer Sunset Flow Bireysel Seans1 Hamile Pilatesi Grup Seansları1 Grup Seansları2 Bireysel Seans2 Yorumlarınız ⭐️ Grup Seansları3 Merkez 📍 Teşekkürler 💙",
-      "matchedConcepts" : [
-        "estafizsym",
-        "takipci"
-      ],
-      "sourceType" : "search-result",
-      "title" : "Fizyoterapi/ Reformer Pilates /Klinik Pilates (@estafizsym ... - Instagram",
-      "url" : "https://www.instagram.com/estafizsym/reels/"
-    }
+
   ],
   "researchSources" : [
-    {
-      "domain" : "www.instagram.com",
-      "sourceType" : "canonical-direct",
-      "title" : "@estafizsym — instagram profil adayı",
-      "url" : "https://www.instagram.com/estafizsym/"
-    },
-    {
-      "domain" : "www.instagram.com",
-      "sourceType" : "search-result",
-      "title" : "Fizyoterapi/ Reformer Pilates /Klinik Pilates (@estafizsym ... - Instagram",
-      "url" : "https://www.instagram.com/estafizsym/reels/"
-    }
+
   ],
   "route" : [
     "Core",
     "Goal",
     "Context",
-    "Plan",
-    "Research",
     "Intelligence",
-    "Verify",
     "Response"
   ],
-  "traceID" : "1BBEEAC4-12AB-4858-9275-631862CE9ACE",
-  "userInput" : "estafizsym instagram sayfasını incele ve bana detaylı bir rapor sun",
-  "verificationState" : "passed",
-  "verificationSummary" : "Kanonik birincil kaynak doğrudan okunarak doğrulandı. Bu kaynağın kendi profil/hesap bilgileri için bağımsız ikinci domain zorunlu tutulmadı."
+  "traceID" : "6912C242-E5B1-462F-B8F5-D1F1266F0DF5",
+  "userInput" : "bu hesap için az önce söylediklerinden 3 özgün reels fikri çıkar ve neden işe yarayacağını açıkla",
+  "verificationState" : "skipped",
+  "verificationSummary" : "Bu turda doğrulanacak gerçek araç işlemi yok."
 }

@@ -1,8 +1,8 @@
 {
-  "appVersion" : "0.7.29",
-  "createdAt" : "2026-09-20T00:37:57Z",
-  "failed" : 0,
-  "passed" : 2,
+  "appVersion" : "0.8.0",
+  "createdAt" : "2026-09-20T01:00:40Z",
+  "failed" : 1,
+  "passed" : 1,
   "probes" : [
     {
       "diagnostics" : [
@@ -19,16 +19,16 @@
     },
     {
       "diagnostics" : [
-
+        "Web araştırması yeterince alakalı sonuç üretmedi."
       ],
-      "evidenceCount" : 2,
-      "passed" : true,
+      "evidenceCount" : 0,
+      "passed" : false,
       "probeID" : "technical-official",
-      "provider" : "DuckDuckGo HTML",
+      "provider" : "none",
       "query" : "macOS üzerinde video içeriği analizi için kullanılabilecek teknolojileri ve frameworkleri araştır",
-      "sourceCount" : 2,
+      "sourceCount" : 0,
       "title" : "Teknik araştırma / resmi kaynak",
-      "uniqueDomainCount" : 1
+      "uniqueDomainCount" : 0
     }
   ],
   "total" : 2

@@ -1,9 +1,9 @@
 {
-  "appVersion" : "0.7.29",
+  "appVersion" : "0.8.0",
   "corePassed" : 14,
-  "coreTotal" : 14,
-  "createdAt" : "2026-09-20T00:37:45Z",
-  "failed" : 0,
+  "coreTotal" : 15,
+  "createdAt" : "2026-09-20T01:00:29Z",
+  "failed" : 1,
   "northStarPassed" : 4,
   "northStarTotal" : 4,
   "passed" : 18,
@@ -168,6 +168,31 @@
       ],
       "tier" : "core",
       "title" : "Sosyal medya profil bilgisi araştırması",
+      "unavailableCapabilities" : [
+
+      ]
+    },
+    {
+      "diagnostics" : [
+        "Eksik hedef sonuçları: ideate",
+        "Plan adımı eksik: Bağımsız fikir üret"
+      ],
+      "goal" : "sonucu ve gerekçeyi açıkla",
+      "passed" : false,
+      "prompt" : "bu hesap için az önce söylediklerinden 3 reels fikri çıkar",
+      "route" : [
+        "Core",
+        "Goal",
+        "Context",
+        "Response"
+      ],
+      "scenarioID" : "context-memory-followup",
+      "selectedCapabilities" : [
+        "context.local",
+        "core.reasoning"
+      ],
+      "tier" : "core",
+      "title" : "Önceki araştırmadan devam etme",
       "unavailableCapabilities" : [
 
       ]
@@ -514,5 +539,5 @@
       ]
     }
   ],
-  "total" : 18
+  "total" : 19
 }
