@@ -1,1 +1,1 @@
-runtime|app=Mail|activate=true|frontmost=true|source=AX raise + ScreenCaptureKit z-order
+runtime|app=Mail|activate=false|frontmost=false|source=unverified

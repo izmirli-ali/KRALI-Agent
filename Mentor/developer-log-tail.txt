@@ -1,93 +1,3 @@
-━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-Cline version: 
-Cline doctor:
-From https://github.com/izmirli-ali/KRALI-Agent
- * branch            main       -> FETCH_HEAD
-Already up to date.
-Preparing worktree (new branch 'krali-dev-agent/20260920-175525')
-branch 'krali-dev-agent/20260920-175525' set up to track 'origin/main'.
-HEAD is now at 63d4280 v0.8.35 lightweight capability-gap Developer Agent
-Developer prompt mode: gap • 2390 bytes
-⚠️ Cline SIGKILL/137 aldı; ultra-light retry deneniyor.
-❌ Cline görevi başarısız oldu (exit 137, 0s): HEAD is now at f8f8527 v0.8.34 automate terminal, CI and Cline auth flow
-
-━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
- KRALİ DEVELOPER AGENT
- 20260920-181151
-━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-Cline version: 
-Cline doctor:
-From https://github.com/izmirli-ali/KRALI-Agent
- * branch            main       -> FETCH_HEAD
-Already up to date.
-Preparing worktree (new branch 'krali-dev-agent/20260920-181151')
-branch 'krali-dev-agent/20260920-181151' set up to track 'origin/main'.
-HEAD is now at 707c592 v0.8.36 current Cline contract and live learning UI
-Developer prompt mode: gap • 2390 bytes
-⚠️ Cline SIGKILL/137 aldı; ultra-light retry deneniyor.
-❌ Cline görevi başarısız oldu (exit 137, 0s): process SIGKILL aldı; kaynak baskısı veya işletim sistemi sonlandırması
-
-━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
- KRALİ DEVELOPER AGENT
- 20260920-181644
-━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-⚠️ Cline health probe başarısız. exit=137 output=
-Cline path: /opt/homebrew/bin/cline
-Machine arch: arm64
-/opt/homebrew/bin/cline: a /usr/bin/env node script text executable, ASCII text
-Cline doctor fix deneniyor...
-Cline CLI yeniden kuruluyor: npm install -g cline@latest
-npm warn EBADENGINE Unsupported engine {
-npm warn EBADENGINE   package: '@sap/xsenv@6.2.2',
-npm warn EBADENGINE   required: { node: '^20.0.0  || ^22.0.0 || ^24.0.0' },
-npm warn EBADENGINE   current: { node: 'v26.9.0', npm: '11.19.1' }
-npm warn EBADENGINE }
-npm warn deprecated node-domexception@1.0.0: Use your platform's native DOMException instead
-
-changed 329 packages in 17s
-
-47 packages are looking for funding
-  run `npm fund` for details
-npm warn install-scripts 2 packages have install scripts not yet covered by allowScripts:
-npm warn install-scripts   cline@3.0.62 (postinstall: node ./postinstall.mjs || true)
-npm warn install-scripts   protobufjs@7.6.6 (postinstall: node scripts/postinstall)
-npm warn install-scripts
-npm warn install-scripts Run `npm install -g --allow-scripts=cline,protobufjs` to allow these scripts once, or `npm config set allow-scripts=cline,protobufjs --location=user` to allow them for all global installs.
-❌ Cline CLI otomatik onarılamadı.
-
-━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
- KRALİ DEVELOPER AGENT
- 20260920-185530
-━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-⚠️ Global Node.js v26 Cline bağımlılıklarıyla uyumlu değil; izole Node 22 runtime hazırlanıyor.
-==> Downloading bottle manifests
-✔︎ Bottle Manifest node@22 (22.23.2_2)
-==> Would install 1 formula:
-node@22 22.23.2_2
-==> Would install 2 dependencies for node@22:
-libnghttp3
-libngtcp2
-==> Fetching downloads for: node@22
-✔︎ Bottle Manifest libnghttp3 (1.18.0)
-✔︎ Bottle Manifest libngtcp2 (1.25.0)
-✔︎ Bottle libnghttp3 (1.18.0)
-✔︎ Bottle libngtcp2 (1.25.0)
-✔︎ Bottle node@22 (22.23.2_2)
-==> Installing dependencies for node@22: libnghttp3 and libngtcp2
-==> Installing node@22 dependency: libnghttp3
-==> Pouring libnghttp3--1.18.0.arm64_golden_gate.bottle.tar.gz
-🍺  /opt/homebrew/Cellar/libnghttp3/1.18.0: 20 files, 600.7KB
-==> Installing node@22 dependency: libngtcp2
-==> Pouring libngtcp2--1.25.0.arm64_golden_gate.bottle.tar.gz
-🍺  /opt/homebrew/Cellar/libngtcp2/1.25.0: 21 files, 1.4MB
-==> Installing node@22
-Warning: node@22 was installed but not linked because node is already linked.
-To link this version, run:
-  brew link node@22
-==> Pouring node@22--22.23.2_2.arm64_golden_gate.bottle.tar.gz
-🍺  /opt/homebrew/Cellar/node@22/22.23.2_2: 2,140 files, 55MB
-==> Caveats
-==> node@22
 node@22 is keg-only, which means it was not symlinked into /opt/homebrew,
 because this is an alternate version of another formula.
 
@@ -118,3 +28,93 @@ changed 329 packages in 18s
 47 packages are looking for funding
   run `npm fund` for details
 ❌ Cline CLI otomatik onarılamadı.
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+ KRALİ DEVELOPER AGENT
+ 20260920-190315
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+⚠️ Global Node.js v26 Cline bağımlılıklarıyla uyumlu değil; izole Node 22 runtime hazırlanıyor.
+✅ Developer Agent runtime: v22.23.2
+⚠️ Cline health probe başarısız. exit=137 output=
+Cline path: /opt/homebrew/bin/cline
+Machine arch: arm64
+/opt/homebrew/bin/cline: a /usr/bin/env node script text executable, ASCII text
+Cline doctor fix deneniyor...
+Cline CLI yeniden kuruluyor: npm install -g --allow-scripts=cline,protobufjs cline@latest
+npm warn deprecated node-domexception@1.0.0: Use your platform's native DOMException instead
+
+changed 329 packages in 17s
+
+47 packages are looking for funding
+  run `npm fund` for details
+Native Cline binary: /opt/homebrew/lib/node_modules/cline/bin/.cline
+/opt/homebrew/lib/node_modules/cline/bin/.cline: Mach-O 64-bit executable arm64
+Executable=/opt/homebrew/lib/node_modules/cline/bin/.cline
+Identifier=a.out
+Format=Mach-O thin (arm64)
+CodeDirectory v=20400 size=693054 flags=0x20002(adhoc,linker-signed) hashes=21655+0 location=embedded
+VersionPlatform=1
+VersionMin=851968
+VersionSDK=983552
+Hash type=sha256 size=32
+CandidateCDHash sha256=f3309838ca62270b6e3f898de565eca34cc271cb
+CandidateCDHashFull sha256=f3309838ca62270b6e3f898de565eca34cc271cba8d4fcb29283c6ca03bd5f7a
+Hash choices=sha256
+CMSDigest=f3309838ca62270b6e3f898de565eca34cc271cba8d4fcb29283c6ca03bd5f7a
+CMSDigestType=2
+Executable Segment base=0
+Executable Segment limit=60899328
+Executable Segment flags=0x1
+Page size=4096
+CDHash=f3309838ca62270b6e3f898de565eca34cc271cb
+Signature=adhoc
+Info.plist=not bound
+TeamIdentifier=not set
+Sealed Resources=none
+Internal requirements=none
+spctl exit=1 • /opt/homebrew/lib/node_modules/cline/bin/.cline: invalid signature (code or signature have been modified)
+🧩 Native Cline platform hatası sınıflandırıldı; Node SDK fallback'e geçiliyor.
+From https://github.com/izmirli-ali/KRALI-Agent
+ * branch            main       -> FETCH_HEAD
+Already up to date.
+Preparing worktree (new branch 'krali-dev-agent/20260920-190315')
+branch 'krali-dev-agent/20260920-190315' set up to track 'origin/main'.
+HEAD is now at 792a8b4 v0.8.39 Cline platform diagnosis and SDK fallback
+Developer prompt mode: gap • 2390 bytes
+Cline SDK kuruluyor: @cline/sdk
+npm warn deprecated node-domexception@1.0.0: Use your platform's native DOMException instead
+
+added 327 packages, and audited 328 packages in 8s
+
+47 packages are looking for funding
+  run `npm fund` for details
+
+20 vulnerabilities (6 low, 13 moderate, 1 high)
+
+To address issues that do not require attention, run:
+  npm audit fix
+
+Some issues need review, and may require choosing
+a different dependency.
+
+Run `npm audit` for details.
+node:internal/modules/esm/resolve:314
+  return new ERR_PACKAGE_PATH_NOT_EXPORTED(
+         ^
+
+Error [ERR_PACKAGE_PATH_NOT_EXPORTED]: No "exports" main defined in /Users/medusa/Library/Application Support/KRALI Agent/Developer/cline-sdk-host/node_modules/@cline/sdk/package.json
+    at exportsNotFound (node:internal/modules/esm/resolve:314:10)
+    at packageExportsResolve (node:internal/modules/esm/resolve:604:13)
+    at resolveExports (node:internal/modules/cjs/loader:664:36)
+    at Module._findPath (node:internal/modules/cjs/loader:731:31)
+    at Module._resolveFilename (node:internal/modules/cjs/loader:1415:27)
+    at Function.resolve (node:internal/modules/helpers:157:19)
+    at file:///Users/medusa/Developer/KRALI-Agent/Scripts/cline-sdk-fallback.mjs:20:34
+    at ModuleJob.run (node:internal/modules/esm/module_job:343:25)
+    at async onImport.tracePromise.__proto__ (node:internal/modules/esm/loader:681:26)
+    at async asyncRunEntryPointWithESMLoader (node:internal/modules/run_main:117:5) {
+  code: 'ERR_PACKAGE_PATH_NOT_EXPORTED'
+}
+
+Node.js v22.23.2
+❌ Cline görevi başarısız oldu (exit 1, 8s): Error [ERR_PACKAGE_PATH_NOT_EXPORTED]: No "exports" main defined in /Users/medusa/Library/Application Support/KRALI Agent/Developer/cline-sdk-host/node_modules/@cline/sdk/package.json
