@@ -117,7 +117,7 @@ struct AgentGoalInterpreter {
         if asksComparison {
             outcomes.insert(.explain)
 
-            if context.relevantMemoryCount == 0 {
+            if decision.intent == .general {
                 outcomes.insert(.research)
                 capabilityIDs.insert("research.web")
             }
