@@ -552,6 +552,46 @@ final class AgentEngine: ObservableObject {
                     subscriptionMission.provider
             }
 
+            if plannedMission == nil {
+                let actionableCapabilities =
+                    goalProfile
+                        .requiredCapabilityIDs
+                        .subtracting(
+                            Set([
+                                "core.reasoning",
+                                "context.local"
+                            ])
+                        )
+
+                if !actionableCapabilities.isEmpty {
+                    plannedMission =
+                        AgentSemanticMission(
+                            objective: text,
+                            outcomes:
+                                goalProfile
+                                    .outcomes
+                                    .map(\.rawValue)
+                                    .sorted(),
+                            steps: [],
+                            requiredCapabilityIDs:
+                                Array(
+                                    goalProfile
+                                        .requiredCapabilityIDs
+                                )
+                                .sorted(),
+                            requiresUserInput: false,
+                            userInputReason: nil,
+                            confidence: 0.6
+                        )
+                    plannerProvider =
+                        "Deterministic Capability Contract"
+
+                    log(
+                        "Semantic planner fallback: goal contract'tan deterministic mission üretildi"
+                    )
+                }
+            }
+
             if let rawMission = plannedMission {
                 let mission =
                     missionNormalizer.normalize(
