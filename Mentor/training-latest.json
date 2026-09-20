@@ -1,12 +1,12 @@
 {
-  "appVersion" : "0.8.4",
-  "corePassed" : 18,
-  "coreTotal" : 18,
-  "createdAt" : "2026-09-20T08:51:55Z",
+  "appVersion" : "0.8.5",
+  "corePassed" : 19,
+  "coreTotal" : 19,
+  "createdAt" : "2026-09-20T08:57:07Z",
   "failed" : 0,
   "northStarPassed" : 4,
   "northStarTotal" : 4,
-  "passed" : 22,
+  "passed" : 23,
   "results" : [
     {
       "diagnostics" : [
@@ -616,7 +616,30 @@
       "unavailableCapabilities" : [
 
       ]
+    },
+    {
+      "diagnostics" : [
+
+      ],
+      "goal" : "referans verilen önceki fikir listesini kaynak olarak seç",
+      "passed" : true,
+      "prompt" : "şimdi Estafiz'e dön, az önceki Reels fikirlerinden birincisini 30 saniyelik çekim senaryosuna çevir",
+      "route" : [
+        "Core",
+        "Context",
+        "Memory"
+      ],
+      "scenarioID" : "context-transform-source-resolution",
+      "selectedCapabilities" : [
+        "context.local",
+        "core.reasoning"
+      ],
+      "tier" : "core",
+      "title" : "Dönüşüm kaynağını doğru hafızadan seçme",
+      "unavailableCapabilities" : [
+
+      ]
     }
   ],
-  "total" : 22
+  "total" : 23
 }
