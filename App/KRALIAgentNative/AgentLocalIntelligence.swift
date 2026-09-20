@@ -106,6 +106,7 @@ actor AgentLocalIntelligence {
             Şu JSON şemasını döndür:
             {
               "objective": "kullanıcının nihai hedefi",
+              "outcomes": ["locate", "research", "analyze", "compose", "edit", "explain"],
               "steps": [
                 {
                   "title": "kısa adım adı",
@@ -124,6 +125,8 @@ actor AgentLocalIntelligence {
             Kurallar:
             - 2 ile 10 arası anlamlı step üret; gerçekten tek adımlı doğal konuşmada 1 step olabilir.
             - dependsOn dizisinde 0 tabanlı önceki step indekslerini kullan.
+            - outcomes yalnızca şu değerlerden oluşsun: converse, locate, shortlist, assessContent, analyze, ideate, compose, transform, explain, organize, open, remember, research, edit, communicate.
+            - Kullanıcının nihai sonucunu tanımlayan outcome'ları seç; araç isimlerini outcome olarak kullanma.
             - requiredCapabilityIDs, steps içinde kullanılan capabilityID'lerin tekilleştirilmiş listesini içersin.
             - confidence 0 ile 1 arasında olsun.
             """
