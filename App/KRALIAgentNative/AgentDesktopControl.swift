@@ -77,25 +77,27 @@ actor AgentDesktopControl {
                     candidate.bundleIdentifier
             )
 
-        let activated: Bool
         if let runningBefore {
-            activated = runningBefore.activate(
+            _ = runningBefore.activate(
                 options: [.activateAllWindows]
             )
         } else {
-            activated = try await openApplication(
+            let launched = try await openApplication(
                 at: candidate.url
             )
+
+            guard launched else {
+                throw DesktopControlError
+                    .launchFailed(candidate.name)
+            }
         }
 
-        guard activated else {
-            throw DesktopControlError
-                .launchFailed(candidate.name)
-        }
-
-        try? await Task.sleep(
-            for: .milliseconds(700)
-        )
+        let activated =
+            await focusCandidate(
+                candidate,
+                maxAttempts: 12,
+                delayMilliseconds: 300
+            )
 
         let after =
             NSWorkspace.shared.frontmostApplication?
@@ -110,8 +112,12 @@ actor AgentDesktopControl {
         let afterNormalized =
             normalize(after ?? "")
 
-        let candidateNormalized =
-            normalize(candidate.name)
+        let candidateAliases =
+            Set(
+                candidate.aliases
+                    .map(normalize)
+                    .filter { !$0.isEmpty }
+            )
 
         let screenVerified =
             screenReport.map {
@@ -121,7 +127,9 @@ actor AgentDesktopControl {
                     )
 
                 return
-                    reportFrontmost == candidateNormalized ||
+                    candidateAliases.contains(
+                        reportFrontmost
+                    ) ||
                     (!afterNormalized.isEmpty &&
                      reportFrontmost == afterNormalized)
             } ?? false
@@ -400,11 +408,16 @@ actor AgentDesktopControl {
                     )
 
                 let aliases = Array(
-                    Set([
-                        baseName,
-                        localizedName,
-                        finderDisplayName
-                    ])
+                    Set(
+                        [
+                            baseName,
+                            localizedName,
+                            finderDisplayName
+                        ] +
+                        localizedBundleAliases(
+                            bundle
+                        )
+                    )
                 )
                 .filter {
                     !$0.trimmingCharacters(
@@ -428,6 +441,124 @@ actor AgentDesktopControl {
         }
 
         return results
+    }
+
+    private func localizedBundleAliases(
+        _ bundle: Bundle?
+    ) -> [String] {
+        guard let bundle else {
+            return []
+        }
+
+        var aliases: [String] = []
+        let localizations =
+            Array(
+                Set(
+                    bundle.localizations +
+                    bundle.preferredLocalizations
+                )
+            )
+
+        for localization in localizations {
+            guard let path =
+                bundle.path(
+                    forResource: "InfoPlist",
+                    ofType: "strings",
+                    inDirectory: nil,
+                    forLocalization:
+                        localization
+                ),
+                let data = try? Data(
+                    contentsOf:
+                        URL(
+                            fileURLWithPath: path
+                        )
+                ),
+                let object = try?
+                    PropertyListSerialization
+                        .propertyList(
+                            from: data,
+                            options: [],
+                            format: nil
+                        ),
+                let dictionary =
+                    object as? [String: Any]
+            else {
+                continue
+            }
+
+            if let value =
+                dictionary[
+                    "CFBundleDisplayName"
+                ] as? String {
+                aliases.append(value)
+            }
+
+            if let value =
+                dictionary[
+                    "CFBundleName"
+                ] as? String {
+                aliases.append(value)
+            }
+        }
+
+        return aliases
+    }
+
+    private func focusCandidate(
+        _ candidate: ApplicationCandidate,
+        maxAttempts: Int,
+        delayMilliseconds: Int
+    ) async -> Bool {
+        let normalizedAliases =
+            Set(
+                candidate.aliases
+                    .map(normalize)
+                    .filter { !$0.isEmpty }
+            )
+
+        for _ in 0..<maxAttempts {
+            if let front =
+                NSWorkspace.shared
+                    .frontmostApplication {
+                if let bundleID =
+                    candidate.bundleIdentifier,
+                   front.bundleIdentifier ==
+                    bundleID {
+                    return true
+                }
+
+                let frontName =
+                    normalize(
+                        front.localizedName ?? ""
+                    )
+
+                if normalizedAliases.contains(
+                    frontName
+                ) {
+                    return true
+                }
+            }
+
+            if let running =
+                matchingRunningApplication(
+                    named: candidate.name,
+                    preferredBundleIdentifier:
+                        candidate.bundleIdentifier
+                ) {
+                _ = running.activate(
+                    options: [.activateAllWindows]
+                )
+            }
+
+            try? await Task.sleep(
+                for: .milliseconds(
+                    delayMilliseconds
+                )
+            )
+        }
+
+        return false
     }
 
     private func waitForAccessibilityTrust(
@@ -586,12 +717,12 @@ actor AgentDesktopControl {
                     return
                 }
 
-                let activated = app.activate(
+                _ = app.activate(
                     options: [.activateAllWindows]
                 )
 
                 continuation.resume(
-                    returning: activated
+                    returning: true
                 )
             }
         }
