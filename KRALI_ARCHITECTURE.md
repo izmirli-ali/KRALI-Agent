@@ -180,3 +180,8 @@ Core olgunlaştıktan sonra Browser, Work/Mail, Premiere ve harici model bağlan
 Öncelik cihazdaki Apple Foundation Models katmanında. Apple modeli hazır değilse ve kullanıcı Cline üzerinden ChatGPT Subscription ile giriş yaptıysa, doğrulanmış kaynak kanıtlarından son kullanıcı cevabı üretmek için ayrı bir subscription synthesis katmanı kullanılabiliyor. Sentez sağlayıcısı yoksa araştırma başarılı olsa bile analiz/ideation görevi kısmi sayılıyor. Mentor trace kullanılan zeka sağlayıcısını da kaydediyor.
 
 Deep-source kanıtlarında HTML entity çözümü ve sayfa boilerplate temizliği de iyileştirildi.
+
+
+**v0.7.25 subscription synthesis reliability:** İlk v0.7.24 gerçek görev trace'i hedef tamamlama doğrulamasının doğru biçimde `partial` verdiğini, ancak ChatGPT Subscription sentez subprocess'inin tamamlanamadığını gösterdi. Synthesis bridge bu nedenle pipe tabanlı stdout/stderr toplamak yerine scratch çalışma alanındaki geçici NDJSON dosyasına yazar; böylece uzun JSON akışında pipe-buffer kilitlenmesi engellenir. Cline güvenli scratch dizininde auto-approve ile çalışabilir fakat shell komut izinleri tamamen kapalı kalır. Non-zero exit ve parse hatalarının son bölümü artık activity/mentor diagnostic'e taşınır.
+
+Ayrıca Türkçe dotless-i normalizasyonu nedeniyle `Bağımsız fikir üret` reasoning adımının yanlışlıkla completed kalabildiği hata düzeltilir; synthesis başarısızsa analiz ve ideation adımlarının ikisi de partial olur.
