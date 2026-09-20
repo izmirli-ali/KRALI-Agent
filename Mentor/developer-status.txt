@@ -1,1 +1,1 @@
-sdk_fallback_running|Mail (mail.work) ClineCore SDK üzerinden öğreniliyor|krali-dev-agent/20260920-192625|/Users/medusa/Developer/KRALI-Agent-Dev-20260920-192625
+sdk_session_running|Mail (mail.work) için model oturumu aktif|krali-dev-agent/20260920-193757|/Users/medusa/Developer/KRALI-Agent-Dev-20260920-193757

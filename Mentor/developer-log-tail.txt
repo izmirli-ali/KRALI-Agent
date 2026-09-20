@@ -1,68 +1,3 @@
-Format=Mach-O thin (arm64)
-CodeDirectory v=20400 size=693054 flags=0x20002(adhoc,linker-signed) hashes=21655+0 location=embedded
-VersionPlatform=1
-VersionMin=851968
-VersionSDK=983552
-Hash type=sha256 size=32
-CandidateCDHash sha256=f3309838ca62270b6e3f898de565eca34cc271cb
-CandidateCDHashFull sha256=f3309838ca62270b6e3f898de565eca34cc271cba8d4fcb29283c6ca03bd5f7a
-Hash choices=sha256
-CMSDigest=f3309838ca62270b6e3f898de565eca34cc271cba8d4fcb29283c6ca03bd5f7a
-CMSDigestType=2
-Executable Segment base=0
-Executable Segment limit=60899328
-Executable Segment flags=0x1
-Page size=4096
-CDHash=f3309838ca62270b6e3f898de565eca34cc271cb
-Signature=adhoc
-Info.plist=not bound
-TeamIdentifier=not set
-Sealed Resources=none
-Internal requirements=none
-spctl exit=1 • /opt/homebrew/lib/node_modules/cline/bin/.cline: invalid signature (code or signature have been modified)
-🧩 Native Cline platform hatası sınıflandırıldı; Node SDK fallback'e geçiliyor.
-From https://github.com/izmirli-ali/KRALI-Agent
- * branch            main       -> FETCH_HEAD
-Already up to date.
-Preparing worktree (new branch 'krali-dev-agent/20260920-190315')
-branch 'krali-dev-agent/20260920-190315' set up to track 'origin/main'.
-HEAD is now at 792a8b4 v0.8.39 Cline platform diagnosis and SDK fallback
-Developer prompt mode: gap • 2390 bytes
-Cline SDK kuruluyor: @cline/sdk
-npm warn deprecated node-domexception@1.0.0: Use your platform's native DOMException instead
-
-added 327 packages, and audited 328 packages in 8s
-
-47 packages are looking for funding
-  run `npm fund` for details
-
-20 vulnerabilities (6 low, 13 moderate, 1 high)
-
-To address issues that do not require attention, run:
-  npm audit fix
-
-Some issues need review, and may require choosing
-a different dependency.
-
-Run `npm audit` for details.
-node:internal/modules/esm/resolve:314
-  return new ERR_PACKAGE_PATH_NOT_EXPORTED(
-         ^
-
-Error [ERR_PACKAGE_PATH_NOT_EXPORTED]: No "exports" main defined in /Users/medusa/Library/Application Support/KRALI Agent/Developer/cline-sdk-host/node_modules/@cline/sdk/package.json
-    at exportsNotFound (node:internal/modules/esm/resolve:314:10)
-    at packageExportsResolve (node:internal/modules/esm/resolve:604:13)
-    at resolveExports (node:internal/modules/cjs/loader:664:36)
-    at Module._findPath (node:internal/modules/cjs/loader:731:31)
-    at Module._resolveFilename (node:internal/modules/cjs/loader:1415:27)
-    at Function.resolve (node:internal/modules/helpers:157:19)
-    at file:///Users/medusa/Developer/KRALI-Agent/Scripts/cline-sdk-fallback.mjs:20:34
-    at ModuleJob.run (node:internal/modules/esm/module_job:343:25)
-    at async onImport.tracePromise.__proto__ (node:internal/modules/esm/loader:681:26)
-    at async asyncRunEntryPointWithESMLoader (node:internal/modules/run_main:117:5) {
-  code: 'ERR_PACKAGE_PATH_NOT_EXPORTED'
-}
-
 Node.js v22.23.2
 ❌ Cline görevi başarısız oldu (exit 1, 8s): Error [ERR_PACKAGE_PATH_NOT_EXPORTED]: No "exports" main defined in /Users/medusa/Library/Application Support/KRALI Agent/Developer/cline-sdk-host/node_modules/@cline/sdk/package.json
 
@@ -118,3 +53,68 @@ Preparing worktree (new branch 'krali-dev-agent/20260920-192625')
 branch 'krali-dev-agent/20260920-192625' set up to track 'origin/main'.
 HEAD is now at dd74eb7 v0.8.40 SDK ESM loader and foreground recovery
 Developer prompt mode: gap • 2390 bytes
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+ KRALİ DEVELOPER AGENT
+ 20260920-193757
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+⚠️ Global Node.js v26 Cline bağımlılıklarıyla uyumlu değil; izole Node 22 runtime hazırlanıyor.
+✅ Developer Agent runtime: v22.23.2
+⚠️ Cline health probe başarısız. exit=137 output=
+Cline path: /opt/homebrew/bin/cline
+Machine arch: arm64
+/opt/homebrew/bin/cline: a /usr/bin/env node script text executable, ASCII text
+Cline doctor fix deneniyor...
+Cline CLI yeniden kuruluyor: npm install -g --allow-scripts=cline,protobufjs cline@latest
+npm warn deprecated node-domexception@1.0.0: Use your platform's native DOMException instead
+
+changed 329 packages in 22s
+
+47 packages are looking for funding
+  run `npm fund` for details
+Native Cline binary: /opt/homebrew/lib/node_modules/cline/bin/.cline
+/opt/homebrew/lib/node_modules/cline/bin/.cline: Mach-O 64-bit executable arm64
+Executable=/opt/homebrew/lib/node_modules/cline/bin/.cline
+Identifier=a.out
+Format=Mach-O thin (arm64)
+CodeDirectory v=20400 size=693054 flags=0x20002(adhoc,linker-signed) hashes=21655+0 location=embedded
+VersionPlatform=1
+VersionMin=851968
+VersionSDK=983552
+Hash type=sha256 size=32
+CandidateCDHash sha256=f3309838ca62270b6e3f898de565eca34cc271cb
+CandidateCDHashFull sha256=f3309838ca62270b6e3f898de565eca34cc271cba8d4fcb29283c6ca03bd5f7a
+Hash choices=sha256
+CMSDigest=f3309838ca62270b6e3f898de565eca34cc271cba8d4fcb29283c6ca03bd5f7a
+CMSDigestType=2
+Executable Segment base=0
+Executable Segment limit=60899328
+Executable Segment flags=0x1
+Page size=4096
+CDHash=f3309838ca62270b6e3f898de565eca34cc271cb
+Signature=adhoc
+Info.plist=not bound
+TeamIdentifier=not set
+Sealed Resources=none
+Internal requirements=none
+spctl exit=1 • /opt/homebrew/lib/node_modules/cline/bin/.cline: invalid signature (code or signature have been modified)
+🧩 Native Cline platform hatası sınıflandırıldı; Node SDK fallback'e geçiliyor.
+From https://github.com/izmirli-ali/KRALI-Agent
+ * branch            main       -> FETCH_HEAD
+Already up to date.
+Preparing worktree (new branch 'krali-dev-agent/20260920-193757')
+branch 'krali-dev-agent/20260920-193757' set up to track 'origin/main'.
+HEAD is now at 59bcc78 v0.8.41 live SDK heartbeat and watchdog
+Developer prompt mode: gap • 2390 bytes
+KRALI_STAGE sdk_importing • Mail (mail.work) için Cline SDK yükleniyor
+KRALI_STAGE sdk_import_ready • Cline SDK yüklendi; provider ayarları doğrulanıyor
+KRALI_STAGE sdk_provider_ready • openai-codex provider ve model ayarı hazır
+KRALI_STAGE sdk_runtime_starting • ClineCore local runtime başlatılıyor
+KRALI_STAGE sdk_runtime_ready • ClineCore runtime hazır; agent session başlatılıyor
+KRALI_STAGE sdk_session_starting • Mail (mail.work) için ClineCore session isteği gönderildi
+KRALI_STAGE sdk_session_running • Mail (mail.work) için model oturumu aktif
+(node:26433) Warning: AI SDK Warning System: To turn off warning logging, set the AI_SDK_LOG_WARNINGS global to false.
+(Use `node --trace-warnings ...` to show where the warning was created)
+(node:26433) Warning: AI SDK Warning (openai-codex.responses / gpt-5.6-sol): Non-OpenAI reasoning parts are not supported. Skipping reasoning part: {"type":"reasoning","text":"**Inspecting repo components**"}.
+(node:26433) Warning: AI SDK Warning (openai-codex.responses / gpt-5.6-sol): Non-OpenAI reasoning parts are not supported. Skipping reasoning part: {"type":"reasoning","text":"**Inspecting repo components**"}.
+(node:26433) Warning: AI SDK Warning (openai-codex.responses / gpt-5.6-sol): Non-OpenAI reasoning parts are not supported. Skipping reasoning part: {"type":"reasoning","text":"**Assessing mail UI bridge feasibility****Evaluating AppleScript and Accessibility use**"}.
