@@ -1452,12 +1452,15 @@ final class AgentEngine: ObservableObject {
                 }
 
             case "files.write.text":
-                let targetFolder =
-                    folderSearchResults.first?.url
-
-                guard let targetFolder else {
+                guard
+                    folderSearchResults.count == 1,
+                    let targetFolder =
+                        folderSearchResults.first?.url
+                else {
                     outputs.append(
-                        "Metin dosyası yazılamadı: hedef klasör güvenilir biçimde çözülemedi."
+                        folderSearchResults.isEmpty
+                            ? "Metin dosyası yazılamadı: hedef klasör bulunamadı."
+                            : "Metin dosyası yazılamadı: hedef klasör belirsiz; birden fazla eşleşme var."
                     )
                     continue
                 }
