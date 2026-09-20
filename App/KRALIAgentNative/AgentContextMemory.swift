@@ -215,6 +215,15 @@ struct AgentContextMemoryStore {
         let query = normalize(rawQuery)
         let queryTokens = Set(tokens(query))
         let continuation = containsContinuationReference(query)
+        let transformation = isTransformationRequest(query)
+        let referencesIdeas = query.contains("fikir") ||
+            query.contains("reels")
+        let hasDirectIdeaSource =
+            transformation &&
+            referencesIdeas &&
+            entries.contains {
+                isDirectIdeaSource($0)
+            }
 
         func overlapCount(
             for entry: AgentContextMemoryEntry
@@ -268,6 +277,26 @@ struct AgentContextMemoryStore {
                 isRelevant =
                     tokenOverlap > 0 ||
                     exactMatch
+            } else if transformation &&
+                      referencesIdeas &&
+                      hasDirectIdeaSource {
+                let priorInput = normalize(
+                    entry.userInput ?? ""
+                )
+
+                if isTransformationRequest(priorInput) {
+                    isRelevant = false
+                } else if isDirectIdeaSource(entry) {
+                    isRelevant = true
+                } else if continuation {
+                    isRelevant =
+                        tokenOverlap > 0 ||
+                        exactMatch
+                } else {
+                    isRelevant =
+                        tokenOverlap >= 2 ||
+                        exactMatch
+                }
             } else if continuation {
                 if strongestContextOverlap > 0 {
                     isRelevant =
@@ -303,6 +332,12 @@ struct AgentContextMemoryStore {
                     1,
                     12 - min(index, 10)
                 )
+            }
+
+            if transformation,
+               referencesIdeas,
+               isDirectIdeaSource(entry) {
+                score += 24
             }
 
             if score > 0 {
@@ -407,6 +442,42 @@ struct AgentContextMemoryStore {
         normalized.contains(
             "su an en guvenli planim"
         )
+    }
+
+    private func isTransformationRequest(
+        _ value: String
+    ) -> Bool {
+        let normalized = normalize(value)
+
+        return [
+            "cevir", "çevir",
+            "donustur", "dönüştür",
+            "uyarla",
+            "senaryoya", "senaryosuna",
+            "cekim plani", "çekim planı"
+        ]
+        .contains {
+            normalized.contains($0)
+        }
+    }
+
+    private func isDirectIdeaSource(
+        _ entry: AgentContextMemoryEntry
+    ) -> Bool {
+        guard entry.kind != .userRule else {
+            return false
+        }
+
+        let input = normalize(
+            entry.userInput ?? ""
+        )
+
+        guard !isTransformationRequest(input) else {
+            return false
+        }
+
+        return input.contains("fikir") ||
+            input.contains("reels")
     }
 
     private func containsContinuationReference(
