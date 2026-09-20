@@ -156,11 +156,12 @@ actor AgentSubscriptionIntelligence {
         )
         process.arguments = [
             "--json",
-            "--auto-approve", "true",
+            "--plan",
+            "--auto-approve", "false",
             "--provider", "openai-codex",
             "--thinking", "medium",
-            "--retries", "1",
-            "--timeout", "150",
+            "--retries", "2",
+            "--timeout", "300",
             "--cwd", workspace.path,
             "--system", systemPrompt,
             prompt
@@ -194,14 +195,53 @@ actor AgentSubscriptionIntelligence {
             )
         ) ?? ""
 
+        let diagnosticURL =
+            fileManager.homeDirectoryForCurrentUser
+                .appendingPathComponent(
+                    "Library/Logs/KRALI-Semantic-Planner.log",
+                    isDirectory: false
+                )
+
+        if process.terminationStatus != 0 {
+            let diagnostic = """
+            \n━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+            KRALİ Semantic Planner Fallback
+            status=\(process.terminationStatus)
+            input=\(userInput)
+            output:
+            \(rawOutput)
+            """
+
+            if let data = diagnostic.data(using: .utf8) {
+                if !fileManager.fileExists(
+                    atPath: diagnosticURL.path
+                ) {
+                    fileManager.createFile(
+                        atPath: diagnosticURL.path,
+                        contents: data
+                    )
+                } else if let handle = try? FileHandle(
+                    forWritingTo: diagnosticURL
+                ) {
+                    try? handle.seekToEnd()
+                    try? handle.write(contentsOf: data)
+                    try? handle.close()
+                }
+            }
+        }
+
         try? fileManager.removeItem(at: outputURL)
 
         guard process.terminationStatus == 0 else {
+            let tail = String(
+                rawOutput.suffix(1200)
+            )
             failureReason =
                 "Semantic planner fallback hata kodu " +
                 String(process.terminationStatus) +
-                ": " +
-                String(rawOutput.suffix(1200))
+                (tail.isEmpty
+                    ? " • ayrıntı: ~/Library/Logs/KRALI-Semantic-Planner.log"
+                    : ": " + tail)
             return nil
         }
 
