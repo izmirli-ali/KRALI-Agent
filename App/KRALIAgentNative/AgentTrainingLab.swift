@@ -582,6 +582,16 @@ struct AgentTrainingLab {
             lastMemoryGoal:
                 "bulguları analiz et → sonucu ve gerekçeyi açıkla"
         )
+        let staleFileResultsWithMemory = context(
+            hasWorkspace: true,
+            fileCount: 80,
+            videoCount: 20,
+            previousFileResultCount: 5,
+            lastTarget: .video,
+            lastGoal: "Son videoları bul",
+            relevantMemoryCount: 2,
+            lastMemoryGoal: "çalışma kuralını öğren"
+        )
 
         return [
             TrainingScenario(
@@ -744,6 +754,21 @@ struct AgentTrainingLab {
                 requiredOutcomes: [.compose],
                 requiredCapabilities: ["core.reasoning", "context.local"],
                 forbiddenCapabilities: ["research.web", "files.search"],
+                requiredRouteStages: ["Context"],
+                requiredStepTitles: ["İçeriği oluştur"],
+                requiredLearningCapabilities: [],
+                minimumResearchConceptGroups: 0,
+                minimumMandatoryResearchConceptGroups: 0
+            ),
+            TrainingScenario(
+                id: "brand-reels-plan-with-stale-file-state",
+                title: "Marka Reels planını eski dosya aramasından ayırma",
+                tier: .core,
+                prompt: "Şimdi Vox Coffee Co. için 30 saniyelik bir Reels planı hazırla. Estafiz'den öğrendiğin marka detaylarını kullanma; yalnızca genel çalışma yöntemini kullan.",
+                context: staleFileResultsWithMemory,
+                requiredOutcomes: [.compose],
+                requiredCapabilities: ["core.reasoning", "context.local"],
+                forbiddenCapabilities: ["files.search", "files.metadata", "research.web"],
                 requiredRouteStages: ["Context"],
                 requiredStepTitles: ["İçeriği oluştur"],
                 requiredLearningCapabilities: [],
