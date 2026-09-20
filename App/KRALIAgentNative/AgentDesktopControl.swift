@@ -2,6 +2,17 @@ import Foundation
 import AppKit
 import ApplicationServices
 
+struct DesktopAppActionResult: Codable, Hashable, Sendable {
+    let requestedText: String
+    let resolvedApplicationName: String
+    let resolvedApplicationURL: String?
+    let wasRunning: Bool
+    let launchOrActivateSucceeded: Bool
+    let frontmostAfter: String?
+    let screenVerifiedFrontmost: Bool
+    let screenSummary: String?
+}
+
 struct DesktopControlProbeReport: Codable, Hashable, Sendable {
     let createdAt: Date
     let requestedApplication: String
@@ -43,6 +54,91 @@ actor AgentDesktopControl {
 
         return AXIsProcessTrustedWithOptions(
             options
+        )
+    }
+
+    func openOrFocusApplication(
+        from userText: String
+    ) async throws -> DesktopAppActionResult {
+        guard let candidate =
+            resolveRequestedApplication(
+                from: userText
+            )
+        else {
+            throw DesktopControlError
+                .applicationNotFound(userText)
+        }
+
+        let runningBefore =
+            matchingRunningApplication(
+                named: candidate.name,
+                preferredBundleIdentifier:
+                    candidate.bundleIdentifier
+            )
+
+        let activated: Bool
+        if let runningBefore {
+            activated = runningBefore.activate(
+                options: [.activateAllWindows]
+            )
+        } else {
+            activated = try await openApplication(
+                at: candidate.url
+            )
+        }
+
+        guard activated else {
+            throw DesktopControlError
+                .launchFailed(candidate.name)
+        }
+
+        try? await Task.sleep(
+            for: .milliseconds(700)
+        )
+
+        let after =
+            NSWorkspace.shared.frontmostApplication?
+                .localizedName
+
+        let screenReport =
+            try? await screenPerception.observe(
+                goal:
+                    "\(candidate.name) uygulamasının açıldığını ve önde olduğunu yalnızca ekran kanıtından doğrula."
+            )
+
+        let afterNormalized =
+            normalize(after ?? "")
+
+        let candidateNormalized =
+            normalize(candidate.name)
+
+        let screenVerified =
+            screenReport.map {
+                let reportFrontmost =
+                    normalize(
+                        $0.frontmostApplication ?? ""
+                    )
+
+                return
+                    reportFrontmost == candidateNormalized ||
+                    (!afterNormalized.isEmpty &&
+                     reportFrontmost == afterNormalized)
+            } ?? false
+
+        return DesktopAppActionResult(
+            requestedText: userText,
+            resolvedApplicationName:
+                candidate.name,
+            resolvedApplicationURL:
+                candidate.url.path,
+            wasRunning: runningBefore != nil,
+            launchOrActivateSucceeded:
+                activated,
+            frontmostAfter: after,
+            screenVerifiedFrontmost:
+                screenVerified,
+            screenSummary:
+                screenReport?.semanticSummary
         )
     }
 
@@ -150,6 +246,140 @@ actor AgentDesktopControl {
             screenSummary:
                 screenReport?.semanticSummary
         )
+    }
+
+    private struct ApplicationCandidate {
+        let name: String
+        let bundleIdentifier: String?
+        let url: URL
+    }
+
+    private func resolveRequestedApplication(
+        from userText: String
+    ) -> ApplicationCandidate? {
+        let corpus = normalize(userText)
+        let candidates = installedApplicationCandidates()
+
+        let exact = candidates
+            .filter {
+                let normalized =
+                    normalize($0.name)
+                return
+                    corpus.contains(normalized) &&
+                    !normalized.isEmpty
+            }
+            .sorted {
+                normalize($0.name).count >
+                    normalize($1.name).count
+            }
+
+        if let candidate = exact.first {
+            return candidate
+        }
+
+        let tokens = Set(
+            corpus.split(separator: " ")
+                .map(String.init)
+                .filter { $0.count >= 3 }
+        )
+
+        return candidates
+            .map { candidate in
+                let nameTokens = Set(
+                    normalize(candidate.name)
+                        .split(separator: " ")
+                        .map(String.init)
+                )
+
+                return (
+                    candidate,
+                    tokens.intersection(
+                        nameTokens
+                    ).count
+                )
+            }
+            .filter { $0.1 > 0 }
+            .sorted {
+                if $0.1 == $1.1 {
+                    return
+                        $0.0.name.count <
+                        $1.0.name.count
+                }
+
+                return $0.1 > $1.1
+            }
+            .first?
+            .0
+    }
+
+    private func installedApplicationCandidates()
+        -> [ApplicationCandidate] {
+        let roots = [
+            URL(fileURLWithPath: "/Applications"),
+            URL(fileURLWithPath: "/System/Applications"),
+            URL(fileURLWithPath: "/System/Applications/Utilities"),
+            fileManager.homeDirectoryForCurrentUser
+                .appendingPathComponent(
+                    "Applications",
+                    isDirectory: true
+                )
+        ]
+
+        var results: [ApplicationCandidate] = []
+        var seen = Set<String>()
+
+        for root in roots {
+            guard let entries = try? fileManager
+                .contentsOfDirectory(
+                    at: root,
+                    includingPropertiesForKeys: nil,
+                    options: [.skipsHiddenFiles]
+                )
+            else {
+                continue
+            }
+
+            for url in entries where
+                url.pathExtension
+                    .lowercased() == "app" {
+                let bundle = Bundle(url: url)
+                let baseName =
+                    url.deletingPathExtension()
+                        .lastPathComponent
+                let localizedName =
+                    bundle?
+                        .localizedInfoDictionary?[
+                            "CFBundleDisplayName"
+                        ] as? String ??
+                    bundle?
+                        .localizedInfoDictionary?[
+                            "CFBundleName"
+                        ] as? String ??
+                    baseName
+                let bundleID =
+                    bundle?.bundleIdentifier
+
+                let key =
+                    (bundleID ?? url.path)
+                        .lowercased()
+
+                guard !seen.contains(key) else {
+                    continue
+                }
+
+                seen.insert(key)
+                results.append(
+                    ApplicationCandidate(
+                        name: localizedName,
+                        bundleIdentifier:
+                            bundleID,
+                        url: url
+                    )
+                )
+            }
+        }
+
+        return results
     }
 
     private func matchingRunningApplication(
