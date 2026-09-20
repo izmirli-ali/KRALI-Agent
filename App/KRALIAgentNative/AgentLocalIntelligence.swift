@@ -89,6 +89,7 @@ actor AgentLocalIntelligence {
             Kullanıcı gerçek bir dijital çıktı, dosya, tasarım, kurgu, uygulama işlemi, web işlemi veya medya üzerinde çalışma istiyorsa yalnızca core.reasoning/context.local ile yetinme; hedefi gerçekten uygulayacak capability'leri ekle.
             Uygulama veya araç capability'si unavailable görünse bile görevin doğal olarak ihtiyacı varsa mission'a dahil et; availability planlama kararını bastırmamalı.
             Son adıma kadar düşün: yalnızca hazırlık/analiz değil, üretim/uygulama ve mümkünse sonucu doğrulama adımlarını da planla.
+            Yerel dosya, mevcut bağlam ve uygulama capability'leriyle çözülebilecek bir görev için sırf genel bilgi toplamak amacıyla research.web ekleme. Web araştırmasını yalnızca hedef için dış/güncel/bilinmeyen bilgi gerçekten gerekiyorsa kullan.
             Marka özelindeki hafızayı başka markalara taşımayı önleyen kullanıcı kurallarına uy.
             JSON dışında hiçbir metin üretme.
             """
@@ -198,6 +199,7 @@ actor AgentLocalIntelligence {
                 - Photoshop içinde gerçek tasarım gerekiyorsa photoshop.control ekle.
                 - Ekrandaki sonucu görsel olarak kontrol etmek gerekiyorsa perception.screen ekle.
                 - Marka/şirket hakkında güncel veya bilinmeyen bilgi gerekiyorsa research.web ekle.
+                - Yerel dosya/kurgu gibi dış bilgi gerektirmeyen görevlerde gereksiz research.web ekleme.
                 - Capability unavailable olsa bile görev gerektiriyorsa mission'a dahil et.
                 - Gereksiz capability ekleme.
                 - Gerekli adımları bağımlılık sırasına koy.
