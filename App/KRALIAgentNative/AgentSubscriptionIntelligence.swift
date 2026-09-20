@@ -148,7 +148,7 @@ actor AgentSubscriptionIntelligence {
 
         return SubscriptionIntelligenceResult(
             text: text,
-            provider: "ChatGPT Subscription / GPT-5.6 Sol"
+            provider: "ChatGPT Subscription / openai-codex"
         )
     }
 
