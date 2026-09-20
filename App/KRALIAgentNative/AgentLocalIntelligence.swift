@@ -31,6 +31,8 @@ enum LocalIntelligenceState: Hashable {
 actor AgentLocalIntelligence {
     private let languageResolver =
         AgentNaturalLanguageResolver()
+    private let missionNormalizer =
+        AgentMissionNormalizer()
     func availability() -> LocalIntelligenceState {
         #if canImport(FoundationModels)
         if #available(macOS 26.0, *) {
@@ -222,11 +224,18 @@ actor AgentLocalIntelligence {
                     mission = fallbackMission
                 }
 
-                let finalMission = repairMission(
+                let repairedMission = repairMission(
                     mission,
                     userInput: userInput,
                     capabilities: capabilities
                 )
+
+                let finalMission =
+                    missionNormalizer.normalize(
+                        repairedMission,
+                        userInput: userInput,
+                        capabilities: capabilities
+                    )
 
                 return validateMission(
                     finalMission,
@@ -286,12 +295,19 @@ actor AgentLocalIntelligence {
             capabilities: capabilities
         )
 
+        let normalized =
+            missionNormalizer.normalize(
+                repaired,
+                userInput: userInput,
+                capabilities: capabilities
+            )
+
         let knownIDs = Set(
             capabilities.map(\.id)
         )
 
         let nonCore = Set(
-            repaired.requiredCapabilityIDs
+            normalized.requiredCapabilityIDs
         )
         .subtracting(
             Set([
@@ -303,15 +319,15 @@ actor AgentLocalIntelligence {
         guard
             !nonCore.isEmpty,
             validateMission(
-                repaired,
+                normalized,
                 knownCapabilityIDs: knownIDs
             ),
-            isOperationallyComplete(repaired)
+            isOperationallyComplete(normalized)
         else {
             return nil
         }
 
-        return repaired
+        return normalized
     }
 
     private func repairMission(
