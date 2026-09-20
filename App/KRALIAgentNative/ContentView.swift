@@ -559,35 +559,56 @@ struct ContentView: View {
                     .clipShape(RoundedRectangle(cornerRadius: 10))
                 }
 
-                sectionTitle("Yerel zeka")
+                sectionTitle("Zeka katmanı")
 
-                HStack(alignment: .top, spacing: 8) {
-                    Image(
-                        systemName: engine.localIntelligenceState.isAvailable
-                            ? "brain.head.profile.fill"
-                            : "brain.head.profile"
-                    )
-                    .font(.caption)
-                    .foregroundStyle(
-                        engine.localIntelligenceState.isAvailable
-                            ? Color.green
-                            : Color.secondary
-                    )
-
-                    VStack(alignment: .leading, spacing: 2) {
-                        Text(engine.localIntelligenceState.title)
-                            .font(.caption.weight(.medium))
-
-                        Text(
-                            engine.localIntelligenceState.isAvailable
-                                ? "Analiz, araştırma sentezi ve bağımsız fikir üretimi cihaz üzerinde çalışır • ayrı API ücreti yok"
-                                : "KRALİ güvenli kural tabanlı Core ile devam eder; model hazır olduğunda otomatik kullanır"
+                VStack(alignment: .leading, spacing: 8) {
+                    HStack(alignment: .top, spacing: 8) {
+                        Image(
+                            systemName: engine.localIntelligenceState.isAvailable
+                                ? "brain.head.profile.fill"
+                                : "brain.head.profile"
                         )
-                        .font(.caption2)
-                        .foregroundStyle(.secondary)
+                        .font(.caption)
+                        .foregroundStyle(
+                            engine.localIntelligenceState.isAvailable
+                                ? Color.green
+                                : Color.secondary
+                        )
+
+                        VStack(alignment: .leading, spacing: 2) {
+                            Text(engine.localIntelligenceState.title)
+                                .font(.caption.weight(.medium))
+
+                            Text(
+                                engine.localIntelligenceState.isAvailable
+                                    ? "Öncelik cihaz üzerindeki Apple modelinde."
+                                    : "Apple modeli hazır değilse KRALİ, yalnızca analiz/yorum gereken görevlerde ChatGPT Subscription sentezini yedek katman olarak kullanabilir."
+                            )
+                            .font(.caption2)
+                            .foregroundStyle(.secondary)
+                        }
+
+                        Spacer()
                     }
 
-                    Spacer()
+                    Divider()
+
+                    HStack(alignment: .top, spacing: 8) {
+                        Image(systemName: "sparkles")
+                            .font(.caption)
+                            .foregroundStyle(.secondary)
+
+                        VStack(alignment: .leading, spacing: 2) {
+                            Text("Sentez durumu")
+                                .font(.caption2.weight(.semibold))
+
+                            Text(engine.intelligenceProviderStatus)
+                                .font(.caption2)
+                                .foregroundStyle(.secondary)
+                        }
+
+                        Spacer()
+                    }
                 }
                 .padding(10)
                 .background(Color(nsColor: .controlBackgroundColor))
@@ -1164,7 +1185,7 @@ struct ContentView: View {
                 }
 
                 Text(
-                    "v0.7.23: Developer Agent için hızlı diagnostic gate ve canlı durum takibi eklendi. Training Lab + Live Research Eval güncel sürümde tamamen yeşilse Cline gereksiz yere çalıştırılmıyor; gerekiyorsa hazırlık → diagnostic → Cline → build doğrulama aşamaları UI’da canlı görünür. Cline turu 15 dakika ile sınırlandı."
+                    "v0.7.24: Mentor trace gerçek bir hedef-tamamlama açığı yakaladı. KRALİ artık yalnızca kaynak bulmayı “analiz tamamlandı” saymıyor; analiz/fikir görevlerinde Apple yerel modeline, o yoksa mevcut ChatGPT Subscription üzerinden Cline sentezine başvuruyor. Sentez yoksa görev kısmi doğrulanıyor. Kaynak kanıtlarındaki HTML/çerez gürültüsü de temizlendi."
                 )
                 .font(.caption2)
                 .foregroundStyle(.orange)
