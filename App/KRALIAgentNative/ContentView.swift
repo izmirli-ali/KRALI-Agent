@@ -1185,7 +1185,7 @@ struct ContentView: View {
                 }
 
                 Text(
-                    "v0.7.27: Sosyal medya profil soruları doğal dilde ayrı bir araştırma ihtiyacı olarak tanınıyor. “estafizsym instagram hesabının kaç takipçisi var, içerikleri neler?” gibi cümleler artık fallback’e düşmek yerine Web Research’e yönleniyor. Handle + platform için özel arama planı, resmi profil önceliği ve takipçi/içerik facet’leri eklendi. Canlı metrikler kanıtta yoksa tahmin edilmiyor."
+                    "v0.7.28: Public profile/resource araştırmasında arama motoruna bağımlılık azaltıldı. KRALİ handle + platformdan doğrudan kanonik hedef adresi çözebiliyor; çözülen URL doğrulanmış kanıt sayılmıyor. Sayfa canlı içeriğini statik istekle açmıyorsa “profil yok” demek yerine hedefi çözdüğünü, veriyi doğrulayamadığını söylüyor ve browser.control yetkinliğini öğrenme kuyruğuna ekliyor."
                 )
                 .font(.caption2)
                 .foregroundStyle(.orange)
