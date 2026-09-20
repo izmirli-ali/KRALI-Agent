@@ -6,245 +6,401 @@ struct ContentView: View {
     @EnvironmentObject private var engine: AgentEngine
     @State private var prompt = ""
     @State private var developerToolsExpanded = false
+    @State private var inspectorVisible = false
     @StateObject private var updater = UpdateController()
 
     var body: some View {
-        VStack(spacing: 0) {
-            topBar
+        HStack(spacing: 0) {
+            ConversationSidebarView()
+                .frame(
+                    minWidth: 200,
+                    idealWidth: 228,
+                    maxWidth: 238
+                )
+
             Divider()
 
-            HSplitView {
+            VStack(spacing: 0) {
+                topBar
+                Divider()
                 chatPane
-                    .frame(minWidth: 640)
+            }
+            .frame(minWidth: 480)
+
+            if inspectorVisible {
+                Divider()
 
                 sidePane
-                    .frame(minWidth: 320, idealWidth: 360, maxWidth: 410)
+                    .frame(
+                        minWidth: 280,
+                        idealWidth: 340,
+                        maxWidth: 390
+                    )
+                    .transition(
+                        .move(edge: .trailing)
+                            .combined(with: .opacity)
+                    )
             }
         }
-        .background(Color(nsColor: .windowBackgroundColor))
+        .background(
+            Color(nsColor: .windowBackgroundColor)
+        )
+        .animation(
+            .easeInOut(duration: 0.18),
+            value: inspectorVisible
+        )
     }
 
     private var topBar: some View {
-        HStack(spacing: 12) {
-            Image(nsImage: NSApplication.shared.applicationIconImage)
-                .resizable()
-                .interpolation(.high)
-                .frame(width: 42, height: 42)
-                .shadow(
-                    color: Color.red.opacity(0.22),
-                    radius: 8
+        HStack(spacing: 10) {
+            VStack(
+                alignment: .leading,
+                spacing: 2
+            ) {
+                Text(
+                    engine.isViewingArchivedConversation
+                        ? "Geçmiş sohbet"
+                        : "KRALİ"
                 )
+                .font(.headline)
 
-            VStack(alignment: .leading, spacing: 2) {
-                Text("KRALİ")
-                    .font(.headline)
-
-                Text("Native macOS • v\(updater.currentVersion) • personal agent")
+                Text(topBarSubtitle)
                     .font(.caption)
                     .foregroundStyle(.secondary)
+                    .lineLimit(1)
             }
 
             Spacer()
 
-            HStack(spacing: 8) {
-                Circle()
-                    .fill(updater.updateAvailable ? Color.orange : Color.green)
-                    .frame(width: 8, height: 8)
-
-                Text(updater.statusText)
-                    .font(.caption)
-                    .foregroundStyle(updater.updateAvailable ? Color.orange : Color.green)
-
-                Button {
-                    updater.checkForUpdates()
-                } label: {
-                    if updater.isChecking {
-                        ProgressView()
-                            .controlSize(.small)
-                    } else {
-                        Image(systemName: "arrow.clockwise")
-                    }
+            if updater.updateAvailable {
+                Button("Güncelle") {
+                    updater.updateNow()
                 }
-                .buttonStyle(.bordered)
-                .controlSize(.small)
-                .disabled(updater.isChecking || updater.isLaunchingUpdate)
-                .help("GitHub güncellemelerini kontrol et")
-
-                if updater.updateAvailable {
-                    Button("Güncelle") {
-                        updater.updateNow()
-                    }
-                    .buttonStyle(.borderedProminent)
-                    .controlSize(.small)
-                    .disabled(updater.isLaunchingUpdate)
-                }
-
-                Button {
-                    engine.syncMentorTrace()
-                } label: {
-                    if engine.mentorSyncBusy {
-                        ProgressView()
-                            .controlSize(.small)
-                    } else {
-                        Label(
-                            "Mentor",
-                            systemImage: "arrow.up.doc"
-                        )
-                    }
-                }
-                .buttonStyle(.bordered)
+                .buttonStyle(.borderedProminent)
                 .controlSize(.small)
                 .disabled(
-                    !engine.mentorTraceReady ||
-                    engine.mentorSyncBusy
-                )
-                .help(
-                    "Son KRALİ görev kaydını private GitHub reposuna gönder. Sonra ChatGPT'ye “mentor kaydına bak” diyebilirsin."
+                    updater.isLaunchingUpdate
                 )
             }
+
+            Button {
+                engine.voiceOutputEnabled.toggle()
+            } label: {
+                Image(
+                    systemName:
+                        engine.voiceOutputEnabled
+                        ? "speaker.wave.2.fill"
+                        : "speaker.slash.fill"
+                )
+            }
+            .buttonStyle(.bordered)
+            .controlSize(.small)
+            .help("Sesli yanıt modunu aç/kapat")
+
+            Button {
+                engine.syncMentorTrace()
+            } label: {
+                if engine.mentorSyncBusy {
+                    ProgressView()
+                        .controlSize(.small)
+                } else {
+                    Image(
+                        systemName: "arrow.up.doc"
+                    )
+                }
+            }
+            .buttonStyle(.bordered)
+            .controlSize(.small)
+            .disabled(
+                !engine.mentorTraceReady ||
+                engine.mentorSyncBusy
+            )
+            .help("Son görevin Mentor kaydını gönder")
+
+            Button {
+                updater.checkForUpdates()
+            } label: {
+                if updater.isChecking {
+                    ProgressView()
+                        .controlSize(.small)
+                } else {
+                    Image(
+                        systemName: "arrow.clockwise"
+                    )
+                }
+            }
+            .buttonStyle(.bordered)
+            .controlSize(.small)
+            .disabled(
+                updater.isChecking ||
+                updater.isLaunchingUpdate
+            )
+            .help(
+                "Güncellemeleri kontrol et • v\(updater.currentVersion)"
+            )
+
+            Button {
+                inspectorVisible.toggle()
+            } label: {
+                Image(
+                    systemName: "sidebar.right"
+                )
+            }
+            .buttonStyle(.bordered)
+            .controlSize(.small)
+            .opacity(
+                inspectorVisible
+                    ? 1.0
+                    : 0.82
+            )
+            .help("Durum ve geliştirici Inspector'ı")
         }
         .padding(.horizontal, 16)
-        .frame(height: 62)
+        .frame(height: 54)
+        .background(.ultraThinMaterial)
+    }
+
+    private var topBarSubtitle: String {
+        if engine.isViewingArchivedConversation {
+            return "Salt okunur geçmiş • aktif sohbete dönerek devam edebilirsin"
+        }
+
+        if engine.busy {
+            return engine.currentGoal
+        }
+
+        return updater.updateAvailable
+            ? "Yeni sürüm hazır • v\(updater.currentVersion)"
+            : "Hazır • v\(updater.currentVersion)"
     }
 
     private var chatPane: some View {
         VStack(spacing: 0) {
-            HStack {
-                VStack(alignment: .leading, spacing: 2) {
-                    Text("KRALİ")
-                        .font(.headline)
-
-                    Text("Hedefi söyle; KRALİ gerekli kabiliyetleri seçer ve yolu kendisi kurar.")
-                        .font(.caption)
-                        .foregroundStyle(.secondary)
-                }
-
-                Spacer()
-
-                Toggle(isOn: $engine.voiceOutputEnabled) {
-                    Label(
-                        "Sesli mod yanıtı",
-                        systemImage: engine.voiceOutputEnabled
-                            ? "speaker.wave.2.fill"
-                            : "speaker.slash.fill"
-                    )
-                }
-                .toggleStyle(.button)
-                .help(
-                    "Yalnızca mikrofonla gönderdiğin mesajlara sesli yanıt verir. Yazılı mesajlar sessiz kalır."
-                )
+            if engine.isViewingArchivedConversation {
+                archiveBanner
             }
-            .padding(14)
-
-            Divider()
 
             ScrollViewReader { proxy in
                 ScrollView {
-                    LazyVStack(spacing: 10) {
-                        ForEach(engine.messages) { message in
+                    LazyVStack(
+                        alignment: .leading,
+                        spacing: 18
+                    ) {
+                        ForEach(
+                            engine.visibleConversationMessages
+                        ) { message in
                             messageBubble(message)
                                 .id(message.id)
                         }
 
-                        if engine.busy {
-                            HStack {
-                                ProgressView()
-                                    .controlSize(.small)
-
-                                Text("KRALİ düşünüyor…")
-                                    .font(.caption)
-                                    .foregroundStyle(.secondary)
-
-                                Spacer()
-                            }
-                            .padding(.horizontal, 8)
+                        if engine.busy &&
+                           !engine.isViewingArchivedConversation {
+                            thinkingRow
                         }
                     }
-                    .padding(14)
+                    .frame(
+                        maxWidth: 860,
+                        alignment: .leading
+                    )
+                    .padding(.horizontal, 28)
+                    .padding(.vertical, 24)
+                    .frame(
+                        maxWidth: .infinity,
+                        alignment: .center
+                    )
                 }
-                .onChange(of: engine.messages.count) { _, _ in
-                    if let last = engine.messages.last {
-                        withAnimation {
-                            proxy.scrollTo(last.id, anchor: .bottom)
-                        }
+                .onChange(
+                    of: engine
+                        .visibleConversationMessages
+                        .count
+                ) { _, _ in
+                    guard
+                        let last =
+                            engine
+                                .visibleConversationMessages
+                                .last
+                    else {
+                        return
+                    }
+
+                    withAnimation(
+                        .easeOut(duration: 0.18)
+                    ) {
+                        proxy.scrollTo(
+                            last.id,
+                            anchor: .bottom
+                        )
                     }
                 }
             }
 
             Divider()
 
-            quickActions
-                .padding(.horizontal, 12)
-                .padding(.top, 10)
+            if engine.isViewingArchivedConversation {
+                HStack {
+                    Spacer()
 
-            VoiceStatusView(speech: engine.speech)
-                .padding(.horizontal, 12)
+                    Button {
+                        engine.showActiveConversation()
+                    } label: {
+                        Label(
+                            "Aktif sohbete dön",
+                            systemImage:
+                                "arrow.uturn.backward"
+                        )
+                    }
+                    .buttonStyle(.borderedProminent)
+
+                    Spacer()
+                }
+                .padding(14)
+                .background(.ultraThinMaterial)
+            } else {
+                if engine.messages.count <= 3 {
+                    quickActions
+                        .padding(.horizontal, 18)
+                        .padding(.top, 10)
+                }
+
+                VoiceStatusView(
+                    speech: engine.speech
+                )
+                .padding(.horizontal, 18)
                 .padding(.top, 8)
 
-            VoiceComposerView(
-                speech: engine.speech,
-                prompt: $prompt,
-                isLocked: engine.busy,
-                onSend: { text, source in
-                    engine.send(text, source: source)
-                }
-            )
-            .padding(12)
+                VoiceComposerView(
+                    speech: engine.speech,
+                    prompt: $prompt,
+                    isLocked: engine.busy,
+                    onSend: { text, source in
+                        engine.send(
+                            text,
+                            source: source
+                        )
+                    }
+                )
+                .padding(.horizontal, 18)
+                .padding(.vertical, 14)
+                .background(.ultraThinMaterial)
+            }
         }
     }
 
-    private func messageBubble(_ message: ChatMessage) -> some View {
-        HStack(alignment: .top) {
-            if message.role == .user {
-                Spacer(minLength: 90)
+    private var archiveBanner: some View {
+        HStack(spacing: 8) {
+            Image(
+                systemName: "clock.arrow.circlepath"
+            )
+            .foregroundStyle(.secondary)
+
+            Text(
+                "Geçmiş bir sohbeti görüntülüyorsun. Bu kayıt salt okunur."
+            )
+            .font(.caption)
+            .foregroundStyle(.secondary)
+
+            Spacer()
+
+            Button("Aktif sohbete dön") {
+                engine.showActiveConversation()
+            }
+            .buttonStyle(.borderless)
+        }
+        .padding(.horizontal, 18)
+        .frame(height: 38)
+        .background(
+            Color.primary.opacity(0.035)
+        )
+    }
+
+    private var thinkingRow: some View {
+        HStack(spacing: 10) {
+            ZStack {
+                Circle()
+                    .fill(
+                        Color.accentColor.opacity(0.12)
+                    )
+                    .frame(width: 28, height: 28)
+
+                ProgressView()
+                    .controlSize(.small)
             }
 
-            Group {
-                if message.role == .assistant {
-                    AssistantMessageText(text: message.text)
-                } else {
+            Text("KRALİ düşünüyor…")
+                .font(.caption)
+                .foregroundStyle(.secondary)
+
+            Spacer()
+        }
+    }
+
+    private func messageBubble(
+        _ message: ChatMessage
+    ) -> some View {
+        Group {
+            if message.role == .user {
+                HStack(alignment: .top) {
+                    Spacer(minLength: 100)
+
                     Text(message.text)
-                        .font(.system(size: 14.5, weight: .medium))
-                        .lineSpacing(2)
-                        .fixedSize(
-                            horizontal: false,
-                            vertical: true
+                        .font(
+                            .system(
+                                size: 14.5,
+                                weight: .medium
+                            )
+                        )
+                        .lineSpacing(3)
+                        .textSelection(.enabled)
+                        .padding(.horizontal, 14)
+                        .padding(.vertical, 11)
+                        .background(
+                            Color.accentColor
+                                .opacity(0.14)
+                        )
+                        .clipShape(
+                            RoundedRectangle(
+                                cornerRadius: 16,
+                                style: .continuous
+                            )
+                        )
+                        .frame(
+                            maxWidth: 620,
+                            alignment: .trailing
                         )
                 }
-            }
-            .textSelection(.enabled)
-            .frame(
-                maxWidth: message.role == .assistant ? 780 : 640,
-                alignment: .leading
-            )
-            .padding(.horizontal, 14)
-            .padding(.vertical, 12)
-            .background(
-                message.role == .user
-                    ? Color.accentColor.opacity(0.18)
-                    : Color(nsColor: .controlBackgroundColor)
-            )
-            .overlay(
-                RoundedRectangle(
-                    cornerRadius: 13,
-                    style: .continuous
-                )
-                .stroke(
-                    message.role == .assistant
-                        ? Color.primary.opacity(0.06)
-                        : Color.accentColor.opacity(0.10),
-                    lineWidth: 1
-                )
-            )
-            .clipShape(
-                RoundedRectangle(
-                    cornerRadius: 13,
-                    style: .continuous
-                )
-            )
+            } else {
+                HStack(
+                    alignment: .top,
+                    spacing: 11
+                ) {
+                    ZStack {
+                        Circle()
+                            .fill(
+                                Color.accentColor
+                                    .opacity(0.10)
+                            )
+                            .frame(
+                                width: 30,
+                                height: 30
+                            )
 
-            if message.role == .assistant {
-                Spacer(minLength: 90)
+                        Image(
+                            systemName: "sparkles"
+                        )
+                        .font(.caption)
+                    }
+
+                    AssistantMessageText(
+                        text: message.text
+                    )
+                    .textSelection(.enabled)
+                    .frame(
+                        maxWidth: 760,
+                        alignment: .leading
+                    )
+
+                    Spacer(minLength: 20)
+                }
             }
         }
     }
@@ -853,11 +1009,8 @@ struct ContentView: View {
                             Button("Onayla") {
                                 let reply =
                                     engine.approvePendingFileAction()
-                                engine.messages.append(
-                                    ChatMessage(
-                                        role: .assistant,
-                                        text: reply
-                                    )
+                                engine.postAssistantMessage(
+                                    reply
                                 )
                             }
                             .buttonStyle(.borderedProminent)
@@ -950,11 +1103,8 @@ struct ContentView: View {
                 if engine.lastUndoAction != nil {
                     Button {
                         let reply = engine.undoLastFileAction()
-                        engine.messages.append(
-                            ChatMessage(
-                                role: .assistant,
-                                text: reply
-                            )
+                        engine.postAssistantMessage(
+                            reply
                         )
                     } label: {
                         Label(
@@ -1457,7 +1607,7 @@ private struct VoiceComposerView: View {
     let onSend: (String, ChatInputSource) -> Void
 
     var body: some View {
-        HStack(alignment: .bottom, spacing: 8) {
+        HStack(alignment: .bottom, spacing: 10) {
             Button {
                 speech.microphoneTapped { text in
                     prompt = ""
@@ -1470,39 +1620,77 @@ private struct VoiceComposerView: View {
                             ? Color.red
                             : Color.primary
                     )
-                    .frame(width: 26, height: 26)
+                    .frame(width: 30, height: 30)
+                    .contentShape(Circle())
             }
-            .buttonStyle(.bordered)
+            .buttonStyle(.plain)
             .disabled(speech.isBusy || isLocked)
             .help(micHelp)
 
             TextField(
                 isLocked
                     ? "KRALİ mevcut görevi tamamlıyor…"
-                    : "KRALİ'ye normal konuşur gibi görev ver…",
+                    : "KRALİ'ye bir şey sor veya görev ver…",
                 text: $prompt,
                 axis: .vertical
             )
-            .textFieldStyle(.roundedBorder)
-            .lineLimit(1...5)
+            .textFieldStyle(.plain)
+            .font(.system(size: 14.5))
+            .lineLimit(1...6)
             .disabled(isLocked)
+            .padding(.vertical, 7)
             .onSubmit {
                 sendPrompt()
             }
 
-            Button("Gönder") {
+            Button {
                 sendPrompt()
-            }
-            .buttonStyle(.borderedProminent)
-            .disabled(
-                isLocked ||
-                prompt
-                    .trimmingCharacters(
-                        in: .whitespacesAndNewlines
+            } label: {
+                Image(systemName: "arrow.up")
+                    .font(.system(size: 12, weight: .bold))
+                    .foregroundStyle(Color.white)
+                    .frame(width: 30, height: 30)
+                    .background(
+                        isSendDisabled
+                            ? Color.secondary.opacity(0.35)
+                            : Color.accentColor
                     )
-                    .isEmpty
-            )
+                    .clipShape(Circle())
+            }
+            .buttonStyle(.plain)
+            .disabled(isSendDisabled)
+            .help("Gönder")
         }
+        .padding(.horizontal, 12)
+        .padding(.vertical, 7)
+        .background(
+            Color(nsColor: .controlBackgroundColor)
+        )
+        .overlay(
+            RoundedRectangle(
+                cornerRadius: 18,
+                style: .continuous
+            )
+            .stroke(
+                Color.primary.opacity(0.08),
+                lineWidth: 1
+            )
+        )
+        .clipShape(
+            RoundedRectangle(
+                cornerRadius: 18,
+                style: .continuous
+            )
+        )
+    }
+
+    private var isSendDisabled: Bool {
+        isLocked ||
+        prompt
+            .trimmingCharacters(
+                in: .whitespacesAndNewlines
+            )
+            .isEmpty
     }
 
     private var micIcon: String {

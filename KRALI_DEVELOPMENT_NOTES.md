@@ -15,7 +15,7 @@ KRALİ büyüdükçe tek dosya / tek store / her veriyi sürekli bellekte tutan 
 
 1. `ContentView.swift` chat, status, context, sources, diagnostics ve developer tools'u tek görünümde topluyor. UI modüllere ayrılmalı.
 2. `AgentEngine.swift` çok fazla servis ve UI state taşıyor. Uzun vadede coordinator + feature stores/view-models yapısına bölünmeli.
-3. Chat mesajları şu anda yalnız RAM'de; uygulama yeniden açılınca geçmiş kayboluyor.
+3. Chat mesajları artık ConversationStore ile kalıcı ve bounded tutuluyor; aktif sohbet restart sonrası geri yükleniyor.
 4. Context memory tek JSON store kullanıyor fakat zaten bounded: en fazla 30 user rule + 40 task/research entry. Bu yüzden ilk performans darboğazı değil.
 5. Diagnostics ve ağır geliştirici state'leri normal sohbet akışından ayrılmalı ve ihtiyaç anında yüklenmeli.
 6. Seçili çalışma klasörü indeksleri başlangıçta ağırlaşırsa lazy/background indexing'e taşınmalı.
@@ -33,14 +33,14 @@ KRALİ büyüdükçe tek dosya / tek store / her veriyi sürekli bellekte tutan 
 
 ## Planned phases
 
-### Phase 1 — Conversation Foundation
+### Phase 1 — Conversation Foundation ✅
 - Chat history'i `AgentEngine` içinden ayır.
 - Kalıcı conversation store ekle.
 - Aktif RAM penceresini bounded tut.
 - Eski mesajları arşiv segmentlerine taşı.
 - Restart sonrası konuşma devam etsin.
 
-### Phase 2 — Modern Assistant UI
+### Phase 2 — Modern Assistant UI — in progress
 - Sol conversation/history sidebar.
 - Merkezde sade chat transcript.
 - Alt composer sabit ve modern.
