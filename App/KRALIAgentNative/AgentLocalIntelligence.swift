@@ -427,6 +427,23 @@ actor AgentLocalIntelligence {
                 )
             )
 
+        let genericScreenObservationTask =
+            containsMissionConcept(
+                corpus,
+                [
+                    "ekrana bak",
+                    "ekrani oku",
+                    "ekranı oku",
+                    "ekranda ne var",
+                    "ekrani kontrol",
+                    "ekranı kontrol",
+                    "ekranda gorunuyor mu",
+                    "ekranda görünüyor mu",
+                    "gorsel olarak kontrol",
+                    "görsel olarak kontrol"
+                ]
+            )
+
         let organizeTask =
             containsMissionConcept(
                 corpus,
@@ -544,6 +561,14 @@ actor AgentLocalIntelligence {
                 "files.search",
                 "files.reveal"
             ])
+        }
+
+        if genericScreenObservationTask {
+            outcomes.formUnion([
+                "analyze",
+                "explain"
+            ])
+            requiredIDs.insert("perception.screen")
         }
 
         if organizeTask {
