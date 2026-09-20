@@ -496,3 +496,16 @@ Fuzzy eşleşme güvenli tarafta kalır. Uzun hedeflerde daha düşük hata tole
 Training Lab'e üç regression eklendi: `spotifyı aç` kısa app-open, `takvimi aç` Türkçe ek ayrıştırma ve `spotfiy aç` yazım hatalı fuzzy eşleşme. Bu testler normal açılışta otomatik çalışmaz; geliştirici tanısında gerektiğinde manuel çalıştırılır.
 
 Kısa zamirli komutlar (`bunu aç`, `şunu yap`) hedef aynı mesajda veya mevcut bağlamda açık değilse güvenlik nedeniyle tahmin edilmez. Uzun vadeli çözüm ayrı bir contextual referent resolver'dır; hedef belli değilken fuzzy matching ile rastgele nesne/provider seçilmemelidir.
+
+
+**v0.8.30 robust app discovery + foreground restoration + intent precedence:** v0.8.29 Mentor turunda fuzzy resolver'ın temel hedefi doğrulandı: `spotfiyı aç` güvenli biçimde Spotify'a çözüldü ve runtime `desktop.app` başarıyla tamamlandı. Kalan problemler uygulama adı fuzzy eşleşmesinden farklı üç sınıfa ayrıldı: arka planda zaten açık uygulamanın bazen öne gelmemesi, macOS sistem uygulamalarının (özellikle Finder) standart app kataloğunda bulunmaması ve “Mail'i aç” komutunun `mail.work` iletişim intent'ine kaçması.
+
+Natural-language intent precedence artık eylem-fiili odaklıdır. Basit app-open komutu Brain ve GoalInterpreter katmanlarında mail/browser benzeri domain keyword inference'ından önce çözülür. Böylece “Mail'i aç” `desktop.app` olurken “müdürüme mail taslağı hazırla” hâlâ `mail.work` olarak kalır. Aynı ayrım ileride domain adı ile uygulama adı çakışan provider'lara uygulanabilir.
+
+Installed-app kataloğu artık yalnız `/Applications` ile sınırlı değildir. Çalışan regular uygulamalar doğrudan NSWorkspace üzerinden kataloğa eklenir; `/System/Applications`, Utilities, `/System/Library/CoreServices`, CoreServices/Applications ve kullanıcı Applications alanları taranır. İlk eşleşme bulunamazsa yalnız fallback olarak `/Applications` ve `~/Applications` recursive taranır; nested vendor klasörlerindeki app bundle'ları yakalanır. Bu ağır recursive tarama yalnız unresolved durumda çalışır ve sonuç cache'lenir.
+
+macOS modern activation davranışına uygun olarak background app focus akışı cooperative activation kullanır. Hidden uygulama önce unhide edilir; KRALİ aktif uygulama olarak hedef NSRunningApplication'a `yieldActivation` verir, ardından target `activate(.activateAllWindows)` çağrılır. Accessibility izni varsa AX application `kAXFrontmostAttribute` true yapılır; erişilebilir pencereler önce unminimize edilir ve `kAXRaiseAction` ile yükseltilir. NSWorkspace frontmost bundle/alias polling sonucu başarı kanıtıdır; Screen Perception yalnız fallback olarak kalır. Bu yol, açık fakat arkada/minimize haldeki uygulamanın gerçek foreground'a getirilmesini hedefler.
+
+Finder normal app lifecycle'ından farklı, sürekli çalışan macOS shell uygulamasıdır. Katalog CoreServices ile Finder'ı genel resolver'a dahil eder; Finder hedefinde aktivasyona ek olarak kullanıcı home directory'si NSWorkspace üzerinden açılarak görünür Finder penceresi garanti edilmeye çalışılır. Bu tek sistem-shell adaptörüdür; diğer uygulama isimleri hard-code edilmez.
+
+Training Lab'e üç routing regression eklendi: “Mail'i aç” desktop.app olmalı ve mail.work olmamalı; “Finder'ı aç” desktop.app olmalı ve files.reveal olmamalı; gerçek “mail taslağı hazırla” isteği mail.work kalmalı. Normal startup'ta test runner otomatik çalışmaz.
