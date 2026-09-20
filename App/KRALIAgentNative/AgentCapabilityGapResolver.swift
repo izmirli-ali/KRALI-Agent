@@ -149,9 +149,9 @@ struct AgentCapabilityGapResolver {
                 "perception.screen"
             ]
 
-            if genericUI.allSatisfy(
-                availableIDs.contains
-            ) {
+            if genericUI.allSatisfy({
+                availableIDs.contains($0)
+            }) {
                 candidates.append(
                     contentsOf:
                         genericUI
@@ -169,9 +169,9 @@ struct AgentCapabilityGapResolver {
                 "perception.screen"
             ]
 
-            if genericUI.allSatisfy(
-                availableIDs.contains
-            ) {
+            if genericUI.allSatisfy({
+                availableIDs.contains($0)
+            }) {
                 candidates.append(
                     contentsOf:
                         genericUI
