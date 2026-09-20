@@ -453,3 +453,18 @@ v0.8.25'in doğrulama hedefi: startup Arena güncel sürümle yeniden 9/9 olmal�
 Training Lab'daki `semantic-required-action-execution` test snapshot'ı artık bilinçli olarak `desktop.app` capability'sini incomplete required action olarak işaretler; `stale-goal-verifier-isolation` snapshot'ı ise boş incomplete set kullanır. Zincirleme `.attention` tip çıkarım hataları da bu initializer eksikliğinin giderilmesiyle çözülür.
 
 Bu sürüm v0.8.25'in desktop.app/verifier/localized app resolver düzeltmelerini aynen korur; yalnızca build/install yolunu tekrar çalışabilir hale getirir.
+
+
+**v0.8.27 natural-language app control hardening + probe UI clarification:** v0.8.26 Mentor turunda Desktop Control Probe tamamen yeşil oldu (`activate=true | ax=true | screen=true`). Böylece Accessibility izni, NSWorkspace activation ve Screen Perception doğrulaması gerçek Mac ortamında birlikte doğrulandı.
+
+Runtime testleri üç ek açık gösterdi. “Takvim uygulamasını aç” Türkçe uygulama adını çözümleyemedi; “WhatsApp uygulamasını aç” uygulamayı buldu ancak tek `activate()` dönüş değeri false olduğu için gereğinden erken başarısız sayıldı; “XYZ123 diye bir uygulama aç” ifadesi ise generic app-open contract tarafından yakalanmadığı için Apple planner Files/Screen yoluna sapabildi.
+
+App resolver artık her bundle için base name, Finder display name, aktif localized info ve bundle içindeki **tüm InfoPlist.strings localization adlarını** alias olarak indeksler. Böylece sistem dili/uygulama localization'ı farklı olsa bile `Calendar.app → Takvim` gibi eşleşmeler generic olarak çözülebilir. Bu Takvim'e özel hard-code değildir.
+
+App activation artık tek `NSRunningApplication.activate()` Boolean sonucuna güvenmez. Launch başarılıysa kısa bir retry döngüsüyle gerçek frontmost uygulama bundle ID / alias üzerinden kontrol edilir; gerekirse activation tekrar denenir. Son başarı yine Screen Perception ile doğrulanır. Böylece yavaş açılan veya ilk activate çağrısında false dönen uygulamalar erken başarısız sayılmaz.
+
+Mission Contract Repair generic “uygulama aç” kalıbını da tanır; “XYZ123 diye bir uygulama aç” gibi ifadeler artık desktop.app yoluna düşer. Kurulu olmayan uygulama için Files aramasına sapmak yerine desktop.app resolver açıkça application-not-found sonucu üretir.
+
+Training Lab'daki semantic-required-action-execution testi yeni verifier hata metniyle uyumlandı. Test artık action incomplete olduğunda `attention` + `desktop.app` + tamamlanmadı/yürütülmedi sinyalini doğrular.
+
+Geliştirici panelindeki Screen Perception Probe ve Desktop Control Probe butonları “Test” olarak etiketlendi ve panelde bu kontrollerin yalnız geliştirici tanısı olduğu açıklandı. Ürün ilkesi: normal kullanıcı capability çalıştırmak için ayrı butona basmaz; “Takvim'i aç”, “ekrana bak”, “Photoshop'ta şunu yap” gibi doğal dil hedefleri uygun provider'ı otomatik tetikler. Yeni capability'ler için kullanıcı-facing manuel çalıştır butonları üretilmeyecek.
