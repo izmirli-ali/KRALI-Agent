@@ -29,6 +29,8 @@ struct DeveloperAgentStatus: Hashable {
             "sdk_session_starting",
             "sdk_session_running",
             "sdk_tools_running",
+            "sdk_tool_completed",
+            "sdk_session_ended",
             "sdk_session_completed",
             "provider_platform_bug"
         ].contains(state)
@@ -82,6 +84,10 @@ struct DeveloperAgentStatus: Hashable {
             return "Model öğreniyor"
         case "sdk_tools_running":
             return "Araçlar çalışıyor"
+        case "sdk_tool_completed":
+            return "Araç adımı tamamlandı"
+        case "sdk_session_ended":
+            return "SDK oturumu sonuçlandı"
         case "sdk_session_completed":
             return "Öğrenme oturumu tamamlandı"
         case "ready_for_review":
