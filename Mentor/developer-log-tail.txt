@@ -1,32 +1,3 @@
-Gerçek interaktif Notes runtime turu bu agent oturumundan çalıştırılmadı; bu nedenle yalnız build sonucuna dayanarak uçtan uca runtime PASS iddiasında bulunmuyorum. Candidate artık runtime’da gerçek `NSWorkspace`/Screen observation kanıtını koruyup verifier’a taşıyacak şekilde hazır.
-
-━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
- KRALİ DEVELOPER AGENT
- 20260920-212954
-━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-⚠️ Global Node.js v26 Cline bağımlılıklarıyla uyumlu değil; izole Node 22 runtime hazırlanıyor.
-✅ Developer Agent runtime: v22.23.2
-⚠️ Cline health probe başarısız. exit=137 output=
-Cline path: /opt/homebrew/bin/cline
-Machine arch: arm64
-/opt/homebrew/bin/cline: a /usr/bin/env node script text executable, ASCII text
-Cline doctor fix deneniyor...
-Cline CLI yeniden kuruluyor: npm install -g --allow-scripts=cline,protobufjs cline@latest
-npm warn deprecated node-domexception@1.0.0: Use your platform's native DOMException instead
-
-changed 329 packages in 13s
-
-47 packages are looking for funding
-  run `npm fund` for details
-Native Cline binary: /opt/homebrew/lib/node_modules/cline/bin/.cline
-/opt/homebrew/lib/node_modules/cline/bin/.cline: Mach-O 64-bit executable arm64
-Executable=/opt/homebrew/lib/node_modules/cline/bin/.cline
-Identifier=a.out
-Format=Mach-O thin (arm64)
-CodeDirectory v=20400 size=693054 flags=0x20002(adhoc,linker-signed) hashes=21655+0 location=embedded
-VersionPlatform=1
-VersionMin=851968
-VersionSDK=983552
 Hash type=sha256 size=32
 CandidateCDHash sha256=f3309838ca62270b6e3f898de565eca34cc271cb
 CandidateCDHashFull sha256=f3309838ca62270b6e3f898de565eca34cc271cba8d4fcb29283c6ca03bd5f7a
@@ -118,3 +89,32 @@ KRALI_STAGE sdk_tools_running • Uygulama kontrolü (desktop.app) araç çıkt�
 KRALI_STAGE sdk_tools_running • Uygulama kontrolü (desktop.app) araç çıktısı güncelleniyor: run_commands
 KRALI_STAGE sdk_tools_running • Uygulama kontrolü (desktop.app) araç çıktısı güncelleniyor: run_commands
 KRALI_STAGE sdk_tool_completed • Uygulama kontrolü (desktop.app) araç adımı tamamlandı: run_commands
+(node:33399) Warning: AI SDK Warning (openai-codex.responses / gpt-5.6-sol): Non-OpenAI reasoning parts are not supported. Skipping reasoning part: {"type":"reasoning","text":"**Inspecting repository status and capabilities**"}.
+(node:33399) Warning: AI SDK Warning (openai-codex.responses / gpt-5.6-sol): Non-OpenAI reasoning parts are not supported. Skipping reasoning part: {"type":"reasoning","text":"**Planning targeted code inspection**"}.
+(node:33399) Warning: AI SDK Warning (openai-codex.responses / gpt-5.6-sol): Non-OpenAI reasoning parts are not supported. Skipping reasoning part: {"type":"reasoning","text":"**Planning desktop control file inspection**"}.
+(node:33399) Warning: AI SDK Warning (openai-codex.responses / gpt-5.6-sol): Non-OpenAI reasoning parts are not supported. Skipping reasoning part: {"type":"reasoning","text":"**Planning detailed code inspection**"}.
+(node:33399) Warning: AI SDK Warning (openai-codex.responses / gpt-5.6-sol): Non-OpenAI reasoning parts are not supported. Skipping reasoning part: {"type":"reasoning","text":"**Investigating missing Turkish localization candidates**"}.
+(node:33399) Warning: AI SDK Warning (openai-codex.responses / gpt-5.6-sol): Non-OpenAI reasoning parts are not supported. Skipping reasoning part: {"type":"reasoning","text":"**Analyzing localized Notes alias mismatch****Inspecting system app metadata and aliases**"}.
+KRALI_STAGE sdk_tools_running • Uygulama kontrolü (desktop.app) için araç çalışıyor: run_commands
+KRALI_STAGE sdk_tool_completed • Uygulama kontrolü (desktop.app) araç adımı tamamlandı: run_commands
+KRALI_STAGE sdk_failed • ClineCore agent hatası: 1 tool call(s) failed: [run_commands] {"error":"Tool was not executed -- NOT a tool or system failure. Clarify with user before proceeding."}
+(node:33399) Warning: AI SDK Warning (openai-codex.responses / gpt-5.6-sol): Non-OpenAI reasoning parts are not supported. Skipping reasoning part: {"type":"reasoning","text":"**Inspecting repository status and capabilities**"}.
+(node:33399) Warning: AI SDK Warning (openai-codex.responses / gpt-5.6-sol): Non-OpenAI reasoning parts are not supported. Skipping reasoning part: {"type":"reasoning","text":"**Planning targeted code inspection**"}.
+(node:33399) Warning: AI SDK Warning (openai-codex.responses / gpt-5.6-sol): Non-OpenAI reasoning parts are not supported. Skipping reasoning part: {"type":"reasoning","text":"**Planning desktop control file inspection**"}.
+(node:33399) Warning: AI SDK Warning (openai-codex.responses / gpt-5.6-sol): Non-OpenAI reasoning parts are not supported. Skipping reasoning part: {"type":"reasoning","text":"**Planning detailed code inspection**"}.
+(node:33399) Warning: AI SDK Warning (openai-codex.responses / gpt-5.6-sol): Non-OpenAI reasoning parts are not supported. Skipping reasoning part: {"type":"reasoning","text":"**Investigating missing Turkish localization candidates**"}.
+(node:33399) Warning: AI SDK Warning (openai-codex.responses / gpt-5.6-sol): Non-OpenAI reasoning parts are not supported. Skipping reasoning part: {"type":"reasoning","text":"**Analyzing localized Notes alias mismatch****Inspecting system app metadata and aliases**"}.
+(node:33399) Warning: AI SDK Warning (openai-codex.responses / gpt-5.6-sol): Non-OpenAI reasoning parts are not supported. Skipping reasoning part: {"type":"reasoning","text":"**Diagnosing localization resource issue**"}.
+KRALI_STAGE sdk_tools_running • Uygulama kontrolü (desktop.app) için araç çalışıyor: search_codebase
+KRALI_STAGE sdk_tool_completed • Uygulama kontrolü (desktop.app) araç adımı tamamlandı: search_codebase
+(node:33399) Warning: AI SDK Warning (openai-codex.responses / gpt-5.6-sol): Non-OpenAI reasoning parts are not supported. Skipping reasoning part: {"type":"reasoning","text":"**Inspecting repository status and capabilities**"}.
+(node:33399) Warning: AI SDK Warning (openai-codex.responses / gpt-5.6-sol): Non-OpenAI reasoning parts are not supported. Skipping reasoning part: {"type":"reasoning","text":"**Planning targeted code inspection**"}.
+(node:33399) Warning: AI SDK Warning (openai-codex.responses / gpt-5.6-sol): Non-OpenAI reasoning parts are not supported. Skipping reasoning part: {"type":"reasoning","text":"**Planning desktop control file inspection**"}.
+(node:33399) Warning: AI SDK Warning (openai-codex.responses / gpt-5.6-sol): Non-OpenAI reasoning parts are not supported. Skipping reasoning part: {"type":"reasoning","text":"**Planning detailed code inspection**"}.
+(node:33399) Warning: AI SDK Warning (openai-codex.responses / gpt-5.6-sol): Non-OpenAI reasoning parts are not supported. Skipping reasoning part: {"type":"reasoning","text":"**Investigating missing Turkish localization candidates**"}.
+(node:33399) Warning: AI SDK Warning (openai-codex.responses / gpt-5.6-sol): Non-OpenAI reasoning parts are not supported. Skipping reasoning part: {"type":"reasoning","text":"**Analyzing localized Notes alias mismatch****Inspecting system app metadata and aliases**"}.
+(node:33399) Warning: AI SDK Warning (openai-codex.responses / gpt-5.6-sol): Non-OpenAI reasoning parts are not supported. Skipping reasoning part: {"type":"reasoning","text":"**Diagnosing localization resource issue**"}.
+(node:33399) Warning: AI SDK Warning (openai-codex.responses / gpt-5.6-sol): Non-OpenAI reasoning parts are not supported. Skipping reasoning part: {"type":"reasoning","text":"**Investigating localization alias mismatch****Planning generic localization resource scanning****Designing recursive application alias extraction****Enhancing localized bundle alias gathering**"}.
+KRALI_STAGE sdk_tools_running • Uygulama kontrolü (desktop.app) için araç çalışıyor: run_commands
+KRALI_STAGE sdk_tool_completed • Uygulama kontrolü (desktop.app) araç adımı tamamlandı: run_commands
+KRALI_STAGE sdk_failed • ClineCore agent hatası: 1 tool call(s) failed: [run_commands] {"error":"Tool was not executed -- NOT a tool or system failure. Clarify with user before proceeding."}

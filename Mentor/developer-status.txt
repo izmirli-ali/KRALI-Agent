@@ -1,1 +1,1 @@
-sdk_tool_completed|Uygulama kontrolü (desktop.app) araç adımı tamamlandı: run_commands|krali-dev-agent/20260920-212954|/Users/medusa/Developer/KRALI-Agent-Dev-20260920-212954|@meta|app=0.8.49|at=1789929076|run=20260920-212954
+sdk_failed|ClineCore agent hatası: 1 tool call(s) failed: [run_commands] {"error":"Tool was not executed -- NOT a tool or system failure. Clarify with user before proceeding."}|krali-dev-agent/20260920-212954|/Users/medusa/Developer/KRALI-Agent-Dev-20260920-212954|@meta|app=0.8.49|at=1789929123|run=20260920-212954
