@@ -1018,19 +1018,19 @@ actor AgentLocalIntelligence {
 
             let prompt = """
             Nihai kullanıcı hedefi:
-            (goal)
+            \(goal)
 
             Step:
-            (title)
+            \(title)
 
             Amaç:
-            (purpose)
+            \(purpose)
 
             Operation:
-            (operation)
+            \(operation)
 
             Önceki adımlardan gelen kanıt:
-            (evidence.isEmpty ? "Yok" : evidence)
+            \(evidence.isEmpty ? "Yok" : evidence)
 
             Bu step'in yalnızca çıktı verisini üret.
             """
