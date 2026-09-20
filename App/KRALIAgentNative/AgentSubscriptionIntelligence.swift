@@ -19,7 +19,8 @@ actor AgentSubscriptionIntelligence {
         draft: String,
         verification: AgentVerificationResult,
         capabilities: [AgentCapability],
-        researchEvidence: [WebSourceEvidence]
+        researchEvidence: [WebSourceEvidence],
+        contextMemory: [AgentContextMemoryEntry]
     ) async -> SubscriptionIntelligenceResult? {
         failureReason = nil
 
@@ -51,6 +52,13 @@ actor AgentSubscriptionIntelligence {
             .map(\.name)
             .joined(separator: ", ")
 
+        let memoryText = contextMemory
+            .prefix(4)
+            .map {
+                "[\($0.kind.rawValue)] \($0.title): \($0.summary)"
+            }
+            .joined(separator: "\n\n")
+
         let evidenceText = researchEvidence
             .prefix(8)
             .enumerated()
@@ -81,6 +89,8 @@ actor AgentSubscriptionIntelligence {
         - Sosyal medya hesabı araştırmasında doğrulanabilen profil kimliği, içerik türleri ve sonuca dair belirsizlikleri ayrı belirt.
         - Cevabın sonunda kullandığın kaynakları kısa bir "Kaynaklar" bölümünde [1], [2] biçiminde göster.
         - Kullanıcının hedefini doğrudan cevapla; iç çalışma planını anlatma.
+        - Kullanıcı "bu hesap", "bu marka", "az önceki analiz", "bunlardan" gibi referanslar kullanıyorsa yalnızca verilen önceki ilgili bağlamla çöz; bağlamda olmayan şeyi uydurma.
+        - Yeni araştırma kanıtı yoksa fakat ilgili önceki bağlam varsa, gereksiz yeniden araştırma yapmadan o bağlam üzerinden devam edebilirsin.
         """
 
         let prompt = """
