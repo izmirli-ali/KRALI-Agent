@@ -127,6 +127,9 @@ struct AgentTrainingLab {
             namedTopicMemoryIsolationResult()
         )
         results.append(
+            newBrandIntroductionIsolationResult()
+        )
+        results.append(
             staleGoalVerifierIsolationResult()
         )
 
@@ -241,6 +244,90 @@ struct AgentTrainingLab {
             selectedCapabilities: [
                 "context.local",
                 "core.reasoning"
+            ],
+            unavailableCapabilities: [],
+            diagnostics: diagnostics
+        )
+    }
+
+    private func newBrandIntroductionIsolationResult()
+        -> TrainingScenarioResult {
+        let store = AgentContextMemoryStore()
+
+        let estafizResearch = AgentContextMemoryEntry(
+            kind: .research,
+            title: "estafizsym instagram sayfasını incele",
+            summary:
+                "Estafiz Reformer ve Klinik Pilates marka araştırması.",
+            userInput:
+                "estafizsym instagram sayfasını incele ve detaylı rapor sun",
+            goal: "markayı araştır"
+        )
+
+        let estafizTask = AgentContextMemoryEntry(
+            kind: .task,
+            title: "Estafiz için Reels çalışması",
+            summary:
+                "Estafiz'e özel sosyal medya video çalışma planı.",
+            userInput:
+                "Estafiz için sosyal medya videosu hazırla",
+            goal: "içerik üret"
+        )
+
+        let query =
+            "dönerci ahmet adında bir markamız var. Bu marka hakkında bir sosyal medya tasarımı hazırlamak istiyorum."
+
+        let selected = store.relevant(
+            to: query,
+            from: [
+                estafizTask,
+                estafizResearch
+            ],
+            limit: 4
+        )
+
+        let decision = brain.analyze(
+            query,
+            context: context(
+                relevantMemoryCount: 2,
+                lastMemoryGoal:
+                    "Estafiz için sosyal medya içeriği üret"
+            )
+        )
+
+        var diagnostics: [String] = []
+
+        if !selected.isEmpty {
+            diagnostics.append(
+                "Açıkça yeni marka tanıtıldığı halde eski Estafiz task/research hafızası geri çağrıldı."
+            )
+        }
+
+        if decision.goal ==
+            "Önceki görev bağlamını kullanarak devam et" {
+            diagnostics.append(
+                "Yeni marka isteği eski görev continuation'ı olarak yorumlandı."
+            )
+        }
+
+        return TrainingScenarioResult(
+            scenarioID:
+                "new-brand-introduction-isolation",
+            title:
+                "Yeni markayı eski marka bağlamından ayırma",
+            tier: .core,
+            prompt: query,
+            passed: diagnostics.isEmpty,
+            goal:
+                "Yeni markayı bağımsız hedef olarak ele al",
+            route: [
+                "Core",
+                "Goal",
+                "Context"
+            ],
+            selectedCapabilities: [
+                "core.reasoning",
+                "context.local"
             ],
             unavailableCapabilities: [],
             diagnostics: diagnostics
