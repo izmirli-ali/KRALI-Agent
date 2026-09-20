@@ -97,11 +97,18 @@ actor AgentDesktopControl {
             }
         }
 
+        if candidate.bundleIdentifier ==
+            "com.apple.finder" {
+            _ = NSWorkspace.shared.open(
+                fileManager.homeDirectoryForCurrentUser
+            )
+        }
+
         let activated =
             await focusCandidate(
                 candidate,
-                maxAttempts: 12,
-                delayMilliseconds: 300
+                maxAttempts: 14,
+                delayMilliseconds: 180
             )
 
         var after =
@@ -316,10 +323,29 @@ actor AgentDesktopControl {
 
         cachedApplicationCandidates = nil
 
+        let refreshed =
+            installedApplicationCandidates()
+
+        if let candidate =
+            bestApplicationCandidate(
+                from: userText,
+                candidates: refreshed
+            ) {
+            return candidate
+        }
+
+        let expanded =
+            mergeCandidates(
+                refreshed +
+                nestedApplicationCandidates()
+            )
+
+        cachedApplicationCandidates =
+            expanded
+
         return bestApplicationCandidate(
             from: userText,
-            candidates:
-                installedApplicationCandidates()
+            candidates: expanded
         )
     }
 
@@ -548,6 +574,124 @@ actor AgentDesktopControl {
         return results
     }
 
+    private func nestedApplicationCandidates()
+        -> [ApplicationCandidate] {
+        let roots = [
+            URL(fileURLWithPath: "/Applications"),
+            fileManager.homeDirectoryForCurrentUser
+                .appendingPathComponent(
+                    "Applications",
+                    isDirectory: true
+                )
+        ]
+
+        var results: [ApplicationCandidate] = []
+
+        for root in roots {
+            guard let enumerator =
+                fileManager.enumerator(
+                    at: root,
+                    includingPropertiesForKeys: nil,
+                    options: [
+                        .skipsHiddenFiles,
+                        .skipsPackageDescendants
+                    ]
+                )
+            else {
+                continue
+            }
+
+            for case let url as URL in enumerator {
+                guard
+                    url.pathExtension
+                        .lowercased() == "app"
+                else {
+                    continue
+                }
+
+                let bundle = Bundle(url: url)
+                let baseName =
+                    url.deletingPathExtension()
+                        .lastPathComponent
+                let localizedName =
+                    bundle?
+                        .localizedInfoDictionary?[
+                            "CFBundleDisplayName"
+                        ] as? String ??
+                    bundle?
+                        .localizedInfoDictionary?[
+                            "CFBundleName"
+                        ] as? String ??
+                    baseName
+                let bundleID =
+                    bundle?.bundleIdentifier
+                let finderDisplayName =
+                    fileManager.displayName(
+                        atPath: url.path
+                    )
+                let aliases = Array(
+                    Set(
+                        [
+                            baseName,
+                            localizedName,
+                            finderDisplayName
+                        ] +
+                        localizedBundleAliases(
+                            bundle
+                        )
+                    )
+                )
+                .filter {
+                    !$0.trimmingCharacters(
+                        in: .whitespacesAndNewlines
+                    ).isEmpty
+                }
+
+                results.append(
+                    ApplicationCandidate(
+                        name:
+                            finderDisplayName.isEmpty
+                                ? localizedName
+                                : finderDisplayName,
+                        aliases: aliases,
+                        bundleIdentifier:
+                            bundleID,
+                        url: url
+                    )
+                )
+            }
+        }
+
+        return mergeCandidates(
+            results
+        )
+    }
+
+    private func mergeCandidates(
+        _ candidates: [ApplicationCandidate]
+    ) -> [ApplicationCandidate] {
+        var seen = Set<String>()
+        var merged: [ApplicationCandidate] = []
+
+        for candidate in candidates {
+            let key =
+                (
+                    candidate.bundleIdentifier ??
+                    candidate.url.path
+                )
+                .lowercased()
+
+            guard !seen.contains(key) else {
+                continue
+            }
+
+            seen.insert(key)
+            merged.append(candidate)
+        }
+
+        return merged
+    }
+
     private func localizedBundleAliases(
         _ bundle: Bundle?
     ) -> [String] {
@@ -722,6 +866,12 @@ actor AgentDesktopControl {
         }
 
         for window in windows.prefix(4) {
+            _ = AXUIElementSetAttributeValue(
+                window,
+                kAXMinimizedAttribute as CFString,
+                kCFBooleanFalse
+            )
+
             _ = AXUIElementPerformAction(
                 window,
                 kAXRaiseAction as CFString
