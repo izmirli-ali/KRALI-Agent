@@ -146,21 +146,85 @@ actor AgentLocalIntelligence {
                     in: .whitespacesAndNewlines
                 )
 
-                guard let json = extractJSONObject(from: raw),
-                      let data = json.data(using: .utf8),
-                      let mission = try? JSONDecoder().decode(
+                let knownIDs = Set(capabilities.map(\.id))
+
+                let decodedMission: AgentSemanticMission?
+                if let json = extractJSONObject(from: raw),
+                   let data = json.data(using: .utf8) {
+                    decodedMission = try? JSONDecoder().decode(
                         AgentSemanticMission.self,
                         from: data
-                      ) else {
-                    return nil
+                    )
+                } else {
+                    decodedMission = nil
                 }
 
-                let knownIDs = Set(capabilities.map(\.id))
-                guard validateMission(
-                    mission,
-                    knownCapabilityIDs: knownIDs
-                ) else {
-                    return nil
+                let mission: AgentSemanticMission
+                if let decodedMission {
+                    let repaired = repairMission(
+                        decodedMission,
+                        userInput: userInput,
+                        capabilities: capabilities
+                    )
+
+                    guard validateMission(
+                        repaired,
+                        knownCapabilityIDs: knownIDs
+                    ) else {
+                        return nil
+                    }
+
+                    mission = repaired
+                } else {
+                    let seed = AgentSemanticMission(
+                        objective: userInput,
+                        outcomes: [],
+                        steps: [
+                            AgentSemanticMissionStep(
+                                title: "Hedefi çöz",
+                                purpose:
+                                    "Yerel model yapılandırılmış mission üretemedi; capability contract güvenli fallback oluşturuyor.",
+                                capabilityID: "core.reasoning",
+                                operation: "semantic.fallback",
+                                dependsOn: []
+                            )
+                        ],
+                        requiredCapabilityIDs: [
+                            "core.reasoning",
+                            "context.local"
+                        ],
+                        requiresUserInput: false,
+                        userInputReason: nil,
+                        confidence: 0.35
+                    )
+
+                    let repaired = repairMission(
+                        seed,
+                        userInput: userInput,
+                        capabilities: capabilities
+                    )
+
+                    let nonCore = Set(
+                        repaired.requiredCapabilityIDs
+                    )
+                    .subtracting(
+                        Set([
+                            "core.reasoning",
+                            "context.local"
+                        ])
+                    )
+
+                    guard !nonCore.isEmpty,
+                          validateMission(
+                            repaired,
+                            knownCapabilityIDs: knownIDs
+                          ),
+                          isOperationallyComplete(repaired)
+                    else {
+                        return nil
+                    }
+
+                    mission = repaired
                 }
 
                 let encoder = JSONEncoder()
@@ -431,6 +495,27 @@ actor AgentLocalIntelligence {
         if webTask {
             outcomes.insert("research")
             requiredIDs.insert("browser.control")
+
+            let explicitLocalFileTask =
+                containsMissionConcept(
+                    corpus,
+                    [
+                        "masaustu", "masaüstü", "dosya",
+                        "klasor", "klasör", "finder",
+                        "yerel dosya", "local file"
+                    ]
+                )
+
+            if !explicitLocalFileTask &&
+               !videoEditTask &&
+               !organizeTask {
+                requiredIDs.remove("files.search")
+                requiredIDs.remove("files.metadata")
+                requiredIDs.remove("files.reveal")
+                requiredIDs.remove("perception.media")
+                outcomes.remove("locate")
+                outcomes.remove("assessContent")
+            }
         }
 
         if mailTask {
@@ -464,7 +549,8 @@ actor AgentLocalIntelligence {
             let dependencies = Array(
                 Set(
                     step.dependsOn.filter {
-                        $0 >= 0 && $0 < index
+                        $0 >= 0 &&
+                        $0 < repairedSteps.count
                     }
                 )
             )
