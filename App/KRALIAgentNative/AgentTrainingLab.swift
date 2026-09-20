@@ -300,6 +300,11 @@ struct AgentTrainingLab {
             lastTarget: .video,
             lastGoal: "Son videoları bul"
         )
+        let rememberedResearch = context(
+            relevantMemoryCount: 1,
+            lastMemoryGoal:
+                "güncel kaynaklarla araştır → sonucu ve gerekçeyi açıkla"
+        )
 
         return [
             TrainingScenario(
@@ -392,6 +397,21 @@ struct AgentTrainingLab {
                 minimumResearchConceptGroups: 2,
                 minimumMandatoryResearchConceptGroups: 1,
                 minimumDirectResearchCandidates: 1
+            ),
+            TrainingScenario(
+                id: "context-memory-followup",
+                title: "Önceki araştırmadan devam etme",
+                tier: .core,
+                prompt: "bu hesap için az önce söylediklerinden 3 reels fikri çıkar",
+                context: rememberedResearch,
+                requiredOutcomes: [.ideate],
+                requiredCapabilities: ["core.reasoning", "context.local"],
+                forbiddenCapabilities: ["research.web", "files.search"],
+                requiredRouteStages: ["Context"],
+                requiredStepTitles: ["Bağımsız fikir üret"],
+                requiredLearningCapabilities: [],
+                minimumResearchConceptGroups: 0,
+                minimumMandatoryResearchConceptGroups: 0
             ),
             TrainingScenario(
                 id: "local-file-search",
@@ -587,7 +607,9 @@ struct AgentTrainingLab {
         previousFileResultCount: Int = 0,
         previousFolderResultCount: Int = 0,
         lastTarget: AgentTargetKind? = nil,
-        lastGoal: String? = nil
+        lastGoal: String? = nil,
+        relevantMemoryCount: Int = 0,
+        lastMemoryGoal: String? = nil
     ) -> AgentContextSnapshot {
         AgentContextSnapshot(
             hasWorkspace: hasWorkspace,
@@ -605,8 +627,8 @@ struct AgentTrainingLab {
             previousFolderResultCount: previousFolderResultCount,
             lastTarget: lastTarget,
             lastGoal: lastGoal,
-            relevantMemoryCount: 0,
-            lastMemoryGoal: nil
+            relevantMemoryCount: relevantMemoryCount,
+            lastMemoryGoal: lastMemoryGoal
         )
     }
 
