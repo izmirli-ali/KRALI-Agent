@@ -1,1 +1,1 @@
-failed|Cline görevi başarısız oldu|krali-dev-agent/20260920-134920|/Users/medusa/Developer/KRALI-Agent-Dev-20260920-134920
+failed|Cline görevi başarısız oldu; Mentor developer-log-tail.txt ayrıntısını incele|krali-dev-agent/20260920-141107|/Users/medusa/Developer/KRALI-Agent-Dev-20260920-141107

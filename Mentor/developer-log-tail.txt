@@ -1,17 +1,3 @@
-{"ts":"2026-09-19T23:52:57.615Z","type":"agent_event","event":{"type":"content_start","contentType":"text","text":".\n\n"}}
-{"ts":"2026-09-19T23:52:57.615Z","type":"agent_event","event":{"type":"content_start","contentType":"text","text":"###"}}
-{"ts":"2026-09-19T23:52:57.659Z","type":"agent_event","event":{"type":"content_start","contentType":"text","text":" Work"}}
-{"ts":"2026-09-19T23:52:57.660Z","type":"agent_event","event":{"type":"content_start","contentType":"text","text":"tree"}}
-{"ts":"2026-09-19T23:52:57.675Z","type":"agent_event","event":{"type":"content_start","contentType":"text","text":" dur"}}
-{"ts":"2026-09-19T23:52:57.692Z","type":"agent_event","event":{"type":"content_start","contentType":"text","text":"umu"}}
-{"ts":"2026-09-19T23:52:57.714Z","type":"agent_event","event":{"type":"content_start","contentType":"text","text":"\n\n"}}
-{"ts":"2026-09-19T23:52:57.734Z","type":"agent_event","event":{"type":"content_start","contentType":"text","text":"-"}}
-{"ts":"2026-09-19T23:52:57.753Z","type":"agent_event","event":{"type":"content_start","contentType":"text","text":" Tak"}}
-{"ts":"2026-09-19T23:52:57.787Z","type":"agent_event","event":{"type":"content_start","contentType":"text","text":"ip"}}
-{"ts":"2026-09-19T23:52:57.787Z","type":"agent_event","event":{"type":"content_start","contentType":"text","text":" edilen"}}
-{"ts":"2026-09-19T23:52:57.794Z","type":"agent_event","event":{"type":"content_start","contentType":"text","text":" dos"}}
-{"ts":"2026-09-19T23:52:57.812Z","type":"agent_event","event":{"type":"content_start","contentType":"text","text":"yal"}}
-{"ts":"2026-09-19T23:52:57.826Z","type":"agent_event","event":{"type":"content_start","contentType":"text","text":"arda"}}
 {"ts":"2026-09-19T23:52:57.846Z","type":"agent_event","event":{"type":"content_start","contentType":"text","text":" değiş"}}
 {"ts":"2026-09-19T23:52:57.862Z","type":"agent_event","event":{"type":"content_start","contentType":"text","text":"iklik"}}
 {"ts":"2026-09-19T23:52:57.878Z","type":"agent_event","event":{"type":"content_start","contentType":"text","text":" yok"}}
@@ -117,4 +103,18 @@ Already up to date.
 Preparing worktree (new branch 'krali-dev-agent/20260920-134920')
 branch 'krali-dev-agent/20260920-134920' set up to track 'origin/main'.
 HEAD is now at a47e6e8 Set app marketing version to 0.8.15
+❌ Cline görevi başarısız oldu.
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+ KRALİ DEVELOPER AGENT
+ 20260920-141107
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+Cline version: 
+Cline doctor:
+From https://github.com/izmirli-ali/KRALI-Agent
+ * branch            main       -> FETCH_HEAD
+Already up to date.
+Preparing worktree (new branch 'krali-dev-agent/20260920-141107')
+branch 'krali-dev-agent/20260920-141107' set up to track 'origin/main'.
+HEAD is now at 84887f3 Set app marketing version to 0.8.17
 ❌ Cline görevi başarısız oldu.
