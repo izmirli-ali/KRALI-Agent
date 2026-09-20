@@ -1,12 +1,3 @@
-This would output the capabilities that match the criteria specified in the `select` function.
-
-### Notes
-- The `select` function appends capability IDs based on the decision intent and the content of the input text.
-- The `resolve` function converts these IDs into actual `AgentCapability` objects.
-- The `normalize` and `containsAny` functions are utility functions to help with text processing.
-
-If you have any specific questions or need further clarification on any part of the code, feel free to ask!
-KRALI_LOCAL_STAGE local_agent_completion_rejected • Tarayıcı kontrolü (browser.control) tamamlanma reddedildi • aktif capability gap için gerçek candidate değişikliği yok • deneme=1/4
 KRALI_LOCAL_STAGE local_agent_running • Tarayıcı kontrolü (browser.control) yerel model çalışıyor • adım 4/36
 KRALI_LOCAL_STAGE local_agent_tool • Tarayıcı kontrolü (browser.control) araç çalışıyor: search_codebase
 KRALI_LOCAL_STAGE local_agent_running • Tarayıcı kontrolü (browser.control) yerel model çalışıyor • adım 5/36
@@ -118,3 +109,12 @@ KRALI_LOCAL_STAGE local_agent_completion_rejected • Uygulama kontrolü (deskto
 Uygulama kontrolü (desktop.app) yerel model açıklama ile erken tamamlanmaya devam etti: aktif capability gap için gerçek candidate değişikliği yok
 🧩 Developer Agent hata verdi ancak candidate değişiklik üretti; recovery başlatılıyor.
 ❌ Native yerel Developer Agent durdu: Uygulama kontrolü (desktop.app) yerel model açıklama ile erken tamamlanmaya devam etti: aktif capability gap için gerçek candidate değişikliği yok
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+ KRALİ DEVELOPER AGENT
+ 20260920-233414
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+⚠️ Global Node.js v26 Cline bağımlılıklarıyla uyumlu değil; izole Node 22 runtime hazırlanıyor.
+✅ Developer Agent runtime: v22.23.2
+Yerel model seçimi: qwen2.5-coder:14b-instruct • RAM≈24GB
+Yerel tool-call probe: qwen2.5-coder:14b-instruct

@@ -1,1 +1,1 @@
-local_agent_completion_gate_failed|Uygulama kontrolü (desktop.app) yerel model açıklama ile erken tamamlanmaya devam etti: aktif capability gap için gerçek candidate değişikliği yok|krali-dev-agent/20260920-225833|/Users/medusa/Developer/KRALI-Agent-Dev-20260920-225833|@meta|app=0.8.53|at=1789934926|run=20260920-225833
+local_tool_probe|Yerel model tool calling doğrulanıyor: qwen2.5-coder:14b-instruct|@meta|app=0.8.54|at=1789936455|run=20260920-233414

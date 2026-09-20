@@ -1,99 +1,103 @@
 {
   "activityTail" : [
     {
-      "date" : "2026-09-20T19:46:00Z",
+      "date" : "2026-09-20T20:34:14Z",
       "text" : "Runtime Capability Gap: desktop.app • Provider available olmasına rağmen runtime step tamamlanamadı veya postcondition doğrulanamadı: desktop.app • app.open"
     },
     {
-      "date" : "2026-09-20T19:46:00Z",
+      "date" : "2026-09-20T20:34:14Z",
       "text" : "Debug/Recovery: Doğrulama uyuşmazlığı • Hata ayıklanıyor • desktop.app"
     },
     {
-      "date" : "2026-09-20T19:46:00Z",
+      "date" : "2026-09-20T20:34:14Z",
       "text" : "Desktop runtime: Safari • foreground=false • source=unverified"
     },
     {
-      "date" : "2026-09-20T19:45:31Z",
+      "date" : "2026-09-20T20:34:01Z",
       "text" : "Semantic rota: Core → Goal → Context → Plan → Browser → Desktop → Learn → Verify → Response"
     },
     {
-      "date" : "2026-09-20T19:45:31Z",
+      "date" : "2026-09-20T20:34:01Z",
       "text" : "Capability Gap: browser.control • integration • strategy=yok"
     },
     {
-      "date" : "2026-09-20T19:45:31Z",
+      "date" : "2026-09-20T20:34:01Z",
       "text" : "Task Graph blocked capability: browser.control"
     },
     {
-      "date" : "2026-09-20T19:45:31Z",
+      "date" : "2026-09-20T20:34:01Z",
       "text" : "Task Graph: 0:context.local[reason] → 1:desktop.app[act] → 2:browser.control[act]"
     },
     {
-      "date" : "2026-09-20T19:45:31Z",
+      "date" : "2026-09-20T20:34:01Z",
       "text" : "Semantic capability planı: browser.control, context.local, core.reasoning, desktop.app"
     },
     {
-      "date" : "2026-09-20T19:45:31Z",
+      "date" : "2026-09-20T20:34:01Z",
       "text" : "Semantic planner sağlayıcısı: Apple Foundation Models"
     },
     {
-      "date" : "2026-09-20T19:45:31Z",
-      "text" : "Semantic Mission: Safari’yi aç. example.com adresine git ve sayfadaki ana başlığı bana söyle. Başka hiçbir işlem yapma"
+      "date" : "2026-09-20T20:34:01Z",
+      "text" : "Semantic Mission: Safari’yi aç. example.com adresine git ve sayfadaki ana başlığı bana söyle. Başka hiçbir işlem yapma."
     },
     {
-      "date" : "2026-09-20T19:45:31Z",
+      "date" : "2026-09-20T20:34:01Z",
       "text" : "Yetkinlik öğrenme planı: Tarayıcı kontrolü → Entegrasyon gerekli"
     },
     {
-      "date" : "2026-09-20T19:45:31Z",
+      "date" : "2026-09-20T20:34:01Z",
       "text" : "Seçilen kabiliyetler: Akıl yürütme, Bağlam, Uygulama kontrolü, Tarayıcı kontrolü [bekliyor]"
     },
     {
-      "date" : "2026-09-20T19:45:31Z",
+      "date" : "2026-09-20T20:34:01Z",
       "text" : "Otomatik rota: Core → Goal → Context → Plan → Desktop → Browser → Learn → Verify → Response"
     },
     {
-      "date" : "2026-09-20T19:45:31Z",
+      "date" : "2026-09-20T20:34:01Z",
       "text" : "Seçilen plan: Uygulama adını çöz, uygulamayı aç veya öne getir ve sonucu doğrula"
     },
     {
-      "date" : "2026-09-20T19:45:31Z",
+      "date" : "2026-09-20T20:34:01Z",
       "text" : "KRALİ Core hedef sözleşmesi: istenen uygulamayı aç veya öne getir"
     },
     {
-      "date" : "2026-09-20T19:45:31Z",
+      "date" : "2026-09-20T20:34:01Z",
       "text" : "Bağlam hafızası: Çalışma kuralı • Çalışma kuralı"
     },
     {
-      "date" : "2026-09-20T19:45:02Z",
+      "date" : "2026-09-20T20:33:54Z",
+      "text" : "Developer candidate recovery: Recovery öncesi gerçek kaynak candidate bulunamadı"
+    },
+    {
+      "date" : "2026-09-20T20:33:54Z",
       "text" : "Apple yerel zeka hazır"
     },
     {
-      "date" : "2026-09-20T19:45:02Z",
+      "date" : "2026-09-20T20:33:54Z",
       "text" : "Çalışma klasörü geri yüklendi: Desktop"
     },
     {
-      "date" : "2026-09-20T19:45:02Z",
+      "date" : "2026-09-20T20:33:54Z",
       "text" : "2 ekran görüntüsü adayı bulundu"
     },
     {
-      "date" : "2026-09-20T19:45:02Z",
+      "date" : "2026-09-20T20:33:54Z",
       "text" : "1768 dosya ve 68 klasör indekslendi"
     },
     {
-      "date" : "2026-09-20T19:45:02Z",
+      "date" : "2026-09-20T20:33:54Z",
       "text" : "Ağır geliştirici testleri normal açılışta otomatik çalıştırılmıyor"
     },
     {
-      "date" : "2026-09-20T19:45:02Z",
+      "date" : "2026-09-20T20:33:54Z",
       "text" : "Dinamik hedef ve kabiliyet yönlendirme aktif"
     },
     {
-      "date" : "2026-09-20T19:45:02Z",
+      "date" : "2026-09-20T20:33:54Z",
       "text" : "KRALİ Core hazır"
     }
   ],
-  "appVersion" : "0.8.53",
+  "appVersion" : "0.8.54",
   "capabilities" : [
     {
       "available" : true,
@@ -127,7 +131,7 @@
       ],
       "capabilityID" : "browser.control",
       "capabilityName" : "Tarayıcı kontrolü",
-      "developerBrief" : "KRALİ Capability Gap Developer Brief\n\nKullanıcı hedefi:\nSafari’yi aç. example.com adresine git ve sayfadaki ana başlığı bana söyle. Başka hiçbir işlem yapma\n\nEksik capability:\nbrowser.control — Tarayıcı kontrolü\n\nGap türü:\nintegration\n\nBlocked step:\n2: Web hedefini tarayıcıda yürüt\nOperation: browser.navigate.observe\nRole: act\n\nMevcut strategy adayları:\nYok\n\nTasarım kuralları:\n- Uygulama/marka adına hard-code yazma; mümkün olduğunca generic capability veya strategy geliştir.\n- Mevcut provider başka bir işi yapılmış gibi göstermesin.\n- Dış dünyaya commit eden eylemlerde kullanıcı onay kapısı korunmalı.\n- Başarı gerçek observation/verification ile kanıtlanmalı.\n- Ana branch üzerinde doğrudan self-modification yapma; candidate branch/worktree kullan.\n- Build + Training Lab + ilgili runtime probe geçmeden capability available yapılmamalı.\n\nKabul kriteri:\nBlocked step gerçek provider/strategy ile tamamlanmalı, evidence downstream step'e aktarılmalı ve verifier sahte PASS üretmemeli.",
+      "developerBrief" : "KRALİ Capability Gap Developer Brief\n\nKullanıcı hedefi:\nSafari’yi aç. example.com adresine git ve sayfadaki ana başlığı bana söyle. Başka hiçbir işlem yapma.\n\nEksik capability:\nbrowser.control — Tarayıcı kontrolü\n\nGap türü:\nintegration\n\nBlocked step:\n2: Web hedefini tarayıcıda yürüt\nOperation: browser.navigate.observe\nRole: act\n\nMevcut strategy adayları:\nYok\n\nTasarım kuralları:\n- Uygulama/marka adına hard-code yazma; mümkün olduğunca generic capability veya strategy geliştir.\n- Mevcut provider başka bir işi yapılmış gibi göstermesin.\n- Dış dünyaya commit eden eylemlerde kullanıcı onay kapısı korunmalı.\n- Başarı gerçek observation/verification ile kanıtlanmalı.\n- Ana branch üzerinde doğrudan self-modification yapma; candidate branch/worktree kullan.\n- Build + Training Lab + ilgili runtime probe geçmeden capability available yapılmamalı.\n\nKabul kriteri:\nBlocked step gerçek provider/strategy ile tamamlanmalı, evidence downstream step'e aktarılmalı ve verifier sahte PASS üretmemeli.",
       "kind" : "integration",
       "reason" : "Task Graph step 'Web hedefini tarayıcıda yürüt' için browser.control gerekiyor ancak provider available değil.",
       "researchGoal" : "Tarayıcı kontrolü için resmi API/entegrasyon veya generic UI bridge seçeneklerini araştır; izin, güvenlik ve doğrulama sınırlarını çıkar."
@@ -138,7 +142,7 @@
       ],
       "capabilityID" : "desktop.app",
       "capabilityName" : "Uygulama kontrolü",
-      "developerBrief" : "KRALİ Runtime Capability Failure Developer Brief\n\nKullanıcı hedefi:\nSafari’yi aç. example.com adresine git ve sayfadaki ana başlığı bana söyle. Başka hiçbir işlem yapma\n\nRuntime'da başarısız capability:\ndesktop.app — Uygulama kontrolü\n\nStep:\n1: Kaynak uygulamayı aç veya öne getir\nOperation: app.open\nRole: act\n\nMevcut strategy adayları:\nYok\n\nSorun:\nProvider available olmasına rağmen runtime step tamamlanamadı veya postcondition doğrulanamadı: desktop.app • app.open\n\nTasarım kuralları:\n- Capability zaten available ise önce mevcut provider'ı ve postcondition verifier'ı debug et.\n- Uygulama/marka adına hard-code yazma; hatayı genel resolver/provider/strategy seviyesinde çöz.\n- Başarı gerçek observation/verification ile kanıtlanmadan PASS üretme.\n- Dış dünyaya commit eden eylemlerde kullanıcı onayı korunmalı.\n- Candidate branch/worktree kullan; ana branch'i doğrudan değiştirme.\n- Build + regression + mümkünse runtime probe geçmeden düzeltmeyi available/healthy sayma.\n\nKabul kriteri:\nAynı sınıftaki bilinmeyen hedeflerde de provider doğru hedefi çözebilmeli; başarısız runtime step tamamlanmalı ve verifier gerçek evidence ile PASS verebilmeli.",
+      "developerBrief" : "KRALİ Runtime Capability Failure Developer Brief\n\nKullanıcı hedefi:\nSafari’yi aç. example.com adresine git ve sayfadaki ana başlığı bana söyle. Başka hiçbir işlem yapma.\n\nRuntime'da başarısız capability:\ndesktop.app — Uygulama kontrolü\n\nStep:\n1: Kaynak uygulamayı aç veya öne getir\nOperation: app.open\nRole: act\n\nMevcut strategy adayları:\nYok\n\nSorun:\nProvider available olmasına rağmen runtime step tamamlanamadı veya postcondition doğrulanamadı: desktop.app • app.open\n\nTasarım kuralları:\n- Capability zaten available ise önce mevcut provider'ı ve postcondition verifier'ı debug et.\n- Uygulama/marka adına hard-code yazma; hatayı genel resolver/provider/strategy seviyesinde çöz.\n- Başarı gerçek observation/verification ile kanıtlanmadan PASS üretme.\n- Dış dünyaya commit eden eylemlerde kullanıcı onayı korunmalı.\n- Candidate branch/worktree kullan; ana branch'i doğrudan değiştirme.\n- Build + regression + mümkünse runtime probe geçmeden düzeltmeyi available/healthy sayma.\n\nKabul kriteri:\nAynı sınıftaki bilinmeyen hedeflerde de provider doğru hedefi çözebilmeli; başarısız runtime step tamamlanmalı ve verifier gerçek evidence ile PASS verebilmeli.",
       "kind" : "strategy",
       "reason" : "Provider available olmasına rağmen runtime step tamamlanamadı veya postcondition doğrulanamadı: desktop.app • app.open",
       "researchGoal" : "Mevcut Uygulama kontrolü provider'ının neden runtime'da başarısız olduğunu kanıtla; önce mevcut provider/strategy'yi debug et, gerekirse generic recovery veya yeni provider stratejisi geliştir ve aynı postcondition'ı gerçek observation ile doğrula."
@@ -158,7 +162,7 @@
       "title" : "Çalışma kuralı"
     }
   ],
-  "createdAt" : "2026-09-20T19:46:00Z",
+  "createdAt" : "2026-09-20T20:34:14Z",
   "executionSteps" : [
     {
       "capabilityID" : "context.local",
@@ -197,7 +201,7 @@
   ],
   "fallbackPlan" : "Tamamlanmayan action step'ini yeniden planla; yürütülmeyen işi başarılı sayma.",
   "finalResponse" : "Görev tamamlanamadı. Eksik kabiliyet: Tarayıcı kontrolü.\n\nDoğrulama: Semantic mission içindeki zorunlu action step'lerinden bazıları tamamlanmadı: browser.control, desktop.app\nAlternatif plan: Tamamlanmayan action step'ini yeniden planla; yürütülmeyen işi başarılı sayma.\nYetkinlik kazanma planı: Resmi API/entegrasyonu araştır → gereken hesap/izinleri çıkar → bağlantıyı sandbox/test ortamında doğrula → kullanıcı onayından sonra etkinleştir.",
-  "goal" : "Safari’yi aç. example.com adresine git ve sayfadaki ana başlığı bana söyle. Başka hiçbir işlem yapma",
+  "goal" : "Safari’yi aç. example.com adresine git ve sayfadaki ana başlığı bana söyle. Başka hiçbir işlem yapma.",
   "inputSource" : "text",
   "learningPlans" : [
     {
@@ -228,7 +232,7 @@
   ],
   "semanticMission" : {
     "confidence" : 0.88,
-    "objective" : "Safari’yi aç. example.com adresine git ve sayfadaki ana başlığı bana söyle. Başka hiçbir işlem yapma",
+    "objective" : "Safari’yi aç. example.com adresine git ve sayfadaki ana başlığı bana söyle. Başka hiçbir işlem yapma.",
     "outcomes" : [
       "explain",
       "open",
@@ -313,8 +317,8 @@
       "title" : "Web hedefini tarayıcıda yürüt"
     }
   ],
-  "traceID" : "8EFD3691-9320-493B-8A49-638FDEE51E5B",
-  "userInput" : "Safari’yi aç. example.com adresine git ve sayfadaki ana başlığı bana söyle. Başka hiçbir işlem yapma",
+  "traceID" : "66BCDDC7-5ED0-4A2D-92F5-1D52B0912AE0",
+  "userInput" : "Safari’yi aç. example.com adresine git ve sayfadaki ana başlığı bana söyle. Başka hiçbir işlem yapma.",
   "verificationState" : "attention",
   "verificationSummary" : "Semantic mission içindeki zorunlu action step'lerinden bazıları tamamlanmadı: browser.control, desktop.app"
 }
