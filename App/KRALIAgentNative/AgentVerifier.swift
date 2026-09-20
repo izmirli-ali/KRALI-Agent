@@ -9,6 +9,7 @@ struct AgentVerificationSnapshot {
     let unavailableCapabilityIDs: Set<String>
     let selectedCapabilityIDs: Set<String>
     let executedCapabilityIDs: Set<String>
+    let incompleteRequiredActionCapabilityIDs: Set<String>
     let webResearchResultCount: Int
     let webResearchEvidenceCount: Int
     let webResearchUniqueDomainCount: Int
@@ -63,6 +64,17 @@ struct AgentVerifier {
                 executableRequired.subtracting(
                     snapshot.executedCapabilityIDs
                 )
+
+            if !snapshot.incompleteRequiredActionCapabilityIDs.isEmpty {
+                return attention(
+                    "Semantic mission içindeki zorunlu action step'lerinden bazıları tamamlanmadı: " +
+                    snapshot.incompleteRequiredActionCapabilityIDs
+                        .sorted()
+                        .joined(separator: ", "),
+                    fallback:
+                        "Tamamlanmayan action step'ini yeniden planla; yürütülmeyen işi başarılı sayma."
+                )
+            }
 
             if !missingExecuted.isEmpty {
                 return attention(
