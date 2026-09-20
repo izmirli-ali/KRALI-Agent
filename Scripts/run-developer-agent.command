@@ -559,7 +559,13 @@ if [ "$USE_SDK_FALLBACK" -eq 1 ]; then
         KRALI_PROMPT_FILE="$PROMPT_FILE" \
         KRALI_CLINE_SETTINGS="$CLINE_SETTINGS" \
         KRALI_DEV_MODEL="$MODEL" \
-        "$NODE_BIN" "$ROOT/Scripts/cline-sdk-fallback.mjs" >"$CLINE_RUN_LOG" 2>&1
+        KRALI_STATUS_FILE="$STATUS" \
+        KRALI_BRANCH="$BRANCH" \
+        KRALI_GAP_LABEL="$GAP_LABEL" \
+        KRALI_SDK_TIMEOUT_MS="480000" \
+        "$NODE_BIN" "$ROOT/Scripts/cline-sdk-fallback.mjs" \
+            > >(tee "$CLINE_RUN_LOG" >>"$LOG") \
+            2> >(tee -a "$CLINE_RUN_LOG" >>"$LOG" >&2)
         CLINE_EXIT=$?
     else
         printf '%s\n' "KRALI SDK fallback kurulamadı." >"$CLINE_RUN_LOG"
