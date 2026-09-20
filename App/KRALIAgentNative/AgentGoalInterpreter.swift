@@ -7,6 +7,7 @@ enum AgentGoalOutcome: String, Hashable {
     case assessContent
     case analyze
     case ideate
+    case compose
     case transform
     case explain
     case organize
@@ -210,6 +211,22 @@ struct AgentGoalInterpreter {
             "proofread", "rewrite"
         ])
 
+        let asksStructuredContentCreation = containsAny(text, [
+            "çekim planı hazırla", "cekim plani hazirla",
+            "çekim planı oluştur", "cekim plani olustur",
+            "senaryo hazırla", "senaryo hazirla",
+            "senaryo oluştur", "senaryo olustur",
+            "senaryo yaz",
+            "reels senaryosu",
+            "içerik planı hazırla", "icerik plani hazirla",
+            "metin hazırla", "metin hazirla",
+            "caption yaz", "açıklama yaz", "aciklama yaz"
+        ])
+
+        if asksStructuredContentCreation {
+            outcomes.insert(.compose)
+        }
+
         if isContextualTransformation || asksTextRewrite {
             outcomes.insert(.transform)
         }
@@ -260,7 +277,7 @@ struct AgentGoalInterpreter {
         }
 
         let isCompound =
-            outcomes.subtracting([.converse, .explain, .ideate, .transform]).count > 1 ||
+            outcomes.subtracting([.converse, .explain, .ideate, .compose, .transform]).count > 1 ||
             decision.intent == .compoundFileTask
 
         return AgentGoalProfile(
@@ -308,6 +325,9 @@ struct AgentGoalInterpreter {
         }
         if outcomes.contains(.ideate) {
             parts.append("bağımsız fikir ve çıkarım üret")
+        }
+        if outcomes.contains(.compose) {
+            parts.append("istenen içeriği oluştur")
         }
         if outcomes.contains(.transform) {
             parts.append("verilen veya önceki çıktıyı istenen formata dönüştür")
