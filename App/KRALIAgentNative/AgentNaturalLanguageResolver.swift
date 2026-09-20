@@ -306,39 +306,69 @@ struct AgentNaturalLanguageResolver: Sendable {
         input raw: String,
         aliases: [String]
     ) -> Double {
+        let normalizedInput =
+            normalized(raw)
         let targets = targetTokens(raw)
 
         guard !targets.isEmpty else {
             return 0
         }
 
-        let aliasVariants =
+        let normalizedAliases =
             aliases
-                .flatMap {
-                    let normalizedAlias =
-                        normalized($0)
+                .map(normalized)
+                .filter {
+                    !$0.isEmpty
+                }
+                .uniqued()
 
-                    return
-                        [normalizedAlias] +
-                        normalizedAlias
-                            .split(separator: " ")
-                            .flatMap {
-                                wordVariants(
-                                    String($0)
-                                )
-                            }
+        for alias in normalizedAliases {
+            if normalizedInput == alias {
+                return 1.0
+            }
+        }
+
+        var best =
+            normalizedAliases
+                .map {
+                    similarity(
+                        normalizedInput,
+                        $0
+                    )
+                }
+                .max() ?? 0
+
+        let aliasVariants =
+            normalizedAliases
+                .flatMap {
+                    [$0] +
+                    $0.split(separator: " ")
+                        .flatMap {
+                            wordVariants(
+                                String($0)
+                            )
+                        }
                 }
                 .filter {
                     !$0.isEmpty
                 }
                 .uniqued()
 
-        var best = 0.0
+        let multiTokenInput =
+            normalizedInput
+                .split(separator: " ")
+                .count > 1
 
         for target in targets {
             for alias in aliasVariants {
                 if target == alias {
-                    return 1.0
+                    best = max(
+                        best,
+                        multiTokenInput
+                            ? 0.88
+                            : 1.0
+                    )
+                    continue
                 }
 
                 if target.count >= 4,
@@ -347,7 +377,12 @@ struct AgentNaturalLanguageResolver: Sendable {
                     target.contains(alias) ||
                     alias.contains(target)
                    ) {
-                    best = max(best, 0.94)
+                    best = max(
+                        best,
+                        multiTokenInput
+                            ? 0.86
+                            : 0.94
+                    )
                     continue
                 }
 
