@@ -76,6 +76,10 @@ struct DeveloperAgentStatus: Hashable {
             "local_tool_probe",
             "local_model_fallback",
             "local_ai_ready",
+            "local_agent_starting",
+            "local_agent_running",
+            "local_agent_tool",
+            "local_agent_completed",
             "sdk_fallback_preparing",
             "sdk_fallback_running",
             "sdk_importing",
@@ -104,6 +108,10 @@ struct DeveloperAgentStatus: Hashable {
             "local_ai_failed",
             "local_model_failed",
             "local_tool_probe_failed",
+            "local_storage_low",
+            "local_agent_failed",
+            "local_agent_tool_protocol_failed",
+            "local_agent_iteration_limit",
             "sdk_tool_protocol_failed",
             "no_change_unverified",
             "sdk_provider_failed",
@@ -145,6 +153,14 @@ struct DeveloperAgentStatus: Hashable {
             return "Alternatif yerel model deneniyor"
         case "local_ai_ready":
             return "Ücretsiz yerel AI hazır"
+        case "local_agent_starting":
+            return "Native yerel agent başlatılıyor"
+        case "local_agent_running":
+            return "Native yerel agent çalışıyor"
+        case "local_agent_tool":
+            return "Yerel agent araç kullanıyor"
+        case "local_agent_completed":
+            return "Yerel agent turu tamamlandı"
         case "setup_local_ai":
             return "Yerel AI kurulumu gerekli"
         case "local_ai_failed":
@@ -153,6 +169,14 @@ struct DeveloperAgentStatus: Hashable {
             return "Yerel model indirilemedi"
         case "local_tool_probe_failed":
             return "Yerel model tool-call testi başarısız"
+        case "local_storage_low":
+            return "Yerel model için disk alanı yetersiz"
+        case "local_agent_failed":
+            return "Native yerel agent durdu"
+        case "local_agent_tool_protocol_failed":
+            return "Native tool-call protokolü başarısız"
+        case "local_agent_iteration_limit":
+            return "Native yerel agent adım sınırına ulaştı"
         case "sdk_tool_protocol_failed":
             return "Yerel model araç protokolü başarısız"
         case "no_change_unverified":
@@ -288,6 +312,10 @@ struct DeveloperAgentStatus: Hashable {
              "local_tool_probe",
              "local_model_fallback",
              "local_ai_ready",
+             "local_agent_starting",
+             "local_agent_running",
+             "local_agent_tool",
+             "local_agent_completed",
              "sdk_fallback_preparing",
              "sdk_importing",
              "sdk_import_ready",
