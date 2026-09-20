@@ -15,30 +15,16 @@ struct AgentMissionNormalizer {
         )
 
         let appOpen =
-            containsAny(
-                corpus,
-                [
-                    "uygulamasini ac",
-                    "uygulamayi ac",
-                    "uygulamasını aç",
-                    "uygulamayı aç",
-                    "uygulamasini one getir",
-                    "uygulamasını öne getir",
-                    "uygulamaya gec",
-                    "uygulamaya geç"
-                ]
-            ) ||
-            (
-                corpus.contains("uygulama") &&
-                containsAny(
-                    corpus,
-                    [
-                        " ac", " aç",
-                        "one getir",
-                        "öne getir"
-                    ]
+            languageResolver
+                .hasApplicationOpenIntent(
+                    userInput
                 )
-            )
+
+        let browserWorkflow =
+            languageResolver
+                .requestsBrowserWorkflow(
+                    userInput
+                )
 
         let appContentRead =
             appOpen &&
@@ -209,13 +195,10 @@ struct AgentMissionNormalizer {
                 corpus,
                 [
                     "premiere",
-                    "photoshop",
-                    "tarayici",
-                    "tarayıcı",
-                    "web sitesi",
-                    "siteye gir"
+                    "photoshop"
                 ]
-            )
+            ) ||
+            browserWorkflow
 
         let genericAppWorkflow =
             appOpen &&
@@ -245,7 +228,9 @@ struct AgentMissionNormalizer {
                     "randevu",
                     "mesaj",
                     "sarki",
-                    "şarkı"
+                    "şarkı",
+                    "bolumune git",
+                    "bölümüne git"
                 ]
             )
 
@@ -259,7 +244,8 @@ struct AgentMissionNormalizer {
             mailRead,
             mailDraft,
             mailSend,
-            genericAppWorkflow
+            genericAppWorkflow,
+            browserWorkflow
         ]
         .filter { $0 }
         .count
@@ -329,6 +315,26 @@ struct AgentMissionNormalizer {
             }
 
             outcomes.insert("open")
+        }
+
+        if browserWorkflow {
+            append(
+                title: "Web hedefini tarayıcıda yürüt",
+                purpose:
+                    "Kullanıcının verdiği web hedefini gerçek tarayıcı oturumunda aç, gerekli görünür bilgiyi oku ve yeni sekme/form/gönderim gibi dış değişiklikleri kullanıcı onayı olmadan uygulama. Provider yoksa capability gap üret ve öğrenme hattına geçir.",
+                capabilityID: "browser.control",
+                operation: "browser.navigate.observe",
+                dependsOn:
+                    latestDataStep.map { [$0] } ?? []
+            )
+
+            if !steps.isEmpty {
+                latestDataStep =
+                    steps.count - 1
+            }
+
+            outcomes.insert("research")
+            outcomes.insert("explain")
         }
 
         if mailRead {
