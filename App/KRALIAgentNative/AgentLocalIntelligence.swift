@@ -55,7 +55,8 @@ actor AgentLocalIntelligence {
         draft: String,
         verification: AgentVerificationResult,
         capabilities: [AgentCapability],
-        researchEvidence: [WebSourceEvidence]
+        researchEvidence: [WebSourceEvidence],
+        contextMemory: [AgentContextMemoryEntry]
     ) async -> String? {
         #if canImport(FoundationModels)
         if #available(macOS 26.0, *) {
@@ -69,14 +70,21 @@ actor AgentLocalIntelligence {
                 .map(\.name)
                 .joined(separator: ", ")
 
+            let memoryText = contextMemory
+                .prefix(4)
+                .map {
+                    "[\($0.kind.rawValue)] \($0.title): \($0.summary)"
+                }
+                .joined(separator: "\n")
+
             let evidenceText = researchEvidence
                 .prefix(6)
                 .enumerated()
                 .map { index, evidence in
                     """
-                    [(index + 1)] (evidence.source.title)
-                    Kaynak: (evidence.source.domain)
-                    Kanıt: (String(evidence.excerpt.prefix(1200)))
+                    [\(index + 1)] \(evidence.source.title)
+                    Kaynak: \(evidence.source.domain)
+                    Kanıt: \(String(evidence.excerpt.prefix(1200)))
                     """
                 }
                 .joined(separator: "\n\n")
@@ -98,23 +106,27 @@ actor AgentLocalIntelligence {
 
             let prompt = """
             Kullanıcı isteği:
-            (userInput)
+            \(userInput)
 
             Hedef sözleşmesi:
-            (goal)
+            \(goal)
+
+            Önceki ilgili bağlam:
+            \(memoryText.isEmpty ? "İlgili önceki bağlam yok." : memoryText)
 
             Executor taslağı:
-            (draft)
+            \(draft)
 
             Verifier:
-            (verification.state.rawValue) — (verification.summary)
+            \(verification.state.rawValue) — \(verification.summary)
 
             Kullanılamayan capability'ler:
-            (unavailableCapabilities.isEmpty ? "Yok" : unavailableCapabilities)
+            \(unavailableCapabilities.isEmpty ? "Yok" : unavailableCapabilities)
 
             Araştırma kanıtları:
-            (evidenceText.isEmpty ? "Bu turda web kanıtı yok." : evidenceText)
+            \(evidenceText.isEmpty ? "Bu turda web kanıtı yok." : evidenceText)
 
+            Önceki bağlamı yalnızca gerçekten ilgiliyse kullan. Kullanıcının 'bu hesap', 'az önceki analiz', 'bunlardan' gibi referanslarını ilgili bağlamla çöz.
             Yukarıdaki bilgiye dayanarak kullanıcıya verilecek nihai cevabı üret.
             """
 
