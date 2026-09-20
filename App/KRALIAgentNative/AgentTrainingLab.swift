@@ -1630,6 +1630,25 @@ actor AgentArena {
                     "open"
                 ],
                 shouldNotRequireUserInput: true
+            ),
+            AgentArenaScenario(
+                id: "generic-screen-observation",
+                title: "Genel ekran gözlemi",
+                prompt:
+                    "Ekrana bak ve şu anda hangi uygulamanın önde olduğunu, ekranda genel olarak ne gördüğünü söyle.",
+                requiredCapabilities: [
+                    "perception.screen"
+                ],
+                forbiddenCapabilities: [
+                    "premiere.control",
+                    "photoshop.control",
+                    "research.web"
+                ],
+                requiredOutcomes: [
+                    "analyze",
+                    "explain"
+                ],
+                shouldNotRequireUserInput: true
             )        ]
     }
 }
