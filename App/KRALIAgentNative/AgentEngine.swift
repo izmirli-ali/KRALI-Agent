@@ -3823,7 +3823,87 @@ final class AgentEngine: ObservableObject {
 
         indexSelectedFolder()
 
-        var results = indexedFolders
+        let text =
+            normalize(rawText)
+
+        let directNamedMatches =
+            indexedFolders.filter { folder in
+                let name =
+                    normalize(folder.name)
+                let path =
+                    normalize(
+                        folder.relativePath
+                    )
+
+                guard name.count >= 2 else {
+                    return false
+                }
+
+                return
+                    text.contains(name) ||
+                    (
+                        !path.isEmpty &&
+                        text.contains(path)
+                    )
+            }
+
+        var results: [FolderRecord]
+
+        if !directNamedMatches.isEmpty {
+            results =
+                directNamedMatches
+        } else {
+            let queryTokens =
+                folderQueryTokens(
+                    from: text
+                )
+
+            if queryTokens.isEmpty {
+                results = indexedFolders
+            } else {
+                let scored =
+                    indexedFolders.compactMap {
+                        folder
+                        -> (
+                            FolderRecord,
+                            Int
+                        )? in
+
+                        let corpus =
+                            normalize(
+                                folder.name +
+                                " " +
+                                folder.relativePath
+                            )
+
+                        let score =
+                            queryTokens.filter {
+                                corpus.contains($0)
+                            }
+                            .count
+
+                        return score > 0
+                            ? (folder, score)
+                            : nil
+                    }
+
+                let bestScore =
+                    scored.map {
+                        $0.1
+                    }
+                    .max() ?? 0
+
+                results =
+                    scored
+                        .filter {
+                            $0.1 ==
+                                bestScore
+                        }
+                        .map {
+                            $0.0
+                        }
+            }
+        }
 
         if let range = decision.dateRange {
             results = results.filter { folder in
@@ -4014,6 +4094,35 @@ final class AgentEngine: ObservableObject {
         guard let date else { return false }
         let components = Calendar.current.dateComponents([.day, .month], from: date)
         return components.day == day && components.month == month
+    }
+
+    private func folderQueryTokens(
+        from text: String
+    ) -> [String] {
+        let stopWords = Set([
+            "bana", "su", "bu", "bir",
+            "klasor", "klasoru",
+            "klasorune", "klasorunde",
+            "folder", "masaustundeki",
+            "masaustu", "desktop",
+            "bul", "ara", "goster",
+            "ac", "kaydet", "yaz",
+            "dosya", "txt", "metin",
+            "olarak", "analiz", "ile",
+            "birlikte", "ekle", "icin",
+            "uygulama", "uygulamasini"
+        ])
+
+        return text
+            .split(whereSeparator: {
+                $0.isWhitespace ||
+                $0.isPunctuation
+            })
+            .map(String.init)
+            .filter {
+                $0.count >= 2 &&
+                !stopWords.contains($0)
+            }
     }
 
     private func fileNameQuery(from text: String) -> String {
