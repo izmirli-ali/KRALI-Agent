@@ -1,111 +1,127 @@
 {
   "activityTail" : [
     {
-      "date" : "2026-09-20T10:09:02Z",
+      "date" : "2026-09-20T10:18:45Z",
       "text" : "Seçilen kabiliyetler: Akıl yürütme, Bağlam"
     },
     {
-      "date" : "2026-09-20T10:09:02Z",
+      "date" : "2026-09-20T10:18:45Z",
       "text" : "Otomatik rota: Core → Goal → Context → Response"
     },
     {
-      "date" : "2026-09-20T10:09:02Z",
-      "text" : "Seçilen plan: İlgili önceki görev bağlamını geri çağır; yeni isteği ona bağla ve gerekmedikçe aynı araştırmayı baştan yapma"
-    },
-    {
-      "date" : "2026-09-20T10:09:02Z",
-      "text" : "KRALİ Core hedef sözleşmesi: Önceki görev bağlamını kullanarak devam et"
-    },
-    {
-      "date" : "2026-09-20T10:09:02Z",
-      "text" : "Bağlam hafızası: Çalışma kuralı • Çalışma kuralı • Tamam. Şimdi bunu 45 saniyelik daha enerjik bir videoya çevirelim. Ma… • estafizsym instagram sayfasını incele ve bana detaylı bir rapor sun"
-    },
-    {
-      "date" : "2026-09-20T10:08:38Z",
-      "text" : "Mentor trace yerel olarak kaydedildi"
-    },
-    {
-      "date" : "2026-09-20T10:08:38Z",
-      "text" : "Yerel zeka sentezi uygulandı"
-    },
-    {
-      "date" : "2026-09-20T10:08:34Z",
-      "text" : "Semantic rota: Core → Goal → Context → Response"
-    },
-    {
-      "date" : "2026-09-20T10:08:34Z",
-      "text" : "Semantic capability planı: core.reasoning"
-    },
-    {
-      "date" : "2026-09-20T10:08:34Z",
-      "text" : "Semantic Mission: Son çekimle ilgili bir kurgu oluşturmak için gerekli araştırma ve içerik düzenleme süreci"
-    },
-    {
-      "date" : "2026-09-20T10:08:21Z",
-      "text" : "Yetkinlik öğrenme planı: Premiere kontrolü → Entegrasyon gerekli"
-    },
-    {
-      "date" : "2026-09-20T10:08:21Z",
-      "text" : "Seçilen kabiliyetler: Akıl yürütme, Bağlam, Premiere kontrolü [bekliyor]"
-    },
-    {
-      "date" : "2026-09-20T10:08:21Z",
-      "text" : "Otomatik rota: Core → Goal → Context → Plan → Premiere → Learn → Verify → Response"
-    },
-    {
-      "date" : "2026-09-20T10:08:21Z",
+      "date" : "2026-09-20T10:18:45Z",
       "text" : "Seçilen plan: Bağlamı incele; doğrudan araç eşleşmesi yoksa güvenli alternatifler üret"
     },
     {
-      "date" : "2026-09-20T10:08:21Z",
-      "text" : "KRALİ Core hedef sözleşmesi: uygulamada işle"
+      "date" : "2026-09-20T10:18:45Z",
+      "text" : "KRALİ Core hedef sözleşmesi: Kullanıcının hedefini anlamlandır ve uygulanabilir bir sonraki adımı seç"
     },
     {
-      "date" : "2026-09-20T10:08:18Z",
+      "date" : "2026-09-20T10:18:45Z",
+      "text" : "Bağlam hafızası: Çalışma kuralı • Çalışma kuralı"
+    },
+    {
+      "date" : "2026-09-20T10:18:26Z",
+      "text" : "Mentor trace yerel olarak kaydedildi"
+    },
+    {
+      "date" : "2026-09-20T10:18:26Z",
+      "text" : "Yerel zeka sentezi uygulandı"
+    },
+    {
+      "date" : "2026-09-20T10:18:14Z",
+      "text" : "Yetkinlik araştırması kaynak buldu: Görsel / video algısı"
+    },
+    {
+      "date" : "2026-09-20T10:18:12Z",
+      "text" : "Yetkinlik araştırması başladı: Görsel / video algısı"
+    },
+    {
+      "date" : "2026-09-20T10:18:12Z",
+      "text" : "Web Research tamamlandı: 4 kaynak, 4 kaynak okundu"
+    },
+    {
+      "date" : "2026-09-20T10:18:07Z",
+      "text" : "Web Research başladı"
+    },
+    {
+      "date" : "2026-09-20T10:18:07Z",
+      "text" : "Semantic rota: Core → Goal → Context → Plan → Research → Perception → Learn → Verify → Response"
+    },
+    {
+      "date" : "2026-09-20T10:18:07Z",
+      "text" : "Semantic capability planı: research.web, perception.media, core.reasoning"
+    },
+    {
+      "date" : "2026-09-20T10:18:07Z",
+      "text" : "Semantic Mission: Son çekimle ilgili bir kurgu oluşturmak için gerekli araştırma ve içerik düzenleme sürecini başlatmak, mevcut bilgiyle medya analizi ve içerik senteziyle desteklenmek."
+    },
+    {
+      "date" : "2026-09-20T10:17:49Z",
       "text" : "Live Research Eval tamamlandı: 2/2"
     },
     {
-      "date" : "2026-09-20T10:08:08Z",
+      "date" : "2026-09-20T10:17:45Z",
+      "text" : "Yetkinlik öğrenme planı: Premiere kontrolü → Entegrasyon gerekli"
+    },
+    {
+      "date" : "2026-09-20T10:17:45Z",
+      "text" : "Seçilen kabiliyetler: Akıl yürütme, Bağlam, Premiere kontrolü [bekliyor]"
+    },
+    {
+      "date" : "2026-09-20T10:17:45Z",
+      "text" : "Otomatik rota: Core → Goal → Context → Plan → Premiere → Learn → Verify → Response"
+    },
+    {
+      "date" : "2026-09-20T10:17:45Z",
+      "text" : "Seçilen plan: Bağlamı incele; doğrudan araç eşleşmesi yoksa güvenli alternatifler üret"
+    },
+    {
+      "date" : "2026-09-20T10:17:45Z",
+      "text" : "KRALİ Core hedef sözleşmesi: uygulamada işle"
+    },
+    {
+      "date" : "2026-09-20T10:17:45Z",
+      "text" : "Bağlam hafızası: Son çekimle ilgili bir kurgu yapmamız gerekiyor."
+    },
+    {
+      "date" : "2026-09-20T10:17:36Z",
       "text" : "Live Research Eval başladı"
     },
     {
-      "date" : "2026-09-20T10:08:06Z",
-      "text" : "Training Lab FAIL [stale-goal-verifier-isolation]: Verifier eski dosya hedefini reddetmeli • Verifier stale fileSearch hedefini mevcut memory komutundan ayıramadı."
+      "date" : "2026-09-20T10:17:35Z",
+      "text" : "Training Lab tamamlandı: 30/30"
     },
     {
-      "date" : "2026-09-20T10:08:06Z",
-      "text" : "Training Lab tamamlandı: 28/29"
-    },
-    {
-      "date" : "2026-09-20T10:08:06Z",
+      "date" : "2026-09-20T10:17:35Z",
       "text" : "Training Lab başladı"
     },
     {
-      "date" : "2026-09-20T10:08:06Z",
+      "date" : "2026-09-20T10:17:34Z",
       "text" : "Apple yerel zeka hazır"
     },
     {
-      "date" : "2026-09-20T10:08:06Z",
+      "date" : "2026-09-20T10:17:34Z",
       "text" : "Çalışma klasörü geri yüklendi: Desktop"
     },
     {
-      "date" : "2026-09-20T10:08:06Z",
+      "date" : "2026-09-20T10:17:34Z",
       "text" : "6 ekran görüntüsü adayı bulundu"
     },
     {
-      "date" : "2026-09-20T10:08:06Z",
+      "date" : "2026-09-20T10:17:34Z",
       "text" : "1772 dosya ve 68 klasör indekslendi"
     },
     {
-      "date" : "2026-09-20T10:08:06Z",
+      "date" : "2026-09-20T10:17:34Z",
       "text" : "Dinamik hedef ve kabiliyet yönlendirme aktif"
     },
     {
-      "date" : "2026-09-20T10:08:06Z",
+      "date" : "2026-09-20T10:17:34Z",
       "text" : "KRALİ Core hazır"
     }
   ],
-  "appVersion" : "0.8.11",
+  "appVersion" : "0.8.12",
   "capabilities" : [
     {
       "available" : true,
@@ -132,25 +148,13 @@
       "kind" : "userRule",
       "summary" : "Estafiz'e özel marka detaylarını başka markalara otomatik uygulama",
       "title" : "Çalışma kuralı"
-    },
-    {
-      "createdAt" : "2026-09-20T09:30:44Z",
-      "kind" : "task",
-      "summary" : "**Hedef:** “Aynı hareket, üç farklı beden” serisini 45 saniyelik, enerjik bir Reels çekim senaryosuna dönüştür. **Neden bu fikir işe yarar:** - Hareket sabit kalırken, direnç, açı ve hareket aralığının kişiye göre değiştiği somutlaşır. - İzleyicinin “bu hareketi ben yapabilir miyim?” sorusuna yanıt verir. - Hesabı yalnızca hareket gösteren bir sayfa değil, kişiye özel yaklaşım sunan bir merkez olarak konumlandırır. - Seri formatına uygun yapı, içerik tekrarlarına imkân tanır. **Çekim Senaryosu (45 saniye – Enerjik ve Hızlı):** 1. **0-10 saniye – Başlangıç seviyesi:** Reformer üzerinde hafif bir esneme hareketi yapılır. Temel form gösterilir; hızlı geçişle farklı açıya geçiş yapılır. 2. **11-25 saniye – Masa başında çalışan:** Aynı hareket, dizler hafif açık, vücut ağırlığı öne kaymış şekilde uygulanır. Direnç açısı dar tutulur; hareket yoğun ama kontrollü. 3. **26-40 saniye – Düzenli egzersiz yapan:** Hareket daha kontrollü, açı daha geniş, direnç daha dengeli şekilde uygulanır; tempo artar. 4. **41-45 saniye – Kapanış mesajı:** Eğitmen ekranda belirir: “Hareket aynı görünebilir; direnç, açı ve hareket aralığı kişiye göre değişir. Sen hangi seviyeden başlardın? Yorumlara 1, 2 veya ",
-      "title" : "Tamam. Şimdi bunu 45 saniyelik daha enerjik bir videoya çevirelim. Ma…"
-    },
-    {
-      "createdAt" : "2026-09-20T01:02:49Z",
-      "kind" : "research",
-      "summary" : "# @estafizsym Instagram Sayfası İnceleme Raporu ## 1. Yönetici özeti Doğrulanan profil: - **Kullanıcı adı:** `@estafizsym` - **Görünen ad:** **Estafiz SYM | Reformer | Klinik Pilates** - **Platform:** Instagram - **Temel faaliyet alanı:** Profil adlandırmasına göre reformer ve klinik pilates hizmetleri cite1 Hesap, görünen adında hem marka ismini hem de temel hizmetlerini açıkça belirtiyor. Bu, Instagram aramalarında ve profil ilk izleniminde kullanıcının faaliyet alanını hızlıca anlamasını sağlayabilecek olumlu bir tercih. Ancak erişilebilen doğrulanmış veri yalnızca profil kimliği ve görünen adla sınırlı. **Biyografi, konum, iletişim bilgileri, gönderiler, Reels içerikleri, takipçi sayısı, paylaşım sıklığı ve etkileşim oranı görüntülenemedi.** Dolayısıyla aşağıdaki çalışma, tam kapsamlı içerik ve performans denetimi değil; doğrulanabilen bilgiler üzerinden hazırlanmış bir **ön değerlendirmedir**. --- ## 2. Profil kimliği ve konumlandırma ### Doğrulanan bilgiler | Alan | Sonuç | |---|---| | Hesap | `@estafizsym` | | Görünen ad | Estafiz SYM \\| Reformer \\| Klinik Pilates | | Sektör | Pilates/egzersiz ve sağlıklı yaşam | | Belirtilen hizmetler | Reformer, klinik pilates | | Hesab",
-      "title" : "estafizsym instagram sayfasını incele ve bana detaylı bir rapor sun"
     }
   ],
-  "createdAt" : "2026-09-20T10:09:16Z",
+  "createdAt" : "2026-09-20T10:18:55Z",
   "executionSteps" : [
     {
       "capabilityID" : "core.reasoning",
-      "detail" : "Hedef sözleşmesi: Önceki görev bağlamını kullanarak devam et. Kısıtları ve mevcut bağlamı anlamlandır.",
+      "detail" : "Hedef sözleşmesi: Kullanıcının hedefini anlamlandır ve uygulanabilir bir sonraki adımı seç. Kısıtları ve mevcut bağlamı anlamlandır.",
       "kind" : "reasoning",
       "state" : "completed",
       "title" : "Hedefi çöz"
@@ -163,20 +167,20 @@
       "title" : "Gerekli yetenekleri tara"
     },
     {
-      "detail" : "İlgili önceki görev bağlamını geri çağır; yeni isteği ona bağla ve gerekmedikçe aynı araştırmayı baştan yapma",
+      "detail" : "Bağlamı incele; doğrudan araç eşleşmesi yoksa güvenli alternatifler üret",
       "kind" : "response",
       "state" : "completed",
       "title" : "Uygulanabilir yolu açıkla"
     }
   ],
-  "fallbackPlan" : "Önceki sonucu genişlet",
-  "finalResponse" : "Hedefi analiz ettim fakat mevcut yerel araçlardan biriyle güvenilir biçimde eşleştiremedim. Şu an en güvenli planım: İlgili önceki görev bağlamını geri çağır; yeni isteği ona bağla ve gerekmedikçe aynı araştırmayı baştan yapma.",
-  "goal" : "Önceki görev bağlamını kullanarak devam et",
+  "fallbackPlan" : "Çalışma alanını incele",
+  "finalResponse" : "Hedefi analiz ettim fakat mevcut yerel araçlardan biriyle güvenilir biçimde eşleştiremedim. Şu an en güvenli planım: Bağlamı incele; doğrudan araç eşleşmesi yoksa güvenli alternatifler üret.",
+  "goal" : "Kullanıcının hedefini anlamlandır ve uygulanabilir bir sonraki adımı seç",
   "inputSource" : "text",
   "learningPlans" : [
 
   ],
-  "plan" : "İlgili önceki görev bağlamını geri çağır; yeni isteği ona bağla ve gerekmedikçe aynı araştırmayı baştan yapma",
+  "plan" : "Bağlamı incele; doğrudan araç eşleşmesi yoksa güvenli alternatifler üret",
   "researchEvidence" : [
 
   ],
@@ -189,8 +193,8 @@
     "Context",
     "Response"
   ],
-  "traceID" : "A88EEB43-FE14-4CC9-939E-4D8C3AA19F1B",
-  "userInput" : "dönerci ahmet adında bir markamız var. Bu marka hakkında bir sosyal medya tasarımı hazırlamak istiyorum.",
+  "traceID" : "B6C7C87C-CF31-4ED4-8252-9767AC8D6539",
+  "userInput" : "tavukçu veli adında bir markamız var. Bu marka hakkında bir sosyal medya tasarımı hazırlamak istiyorum.",
   "verificationState" : "skipped",
   "verificationSummary" : "Bu turda doğrulanacak gerçek araç işlemi yok."
 }

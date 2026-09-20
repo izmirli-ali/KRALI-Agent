@@ -1,12 +1,12 @@
 {
-  "appVersion" : "0.8.11",
-  "corePassed" : 24,
-  "coreTotal" : 25,
-  "createdAt" : "2026-09-20T10:08:06Z",
-  "failed" : 1,
+  "appVersion" : "0.8.12",
+  "corePassed" : 26,
+  "coreTotal" : 26,
+  "createdAt" : "2026-09-20T10:17:35Z",
+  "failed" : 0,
   "northStarPassed" : 4,
   "northStarTotal" : 4,
-  "passed" : 28,
+  "passed" : 30,
   "results" : [
     {
       "diagnostics" : [
@@ -764,10 +764,33 @@
     },
     {
       "diagnostics" : [
-        "Verifier stale fileSearch hedefini mevcut memory komutundan ayıramadı."
+
+      ],
+      "goal" : "Yeni markayı bağımsız hedef olarak ele al",
+      "passed" : true,
+      "prompt" : "dönerci ahmet adında bir markamız var. Bu marka hakkında bir sosyal medya tasarımı hazırlamak istiyorum.",
+      "route" : [
+        "Core",
+        "Goal",
+        "Context"
+      ],
+      "scenarioID" : "new-brand-introduction-isolation",
+      "selectedCapabilities" : [
+        "core.reasoning",
+        "context.local"
+      ],
+      "tier" : "core",
+      "title" : "Yeni markayı eski marka bağlamından ayırma",
+      "unavailableCapabilities" : [
+
+      ]
+    },
+    {
+      "diagnostics" : [
+
       ],
       "goal" : "Yeni kullanıcı girdisini stale fileSearch goal'ünden ayır",
-      "passed" : false,
+      "passed" : true,
       "prompt" : "Bu yaptığımız çalışma biçimini ileride benzer sosyal medya video işleri için de kullan. Ama Estafiz'e özel marka detaylarını başka markalara otomatik uygulama.",
       "route" : [
         "Core",
@@ -785,5 +808,5 @@
       ]
     }
   ],
-  "total" : 29
+  "total" : 30
 }
