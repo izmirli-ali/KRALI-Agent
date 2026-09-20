@@ -498,6 +498,9 @@ struct AgentTrainingLab {
                     "core.reasoning",
                     "context.local"
                 ],
+                incompleteRequiredActionCapabilityIDs: [
+                    "desktop.app"
+                ],
                 webResearchResultCount: 0,
                 webResearchEvidenceCount: 0,
                 webResearchUniqueDomainCount: 0,
@@ -583,6 +586,7 @@ struct AgentTrainingLab {
                     "files.search",
                     "files.metadata"
                 ],
+                incompleteRequiredActionCapabilityIDs: [],
                 webResearchResultCount: 0,
                 webResearchEvidenceCount: 0,
                 webResearchUniqueDomainCount: 0,
