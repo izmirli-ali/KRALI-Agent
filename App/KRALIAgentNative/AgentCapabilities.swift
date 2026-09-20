@@ -125,7 +125,7 @@ struct AgentCapabilityRegistry {
         AgentCapability(
             id: "desktop.app",
             name: "Uygulama kontrolü",
-            summary: "Yüklü macOS uygulamasını ada göre bulur, açar veya öne getirir ve sonucu Screen Perception ile doğrular.",
+            summary: "Yüklü macOS uygulamasını doğal dilde çözer; açar veya öne getirir. NSWorkspace/Accessibility ile odaklar ve ScreenCaptureKit pencere z-order kanıtıyla görünür foreground durumunu doğrular.",
             risk: .external,
             isAvailable: true,
             requiresWorkspace: false
