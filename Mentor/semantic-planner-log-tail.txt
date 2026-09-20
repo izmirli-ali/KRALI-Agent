@@ -58,3 +58,9 @@ KRALİ Semantic Planner Fallback
 status=9
 input=Bugün yaptığım işleri toparla ve müdürüme göndermek için mail taslağını hazırla.
 output:
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+KRALİ Semantic Planner Fallback
+status=9
+input=Notlar uygulamasını aç ve pencereyi öne getir.
+output:
