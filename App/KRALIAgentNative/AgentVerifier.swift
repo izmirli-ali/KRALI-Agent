@@ -170,6 +170,16 @@ struct AgentVerifier {
                     )
                 }
 
+                if snapshot.unavailableCapabilityIDs.contains(
+                    "browser.control"
+                ) {
+                    return AgentVerificationResult(
+                        state: .partial,
+                        summary: "Hedef web kaynağı çözüldü ancak canlı / etkileşimli içerik doğrulanamadı. Güvenli tarayıcı erişimi gerekiyor ve browser.control henüz bağlı değil.",
+                        fallback: nil
+                    )
+                }
+
                 if snapshot.webResearchResultCount == 1 {
                     return AgentVerificationResult(
                         state: .partial,
