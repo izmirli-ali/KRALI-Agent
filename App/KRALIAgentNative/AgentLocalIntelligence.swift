@@ -197,117 +197,23 @@ actor AgentLocalIntelligence {
                     mission = fallbackMission
                 }
 
-                let encoder = JSONEncoder()
-                encoder.outputFormatting = [.sortedKeys]
-
-                guard
-                    let missionData = try? encoder.encode(mission),
-                    let missionJSON = String(
-                        data: missionData,
-                        encoding: .utf8
-                    )
-                else {
-                    let repaired = repairMission(
-                        mission,
-                        userInput: userInput,
-                        capabilities: capabilities
-                    )
-                    return isOperationallyComplete(repaired)
-                        ? repaired
-                        : nil
-                }
-
-                let reviewPrompt = """
-                İlk mission taslağını şimdi eleştirel olarak denetle.
-
-                Orijinal kullanıcı mesajı:
-                \(userInput)
-
-                İlk mission:
-                \(missionJSON)
-
-                Capability kataloğu:
-                \(capabilityCatalog)
-
-                Denetim kuralları:
-                - Mission kullanıcının nihai hedefini gerçekten uçtan uca tamamlıyor mu?
-                - Kullanıcı bir gerçek dünya/dijital iş istiyorsa yalnızca reasoning/context adımları yeterli değildir.
-                - Dosya bulma gerekiyorsa files.search/files.metadata ekle.
-                - Medyanın içeriğini görmeden karar verilecekse perception.media ekle.
-                - macOS uygulama açma/pencere/klavye/mouse etkileşimi gerekiyorsa desktop.control ekle.
-                - Web arayüzünde gezinme veya oturumlu işlem gerekiyorsa browser.control ekle.
-                - Premiere içinde gerçek kurgu gerekiyorsa premiere.control ekle.
-                - Photoshop içinde gerçek tasarım gerekiyorsa photoshop.control ekle.
-                - Ekrandaki sonucu görsel olarak kontrol etmek gerekiyorsa perception.screen ekle.
-                - Marka/şirket hakkında güncel veya bilinmeyen bilgi gerekiyorsa research.web ekle.
-                - Yerel dosya/kurgu gibi dış bilgi gerektirmeyen görevlerde gereksiz research.web ekleme.
-                - Capability unavailable olsa bile görev gerektiriyorsa mission'a dahil et.
-                - Gereksiz capability ekleme.
-                - Gerekli adımları bağımlılık sırasına koy.
-                - JSON dışında hiçbir şey döndürme.
-
-                Aynı JSON şemasıyla düzeltilmiş mission'ı döndür.
-                """
-
-                do {
-                    let reviewedResponse = try await session.respond(
-                        to: reviewPrompt
-                    )
-                    let reviewedRaw = reviewedResponse.content
-                        .trimmingCharacters(
-                            in: .whitespacesAndNewlines
-                        )
-
-                    let reviewCandidate: AgentSemanticMission
-                    if let reviewedJSON =
-                        extractJSONObject(from: reviewedRaw),
-                       let reviewedData =
-                        reviewedJSON.data(using: .utf8),
-                       let reviewedMission =
-                        try? JSONDecoder().decode(
-                            AgentSemanticMission.self,
-                            from: reviewedData
-                        ),
-                       validateMission(
-                            reviewedMission,
-                            knownCapabilityIDs: knownIDs
-                       ) {
-                        reviewCandidate = reviewedMission
-                    } else {
-                        reviewCandidate = mission
-                    }
-
-                    let repaired = repairMission(
-                        reviewCandidate,
-                        userInput: userInput,
-                        capabilities: capabilities
-                    )
-
-                    if validateMission(
-                        repaired,
-                        knownCapabilityIDs: knownIDs
-                    ) && isOperationallyComplete(repaired) {
-                        return repaired
-                    }
-                } catch {
-                    // Self-review is advisory. A valid repaired mission
-                    // must survive temporary Foundation Models failures.
-                }
-
-                let fallbackRepaired = repairMission(
+                let finalMission = repairMission(
                     mission,
                     userInput: userInput,
                     capabilities: capabilities
                 )
 
                 return validateMission(
-                    fallbackRepaired,
+                    finalMission,
                     knownCapabilityIDs: knownIDs
                 ) && isOperationallyComplete(
-                    fallbackRepaired
+                    finalMission
                 )
-                    ? fallbackRepaired
-                    : nil
+                    ? finalMission
+                    : contractFallbackMission(
+                        userInput: userInput,
+                        capabilities: capabilities
+                    )
             } catch {
                 return contractFallbackMission(
                     userInput: userInput,
