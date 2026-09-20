@@ -2690,6 +2690,8 @@ final class AgentEngine: ObservableObject {
                     currentSemanticPlannerProvider,
                 taskGraph:
                     currentTaskGraph,
+                capabilityGaps:
+                    currentCapabilityGaps,
                 capabilities: capabilities,
                 learningPlans: learningPlans,
                 executionSteps: executionSteps,
