@@ -83,8 +83,8 @@ actor AgentDesktopControl {
             )
 
         if let runningBefore {
-            _ = runningBefore.activate(
-                options: [.activateAllWindows]
+            requestActivation(
+                runningBefore
             )
         } else {
             let launched = try await openApplication(
@@ -385,6 +385,8 @@ actor AgentDesktopControl {
             URL(fileURLWithPath: "/Applications"),
             URL(fileURLWithPath: "/System/Applications"),
             URL(fileURLWithPath: "/System/Applications/Utilities"),
+            URL(fileURLWithPath: "/System/Library/CoreServices"),
+            URL(fileURLWithPath: "/System/Library/CoreServices/Applications"),
             fileManager.homeDirectoryForCurrentUser
                 .appendingPathComponent(
                     "Applications",
@@ -394,6 +396,73 @@ actor AgentDesktopControl {
 
         var results: [ApplicationCandidate] = []
         var seen = Set<String>()
+
+        for app in NSWorkspace.shared.runningApplications {
+            guard
+                app.activationPolicy == .regular,
+                let url = app.bundleURL
+            else {
+                continue
+            }
+
+            let bundle = Bundle(url: url)
+            let baseName =
+                url.deletingPathExtension()
+                    .lastPathComponent
+            let localizedName =
+                app.localizedName ??
+                bundle?
+                    .localizedInfoDictionary?[
+                        "CFBundleDisplayName"
+                    ] as? String ??
+                bundle?
+                    .localizedInfoDictionary?[
+                        "CFBundleName"
+                    ] as? String ??
+                baseName
+            let bundleID =
+                app.bundleIdentifier ??
+                bundle?.bundleIdentifier
+            let key =
+                (bundleID ?? url.path)
+                    .lowercased()
+
+            guard !seen.contains(key) else {
+                continue
+            }
+
+            seen.insert(key)
+
+            let aliases = Array(
+                Set(
+                    [
+                        baseName,
+                        localizedName,
+                        fileManager.displayName(
+                            atPath: url.path
+                        )
+                    ] +
+                    localizedBundleAliases(
+                        bundle
+                    )
+                )
+            )
+            .filter {
+                !$0.trimmingCharacters(
+                    in: .whitespacesAndNewlines
+                ).isEmpty
+            }
+
+            results.append(
+                ApplicationCandidate(
+                    name: localizedName,
+                    aliases: aliases,
+                    bundleIdentifier:
+                        bundleID,
+                    url: url
+                )
+            )
+        }
 
         for root in roots {
             guard let entries = try? fileManager
@@ -582,8 +651,8 @@ actor AgentDesktopControl {
                     preferredBundleIdentifier:
                         candidate.bundleIdentifier
                 ) {
-                _ = running.activate(
-                    options: [.activateAllWindows]
+                requestActivation(
+                    running
                 )
             }
 
@@ -595,6 +664,69 @@ actor AgentDesktopControl {
         }
 
         return false
+    }
+
+    private func requestActivation(
+        _ app: NSRunningApplication
+    ) {
+        if app.isHidden {
+            _ = app.unhide()
+        }
+
+        if #available(macOS 14.0, *) {
+            NSApplication.shared
+                .yieldActivation(to: app)
+        }
+
+        _ = app.activate(
+            options: [.activateAllWindows]
+        )
+
+        if accessibilityTrusted(
+            promptIfNeeded: false
+        ) {
+            raiseAccessibilityWindows(
+                for: app
+            )
+        }
+    }
+
+    private func raiseAccessibilityWindows(
+        for app: NSRunningApplication
+    ) {
+        let applicationElement =
+            AXUIElementCreateApplication(
+                app.processIdentifier
+            )
+
+        _ = AXUIElementSetAttributeValue(
+            applicationElement,
+            kAXFrontmostAttribute as CFString,
+            kCFBooleanTrue
+        )
+
+        var rawWindows: CFTypeRef?
+        let error =
+            AXUIElementCopyAttributeValue(
+                applicationElement,
+                kAXWindowsAttribute as CFString,
+                &rawWindows
+            )
+
+        guard
+            error == .success,
+            let windows =
+                rawWindows as? [AXUIElement]
+        else {
+            return
+        }
+
+        for window in windows.prefix(4) {
+            _ = AXUIElementPerformAction(
+                window,
+                kAXRaiseAction as CFString
+            )
+        }
     }
 
     private func waitForAccessibilityTrust(
