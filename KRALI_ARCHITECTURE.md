@@ -396,3 +396,16 @@ Düzeltme uygulama adı özel-case'i olarak yapılmadı. Mission Contract Repair
 Aynı katmana generic file-open sözleşmesi de eklendi. Kullanıcı bir dosya/PDF/belge/klasörü bulup Finder'da açmayı istediğinde `files.search + files.reveal`, `locate + open` sözleşmesi local fallback tarafından da üretilebilir. Böylece genel bilgisayar görevleri yalnızca Apple planner başarılı olduğunda çalışmak zorunda değildir.
 
 Screen Perception Mentor tanısı artık probe hiç çalıştırılmadığında da sessiz kalmaz. Uygulama açılışında önceki Screen Perception raporu veya status yoksa `not_run|Screen Perception Probe henüz çalıştırılmadı.` durumu kaydedilir. Probe çalışırsa status `running/success/failed` olarak güncellenir. Böylece Mentor paketi rapor yokluğunu izin/capture hatasıyla karıştırmaz.
+
+
+**v0.8.22 runtime Screen Perception + dependency-aware semantic execution:** v0.8.21 Mentor turunda Training Lab 30/30, Live Research Eval 2/2, KRALİ Arena 8/8 ve gerçek Screen Perception Probe başarılı oldu. Probe 1600×1040 ekran karesinden 24 OCR satırı ve 9 görünür pencere çıkardı; bu, ScreenCaptureKit + Vision provider'ın gerçek Mac ortamında çalıştığını doğruladı.
+
+Probe raporunda önemli bir güvenlik/kalite açığı da görüldü: ChatGPT penceresinde görünen metin Screen Perception özetleyicisi tarafından hedef/talimat gibi yorumlanabildi. v0.8.22 ile ekran OCR'ı ve pencere başlıkları açıkça **untrusted visual evidence** olarak sınıflandırılır. Tek gerçek talimat `goal` alanıdır; ekrandaki metin içinde emir, prompt veya yapılacak iş yazsa bile semantic summarizer bunları uygulayamaz, hedef üretemez veya kullanıcı niyetini değiştiremez. Frontmost application bilgisi ayrıca rapora eklenir; boş uygulama isimleri temizlenir.
+
+`perception.screen` capability artık gerçek read-only provider olarak available'dır. Semantic executor Screen Perception step'ini yalnızca mission dependency'leri gerçekten tamamlandıysa çalıştırır. Örneğin Premiere/Photoshop action blocked ise ona bağlı screen-verification step'i çalışmış sayılmaz. Semantic execution artık yalnızca capability ID düzeyinde değil mission step index düzeyinde tamamlanma takibi yapar; aynı capability birden fazla step'te kullanılsa bile başarısız/blocked dependency nedeniyle yanlışlıkla completed işaretlenmez.
+
+Runtime Screen Perception başarılı olduğunda rapor Mentor store'a kaydedilir, semantic summary kullanıcı cevabına ekran gözlemi olarak eklenir ve runtime status yazılır. Capture başarısızsa capability yapılmış gibi gösterilmez; status failure olarak kaydedilir.
+
+Mission Contract Repair'e provider-neutral genel ekran gözlemi sınıfı eklendi: “ekrana bak”, “ekranda ne var”, “ekranı kontrol et”, “görsel olarak kontrol et” benzeri hedefler `perception.screen` ile `analyze + explain` sonucuna yönlenebilir. Arena 8'den 9 senaryoya genişletildi; yeni medya-dışı regression “ekrana bak ve hangi uygulamanın önde olduğunu söyle” görevidir. Böylece ekran algısı Premiere/Photoshop doğrulamasına özel bir capability'ye dönüşemez.
+
+Sonraki ana provider fazı: Accessibility/NSWorkspace tabanlı generic `desktop.control`. Önce Screen Perception runtime turu Mentor ile doğrulanmalı; ardından macOS uygulama açma, pencere odaklama ve AXUIElement tabanlı etkileşim eklenecektir.
