@@ -604,7 +604,9 @@ struct AgentTrainingLab {
             previousFileResultCount: previousFileResultCount,
             previousFolderResultCount: previousFolderResultCount,
             lastTarget: lastTarget,
-            lastGoal: lastGoal
+            lastGoal: lastGoal,
+            relevantMemoryCount: 0,
+            lastMemoryGoal: nil
         )
     }
 
