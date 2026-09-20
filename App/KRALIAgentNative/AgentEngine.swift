@@ -428,9 +428,21 @@ final class AgentEngine: ObservableObject {
                     activeRoute.joined(separator: " → ")
                 )
                 } else {
-                    log(
-                        "Semantic planner geçerli mission üretemedi; deterministic fallback korunuyor"
-                    )
+                    let plannerFailure =
+                        await subscriptionIntelligence
+                            .lastFailureReason()
+
+                    if let plannerFailure,
+                       !plannerFailure.isEmpty {
+                        log(
+                            "Semantic planner geçerli mission üretemedi: " +
+                            plannerFailure
+                        )
+                    } else {
+                        log(
+                            "Semantic planner geçerli mission üretemedi; deterministic fallback korunuyor"
+                        )
+                    }
                 }
             }
 
