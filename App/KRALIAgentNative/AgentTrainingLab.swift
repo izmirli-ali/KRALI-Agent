@@ -414,6 +414,36 @@ struct AgentTrainingLab {
                 minimumMandatoryResearchConceptGroups: 0
             ),
             TrainingScenario(
+                id: "context-memory-transform",
+                title: "Önceki fikri yeni formata dönüştürme",
+                tier: .core,
+                prompt: "şimdi Estafiz'e dön, az önceki Reels fikirlerinden birincisini 30 saniyelik çekim senaryosuna çevir",
+                context: rememberedResearch,
+                requiredOutcomes: [.ideate],
+                requiredCapabilities: ["core.reasoning", "context.local"],
+                forbiddenCapabilities: ["research.web", "files.search"],
+                requiredRouteStages: ["Context"],
+                requiredStepTitles: ["Bağımsız fikir üret"],
+                requiredLearningCapabilities: [],
+                minimumResearchConceptGroups: 0,
+                minimumMandatoryResearchConceptGroups: 0
+            ),
+            TrainingScenario(
+                id: "knowledge-comparison-not-file-search",
+                title: "Bilgi karşılaştırmasını yerel dosya aramasından ayırma",
+                tier: .core,
+                prompt: "Sony A7 IV ile Fuji X-T5 arasında video açısından temel farklar neler?",
+                context: empty,
+                requiredOutcomes: [.research, .analyze, .explain],
+                requiredCapabilities: ["core.reasoning", "research.web"],
+                forbiddenCapabilities: ["files.search"],
+                requiredRouteStages: ["Research", "Verify"],
+                requiredStepTitles: ["Analiz et", "Kaynakları oku"],
+                requiredLearningCapabilities: [],
+                minimumResearchConceptGroups: 1,
+                minimumMandatoryResearchConceptGroups: 0
+            ),
+            TrainingScenario(
                 id: "local-file-search",
                 title: "Yerel dosya araması",
                 tier: .core,
