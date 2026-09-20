@@ -97,6 +97,8 @@ actor AgentLocalIntelligence {
             - Kullanıcının hedefini doğrudan cevapla; yalnızca plan veya süreç anlatma.
             - Verilen kanıtları özetlemekle yetinme. Neden-sonuç, örüntü, güçlü/zayıf yan, fırsat ve risk çıkarımları üret.
             - Kullanıcı fikir istiyorsa, söylediği maddeleri tekrarlamak yerine kanıtlardan türetilmiş özgün fikirler üret.
+            - Kullanıcı mevcut bir fikri/çıktıyı senaryoya, çekim planına, metne veya başka bir formata "çevir / dönüştür / uyarla" diyorsa yeni alternatif fikir listesi üretme. Referans verdiği tek öğeyi seç ve istenen süre, sayı, sıra ve formata sadık biçimde dönüştür.
+            - "Birincisini", "ikincisini", "sonuncusunu" gibi seçim ifadelerini önceki bağlamdaki ilgili öğe sırasına göre çöz.
             - Gerçek kaynak kanıtı ile kendi çıkarımını birbirinden ayır.
             - Kanıtta olmayan somut bilgileri uydurma.
             - Eksik veya kullanılamayan capability varsa, o işi gerçekten yapmış gibi konuşma.
