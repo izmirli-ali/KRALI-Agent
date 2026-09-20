@@ -530,7 +530,20 @@ struct AgentBrain {
             "karşılaştır", "karsilastir", " vs ", "versus"
         ])
 
-        if looksLikeKnowledgeComparison && !explicitLocalScope {
+        let looksLikeContentCreation = containsAny(text, [
+            "çekim planı", "cekim plani",
+            "senaryo hazırla", "senaryo hazirla",
+            "plan hazırla", "plan hazirla",
+            "metni hazırla", "metni hazirla",
+            "yeniden yaz", "tekrar yaz",
+            "düzgün türkçeyle", "duzgun turkceyle",
+            "yazım hat", "yazim hat",
+            "kalın göster", "kalin goster",
+            "başlık", "baslik"
+        ])
+
+        if (looksLikeKnowledgeComparison || looksLikeContentCreation) &&
+           !explicitLocalScope {
             return false
         }
 
