@@ -226,11 +226,16 @@ actor AgentLocalIntelligence {
                    validateMission(
                         reviewedMission,
                         knownCapabilityIDs: knownIDs
+                   ),
+                   isOperationallyComplete(
+                        reviewedMission
                    ) {
                     return reviewedMission
                 }
 
-                return mission
+                return isOperationallyComplete(mission)
+                    ? mission
+                    : nil
             } catch {
                 return nil
             }
@@ -283,6 +288,45 @@ actor AgentLocalIntelligence {
         return mission.outcomes.allSatisfy {
             allowedOutcomes.contains($0)
         }
+    }
+
+    private func isOperationallyComplete(
+        _ mission: AgentSemanticMission
+    ) -> Bool {
+        let operationalOutcomes = Set([
+            "locate",
+            "shortlist",
+            "assessContent",
+            "organize",
+            "open",
+            "research",
+            "edit",
+            "communicate"
+        ])
+
+        let requiresOperationalCapability =
+            !operationalOutcomes
+                .intersection(
+                    Set(mission.outcomes)
+                )
+                .isEmpty
+
+        guard requiresOperationalCapability else {
+            return true
+        }
+
+        let nonReasoningCapabilityIDs = Set(
+            mission.requiredCapabilityIDs +
+            mission.steps.map(\.capabilityID)
+        )
+        .subtracting(
+            Set([
+                "core.reasoning",
+                "context.local"
+            ])
+        )
+
+        return !nonReasoningCapabilityIDs.isEmpty
     }
 
     private func extractJSONObject(
