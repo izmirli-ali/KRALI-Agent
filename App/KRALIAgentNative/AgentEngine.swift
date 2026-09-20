@@ -2725,7 +2725,7 @@ final class AgentEngine: ObservableObject {
                 finalResponse: finalResponse,
                 researchSources: webResearchResults,
                 researchEvidence: webResearchEvidence,
-                contextMemory: executionContextMemories,
+                contextMemory: activeContextMemories,
                 activities: activities
             )
 
