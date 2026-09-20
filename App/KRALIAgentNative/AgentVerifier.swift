@@ -184,7 +184,9 @@ struct AgentVerifier {
                 if snapshot.webResearchCanonicalEvidenceCount > 0 {
                     let remainingUnavailable =
                         snapshot.unavailableCapabilityIDs
-                            .subtracting(["browser.control"])
+                            .subtracting(
+                                Set(["browser.control"])
+                            )
 
                     if !remainingUnavailable.isEmpty {
                         return AgentVerificationResult(
