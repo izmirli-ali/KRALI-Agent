@@ -29,6 +29,16 @@ struct AgentNaturalLanguageResolver: Sendable {
         "url", "sayfa"
     ])
 
+    private let compoundTaskWords = Set([
+        "incele", "analiz", "analizet",
+        "oku", "ozetle", "degerlendir",
+        "cevapla", "cevap", "taslak",
+        "gonder", "arastir", "ara",
+        "bul", "kaydet", "yaz", "ekle",
+        "olustur", "donustur", "karsilastir",
+        "icerik", "sozleri", "raporla"
+    ])
+
     func normalized(_ raw: String) -> String {
         let folded = raw
             .folding(
@@ -101,6 +111,9 @@ struct AgentNaturalLanguageResolver: Sendable {
             ).isEmpty,
             wordSet.intersection(
                 nonAppObjectWords
+            ).isEmpty,
+            wordSet.intersection(
+                compoundTaskWords
             ).isEmpty
         else {
             return false
