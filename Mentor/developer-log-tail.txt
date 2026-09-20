@@ -1,112 +1,4 @@
-Hash type=sha256 size=32
-CandidateCDHash sha256=f3309838ca62270b6e3f898de565eca34cc271cb
-CandidateCDHashFull sha256=f3309838ca62270b6e3f898de565eca34cc271cba8d4fcb29283c6ca03bd5f7a
-Hash choices=sha256
-CMSDigest=f3309838ca62270b6e3f898de565eca34cc271cba8d4fcb29283c6ca03bd5f7a
-CMSDigestType=2
-Executable Segment base=0
-Executable Segment limit=60899328
-Executable Segment flags=0x1
-Page size=4096
-CDHash=f3309838ca62270b6e3f898de565eca34cc271cb
-Signature=adhoc
-Info.plist=not bound
-TeamIdentifier=not set
-Sealed Resources=none
-Internal requirements=none
-spctl exit=1 • /opt/homebrew/lib/node_modules/cline/bin/.cline: invalid signature (code or signature have been modified)
-🧩 Native Cline platform hatası sınıflandırıldı; Node SDK fallback'e geçiliyor.
-From https://github.com/izmirli-ali/KRALI-Agent
- * branch            main       -> FETCH_HEAD
-Already up to date.
-Learning Queue job brief bulundu; mutable Mentor latest yerine immutable job kullanılacak.
-Preparing worktree (new branch 'krali-dev-agent/20260920-212954')
-branch 'krali-dev-agent/20260920-212954' set up to track 'origin/main'.
-HEAD is now at 5024aae v0.8.49 durable serialized learning queue
-Developer prompt mode: gap • 3016 bytes
-KRALI_STAGE sdk_importing • Uygulama kontrolü (desktop.app) için Cline SDK yükleniyor
-KRALI_STAGE sdk_import_ready • Cline SDK yüklendi; provider ayarları doğrulanıyor
-KRALI_STAGE sdk_provider_ready • openai-codex provider ve model ayarı hazır
-KRALI_STAGE sdk_runtime_starting • ClineCore local runtime başlatılıyor
-KRALI_STAGE sdk_runtime_ready • ClineCore runtime hazır; agent session başlatılıyor
-KRALI_STAGE sdk_session_starting • Uygulama kontrolü (desktop.app) için ClineCore session isteği gönderildi
-KRALI_STAGE sdk_session_running • Uygulama kontrolü (desktop.app) için model oturumu aktif
-KRALI_STAGE sdk_tools_running • Uygulama kontrolü (desktop.app) için araç çalışıyor: run_commands
-KRALI_STAGE sdk_tools_running • Uygulama kontrolü (desktop.app) araç çıktısı güncelleniyor: run_commands
-KRALI_STAGE sdk_tools_running • Uygulama kontrolü (desktop.app) araç çıktısı güncelleniyor: run_commands
-KRALI_STAGE sdk_tools_running • Uygulama kontrolü (desktop.app) araç çıktısı güncelleniyor: run_commands
-KRALI_STAGE sdk_tool_completed • Uygulama kontrolü (desktop.app) araç adımı tamamlandı: run_commands
-KRALI_STAGE sdk_tools_running • Uygulama kontrolü (desktop.app) için araç çalışıyor: search_codebase
-KRALI_STAGE sdk_tool_completed • Uygulama kontrolü (desktop.app) araç adımı tamamlandı: search_codebase
-(node:33399) Warning: AI SDK Warning System: To turn off warning logging, set the AI_SDK_LOG_WARNINGS global to false.
-(Use `node --trace-warnings ...` to show where the warning was created)
-(node:33399) Warning: AI SDK Warning (openai-codex.responses / gpt-5.6-sol): Non-OpenAI reasoning parts are not supported. Skipping reasoning part: {"type":"reasoning","text":"**Inspecting repository status and capabilities**"}.
-KRALI_STAGE sdk_tools_running • Uygulama kontrolü (desktop.app) için araç çalışıyor: search_codebase
-KRALI_STAGE sdk_tool_completed • Uygulama kontrolü (desktop.app) araç adımı tamamlandı: search_codebase
-KRALI_STAGE sdk_tools_running • Uygulama kontrolü (desktop.app) için araç çalışıyor: read_files
-KRALI_STAGE sdk_tool_completed • Uygulama kontrolü (desktop.app) araç adımı tamamlandı: read_files
-(node:33399) Warning: AI SDK Warning (openai-codex.responses / gpt-5.6-sol): Non-OpenAI reasoning parts are not supported. Skipping reasoning part: {"type":"reasoning","text":"**Inspecting repository status and capabilities**"}.
-(node:33399) Warning: AI SDK Warning (openai-codex.responses / gpt-5.6-sol): Non-OpenAI reasoning parts are not supported. Skipping reasoning part: {"type":"reasoning","text":"**Planning targeted code inspection**"}.
-KRALI_STAGE sdk_tools_running • Uygulama kontrolü (desktop.app) için araç çalışıyor: read_files
-KRALI_STAGE sdk_tool_completed • Uygulama kontrolü (desktop.app) araç adımı tamamlandı: read_files
-KRALI_STAGE sdk_tools_running • Uygulama kontrolü (desktop.app) için araç çalışıyor: search_codebase
-KRALI_STAGE sdk_tool_completed • Uygulama kontrolü (desktop.app) araç adımı tamamlandı: search_codebase
-(node:33399) Warning: AI SDK Warning (openai-codex.responses / gpt-5.6-sol): Non-OpenAI reasoning parts are not supported. Skipping reasoning part: {"type":"reasoning","text":"**Inspecting repository status and capabilities**"}.
-(node:33399) Warning: AI SDK Warning (openai-codex.responses / gpt-5.6-sol): Non-OpenAI reasoning parts are not supported. Skipping reasoning part: {"type":"reasoning","text":"**Planning targeted code inspection**"}.
-(node:33399) Warning: AI SDK Warning (openai-codex.responses / gpt-5.6-sol): Non-OpenAI reasoning parts are not supported. Skipping reasoning part: {"type":"reasoning","text":"**Planning desktop control file inspection**"}.
-KRALI_STAGE sdk_tools_running • Uygulama kontrolü (desktop.app) için araç çalışıyor: read_files
-KRALI_STAGE sdk_tool_completed • Uygulama kontrolü (desktop.app) araç adımı tamamlandı: read_files
-(node:33399) Warning: AI SDK Warning (openai-codex.responses / gpt-5.6-sol): Non-OpenAI reasoning parts are not supported. Skipping reasoning part: {"type":"reasoning","text":"**Inspecting repository status and capabilities**"}.
-(node:33399) Warning: AI SDK Warning (openai-codex.responses / gpt-5.6-sol): Non-OpenAI reasoning parts are not supported. Skipping reasoning part: {"type":"reasoning","text":"**Planning targeted code inspection**"}.
-(node:33399) Warning: AI SDK Warning (openai-codex.responses / gpt-5.6-sol): Non-OpenAI reasoning parts are not supported. Skipping reasoning part: {"type":"reasoning","text":"**Planning desktop control file inspection**"}.
-(node:33399) Warning: AI SDK Warning (openai-codex.responses / gpt-5.6-sol): Non-OpenAI reasoning parts are not supported. Skipping reasoning part: {"type":"reasoning","text":"**Planning detailed code inspection**"}.
-KRALI_STAGE sdk_tools_running • Uygulama kontrolü (desktop.app) için araç çalışıyor: read_files
-KRALI_STAGE sdk_tool_completed • Uygulama kontrolü (desktop.app) araç adımı tamamlandı: read_files
-(node:33399) Warning: AI SDK Warning (openai-codex.responses / gpt-5.6-sol): Non-OpenAI reasoning parts are not supported. Skipping reasoning part: {"type":"reasoning","text":"**Inspecting repository status and capabilities**"}.
-(node:33399) Warning: AI SDK Warning (openai-codex.responses / gpt-5.6-sol): Non-OpenAI reasoning parts are not supported. Skipping reasoning part: {"type":"reasoning","text":"**Planning targeted code inspection**"}.
-(node:33399) Warning: AI SDK Warning (openai-codex.responses / gpt-5.6-sol): Non-OpenAI reasoning parts are not supported. Skipping reasoning part: {"type":"reasoning","text":"**Planning desktop control file inspection**"}.
-(node:33399) Warning: AI SDK Warning (openai-codex.responses / gpt-5.6-sol): Non-OpenAI reasoning parts are not supported. Skipping reasoning part: {"type":"reasoning","text":"**Planning detailed code inspection**"}.
-KRALI_STAGE sdk_tools_running • Uygulama kontrolü (desktop.app) için araç çalışıyor: read_files
-KRALI_STAGE sdk_tool_completed • Uygulama kontrolü (desktop.app) araç adımı tamamlandı: read_files
-KRALI_STAGE sdk_tools_running • Uygulama kontrolü (desktop.app) için araç çalışıyor: search_codebase
-KRALI_STAGE sdk_tool_completed • Uygulama kontrolü (desktop.app) araç adımı tamamlandı: search_codebase
-KRALI_STAGE sdk_tools_running • Uygulama kontrolü (desktop.app) için araç çalışıyor: run_commands
-KRALI_STAGE sdk_tools_running • Uygulama kontrolü (desktop.app) araç çıktısı güncelleniyor: run_commands
-KRALI_STAGE sdk_tools_running • Uygulama kontrolü (desktop.app) araç çıktısı güncelleniyor: run_commands
-KRALI_STAGE sdk_tools_running • Uygulama kontrolü (desktop.app) araç çıktısı güncelleniyor: run_commands
-KRALI_STAGE sdk_tool_completed • Uygulama kontrolü (desktop.app) araç adımı tamamlandı: run_commands
-(node:33399) Warning: AI SDK Warning (openai-codex.responses / gpt-5.6-sol): Non-OpenAI reasoning parts are not supported. Skipping reasoning part: {"type":"reasoning","text":"**Inspecting repository status and capabilities**"}.
-(node:33399) Warning: AI SDK Warning (openai-codex.responses / gpt-5.6-sol): Non-OpenAI reasoning parts are not supported. Skipping reasoning part: {"type":"reasoning","text":"**Planning targeted code inspection**"}.
-(node:33399) Warning: AI SDK Warning (openai-codex.responses / gpt-5.6-sol): Non-OpenAI reasoning parts are not supported. Skipping reasoning part: {"type":"reasoning","text":"**Planning desktop control file inspection**"}.
-(node:33399) Warning: AI SDK Warning (openai-codex.responses / gpt-5.6-sol): Non-OpenAI reasoning parts are not supported. Skipping reasoning part: {"type":"reasoning","text":"**Planning detailed code inspection**"}.
-(node:33399) Warning: AI SDK Warning (openai-codex.responses / gpt-5.6-sol): Non-OpenAI reasoning parts are not supported. Skipping reasoning part: {"type":"reasoning","text":"**Investigating missing Turkish localization candidates**"}.
-KRALI_STAGE sdk_tools_running • Uygulama kontrolü (desktop.app) için araç çalışıyor: run_commands
-KRALI_STAGE sdk_tool_completed • Uygulama kontrolü (desktop.app) araç adımı tamamlandı: run_commands
-KRALI_STAGE sdk_tools_running • Uygulama kontrolü (desktop.app) için araç çalışıyor: read_files
-KRALI_STAGE sdk_tool_completed • Uygulama kontrolü (desktop.app) araç adımı tamamlandı: read_files
-KRALI_STAGE sdk_tools_running • Uygulama kontrolü (desktop.app) için araç çalışıyor: run_commands
-KRALI_STAGE sdk_tools_running • Uygulama kontrolü (desktop.app) araç çıktısı güncelleniyor: run_commands
-KRALI_STAGE sdk_tools_running • Uygulama kontrolü (desktop.app) araç çıktısı güncelleniyor: run_commands
-KRALI_STAGE sdk_tools_running • Uygulama kontrolü (desktop.app) araç çıktısı güncelleniyor: run_commands
-KRALI_STAGE sdk_tool_completed • Uygulama kontrolü (desktop.app) araç adımı tamamlandı: run_commands
-(node:33399) Warning: AI SDK Warning (openai-codex.responses / gpt-5.6-sol): Non-OpenAI reasoning parts are not supported. Skipping reasoning part: {"type":"reasoning","text":"**Inspecting repository status and capabilities**"}.
-(node:33399) Warning: AI SDK Warning (openai-codex.responses / gpt-5.6-sol): Non-OpenAI reasoning parts are not supported. Skipping reasoning part: {"type":"reasoning","text":"**Planning targeted code inspection**"}.
-(node:33399) Warning: AI SDK Warning (openai-codex.responses / gpt-5.6-sol): Non-OpenAI reasoning parts are not supported. Skipping reasoning part: {"type":"reasoning","text":"**Planning desktop control file inspection**"}.
-(node:33399) Warning: AI SDK Warning (openai-codex.responses / gpt-5.6-sol): Non-OpenAI reasoning parts are not supported. Skipping reasoning part: {"type":"reasoning","text":"**Planning detailed code inspection**"}.
-(node:33399) Warning: AI SDK Warning (openai-codex.responses / gpt-5.6-sol): Non-OpenAI reasoning parts are not supported. Skipping reasoning part: {"type":"reasoning","text":"**Investigating missing Turkish localization candidates**"}.
-(node:33399) Warning: AI SDK Warning (openai-codex.responses / gpt-5.6-sol): Non-OpenAI reasoning parts are not supported. Skipping reasoning part: {"type":"reasoning","text":"**Analyzing localized Notes alias mismatch****Inspecting system app metadata and aliases**"}.
-KRALI_STAGE sdk_tools_running • Uygulama kontrolü (desktop.app) için araç çalışıyor: run_commands
-KRALI_STAGE sdk_tool_completed • Uygulama kontrolü (desktop.app) araç adımı tamamlandı: run_commands
-KRALI_STAGE sdk_failed • ClineCore agent hatası: 1 tool call(s) failed: [run_commands] {"error":"Tool was not executed -- NOT a tool or system failure. Clarify with user before proceeding."}
-(node:33399) Warning: AI SDK Warning (openai-codex.responses / gpt-5.6-sol): Non-OpenAI reasoning parts are not supported. Skipping reasoning part: {"type":"reasoning","text":"**Inspecting repository status and capabilities**"}.
-(node:33399) Warning: AI SDK Warning (openai-codex.responses / gpt-5.6-sol): Non-OpenAI reasoning parts are not supported. Skipping reasoning part: {"type":"reasoning","text":"**Planning targeted code inspection**"}.
-(node:33399) Warning: AI SDK Warning (openai-codex.responses / gpt-5.6-sol): Non-OpenAI reasoning parts are not supported. Skipping reasoning part: {"type":"reasoning","text":"**Planning desktop control file inspection**"}.
-(node:33399) Warning: AI SDK Warning (openai-codex.responses / gpt-5.6-sol): Non-OpenAI reasoning parts are not supported. Skipping reasoning part: {"type":"reasoning","text":"**Planning detailed code inspection**"}.
-(node:33399) Warning: AI SDK Warning (openai-codex.responses / gpt-5.6-sol): Non-OpenAI reasoning parts are not supported. Skipping reasoning part: {"type":"reasoning","text":"**Investigating missing Turkish localization candidates**"}.
-(node:33399) Warning: AI SDK Warning (openai-codex.responses / gpt-5.6-sol): Non-OpenAI reasoning parts are not supported. Skipping reasoning part: {"type":"reasoning","text":"**Analyzing localized Notes alias mismatch****Inspecting system app metadata and aliases**"}.
-(node:33399) Warning: AI SDK Warning (openai-codex.responses / gpt-5.6-sol): Non-OpenAI reasoning parts are not supported. Skipping reasoning part: {"type":"reasoning","text":"**Diagnosing localization resource issue**"}.
-KRALI_STAGE sdk_tools_running • Uygulama kontrolü (desktop.app) için araç çalışıyor: search_codebase
-KRALI_STAGE sdk_tool_completed • Uygulama kontrolü (desktop.app) araç adımı tamamlandı: search_codebase
+KRALI_STAGE sdk_tool_completed • Uygulama kontrolü (desktop.app) araç adımı tamamlandı: apply_patch
 (node:33399) Warning: AI SDK Warning (openai-codex.responses / gpt-5.6-sol): Non-OpenAI reasoning parts are not supported. Skipping reasoning part: {"type":"reasoning","text":"**Inspecting repository status and capabilities**"}.
 (node:33399) Warning: AI SDK Warning (openai-codex.responses / gpt-5.6-sol): Non-OpenAI reasoning parts are not supported. Skipping reasoning part: {"type":"reasoning","text":"**Planning targeted code inspection**"}.
 (node:33399) Warning: AI SDK Warning (openai-codex.responses / gpt-5.6-sol): Non-OpenAI reasoning parts are not supported. Skipping reasoning part: {"type":"reasoning","text":"**Planning desktop control file inspection**"}.
@@ -115,6 +7,114 @@ KRALI_STAGE sdk_tool_completed • Uygulama kontrolü (desktop.app) araç adım�
 (node:33399) Warning: AI SDK Warning (openai-codex.responses / gpt-5.6-sol): Non-OpenAI reasoning parts are not supported. Skipping reasoning part: {"type":"reasoning","text":"**Analyzing localized Notes alias mismatch****Inspecting system app metadata and aliases**"}.
 (node:33399) Warning: AI SDK Warning (openai-codex.responses / gpt-5.6-sol): Non-OpenAI reasoning parts are not supported. Skipping reasoning part: {"type":"reasoning","text":"**Diagnosing localization resource issue**"}.
 (node:33399) Warning: AI SDK Warning (openai-codex.responses / gpt-5.6-sol): Non-OpenAI reasoning parts are not supported. Skipping reasoning part: {"type":"reasoning","text":"**Investigating localization alias mismatch****Planning generic localization resource scanning****Designing recursive application alias extraction****Enhancing localized bundle alias gathering**"}.
+(node:33399) Warning: AI SDK Warning (openai-codex.responses / gpt-5.6-sol): Non-OpenAI reasoning parts are not supported. Skipping reasoning part: {"type":"reasoning","text":"**Investigating intermittent Notes localization failure****Exploring robust localization scanning methods**"}.
+(node:33399) Warning: AI SDK Warning (openai-codex.responses / gpt-5.6-sol): Non-OpenAI reasoning parts are not supported. Skipping reasoning part: {"type":"reasoning","text":"**Diagnosing localized alias resolution failure**"}.
+(node:33399) Warning: AI SDK Warning (openai-codex.responses / gpt-5.6-sol): Non-OpenAI reasoning parts are not supported. Skipping reasoning part: {"type":"reasoning","text":"**Diagnosing localization alias loading issue****Planning robust localized alias resolution****Reevaluating cached application localization impact****Planning fallback localized alias tests****Designing comprehensive alias resolver****Evaluating internal testing method accessibility****Designing robust alias parsing with localization merging****Refactoring alias merging and removing duplicate guards**"}.
+(node:33399) Warning: AI SDK Warning (openai-codex.responses / gpt-5.6-sol): Non-OpenAI reasoning parts are not supported. Skipping reasoning part: {"type":"reasoning","text":"**Planning tests for optional dictionary handling**"}.
+(node:33399) Warning: AI SDK Warning (openai-codex.responses / gpt-5.6-sol): Non-OpenAI reasoning parts are not supported. Skipping reasoning part: {"type":"reasoning","text":"**Planning test build and regression setup**"}.
+(node:33399) Warning: AI SDK Warning (openai-codex.responses / gpt-5.6-sol): Non-OpenAI reasoning parts are not supported. Skipping reasoning part: {"type":"reasoning","text":"**Planning Swift script for probing runtime****Testing Swift script for alias resolution**"}.
+(node:33399) Warning: AI SDK Warning (openai-codex.responses / gpt-5.6-sol): Non-OpenAI reasoning parts are not supported. Skipping reasoning part: {"type":"reasoning","text":"**Verifying runtime probe and localization fixes****Designing generic alias merging helper**"}.
+(node:33399) Warning: AI SDK Warning (openai-codex.responses / gpt-5.6-sol): Non-OpenAI reasoning parts are not supported. Skipping reasoning part: {"type":"reasoning","text":"**Inspecting code patch misplacement**"}.
+(node:33399) Warning: AI SDK Warning (openai-codex.responses / gpt-5.6-sol): Non-OpenAI reasoning parts are not supported. Skipping reasoning part: {"type":"reasoning","text":"**Fixing corrupted patch with exact merge**"}.
+KRALI_STAGE sdk_tools_running • Uygulama kontrolü (desktop.app) için araç çalışıyor: run_commands
+KRALI_STAGE sdk_tools_running • Uygulama kontrolü (desktop.app) araç çıktısı güncelleniyor: run_commands
+KRALI_STAGE sdk_tools_running • Uygulama kontrolü (desktop.app) araç çıktısı güncelleniyor: run_commands
+KRALI_STAGE sdk_tools_running • Uygulama kontrolü (desktop.app) araç çıktısı güncelleniyor: run_commands
+KRALI_STAGE sdk_tool_completed • Uygulama kontrolü (desktop.app) araç adımı tamamlandı: run_commands
+KRALI_STAGE sdk_tools_running • Uygulama kontrolü (desktop.app) için araç çalışıyor: read_files
+KRALI_STAGE sdk_tool_completed • Uygulama kontrolü (desktop.app) araç adımı tamamlandı: read_files
+(node:33399) Warning: AI SDK Warning (openai-codex.responses / gpt-5.6-sol): Non-OpenAI reasoning parts are not supported. Skipping reasoning part: {"type":"reasoning","text":"**Inspecting repository status and capabilities**"}.
+(node:33399) Warning: AI SDK Warning (openai-codex.responses / gpt-5.6-sol): Non-OpenAI reasoning parts are not supported. Skipping reasoning part: {"type":"reasoning","text":"**Planning targeted code inspection**"}.
+(node:33399) Warning: AI SDK Warning (openai-codex.responses / gpt-5.6-sol): Non-OpenAI reasoning parts are not supported. Skipping reasoning part: {"type":"reasoning","text":"**Planning desktop control file inspection**"}.
+(node:33399) Warning: AI SDK Warning (openai-codex.responses / gpt-5.6-sol): Non-OpenAI reasoning parts are not supported. Skipping reasoning part: {"type":"reasoning","text":"**Planning detailed code inspection**"}.
+(node:33399) Warning: AI SDK Warning (openai-codex.responses / gpt-5.6-sol): Non-OpenAI reasoning parts are not supported. Skipping reasoning part: {"type":"reasoning","text":"**Investigating missing Turkish localization candidates**"}.
+(node:33399) Warning: AI SDK Warning (openai-codex.responses / gpt-5.6-sol): Non-OpenAI reasoning parts are not supported. Skipping reasoning part: {"type":"reasoning","text":"**Analyzing localized Notes alias mismatch****Inspecting system app metadata and aliases**"}.
+(node:33399) Warning: AI SDK Warning (openai-codex.responses / gpt-5.6-sol): Non-OpenAI reasoning parts are not supported. Skipping reasoning part: {"type":"reasoning","text":"**Diagnosing localization resource issue**"}.
+(node:33399) Warning: AI SDK Warning (openai-codex.responses / gpt-5.6-sol): Non-OpenAI reasoning parts are not supported. Skipping reasoning part: {"type":"reasoning","text":"**Investigating localization alias mismatch****Planning generic localization resource scanning****Designing recursive application alias extraction****Enhancing localized bundle alias gathering**"}.
+(node:33399) Warning: AI SDK Warning (openai-codex.responses / gpt-5.6-sol): Non-OpenAI reasoning parts are not supported. Skipping reasoning part: {"type":"reasoning","text":"**Investigating intermittent Notes localization failure****Exploring robust localization scanning methods**"}.
+(node:33399) Warning: AI SDK Warning (openai-codex.responses / gpt-5.6-sol): Non-OpenAI reasoning parts are not supported. Skipping reasoning part: {"type":"reasoning","text":"**Diagnosing localized alias resolution failure**"}.
+(node:33399) Warning: AI SDK Warning (openai-codex.responses / gpt-5.6-sol): Non-OpenAI reasoning parts are not supported. Skipping reasoning part: {"type":"reasoning","text":"**Diagnosing localization alias loading issue****Planning robust localized alias resolution****Reevaluating cached application localization impact****Planning fallback localized alias tests****Designing comprehensive alias resolver****Evaluating internal testing method accessibility****Designing robust alias parsing with localization merging****Refactoring alias merging and removing duplicate guards**"}.
+(node:33399) Warning: AI SDK Warning (openai-codex.responses / gpt-5.6-sol): Non-OpenAI reasoning parts are not supported. Skipping reasoning part: {"type":"reasoning","text":"**Planning tests for optional dictionary handling**"}.
+(node:33399) Warning: AI SDK Warning (openai-codex.responses / gpt-5.6-sol): Non-OpenAI reasoning parts are not supported. Skipping reasoning part: {"type":"reasoning","text":"**Planning test build and regression setup**"}.
+(node:33399) Warning: AI SDK Warning (openai-codex.responses / gpt-5.6-sol): Non-OpenAI reasoning parts are not supported. Skipping reasoning part: {"type":"reasoning","text":"**Planning Swift script for probing runtime****Testing Swift script for alias resolution**"}.
+(node:33399) Warning: AI SDK Warning (openai-codex.responses / gpt-5.6-sol): Non-OpenAI reasoning parts are not supported. Skipping reasoning part: {"type":"reasoning","text":"**Verifying runtime probe and localization fixes****Designing generic alias merging helper**"}.
+(node:33399) Warning: AI SDK Warning (openai-codex.responses / gpt-5.6-sol): Non-OpenAI reasoning parts are not supported. Skipping reasoning part: {"type":"reasoning","text":"**Inspecting code patch misplacement**"}.
+(node:33399) Warning: AI SDK Warning (openai-codex.responses / gpt-5.6-sol): Non-OpenAI reasoning parts are not supported. Skipping reasoning part: {"type":"reasoning","text":"**Fixing corrupted patch with exact merge**"}.
+KRALI_STAGE sdk_tools_running • Uygulama kontrolü (desktop.app) için araç çalışıyor: read_files
+KRALI_STAGE sdk_tool_completed • Uygulama kontrolü (desktop.app) araç adımı tamamlandı: read_files
+KRALI_STAGE sdk_tools_running • Uygulama kontrolü (desktop.app) için araç çalışıyor: run_commands
+KRALI_STAGE sdk_tools_running • Uygulama kontrolü (desktop.app) araç çıktısı güncelleniyor: run_commands
+KRALI_STAGE sdk_tools_running • Uygulama kontrolü (desktop.app) araç çıktısı güncelleniyor: run_commands
+KRALI_STAGE sdk_tools_running • Uygulama kontrolü (desktop.app) araç çıktısı güncelleniyor: run_commands
+KRALI_STAGE sdk_tool_completed • Uygulama kontrolü (desktop.app) araç adımı tamamlandı: run_commands
+(node:33399) Warning: AI SDK Warning (openai-codex.responses / gpt-5.6-sol): Non-OpenAI reasoning parts are not supported. Skipping reasoning part: {"type":"reasoning","text":"**Inspecting repository status and capabilities**"}.
+(node:33399) Warning: AI SDK Warning (openai-codex.responses / gpt-5.6-sol): Non-OpenAI reasoning parts are not supported. Skipping reasoning part: {"type":"reasoning","text":"**Planning targeted code inspection**"}.
+(node:33399) Warning: AI SDK Warning (openai-codex.responses / gpt-5.6-sol): Non-OpenAI reasoning parts are not supported. Skipping reasoning part: {"type":"reasoning","text":"**Planning desktop control file inspection**"}.
+(node:33399) Warning: AI SDK Warning (openai-codex.responses / gpt-5.6-sol): Non-OpenAI reasoning parts are not supported. Skipping reasoning part: {"type":"reasoning","text":"**Planning detailed code inspection**"}.
+(node:33399) Warning: AI SDK Warning (openai-codex.responses / gpt-5.6-sol): Non-OpenAI reasoning parts are not supported. Skipping reasoning part: {"type":"reasoning","text":"**Investigating missing Turkish localization candidates**"}.
+(node:33399) Warning: AI SDK Warning (openai-codex.responses / gpt-5.6-sol): Non-OpenAI reasoning parts are not supported. Skipping reasoning part: {"type":"reasoning","text":"**Analyzing localized Notes alias mismatch****Inspecting system app metadata and aliases**"}.
+(node:33399) Warning: AI SDK Warning (openai-codex.responses / gpt-5.6-sol): Non-OpenAI reasoning parts are not supported. Skipping reasoning part: {"type":"reasoning","text":"**Diagnosing localization resource issue**"}.
+(node:33399) Warning: AI SDK Warning (openai-codex.responses / gpt-5.6-sol): Non-OpenAI reasoning parts are not supported. Skipping reasoning part: {"type":"reasoning","text":"**Investigating localization alias mismatch****Planning generic localization resource scanning****Designing recursive application alias extraction****Enhancing localized bundle alias gathering**"}.
+(node:33399) Warning: AI SDK Warning (openai-codex.responses / gpt-5.6-sol): Non-OpenAI reasoning parts are not supported. Skipping reasoning part: {"type":"reasoning","text":"**Investigating intermittent Notes localization failure****Exploring robust localization scanning methods**"}.
+(node:33399) Warning: AI SDK Warning (openai-codex.responses / gpt-5.6-sol): Non-OpenAI reasoning parts are not supported. Skipping reasoning part: {"type":"reasoning","text":"**Diagnosing localized alias resolution failure**"}.
+(node:33399) Warning: AI SDK Warning (openai-codex.responses / gpt-5.6-sol): Non-OpenAI reasoning parts are not supported. Skipping reasoning part: {"type":"reasoning","text":"**Diagnosing localization alias loading issue****Planning robust localized alias resolution****Reevaluating cached application localization impact****Planning fallback localized alias tests****Designing comprehensive alias resolver****Evaluating internal testing method accessibility****Designing robust alias parsing with localization merging****Refactoring alias merging and removing duplicate guards**"}.
+(node:33399) Warning: AI SDK Warning (openai-codex.responses / gpt-5.6-sol): Non-OpenAI reasoning parts are not supported. Skipping reasoning part: {"type":"reasoning","text":"**Planning tests for optional dictionary handling**"}.
+(node:33399) Warning: AI SDK Warning (openai-codex.responses / gpt-5.6-sol): Non-OpenAI reasoning parts are not supported. Skipping reasoning part: {"type":"reasoning","text":"**Planning test build and regression setup**"}.
+(node:33399) Warning: AI SDK Warning (openai-codex.responses / gpt-5.6-sol): Non-OpenAI reasoning parts are not supported. Skipping reasoning part: {"type":"reasoning","text":"**Planning Swift script for probing runtime****Testing Swift script for alias resolution**"}.
+(node:33399) Warning: AI SDK Warning (openai-codex.responses / gpt-5.6-sol): Non-OpenAI reasoning parts are not supported. Skipping reasoning part: {"type":"reasoning","text":"**Verifying runtime probe and localization fixes****Designing generic alias merging helper**"}.
+(node:33399) Warning: AI SDK Warning (openai-codex.responses / gpt-5.6-sol): Non-OpenAI reasoning parts are not supported. Skipping reasoning part: {"type":"reasoning","text":"**Inspecting code patch misplacement**"}.
+(node:33399) Warning: AI SDK Warning (openai-codex.responses / gpt-5.6-sol): Non-OpenAI reasoning parts are not supported. Skipping reasoning part: {"type":"reasoning","text":"**Fixing corrupted patch with exact merge**"}.
+(node:33399) Warning: AI SDK Warning (openai-codex.responses / gpt-5.6-sol): Non-OpenAI reasoning parts are not supported. Skipping reasoning part: {"type":"reasoning","text":"**Planning runtime app inspection via plist reading**"}.
+KRALI_STAGE sdk_tools_running • Uygulama kontrolü (desktop.app) için araç çalışıyor: apply_patch
+KRALI_STAGE sdk_tool_completed • Uygulama kontrolü (desktop.app) araç adımı tamamlandı: apply_patch
+(node:33399) Warning: AI SDK Warning (openai-codex.responses / gpt-5.6-sol): Non-OpenAI reasoning parts are not supported. Skipping reasoning part: {"type":"reasoning","text":"**Inspecting repository status and capabilities**"}.
+(node:33399) Warning: AI SDK Warning (openai-codex.responses / gpt-5.6-sol): Non-OpenAI reasoning parts are not supported. Skipping reasoning part: {"type":"reasoning","text":"**Planning targeted code inspection**"}.
+(node:33399) Warning: AI SDK Warning (openai-codex.responses / gpt-5.6-sol): Non-OpenAI reasoning parts are not supported. Skipping reasoning part: {"type":"reasoning","text":"**Planning desktop control file inspection**"}.
+(node:33399) Warning: AI SDK Warning (openai-codex.responses / gpt-5.6-sol): Non-OpenAI reasoning parts are not supported. Skipping reasoning part: {"type":"reasoning","text":"**Planning detailed code inspection**"}.
+(node:33399) Warning: AI SDK Warning (openai-codex.responses / gpt-5.6-sol): Non-OpenAI reasoning parts are not supported. Skipping reasoning part: {"type":"reasoning","text":"**Investigating missing Turkish localization candidates**"}.
+(node:33399) Warning: AI SDK Warning (openai-codex.responses / gpt-5.6-sol): Non-OpenAI reasoning parts are not supported. Skipping reasoning part: {"type":"reasoning","text":"**Analyzing localized Notes alias mismatch****Inspecting system app metadata and aliases**"}.
+(node:33399) Warning: AI SDK Warning (openai-codex.responses / gpt-5.6-sol): Non-OpenAI reasoning parts are not supported. Skipping reasoning part: {"type":"reasoning","text":"**Diagnosing localization resource issue**"}.
+(node:33399) Warning: AI SDK Warning (openai-codex.responses / gpt-5.6-sol): Non-OpenAI reasoning parts are not supported. Skipping reasoning part: {"type":"reasoning","text":"**Investigating localization alias mismatch****Planning generic localization resource scanning****Designing recursive application alias extraction****Enhancing localized bundle alias gathering**"}.
+(node:33399) Warning: AI SDK Warning (openai-codex.responses / gpt-5.6-sol): Non-OpenAI reasoning parts are not supported. Skipping reasoning part: {"type":"reasoning","text":"**Investigating intermittent Notes localization failure****Exploring robust localization scanning methods**"}.
+(node:33399) Warning: AI SDK Warning (openai-codex.responses / gpt-5.6-sol): Non-OpenAI reasoning parts are not supported. Skipping reasoning part: {"type":"reasoning","text":"**Diagnosing localized alias resolution failure**"}.
+(node:33399) Warning: AI SDK Warning (openai-codex.responses / gpt-5.6-sol): Non-OpenAI reasoning parts are not supported. Skipping reasoning part: {"type":"reasoning","text":"**Diagnosing localization alias loading issue****Planning robust localized alias resolution****Reevaluating cached application localization impact****Planning fallback localized alias tests****Designing comprehensive alias resolver****Evaluating internal testing method accessibility****Designing robust alias parsing with localization merging****Refactoring alias merging and removing duplicate guards**"}.
+(node:33399) Warning: AI SDK Warning (openai-codex.responses / gpt-5.6-sol): Non-OpenAI reasoning parts are not supported. Skipping reasoning part: {"type":"reasoning","text":"**Planning tests for optional dictionary handling**"}.
+(node:33399) Warning: AI SDK Warning (openai-codex.responses / gpt-5.6-sol): Non-OpenAI reasoning parts are not supported. Skipping reasoning part: {"type":"reasoning","text":"**Planning test build and regression setup**"}.
+(node:33399) Warning: AI SDK Warning (openai-codex.responses / gpt-5.6-sol): Non-OpenAI reasoning parts are not supported. Skipping reasoning part: {"type":"reasoning","text":"**Planning Swift script for probing runtime****Testing Swift script for alias resolution**"}.
+(node:33399) Warning: AI SDK Warning (openai-codex.responses / gpt-5.6-sol): Non-OpenAI reasoning parts are not supported. Skipping reasoning part: {"type":"reasoning","text":"**Verifying runtime probe and localization fixes****Designing generic alias merging helper**"}.
+(node:33399) Warning: AI SDK Warning (openai-codex.responses / gpt-5.6-sol): Non-OpenAI reasoning parts are not supported. Skipping reasoning part: {"type":"reasoning","text":"**Inspecting code patch misplacement**"}.
+(node:33399) Warning: AI SDK Warning (openai-codex.responses / gpt-5.6-sol): Non-OpenAI reasoning parts are not supported. Skipping reasoning part: {"type":"reasoning","text":"**Fixing corrupted patch with exact merge**"}.
+(node:33399) Warning: AI SDK Warning (openai-codex.responses / gpt-5.6-sol): Non-OpenAI reasoning parts are not supported. Skipping reasoning part: {"type":"reasoning","text":"**Planning runtime app inspection via plist reading**"}.
+(node:33399) Warning: AI SDK Warning (openai-codex.responses / gpt-5.6-sol): Non-OpenAI reasoning parts are not supported. Skipping reasoning part: {"type":"reasoning","text":"**Planning duplicate merge fix for aliases****Reverting localization parser extras**"}.
+KRALI_STAGE sdk_tools_running • Uygulama kontrolü (desktop.app) için araç çalışıyor: run_commands
+KRALI_STAGE sdk_tools_running • Uygulama kontrolü (desktop.app) araç çıktısı güncelleniyor: run_commands
+KRALI_STAGE sdk_tools_running • Uygulama kontrolü (desktop.app) araç çıktısı güncelleniyor: run_commands
+KRALI_STAGE sdk_tools_running • Uygulama kontrolü (desktop.app) araç çıktısı güncelleniyor: run_commands
+KRALI_STAGE sdk_tool_completed • Uygulama kontrolü (desktop.app) araç adımı tamamlandı: run_commands
+(node:33399) Warning: AI SDK Warning (openai-codex.responses / gpt-5.6-sol): Non-OpenAI reasoning parts are not supported. Skipping reasoning part: {"type":"reasoning","text":"**Inspecting repository status and capabilities**"}.
+(node:33399) Warning: AI SDK Warning (openai-codex.responses / gpt-5.6-sol): Non-OpenAI reasoning parts are not supported. Skipping reasoning part: {"type":"reasoning","text":"**Planning targeted code inspection**"}.
+(node:33399) Warning: AI SDK Warning (openai-codex.responses / gpt-5.6-sol): Non-OpenAI reasoning parts are not supported. Skipping reasoning part: {"type":"reasoning","text":"**Planning desktop control file inspection**"}.
+(node:33399) Warning: AI SDK Warning (openai-codex.responses / gpt-5.6-sol): Non-OpenAI reasoning parts are not supported. Skipping reasoning part: {"type":"reasoning","text":"**Planning detailed code inspection**"}.
+(node:33399) Warning: AI SDK Warning (openai-codex.responses / gpt-5.6-sol): Non-OpenAI reasoning parts are not supported. Skipping reasoning part: {"type":"reasoning","text":"**Investigating missing Turkish localization candidates**"}.
+(node:33399) Warning: AI SDK Warning (openai-codex.responses / gpt-5.6-sol): Non-OpenAI reasoning parts are not supported. Skipping reasoning part: {"type":"reasoning","text":"**Analyzing localized Notes alias mismatch****Inspecting system app metadata and aliases**"}.
+(node:33399) Warning: AI SDK Warning (openai-codex.responses / gpt-5.6-sol): Non-OpenAI reasoning parts are not supported. Skipping reasoning part: {"type":"reasoning","text":"**Diagnosing localization resource issue**"}.
+(node:33399) Warning: AI SDK Warning (openai-codex.responses / gpt-5.6-sol): Non-OpenAI reasoning parts are not supported. Skipping reasoning part: {"type":"reasoning","text":"**Investigating localization alias mismatch****Planning generic localization resource scanning****Designing recursive application alias extraction****Enhancing localized bundle alias gathering**"}.
+(node:33399) Warning: AI SDK Warning (openai-codex.responses / gpt-5.6-sol): Non-OpenAI reasoning parts are not supported. Skipping reasoning part: {"type":"reasoning","text":"**Investigating intermittent Notes localization failure****Exploring robust localization scanning methods**"}.
+(node:33399) Warning: AI SDK Warning (openai-codex.responses / gpt-5.6-sol): Non-OpenAI reasoning parts are not supported. Skipping reasoning part: {"type":"reasoning","text":"**Diagnosing localized alias resolution failure**"}.
+(node:33399) Warning: AI SDK Warning (openai-codex.responses / gpt-5.6-sol): Non-OpenAI reasoning parts are not supported. Skipping reasoning part: {"type":"reasoning","text":"**Diagnosing localization alias loading issue****Planning robust localized alias resolution****Reevaluating cached application localization impact****Planning fallback localized alias tests****Designing comprehensive alias resolver****Evaluating internal testing method accessibility****Designing robust alias parsing with localization merging****Refactoring alias merging and removing duplicate guards**"}.
+(node:33399) Warning: AI SDK Warning (openai-codex.responses / gpt-5.6-sol): Non-OpenAI reasoning parts are not supported. Skipping reasoning part: {"type":"reasoning","text":"**Planning tests for optional dictionary handling**"}.
+(node:33399) Warning: AI SDK Warning (openai-codex.responses / gpt-5.6-sol): Non-OpenAI reasoning parts are not supported. Skipping reasoning part: {"type":"reasoning","text":"**Planning test build and regression setup**"}.
+(node:33399) Warning: AI SDK Warning (openai-codex.responses / gpt-5.6-sol): Non-OpenAI reasoning parts are not supported. Skipping reasoning part: {"type":"reasoning","text":"**Planning Swift script for probing runtime****Testing Swift script for alias resolution**"}.
+(node:33399) Warning: AI SDK Warning (openai-codex.responses / gpt-5.6-sol): Non-OpenAI reasoning parts are not supported. Skipping reasoning part: {"type":"reasoning","text":"**Verifying runtime probe and localization fixes****Designing generic alias merging helper**"}.
+(node:33399) Warning: AI SDK Warning (openai-codex.responses / gpt-5.6-sol): Non-OpenAI reasoning parts are not supported. Skipping reasoning part: {"type":"reasoning","text":"**Inspecting code patch misplacement**"}.
+(node:33399) Warning: AI SDK Warning (openai-codex.responses / gpt-5.6-sol): Non-OpenAI reasoning parts are not supported. Skipping reasoning part: {"type":"reasoning","text":"**Fixing corrupted patch with exact merge**"}.
+(node:33399) Warning: AI SDK Warning (openai-codex.responses / gpt-5.6-sol): Non-OpenAI reasoning parts are not supported. Skipping reasoning part: {"type":"reasoning","text":"**Planning runtime app inspection via plist reading**"}.
+(node:33399) Warning: AI SDK Warning (openai-codex.responses / gpt-5.6-sol): Non-OpenAI reasoning parts are not supported. Skipping reasoning part: {"type":"reasoning","text":"**Planning duplicate merge fix for aliases****Reverting localization parser extras**"}.
 KRALI_STAGE sdk_tools_running • Uygulama kontrolü (desktop.app) için araç çalışıyor: run_commands
 KRALI_STAGE sdk_tool_completed • Uygulama kontrolü (desktop.app) araç adımı tamamlandı: run_commands
 KRALI_STAGE sdk_failed • ClineCore agent hatası: 1 tool call(s) failed: [run_commands] {"error":"Tool was not executed -- NOT a tool or system failure. Clarify with user before proceeding."}
+KRALI_STAGE sdk_failed • ClineCore agent hatası: Agent runtime exceeded maxIterations (24)
+KRALI_STAGE sdk_session_ended • Uygulama kontrolü (desktop.app) SDK session sona erdi: unknown
+KRALI_STAGE sdk_session_completed • Uygulama kontrolü (desktop.app) SDK oturumu tamamlandı; candidate değişiklikler kontrol ediliyor
+Agent runtime exceeded maxIterations (24)
+KRALI SDK fallback başarısız. finishReason=error
