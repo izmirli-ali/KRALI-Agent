@@ -311,17 +311,26 @@ struct AgentGoalInterpreter {
             capabilityIDs.insert("mail.work")
         }
 
+        let affirmativeWorkflowText =
+            languageResolver
+                .affirmativeWorkflowText(
+                    rawText
+                )
+
         let asksGenericAppWorkflow =
             appOpenIntent &&
-            containsAny(text, [
-                "bul", "oku", "incele", "listele",
-                "söyle", "soyle", "göster", "goster",
-                "seç", "sec", "ekle", "hazırla", "hazirla",
-                "ayarla", "değiştir", "degistir",
-                "hatırlatma", "hatirlatma",
-                "etkinlik", "randevu", "mesaj", "şarkı", "sarki",
-                "bölümüne git", "bolumune git"
-            ])
+            containsAny(
+                affirmativeWorkflowText,
+                [
+                    "bul", "oku", "incele", "listele",
+                    "soyle", "goster",
+                    "sec", "ekle", "hazirla",
+                    "ayarla", "degistir",
+                    "hatirlatma",
+                    "etkinlik", "randevu", "mesaj", "sarki",
+                    "bolumune git"
+                ]
+            )
 
         let specializedAppDomain =
             containsAny(text, [
