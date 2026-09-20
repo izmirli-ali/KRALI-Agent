@@ -732,7 +732,8 @@ final class AgentEngine: ObservableObject {
             : parsedOutcomes
 
         var capabilityIDs = Set(
-            mission.requiredCapabilityIDs
+            mission.requiredCapabilityIDs +
+            mission.steps.map(\.capabilityID)
         )
         capabilityIDs.insert("core.reasoning")
         capabilityIDs.insert("context.local")
@@ -763,6 +764,7 @@ final class AgentEngine: ObservableObject {
             "context.local"
         ]
         ids += mission.requiredCapabilityIDs
+        ids += mission.steps.map(\.capabilityID)
 
         let resolved = capabilityRegistry.resolve(ids: ids)
 
