@@ -285,6 +285,16 @@ struct ScreenPerceptionStore {
             )
     }
 
+    func readStatus() -> String? {
+        try? String(
+            contentsOf: statusURL,
+            encoding: .utf8
+        )
+        .trimmingCharacters(
+            in: .whitespacesAndNewlines
+        )
+    }
+
     func saveStatus(_ value: String) {
         let directory = statusURL
             .deletingLastPathComponent()
