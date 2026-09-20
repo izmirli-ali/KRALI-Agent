@@ -262,6 +262,8 @@ struct AgentMissionNormalizer {
 
         var latestDataStep: Int? =
             steps.isEmpty ? nil : steps.count - 1
+        var researchStepIndex: Int?
+        var analysisStepIndex: Int?
 
         if appOpen {
             append(
@@ -332,6 +334,8 @@ struct AgentMissionNormalizer {
             if !steps.isEmpty {
                 latestDataStep =
                     steps.count - 1
+                researchStepIndex =
+                    steps.count - 1
             }
 
             outcomes.insert("research")
@@ -354,6 +358,8 @@ struct AgentMissionNormalizer {
 
             if !steps.isEmpty {
                 latestDataStep =
+                    steps.count - 1
+                analysisStepIndex =
                     steps.count - 1
             }
 
@@ -403,10 +409,18 @@ struct AgentMissionNormalizer {
         if textWrite {
             var dependencies: [Int] = []
 
-            if let latestDataStep {
-                dependencies.append(
-                    latestDataStep
-                )
+            for dataStep in [
+                researchStepIndex,
+                analysisStepIndex,
+                latestDataStep
+            ].compactMap({ $0 }) {
+                if !dependencies.contains(
+                    dataStep
+                ) {
+                    dependencies.append(
+                        dataStep
+                    )
+                }
             }
 
             if let targetFolderStep,
