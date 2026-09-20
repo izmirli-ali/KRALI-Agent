@@ -35,6 +35,7 @@
 		A10000000000000000000026 /* AgentContextMemory.swift in Sources */ = {isa = PBXBuildFile; fileRef = B10000000000000000000026 /* AgentContextMemory.swift */; };
 		A10000000000000000000027 /* AgentScreenPerception.swift in Sources */ = {isa = PBXBuildFile; fileRef = B10000000000000000000027 /* AgentScreenPerception.swift */; };
 		A10000000000000000000028 /* AgentDesktopControl.swift in Sources */ = {isa = PBXBuildFile; fileRef = B10000000000000000000028 /* AgentDesktopControl.swift */; };
+		A10000000000000000000029 /* AgentNaturalLanguageResolver.swift in Sources */ = {isa = PBXBuildFile; fileRef = B10000000000000000000029 /* AgentNaturalLanguageResolver.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
@@ -67,6 +68,7 @@
 		B10000000000000000000026 /* AgentContextMemory.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AgentContextMemory.swift; sourceTree = "<group>"; };
 		B10000000000000000000027 /* AgentScreenPerception.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AgentScreenPerception.swift; sourceTree = "<group>"; };
 		B10000000000000000000028 /* AgentDesktopControl.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AgentDesktopControl.swift; sourceTree = "<group>"; };
+		B10000000000000000000029 /* AgentNaturalLanguageResolver.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AgentNaturalLanguageResolver.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -119,6 +121,7 @@
 				B10000000000000000000026 /* AgentContextMemory.swift */,
 				B10000000000000000000027 /* AgentScreenPerception.swift */,
 				B10000000000000000000028 /* AgentDesktopControl.swift */,
+				B10000000000000000000029 /* AgentNaturalLanguageResolver.swift */,
 			);
 			path = KRALIAgentNative;
 			sourceTree = "<group>";
@@ -228,6 +231,7 @@
 				A10000000000000000000026 /* AgentContextMemory.swift in Sources */,
 				A10000000000000000000027 /* AgentScreenPerception.swift in Sources */,
 				A10000000000000000000028 /* AgentDesktopControl.swift in Sources */,
+				A10000000000000000000029 /* AgentNaturalLanguageResolver.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
