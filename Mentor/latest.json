@@ -1,83 +1,99 @@
 {
   "activityTail" : [
     {
-      "date" : "2026-09-20T16:53:58Z",
-      "text" : "Debug/Recovery: Doğrulama uyuşmazlığı • Hata ayıklanıyor • desktop.app"
+      "date" : "2026-09-20T17:02:43Z",
+      "text" : "Uygulama kontrolü başarısız: Uygulama bulunamadı: Takvim uygulamasını aç. Yarınki ilk etkinliği bul, başlığını ve saatini bana söyle. Ardından bu etkinlik için 15 dakika öncesine bir hatırlatma eklemeyi hazırla ama benden onay almadan hiçbir değişiklik yapma."
     },
     {
-      "date" : "2026-09-20T16:53:58Z",
-      "text" : "Desktop runtime: Takvim • foreground=false • source=unverified"
+      "date" : "2026-09-20T17:02:43Z",
+      "text" : "Debug/Recovery: Bilinmeyen hata • Hata ayıklanıyor • desktop.app"
     },
     {
-      "date" : "2026-09-20T16:53:30Z",
-      "text" : "Semantic rota: Core → Goal → Context → Plan → Desktop → Verify → Response"
+      "date" : "2026-09-20T17:02:42Z",
+      "text" : "Semantic rota: Core → Goal → Context → Plan → Desktop → Learn → Verify → Response"
     },
     {
-      "date" : "2026-09-20T16:53:30Z",
-      "text" : "Task Graph: 0:core.reasoning[reason] → 1:context.local[reason] → 2:desktop.app[verify]"
+      "date" : "2026-09-20T17:02:42Z",
+      "text" : "Task Graph kullanıcı onayı bekleyen step: 2"
     },
     {
-      "date" : "2026-09-20T16:53:30Z",
-      "text" : "Semantic capability planı: context.local, core.reasoning, desktop.app"
+      "date" : "2026-09-20T17:02:42Z",
+      "text" : "Capability Gap: app.workflow • strategy • strategy=desktop.app,perception.screen"
     },
     {
-      "date" : "2026-09-20T16:53:30Z",
-      "text" : "Semantic planner sağlayıcısı: Apple + Contract Repair"
+      "date" : "2026-09-20T17:02:42Z",
+      "text" : "Task Graph blocked capability: app.workflow"
     },
     {
-      "date" : "2026-09-20T16:53:30Z",
+      "date" : "2026-09-20T17:02:42Z",
+      "text" : "Task Graph: 0:context.local[reason] → 1:desktop.app[act] → 2:app.workflow[verify]"
+    },
+    {
+      "date" : "2026-09-20T17:02:42Z",
+      "text" : "Semantic capability planı: app.workflow, context.local, core.reasoning, desktop.app"
+    },
+    {
+      "date" : "2026-09-20T17:02:42Z",
+      "text" : "Semantic planner sağlayıcısı: Apple Foundation Models"
+    },
+    {
+      "date" : "2026-09-20T17:02:42Z",
       "text" : "Semantic Mission: Takvim uygulamasını aç. Yarınki ilk etkinliği bul, başlığını ve saatini bana söyle. Ardından bu etkinlik için 15 dakika öncesine bir hatırlatma eklemeyi hazırla ama benden onay almadan hiçbir değişiklik yapma."
     },
     {
-      "date" : "2026-09-20T16:53:15Z",
-      "text" : "Seçilen kabiliyetler: Akıl yürütme, Bağlam"
+      "date" : "2026-09-20T17:02:26Z",
+      "text" : "Yetkinlik öğrenme planı: Uygulama içi iş akışı → Entegrasyon gerekli"
     },
     {
-      "date" : "2026-09-20T16:53:15Z",
-      "text" : "Otomatik rota: Core → Goal → Context → Response"
+      "date" : "2026-09-20T17:02:26Z",
+      "text" : "Seçilen kabiliyetler: Akıl yürütme, Bağlam, Uygulama içi iş akışı [bekliyor]"
     },
     {
-      "date" : "2026-09-20T16:53:15Z",
+      "date" : "2026-09-20T17:02:26Z",
+      "text" : "Otomatik rota: Core → Goal → Context → Plan → Learn → Verify → Response"
+    },
+    {
+      "date" : "2026-09-20T17:02:26Z",
       "text" : "Seçilen plan: Bağlamı incele; doğrudan araç eşleşmesi yoksa güvenli alternatifler üret"
     },
     {
-      "date" : "2026-09-20T16:53:15Z",
+      "date" : "2026-09-20T17:02:26Z",
       "text" : "KRALİ Core hedef sözleşmesi: sonucu ve gerekçeyi açıkla"
     },
     {
-      "date" : "2026-09-20T16:53:15Z",
-      "text" : "Bağlam hafızası: Mail uygulamasını aç, son gelen maili incele, ne yapmamız gerektiğini… • Estafiz için 30 saniyelik bir Reels çekim planı hazırla. 3 bölüm olsu… • Spotify uygulamasını aç, şu anda açık olan şarkıyı bul, şarkı hakkınd… • Spotify uygulamasını aç, şu anda açık olan şarkıyı bul, şarkının sözl…"
+      "date" : "2026-09-20T17:02:26Z",
+      "text" : "Bağlam firewall: önceki görev bağlamları bu tura taşınmadı"
     },
     {
-      "date" : "2026-09-20T16:52:58Z",
+      "date" : "2026-09-20T17:02:17Z",
       "text" : "Apple yerel zeka hazır"
     },
     {
-      "date" : "2026-09-20T16:52:58Z",
+      "date" : "2026-09-20T17:02:16Z",
       "text" : "Çalışma klasörü geri yüklendi: Desktop"
     },
     {
-      "date" : "2026-09-20T16:52:58Z",
+      "date" : "2026-09-20T17:02:16Z",
       "text" : "0 ekran görüntüsü adayı bulundu"
     },
     {
-      "date" : "2026-09-20T16:52:58Z",
+      "date" : "2026-09-20T17:02:16Z",
       "text" : "1766 dosya ve 68 klasör indekslendi"
     },
     {
-      "date" : "2026-09-20T16:52:58Z",
+      "date" : "2026-09-20T17:02:16Z",
       "text" : "Ağır geliştirici testleri normal açılışta otomatik çalıştırılmıyor"
     },
     {
-      "date" : "2026-09-20T16:52:58Z",
+      "date" : "2026-09-20T17:02:16Z",
       "text" : "Dinamik hedef ve kabiliyet yönlendirme aktif"
     },
     {
-      "date" : "2026-09-20T16:52:58Z",
+      "date" : "2026-09-20T17:02:16Z",
       "text" : "KRALİ Core hazır"
     }
   ],
-  "appVersion" : "0.8.43",
+  "appVersion" : "0.8.44",
   "capabilities" : [
     {
       "available" : true,
@@ -92,6 +108,12 @@
       "risk" : "reasoning"
     },
     {
+      "available" : false,
+      "id" : "app.workflow",
+      "name" : "Uygulama içi iş akışı",
+      "risk" : "external"
+    },
+    {
       "available" : true,
       "id" : "desktop.app",
       "name" : "Uygulama kontrolü",
@@ -99,56 +121,44 @@
     }
   ],
   "capabilityGaps" : [
-
-  ],
-  "contextMemory" : [
     {
-      "createdAt" : "2026-09-20T14:05:18Z",
-      "kind" : "task",
-      "summary" : "**Mail uygulaması doğrudan erişilemiyor.** Mevcut sistem, görsel ve video içeriğine doğrudan erişim sağlamıyor. Bu nedenle Mail uygulamasını açma ve son gelen maili inceleme işlemi gerçekleştirilemiyor. **Fırsat** Görsel ve video analiz araçlarının yapısal özellikleri, yeni anlatı yapıları inşa etme potansiyeli sunar. Contextual Frame Analysis yöntemi, sahne bazlı gelişimi anlamlandırmak için kullanılabilir. **Risk** Araçlar gerçek video verisiyle entegre değil. Bu nedenle kurgunun doğruluğu belirsizdir. Olası anlatılar, mevcut teknik sınırlara dayanmalıdır. **Sonuç** Mevcut kaynaklarla doğrudan bir kurgu üretilemez. Araçların yapısal imkânları, yeni bir anlatı için temel oluşturabilir. **Not:** Mail yetkinliği tam olarak desteklenmiyor. Bu nedenle Mail uygulamasını açma ve uygun cevap taslağı hazırlama isteği yerine getirilemiyor. Doğrulama: Semantic mission içindeki zorunlu action step'lerinden bazıları tamamlanmadı: desktop.app, mail.work Alternatif plan: Tamamlanmayan action step'ini yeniden planla; yürütülmeyen işi başarılı sayma. Yetkinlik kazanma planı: Resmi API/entegrasyonu araştır → gereken hesap/izinleri çıkar → bağlantıyı sandbox/test ortamında doğrula → kullanıcı onayı",
-      "title" : "Mail uygulamasını aç, son gelen maili incele, ne yapmamız gerektiğini…"
-    },
-    {
-      "createdAt" : "2026-09-20T09:05:38Z",
-      "kind" : "task",
-      "summary" : "**1. Açılış Bölümü (0-5 saniye)** **“Aynı hareket, üç farklı beden”** serisi temel alınarak hazırlanan bu bölüm, görsel bir karşılaştırma sunar. Reformer üzerinde aynı pozisyon, ancak üç farklı hedef kitleye göre uyarlanmıştır. Başlangıç seviyesi, masa başında çalışan birey ve düzenli egzersiz yapan kişi. **Neden işe yarar?** - Hareketin görünüşü sabit kalırken, direnç ve açı gibi faktörlerin kişiye göre değiştiğini somutlaştırır. - İzleyicinin “bu hareketi ben yapabilir miyim?” sorusunu yanıtlar. - Hesabı yalnızca hareket gösteren bir sayfa değil, **kişiye özel yaklaşım sunan uzman bir merkez** olarak konumlandırır. - Seri formatına uygun yapı, içerik tekrarlarına imkân tanır. **2. Ana Mesaj Bölümü (5-20 saniye)** Günlük yaşamdan kısa bir sahneyle başlar: Bilgisayar başında çalışan bir kişi kalktığında belini tutuyor veya omuzlarını çeviriyor. Ekranda sorular sırayla belirir: - “Sandalyeden kalkınca birkaç saniye doğrulamaya çalışıyor musun?” - “Günün sonunda omuzların öne mi düşüyor?” - “Sorun yalnızca ‘esnek olmamak’ olmayabilir.” Ardından eğitmen, tanı koymadan **kişiye özel değerlendirme ve kontrollü egzersiz** önerir. **Neden işe yarar?** - Hizmetin soyut bir kavram değil, iz",
-      "title" : "Estafiz için 30 saniyelik bir Reels çekim planı hazırla. 3 bölüm olsu…"
-    },
-    {
-      "createdAt" : "2026-09-20T14:01:45Z",
-      "kind" : "task",
-      "summary" : "**Ekran durumu** KRALİ uygulaması önde konumda. Pencere başlıkları ve uygulama isimleri ekranın üzerinde açık. KRALİ — KRALİ başlığı açık. **Nihai çıktı** Mevcut sistem, görsel ve video içeriğine doğrudan erişim sağlamıyor. Bu nedenle ekran görüntüsünü analiz etmek veya ilgili klasörü Finder’da açmak mümkün değil. **Fırsat** Görsel ve video analiz araçlarının yapısal özellikleri, yeni anlatı yapıları inşa etme potansiyeli sunar. Contextual Frame Analysis yöntemi, sahne bazlı gelişimi anlamlandırmak için kullanılabilir. **Risk** Araçlar gerçek video verisiyle entegre değil. Bu nedenle kurgunun doğruluğu belirsizdir. Olası anlatılar, mevcut teknik sınırlara dayanmalıdır. **Sonuç** Mevcut kaynaklarla doğrudan bir kurgu üretilemez. Araçların yapısal imkânları, yeni bir anlatı için temel oluşturabilir. Doğrulama: Doğrulama durduruldu: seçilen dosya arama hedefi mevcut kullanıcı girdisiyle uyuşmuyor. Alternatif plan: Mevcut kullanıcı girdisinden hedefi yeniden türet; önceki turun goal / plan state'ini bu tura taşıma.",
-      "title" : "Spotify uygulamasını aç, şu anda açık olan şarkıyı bul, şarkı hakkınd…"
-    },
-    {
-      "createdAt" : "2026-09-20T13:40:09Z",
-      "kind" : "task",
-      "summary" : "**Hedef gerçekleştirilemez** Mevcut sistem, görsel ve video içeriğine doğrudan erişim sağlayamıyor. Spotify uygulamasında açık olan şarkıyı tespit etmek veya sözlerini araştırmak için gerekli teknik yetenekler mevcut değil. Sözlerin analiz edilmesi ve sonuçların masaüstündeki 9 Eylül klasörüne txt dosyası olarak kaydedilmesi, metin dosyası yazma yeteneğiyle sınırlı. Bu özellik doğrudan desteklenmiyor. **Fırsat** Görsel ve video analiz araçlarının yapısal özellikleri, yeni anlatı yapıları inşa etme potansiyeli sunar. Contextual Frame Analysis yöntemi, sahne bazlı gelişimi anlamlandırmak için kullanılabilir. **Risk** Araçlar gerçek video verisiyle entegre değil. Bu nedenle kurgunun doğruluğu belirsizdir. Olası anlatılar, mevcut teknik sınırlara dayanmalıdır. **Sonuç** Mevcut kaynaklarla doğrudan bir kurgu üretilemez. Araçların yapısal imkânları, yeni bir anlatı için temel oluşturabilir. Doğrulama: Doğrulama durduruldu: seçilen dosya arama hedefi mevcut kullanıcı girdisiyle uyuşmuyor. Alternatif plan: Mevcut kullanıcı girdisinden hedefi yeniden türet; önceki turun goal / plan state'ini bu tura taşıma. Yetkinlik kazanma planı: Resmi kaynakları araştır → geri alınabilir prototip oluştur",
-      "title" : "Spotify uygulamasını aç, şu anda açık olan şarkıyı bul, şarkının sözl…"
+      "candidateCapabilityIDs" : [
+        "desktop.app",
+        "perception.screen"
+      ],
+      "capabilityID" : "app.workflow",
+      "capabilityName" : "Uygulama içi iş akışı",
+      "developerBrief" : "KRALİ Capability Gap Developer Brief\n\nKullanıcı hedefi:\nTakvim uygulamasını aç. Yarınki ilk etkinliği bul, başlığını ve saatini bana söyle. Ardından bu etkinlik için 15 dakika öncesine bir hatırlatma eklemeyi hazırla ama benden onay almadan hiçbir değişiklik yapma.\n\nEksik capability:\napp.workflow — Uygulama içi iş akışı\n\nGap türü:\nstrategy\n\nBlocked step:\n2: Uygulama içi hedefi yürüt\nOperation: app.workflow.execute\nRole: verify\n\nMevcut strategy adayları:\ndesktop.app, perception.screen\n\nTasarım kuralları:\n- Uygulama/marka adına hard-code yazma; mümkün olduğunca generic capability veya strategy geliştir.\n- Mevcut provider başka bir işi yapılmış gibi göstermesin.\n- Dış dünyaya commit eden eylemlerde kullanıcı onay kapısı korunmalı.\n- Başarı gerçek observation/verification ile kanıtlanmalı.\n- Ana branch üzerinde doğrudan self-modification yapma; candidate branch/worktree kullan.\n- Build + Training Lab + ilgili runtime probe geçmeden capability available yapılmamalı.\n\nKabul kriteri:\nBlocked step gerçek provider/strategy ile tamamlanmalı, evidence downstream step'e aktarılmalı ve verifier sahte PASS üretmemeli.",
+      "kind" : "strategy",
+      "reason" : "Task Graph step 'Uygulama içi hedefi yürüt' için app.workflow gerekiyor ancak provider available değil.",
+      "researchGoal" : "Mevcut capability'leri kullanarak app.workflow.execute işlemini güvenli biçimde tamamlayan generic bir strategy/recipe araştır ve test planı çıkar."
     }
   ],
-  "createdAt" : "2026-09-20T16:53:58Z",
+  "contextMemory" : [
+
+  ],
+  "createdAt" : "2026-09-20T17:02:43Z",
   "executionSteps" : [
     {
-      "capabilityID" : "core.reasoning",
-      "detail" : "Mission hedefini uçtan uca tamamlamak için gerekli capability sözleşmesi. Operation: capability.contract",
-      "kind" : "reasoning",
-      "state" : "completed",
-      "title" : "Akıl yürütme"
-    },
-    {
       "capabilityID" : "context.local",
-      "detail" : "Mission hedefini uçtan uca tamamlamak için gerekli capability sözleşmesi. Ön koşul adımları: 1. Operation: capability.contract",
+      "detail" : "Yalnızca bu kullanıcı hedefiyle ilgili bağlamı hazırla; eski görev hedeflerini yeni göreve taşıma. Operation: context.resolve",
       "kind" : "reasoning",
       "state" : "completed",
-      "title" : "Bağlam"
+      "title" : "Görev bağlamını hazırla"
     },
     {
       "capabilityID" : "desktop.app",
-      "detail" : "Mission hedefini uçtan uca tamamlamak için gerekli capability sözleşmesi. Ön koşul adımları: 2. Operation: capability.contract",
+      "detail" : "Kullanıcının adlandırdığı uygulamayı çöz ve görünür foreground durumuna getir. Ön koşul adımları: 1. Operation: app.open",
       "kind" : "action",
       "state" : "partial",
-      "title" : "Uygulama kontrolü"
+      "title" : "Kaynak uygulamayı aç veya öne getir"
+    },
+    {
+      "capabilityID" : "app.workflow",
+      "detail" : "Uygulamayı açmanın ötesindeki kullanıcı hedefini çöz: gerekli veriyi oku/bul, sonucu doğrula ve istenen değişiklik yalnız hazırlık düzeyindeyse dış dünyaya commit etmeden hazırla. Özel provider yoksa bu generic contract yeni strategy/provider öğrenimini tetiklemeli. Ön koşul adımları: 2. Operation: app.workflow.execute",
+      "kind" : "action",
+      "state" : "blocked",
+      "title" : "Uygulama içi hedefi yürüt"
     },
     {
       "capabilityID" : "core.reasoning",
@@ -164,14 +174,20 @@
       "title" : "Sonucu kullanıcıya aktar"
     }
   ],
-  "fallbackPlan" : "Mevcut kullanıcı girdisinden hedefi yeniden türet; önceki turun goal / plan state'ini bu tura taşıma.",
-  "finalResponse" : "Takvim uygulamasını açmayı/öne getirmeyi denedim ancak görünür biçimde öne geldiğini doğrulayamadım.\n\nDoğrulama: Doğrulama durduruldu: memory hedefi farklı bir eski intent ile eşleşti.\nAlternatif plan: Mevcut kullanıcı girdisinden hedefi yeniden türet; önceki turun goal / plan state'ini bu tura taşıma.",
+  "fallbackPlan" : "Tamamlanmayan action step'ini yeniden planla; yürütülmeyen işi başarılı sayma.",
+  "finalResponse" : "Görev tamamlanamadı. Eksik kabiliyet: Uygulama içi iş akışı.\n\nDoğrulama: Semantic mission içindeki zorunlu action step'lerinden bazıları tamamlanmadı: app.workflow, desktop.app\nAlternatif plan: Tamamlanmayan action step'ini yeniden planla; yürütülmeyen işi başarılı sayma.\nYetkinlik kazanma planı: Resmi API/entegrasyonu araştır → gereken hesap/izinleri çıkar → bağlantıyı sandbox/test ortamında doğrula → kullanıcı onayından sonra etkinleştir.",
   "goal" : "Takvim uygulamasını aç. Yarınki ilk etkinliği bul, başlığını ve saatini bana söyle. Ardından bu etkinlik için 15 dakika öncesine bir hatırlatma eklemeyi hazırla ama benden onay almadan hiçbir değişiklik yapma.",
   "inputSource" : "text",
   "learningPlans" : [
-
+    {
+      "capabilityID" : "app.workflow",
+      "capabilityName" : "Uygulama içi iş akışı",
+      "nextStep" : "Resmi API/entegrasyonu araştır → gereken hesap/izinleri çıkar → bağlantıyı sandbox/test ortamında doğrula → kullanıcı onayından sonra etkinleştir.",
+      "researchGoal" : "Uygulama içi iş akışı yeteneğini kazanmak için resmi dokümantasyon, güvenli entegrasyon seçenekleri ve test yöntemlerini araştır.",
+      "state" : "integrationRequired"
+    }
   ],
-  "plan" : "Akıl yürütme → Bağlam → Uygulama kontrolü",
+  "plan" : "Görev bağlamını hazırla → Kaynak uygulamayı aç veya öne getir → Uygulama içi hedefi yürüt",
   "researchEvidence" : [
 
   ],
@@ -184,17 +200,19 @@
     "Context",
     "Plan",
     "Desktop",
+    "Learn",
     "Verify",
     "Response"
   ],
   "semanticMission" : {
-    "confidence" : 0.8,
+    "confidence" : 0.95,
     "objective" : "Takvim uygulamasını aç. Yarınki ilk etkinliği bul, başlığını ve saatini bana söyle. Ardından bu etkinlik için 15 dakika öncesine bir hatırlatma eklemeyi hazırla ama benden onay almadan hiçbir değişiklik yapma.",
     "outcomes" : [
-      "open",
-      "remember"
+      "analyze",
+      "open"
     ],
     "requiredCapabilityIDs" : [
+      "app.workflow",
       "context.local",
       "core.reasoning",
       "desktop.app"
@@ -202,78 +220,78 @@
     "requiresUserInput" : false,
     "steps" : [
       {
-        "capabilityID" : "core.reasoning",
+        "capabilityID" : "context.local",
         "dependsOn" : [
 
         ],
-        "operation" : "capability.contract",
-        "purpose" : "Mission hedefini uçtan uca tamamlamak için gerekli capability sözleşmesi.",
-        "title" : "Akıl yürütme"
-      },
-      {
-        "capabilityID" : "context.local",
-        "dependsOn" : [
-          0
-        ],
-        "operation" : "capability.contract",
-        "purpose" : "Mission hedefini uçtan uca tamamlamak için gerekli capability sözleşmesi.",
-        "title" : "Bağlam"
+        "operation" : "context.resolve",
+        "purpose" : "Yalnızca bu kullanıcı hedefiyle ilgili bağlamı hazırla; eski görev hedeflerini yeni göreve taşıma.",
+        "title" : "Görev bağlamını hazırla"
       },
       {
         "capabilityID" : "desktop.app",
         "dependsOn" : [
+          0
+        ],
+        "operation" : "app.open",
+        "purpose" : "Kullanıcının adlandırdığı uygulamayı çöz ve görünür foreground durumuna getir.",
+        "title" : "Kaynak uygulamayı aç veya öne getir"
+      },
+      {
+        "capabilityID" : "app.workflow",
+        "dependsOn" : [
           1
         ],
-        "operation" : "capability.contract",
-        "purpose" : "Mission hedefini uçtan uca tamamlamak için gerekli capability sözleşmesi.",
-        "title" : "Uygulama kontrolü"
+        "operation" : "app.workflow.execute",
+        "purpose" : "Uygulamayı açmanın ötesindeki kullanıcı hedefini çöz: gerekli veriyi oku/bul, sonucu doğrula ve istenen değişiklik yalnız hazırlık düzeyindeyse dış dünyaya commit etmeden hazırla. Özel provider yoksa bu generic contract yeni strategy/provider öğrenimini tetiklemeli.",
+        "title" : "Uygulama içi hedefi yürüt"
       }
     ]
   },
-  "semanticPlannerProvider" : "Apple + Contract Repair",
+  "semanticPlannerProvider" : "Apple Foundation Models",
   "taskGraph" : [
-    {
-      "available" : true,
-      "capabilityID" : "core.reasoning",
-      "dependsOn" : [
-
-      ],
-      "index" : 0,
-      "operation" : "capability.contract",
-      "requiresApproval" : false,
-      "risk" : "reasoning",
-      "role" : "reason",
-      "title" : "Akıl yürütme"
-    },
     {
       "available" : true,
       "capabilityID" : "context.local",
       "dependsOn" : [
-        0
+
       ],
-      "index" : 1,
-      "operation" : "capability.contract",
+      "index" : 0,
+      "operation" : "context.resolve",
       "requiresApproval" : false,
       "risk" : "reasoning",
       "role" : "reason",
-      "title" : "Bağlam"
+      "title" : "Görev bağlamını hazırla"
     },
     {
       "available" : true,
       "capabilityID" : "desktop.app",
       "dependsOn" : [
+        0
+      ],
+      "index" : 1,
+      "operation" : "app.open",
+      "requiresApproval" : false,
+      "risk" : "external",
+      "role" : "act",
+      "title" : "Kaynak uygulamayı aç veya öne getir"
+    },
+    {
+      "available" : false,
+      "capabilityID" : "app.workflow",
+      "dependsOn" : [
         1
       ],
       "index" : 2,
-      "operation" : "capability.contract",
-      "requiresApproval" : false,
+      "operation" : "app.workflow.execute",
+      "requiresApproval" : true,
       "risk" : "external",
       "role" : "verify",
-      "title" : "Uygulama kontrolü"
+      "title" : "Uygulama içi hedefi yürüt"
     }
   ],
-  "traceID" : "DA1DBB51-FD8A-442F-B093-8A7FEE942690",
+  "traceID" : "DB810C5D-813D-4106-A7B7-D62312F6941F",
   "userInput" : "Takvim uygulamasını aç. Yarınki ilk etkinliği bul, başlığını ve saatini bana söyle. Ardından bu etkinlik için 15 dakika öncesine bir hatırlatma eklemeyi hazırla ama benden onay almadan hiçbir değişiklik yapma.",
   "verificationState" : "attention",
-  "verificationSummary" : "Doğrulama durduruldu: memory hedefi farklı bir eski intent ile eşleşti."
+  "verificationSummary" : "Semantic mission içindeki zorunlu action step'lerinden bazıları tamamlanmadı: app.workflow, desktop.app"
 }
