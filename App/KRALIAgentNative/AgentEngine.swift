@@ -1148,15 +1148,18 @@ final class AgentEngine: ObservableObject {
             )
         }
 
+        let taskGraph =
+            taskOrchestrator.compile(
+                mission: mission,
+                capabilities:
+                    capabilityRegistry.all
+            )
+
         var outputs: [String] = []
-        var executed = Set([
-            "core.reasoning",
-            "context.local"
-        ])
-        var didResearch = false
-        var didFileSearch = false
-        var didScreenObserve = false
+        var stepEvidence: [Int: String] = [:]
+        var executed = Set<String>()
         var completedStepIndexes = Set<Int>()
+        var didFileSearch = false
 
         for (stepIndex, step) in mission.steps.enumerated() {
             let dependenciesSatisfied =
@@ -1168,74 +1171,254 @@ final class AgentEngine: ObservableObject {
                 continue
             }
 
-            guard let capability = selectedCapabilities.first(
-                where: { $0.id == step.capabilityID }
-            ),
-            capability.isAvailable else {
+            guard
+                taskGraph.steps.indices.contains(
+                    stepIndex
+                )
+            else {
+                continue
+            }
+
+            let graphStep =
+                taskGraph.steps[stepIndex]
+
+            let dependencyEvidence =
+                taskOrchestrator
+                    .dependencyEvidence(
+                        for: graphStep,
+                        evidence: stepEvidence
+                    )
+
+            guard let capability =
+                selectedCapabilities.first(
+                    where: {
+                        $0.id ==
+                            step.capabilityID
+                    }
+                ),
+                capability.isAvailable
+            else {
+                continue
+            }
+
+            if graphStep.requiresApproval {
+                let approvalMessage =
+                    "Kullanıcı onayı bekleniyor: " +
+                    step.title
+
+                stepEvidence[stepIndex] =
+                    approvalMessage
+                outputs.append(
+                    approvalMessage
+                )
+                log(
+                    "Task Graph approval gate: " +
+                    String(stepIndex) +
+                    " • " +
+                    step.capabilityID +
+                    " • " +
+                    step.operation
+                )
                 continue
             }
 
             switch step.capabilityID {
-            case "core.reasoning", "context.local":
-                executed.insert(step.capabilityID)
-                completedStepIndexes.insert(stepIndex)
+            case "context.local":
+                let contextSummary =
+                    activeContextMemories
+                        .map {
+                            $0.title +
+                            ": " +
+                            $0.summary
+                        }
+                        .joined(separator: "\n")
+
+                stepEvidence[stepIndex] =
+                    contextSummary.isEmpty
+                        ? "Bu görev için ek kalıcı bağlam yok."
+                        : contextSummary
+
+                executed.insert(
+                    "context.local"
+                )
+                completedStepIndexes.insert(
+                    stepIndex
+                )
+
+            case "core.reasoning":
+                let operation =
+                    normalizeSemanticText(
+                        step.operation
+                    )
+
+                let isContractStep =
+                    operation.contains(
+                        "semantic.fallback"
+                    ) ||
+                    operation.contains(
+                        "capability.contract"
+                    )
+
+                if isContractStep ||
+                   dependencyEvidence
+                    .trimmingCharacters(
+                        in: .whitespacesAndNewlines
+                    )
+                    .isEmpty {
+                    stepEvidence[stepIndex] =
+                        mission.objective
+                    executed.insert(
+                        "core.reasoning"
+                    )
+                    completedStepIndexes.insert(
+                        stepIndex
+                    )
+                } else if let reasoningOutput =
+                    await localIntelligence
+                        .executeReasoningStep(
+                            goal:
+                                mission.objective,
+                            title:
+                                step.title,
+                            purpose:
+                                step.purpose,
+                            operation:
+                                step.operation,
+                            dependencyEvidence:
+                                dependencyEvidence
+                        ) {
+                    stepEvidence[stepIndex] =
+                        reasoningOutput
+                    executed.insert(
+                        "core.reasoning"
+                    )
+                    completedStepIndexes.insert(
+                        stepIndex
+                    )
+
+                    if graphStep.role ==
+                        .transform {
+                        outputs.append(
+                            reasoningOutput
+                        )
+                    }
+                }
 
             case "research.web":
-                guard !didResearch else {
-                    executed.insert("research.web")
-                    completedStepIndexes.insert(stepIndex)
-                    continue
-                }
+                let composedQuery =
+                    [
+                        mission.objective,
+                        step.purpose,
+                        dependencyEvidence
+                    ]
+                    .filter {
+                        !$0.trimmingCharacters(
+                            in:
+                                .whitespacesAndNewlines
+                        ).isEmpty
+                    }
+                    .joined(separator: "\n")
+
+                let query =
+                    webResearchQuery(
+                        from:
+                            String(
+                                composedQuery
+                                    .prefix(4_000)
+                            )
+                    )
+
+                let researchReply =
+                    await performWebResearch(
+                        query: query
+                    )
 
                 outputs.append(
-                    await performWebResearch(
-                        query: mission.objective
-                    )
+                    researchReply
                 )
-                executed.insert("research.web")
-                didResearch = true
-                completedStepIndexes.insert(stepIndex)
+                stepEvidence[stepIndex] =
+                    researchReply
+                executed.insert(
+                    "research.web"
+                )
+                completedStepIndexes.insert(
+                    stepIndex
+                )
 
             case "files.search":
-                guard !didFileSearch else {
-                    executed.insert("files.search")
-                    completedStepIndexes.insert(stepIndex)
-                    continue
-                }
+                let searchInput =
+                    [
+                        userInput,
+                        step.purpose,
+                        dependencyEvidence
+                    ]
+                    .filter {
+                        !$0.trimmingCharacters(
+                            in:
+                                .whitespacesAndNewlines
+                        ).isEmpty
+                    }
+                    .joined(separator: "\n")
 
                 let searchDecision =
                     semanticFileSearchDecision(
                         mission: mission,
-                        userInput: userInput
+                        userInput: searchInput
                     )
 
                 let searchReply: String
-                if searchDecision.target == .folder {
-                    searchReply = searchIndexedFolders(
-                        for: userInput,
-                        decision: searchDecision
-                    )
+                if searchDecision.target ==
+                    .folder {
+                    searchReply =
+                        searchIndexedFolders(
+                            for: searchInput,
+                            decision:
+                                searchDecision
+                        )
                 } else {
-                    searchReply = searchIndexedFiles(
-                        for: userInput,
-                        decision: searchDecision
-                    )
+                    searchReply =
+                        searchIndexedFiles(
+                            for: searchInput,
+                            decision:
+                                searchDecision
+                        )
                 }
 
-                outputs.append(searchReply)
+                outputs.append(
+                    searchReply
+                )
+                stepEvidence[stepIndex] =
+                    searchReply
 
                 if selectedRootURL != nil {
-                    executed.insert("files.search")
-                    completedStepIndexes.insert(stepIndex)
+                    executed.insert(
+                        "files.search"
+                    )
+                    completedStepIndexes.insert(
+                        stepIndex
+                    )
+                    didFileSearch = true
                 }
-
-                didFileSearch = true
 
             case "files.metadata":
                 if didFileSearch &&
-                   executed.contains("files.search") {
-                    executed.insert("files.metadata")
-                    completedStepIndexes.insert(stepIndex)
+                   executed.contains(
+                        "files.search"
+                   ) {
+                    let metadataEvidence =
+                        dependencyEvidence
+                            .isEmpty
+                            ? "Dosya araması tamamlandı."
+                            : dependencyEvidence
+
+                    stepEvidence[stepIndex] =
+                        metadataEvidence
+                    executed.insert(
+                        "files.metadata"
+                    )
+                    completedStepIndexes.insert(
+                        stepIndex
+                    )
                 }
 
             case "desktop.app":
@@ -1247,124 +1430,214 @@ final class AgentEngine: ObservableObject {
                             )
 
                     let verified =
-                        result.launchOrActivateSucceeded &&
-                        result.frontmostVerified
+                        result
+                            .launchOrActivateSucceeded &&
+                        result
+                            .frontmostVerified
 
                     desktopControlStatus =
-                        result.resolvedApplicationName +
-                        (verified
-                            ? " açıldı/öne geldi • ön plan doğrulandı"
-                            : " açıldı fakat ön plan doğrulaması eksik")
+                        result
+                            .resolvedApplicationName +
+                        (
+                            verified
+                                ? " açıldı/öne geldi • görsel ön plan doğrulandı"
+                                : " açıldı fakat gerçek ön plan doğrulaması başarısız"
+                        )
 
-                    desktopControlStore.saveStatus(
-                        "runtime|app=" +
-                        result.resolvedApplicationName +
-                        "|activate=" +
-                        String(
-                            result.launchOrActivateSucceeded
-                        ) +
-                        "|frontmost=" +
-                        String(
-                            result.frontmostVerified
-                        ) +
-                        "|source=" +
-                        result.verificationSource
-                    )
+                    desktopControlStore
+                        .saveStatus(
+                            "runtime|app=" +
+                            result
+                                .resolvedApplicationName +
+                            "|activate=" +
+                            String(
+                                result
+                                    .launchOrActivateSucceeded
+                            ) +
+                            "|frontmost=" +
+                            String(
+                                result
+                                    .frontmostVerified
+                            ) +
+                            "|source=" +
+                            result
+                                .verificationSource
+                        )
 
-                    outputs.append(
-                        verified
-                            ? result.resolvedApplicationName +
-                                " uygulamasını açtım ve öne geldiğini doğruladım."
-                            : result.resolvedApplicationName +
-                                " uygulamasını açmayı denedim; ön plan doğrulaması tamamlanmadı."
-                    )
+                    let appEvidence =
+                        result
+                            .resolvedApplicationName +
+                        " • foreground=" +
+                        String(
+                            result
+                                .frontmostVerified
+                        ) +
+                        " • source=" +
+                        result
+                            .verificationSource
+
+                    stepEvidence[stepIndex] =
+                        appEvidence
 
                     if verified {
-                        executed.insert("desktop.app")
-                        completedStepIndexes.insert(
-                            stepIndex
+                        outputs.append(
+                            result
+                                .resolvedApplicationName +
+                            " uygulamasını açtım ve görünür biçimde öne geldiğini doğruladım."
+                        )
+                        executed.insert(
+                            "desktop.app"
+                        )
+                        completedStepIndexes
+                            .insert(
+                                stepIndex
+                            )
+                    } else {
+                        outputs.append(
+                            result
+                                .resolvedApplicationName +
+                            " uygulamasını açmayı/öne getirmeyi denedim ancak görünür biçimde öne geldiğini doğrulayamadım."
                         )
                     }
                 } catch {
                     desktopControlStatus =
                         "Uygulama kontrolü başarısız: " +
                         error.localizedDescription
-                    desktopControlStore.saveStatus(
-                        "runtime_failed|" +
-                        error.localizedDescription
+                    desktopControlStore
+                        .saveStatus(
+                            "runtime_failed|" +
+                            error.localizedDescription
+                        )
+                    log(
+                        desktopControlStatus
                     )
-                    log(desktopControlStatus)
                 }
 
             case "perception.screen":
-                guard !didScreenObserve else {
-                    executed.insert("perception.screen")
-                    completedStepIndexes.insert(stepIndex)
-                    continue
-                }
-
                 do {
-                    let report = try await screenPerception.observe(
-                        goal:
-                            mission.objective +
-                            "\nDoğrulanacak ekran adımı: " +
-                            step.purpose
-                    )
+                    let goal =
+                        [
+                            mission.objective,
+                            "Aktif step: " +
+                                step.title,
+                            step.purpose,
+                            dependencyEvidence
+                        ]
+                        .filter {
+                            !$0.trimmingCharacters(
+                                in:
+                                    .whitespacesAndNewlines
+                            ).isEmpty
+                        }
+                        .joined(separator: "\n")
 
-                    screenPerceptionReport = report
-                    try? screenPerceptionStore.save(report)
-                    screenPerceptionStore.saveStatus(
-                        "success|" +
-                        String(report.recognizedText.count) +
-                        " metin satırı|" +
-                        String(report.visibleWindows.count) +
-                        " pencere|runtime"
-                    )
+                    let report =
+                        try await screenPerception
+                            .observe(
+                                goal:
+                                    String(
+                                        goal
+                                            .prefix(
+                                                8_000
+                                            )
+                                    )
+                            )
+
+                    screenPerceptionReport =
+                        report
+                    try? screenPerceptionStore
+                        .save(report)
+                    screenPerceptionStore
+                        .saveStatus(
+                            "success|" +
+                            String(
+                                report
+                                    .recognizedText
+                                    .count
+                            ) +
+                            " metin satırı|" +
+                            String(
+                                report
+                                    .visibleWindows
+                                    .count
+                            ) +
+                            " pencere|runtime"
+                        )
+
                     screenPerceptionStatus =
-                        String(report.recognizedText.count) +
+                        String(
+                            report
+                                .recognizedText
+                                .count
+                        ) +
                         " metin satırı • " +
-                        String(report.visibleWindows.count) +
+                        String(
+                            report
+                                .visibleWindows
+                                .count
+                        ) +
                         " pencere • runtime gözlemi başarılı"
 
+                    let perceptionEvidence =
+                        report
+                            .semanticSummary
+
+                    stepEvidence[stepIndex] =
+                        perceptionEvidence
                     outputs.append(
                         "Ekran gözlemi:\n" +
-                        report.semanticSummary
+                        perceptionEvidence
                     )
 
-                    executed.insert("perception.screen")
-                    completedStepIndexes.insert(stepIndex)
-                    didScreenObserve = true
-                } catch {
-                    screenPerceptionStore.saveStatus(
-                        "failed|" +
-                        error.localizedDescription +
-                        "|runtime"
+                    executed.insert(
+                        "perception.screen"
                     )
+                    completedStepIndexes.insert(
+                        stepIndex
+                    )
+                } catch {
+                    screenPerceptionStore
+                        .saveStatus(
+                            "failed|" +
+                            error
+                                .localizedDescription +
+                            "|runtime"
+                        )
                     screenPerceptionStatus =
                         "Screen Perception başarısız: " +
                         error.localizedDescription
-                    log(screenPerceptionStatus)
+                    log(
+                        screenPerceptionStatus
+                    )
                 }
 
             default:
-                // v0.8.11 semantic executor intentionally runs only
-                // verified read-only primitives. Other capabilities stay
-                // blocked/partial until their provider is connected.
+                // Provider henüz bağlı değilse step task graph içinde
+                // blocked kalır. Başka capability o işi yapılmış gibi
+                // taklit etmez.
                 break
             }
         }
 
         if didFileSearch,
-           mission.requiredCapabilityIDs.contains(
+           mission.requiredCapabilityIDs
+            .contains(
                 "files.metadata"
-           ) {
-            executed.insert("files.metadata")
+            ) {
+            executed.insert(
+                "files.metadata"
+            )
         }
 
         return SemanticMissionExecutionResult(
-            reply: outputs.joined(separator: "\n\n"),
-            executedCapabilityIDs: executed,
-            completedStepIndexes: completedStepIndexes
+            reply:
+                outputs.joined(
+                    separator: "\n\n"
+                ),
+            executedCapabilityIDs:
+                executed,
+            completedStepIndexes:
+                completedStepIndexes
         )
     }
 
