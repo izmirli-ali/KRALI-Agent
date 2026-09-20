@@ -2103,7 +2103,27 @@ final class AgentEngine: ObservableObject {
         log("KRALİ Arena başladı")
 
         Task {
+            let monitor = Task { @MainActor [weak self] in
+                while !Task.isCancelled {
+                    guard let self, self.arenaBusy else {
+                        break
+                    }
+
+                    if let progress =
+                        self.arenaStore.readProgress(),
+                       !progress.isEmpty {
+                        self.arenaStatus = progress
+                    }
+
+                    try? await Task.sleep(
+                        for: .milliseconds(400)
+                    )
+                }
+            }
+
             let report = await arena.run()
+            monitor.cancel()
+
             arenaReport = report
 
             do {
