@@ -2156,6 +2156,14 @@ final class AgentEngine: ObservableObject {
                         )
                     }
 
+                    if !result.reviewerRiskNotes.isEmpty {
+                        detail.append(
+                            "Reviewer risk notu: " +
+                            result.reviewerRiskNotes
+                                .joined(separator: " • ")
+                        )
+                    }
+
                     log(
                         "Arena REVIEW [\(result.scenarioID)] " +
                         result.plannerProvider +
