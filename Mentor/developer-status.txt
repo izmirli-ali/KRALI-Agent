@@ -1,1 +1,1 @@
-sdk_session_running|Mail (mail.work) için model oturumu aktif|krali-dev-agent/20260920-193757|/Users/medusa/Developer/KRALI-Agent-Dev-20260920-193757
+failed|Cline exit 124 (480s): (node:26433) Warning: AI SDK Warning (openai-codex.responses / gpt-5.6-sol): Non-OpenAI reasoning parts are not supported. Skipping reasoning part: {"type":"reasoning","text":"**Planning generic Mail AX provider scope****Designing generic mail read heuristics****Verifying selecte|krali-dev-agent/20260920-193757|/Users/medusa/Developer/KRALI-Agent-Dev-20260920-193757

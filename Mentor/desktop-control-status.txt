@@ -1,1 +1,1 @@
-runtime|app=Mail|activate=false|frontmost=false|source=unverified
+runtime|app=Takvim|activate=false|frontmost=false|source=unverified

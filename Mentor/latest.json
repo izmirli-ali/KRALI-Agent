@@ -1,99 +1,83 @@
 {
   "activityTail" : [
     {
-      "date" : "2026-09-20T16:37:57Z",
+      "date" : "2026-09-20T16:53:58Z",
       "text" : "Debug/Recovery: Doğrulama uyuşmazlığı • Hata ayıklanıyor • desktop.app"
     },
     {
-      "date" : "2026-09-20T16:37:57Z",
-      "text" : "Desktop runtime: Mail • foreground=false • source=unverified"
+      "date" : "2026-09-20T16:53:58Z",
+      "text" : "Desktop runtime: Takvim • foreground=false • source=unverified"
     },
     {
-      "date" : "2026-09-20T16:37:42Z",
-      "text" : "Semantic rota: Core → Goal → Context → Plan → Desktop → Mail → Learn → Verify → Response"
+      "date" : "2026-09-20T16:53:30Z",
+      "text" : "Semantic rota: Core → Goal → Context → Plan → Desktop → Verify → Response"
     },
     {
-      "date" : "2026-09-20T16:37:42Z",
-      "text" : "Task Graph kullanıcı onayı bekleyen step: 4, 5"
+      "date" : "2026-09-20T16:53:30Z",
+      "text" : "Task Graph: 0:core.reasoning[reason] → 1:context.local[reason] → 2:desktop.app[verify]"
     },
     {
-      "date" : "2026-09-20T16:37:42Z",
-      "text" : "Capability Gap: mail.work • integration • strategy=yok"
+      "date" : "2026-09-20T16:53:30Z",
+      "text" : "Semantic capability planı: context.local, core.reasoning, desktop.app"
     },
     {
-      "date" : "2026-09-20T16:37:42Z",
-      "text" : "Task Graph blocked capability: mail.work"
+      "date" : "2026-09-20T16:53:30Z",
+      "text" : "Semantic planner sağlayıcısı: Apple + Contract Repair"
     },
     {
-      "date" : "2026-09-20T16:37:42Z",
-      "text" : "Task Graph: 0:context.local[reason] → 1:desktop.app[act] → 2:mail.work[communicate] → 3:core.reasoning[transform] → 4:mail.work[communicate] → 5:mail.work[communicate]"
+      "date" : "2026-09-20T16:53:30Z",
+      "text" : "Semantic Mission: Takvim uygulamasını aç. Yarınki ilk etkinliği bul, başlığını ve saatini bana söyle. Ardından bu etkinlik için 15 dakika öncesine bir hatırlatma eklemeyi hazırla ama benden onay almadan hiçbir değişiklik yapma."
     },
     {
-      "date" : "2026-09-20T16:37:42Z",
-      "text" : "Semantic capability planı: context.local, core.reasoning, desktop.app, mail.work"
+      "date" : "2026-09-20T16:53:15Z",
+      "text" : "Seçilen kabiliyetler: Akıl yürütme, Bağlam"
     },
     {
-      "date" : "2026-09-20T16:37:42Z",
-      "text" : "Semantic planner sağlayıcısı: Apple Foundation Models"
+      "date" : "2026-09-20T16:53:15Z",
+      "text" : "Otomatik rota: Core → Goal → Context → Response"
     },
     {
-      "date" : "2026-09-20T16:37:42Z",
-      "text" : "Semantic Mission: Mail uygulamasını aç, son gelen maili incele, ne yapmamız gerektiğini analiz et, uygun cevap taslağını hazırla ama göndermeden önce benden onay iste."
+      "date" : "2026-09-20T16:53:15Z",
+      "text" : "Seçilen plan: Bağlamı incele; doğrudan araç eşleşmesi yoksa güvenli alternatifler üret"
     },
     {
-      "date" : "2026-09-20T16:37:26Z",
-      "text" : "Yetkinlik öğrenme planı: Mail → Entegrasyon gerekli"
+      "date" : "2026-09-20T16:53:15Z",
+      "text" : "KRALİ Core hedef sözleşmesi: sonucu ve gerekçeyi açıkla"
     },
     {
-      "date" : "2026-09-20T16:37:26Z",
-      "text" : "Seçilen kabiliyetler: Akıl yürütme, Bağlam, Mail [bekliyor]"
+      "date" : "2026-09-20T16:53:15Z",
+      "text" : "Bağlam hafızası: Mail uygulamasını aç, son gelen maili incele, ne yapmamız gerektiğini… • Estafiz için 30 saniyelik bir Reels çekim planı hazırla. 3 bölüm olsu… • Spotify uygulamasını aç, şu anda açık olan şarkıyı bul, şarkı hakkınd… • Spotify uygulamasını aç, şu anda açık olan şarkıyı bul, şarkının sözl…"
     },
     {
-      "date" : "2026-09-20T16:37:26Z",
-      "text" : "Otomatik rota: Core → Goal → Context → Plan → Mail → Learn → Verify → Response"
-    },
-    {
-      "date" : "2026-09-20T16:37:26Z",
-      "text" : "Seçilen plan: Kaynağı belirle, taslağı hazırla ve gönderimden önce onay iste"
-    },
-    {
-      "date" : "2026-09-20T16:37:26Z",
-      "text" : "KRALİ Core hedef sözleşmesi: bulguları analiz et → iletişim görevini yürüt"
-    },
-    {
-      "date" : "2026-09-20T16:37:26Z",
-      "text" : "Bağlam hafızası: Mail uygulamasını aç, son gelen maili incele, ne yapmamız gerektiğini… • mail uygulamasını aç son gelen maili kontrol et ve bana içeriği özetle • Son çekimle ilgili bir kurgu yapmamız gerekiyor. • Spotify uygulamasını aç, şu anda açık olan şarkıyı bul, şarkı hakkınd…"
-    },
-    {
-      "date" : "2026-09-20T16:37:21Z",
+      "date" : "2026-09-20T16:52:58Z",
       "text" : "Apple yerel zeka hazır"
     },
     {
-      "date" : "2026-09-20T16:37:21Z",
+      "date" : "2026-09-20T16:52:58Z",
       "text" : "Çalışma klasörü geri yüklendi: Desktop"
     },
     {
-      "date" : "2026-09-20T16:37:21Z",
+      "date" : "2026-09-20T16:52:58Z",
       "text" : "0 ekran görüntüsü adayı bulundu"
     },
     {
-      "date" : "2026-09-20T16:37:21Z",
+      "date" : "2026-09-20T16:52:58Z",
       "text" : "1766 dosya ve 68 klasör indekslendi"
     },
     {
-      "date" : "2026-09-20T16:37:21Z",
+      "date" : "2026-09-20T16:52:58Z",
       "text" : "Ağır geliştirici testleri normal açılışta otomatik çalıştırılmıyor"
     },
     {
-      "date" : "2026-09-20T16:37:21Z",
+      "date" : "2026-09-20T16:52:58Z",
       "text" : "Dinamik hedef ve kabiliyet yönlendirme aktif"
     },
     {
-      "date" : "2026-09-20T16:37:21Z",
+      "date" : "2026-09-20T16:52:58Z",
       "text" : "KRALİ Core hazır"
     }
   ],
-  "appVersion" : "0.8.41",
+  "appVersion" : "0.8.43",
   "capabilities" : [
     {
       "available" : true,
@@ -112,26 +96,10 @@
       "id" : "desktop.app",
       "name" : "Uygulama kontrolü",
       "risk" : "external"
-    },
-    {
-      "available" : false,
-      "id" : "mail.work",
-      "name" : "Mail",
-      "risk" : "external"
     }
   ],
   "capabilityGaps" : [
-    {
-      "candidateCapabilityIDs" : [
 
-      ],
-      "capabilityID" : "mail.work",
-      "capabilityName" : "Mail",
-      "developerBrief" : "KRALİ Capability Gap Developer Brief\n\nKullanıcı hedefi:\nMail uygulamasını aç, son gelen maili incele, ne yapmamız gerektiğini analiz et, uygun cevap taslağını hazırla ama göndermeden önce benden onay iste.\n\nEksik capability:\nmail.work — Mail\n\nGap türü:\nintegration\n\nBlocked step:\n2: İletiyi oku\nOperation: mail.read\nRole: communicate\n\nMevcut strategy adayları:\nYok\n\nTasarım kuralları:\n- Uygulama/marka adına hard-code yazma; mümkün olduğunca generic capability veya strategy geliştir.\n- Mevcut provider başka bir işi yapılmış gibi göstermesin.\n- Dış dünyaya commit eden eylemlerde kullanıcı onay kapısı korunmalı.\n- Başarı gerçek observation/verification ile kanıtlanmalı.\n- Ana branch üzerinde doğrudan self-modification yapma; candidate branch/worktree kullan.\n- Build + Training Lab + ilgili runtime probe geçmeden capability available yapılmamalı.\n\nKabul kriteri:\nBlocked step gerçek provider/strategy ile tamamlanmalı, evidence downstream step'e aktarılmalı ve verifier sahte PASS üretmemeli.",
-      "kind" : "integration",
-      "reason" : "Task Graph step 'İletiyi oku' için mail.work gerekiyor ancak provider available değil.",
-      "researchGoal" : "Mail için resmi API/entegrasyon veya generic UI bridge seçeneklerini araştır; izin, güvenlik ve doğrulama sınırlarını çıkar."
-    }
   ],
   "contextMemory" : [
     {
@@ -141,67 +109,46 @@
       "title" : "Mail uygulamasını aç, son gelen maili incele, ne yapmamız gerektiğini…"
     },
     {
-      "createdAt" : "2026-09-20T13:38:09Z",
+      "createdAt" : "2026-09-20T09:05:38Z",
       "kind" : "task",
-      "summary" : "Görevin yapabildiğim kısmını tamamladım. **Son çekim için kurgu üretilemez** Mevcut kaynaklar, doğrudan video içeriğine erişim sağlamaz. Sadece araçların işlevleri, kullanım adımları ve teknik detayları mevcuttur. **Fırsat** Görsel ve video analiz araçlarının yapısal özellikleri, yeni anlatı yapıları inşa etme potansiyeli sunar. Contextual Frame Analysis yöntemi, sahne bazlı gelişimi anlamlandırmak için kullanılabilir. **Risk** Araçlar gerçek video verisiyle entegre değil. Bu nedenle kurgunun doğruluğu belirsizdir. Olası anlatılar, mevcut teknik sınırlara dayanmalıdır. **Özgün fikirler** - **Sahne bazlı anlatı döngüsü:** Her sahne, önceki sahnenin bağlamıyla birlikte analiz edilerek bir hikâye örgüsü oluşturulabilir. - **Dilsel dönüşüm aracı:** Video analiz araçlarının sunduğu anlatı özetleri, yeni bir hikâye anlatım biçimine dönüştürülebilir. - **Veri odaklı karakter gelişimi:** Araçların tespit ettiği görsel unsurlar (yüzler, etiketler), karakter gelişiminde sembolik olarak kullanılabilir. **Sonuç** Mevcut kaynaklarla doğrudan bir kurgu üretilemez. Araçların yapısal imkânları, yeni bir anlatı için temel oluşturabilir. Kısmi doğrulama: Web araştırması 4 alakalı kaynak buldu; ancak",
-      "title" : "mail uygulamasını aç son gelen maili kontrol et ve bana içeriği özetle"
-    },
-    {
-      "createdAt" : "2026-09-20T10:18:26Z",
-      "kind" : "research",
-      "summary" : "Görevin yapabildiğim kısmını tamamladım. **Son çekim için kurgu üretilemez** Mevcut kaynaklar, doğrudan video içeriğine erişim sağlamaz. Kanıtlar yalnızca araçların işlevlerini, kullanım adımlarını ve teknik detayları içerir. **Fırsat** Görsel ve video analiz araçlarının yapısal özellikleri, kurgu için yeni anlatı yapıları inşa etme potansiyeli sunar. Contextual Frame Analysis yöntemi, sahne bazlı gelişimi anlamlandırmak için kullanılabilir. **Risk** Araçlar gerçek video verisiyle entegre değil. Bu nedenle kurgunun doğruluğu belirsizdir. Olası anlatılar, mevcut teknik sınırlara dayanmalıdır. **Özgün fikirler** - **Sahne bazlı anlatı döngüsü:** Her sahne, önceki sahnenin bağlamıyla birlikte analiz edilerek bir hikâye örgüsü oluşturulabilir. - **Dilsel dönüşüm aracı:** Video analiz araçlarının sunduğu anlatı özetleri, yeni bir hikâye anlatım biçimine dönüştürülebilir. - **Veri odaklı karakter gelişimi:** Araçların tespit ettiği görsel unsurlar (yüzler, etiketler), karakter gelişiminde sembolik olarak kullanılabilir. **Sonuç** Mevcut kaynaklarla doğrudan bir kurgu üretilemez. Araçların yapısal imkânları, yeni bir anlatı için temel oluşturabilir. Kısmi doğrulama: Web araştırması 4 alak",
-      "title" : "Son çekimle ilgili bir kurgu yapmamız gerekiyor."
+      "summary" : "**1. Açılış Bölümü (0-5 saniye)** **“Aynı hareket, üç farklı beden”** serisi temel alınarak hazırlanan bu bölüm, görsel bir karşılaştırma sunar. Reformer üzerinde aynı pozisyon, ancak üç farklı hedef kitleye göre uyarlanmıştır. Başlangıç seviyesi, masa başında çalışan birey ve düzenli egzersiz yapan kişi. **Neden işe yarar?** - Hareketin görünüşü sabit kalırken, direnç ve açı gibi faktörlerin kişiye göre değiştiğini somutlaştırır. - İzleyicinin “bu hareketi ben yapabilir miyim?” sorusunu yanıtlar. - Hesabı yalnızca hareket gösteren bir sayfa değil, **kişiye özel yaklaşım sunan uzman bir merkez** olarak konumlandırır. - Seri formatına uygun yapı, içerik tekrarlarına imkân tanır. **2. Ana Mesaj Bölümü (5-20 saniye)** Günlük yaşamdan kısa bir sahneyle başlar: Bilgisayar başında çalışan bir kişi kalktığında belini tutuyor veya omuzlarını çeviriyor. Ekranda sorular sırayla belirir: - “Sandalyeden kalkınca birkaç saniye doğrulamaya çalışıyor musun?” - “Günün sonunda omuzların öne mi düşüyor?” - “Sorun yalnızca ‘esnek olmamak’ olmayabilir.” Ardından eğitmen, tanı koymadan **kişiye özel değerlendirme ve kontrollü egzersiz** önerir. **Neden işe yarar?** - Hizmetin soyut bir kavram değil, iz",
+      "title" : "Estafiz için 30 saniyelik bir Reels çekim planı hazırla. 3 bölüm olsu…"
     },
     {
       "createdAt" : "2026-09-20T14:01:45Z",
       "kind" : "task",
       "summary" : "**Ekran durumu** KRALİ uygulaması önde konumda. Pencere başlıkları ve uygulama isimleri ekranın üzerinde açık. KRALİ — KRALİ başlığı açık. **Nihai çıktı** Mevcut sistem, görsel ve video içeriğine doğrudan erişim sağlamıyor. Bu nedenle ekran görüntüsünü analiz etmek veya ilgili klasörü Finder’da açmak mümkün değil. **Fırsat** Görsel ve video analiz araçlarının yapısal özellikleri, yeni anlatı yapıları inşa etme potansiyeli sunar. Contextual Frame Analysis yöntemi, sahne bazlı gelişimi anlamlandırmak için kullanılabilir. **Risk** Araçlar gerçek video verisiyle entegre değil. Bu nedenle kurgunun doğruluğu belirsizdir. Olası anlatılar, mevcut teknik sınırlara dayanmalıdır. **Sonuç** Mevcut kaynaklarla doğrudan bir kurgu üretilemez. Araçların yapısal imkânları, yeni bir anlatı için temel oluşturabilir. Doğrulama: Doğrulama durduruldu: seçilen dosya arama hedefi mevcut kullanıcı girdisiyle uyuşmuyor. Alternatif plan: Mevcut kullanıcı girdisinden hedefi yeniden türet; önceki turun goal / plan state'ini bu tura taşıma.",
       "title" : "Spotify uygulamasını aç, şu anda açık olan şarkıyı bul, şarkı hakkınd…"
+    },
+    {
+      "createdAt" : "2026-09-20T13:40:09Z",
+      "kind" : "task",
+      "summary" : "**Hedef gerçekleştirilemez** Mevcut sistem, görsel ve video içeriğine doğrudan erişim sağlayamıyor. Spotify uygulamasında açık olan şarkıyı tespit etmek veya sözlerini araştırmak için gerekli teknik yetenekler mevcut değil. Sözlerin analiz edilmesi ve sonuçların masaüstündeki 9 Eylül klasörüne txt dosyası olarak kaydedilmesi, metin dosyası yazma yeteneğiyle sınırlı. Bu özellik doğrudan desteklenmiyor. **Fırsat** Görsel ve video analiz araçlarının yapısal özellikleri, yeni anlatı yapıları inşa etme potansiyeli sunar. Contextual Frame Analysis yöntemi, sahne bazlı gelişimi anlamlandırmak için kullanılabilir. **Risk** Araçlar gerçek video verisiyle entegre değil. Bu nedenle kurgunun doğruluğu belirsizdir. Olası anlatılar, mevcut teknik sınırlara dayanmalıdır. **Sonuç** Mevcut kaynaklarla doğrudan bir kurgu üretilemez. Araçların yapısal imkânları, yeni bir anlatı için temel oluşturabilir. Doğrulama: Doğrulama durduruldu: seçilen dosya arama hedefi mevcut kullanıcı girdisiyle uyuşmuyor. Alternatif plan: Mevcut kullanıcı girdisinden hedefi yeniden türet; önceki turun goal / plan state'ini bu tura taşıma. Yetkinlik kazanma planı: Resmi kaynakları araştır → geri alınabilir prototip oluştur",
+      "title" : "Spotify uygulamasını aç, şu anda açık olan şarkıyı bul, şarkının sözl…"
     }
   ],
-  "createdAt" : "2026-09-20T16:37:57Z",
+  "createdAt" : "2026-09-20T16:53:58Z",
   "executionSteps" : [
     {
-      "capabilityID" : "context.local",
-      "detail" : "Yalnızca bu kullanıcı hedefiyle ilgili bağlamı hazırla; eski görev hedeflerini yeni göreve taşıma. Operation: context.resolve",
+      "capabilityID" : "core.reasoning",
+      "detail" : "Mission hedefini uçtan uca tamamlamak için gerekli capability sözleşmesi. Operation: capability.contract",
       "kind" : "reasoning",
       "state" : "completed",
-      "title" : "Görev bağlamını hazırla"
+      "title" : "Akıl yürütme"
+    },
+    {
+      "capabilityID" : "context.local",
+      "detail" : "Mission hedefini uçtan uca tamamlamak için gerekli capability sözleşmesi. Ön koşul adımları: 1. Operation: capability.contract",
+      "kind" : "reasoning",
+      "state" : "completed",
+      "title" : "Bağlam"
     },
     {
       "capabilityID" : "desktop.app",
-      "detail" : "Kullanıcının adlandırdığı uygulamayı çöz ve görünür foreground durumuna getir. Ön koşul adımları: 1. Operation: app.open",
+      "detail" : "Mission hedefini uçtan uca tamamlamak için gerekli capability sözleşmesi. Ön koşul adımları: 2. Operation: capability.contract",
       "kind" : "action",
       "state" : "partial",
-      "title" : "Kaynak uygulamayı aç veya öne getir"
-    },
-    {
-      "capabilityID" : "mail.work",
-      "detail" : "Kullanıcının istediği mail içeriğini salt-okunur biçimde al. Ön koşul adımları: 2. Operation: mail.read",
-      "kind" : "action",
-      "state" : "blocked",
-      "title" : "İletiyi oku"
-    },
-    {
-      "capabilityID" : "core.reasoning",
-      "detail" : "Önceki adımların gerçek çıktısını birlikte değerlendir ve sonraki adımın kullanabileceği sonucu üret. Ön koşul adımları: 3. Operation: content.analyze",
-      "kind" : "reasoning",
-      "state" : "pending",
-      "title" : "Toplanan veriyi analiz et"
-    },
-    {
-      "capabilityID" : "mail.work",
-      "detail" : "Analiz sonucuna uygun bir cevap taslağı hazırla; henüz dış dünyaya gönderme. Ön koşul adımları: 4. Operation: mail.draft",
-      "kind" : "action",
-      "state" : "blocked",
-      "title" : "Cevap taslağı oluştur"
-    },
-    {
-      "capabilityID" : "mail.work",
-      "detail" : "Hazırlanan taslağı yalnız kullanıcı onayından sonra dış dünyaya gönder. Ön koşul adımları: 5. Operation: mail.send",
-      "kind" : "action",
-      "state" : "blocked",
-      "title" : "Gönder"
+      "title" : "Uygulama kontrolü"
     },
     {
       "capabilityID" : "core.reasoning",
@@ -217,20 +164,14 @@
       "title" : "Sonucu kullanıcıya aktar"
     }
   ],
-  "fallbackPlan" : "Tamamlanmayan action step'ini yeniden planla; yürütülmeyen işi başarılı sayma.",
-  "finalResponse" : "Görev tamamlanamadı. Eksik kabiliyet: Mail.\n\nDoğrulama: Semantic mission içindeki zorunlu action step'lerinden bazıları tamamlanmadı: desktop.app, mail.work\nAlternatif plan: Tamamlanmayan action step'ini yeniden planla; yürütülmeyen işi başarılı sayma.\nYetkinlik kazanma planı: Resmi API/entegrasyonu araştır → gereken hesap/izinleri çıkar → bağlantıyı sandbox/test ortamında doğrula → kullanıcı onayından sonra etkinleştir.",
-  "goal" : "Mail uygulamasını aç, son gelen maili incele, ne yapmamız gerektiğini analiz et, uygun cevap taslağını hazırla ama göndermeden önce benden onay iste.",
+  "fallbackPlan" : "Mevcut kullanıcı girdisinden hedefi yeniden türet; önceki turun goal / plan state'ini bu tura taşıma.",
+  "finalResponse" : "Takvim uygulamasını açmayı/öne getirmeyi denedim ancak görünür biçimde öne geldiğini doğrulayamadım.\n\nDoğrulama: Doğrulama durduruldu: memory hedefi farklı bir eski intent ile eşleşti.\nAlternatif plan: Mevcut kullanıcı girdisinden hedefi yeniden türet; önceki turun goal / plan state'ini bu tura taşıma.",
+  "goal" : "Takvim uygulamasını aç. Yarınki ilk etkinliği bul, başlığını ve saatini bana söyle. Ardından bu etkinlik için 15 dakika öncesine bir hatırlatma eklemeyi hazırla ama benden onay almadan hiçbir değişiklik yapma.",
   "inputSource" : "text",
   "learningPlans" : [
-    {
-      "capabilityID" : "mail.work",
-      "capabilityName" : "Mail",
-      "nextStep" : "Resmi API/entegrasyonu araştır → gereken hesap/izinleri çıkar → bağlantıyı sandbox/test ortamında doğrula → kullanıcı onayından sonra etkinleştir.",
-      "researchGoal" : "Mail okuma/taslak/gönderim için sağlayıcı API'leri, OAuth izin kapsamları ve gönderim öncesi onay modelini araştır.",
-      "state" : "integrationRequired"
-    }
+
   ],
-  "plan" : "Görev bağlamını hazırla → Kaynak uygulamayı aç veya öne getir → İletiyi oku → Toplanan veriyi analiz et → Cevap taslağı oluştur → Gönder",
+  "plan" : "Akıl yürütme → Bağlam → Uygulama kontrolü",
   "researchEvidence" : [
 
   ],
@@ -243,168 +184,96 @@
     "Context",
     "Plan",
     "Desktop",
-    "Mail",
-    "Learn",
     "Verify",
     "Response"
   ],
   "semanticMission" : {
-    "confidence" : 0.9,
-    "objective" : "Mail uygulamasını aç, son gelen maili incele, ne yapmamız gerektiğini analiz et, uygun cevap taslağını hazırla ama göndermeden önce benden onay iste.",
+    "confidence" : 0.8,
+    "objective" : "Takvim uygulamasını aç. Yarınki ilk etkinliği bul, başlığını ve saatini bana söyle. Ardından bu etkinlik için 15 dakika öncesine bir hatırlatma eklemeyi hazırla ama benden onay almadan hiçbir değişiklik yapma.",
     "outcomes" : [
-      "analyze",
-      "communicate",
-      "compose",
-      "explain",
-      "open"
+      "open",
+      "remember"
     ],
     "requiredCapabilityIDs" : [
       "context.local",
       "core.reasoning",
-      "desktop.app",
-      "mail.work"
+      "desktop.app"
     ],
     "requiresUserInput" : false,
     "steps" : [
       {
-        "capabilityID" : "context.local",
+        "capabilityID" : "core.reasoning",
         "dependsOn" : [
 
         ],
-        "operation" : "context.resolve",
-        "purpose" : "Yalnızca bu kullanıcı hedefiyle ilgili bağlamı hazırla; eski görev hedeflerini yeni göreve taşıma.",
-        "title" : "Görev bağlamını hazırla"
+        "operation" : "capability.contract",
+        "purpose" : "Mission hedefini uçtan uca tamamlamak için gerekli capability sözleşmesi.",
+        "title" : "Akıl yürütme"
+      },
+      {
+        "capabilityID" : "context.local",
+        "dependsOn" : [
+          0
+        ],
+        "operation" : "capability.contract",
+        "purpose" : "Mission hedefini uçtan uca tamamlamak için gerekli capability sözleşmesi.",
+        "title" : "Bağlam"
       },
       {
         "capabilityID" : "desktop.app",
         "dependsOn" : [
-          0
-        ],
-        "operation" : "app.open",
-        "purpose" : "Kullanıcının adlandırdığı uygulamayı çöz ve görünür foreground durumuna getir.",
-        "title" : "Kaynak uygulamayı aç veya öne getir"
-      },
-      {
-        "capabilityID" : "mail.work",
-        "dependsOn" : [
           1
         ],
-        "operation" : "mail.read",
-        "purpose" : "Kullanıcının istediği mail içeriğini salt-okunur biçimde al.",
-        "title" : "İletiyi oku"
-      },
-      {
-        "capabilityID" : "core.reasoning",
-        "dependsOn" : [
-          2
-        ],
-        "operation" : "content.analyze",
-        "purpose" : "Önceki adımların gerçek çıktısını birlikte değerlendir ve sonraki adımın kullanabileceği sonucu üret.",
-        "title" : "Toplanan veriyi analiz et"
-      },
-      {
-        "capabilityID" : "mail.work",
-        "dependsOn" : [
-          3
-        ],
-        "operation" : "mail.draft",
-        "purpose" : "Analiz sonucuna uygun bir cevap taslağı hazırla; henüz dış dünyaya gönderme.",
-        "title" : "Cevap taslağı oluştur"
-      },
-      {
-        "capabilityID" : "mail.work",
-        "dependsOn" : [
-          4
-        ],
-        "operation" : "mail.send",
-        "purpose" : "Hazırlanan taslağı yalnız kullanıcı onayından sonra dış dünyaya gönder.",
-        "title" : "Gönder"
+        "operation" : "capability.contract",
+        "purpose" : "Mission hedefini uçtan uca tamamlamak için gerekli capability sözleşmesi.",
+        "title" : "Uygulama kontrolü"
       }
     ]
   },
-  "semanticPlannerProvider" : "Apple Foundation Models",
+  "semanticPlannerProvider" : "Apple + Contract Repair",
   "taskGraph" : [
     {
       "available" : true,
-      "capabilityID" : "context.local",
+      "capabilityID" : "core.reasoning",
       "dependsOn" : [
 
       ],
       "index" : 0,
-      "operation" : "context.resolve",
+      "operation" : "capability.contract",
       "requiresApproval" : false,
       "risk" : "reasoning",
       "role" : "reason",
-      "title" : "Görev bağlamını hazırla"
+      "title" : "Akıl yürütme"
+    },
+    {
+      "available" : true,
+      "capabilityID" : "context.local",
+      "dependsOn" : [
+        0
+      ],
+      "index" : 1,
+      "operation" : "capability.contract",
+      "requiresApproval" : false,
+      "risk" : "reasoning",
+      "role" : "reason",
+      "title" : "Bağlam"
     },
     {
       "available" : true,
       "capabilityID" : "desktop.app",
       "dependsOn" : [
-        0
-      ],
-      "index" : 1,
-      "operation" : "app.open",
-      "requiresApproval" : false,
-      "risk" : "external",
-      "role" : "act",
-      "title" : "Kaynak uygulamayı aç veya öne getir"
-    },
-    {
-      "available" : false,
-      "capabilityID" : "mail.work",
-      "dependsOn" : [
         1
       ],
       "index" : 2,
-      "operation" : "mail.read",
+      "operation" : "capability.contract",
       "requiresApproval" : false,
       "risk" : "external",
-      "role" : "communicate",
-      "title" : "İletiyi oku"
-    },
-    {
-      "available" : true,
-      "capabilityID" : "core.reasoning",
-      "dependsOn" : [
-        2
-      ],
-      "index" : 3,
-      "operation" : "content.analyze",
-      "requiresApproval" : false,
-      "risk" : "reasoning",
-      "role" : "transform",
-      "title" : "Toplanan veriyi analiz et"
-    },
-    {
-      "available" : false,
-      "capabilityID" : "mail.work",
-      "dependsOn" : [
-        3
-      ],
-      "index" : 4,
-      "operation" : "mail.draft",
-      "requiresApproval" : true,
-      "risk" : "external",
-      "role" : "communicate",
-      "title" : "Cevap taslağı oluştur"
-    },
-    {
-      "available" : false,
-      "capabilityID" : "mail.work",
-      "dependsOn" : [
-        4
-      ],
-      "index" : 5,
-      "operation" : "mail.send",
-      "requiresApproval" : true,
-      "risk" : "external",
-      "role" : "communicate",
-      "title" : "Gönder"
+      "role" : "verify",
+      "title" : "Uygulama kontrolü"
     }
   ],
-  "traceID" : "2339777E-3319-4DFA-909E-6DBA799A282B",
-  "userInput" : "Mail uygulamasını aç, son gelen maili incele, ne yapmamız gerektiğini analiz et, uygun cevap taslağını hazırla ama göndermeden önce benden onay iste.",
+  "traceID" : "DA1DBB51-FD8A-442F-B093-8A7FEE942690",
+  "userInput" : "Takvim uygulamasını aç. Yarınki ilk etkinliği bul, başlığını ve saatini bana söyle. Ardından bu etkinlik için 15 dakika öncesine bir hatırlatma eklemeyi hazırla ama benden onay almadan hiçbir değişiklik yapma.",
   "verificationState" : "attention",
-  "verificationSummary" : "Semantic mission içindeki zorunlu action step'lerinden bazıları tamamlanmadı: desktop.app, mail.work"
+  "verificationSummary" : "Doğrulama durduruldu: memory hedefi farklı bir eski intent ile eşleşti."
 }
