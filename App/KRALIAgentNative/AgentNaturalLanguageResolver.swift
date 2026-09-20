@@ -3,7 +3,7 @@ import Foundation
 struct AgentNaturalLanguageResolver: Sendable {
     private let openVerbs = Set([
         "ac", "baslat", "calistir",
-        "getir", "goster"
+        "getir", "goster", "gir", "gec"
     ])
 
     private let commandNoise = Set([
@@ -12,7 +12,7 @@ struct AgentNaturalLanguageResolver: Sendable {
         "pencere", "pencereyi",
         "ac", "baslat", "calistir",
         "one", "getir", "goster",
-        "gec", "lutfen", "hemen",
+        "gec", "gir", "lutfen", "hemen",
         "bir", "su", "sunu", "bunu"
     ])
 
@@ -222,6 +222,8 @@ struct AgentNaturalLanguageResolver: Sendable {
             "ini", "ını", "unu", "ünü",
             "yi", "yı", "yu", "yü",
             "ni", "nı", "nu", "nü",
+            "ya", "ye", "na", "ne",
+            "a", "e",
             "i", "ı", "u", "ü"
         ]
         .map(normalized)
