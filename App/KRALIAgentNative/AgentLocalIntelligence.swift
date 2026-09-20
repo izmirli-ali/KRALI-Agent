@@ -57,9 +57,6 @@ actor AgentLocalIntelligence {
         capabilities: [AgentCapability],
         hasWorkspace: Bool
     ) async -> AgentSemanticMission? {
-        let normalizedInput =
-            normalizeMissionText(userInput)
-
         let simpleAppOpen =
             languageResolver
                 .isSimpleOpenCommand(
