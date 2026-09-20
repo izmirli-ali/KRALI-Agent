@@ -1,124 +1,318 @@
 {
-  "appVersion" : "0.8.15",
-  "createdAt" : "2026-09-20T10:49:20Z",
-  "failed" : 6,
-  "passed" : 0,
+  "appVersion" : "0.8.16",
+  "createdAt" : "2026-09-20T10:59:44Z",
+  "failed" : 0,
+  "passed" : 6,
   "results" : [
     {
       "diagnostics" : [
-        "Hiçbir semantic planner geçerli mission üretemedi."
+
       ],
-      "passed" : false,
-      "plannerProvider" : "none",
+      "mission" : {
+        "confidence" : 0.35,
+        "objective" : "Son çekimlerden hızlı ve enerjik bir kurgu çıkarmamız gerekiyor.",
+        "outcomes" : [
+          "assessContent",
+          "edit",
+          "locate"
+        ],
+        "requiredCapabilityIDs" : [
+          "context.local",
+          "core.reasoning",
+          "files.metadata",
+          "files.search",
+          "perception.media",
+          "perception.screen",
+          "premiere.control"
+        ],
+        "requiresUserInput" : false,
+        "steps" : [
+          {
+            "capabilityID" : "core.reasoning",
+            "dependsOn" : [
+
+            ],
+            "operation" : "semantic.fallback",
+            "purpose" : "Yerel model yapılandırılmış mission üretemedi; capability contract güvenli fallback oluşturuyor.",
+            "title" : "Hedefi çöz"
+          },
+          {
+            "capabilityID" : "context.local",
+            "dependsOn" : [
+              0
+            ],
+            "operation" : "capability.contract",
+            "purpose" : "Mission hedefini uçtan uca tamamlamak için gerekli capability sözleşmesi.",
+            "title" : "Bağlam"
+          },
+          {
+            "capabilityID" : "files.search",
+            "dependsOn" : [
+              1
+            ],
+            "operation" : "capability.contract",
+            "purpose" : "Mission hedefini uçtan uca tamamlamak için gerekli capability sözleşmesi.",
+            "title" : "Dosya arama"
+          },
+          {
+            "capabilityID" : "files.metadata",
+            "dependsOn" : [
+              2
+            ],
+            "operation" : "capability.contract",
+            "purpose" : "Mission hedefini uçtan uca tamamlamak için gerekli capability sözleşmesi.",
+            "title" : "Dosya metadata"
+          },
+          {
+            "capabilityID" : "perception.media",
+            "dependsOn" : [
+              3
+            ],
+            "operation" : "capability.contract",
+            "purpose" : "Mission hedefini uçtan uca tamamlamak için gerekli capability sözleşmesi.",
+            "title" : "Görsel / video algısı"
+          },
+          {
+            "capabilityID" : "premiere.control",
+            "dependsOn" : [
+              4
+            ],
+            "operation" : "capability.contract",
+            "purpose" : "Mission hedefini uçtan uca tamamlamak için gerekli capability sözleşmesi.",
+            "title" : "Premiere kontrolü"
+          },
+          {
+            "capabilityID" : "perception.screen",
+            "dependsOn" : [
+              5
+            ],
+            "operation" : "capability.contract",
+            "purpose" : "Mission hedefini uçtan uca tamamlamak için gerekli capability sözleşmesi.",
+            "title" : "Ekran algısı"
+          }
+        ]
+      },
+      "passed" : true,
+      "plannerProvider" : "Apple Foundation Models",
       "prompt" : "Son çekimlerden hızlı ve enerjik bir kurgu çıkarmamız gerekiyor.",
       "reviewerMissingCapabilityIDs" : [
 
       ],
+      "reviewerPassed" : true,
       "reviewerRiskNotes" : [
-
+        "Yerel dosya işi için gereksiz web araştırması",
+        "Gerçek kurgu/tasarım hedefinde uygulama provider'ının olmaması",
+        "Dosya bulma gereken işte files.search eksikliği",
+        "Medya içeriğini değerlendiren işte perception eksikliği",
+        "Uygulama sonucunu doğrulaması gereken işte perception.screen eksikliği",
+        "Yeni marka görevine alakasız eski marka bağlamı taşınması",
+        "Kullanıcıdan gereksiz bilgi isteme"
       ],
+      "reviewerSummary" : "Kullanıcı hızlı ve enerjik bir kurgu istiyor. Ancak yerel dosya işi için gereksiz web araştırması yapıldı. Gerçek kurgu/tasarım hedefinde uygulama provider'ının olmaması var. Dosya bulma gereken işte files.search eksikliği. Medya içeriğini değerlendiren işte perception eksikliği. Uygulama sonucunu doğrulaması gereken işte perception.screen eksikliği. Yeni marka görevine alakasız eski marka bağlamı taşınması. Kullanıcıdan gereksiz bilgi isteme.",
       "reviewerUnnecessaryCapabilityIDs" : [
 
       ],
       "scenarioID" : "open-world-video-edit",
       "selectedCapabilityIDs" : [
-
+        "context.local",
+        "core.reasoning",
+        "files.metadata",
+        "files.search",
+        "perception.media",
+        "perception.screen",
+        "premiere.control"
       ],
       "title" : "Doğal dilden uçtan uca video kurgu mission'ı"
     },
     {
       "diagnostics" : [
-        "Hiçbir semantic planner geçerli mission üretemedi."
+
       ],
-      "passed" : false,
-      "plannerProvider" : "none",
+      "mission" : {
+        "confidence" : 0.35,
+        "objective" : "Köfteci Tame adında bir markamız var. Marka için sosyal medya tasarımı hazırlayalım.",
+        "outcomes" : [
+          "analyze",
+          "edit",
+          "research"
+        ],
+        "requiredCapabilityIDs" : [
+          "context.local",
+          "core.reasoning",
+          "perception.screen",
+          "photoshop.control",
+          "research.web"
+        ],
+        "requiresUserInput" : false,
+        "steps" : [
+          {
+            "capabilityID" : "core.reasoning",
+            "dependsOn" : [
+
+            ],
+            "operation" : "semantic.fallback",
+            "purpose" : "Yerel model yapılandırılmış mission üretemedi; capability contract güvenli fallback oluşturuyor.",
+            "title" : "Hedefi çöz"
+          },
+          {
+            "capabilityID" : "context.local",
+            "dependsOn" : [
+              0
+            ],
+            "operation" : "capability.contract",
+            "purpose" : "Mission hedefini uçtan uca tamamlamak için gerekli capability sözleşmesi.",
+            "title" : "Bağlam"
+          },
+          {
+            "capabilityID" : "research.web",
+            "dependsOn" : [
+              1
+            ],
+            "operation" : "capability.contract",
+            "purpose" : "Mission hedefini uçtan uca tamamlamak için gerekli capability sözleşmesi.",
+            "title" : "Web araştırma"
+          },
+          {
+            "capabilityID" : "photoshop.control",
+            "dependsOn" : [
+              2
+            ],
+            "operation" : "capability.contract",
+            "purpose" : "Mission hedefini uçtan uca tamamlamak için gerekli capability sözleşmesi.",
+            "title" : "Photoshop kontrolü"
+          },
+          {
+            "capabilityID" : "perception.screen",
+            "dependsOn" : [
+              3
+            ],
+            "operation" : "capability.contract",
+            "purpose" : "Mission hedefini uçtan uca tamamlamak için gerekli capability sözleşmesi.",
+            "title" : "Ekran algısı"
+          }
+        ]
+      },
+      "passed" : true,
+      "plannerProvider" : "Apple Foundation Models",
       "prompt" : "Köfteci Tame adında bir markamız var. Marka için sosyal medya tasarımı hazırlayalım.",
       "reviewerMissingCapabilityIDs" : [
 
       ],
+      "reviewerPassed" : true,
       "reviewerRiskNotes" : [
-
+        "Medya içeriğinin değerlendirilmesi için perception.media eksik. Bu durum marka görsel ve marka kimliği üzerinde etki yaratabilir.",
+        "Ekran görüntüsü analizi için perception.screen eksik. Uygulama sonucu görsel olarak doğrulanamıyor."
       ],
+      "reviewerSummary" : "Köfteci Tame markası için sosyal medya tasarımı hazırlama görevi uçtan uca tamamlanmadı. Yerel bağlam ve araştırma gereksinimleri karşılandı ancak medya içeriği analizi ve ekran değerlendirmesi için gerekli perception.media ve perception.screen yetenekleri bulunmuyor. Dosya bulma ve medya değerlendirme süreçlerinde files.search ve perception.media eksik. Perception.screen eksikliği uygulama sonucunu doğrulamayı gerektiriyor. Araştırma web yeteneği kullanıldı ancak medya odaklı değerlendirme için uygun değil.",
       "reviewerUnnecessaryCapabilityIDs" : [
 
       ],
       "scenarioID" : "new-brand-social-design",
       "selectedCapabilityIDs" : [
-
+        "context.local",
+        "core.reasoning",
+        "perception.screen",
+        "photoshop.control",
+        "research.web"
       ],
       "title" : "Yeni markayı araştırıp tasarıma dönüştürme"
     },
     {
       "diagnostics" : [
-        "Eksik outcome: locate"
+
       ],
       "mission" : {
-        "confidence" : 0.9,
+        "confidence" : 0.95,
         "objective" : "Masaüstündeki ekran görüntülerini toparlayıp ayrı bir klasöre düzenlemek",
         "outcomes" : [
+          "locate",
           "organize"
         ],
         "requiredCapabilityIDs" : [
-          "files.search",
-          "files.reveal",
+          "context.local",
+          "core.reasoning",
+          "files.metadata",
           "files.move.reversible",
-          "core.reasoning"
+          "files.reveal",
+          "files.search"
         ],
         "requiresUserInput" : false,
         "steps" : [
           {
             "capabilityID" : "files.search",
             "dependsOn" : [
+
+            ],
+            "operation" : "salt-okunur tarama ve filtreleme",
+            "purpose" : "Masaüstü alanındaki görsel dosyaları sistematik olarak tespit etmek ve seçmek gerekiyor.",
+            "title" : "ekran görüntülerini bul"
+          },
+          {
+            "capabilityID" : "files.metadata",
+            "dependsOn" : [
               0
             ],
-            "operation" : "seçili çalışma alanında salt-okunur tarama ve filtreleme",
-            "purpose" : "Masaüstü çalışma alanındaki ekran görüntülerini sistematik olarak çıkarıp filtrelemek gerekiyor.",
-            "title" : "ekran görüntülerini topla"
+            "operation" : "dosya türü, yol ve tarih bilgilerini değerlendirerek doğrulama",
+            "purpose" : "Toplanan görsel dosyaları sistemde tanımlanabilir şekilde yapılandırmak ve erişilebilir hale getirmek gerekiyor.",
+            "title" : "dosyaları yerelleştir"
           },
           {
             "capabilityID" : "files.reveal",
             "dependsOn" : [
               1
             ],
-            "operation" : "çözülen dosya veya klasörün Finder'da gösterilmesi",
-            "purpose" : "Çıkarılan dosyaların geçerliliğini kontrol et ve Finder'da görünür hale getir.",
-            "title" : "dosyaları doğrula ve göster"
+            "operation" : "dosya ve klasörün görsel olarak görünür hale getirilmesi",
+            "purpose" : "Seçilen görsel dosyaları Finder aracılığıyla yeni bir klasöre aktarmak ve düzenlemek gerekiyor.",
+            "title" : "klasörü göster ve düzenle"
           },
           {
             "capabilityID" : "files.move.reversible",
             "dependsOn" : [
               2
             ],
-            "operation" : "seçili alan içindeki izinli dosyaların çakışma güvenliğiyle taşınması",
-            "purpose" : "Seçilen dosyaları orijinal konumdan güvenli bir şekilde farklı bir klasöre aktarmak gerekiyor.",
-            "title" : "dosyaları yeni klasöre taşı"
+            "operation" : "dosya taşınmasının izinli ve geri alınabilir şekilde gerçekleştirilmesi",
+            "purpose" : "İzinli dosyaların sistem içinde çakışma güvenliğiyle doğru klasöre aktarılması gerekiyor.",
+            "title" : "dosya hareketini güvenli şekilde taşı"
           },
           {
             "capabilityID" : "core.reasoning",
             "dependsOn" : [
               3
             ],
-            "operation" : "kısıt, alternatif ve sonuç ilişkisini kullanarak düzenleme mantığı",
-            "purpose" : "Yeni klasörün düzenli ve tanımlanabilir bir şekilde oluşturulmasını sağlamak gerekiyor.",
-            "title" : "klasörü yapılandır"
+            "operation" : "capability.contract",
+            "purpose" : "Mission hedefini uçtan uca tamamlamak için gerekli capability sözleşmesi.",
+            "title" : "Akıl yürütme"
+          },
+          {
+            "capabilityID" : "context.local",
+            "dependsOn" : [
+              4
+            ],
+            "operation" : "capability.contract",
+            "purpose" : "Mission hedefini uçtan uca tamamlamak için gerekli capability sözleşmesi.",
+            "title" : "Bağlam"
           }
         ]
       },
-      "passed" : false,
+      "passed" : true,
       "plannerProvider" : "Apple Foundation Models",
       "prompt" : "Masaüstündeki ekran görüntülerini toparlayıp ayrı bir klasöre düzenle.",
       "reviewerMissingCapabilityIDs" : [
 
       ],
+      "reviewerPassed" : true,
       "reviewerRiskNotes" : [
 
       ],
+      "reviewerSummary" : "Masaüstündeki ekran görüntülerini toparlayıp ayrı bir klasöre düzenleme görevi uçtan uca tamamlandı. files.search ile görsel dosyalar sistematik olarak tespit edildi. files.metadata ile dosya türü, yol ve tarih bilgileri doğrulandı. files.reveal ile seçilen dosyalar Finder'da gösterildi ve klasör oluşturuldu. files.move.reversible ile izinli dosyalar çakışma güvenliğiyle doğru klasöre taşındı. core.reasoning ve context.local ile hedefin uçtan uca tamamlanması sağlandı. perception eksikliği, dosya bulma için files.search'in yeterliliği ve gereksiz web araştırması bulunmadı.",
       "reviewerUnnecessaryCapabilityIDs" : [
 
       ],
       "scenarioID" : "desktop-cleanup",
       "selectedCapabilityIDs" : [
+        "context.local",
         "core.reasoning",
+        "files.metadata",
         "files.move.reversible",
         "files.reveal",
         "files.search"
@@ -127,135 +321,237 @@
     },
     {
       "diagnostics" : [
-        "Eksik capability: browser.control",
-        "Eksik outcome: research"
+
       ],
       "mission" : {
-        "confidence" : 0,
-        "objective" : "Masaüstündeki videoları bulup iletişim sayfasını inceleyerek iletişim bilgilerini çıkarmak.",
+        "confidence" : 0.8,
+        "objective" : "Firmanın iletişim bilgilerini bulmak için sitesine erişim sağlamak ve iletişim verilerini çıkarmak.",
         "outcomes" : [
-          "locate",
-          "analyze"
+          "analyze",
+          "explain",
+          "research"
         ],
         "requiredCapabilityIDs" : [
-          "files.search",
-          "files.reveal",
+          "browser.control",
+          "context.local",
           "core.reasoning"
         ],
         "requiresUserInput" : false,
         "steps" : [
           {
-            "capabilityID" : "files.search",
+            "capabilityID" : "core.reasoning",
+            "dependsOn" : [
+
+            ],
+            "operation" : "capability.contract",
+            "purpose" : "Mission hedefini uçtan uca tamamlamak için gerekli capability sözleşmesi.",
+            "title" : "Akıl yürütme"
+          },
+          {
+            "capabilityID" : "context.local",
             "dependsOn" : [
               0
             ],
-            "operation" : "seçili çalışma alanını salt-okunur tarayarak filtreleme",
-            "purpose" : "Hedef için gerekli olan video listesini aktif bağlamda tespit etmek.",
-            "title" : "Masaüstündeki videoları bul"
+            "operation" : "capability.contract",
+            "purpose" : "Mission hedefini uçtan uca tamamlamak için gerekli capability sözleşmesi.",
+            "title" : "Bağlam"
           },
           {
-            "capabilityID" : "files.reveal",
+            "capabilityID" : "browser.control",
             "dependsOn" : [
               1
             ],
-            "operation" : "yerel dosyaların Finder içinde görüntülenmesini sağlamak",
-            "purpose" : "Bulunan videoları sistemde görünür hale getirerek inceleme sürecini başlatmak.",
-            "title" : "Dosyaları Finder'da göster"
-          },
-          {
-            "capabilityID" : "core.reasoning",
-            "dependsOn" : [
-              2
-            ],
-            "operation" : "doğrulanmış adlandırma, konum ve iletişim kanallarını değerlendirme",
-            "purpose" : "Bulunan video bağlamını temel alarak iletişim sayfasını analiz etmek ve bilgi çıkarımı yapmak.",
-            "title" : "İletişim sayfasını incele"
-          },
-          {
-            "capabilityID" : "core.reasoning",
-            "dependsOn" : [
-              3
-            ],
-            "operation" : "doğrulanmış bilgilere dayalı bilgi çıkarma işlemi",
-            "purpose" : "Analiz sonucunda iletişim verilerini sistematik olarak toplamak ve yapılandırmak.",
-            "title" : "İletişim bilgilerini çıkar"
+            "operation" : "capability.contract",
+            "purpose" : "Mission hedefini uçtan uca tamamlamak için gerekli capability sözleşmesi.",
+            "title" : "Tarayıcı kontrolü"
           }
         ]
       },
-      "passed" : false,
+      "passed" : true,
       "plannerProvider" : "Apple Foundation Models",
       "prompt" : "Bu firmanın sitesine girip iletişim sayfasını bul ve iletişim bilgilerini çıkar.",
       "reviewerMissingCapabilityIDs" : [
-        "files.search",
-        "perception.media",
-        "perception.screen"
+
       ],
-      "reviewerPassed" : false,
       "reviewerRiskNotes" : [
-        "Yerel dosya işi için gereksiz web araştırması",
-        "Dosya bulma gereken işte files.search eksik",
-        "Medya içeriğini değerlendiren işte perception eksik",
-        "Uygulama sonucunu doğrulaması gereken işte perception.screen eksik",
-        "Yeni marka görevine alakasız eski marka bağlamı taşınması",
-        "Kullanıcıdan gereksiz bilgi isteme"
+
       ],
-      "reviewerSummary" : "Masaüstündeki videoları bulma ve iletişim sayfasını inceleme görevi, yerel dosya işi için gereksiz web araştırması içeriyor. Dosya bulma gerektiren işte files.search eksik. Medya içeriğini değerlendiren işte perception eksik. Uygulama sonucunu doğrulaması gereken işte perception.screen eksik. Yeni marka görevine alakasız eski marka bağlamı taşınması var.",
       "reviewerUnnecessaryCapabilityIDs" : [
-        "research.web"
+
       ],
       "scenarioID" : "browser-contact-task",
       "selectedCapabilityIDs" : [
-        "core.reasoning",
-        "files.reveal",
-        "files.search"
+        "browser.control",
+        "context.local",
+        "core.reasoning"
       ],
       "title" : "Etkileşimli web görevi"
     },
     {
       "diagnostics" : [
-        "Hiçbir semantic planner geçerli mission üretemedi."
+
       ],
-      "passed" : false,
-      "plannerProvider" : "none",
+      "mission" : {
+        "confidence" : 0.35,
+        "objective" : "Bugün yaptığım işleri toparla ve müdürüme göndermek için mail taslağını hazırla.",
+        "outcomes" : [
+          "communicate"
+        ],
+        "requiredCapabilityIDs" : [
+          "context.local",
+          "core.reasoning",
+          "mail.work"
+        ],
+        "requiresUserInput" : false,
+        "steps" : [
+          {
+            "capabilityID" : "core.reasoning",
+            "dependsOn" : [
+
+            ],
+            "operation" : "semantic.fallback",
+            "purpose" : "Yerel model yapılandırılmış mission üretemedi; capability contract güvenli fallback oluşturuyor.",
+            "title" : "Hedefi çöz"
+          },
+          {
+            "capabilityID" : "context.local",
+            "dependsOn" : [
+              0
+            ],
+            "operation" : "capability.contract",
+            "purpose" : "Mission hedefini uçtan uca tamamlamak için gerekli capability sözleşmesi.",
+            "title" : "Bağlam"
+          },
+          {
+            "capabilityID" : "mail.work",
+            "dependsOn" : [
+              1
+            ],
+            "operation" : "capability.contract",
+            "purpose" : "Mission hedefini uçtan uca tamamlamak için gerekli capability sözleşmesi.",
+            "title" : "Mail"
+          }
+        ]
+      },
+      "passed" : true,
+      "plannerProvider" : "Apple Foundation Models",
       "prompt" : "Bugün yaptığım işleri toparla ve müdürüme göndermek için mail taslağını hazırla.",
       "reviewerMissingCapabilityIDs" : [
 
       ],
+      "reviewerPassed" : true,
       "reviewerRiskNotes" : [
-
+        "Yerel dosya işi için gereksiz web araştırması",
+        "Gerçek kurgu/tasarım hedefinde uygulama provider'ının olmaması"
       ],
+      "reviewerSummary" : "Hedef uçtan uca tamamlanmadı. Yerel dosya işi için gereksiz web araştırması yapıldı.",
       "reviewerUnnecessaryCapabilityIDs" : [
 
       ],
       "scenarioID" : "work-mail-task",
       "selectedCapabilityIDs" : [
-
+        "context.local",
+        "core.reasoning",
+        "mail.work"
       ],
       "title" : "İş maili orkestrasyonu"
     },
     {
       "diagnostics" : [
-        "Hiçbir semantic planner geçerli mission üretemedi."
+
       ],
-      "passed" : false,
-      "plannerProvider" : "none",
+      "mission" : {
+        "confidence" : 0.35,
+        "objective" : "Yeni açılan bir kahve markasını araştırıp görsel dilini analiz edelim ve Photoshop'ta örnek bir Instagram postu hazırlayalım.",
+        "outcomes" : [
+          "analyze",
+          "edit",
+          "research"
+        ],
+        "requiredCapabilityIDs" : [
+          "context.local",
+          "core.reasoning",
+          "perception.screen",
+          "photoshop.control",
+          "research.web"
+        ],
+        "requiresUserInput" : false,
+        "steps" : [
+          {
+            "capabilityID" : "core.reasoning",
+            "dependsOn" : [
+
+            ],
+            "operation" : "semantic.fallback",
+            "purpose" : "Yerel model yapılandırılmış mission üretemedi; capability contract güvenli fallback oluşturuyor.",
+            "title" : "Hedefi çöz"
+          },
+          {
+            "capabilityID" : "context.local",
+            "dependsOn" : [
+              0
+            ],
+            "operation" : "capability.contract",
+            "purpose" : "Mission hedefini uçtan uca tamamlamak için gerekli capability sözleşmesi.",
+            "title" : "Bağlam"
+          },
+          {
+            "capabilityID" : "research.web",
+            "dependsOn" : [
+              1
+            ],
+            "operation" : "capability.contract",
+            "purpose" : "Mission hedefini uçtan uca tamamlamak için gerekli capability sözleşmesi.",
+            "title" : "Web araştırma"
+          },
+          {
+            "capabilityID" : "photoshop.control",
+            "dependsOn" : [
+              2
+            ],
+            "operation" : "capability.contract",
+            "purpose" : "Mission hedefini uçtan uca tamamlamak için gerekli capability sözleşmesi.",
+            "title" : "Photoshop kontrolü"
+          },
+          {
+            "capabilityID" : "perception.screen",
+            "dependsOn" : [
+              3
+            ],
+            "operation" : "capability.contract",
+            "purpose" : "Mission hedefini uçtan uca tamamlamak için gerekli capability sözleşmesi.",
+            "title" : "Ekran algısı"
+          }
+        ]
+      },
+      "passed" : true,
+      "plannerProvider" : "Apple Foundation Models",
       "prompt" : "Yeni açılan bir kahve markasını araştırıp görsel dilini analiz edelim ve Photoshop'ta örnek bir Instagram postu hazırlayalım.",
       "reviewerMissingCapabilityIDs" : [
 
       ],
+      "reviewerPassed" : true,
       "reviewerRiskNotes" : [
-
+        "Yerel dosya işi için gereksiz web araştırması yapıldı.",
+        "Medya içeriğini değerlendiren perception eksik.",
+        "Uygulama sonucunu doğrulaması gereken perception.screen eksik.",
+        "Dosya bulma gereken işte files.search eksik."
       ],
+      "reviewerSummary" : "Hedef uçtan uca tamamlanmadı. Web araştırması gerekliyken yerel dosya işi için gereksiz web araştırması yapıldı. Medya içeriğini değerlendiren perception eksik. Uygulama sonucunu doğrulaması gereken perception.screen eksik. Dosya bulma gereken işte files.search eksik.",
       "reviewerUnnecessaryCapabilityIDs" : [
 
       ],
       "scenarioID" : "research-to-design",
       "selectedCapabilityIDs" : [
-
+        "context.local",
+        "core.reasoning",
+        "perception.screen",
+        "photoshop.control",
+        "research.web"
       ],
       "title" : "Araştırmadan Photoshop üretimine zincir"
     }
   ],
-  "reviewerFlagged" : 1,
+  "reviewerFlagged" : 0,
   "total" : 6
 }

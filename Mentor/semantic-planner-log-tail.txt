@@ -1,0 +1,24 @@
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+KRALİ Semantic Planner Fallback
+status=9
+input=Son çekimlerden hızlı ve enerjik bir kurgu çıkarmamız gerekiyor.
+output:
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+KRALİ Semantic Planner Fallback
+status=9
+input=Köfteci Tame adında bir markamız var. Marka için sosyal medya tasarımı hazırlayalım.
+output:
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+KRALİ Semantic Planner Fallback
+status=9
+input=Son çekimlerden hızlı ve enerjik bir kurgu çıkarmamız gerekiyor.
+output:
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+KRALİ Semantic Planner Fallback
+status=9
+input=Köfteci Tame adında bir markamız var. Marka için sosyal medya tasarımı hazırlayalım.
+output:
