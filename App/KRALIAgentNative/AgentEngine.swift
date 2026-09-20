@@ -369,7 +369,7 @@ final class AgentEngine: ObservableObject {
             var intelligenceProvider: String?
             var synthesisApplied = false
 
-            if shouldUseLocalIntelligence(
+            if shouldUseIntelligence(
                 goal: goalProfile,
                 verification: finalVerification
             ) {
@@ -1306,14 +1306,10 @@ final class AgentEngine: ObservableObject {
         }
     }
 
-    private func shouldUseLocalIntelligence(
+    private func shouldUseIntelligence(
         goal: AgentGoalProfile,
         verification: AgentVerificationResult
     ) -> Bool {
-        guard localIntelligenceState.isAvailable else {
-            return false
-        }
-
         if goal.outcomes.contains(.analyze) ||
            goal.outcomes.contains(.ideate) ||
            goal.outcomes.contains(.research) {
