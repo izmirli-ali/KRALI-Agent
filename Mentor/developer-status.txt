@@ -1,1 +1,1 @@
-failed|Cline exit 137: ayrıntılı hata satırı üretilemedi|krali-dev-agent/20260920-174655|/Users/medusa/Developer/KRALI-Agent-Dev-20260920-174655
+failed|Cline exit 137 (0s): HEAD is now at f8f8527 v0.8.34 automate terminal, CI and Cline auth flow|krali-dev-agent/20260920-175525|/Users/medusa/Developer/KRALI-Agent-Dev-20260920-175525

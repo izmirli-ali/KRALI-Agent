@@ -1,19 +1,3 @@
-{"ts":"2026-09-19T23:52:59.326Z","type":"agent_event","event":{"type":"done","reason":"completed","text":"## Sonuç\n\n**Kod değişikliği yapmadım.** Mevcut diagnostic’ler yeni bir düzeltme için yeterli kanıt göstermiyor.\n\n### Diagnostic değerlendirmesi\n\n| Kaynak | Sürüm | Tarih | Sonuç |\n|---|---:|---|---|\n| `Mentor/latest.json` | 0.7.18 | 19 Eylül 2026 23:18 UTC | HABAŞ araştırması başarısız |\n| `Mentor/training-latest.json` | 0.7.19 | 19 Eylül 2026 23:27 UTC | **16/16 başarılı** |\n| `Mentor/live-eval-latest.json` | 0.7.19 | 19 Eylül 2026 23:27 UTC | **2/2 başarılı** |\n| `VERSION` | 0.7.22 | — | Mevcut sürüm |\n\n`Mentor/latest.json` eski **0.7.18** sürümüne ait. Daha yeni **0.7.19 Live Research Eval**, aynı HABAŞ/entity-grounding alanını gerçek internet araştırmasıyla başarılı geçmiş:\n\n- 6 kaynak\n- 4 derin okuma kanıtı\n- 6 farklı domain\n- Boş diagnostic listesi\n\nGit geçmişi de sıralamayı doğruluyor:\n\n1. `f0d03ef` — marka araştırmasında facet sorgularını önceleyen minimal düzeltme, **20 Eylül 2026 02:24 +03:00**\n2. Başarılı Mentor diagnostic senkronu, **20 Eylül 2026 02:27 +03:00**\n3. Sonraki 0.7.20–0.7.22 değişiklikleri Developer Agent, kurulum tanılaması ve updater ile ilgili; research pipeline’a daha sonra müdahale edilmemiş.\n\nBu nedenle eski 0.7.18 hatasını tekrar düzeltmek, özellikle değişmez kurallar **7 ve 8** uyarınca gereksiz ve regression riski taşıyan bir değişiklik olurdu.\n\n### Build doğrulaması\n\n`Scripts/build-check.command` doğrudan çalıştırıldığında executable biti olmadığı için `Permission denied` / exit 126 verdi. Repo izinlerini değiştirmeden aynı script şu şekilde çalıştırıldı:\n\n```bash\nzsh /Users/medusa/Developer/KRALI-Agent-Dev-20260920-025105/Scripts/build-check.command\n```\n\nSonuç:\n\n```text\n** BUILD SUCCEEDED **\n✅ Build check başarılı.\n```\n\nGeçici `.build-check/` çıktısı kaldırıldı.\n\n### Worktree durumu\n\n- Takip edilen dosyalarda değişiklik yok.\n- `VERSION`, signing, updater, bundle/team ayarları ve Mentor JSON dosyaları değiştirilmedi.\n- Başlangıçtan beri mevcut olan izlenmeyen `.krali-developer-agent-prompt.txt` dosyasına dokunulmadı.\n- Push veya merge yapılmadı.","iterations":8,"usage":{"inputTokens":191852,"outputTokens":4187,"cacheReadTokens":160384,"cacheWriteTokens":0,"totalCost":0.2737656}}}
-{"ts":"2026-09-19T23:52:59.413Z","type":"run_result","finishReason":"completed","iterations":8,"usage":{"inputTokens":191852,"outputTokens":4187,"cacheReadTokens":160384,"cacheWriteTokens":0,"totalCost":0.2737656},"aggregateUsage":{"inputTokens":191852,"outputTokens":4187,"cacheReadTokens":160384,"cacheWriteTokens":0,"totalCost":0.2737656},"durationMs":111326,"text":"## Sonuç\n\n**Kod değişikliği yapmadım.** Mevcut diagnostic’ler yeni bir düzeltme için yeterli kanıt göstermiyor.\n\n### Diagnostic değerlendirmesi\n\n| Kaynak | Sürüm | Tarih | Sonuç |\n|---|---:|---|---|\n| `Mentor/latest.json` | 0.7.18 | 19 Eylül 2026 23:18 UTC | HABAŞ araştırması başarısız |\n| `Mentor/training-latest.json` | 0.7.19 | 19 Eylül 2026 23:27 UTC | **16/16 başarılı** |\n| `Mentor/live-eval-latest.json` | 0.7.19 | 19 Eylül 2026 23:27 UTC | **2/2 başarılı** |\n| `VERSION` | 0.7.22 | — | Mevcut sürüm |\n\n`Mentor/latest.json` eski **0.7.18** sürümüne ait. Daha yeni **0.7.19 Live Research Eval**, aynı HABAŞ/entity-grounding alanını gerçek internet araştırmasıyla başarılı geçmiş:\n\n- 6 kaynak\n- 4 derin okuma kanıtı\n- 6 farklı domain\n- Boş diagnostic listesi\n\nGit geçmişi de sıralamayı doğruluyor:\n\n1. `f0d03ef` — marka araştırmasında facet sorgularını önceleyen minimal düzeltme, **20 Eylül 2026 02:24 +03:00**\n2. Başarılı Mentor diagnostic senkronu, **20 Eylül 2026 02:27 +03:00**\n3. Sonraki 0.7.20–0.7.22 değişiklikleri Developer Agent, kurulum tanılaması ve updater ile ilgili; research pipeline’a daha sonra müdahale edilmemiş.\n\nBu nedenle eski 0.7.18 hatasını tekrar düzeltmek, özellikle değişmez kurallar **7 ve 8** uyarınca gereksiz ve regression riski taşıyan bir değişiklik olurdu.\n\n### Build doğrulaması\n\n`Scripts/build-check.command` doğrudan çalıştırıldığında executable biti olmadığı için `Permission denied` / exit 126 verdi. Repo izinlerini değiştirmeden aynı script şu şekilde çalıştırıldı:\n\n```bash\nzsh /Users/medusa/Developer/KRALI-Agent-Dev-20260920-025105/Scripts/build-check.command\n```\n\nSonuç:\n\n```text\n** BUILD SUCCEEDED **\n✅ Build check başarılı.\n```\n\nGeçici `.build-check/` çıktısı kaldırıldı.\n\n### Worktree durumu\n\n- Takip edilen dosyalarda değişiklik yok.\n- `VERSION`, signing, updater, bundle/team ayarları ve Mentor JSON dosyaları değiştirilmedi.\n- Başlangıçtan beri mevcut olan izlenmeyen `.krali-developer-agent-prompt.txt` dosyasına dokunulmadı.\n- Push veya merge yapılmadı.","model":{"id":"gpt-5.6-sol","provider":"openai-codex","info":{"id":"gpt-5.6-sol","name":"GPT-5.6 Sol","contextWindow":400000,"maxInputTokens":258400,"maxTokens":128000,"capabilities":["images","files","tools","reasoning","structured_output","prompt-cache"],"reasoningOptions":[{"type":"effort","values":["none","low","medium","high","xhigh","max"]}],"pricing":{"input":4,"output":20,"cacheRead":0.4,"cacheWrite":5},"releaseDate":"2026-07-09","family":"gpt-sol","operation":"language"}}}
-✅ Developer Agent değişiklik gerektirmedi.
-
-━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
- KRALİ DEVELOPER AGENT
- 20260920-025811
-━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-From https://github.com/izmirli-ali/KRALI-Agent
- * branch            main       -> FETCH_HEAD
-Already up to date.
-✅ Güncel diagnostic'ler yeşil. Cline çağrısı gereksiz olduğu için atlandı.
-
-━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
- KRALİ DEVELOPER AGENT
- 20260920-133944
 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 From https://github.com/izmirli-ali/KRALI-Agent
  * branch            main       -> FETCH_HEAD
@@ -118,3 +102,19 @@ Preparing worktree (new branch 'krali-dev-agent/20260920-174655')
 branch 'krali-dev-agent/20260920-174655' set up to track 'origin/main'.
 HEAD is now at f8f8527 v0.8.34 automate terminal, CI and Cline auth flow
 ❌ Cline görevi başarısız oldu (exit 137): ayrıntılı hata satırı üretilemedi
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+ KRALİ DEVELOPER AGENT
+ 20260920-175525
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+Cline version: 
+Cline doctor:
+From https://github.com/izmirli-ali/KRALI-Agent
+ * branch            main       -> FETCH_HEAD
+Already up to date.
+Preparing worktree (new branch 'krali-dev-agent/20260920-175525')
+branch 'krali-dev-agent/20260920-175525' set up to track 'origin/main'.
+HEAD is now at 63d4280 v0.8.35 lightweight capability-gap Developer Agent
+Developer prompt mode: gap • 2390 bytes
+⚠️ Cline SIGKILL/137 aldı; ultra-light retry deneniyor.
+❌ Cline görevi başarısız oldu (exit 137, 0s): HEAD is now at f8f8527 v0.8.34 automate terminal, CI and Cline auth flow
