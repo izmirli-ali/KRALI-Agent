@@ -69,6 +69,11 @@ struct DeveloperAgentStatus: Hashable {
             "verifying",
             "repairing_cline",
             "repairing_runtime",
+            "local_ai_checking",
+            "local_ai_installing",
+            "local_ai_starting",
+            "local_model_downloading",
+            "local_ai_ready",
             "sdk_fallback_preparing",
             "sdk_fallback_running",
             "sdk_importing",
@@ -93,6 +98,9 @@ struct DeveloperAgentStatus: Hashable {
         [
             "ready_for_review",
             "build_failed",
+            "setup_local_ai",
+            "local_ai_failed",
+            "local_model_failed",
             "sdk_provider_failed",
             "sdk_failed",
             "sdk_watchdog_timeout",
@@ -118,6 +126,22 @@ struct DeveloperAgentStatus: Hashable {
             return "Cline onarılıyor"
         case "repairing_runtime":
             return "Runtime hazırlanıyor"
+        case "local_ai_checking":
+            return "Yerel AI kontrol ediliyor"
+        case "local_ai_installing":
+            return "Yerel AI kuruluyor"
+        case "local_ai_starting":
+            return "Yerel AI başlatılıyor"
+        case "local_model_downloading":
+            return "Yerel model indiriliyor"
+        case "local_ai_ready":
+            return "Ücretsiz yerel AI hazır"
+        case "setup_local_ai":
+            return "Yerel AI kurulumu gerekli"
+        case "local_ai_failed":
+            return "Yerel AI başlatılamadı"
+        case "local_model_failed":
+            return "Yerel model indirilemedi"
         case "provider_platform_bug":
             return "Provider platform hatası bulundu"
         case "sdk_fallback_preparing":
@@ -242,6 +266,11 @@ struct DeveloperAgentStatus: Hashable {
         switch state {
         case "repairing_cline",
              "repairing_runtime",
+             "local_ai_checking",
+             "local_ai_installing",
+             "local_ai_starting",
+             "local_model_downloading",
+             "local_ai_ready",
              "sdk_fallback_preparing",
              "sdk_importing",
              "sdk_import_ready",
@@ -283,7 +312,8 @@ struct DeveloperAgentStatus: Hashable {
             "setup_node_supported",
             "setup_cline_repair",
             "setup_cline_auth",
-            "waiting_cline_auth"
+            "waiting_cline_auth",
+            "setup_local_ai"
         ].contains(state)
     }
 
@@ -299,6 +329,8 @@ struct DeveloperAgentStatus: Hashable {
             return "Developer Agent için desteklenen Node.js runtime hazırlanamadı."
         case "waiting_cline_auth":
             return "Cline giriş penceresi otomatik açıldı; tarayıcıdaki girişi tamamla."
+        case "setup_local_ai":
+            return "Yerel Ollama runtime otomatik hazırlanamadı."
         case "setup_cline_repair":
             return "Cline otomatik onarılamadı; Developer Agent logu incelenmeli."
         case "setup_cline_auth":

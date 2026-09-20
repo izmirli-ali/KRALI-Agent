@@ -8,7 +8,11 @@ const promptFile = process.env.KRALI_PROMPT_FILE;
 const settingsFile =
   process.env.KRALI_CLINE_SETTINGS ||
   path.join(process.env.HOME || "", ".cline/data/settings/providers.json");
+const requestedProvider = process.env.KRALI_DEV_PROVIDER || "ollama";
 const requestedModel = process.env.KRALI_DEV_MODEL || "";
+const ollamaBaseUrl =
+  process.env.KRALI_OLLAMA_BASE_URL ||
+  "http://127.0.0.1:11434";
 const statusFile = process.env.KRALI_STATUS_FILE || "";
 const branchName = process.env.KRALI_BRANCH || "";
 const gapLabel = process.env.KRALI_GAP_LABEL || "Capability";
@@ -151,39 +155,69 @@ function findProvider(value, providerId) {
   return null;
 }
 
+let providerId = requestedProvider;
 let providerSettings = null;
-try {
-  providerSettings = findProvider(
-    JSON.parse(fs.readFileSync(settingsFile, "utf8")),
-    "openai-codex"
-  );
-} catch {}
+let modelId = requestedModel;
+let providerBaseUrl = undefined;
 
-const modelId =
-  requestedModel ||
-  providerSettings?.model ||
-  providerSettings?.modelId ||
-  providerSettings?.apiModelId ||
-  providerSettings?.actModeApiModelId ||
-  providerSettings?.planModeApiModelId ||
-  "";
+if (providerId === "ollama") {
+  providerBaseUrl = ollamaBaseUrl;
 
-if (!modelId) {
+  if (!modelId) {
+    setStage(
+      "sdk_provider_failed",
+      "Ollama için yerel model seçilmedi"
+    );
+    console.error(
+      "KRALI SDK fallback: Ollama için modelId gerekli."
+    );
+    process.exit(4);
+  }
+
   setStage(
-    "sdk_provider_failed",
-    "openai-codex için kayıtlı model bulunamadı"
+    "sdk_provider_ready",
+    "Yerel Ollama provider hazır: " + modelId
   );
-  console.error(
-    "KRALI SDK fallback: openai-codex için kayıtlı model bulunamadı. " +
-      "Provider settings içinde model/modelId bekleniyor."
-  );
-  process.exit(4);
-}
+} else {
+  try {
+    providerSettings = findProvider(
+      JSON.parse(fs.readFileSync(settingsFile, "utf8")),
+      providerId
+    );
+  } catch {}
 
-setStage(
-  "sdk_provider_ready",
-  "openai-codex provider ve model ayarı hazır"
-);
+  modelId =
+    modelId ||
+    providerSettings?.model ||
+    providerSettings?.modelId ||
+    providerSettings?.apiModelId ||
+    providerSettings?.actModeApiModelId ||
+    providerSettings?.planModeApiModelId ||
+    "";
+
+  if (!modelId) {
+    setStage(
+      "sdk_provider_failed",
+      providerId + " için kayıtlı model bulunamadı"
+    );
+    console.error(
+      "KRALI SDK fallback: " +
+        providerId +
+        " için kayıtlı model bulunamadı."
+    );
+    process.exit(4);
+  }
+
+  providerBaseUrl =
+    providerSettings?.baseUrl ||
+    providerSettings?.apiBaseUrl ||
+    undefined;
+
+  setStage(
+    "sdk_provider_ready",
+    providerId + " provider ve model ayarı hazır"
+  );
+}
 
 const prompt = fs.readFileSync(promptFile, "utf8");
 
@@ -373,10 +407,11 @@ try {
 
   const session = await cline.start({
     prompt,
-    interactive: false,
+    interactive: true,
     config: {
-      providerId: "openai-codex",
+      providerId,
       modelId,
+      ...(providerBaseUrl ? { baseUrl: providerBaseUrl } : {}),
       cwd: worktree,
       workspaceRoot: worktree,
       mode: "act",
@@ -393,6 +428,7 @@ try {
     },
     toolPolicies: {
       "*": { autoApprove: false },
+      ask_question: { enabled: false },
       read_files: { autoApprove: true },
       search_codebase: { autoApprove: true },
       fetch_web_content: { autoApprove: true },
