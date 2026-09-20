@@ -379,6 +379,54 @@ actor AgentLocalIntelligence {
             ]
         )
 
+        let genericDesktopOpenTask =
+            containsMissionConcept(
+                corpus,
+                [
+                    "uygulamasini ac",
+                    "uygulamayi ac",
+                    "uygulamayı aç",
+                    "uygulamasını aç",
+                    "pencereyi one getir",
+                    "pencereyi öne getir",
+                    "uygulamaya gec",
+                    "uygulamaya geç",
+                    "uygulamayi one getir",
+                    "uygulamayı öne getir"
+                ]
+            )
+
+        let genericFileOpenTask =
+            containsMissionConcept(
+                corpus,
+                [
+                    "finder'da ac",
+                    "finderda ac",
+                    "finder'da aç",
+                    "finderda aç"
+                ]
+            ) ||
+            (
+                containsMissionConcept(
+                    corpus,
+                    [
+                        "dosya", "pdf", "belge", "klasor", "klasör"
+                    ]
+                ) &&
+                containsMissionConcept(
+                    corpus,
+                    [
+                        "bul", "son", "en son"
+                    ]
+                ) &&
+                containsMissionConcept(
+                    corpus,
+                    [
+                        "ac", "aç"
+                    ]
+                )
+            )
+
         let organizeTask =
             containsMissionConcept(
                 corpus,
@@ -480,6 +528,22 @@ actor AgentLocalIntelligence {
         if mailTask {
             outcomes.insert("communicate")
             requiredIDs.insert("mail.work")
+        }
+
+        if genericDesktopOpenTask {
+            outcomes.insert("open")
+            requiredIDs.insert("desktop.control")
+        }
+
+        if genericFileOpenTask {
+            outcomes.formUnion([
+                "locate",
+                "open"
+            ])
+            requiredIDs.formUnion([
+                "files.search",
+                "files.reveal"
+            ])
         }
 
         if organizeTask {
