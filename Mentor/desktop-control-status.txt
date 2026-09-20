@@ -1,1 +1,1 @@
-runtime|app=Safari|activate=false|frontmost=false|source=unverified
+runtime|app=Safari|activate=true|frontmost=true|source=ScreenCaptureKit z-order
