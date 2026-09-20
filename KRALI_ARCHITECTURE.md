@@ -446,3 +446,10 @@ Verifier'a doğrudan execution-state truth gate eklendi. Semantic mission içind
 Generic macOS app resolver localized ad konusunda güçlendirildi. Her uygulama için base bundle name, localized bundle display name ve Finder'ın macOS dilinde gösterdiği `FileManager.displayName(atPath:)` alias olarak indekslenir. Bu özellikle `Calendar.app → Takvim` gibi sistem yerelleştirmelerinde kullanıcı Türkçe uygulama adını yazdığında doğru eşleşmeyi sağlar. Resolver hala yalnız yüklü uygulamalar arasından seçim yapar; bulunmayan uygulama için dosya aramasına veya sahte başarıya düşmez.
 
 v0.8.25'in doğrulama hedefi: startup Arena güncel sürümle yeniden 9/9 olmalı; ardından “Takvim uygulamasını aç” gibi düşük riskli app-open komutu `desktop.app` ile gerçekten çalışmalı ve Screen Perception ile frontmost doğrulanmalı. Accessibility/AXUIElement tabanlı `desktop.control` bu sürümde yine unavailable kalır.
+
+
+**v0.8.26 updater build fix:** v0.8.25 ilk dağıtım denemesinde Swift build, `AgentVerificationSnapshot` modeline eklenen `incompleteRequiredActionCapabilityIDs` alanının Training Lab içindeki iki test initializer'ına taşınmaması nedeniyle durdu. Updater tasarımı build başarısızlığında mevcut kurulu uygulamayı yeniden açtığı için kullanıcı v0.8.24'te kaldı ve “güncelleme hazır” durumu devam etti.
+
+Training Lab'daki `semantic-required-action-execution` test snapshot'ı artık bilinçli olarak `desktop.app` capability'sini incomplete required action olarak işaretler; `stale-goal-verifier-isolation` snapshot'ı ise boş incomplete set kullanır. Zincirleme `.attention` tip çıkarım hataları da bu initializer eksikliğinin giderilmesiyle çözülür.
+
+Bu sürüm v0.8.25'in desktop.app/verifier/localized app resolver düzeltmelerini aynen korur; yalnızca build/install yolunu tekrar çalışabilir hale getirir.
