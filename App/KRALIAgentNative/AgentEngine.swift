@@ -380,6 +380,7 @@ final class AgentEngine: ObservableObject {
             var resolvedExecutionPlan = executionPlan
             var semanticMission: AgentSemanticMission?
             var executedSemanticCapabilities = Set<String>()
+            var completedSemanticStepIndexes = Set<Int>()
 
             if shouldUseSemanticMission(
                 decision: decision,
@@ -531,6 +532,8 @@ final class AgentEngine: ObservableObject {
                     : result.reply
                 executedSemanticCapabilities =
                     result.executedCapabilityIDs
+                completedSemanticStepIndexes =
+                    result.completedStepIndexes
             } else if resolvedGoal.outcomes.contains(.research),
                       resolvedCapabilities.contains(where: {
                           $0.id == "research.web" && $0.isAvailable
@@ -554,7 +557,9 @@ final class AgentEngine: ObservableObject {
             if semanticMission != nil {
                 completeSemanticActionSteps(
                     executedCapabilityIDs:
-                        executedSemanticCapabilities
+                        executedSemanticCapabilities,
+                    completedMissionStepIndexes:
+                        completedSemanticStepIndexes
                 )
             } else {
                 completeActionSteps()
@@ -821,6 +826,7 @@ final class AgentEngine: ObservableObject {
     private struct SemanticMissionExecutionResult {
         let reply: String
         let executedCapabilityIDs: Set<String>
+        let completedStepIndexes: Set<Int>
     }
 
     private func shouldUseSemanticMission(
@@ -1059,7 +1065,8 @@ final class AgentEngine: ObservableObject {
                 executedCapabilityIDs: [
                     "core.reasoning",
                     "context.local"
-                ]
+                ],
+                completedStepIndexes: []
             )
         }
 
@@ -1070,8 +1077,19 @@ final class AgentEngine: ObservableObject {
         ])
         var didResearch = false
         var didFileSearch = false
+        var didScreenObserve = false
+        var completedStepIndexes = Set<Int>()
 
-        for step in mission.steps {
+        for (stepIndex, step) in mission.steps.enumerated() {
+            let dependenciesSatisfied =
+                step.dependsOn.allSatisfy {
+                    completedStepIndexes.contains($0)
+                }
+
+            guard dependenciesSatisfied else {
+                continue
+            }
+
             guard let capability = selectedCapabilities.first(
                 where: { $0.id == step.capabilityID }
             ),
@@ -1082,10 +1100,12 @@ final class AgentEngine: ObservableObject {
             switch step.capabilityID {
             case "core.reasoning", "context.local":
                 executed.insert(step.capabilityID)
+                completedStepIndexes.insert(stepIndex)
 
             case "research.web":
                 guard !didResearch else {
                     executed.insert("research.web")
+                    completedStepIndexes.insert(stepIndex)
                     continue
                 }
 
@@ -1096,10 +1116,12 @@ final class AgentEngine: ObservableObject {
                 )
                 executed.insert("research.web")
                 didResearch = true
+                completedStepIndexes.insert(stepIndex)
 
             case "files.search":
                 guard !didFileSearch else {
                     executed.insert("files.search")
+                    completedStepIndexes.insert(stepIndex)
                     continue
                 }
 
@@ -1126,13 +1148,66 @@ final class AgentEngine: ObservableObject {
 
                 if selectedRootURL != nil {
                     executed.insert("files.search")
+                    completedStepIndexes.insert(stepIndex)
                 }
 
                 didFileSearch = true
 
             case "files.metadata":
-                if didFileSearch {
+                if didFileSearch &&
+                   executed.contains("files.search") {
                     executed.insert("files.metadata")
+                    completedStepIndexes.insert(stepIndex)
+                }
+
+            case "perception.screen":
+                guard !didScreenObserve else {
+                    executed.insert("perception.screen")
+                    completedStepIndexes.insert(stepIndex)
+                    continue
+                }
+
+                do {
+                    let report = try await screenPerception.observe(
+                        goal:
+                            mission.objective +
+                            "\nDoğrulanacak ekran adımı: " +
+                            step.purpose
+                    )
+
+                    screenPerceptionReport = report
+                    try? screenPerceptionStore.save(report)
+                    screenPerceptionStore.saveStatus(
+                        "success|" +
+                        String(report.recognizedText.count) +
+                        " metin satırı|" +
+                        String(report.visibleWindows.count) +
+                        " pencere|runtime"
+                    )
+                    screenPerceptionStatus =
+                        String(report.recognizedText.count) +
+                        " metin satırı • " +
+                        String(report.visibleWindows.count) +
+                        " pencere • runtime gözlemi başarılı"
+
+                    outputs.append(
+                        "Ekran gözlemi:\n" +
+                        report.semanticSummary
+                    )
+
+                    executed.insert("perception.screen")
+                    completedStepIndexes.insert(stepIndex)
+                    didScreenObserve = true
+                } catch {
+                    screenPerceptionStore.saveStatus(
+                        "failed|" +
+                        error.localizedDescription +
+                        "|runtime"
+                    )
+                    screenPerceptionStatus =
+                        "Screen Perception başarısız: " +
+                        error.localizedDescription
+                    log(screenPerceptionStatus)
                 }
 
             default:
@@ -1152,7 +1227,8 @@ final class AgentEngine: ObservableObject {
 
         return SemanticMissionExecutionResult(
             reply: outputs.joined(separator: "\n\n"),
-            executedCapabilityIDs: executed
+            executedCapabilityIDs: executed,
+            completedStepIndexes: completedStepIndexes
         )
     }
 
@@ -1252,8 +1328,11 @@ final class AgentEngine: ObservableObject {
     }
 
     private func completeSemanticActionSteps(
-        executedCapabilityIDs: Set<String>
+        executedCapabilityIDs: Set<String>,
+        completedMissionStepIndexes: Set<Int>
     ) {
+        var semanticStepIndex = 0
+
         for index in executionSteps.indices {
             switch executionSteps[index].kind {
             case .reasoning:
@@ -1261,6 +1340,10 @@ final class AgentEngine: ObservableObject {
                     executionSteps[index]
                 ) {
                     executionSteps[index].state = .completed
+                }
+
+                if executionSteps[index].capabilityID != nil {
+                    semanticStepIndex += 1
                 }
 
             case .action:
@@ -1274,13 +1357,16 @@ final class AgentEngine: ObservableObject {
                     executionSteps[index]
                 ) {
                     executionSteps[index].state = .blocked
-                } else if executedCapabilityIDs.contains(
-                    capabilityID
-                ) {
+                } else if completedMissionStepIndexes.contains(
+                    semanticStepIndex
+                ) &&
+                executedCapabilityIDs.contains(capabilityID) {
                     executionSteps[index].state = .completed
                 } else {
                     executionSteps[index].state = .partial
                 }
+
+                semanticStepIndex += 1
 
             case .response:
                 executionSteps[index].state = .completed
