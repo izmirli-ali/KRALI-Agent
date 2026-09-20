@@ -906,6 +906,10 @@ if [ -z "$(git status --porcelain)" ]; then
     if [ "$GAP_MODE" = "gap" ]; then
         write_status "no_change_unverified|Aktif capability gap için doğrulanmış candidate üretilmedi|$BRANCH|$WORKTREE"
         echo "❌ Capability gap devam ederken kanıtsız no_change kabul edilmedi." | tee -a "$LOG"
+
+        cd "$ROOT"
+        git worktree remove "$WORKTREE" --force >>"$LOG" 2>&1 || true
+        git branch -D "$BRANCH" >>"$LOG" 2>&1 || true
         exit 26
     fi
 
