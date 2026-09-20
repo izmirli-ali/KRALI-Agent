@@ -156,6 +156,9 @@ struct AgentTrainingLab {
             typoAppNameLanguageResult()
         )
         results.append(
+            duplicateApplicationAliasMergeResult()
+        )
+        results.append(
             appOpenIntentRoutingResult(
                 id: "mail-app-open-routing",
                 title: "Mail uygulaması açma intent ayrımı",
@@ -713,6 +716,62 @@ struct AgentTrainingLab {
                 ? []
                 : [
                     "Yakın yazım hatası güven eşiğini geçemedi."
+                ]
+        )
+    }
+
+    private func duplicateApplicationAliasMergeResult()
+        -> TrainingScenarioResult {
+        let aliases =
+            languageResolver
+                .mergedAliases(
+                    [
+                        ["Example", "Example"],
+                        ["Örnek", " example "]
+                    ]
+                )
+
+        let score =
+            languageResolver
+                .bestAliasScore(
+                    input:
+                        "örnek uygulamasını aç",
+                    aliases: aliases
+                )
+
+        let passed =
+            aliases.contains("Example") &&
+            aliases.contains("Örnek") &&
+            aliases.count == 2 &&
+            languageResolver
+                .isConfidentAliasMatch(
+                    score: score,
+                    input: "örnek"
+                )
+
+        return TrainingScenarioResult(
+            scenarioID:
+                "duplicate-application-localized-alias-merge",
+            title:
+                "Aynı bundle için yerelleştirilmiş uygulama aliaslarını koruma",
+            tier: .core,
+            prompt:
+                "Örnek uygulamasını aç",
+            passed: passed,
+            goal:
+                "Çalışan uygulama ve disk kaynaklarından gelen aynı bundle aliaslarını kaybetmeden birleştir",
+            route: [
+                "Core",
+                "Desktop"
+            ],
+            selectedCapabilities: [
+                "desktop.app"
+            ],
+            unavailableCapabilities: [],
+            diagnostics: passed
+                ? []
+                : [
+                    "Duplicate bundle birleştirmesi yerelleştirilmiş aliası kaybetti."
                 ]
         )
     }
