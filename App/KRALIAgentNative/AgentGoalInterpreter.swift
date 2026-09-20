@@ -26,12 +26,29 @@ struct AgentGoalProfile: Hashable {
 }
 
 struct AgentGoalInterpreter {
+    private let languageResolver =
+        AgentNaturalLanguageResolver()
     func interpret(
         _ rawText: String,
         decision: AgentDecision,
         context: AgentContextSnapshot
     ) -> AgentGoalProfile {
         let text = normalize(rawText)
+
+        if languageResolver.isSimpleOpenCommand(
+            rawText
+        ) {
+            return AgentGoalProfile(
+                summary:
+                    "istenen uygulamayı aç veya öne getir",
+                outcomes: [.open],
+                requiredCapabilityIDs: [
+                    "desktop.app"
+                ],
+                isCompound: false
+            )
+        }
+
         var outcomes = Set<AgentGoalOutcome>()
         var capabilityIDs = Set<String>(["core.reasoning", "context.local"])
 
