@@ -46,3 +46,15 @@ KRALİ Semantic Planner Fallback
 status=9
 input=Bugün yaptığım işleri toparla ve müdürüme göndermek için mail taslağını hazırla.
 output:
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+KRALİ Semantic Planner Fallback
+status=9
+input=Köfteci Tame adında bir markamız var. Marka için sosyal medya tasarımı hazırlayalım.
+output:
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+KRALİ Semantic Planner Fallback
+status=9
+input=Bugün yaptığım işleri toparla ve müdürüme göndermek için mail taslağını hazırla.
+output:
