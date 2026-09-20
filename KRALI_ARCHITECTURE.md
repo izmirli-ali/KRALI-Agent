@@ -233,3 +233,12 @@ Aynı sürümde sağ sidebar 0.7.x geliştirme döneminden kalan debug kalabalı
 0.8.1'de Türkçe ideation kalıpları `fikir çıkar / fikri çıkar / fikirleri çıkar` biçimleriyle genişletilir. Structured memory relevance skorunda userRule artık salt türü nedeniyle taban puan almaz; yalnızca mevcut sorguyla gerçek token örtüşmesi varsa ek puan kazanır. Böylece görev bağlamı ile ilgisiz kalıcı kurallar synthesis prompt'una taşınmaz.
 
 Live Research Eval teknik probe'u da genel Türkçe sorgu yerine Apple Developer / Vision / AVFoundation odaklı resmi dokümantasyon sorgusuna geçirilir. Amaç değerlendirmeyi kolaylaştırmak değil, sağlayıcıların resmi teknik kaynakları bulma olasılığını yükseltip gerçek research pipeline regresyonunu daha kararlı ölçmektir.
+
+
+**v0.8.2 topic switching + memory quality gate:** Gerçek 0.8.1 ekran testi iki ayrı semantik hatayı ortaya çıkardı. “Sony A7 IV ile Fuji X-T5 arasında video açısından temel farklar neler?” cümlesi, yalnızca “video + neler” kelimeleri nedeniyle yanlışlıkla yerel dosya aramasına yönlenebiliyordu. File Search intent'i artık bilgi/ürün karşılaştırması sinyallerini (`arasındaki fark`, `farklar neler`, `karşılaştır`, `vs`) yerel dosya kapsamından ayırır. Böyle bir bilgi karşılaştırması açık bir yerel kapsam yoksa web araştırma + analiz + açıklama hedefi olarak ele alınır.
+
+Aynı turda “Estafiz'e dön, az önceki Reels fikirlerinden birincisini 30 saniyelik çekim senaryosuna çevir” follow-up'ı doğru memory kaydını görmesine rağmen generative synthesis'e girmeden executor fallback metnini döndürüyordu. Contextual transformation ifadeleri (`senaryo`, `çekim planı`, `çevir`, `uyarla`, `dönüştür`) artık `ideate` sonucu üretir; böylece Intelligence katmanı recalled memory üzerinde gerçek dönüşüm/sentez yapar. Context devamında eski araştırma goal metni aynen devralınmaz; yeni turun hedefi kendi isteğinden türetilir.
+
+Memory store ayrıca düşük kaliteli generic fallback cevaplarını kalıcı göreve dönüştürmez. Önceki sürümden kalmış “hedefi analiz ettim fakat ... eşleştiremedim / şu an en güvenli planım ...” türü task kayıtları load sırasında elenir ve tekrar kaydedilmez. Non-continuation topic recall için tek ortak kelime yeterli değildir; task/research kayıtlarında daha güçlü lexical eşleşme aranır. Böylece konu değişimlerinde yalnızca “video” gibi genel bir sözcük yüzünden Estafiz bağlamının Sony/Fuji karşılaştırmasına sızması azaltılır.
+
+Training Lab'e iki regression eklenir: `context-memory-transform` ve `knowledge-comparison-not-file-search`.
