@@ -865,7 +865,9 @@ fi
 
 if [ "$CLINE_EXIT" -ne 0 ]; then
     ERROR_SOURCE="$CLINE_RUN_LOG"
-    if [ -f "$LOG_DIR/KRALI-Developer-Agent-Cline-$STAMP-retry.log" ]; then
+    if [ -f "$LOG_DIR/KRALI-Developer-Agent-Cline-$STAMP-tool-retry.log" ]; then
+        ERROR_SOURCE="$LOG_DIR/KRALI-Developer-Agent-Cline-$STAMP-tool-retry.log"
+    elif [ -f "$LOG_DIR/KRALI-Developer-Agent-Cline-$STAMP-retry.log" ]; then
         ERROR_SOURCE="$LOG_DIR/KRALI-Developer-Agent-Cline-$STAMP-retry.log"
     fi
 
