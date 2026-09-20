@@ -40,7 +40,7 @@ actor AgentLiveResearchEval {
             (
                 id: "technical-official",
                 title: "Teknik araştırma / resmi kaynak",
-                query: "macOS üzerinde video içeriği analizi için kullanılabilecek teknolojileri ve frameworkleri araştır",
+                query: "Apple Developer Vision AVFoundation macOS video analysis framework official documentation",
                 minSources: 2,
                 minEvidence: 2,
                 minDomains: 1
