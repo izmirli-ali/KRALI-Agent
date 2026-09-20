@@ -1,12 +1,12 @@
 {
-  "appVersion" : "0.8.6",
-  "corePassed" : 19,
-  "coreTotal" : 19,
-  "createdAt" : "2026-09-20T09:04:28Z",
+  "appVersion" : "0.8.8",
+  "corePassed" : 22,
+  "coreTotal" : 22,
+  "createdAt" : "2026-09-20T09:28:46Z",
   "failed" : 0,
   "northStarPassed" : 4,
   "northStarTotal" : 4,
-  "passed" : 23,
+  "passed" : 26,
   "results" : [
     {
       "diagnostics" : [
@@ -200,7 +200,7 @@
       "diagnostics" : [
 
       ],
-      "goal" : "önceki çıktıyı istenen formata dönüştür",
+      "goal" : "verilen veya önceki çıktıyı istenen formata dönüştür",
       "passed" : true,
       "prompt" : "şimdi Estafiz'e dön, az önceki Reels fikirlerinden birincisini 30 saniyelik çekim senaryosuna çevir",
       "route" : [
@@ -272,6 +272,54 @@
       ],
       "tier" : "core",
       "title" : "Eski hafıza güncel karşılaştırmayı bastırmamalı",
+      "unavailableCapabilities" : [
+
+      ]
+    },
+    {
+      "diagnostics" : [
+
+      ],
+      "goal" : "istenen içeriği oluştur → verilen veya önceki çıktıyı istenen formata dönüştür → sonucu ve gerekçeyi açıkla",
+      "passed" : true,
+      "prompt" : "Estafiz için 30 saniyelik bir Reels çekim planı hazırla. 3 bölüm olsun: açılış, ana mesaj ve kapanış. Her bölüm için süre aralığını yaz. Önemli cümleleri kalın göster, maddeler kullan ve kısa bir Neden işe yarar bölümü ekle.",
+      "route" : [
+        "Core",
+        "Goal",
+        "Context",
+        "Response"
+      ],
+      "scenarioID" : "content-plan-not-file-search",
+      "selectedCapabilities" : [
+        "context.local",
+        "core.reasoning"
+      ],
+      "tier" : "core",
+      "title" : "İçerik planını dosya aramasından ayırma",
+      "unavailableCapabilities" : [
+
+      ]
+    },
+    {
+      "diagnostics" : [
+
+      ],
+      "goal" : "verilen veya önceki çıktıyı istenen formata dönüştür",
+      "passed" : true,
+      "prompt" : "şu metni düzgün Türkçeyle yeniden yaz: “şuan birşey yapmıyorum ama yada yarın devam ederiz, herkez gelirse kapanışda konuşuruz”",
+      "route" : [
+        "Core",
+        "Goal",
+        "Context",
+        "Response"
+      ],
+      "scenarioID" : "inline-turkish-rewrite",
+      "selectedCapabilities" : [
+        "context.local",
+        "core.reasoning"
+      ],
+      "tier" : "core",
+      "title" : "Verilen metni doğrudan yeniden yazma",
       "unavailableCapabilities" : [
 
       ]
@@ -639,7 +687,30 @@
       "unavailableCapabilities" : [
 
       ]
+    },
+    {
+      "diagnostics" : [
+
+      ],
+      "goal" : "Estafiz bağlamını seç; alakasız kamera hafızasını dışarıda bırak",
+      "passed" : true,
+      "prompt" : "Estafiz için 30 saniyelik bir Reels çekim planı hazırla. 3 bölüm olsun: açılış, ana mesaj ve kapanış.",
+      "route" : [
+        "Core",
+        "Context",
+        "Memory"
+      ],
+      "scenarioID" : "named-topic-memory-isolation",
+      "selectedCapabilities" : [
+        "context.local",
+        "core.reasoning"
+      ],
+      "tier" : "core",
+      "title" : "Adı verilen konuyu alakasız hafızadan ayırma",
+      "unavailableCapabilities" : [
+
+      ]
     }
   ],
-  "total" : 23
+  "total" : 26
 }
