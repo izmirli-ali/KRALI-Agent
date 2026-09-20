@@ -67,6 +67,14 @@ struct AgentCapabilityRegistry {
             requiresWorkspace: true
         ),
         AgentCapability(
+            id: "files.write.text",
+            name: "Metin dosyası yazma",
+            summary: "Görev çıktısını kullanıcının belirttiği veya çözülen çalışma alanı içindeki hedefe yeni bir metin dosyası olarak yazar; mevcut dosyayı sessizce ezmez.",
+            risk: .reversibleWrite,
+            isAvailable: false,
+            requiresWorkspace: true
+        ),
+        AgentCapability(
             id: "memory.local",
             name: "Yerel hafıza",
             summary: "Açık kullanıcı kurallarını ve tamamlanan görev bağlamını yapılandırılmış biçimde yerel olarak saklar.",
