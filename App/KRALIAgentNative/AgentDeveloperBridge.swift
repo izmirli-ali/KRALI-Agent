@@ -17,7 +17,9 @@ struct DeveloperAgentStatus: Hashable {
             "setup_node",
             "setup_homebrew",
             "setup_node_upgrade",
-            "setup_cline"
+            "setup_cline",
+            "setup_cline_auth",
+            "waiting_cline_auth"
         ].contains(state)
     }
 
@@ -29,8 +31,12 @@ struct DeveloperAgentStatus: Hashable {
             return "Önce Homebrew kur; ardından brew install node"
         case "setup_node_upgrade":
             return "Node.js 20+ gerekiyor; Homebrew kullanıyorsan brew upgrade node"
+        case "waiting_cline_auth":
+            return "Cline giriş penceresi otomatik açıldı; tarayıcıdaki girişi tamamla."
+        case "setup_cline_auth":
+            return "KRALİ giriş penceresini otomatik açmayı yeniden deneyecek."
         case "setup_cline", "setup_required":
-            return "Terminal: npm install -g cline → cline auth"
+            return "Terminal: npm install -g cline → cline auth openai-codex"
         default:
             return nil
         }

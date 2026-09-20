@@ -52,6 +52,6 @@ else
     echo "ℹ️ Henüz GitHub remote bağlı değil."
 fi
 
-"$ROOT/Scripts/build-install.command" || fail $? "Build / kurulum tamamlanamadı."
+/bin/zsh "$ROOT/Scripts/build-install.command" || fail $? "Build / kurulum tamamlanamadı."
 
 rm -f "$FAILURE_MARKER"
