@@ -11,6 +11,7 @@ struct AgentVerificationSnapshot {
     let webResearchResultCount: Int
     let webResearchEvidenceCount: Int
     let webResearchUniqueDomainCount: Int
+    let webResearchCanonicalEvidenceCount: Int
 }
 
 struct AgentVerifier {
@@ -176,6 +177,26 @@ struct AgentVerifier {
                     return AgentVerificationResult(
                         state: .partial,
                         summary: "Hedef web kaynağı çözüldü ancak canlı / etkileşimli içerik doğrulanamadı. Güvenli tarayıcı erişimi gerekiyor ve browser.control henüz bağlı değil.",
+                        fallback: nil
+                    )
+                }
+
+                if snapshot.webResearchCanonicalEvidenceCount > 0 {
+                    let remainingUnavailable =
+                        snapshot.unavailableCapabilityIDs
+                            .subtracting(["browser.control"])
+
+                    if !remainingUnavailable.isEmpty {
+                        return AgentVerificationResult(
+                            state: .partial,
+                            summary: "Kanonik birincil kaynak doğrulandı; ancak hedefte gereken başka capability'lerden en az biri hazır değil. Sonuç kısmi.",
+                            fallback: nil
+                        )
+                    }
+
+                    return AgentVerificationResult(
+                        state: .passed,
+                        summary: "Kanonik birincil kaynak doğrudan okunarak doğrulandı. Bu kaynağın kendi profil/hesap bilgileri için bağımsız ikinci domain zorunlu tutulmadı.",
                         fallback: nil
                     )
                 }
