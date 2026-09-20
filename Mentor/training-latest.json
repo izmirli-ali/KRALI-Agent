@@ -1,8 +1,8 @@
 {
-  "appVersion" : "0.8.14",
+  "appVersion" : "0.8.15",
   "corePassed" : 26,
   "coreTotal" : 26,
-  "createdAt" : "2026-09-20T10:37:57Z",
+  "createdAt" : "2026-09-20T10:47:12Z",
   "failed" : 0,
   "northStarPassed" : 4,
   "northStarTotal" : 4,

@@ -1,6 +1,6 @@
 {
-  "appVersion" : "0.8.14",
-  "createdAt" : "2026-09-20T10:39:44Z",
+  "appVersion" : "0.8.15",
+  "createdAt" : "2026-09-20T10:49:20Z",
   "failed" : 6,
   "passed" : 0,
   "results" : [
@@ -53,16 +53,16 @@
         "Eksik outcome: locate"
       ],
       "mission" : {
-        "confidence" : 0.98,
+        "confidence" : 0.9,
         "objective" : "Masaüstündeki ekran görüntülerini toparlayıp ayrı bir klasöre düzenlemek",
         "outcomes" : [
           "organize"
         ],
         "requiredCapabilityIDs" : [
           "files.search",
-          "files.metadata",
           "files.reveal",
-          "files.move.reversible"
+          "files.move.reversible",
+          "core.reasoning"
         ],
         "requiresUserInput" : false,
         "steps" : [
@@ -71,36 +71,36 @@
             "dependsOn" : [
               0
             ],
-            "operation" : "seçili çalışma alanını tarayarak görsel dosyaları listele",
-            "purpose" : "Masaüstü alanındaki görsel dosyaları sistematik olarak toplamalıyız",
+            "operation" : "seçili çalışma alanında salt-okunur tarama ve filtreleme",
+            "purpose" : "Masaüstü çalışma alanındaki ekran görüntülerini sistematik olarak çıkarıp filtrelemek gerekiyor.",
             "title" : "ekran görüntülerini topla"
-          },
-          {
-            "capabilityID" : "files.metadata",
-            "dependsOn" : [
-              1
-            ],
-            "operation" : "dosyaların metadata bilgilerini inceleyerek doğru kategorilendirmeyi gerçekleştir",
-            "purpose" : "Her görselin türünü, konumunu ve tarihini analiz ederek doğru sınıflandırmayı yapmalıyız",
-            "title" : "dosyaları değerlendir"
           },
           {
             "capabilityID" : "files.reveal",
             "dependsOn" : [
-              2
+              1
             ],
-            "operation" : "seçilen görsel dosyaları Finder'da göstererek görsel kontrolü yap",
-            "purpose" : "Seçilen görsel dosyaları Finder'da göstererek görsel kontrolü sağla",
-            "title" : "dosyaları göster"
+            "operation" : "çözülen dosya veya klasörün Finder'da gösterilmesi",
+            "purpose" : "Çıkarılan dosyaların geçerliliğini kontrol et ve Finder'da görünür hale getir.",
+            "title" : "dosyaları doğrula ve göster"
           },
           {
             "capabilityID" : "files.move.reversible",
             "dependsOn" : [
+              2
+            ],
+            "operation" : "seçili alan içindeki izinli dosyaların çakışma güvenliğiyle taşınması",
+            "purpose" : "Seçilen dosyaları orijinal konumdan güvenli bir şekilde farklı bir klasöre aktarmak gerekiyor.",
+            "title" : "dosyaları yeni klasöre taşı"
+          },
+          {
+            "capabilityID" : "core.reasoning",
+            "dependsOn" : [
               3
             ],
-            "operation" : "seçili dosyaları izinli taşıma yöntemiyle yeni bir klasöre aktar",
-            "purpose" : "Organize edilmiş bir yapı oluşturmak için görsel dosyaları yeni bir klasöre taşımalıyız",
-            "title" : "klasörü düzenle"
+            "operation" : "kısıt, alternatif ve sonuç ilişkisini kullanarak düzenleme mantığı",
+            "purpose" : "Yeni klasörün düzenli ve tanımlanabilir bir şekilde oluşturulmasını sağlamak gerekiyor.",
+            "title" : "klasörü yapılandır"
           }
         ]
       },
@@ -108,24 +108,17 @@
       "plannerProvider" : "Apple Foundation Models",
       "prompt" : "Masaüstündeki ekran görüntülerini toparlayıp ayrı bir klasöre düzenle.",
       "reviewerMissingCapabilityIDs" : [
-        "perception.media"
+
       ],
-      "reviewerPassed" : false,
       "reviewerRiskNotes" : [
-        "Dosya bulma işlemi için files.search eksik. Yerel dosya işi için gereksiz web araştırması yapıldı.",
-        "Gerçek kurgu/tasarım hedefinde uygulama provider'ının olmaması.",
-        "Dosya bulma gereken işte files.search eksik.",
-        "Medya içeriğini değerlendiren işte perception eksikliği.",
-        "Uygulama sonucunu doğrulaması gereken işte perception.screen eksikliği.",
-        "Yeni marka görevine alakasız eski marka bağlamı taşınması."
+
       ],
-      "reviewerSummary" : "Hedef: Masaüstündeki ekran görüntülerini toparlayıp ayrı bir klasöre düzenlemek. Gerçek kurgu/tasarım hedefinde uygulama provider'ının olmaması ve dosya bulma gereken işte files.search eksikliği nedeniyle tam olarak gerçekleştirilemedi. Perception eksikliği medya içeriğini değerlendirme işini engelledi.",
       "reviewerUnnecessaryCapabilityIDs" : [
-        "research.web"
+
       ],
       "scenarioID" : "desktop-cleanup",
       "selectedCapabilityIDs" : [
-        "files.metadata",
+        "core.reasoning",
         "files.move.reversible",
         "files.reveal",
         "files.search"
@@ -134,23 +127,87 @@
     },
     {
       "diagnostics" : [
-        "Hiçbir semantic planner geçerli mission üretemedi."
+        "Eksik capability: browser.control",
+        "Eksik outcome: research"
       ],
+      "mission" : {
+        "confidence" : 0,
+        "objective" : "Masaüstündeki videoları bulup iletişim sayfasını inceleyerek iletişim bilgilerini çıkarmak.",
+        "outcomes" : [
+          "locate",
+          "analyze"
+        ],
+        "requiredCapabilityIDs" : [
+          "files.search",
+          "files.reveal",
+          "core.reasoning"
+        ],
+        "requiresUserInput" : false,
+        "steps" : [
+          {
+            "capabilityID" : "files.search",
+            "dependsOn" : [
+              0
+            ],
+            "operation" : "seçili çalışma alanını salt-okunur tarayarak filtreleme",
+            "purpose" : "Hedef için gerekli olan video listesini aktif bağlamda tespit etmek.",
+            "title" : "Masaüstündeki videoları bul"
+          },
+          {
+            "capabilityID" : "files.reveal",
+            "dependsOn" : [
+              1
+            ],
+            "operation" : "yerel dosyaların Finder içinde görüntülenmesini sağlamak",
+            "purpose" : "Bulunan videoları sistemde görünür hale getirerek inceleme sürecini başlatmak.",
+            "title" : "Dosyaları Finder'da göster"
+          },
+          {
+            "capabilityID" : "core.reasoning",
+            "dependsOn" : [
+              2
+            ],
+            "operation" : "doğrulanmış adlandırma, konum ve iletişim kanallarını değerlendirme",
+            "purpose" : "Bulunan video bağlamını temel alarak iletişim sayfasını analiz etmek ve bilgi çıkarımı yapmak.",
+            "title" : "İletişim sayfasını incele"
+          },
+          {
+            "capabilityID" : "core.reasoning",
+            "dependsOn" : [
+              3
+            ],
+            "operation" : "doğrulanmış bilgilere dayalı bilgi çıkarma işlemi",
+            "purpose" : "Analiz sonucunda iletişim verilerini sistematik olarak toplamak ve yapılandırmak.",
+            "title" : "İletişim bilgilerini çıkar"
+          }
+        ]
+      },
       "passed" : false,
-      "plannerProvider" : "none",
+      "plannerProvider" : "Apple Foundation Models",
       "prompt" : "Bu firmanın sitesine girip iletişim sayfasını bul ve iletişim bilgilerini çıkar.",
       "reviewerMissingCapabilityIDs" : [
-
+        "files.search",
+        "perception.media",
+        "perception.screen"
       ],
+      "reviewerPassed" : false,
       "reviewerRiskNotes" : [
-
+        "Yerel dosya işi için gereksiz web araştırması",
+        "Dosya bulma gereken işte files.search eksik",
+        "Medya içeriğini değerlendiren işte perception eksik",
+        "Uygulama sonucunu doğrulaması gereken işte perception.screen eksik",
+        "Yeni marka görevine alakasız eski marka bağlamı taşınması",
+        "Kullanıcıdan gereksiz bilgi isteme"
       ],
+      "reviewerSummary" : "Masaüstündeki videoları bulma ve iletişim sayfasını inceleme görevi, yerel dosya işi için gereksiz web araştırması içeriyor. Dosya bulma gerektiren işte files.search eksik. Medya içeriğini değerlendiren işte perception eksik. Uygulama sonucunu doğrulaması gereken işte perception.screen eksik. Yeni marka görevine alakasız eski marka bağlamı taşınması var.",
       "reviewerUnnecessaryCapabilityIDs" : [
-
+        "research.web"
       ],
       "scenarioID" : "browser-contact-task",
       "selectedCapabilityIDs" : [
-
+        "core.reasoning",
+        "files.reveal",
+        "files.search"
       ],
       "title" : "Etkileşimli web görevi"
     },
