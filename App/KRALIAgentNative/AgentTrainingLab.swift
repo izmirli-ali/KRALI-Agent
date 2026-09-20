@@ -305,6 +305,11 @@ struct AgentTrainingLab {
             lastMemoryGoal:
                 "güncel kaynaklarla araştır → sonucu ve gerekçeyi açıkla"
         )
+        let staleComparisonMemory = context(
+            relevantMemoryCount: 1,
+            lastMemoryGoal:
+                "bulguları analiz et → sonucu ve gerekçeyi açıkla"
+        )
 
         return [
             TrainingScenario(
@@ -434,6 +439,21 @@ struct AgentTrainingLab {
                 tier: .core,
                 prompt: "Sony A7 IV ile Fuji X-T5 arasında video açısından temel farklar neler?",
                 context: empty,
+                requiredOutcomes: [.research, .analyze, .explain],
+                requiredCapabilities: ["core.reasoning", "research.web"],
+                forbiddenCapabilities: ["files.search"],
+                requiredRouteStages: ["Research", "Verify"],
+                requiredStepTitles: ["Analiz et", "Kaynakları oku"],
+                requiredLearningCapabilities: [],
+                minimumResearchConceptGroups: 1,
+                minimumMandatoryResearchConceptGroups: 0
+            ),
+            TrainingScenario(
+                id: "knowledge-comparison-with-stale-memory",
+                title: "Eski hafıza güncel karşılaştırmayı bastırmamalı",
+                tier: .core,
+                prompt: "Sony A7 IV ile Fuji X-T5 arasında video açısından temel farklar neler?",
+                context: staleComparisonMemory,
                 requiredOutcomes: [.research, .analyze, .explain],
                 requiredCapabilities: ["core.reasoning", "research.web"],
                 forbiddenCapabilities: ["files.search"],
