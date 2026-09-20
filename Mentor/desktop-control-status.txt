@@ -1,1 +1,1 @@
-runtime_failed|Uygulama bulunamadı: xyz123 diye bir uygulama aç
+runtime_failed|Uygulama bulunamadı: spotfiy uygulamasını aç
