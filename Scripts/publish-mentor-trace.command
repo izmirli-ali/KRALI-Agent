@@ -6,6 +6,7 @@ TRACE_SOURCE="$HOME/Library/Application Support/KRALI Agent/Mentor/latest.json"
 TRAINING_SOURCE="$HOME/Library/Application Support/KRALI Agent/Mentor/training-latest.json"
 LIVE_EVAL_SOURCE="$HOME/Library/Application Support/KRALI Agent/Mentor/live-eval-latest.json"
 ARENA_SOURCE="$HOME/Library/Application Support/KRALI Agent/Mentor/arena-latest.json"
+SCREEN_SOURCE="$HOME/Library/Application Support/KRALI Agent/Mentor/screen-perception-latest.json"
 DEVELOPER_STATUS_SOURCE="$HOME/Library/Application Support/KRALI Agent/Developer/latest.txt"
 DEVELOPER_LOG_SOURCE="$HOME/Library/Logs/KRALI-Developer-Agent.log"
 SEMANTIC_LOG_SOURCE="$HOME/Library/Logs/KRALI-Semantic-Planner.log"
@@ -13,6 +14,7 @@ TRACE_DEST="$ROOT/Mentor/latest.json"
 TRAINING_DEST="$ROOT/Mentor/training-latest.json"
 LIVE_EVAL_DEST="$ROOT/Mentor/live-eval-latest.json"
 ARENA_DEST="$ROOT/Mentor/arena-latest.json"
+SCREEN_DEST="$ROOT/Mentor/screen-perception-latest.json"
 DEVELOPER_STATUS_DEST="$ROOT/Mentor/developer-status.txt"
 DEVELOPER_LOG_DEST="$ROOT/Mentor/developer-log-tail.txt"
 SEMANTIC_LOG_DEST="$ROOT/Mentor/semantic-planner-log-tail.txt"
@@ -29,8 +31,8 @@ if [ ! -d "$ROOT/.git" ]; then
     exit 10
 fi
 
-if [ ! -f "$TRACE_SOURCE" ] && [ ! -f "$TRAINING_SOURCE" ] && [ ! -f "$LIVE_EVAL_SOURCE" ] && [ ! -f "$ARENA_SOURCE" ]; then
-    echo "❌ Gönderilecek mentor trace, Training Lab, Live Research Eval veya Arena raporu yok."
+if [ ! -f "$TRACE_SOURCE" ] && [ ! -f "$TRAINING_SOURCE" ] && [ ! -f "$LIVE_EVAL_SOURCE" ] && [ ! -f "$ARENA_SOURCE" ] && [ ! -f "$SCREEN_SOURCE" ]; then
+    echo "❌ Gönderilecek mentor trace, Training Lab, Live Research Eval, Arena veya Screen Perception raporu yok."
     exit 11
 fi
 
@@ -71,6 +73,11 @@ fi
 if [ -f "$ARENA_SOURCE" ]; then
     cp "$ARENA_SOURCE" "$ARENA_DEST"
     FILES+=("Mentor/arena-latest.json")
+fi
+
+if [ -f "$SCREEN_SOURCE" ]; then
+    cp "$SCREEN_SOURCE" "$SCREEN_DEST"
+    FILES+=("Mentor/screen-perception-latest.json")
 fi
 
 if [ -f "$DEVELOPER_STATUS_SOURCE" ]; then
