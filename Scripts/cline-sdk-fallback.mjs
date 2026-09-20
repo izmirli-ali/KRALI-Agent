@@ -12,17 +12,42 @@ const requestedModel = process.env.KRALI_DEV_MODEL || "";
 const statusFile = process.env.KRALI_STATUS_FILE || "";
 const branchName = process.env.KRALI_BRANCH || "";
 const gapLabel = process.env.KRALI_GAP_LABEL || "Capability";
+const appVersion = process.env.KRALI_APP_VERSION || "unknown";
+const runID = process.env.KRALI_RUN_ID || "";
 const timeoutMs = Number(process.env.KRALI_SDK_TIMEOUT_MS || "480000");
 
-function setStage(state, message) {
+let currentState = "sdk_fallback_running";
+let currentMessage = gapLabel + " ClineCore SDK üzerinden öğreniliyor";
+
+function persistStatus(state, message) {
+  currentState = state;
+  currentMessage = message;
+
   const line =
-    state + "|" + message + "|" + branchName + "|" + worktree + "\n";
+    state +
+    "|" +
+    message +
+    "|" +
+    branchName +
+    "|" +
+    worktree +
+    "|@meta|app=" +
+    appVersion +
+    "|at=" +
+    Math.floor(Date.now() / 1000) +
+    "|run=" +
+    runID +
+    "\n";
 
   if (statusFile) {
     try {
       fs.writeFileSync(statusFile, line, "utf8");
     } catch {}
   }
+}
+
+function setStage(state, message) {
+  persistStatus(state, message);
 
   process.stdout.write(
     "KRALI_STAGE " + state + " • " + message + "\n"
@@ -52,6 +77,10 @@ function armIdleWatchdog() {
 }
 
 function touchActivity() {
+  persistStatus(
+    currentState,
+    currentMessage
+  );
   armIdleWatchdog();
 }
 
