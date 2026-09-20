@@ -426,10 +426,9 @@ if [ "$GAP_MODE" = "gap" ]; then
     TIMEOUT_SECONDS="600"
 fi
 
-# Güncel Cline CLI sözleşmesi:
-# --json, --auto-approve, --provider ve --timeout.
-# Çalışma klasörü --cwd ile değil process working directory ile verilir.
-# Model, "cline auth" sırasında provider ayarına kaydedilir.
+# Headless çağrıyı minimum argüman yüzeyinde tutuyoruz.
+# Güncel Cline ayrıca --cwd, --model, --thinking ve --retries destekler;
+# burada worktree çalışma dizini process cwd ile verilir.
 CLINE_ARGS=(
     --json
     --auto-approve true
