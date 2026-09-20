@@ -215,6 +215,8 @@ struct AgentContextMemoryStore {
         let query = normalize(rawQuery)
         let queryTokens = Set(tokens(query))
         let continuation = containsContinuationReference(query)
+        let inlineSourceRewrite =
+            isInlineSourceRewriteRequest(rawQuery)
         let transformation = isTransformationRequest(query)
         let referencesIdeas = query.contains("fikir") ||
             query.contains("reels")
@@ -273,7 +275,10 @@ struct AgentContextMemoryStore {
                 corpus.contains(query)
 
             let isRelevant: Bool
-            if entry.kind == .userRule {
+            if entry.kind != .userRule &&
+               inlineSourceRewrite {
+                isRelevant = false
+            } else if entry.kind == .userRule {
                 isRelevant =
                     tokenOverlap > 0 ||
                     exactMatch
@@ -442,6 +447,35 @@ struct AgentContextMemoryStore {
         normalized.contains(
             "su an en guvenli planim"
         )
+    }
+
+    private func isInlineSourceRewriteRequest(
+        _ value: String
+    ) -> Bool {
+        let normalized = normalize(value)
+
+        let asksRewrite = [
+            "yeniden yaz",
+            "tekrar yaz",
+            "duzgun turkceyle",
+            "düzgün türkçeyle",
+            "metni duzelt",
+            "metni düzelt",
+            "proofread",
+            "rewrite"
+        ]
+        .contains {
+            normalized.contains($0)
+        }
+
+        let hasInlineSource =
+            value.contains("“") ||
+            value.contains("”") ||
+            value.contains(""") ||
+            value.contains(": “") ||
+            value.contains(": "")
+
+        return asksRewrite && hasInlineSource
     }
 
     private func isTransformationRequest(
