@@ -109,9 +109,9 @@ struct AgentCapabilityRegistry {
         AgentCapability(
             id: "perception.screen",
             name: "Ekran algısı",
-            summary: "Ekran görüntüsünü okuyarak uygulama durumu, UI elemanları ve işlem sonucunu görsel olarak değerlendirir.",
+            summary: "ScreenCaptureKit + Vision ile ekranı salt-okunur gözlemler; pencere, uygulama ve OCR kanıtını hedefe göre doğrular.",
             risk: .readOnly,
-            isAvailable: false,
+            isAvailable: true,
             requiresWorkspace: false
         ),
         AgentCapability(
