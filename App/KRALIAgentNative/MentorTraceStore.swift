@@ -78,6 +78,7 @@ struct MentorTrace: Codable {
     let semanticMission: AgentSemanticMission?
     let semanticPlannerProvider: String?
     let taskGraph: [MentorTraceTaskGraphStep]
+    let capabilityGaps: [CapabilityGapResolution]
     let capabilities: [MentorTraceCapability]
     let learningPlans: [MentorTraceLearningPlan]
     let executionSteps: [MentorTraceStep]
@@ -119,6 +120,7 @@ struct MentorTraceStore {
         semanticMission: AgentSemanticMission?,
         semanticPlannerProvider: String?,
         taskGraph: AgentTaskGraph?,
+        capabilityGaps: [CapabilityGapResolution],
         capabilities: [AgentCapability],
         learningPlans: [CapabilityLearningPlan],
         executionSteps: [AgentExecutionStep],
@@ -182,6 +184,8 @@ struct MentorTraceStore {
                             $0.requiresApproval
                     )
                 } ?? [],
+            capabilityGaps:
+                capabilityGaps,
             capabilities: capabilities.map {
                 MentorTraceCapability(
                     id: $0.id,
