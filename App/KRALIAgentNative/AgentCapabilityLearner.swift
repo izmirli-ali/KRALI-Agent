@@ -114,6 +114,15 @@ struct AgentCapabilityLearner {
         case "browser.control":
             return "macOS tarayıcı otomasyonu için güvenli browser bridge, Accessibility ve desteklenen otomasyon API'lerini resmi kaynaklardan karşılaştır."
 
+        case "perception.screen":
+            return "macOS ekran algısı için ScreenCaptureKit, Vision, Accessibility element tree ve görsel doğrulama yaklaşımlarını resmi dokümanlardan karşılaştır."
+
+        case "desktop.control":
+            return "macOS uygulama/pencere kontrolü için Accessibility API, Apple Events, Shortcuts ve güvenli input otomasyonu seçeneklerini resmi kaynaklardan karşılaştır."
+
+        case "photoshop.control":
+            return "Adobe Photoshop otomasyonu için güncel UXP API, plugin messaging, document/layer işlemleri ve dış ajan köprüsü seçeneklerini resmi Adobe dokümantasyonundan araştır."
+
         case "premiere.control":
             return "Premiere Pro otomasyonu için güncel resmi API/UXP/CEP seçeneklerini, desteklenen komutları ve güvenli doğrulama yöntemlerini araştır."
 
