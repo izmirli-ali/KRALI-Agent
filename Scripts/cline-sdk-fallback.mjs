@@ -430,7 +430,11 @@ try {
       mode: "act",
       maxIterations: Number(
         process.env.KRALI_SDK_MAX_ITERATIONS ||
-          "24"
+          (
+            requestedProvider === "ollama"
+              ? "36"
+              : "24"
+          )
       ),
       enableTools: true,
       enableSpawnAgent: false,
