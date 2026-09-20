@@ -367,3 +367,12 @@ Mission Contract Repair artık required capability set'inden çıkarılan stale 
 Arena sonuç metni tamamlanmış test ile devam eden testi karıştırmayacak biçimde değiştirildi: `X/6 geçti • Y başarısız • Reviewer Z işaret`. Böylece örneğin 2/6 sonucu artık UI'da takılmış gibi görünmez; 2 pass + 4 fail olduğu açıkça anlaşılır.
 
 Screen Perception Probe v0.8.17'de olduğu gibi manuel probe olarak kalır; `perception.screen` runtime capability'si henüz açılmaz. Önce Arena yeniden kararlı hale getirilecek, ardından gerçek screen-perception raporu doğrulanacaktır.
+
+
+**v0.8.19 contract fallback hardening:** v0.8.18 Mentor turunda Training Lab 30/30 ve Live Research Eval 2/2 yeşil kalırken Arena 3/6 oldu. Video edit, desktop cleanup ve browser contact senaryoları geçti; new-brand design, work-mail ve research-to-design mission'ları geçerli mission üretemedi. Kök neden, Apple çıktısı parse edilse bile repair sonrası validation başarısızlığının doğrudan nil dönmesi ve deterministic contract fallback'a geçmemesiydi.
+
+Semantic Planner artık repaired model mission validation'dan geçmezse current user input'tan `contractFallbackMission` dener. Foundation Models ilk çağrı, self-review çağrısı veya model availability katmanında hata verse de tanınan güvenli görev aileleri local contract üzerinden mission üretmeye devam eder. Deterministic fallback confidence 0.65'e çıkarılmıştır; runtime'ın 0.45 semantic mission kabul eşiğinin altında kalıp gereksiz Subscription fallback'a düşmez.
+
+Arena ve runtime diagnostic'leri planner kaynağını artık daha doğru ayırır: doğrudan model mission'ı `Apple Foundation Models`, model mission'ının deterministic capability contract ile tamamlandığı yol `Apple + Contract Repair`, model olmadan current-input contract seed ile üretilen yol ise `Local Contract Repair` olarak görünür. Böylece Mentor turunda hangi katmanın gerçekten mission'ı kurtardığı anlaşılır.
+
+Screen Perception Probe bu sürümde yine manuel probe olarak kalır ve runtime `perception.screen` availability açılmaz.
