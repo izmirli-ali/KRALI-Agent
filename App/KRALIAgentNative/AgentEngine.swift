@@ -30,6 +30,7 @@ final class AgentEngine: ObservableObject {
     @Published var currentSemanticPlannerProvider: String?
     @Published var currentTaskGraph: AgentTaskGraph?
     @Published var taskGraphStatus = "Henüz görev grafiği yok."
+    @Published var currentCapabilityGaps: [CapabilityGapResolution] = []
     @Published var executionSteps: [AgentExecutionStep] = []
     @Published var verificationState: AgentVerificationState = .idle
     @Published var verificationSummary = "Henüz doğrulama yapılmadı."
@@ -87,6 +88,7 @@ final class AgentEngine: ObservableObject {
     private let brain = AgentBrain()
     private let planner = AgentPlanner()
     private let taskOrchestrator = AgentTaskOrchestrator()
+    private let capabilityGapResolver = AgentCapabilityGapResolver()
     private let verifier = AgentVerifier()
     private let capabilityRegistry = AgentCapabilityRegistry()
     private let goalInterpreter = AgentGoalInterpreter()
@@ -470,6 +472,14 @@ final class AgentEngine: ObservableObject {
                 currentTaskGraph =
                     compiledTaskGraph
 
+                currentCapabilityGaps =
+                    capabilityGapResolver.resolve(
+                        graph:
+                            compiledTaskGraph,
+                        capabilities:
+                            capabilityRegistry.all
+                    )
+
                 let blocked =
                     compiledTaskGraph
                         .blockedCapabilityIDs
@@ -545,6 +555,24 @@ final class AgentEngine: ObservableObject {
                         "Task Graph blocked capability: " +
                         blocked.joined(
                             separator: ", "
+                        )
+                    )
+                }
+                for gap in currentCapabilityGaps {
+                    log(
+                        "Capability Gap: " +
+                        gap.capabilityID +
+                        " • " +
+                        gap.kind.rawValue +
+                        " • strategy=" +
+                        (
+                            gap.candidateCapabilityIDs
+                                .isEmpty
+                                ? "yok"
+                                : gap.candidateCapabilityIDs
+                                    .joined(
+                                        separator: ","
+                                    )
                         )
                     )
                 }
@@ -2004,6 +2032,7 @@ final class AgentEngine: ObservableObject {
         currentSemanticPlannerProvider = nil
         currentTaskGraph = nil
         taskGraphStatus = "Yeni görev için görev grafiği bekleniyor."
+        currentCapabilityGaps = []
         activeRoute = ["Core"]
         selectedCapabilities = []
         capabilityLearningPlans = []
