@@ -770,6 +770,25 @@ struct ContentView: View {
 
                         HStack {
                             VStack(alignment: .leading, spacing: 2) {
+                                Text("Desktop Control Probe")
+                                    .font(.caption.weight(.medium))
+                                Text(engine.desktopControlStatus)
+                                    .font(.caption2)
+                                    .foregroundStyle(.secondary)
+                                    .lineLimit(3)
+                            }
+
+                            Spacer()
+
+                            Button("Çalıştır") {
+                                engine.runDesktopControlProbe()
+                            }
+                            .controlSize(.small)
+                            .disabled(engine.desktopControlBusy)
+                        }
+
+                        HStack {
+                            VStack(alignment: .leading, spacing: 2) {
                                 Text("Developer Agent")
                                     .font(.caption.weight(.medium))
                                 Text(engine.developerAgentStatus.message)
