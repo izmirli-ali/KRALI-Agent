@@ -199,3 +199,12 @@ Training Lab'e Estafiz biçiminde doğal dilde detaylı yerel işletme araştır
 Research Query Planner handle + platform ikilisini çıkarır; resmi profil, takipçi/kitle ve içerik türleri için ayrı facet sorguları üretir. Sonuçlar handle ile entity-grounded kalır ve platform domainine öncelik verilir. Canlı takipçi/gönderi gibi hızlı değişen metrikler yalnızca doğrulanmış evidence içinde açıkça varsa sayı olarak verilir; aksi durumda KRALİ doğrulanamadığını söyler, tahmin üretmez.
 
 Training Lab'e aynı Estafiz Instagram cümlesi regression senaryosu olarak eklenir.
+
+
+**v0.7.28 direct resource resolution + capability escalation:** Sosyal/public profile araştırmasında “arama motorunda sonuç yok = hedef yok” varsayımı kaldırılır. Research plan, handle + platform gibi yeterince kesin bir tanımlayıcıdan doğrudan kanonik public resource adayı üretebilir. Bu aday bir URL çözümüdür; doğrulanmış evidence değildir.
+
+Web Research direct adayları arama sonuçlarıyla birlikte değerlendirir. Source Reader, direct-resolved bir kaynağı ancak sayfanın gerçek içeriğinden varlık kanıtı çıkarabiliyorsa evidence kabul eder; yalnızca URL/title varlığı kanıt sayılmaz. Böylece KRALİ hedef adresini bilebilir ama canlı takipçi, gönderi, stok, fiyat gibi verileri okuyamadığında bunu uydurmaz.
+
+Direct hedef çözüldüğü halde page evidence alınamazsa Core bunu “kaynak yok” yerine “etkileşimli/live erişim eksik” olarak sınıflandırır. `browser.control` runtime capability olarak seçilir, Learning backlog'a güvenli browser/session bridge araştırma görevi eklenir ve Verifier sonucu partial verir. Bu davranış yalnızca Instagram'a özgü değil; ileride deterministic URL/ID çözümü yapılabilen diğer public resources için aynı resolver → retriever → verifier zinciri kullanılabilir.
+
+Training Lab sosyal profil senaryosunda artık en az bir direct resource candidate üretildiğini de regression olarak doğrular.
