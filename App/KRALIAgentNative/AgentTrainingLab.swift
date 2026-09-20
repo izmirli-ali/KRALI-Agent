@@ -63,6 +63,10 @@ struct AgentTrainingLab {
         AgentNaturalLanguageResolver()
     private let taskOrchestrator =
         AgentTaskOrchestrator()
+    private let missionNormalizer =
+        AgentMissionNormalizer()
+    private let capabilityGapResolver =
+        AgentCapabilityGapResolver()
 
     func run() -> TrainingLabReport {
         let scenarios = makeScenarios()
@@ -177,6 +181,12 @@ struct AgentTrainingLab {
         )
         results.append(
             compoundCommandBypassesFastPathResult()
+        )
+        results.append(
+            compoundMissionNormalizationResult()
+        )
+        results.append(
+            capabilityGapClassificationResult()
         )
 
         let core = results.filter { $0.tier == .core }
@@ -815,8 +825,8 @@ struct AgentTrainingLab {
             roles[2] == .retrieve &&
             roles[3] == .transform &&
             roles[4] == .persist &&
-            graph.blockedCapabilityIDs ==
-                ["files.write.text"] &&
+            graph.blockedCapabilityIDs
+                .isEmpty &&
             graph.approvalStepIndexes
                 .isEmpty
 
@@ -993,6 +1003,228 @@ struct AgentTrainingLab {
                 ? []
                 : [
                     "Karmaşık görev yanlışlıkla basit app-open fast path'e düştü."
+                ]
+        )
+    }
+
+    private func compoundMissionNormalizationResult()
+        -> TrainingScenarioResult {
+        let prompt =
+            "Bir uygulamayı aç, şu anda açık olan içeriği bul, bununla ilgili bilgiyi araştır, analiz et ve masaüstündeki proje klasörüne txt dosyası olarak kaydet."
+
+        let staleMission =
+            AgentSemanticMission(
+                objective: prompt,
+                outcomes: [
+                    "locate",
+                    "organize"
+                ],
+                steps: [
+                    AgentSemanticMissionStep(
+                        title:
+                            "Eski videoları bul",
+                        purpose:
+                            "Alakasız önceki görev kalıntısı.",
+                        capabilityID:
+                            "files.search",
+                        operation:
+                            "files.search",
+                        dependsOn: []
+                    ),
+                    AgentSemanticMissionStep(
+                        title:
+                            "Finder'da göster",
+                        purpose:
+                            "Alakasız eski step.",
+                        capabilityID:
+                            "files.reveal",
+                        operation:
+                            "files.reveal",
+                        dependsOn: [0]
+                    )
+                ],
+                requiredCapabilityIDs: [
+                    "files.search",
+                    "files.reveal",
+                    "files.move.reversible"
+                ],
+                requiresUserInput: false,
+                userInputReason: nil,
+                confidence: 0.4
+            )
+
+        let normalized =
+            missionNormalizer.normalize(
+                staleMission,
+                userInput: prompt,
+                capabilities:
+                    capabilityRegistry.all
+            )
+
+        let ids =
+            Set(
+                normalized
+                    .requiredCapabilityIDs
+            )
+
+        let operations =
+            normalized.steps.map(
+                \.operation
+            )
+
+        let expectedIDs =
+            Set([
+                "context.local",
+                "core.reasoning",
+                "desktop.app",
+                "perception.screen",
+                "research.web",
+                "files.search",
+                "files.write.text"
+            ])
+
+        let expectedOperations = [
+            "context.resolve",
+            "app.open",
+            "screen.read",
+            "web.research",
+            "content.analyze",
+            "files.search.target-folder",
+            "file.write.text"
+        ]
+
+        let passed =
+            ids == expectedIDs &&
+            operations ==
+                expectedOperations &&
+            !ids.contains(
+                "files.move.reversible"
+            ) &&
+            !ids.contains(
+                "files.reveal"
+            )
+
+        return TrainingScenarioResult(
+            scenarioID:
+                "compound-mission-current-goal-normalization",
+            title:
+                "Karmaşık görevi current goal'den yeniden kurma",
+            tier: .core,
+            prompt: prompt,
+            passed: passed,
+            goal:
+                "Stale capability/step kalıntılarını atıp gerçek cross-provider zinciri kur",
+            route: [
+                "Core",
+                "Desktop",
+                "Screen",
+                "Research",
+                "Files"
+            ],
+            selectedCapabilities:
+                normalized
+                    .requiredCapabilityIDs,
+            unavailableCapabilities:
+                normalized
+                    .requiredCapabilityIDs
+                    .filter { id in
+                        capabilityRegistry.all
+                            .first {
+                                $0.id == id
+                            }?
+                            .isAvailable ==
+                            false
+                    },
+            diagnostics: passed
+                ? []
+                : [
+                    "Current-goal mission normalizer capability veya operation zincirini yanlış kurdu."
+                ]
+        )
+    }
+
+    private func capabilityGapClassificationResult()
+        -> TrainingScenarioResult {
+        let mission =
+            AgentSemanticMission(
+                objective:
+                    "Bir iletiyi oku ve cevap taslağı hazırla.",
+                outcomes: [
+                    "communicate"
+                ],
+                steps: [
+                    AgentSemanticMissionStep(
+                        title: "İletiyi oku",
+                        purpose:
+                            "İletiyi salt-okunur al.",
+                        capabilityID:
+                            "mail.work",
+                        operation:
+                            "mail.read",
+                        dependsOn: []
+                    )
+                ],
+                requiredCapabilityIDs: [
+                    "mail.work"
+                ],
+                requiresUserInput: false,
+                userInputReason: nil,
+                confidence: 1
+            )
+
+        let graph =
+            taskOrchestrator.compile(
+                mission: mission,
+                capabilities:
+                    capabilityRegistry.all
+            )
+
+        let gaps =
+            capabilityGapResolver.resolve(
+                graph: graph,
+                capabilities:
+                    capabilityRegistry.all
+            )
+
+        let passed =
+            gaps.count == 1 &&
+            gaps.first?.capabilityID ==
+                "mail.work" &&
+            gaps.first?.kind ==
+                .integration &&
+            gaps.first?
+                .developerBrief
+                .contains(
+                    "candidate branch"
+                ) == true
+
+        return TrainingScenarioResult(
+            scenarioID:
+                "capability-gap-classification",
+            title:
+                "Eksik provider'ı strategy/code/integration olarak sınıflandırma",
+            tier: .core,
+            prompt:
+                "Unavailable provider için güvenli developer brief üret.",
+            passed: passed,
+            goal:
+                "Capability gap'i self-evolution hattına hazırla",
+            route: [
+                "Core",
+                "GapResolver"
+            ],
+            selectedCapabilities:
+                gaps.map(
+                    \.capabilityID
+                ),
+            unavailableCapabilities:
+                gaps.map(
+                    \.capabilityID
+                ),
+            diagnostics: passed
+                ? []
+                : [
+                    "Capability Gap Resolver beklenen integration/developer brief sonucunu üretmedi."
                 ]
         )
     }
