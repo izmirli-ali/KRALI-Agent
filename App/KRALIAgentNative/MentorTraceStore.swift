@@ -23,6 +23,19 @@ struct MentorTraceStep: Codable {
     let state: String
 }
 
+struct MentorTraceTaskGraphStep: Codable {
+    let index: Int
+    let title: String
+    let capabilityID: String
+    let operation: String
+    let role: String
+    let dependsOn: [Int]
+    let risk: String
+    let available: Bool
+    let requiresApproval: Bool
+}
+
+
 struct MentorTraceResearchSource: Codable {
     let title: String
     let url: String
@@ -64,6 +77,7 @@ struct MentorTrace: Codable {
     let route: [String]
     let semanticMission: AgentSemanticMission?
     let semanticPlannerProvider: String?
+    let taskGraph: [MentorTraceTaskGraphStep]
     let capabilities: [MentorTraceCapability]
     let learningPlans: [MentorTraceLearningPlan]
     let executionSteps: [MentorTraceStep]
@@ -104,6 +118,7 @@ struct MentorTraceStore {
         route: [String],
         semanticMission: AgentSemanticMission?,
         semanticPlannerProvider: String?,
+        taskGraph: AgentTaskGraph?,
         capabilities: [AgentCapability],
         learningPlans: [CapabilityLearningPlan],
         executionSteps: [AgentExecutionStep],
@@ -146,6 +161,27 @@ struct MentorTraceStore {
             semanticMission: semanticMission,
             semanticPlannerProvider:
                 semanticPlannerProvider,
+            taskGraph:
+                taskGraph?.steps.map {
+                    MentorTraceTaskGraphStep(
+                        index: $0.index,
+                        title: $0.title,
+                        capabilityID:
+                            $0.capabilityID,
+                        operation:
+                            $0.operation,
+                        role:
+                            $0.role.rawValue,
+                        dependsOn:
+                            $0.dependsOn,
+                        risk:
+                            $0.risk.rawValue,
+                        available:
+                            $0.isAvailable,
+                        requiresApproval:
+                            $0.requiresApproval
+                    )
+                } ?? [],
             capabilities: capabilities.map {
                 MentorTraceCapability(
                     id: $0.id,
