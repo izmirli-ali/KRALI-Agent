@@ -940,6 +940,19 @@ if [ "$CLINE_EXIT" -eq 137 ] &&
 fi
 
 if [ "$CLINE_EXIT" -ne 0 ]; then
+    FAILURE_BASE="$(
+        /bin/cat "$STATUS" 2>/dev/null |
+        /usr/bin/sed 's/|@meta.*//'
+    )"
+    FAILURE_STATE="$(
+        printf '%s' "$FAILURE_BASE" |
+        /usr/bin/awk -F'|' '{print $1}'
+    )"
+    FAILURE_MESSAGE="$(
+        printf '%s' "$FAILURE_BASE" |
+        /usr/bin/awk -F'|' '{print $2}'
+    )"
+
     ERROR_SOURCE="$CLINE_RUN_LOG"
     if [ -f "$LOG_DIR/KRALI-Developer-Agent-Cline-$STAMP-tool-retry.log" ]; then
         ERROR_SOURCE="$LOG_DIR/KRALI-Developer-Agent-Cline-$STAMP-tool-retry.log"
@@ -967,8 +980,8 @@ if [ "$CLINE_EXIT" -ne 0 ]; then
     DIRTY_CANDIDATE="$(git -C "$WORKTREE" status --porcelain 2>/dev/null || true)"
 
     if [ -n "$DIRTY_CANDIDATE" ]; then
-        echo "🧩 Cline hata verdi ancak candidate değişiklik üretti; recovery başlatılıyor." | tee -a "$LOG"
-        write_status "recovering_candidate|Cline oturumu tamamlanmadı ancak üretilen candidate değişiklikler korunuyor|$BRANCH|$WORKTREE"
+        echo "🧩 Developer Agent hata verdi ancak candidate değişiklik üretti; recovery başlatılıyor." | tee -a "$LOG"
+        write_status "recovering_candidate|Developer Agent oturumu tamamlanmadı ancak üretilen candidate değişiklikler korunuyor|$BRANCH|$WORKTREE"
 
         /bin/zsh "$ROOT/Scripts/recover-developer-candidate.command" >>"$LOG" 2>&1 || true
 
@@ -996,8 +1009,17 @@ if [ "$CLINE_EXIT" -ne 0 ]; then
         git -C "$ROOT" branch -D "$BRANCH" >>"$LOG" 2>&1 || true
     fi
 
-    write_status "failed|Cline exit $CLINE_EXIT (${CLINE_DURATION}s): $CLINE_ERROR|$BRANCH|$WORKTREE"
-    echo "❌ Cline görevi başarısız oldu (exit $CLINE_EXIT, ${CLINE_DURATION}s): $CLINE_ERROR" | tee -a "$LOG"
+    if [ "$PROVIDER" = "ollama" ] &&
+       [ "$LOCAL_AGENT_ENGINE" = "native-ollama" ] &&
+       echo "$FAILURE_STATE" |
+       /usr/bin/grep -Eq '^local_(agent_|storage_|tool_|ai_|model_)'; then
+        write_status "$FAILURE_STATE|${FAILURE_MESSAGE:-Native yerel agent başarısız}|$BRANCH|$WORKTREE"
+        echo "❌ Native yerel Developer Agent durdu: ${FAILURE_MESSAGE:-$CLINE_ERROR}" | tee -a "$LOG"
+        exit 20
+    fi
+
+    write_status "failed|Developer Agent exit $CLINE_EXIT (${CLINE_DURATION}s): $CLINE_ERROR|$BRANCH|$WORKTREE"
+    echo "❌ Developer Agent görevi başarısız oldu (exit $CLINE_EXIT, ${CLINE_DURATION}s): $CLINE_ERROR" | tee -a "$LOG"
     exit 20
 fi
 
