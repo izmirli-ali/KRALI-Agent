@@ -599,8 +599,11 @@ struct ContentView: View {
                     .clipShape(RoundedRectangle(cornerRadius: 11))
                 }
 
-                if !engine.fileSearchResults.isEmpty ||
-                   !engine.folderSearchResults.isEmpty {
+                if engine.activeRoute.contains("Files") &&
+                   (
+                       !engine.fileSearchResults.isEmpty ||
+                       !engine.folderSearchResults.isEmpty
+                   ) {
                     sectionTitle("Sonuçlar")
 
                     VStack(spacing: 6) {
