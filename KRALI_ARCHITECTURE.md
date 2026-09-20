@@ -481,3 +481,18 @@ Low-risk app-open başarı doğrulaması da hızlandırıldı. `focusCandidate` 
 Chat pipeline'daki 180 ms yapay başlangıç gecikmesi kaldırıldı. Her görev artık başlangıç ve bitiş zamanını ölçer; Activity/Mentor trace içinde `Görev tamamlandı • X.XX sn` satırı bulunur. Sonraki performans optimizasyonları hissiyata değil gerçek tur sürelerine göre yapılacaktır.
 
 Startup sırasında seçili çalışma alanının mevcut file index restore akışı şimdilik korunur; v0.8.27 Mentor'da ~1772 dosya / 68 klasör indeksleme aynı saniye içinde tamamlandığı için gözlenen ana gecikme kaynağı bu değil, ağır diagnostics + model/screen doğrulama zinciriydi.
+
+
+**v0.8.29 natural-language tolerance + fuzzy target resolution:** v0.8.28 Mentor turunda normal app-open performansı belirgin biçimde iyileşti. WhatsApp görevi 0.26 saniyede tamamlandı; yazım hatalı “takavim uygulamasını aç” denemesi 0.07 saniyede güvenli biçimde application-not-found sonucuna düştü. Startup ağır testleri kaldırma, single-flight execution ve NSWorkspace fast verification performans hedefini karşıladı. Kalan ana açık doğal dil toleransıydı.
+
+Yeni `AgentNaturalLanguageResolver` provider'dan bağımsız hafif bir dil ön-işleme katmanıdır. Türkçe karakter/harf normalizasyonu, komut tokenizasyonu, kısa imperative intent algısı, Türkçe durum eklerini hedef addan ayırma ve Damerau-Levenshtein tabanlı güven skorlu fuzzy eşleşme sağlar. İlk entegrasyon `desktop.app` provider'ındadır; katman ileride dosya, tarayıcı, menü ve diğer capability hedef çözümlemelerinde yeniden kullanılabilir.
+
+Basit app-open komutları artık “uygulama” kelimesine bağlı değildir. `spotifyı aç`, `takvimi aç`, `Spotify'a gir`, `Photoshop'u öne getir`, `X'i başlat` gibi kısa biçimler deterministic app-open fast path'e girebilir. Derin UI etkileşimi, dosya/web hedefi veya analiz içeren cümleler semantic planner yolunda kalır.
+
+Target resolver Türkçe belirtme/yönelme ekleri için `-ı/-i/-u/-ü`, `-yı/-yi/-yu/-yü`, `-nı/-ni/-nu/-nü`, `-a/-e`, `-ya/-ye`, `-na/-ne` varyantlarını hedef kelimeden ayırır. Uygulama alias eşleşmesi birebir isim gerektirmez; küçük yazım hataları ve karakter yer değiştirmeleri güven skoruyla değerlendirilir. Örnek sınıf: `spotfiy → Spotify`, `takavim → Takvim`, `spotifyı → Spotify`. Uygulama isimleri hard-code edilmez; sistemde yüklü app bundle alias kataloğuna karşı eşleştirilir.
+
+Fuzzy eşleşme güvenli tarafta kalır. Uzun hedeflerde daha düşük hata toleransı, kısa hedeflerde daha yüksek güven eşiği kullanılır. En iyi iki uygulama adayı birbirine çok yakınsa resolver rastgele uygulama açmaz; unresolved kalır. Application catalog actor içinde cache'lenir; eşleşme bulunamazsa katalog bir kez yenilenerek yeni kurulmuş uygulamalar da yakalanmaya çalışılır.
+
+Training Lab'e üç regression eklendi: `spotifyı aç` kısa app-open, `takvimi aç` Türkçe ek ayrıştırma ve `spotfiy aç` yazım hatalı fuzzy eşleşme. Bu testler normal açılışta otomatik çalışmaz; geliştirici tanısında gerektiğinde manuel çalıştırılır.
+
+Kısa zamirli komutlar (`bunu aç`, `şunu yap`) hedef aynı mesajda veya mevcut bağlamda açık değilse güvenlik nedeniyle tahmin edilmez. Uzun vadeli çözüm ayrı bir contextual referent resolver'dır; hedef belli değilken fuzzy matching ile rastgele nesne/provider seçilmemelidir.
