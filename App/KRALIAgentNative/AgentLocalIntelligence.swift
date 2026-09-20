@@ -293,40 +293,76 @@ actor AgentLocalIntelligence {
     private func isOperationallyComplete(
         _ mission: AgentSemanticMission
     ) -> Bool {
-        let operationalOutcomes = Set([
-            "locate",
-            "shortlist",
-            "assessContent",
-            "organize",
-            "open",
-            "research",
-            "edit",
-            "communicate"
-        ])
-
-        let requiresOperationalCapability =
-            !operationalOutcomes
-                .intersection(
-                    Set(mission.outcomes)
-                )
-                .isEmpty
-
-        guard requiresOperationalCapability else {
-            return true
-        }
-
-        let nonReasoningCapabilityIDs = Set(
+        let ids = Set(
             mission.requiredCapabilityIDs +
             mission.steps.map(\.capabilityID)
         )
-        .subtracting(
-            Set([
-                "core.reasoning",
-                "context.local"
-            ])
-        )
+        let outcomes = Set(mission.outcomes)
 
-        return !nonReasoningCapabilityIDs.isEmpty
+        if outcomes.contains("locate") ||
+           outcomes.contains("shortlist") {
+            guard ids.contains("files.search") ||
+                  ids.contains("browser.control")
+            else {
+                return false
+            }
+        }
+
+        if outcomes.contains("assessContent") {
+            guard ids.contains("perception.media") ||
+                  ids.contains("perception.screen")
+            else {
+                return false
+            }
+        }
+
+        if outcomes.contains("research") {
+            guard ids.contains("research.web") ||
+                  ids.contains("browser.control")
+            else {
+                return false
+            }
+        }
+
+        if outcomes.contains("organize") {
+            guard ids.contains("files.move.reversible") ||
+                  ids.contains("desktop.control")
+            else {
+                return false
+            }
+        }
+
+        if outcomes.contains("open") {
+            guard ids.contains("files.reveal") ||
+                  ids.contains("desktop.control") ||
+                  ids.contains("browser.control")
+            else {
+                return false
+            }
+        }
+
+        if outcomes.contains("edit") {
+            let editProviders = Set([
+                "premiere.control",
+                "photoshop.control",
+                "desktop.control",
+                "files.move.reversible"
+            ])
+
+            guard !ids.intersection(editProviders).isEmpty else {
+                return false
+            }
+        }
+
+        if outcomes.contains("communicate") {
+            guard ids.contains("mail.work") ||
+                  ids.contains("browser.control")
+            else {
+                return false
+            }
+        }
+
+        return true
     }
 
     private func extractJSONObject(
