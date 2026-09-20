@@ -165,6 +165,7 @@ final class AgentEngine: ObservableObject {
         if let report = arenaReport {
             arenaStatus =
                 "Son Arena: \(report.passed)/\(report.total) geçti • " +
+                "\(report.failed) başarısız • " +
                 "Reviewer \(report.reviewerFlagged) işaret"
             mentorTraceReady = true
         }
@@ -2147,7 +2148,8 @@ final class AgentEngine: ObservableObject {
                 try arenaStore.save(report)
 
                 arenaStatus =
-                    "\(report.passed)/\(report.total) Arena görevi geçti • " +
+                    "\(report.passed)/\(report.total) geçti • " +
+                    "\(report.failed) başarısız • " +
                     "Reviewer \(report.reviewerFlagged) işaret"
 
                 mentorTraceReady = true
