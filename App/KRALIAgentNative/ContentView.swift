@@ -498,6 +498,85 @@ struct ContentView: View {
                     .clipShape(RoundedRectangle(cornerRadius: 11))
                 }
 
+                if let incident = engine.debugIncident {
+                    sectionTitle("Hata Ayıklama")
+
+                    VStack(alignment: .leading, spacing: 8) {
+                        HStack(alignment: .top, spacing: 8) {
+                            if incident.progress.isActive {
+                                ProgressView()
+                                    .controlSize(.small)
+                                    .frame(width: 16, height: 16)
+                            } else {
+                                Image(systemName: incident.kind.systemImage)
+                                    .font(.caption)
+                                    .foregroundStyle(
+                                        incident.progress == .recovered
+                                            ? Color.green
+                                            : Color.orange
+                                    )
+                                    .frame(width: 16)
+                            }
+
+                            VStack(alignment: .leading, spacing: 2) {
+                                Text(incident.progress.title)
+                                    .font(.caption.weight(.semibold))
+
+                                Text(
+                                    incident.kind.title +
+                                    " • " +
+                                    incident.source
+                                )
+                                .font(.caption2.weight(.medium))
+                                .foregroundStyle(.secondary)
+
+                                Text(incident.summary)
+                                    .font(.caption2)
+                                    .foregroundStyle(.secondary)
+                                    .lineLimit(3)
+                            }
+
+                            Spacer()
+                        }
+
+                        Divider()
+
+                        VStack(alignment: .leading, spacing: 2) {
+                            Text("Recovery planı")
+                                .font(.caption2.weight(.semibold))
+
+                            Text(incident.recoveryPlan)
+                                .font(.caption2)
+                                .foregroundStyle(.secondary)
+                                .lineLimit(3)
+                        }
+
+                        if let evidence = incident.evidence,
+                           !evidence.isEmpty {
+                            Text("Kanıt: " + evidence)
+                                .font(.caption2.monospaced())
+                                .foregroundStyle(.secondary)
+                                .lineLimit(2)
+                        }
+                    }
+                    .padding(11)
+                    .background(
+                        incident.progress == .recovered
+                            ? Color.green.opacity(0.07)
+                            : Color.orange.opacity(0.07)
+                    )
+                    .overlay(
+                        RoundedRectangle(cornerRadius: 11)
+                            .stroke(
+                                incident.progress == .recovered
+                                    ? Color.green.opacity(0.25)
+                                    : Color.orange.opacity(0.25),
+                                lineWidth: 1
+                            )
+                    )
+                    .clipShape(RoundedRectangle(cornerRadius: 11))
+                }
+
                 if !engine.capabilityLearningPlans.isEmpty ||
                    !engine.capabilityLearningBacklog.isEmpty ||
                    engine.developerAgentStatus.shouldShowLearningStatus {
