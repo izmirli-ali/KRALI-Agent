@@ -549,7 +549,7 @@ actor AgentLocalIntelligence {
 
         if genericDesktopOpenTask {
             outcomes.insert("open")
-            requiredIDs.insert("desktop.control")
+            requiredIDs.insert("desktop.app")
         }
 
         if genericFileOpenTask {
@@ -676,12 +676,13 @@ actor AgentLocalIntelligence {
         case "files.search": return 4
         case "files.metadata": return 5
         case "perception.media": return 6
-        case "desktop.control": return 7
+        case "desktop.app": return 7
+        case "desktop.control": return 8
         case "premiere.control",
-             "photoshop.control": return 8
+             "photoshop.control": return 9
         case "files.move.reversible",
-             "mail.work": return 9
-        case "perception.screen": return 10
+             "mail.work": return 10
+        case "perception.screen": return 11
         default: return 20
         }
     }
@@ -801,6 +802,7 @@ actor AgentLocalIntelligence {
 
         if outcomes.contains("open") {
             guard ids.contains("files.reveal") ||
+                  ids.contains("desktop.app") ||
                   ids.contains("desktop.control") ||
                   ids.contains("browser.control")
             else {
