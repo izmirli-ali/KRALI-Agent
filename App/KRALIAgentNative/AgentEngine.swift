@@ -3755,6 +3755,7 @@ final class AgentEngine: ObservableObject {
                  "local_agent_failed",
                  "local_agent_tool_protocol_failed",
                  "local_agent_iteration_limit",
+                 "local_agent_watchdog_timeout",
                  "local_ai_failed",
                  "local_model_failed",
                  "no_change_unverified",
