@@ -3319,7 +3319,10 @@ final class AgentEngine: ObservableObject {
                         self.developerAgentStatus = liveStatus
 
                         if liveStatus.state == "repairing_cline" ||
-                           liveStatus.state == "repairing_runtime" {
+                           liveStatus.state == "repairing_runtime" ||
+                           liveStatus.state == "provider_platform_bug" ||
+                           liveStatus.state == "sdk_fallback_preparing" ||
+                           liveStatus.state == "sdk_fallback_running" {
                             self.registerDebugIncident(
                                 source: "Developer Agent",
                                 message: liveStatus.message,
