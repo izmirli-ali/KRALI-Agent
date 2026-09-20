@@ -76,6 +76,10 @@ struct DeveloperAgentStatus: Hashable {
             "local_tool_probe",
             "local_model_fallback",
             "local_ai_ready",
+            "local_agent_starting",
+            "local_agent_running",
+            "local_agent_tool",
+            "local_agent_completed",
             "sdk_fallback_preparing",
             "sdk_fallback_running",
             "sdk_importing",
@@ -104,6 +108,11 @@ struct DeveloperAgentStatus: Hashable {
             "local_ai_failed",
             "local_model_failed",
             "local_tool_probe_failed",
+            "local_storage_low",
+            "local_agent_failed",
+            "local_agent_tool_protocol_failed",
+            "local_agent_iteration_limit",
+            "local_agent_watchdog_timeout",
             "sdk_tool_protocol_failed",
             "no_change_unverified",
             "sdk_provider_failed",
@@ -145,6 +154,14 @@ struct DeveloperAgentStatus: Hashable {
             return "Alternatif yerel model deneniyor"
         case "local_ai_ready":
             return "Ücretsiz yerel AI hazır"
+        case "local_agent_starting":
+            return "Native yerel agent başlatılıyor"
+        case "local_agent_running":
+            return "Native yerel agent çalışıyor"
+        case "local_agent_tool":
+            return "Yerel agent araç kullanıyor"
+        case "local_agent_completed":
+            return "Yerel agent turu tamamlandı"
         case "setup_local_ai":
             return "Yerel AI kurulumu gerekli"
         case "local_ai_failed":
@@ -153,6 +170,16 @@ struct DeveloperAgentStatus: Hashable {
             return "Yerel model indirilemedi"
         case "local_tool_probe_failed":
             return "Yerel model tool-call testi başarısız"
+        case "local_storage_low":
+            return "Yerel model için disk alanı yetersiz"
+        case "local_agent_failed":
+            return "Native yerel agent durdu"
+        case "local_agent_tool_protocol_failed":
+            return "Native tool-call protokolü başarısız"
+        case "local_agent_iteration_limit":
+            return "Native yerel agent adım sınırına ulaştı"
+        case "local_agent_watchdog_timeout":
+            return "Native yerel agent zaman aşımına uğradı"
         case "sdk_tool_protocol_failed":
             return "Yerel model araç protokolü başarısız"
         case "no_change_unverified":
@@ -288,6 +315,10 @@ struct DeveloperAgentStatus: Hashable {
              "local_tool_probe",
              "local_model_fallback",
              "local_ai_ready",
+             "local_agent_starting",
+             "local_agent_running",
+             "local_agent_tool",
+             "local_agent_completed",
              "sdk_fallback_preparing",
              "sdk_importing",
              "sdk_import_ready",
@@ -298,16 +329,20 @@ struct DeveloperAgentStatus: Hashable {
 
         case "sdk_session_starting",
              "sdk_session_running",
+             "local_agent_starting",
+             "local_agent_running",
              "learning",
              "running":
             return "3–7 dk"
 
         case "sdk_tools_running",
-             "sdk_tool_completed":
+             "sdk_tool_completed",
+             "local_agent_tool":
             return "2–6 dk"
 
         case "sdk_session_ended",
              "sdk_session_completed",
+             "local_agent_completed",
              "verifying":
             return "1–3 dk"
 
@@ -330,7 +365,8 @@ struct DeveloperAgentStatus: Hashable {
             "setup_cline_repair",
             "setup_cline_auth",
             "waiting_cline_auth",
-            "setup_local_ai"
+            "setup_local_ai",
+            "local_storage_low"
         ].contains(state)
     }
 
@@ -348,6 +384,8 @@ struct DeveloperAgentStatus: Hashable {
             return "Cline giriş penceresi otomatik açıldı; tarayıcıdaki girişi tamamla."
         case "setup_local_ai":
             return "Yerel Ollama runtime otomatik hazırlanamadı."
+        case "local_storage_low":
+            return "Diskte yeterli boş alan yok. KRALİ yeni büyük model indirmeyi durdurdu; mevcut kurulu model korunuyor."
         case "setup_cline_repair":
             return "Cline otomatik onarılamadı; Developer Agent logu incelenmeli."
         case "setup_cline_auth":

@@ -102,6 +102,7 @@ NODE_RUNTIME_BIN_DIR="$(dirname "$NODE_BIN")"
 CLINE_BIN="$(command -v cline || true)"
 PROVIDER="${KRALI_DEV_PROVIDER:-ollama}"
 MODEL="${KRALI_DEV_MODEL:-}"
+LOCAL_AGENT_ENGINE="${KRALI_LOCAL_AGENT_ENGINE:-native-ollama}"
 OLLAMA_BASE_URL="${KRALI_OLLAMA_BASE_URL:-http://127.0.0.1:11434}"
 CLINE_SETTINGS="${CLINE_PROVIDER_SETTINGS_PATH:-$HOME/.cline/data/settings/providers.json}"
 USE_SDK_FALLBACK=0
@@ -201,11 +202,37 @@ prepare_sdk_fallback() {
     return 0
 }
 
+model_required_free_gb() {
+    case "$1" in
+        qwen3-coder:30b) echo 24 ;;
+        devstral:24b) echo 18 ;;
+        qwen2.5-coder:14b-instruct) echo 12 ;;
+        qwen3:8b) echo 8 ;;
+        qwen2.5-coder:7b-instruct) echo 7 ;;
+        *) echo 10 ;;
+    esac
+}
+
+available_disk_gb() {
+    /bin/df -Pk "$HOME" 2>/dev/null |
+    /usr/bin/awk 'NR==2 {printf "%d", $4 / 1024 / 1024}'
+}
+
 ensure_ollama_model() {
     local requested_model="$1"
 
     if "$OLLAMA_BIN" show "$requested_model" >/dev/null 2>&1; then
         return 0
+    fi
+
+    local required_gb="$(model_required_free_gb "$requested_model")"
+    local free_gb="$(available_disk_gb)"
+
+    if [ -n "$free_gb" ] &&
+       [ "$free_gb" -lt "$required_gb" ]; then
+        write_status "local_storage_low|Yerel model için disk alanı yetersiz: $requested_model • boş≈${free_gb}GB • gereken≈${required_gb}GB"
+        echo "❌ Model indirilmedi; disk alanı korunuyor: $requested_model • boş≈${free_gb}GB" | tee -a "$LOG"
+        return 1
     fi
 
     write_status "local_model_downloading|Yerel model indiriliyor: $requested_model"
@@ -225,25 +252,63 @@ probe_ollama_model() {
     "$NODE_BIN" "$ROOT/Scripts/ollama-tool-probe.mjs" >>"$LOG" 2>&1
 }
 
-select_tool_fallback_model() {
+select_existing_local_model() {
+    local candidates=()
+
+    if [ "$MEMORY_GB" -ge 32 ]; then
+        candidates=(
+            "devstral:24b"
+            "qwen3-coder:30b"
+            "qwen2.5-coder:14b-instruct"
+            "qwen3:8b"
+            "qwen2.5-coder:7b-instruct"
+        )
+    elif [ "$MEMORY_GB" -ge 20 ]; then
+        candidates=(
+            "qwen2.5-coder:14b-instruct"
+            "qwen3:8b"
+            "qwen2.5-coder:7b-instruct"
+        )
+    else
+        candidates=(
+            "qwen2.5-coder:7b-instruct"
+            "qwen3:8b"
+        )
+    fi
+
+    for candidate in "${candidates[@]}"; do
+        if "$OLLAMA_BIN" show "$candidate" >/dev/null 2>&1; then
+            MODEL="$candidate"
+            return 0
+        fi
+    done
+
+    return 1
+}
+
+select_installed_tool_fallback() {
     local current_model="$1"
+    local candidates=(
+        "qwen2.5-coder:14b-instruct"
+        "qwen2.5-coder:7b-instruct"
+        "qwen3:8b"
+        "devstral:24b"
+        "qwen3-coder:30b"
+    )
 
-    if [ "$MEMORY_GB" -ge 32 ] &&
-       [ "$current_model" != "qwen3-coder:30b" ]; then
-        printf '%s' "qwen3-coder:30b"
-        return 0
-    fi
+    FALLBACK_MODEL=""
 
-    if [ "$MEMORY_GB" -ge 20 ] &&
-       [ "$current_model" != "devstral:24b" ]; then
-        printf '%s' "devstral:24b"
-        return 0
-    fi
+    for candidate in "${candidates[@]}"; do
+        if [ "$candidate" = "$current_model" ]; then
+            continue
+        fi
 
-    if [ "$current_model" != "qwen3:8b" ]; then
-        printf '%s' "qwen3:8b"
-        return 0
-    fi
+        if "$OLLAMA_BIN" show "$candidate" >/dev/null 2>&1 &&
+           probe_ollama_model "$candidate"; then
+            FALLBACK_MODEL="$candidate"
+            return 0
+        fi
+    done
 
     return 1
 }
@@ -302,44 +367,32 @@ prepare_ollama_runtime() {
     MEMORY_GB="$(( MEMORY_BYTES / 1024 / 1024 / 1024 ))"
 
     if [ -z "$MODEL" ]; then
-        if [ "$MEMORY_GB" -ge 32 ]; then
-            MODEL="devstral:24b"
-        elif [ "$MEMORY_GB" -ge 20 ]; then
-            MODEL="qwen2.5-coder:14b-instruct"
-        else
-            MODEL="qwen2.5-coder:7b-instruct"
+        if ! select_existing_local_model; then
+            if [ "$MEMORY_GB" -ge 20 ]; then
+                MODEL="qwen2.5-coder:14b-instruct"
+            else
+                MODEL="qwen2.5-coder:7b-instruct"
+            fi
         fi
 
         echo "Yerel model seçimi: $MODEL • RAM≈${MEMORY_GB}GB" | tee -a "$LOG"
     fi
 
     if ! ensure_ollama_model "$MODEL"; then
-        write_status "local_model_failed|Yerel model indirilemedi: $MODEL"
+        write_status "local_model_failed|Yerel model hazırlanamadı: $MODEL"
         return 1
     fi
 
     if ! probe_ollama_model "$MODEL"; then
-        echo "⚠️ $MODEL native tool-call probe geçmedi." | tee -a "$LOG"
+        echo "⚠️ $MODEL native tool-call probe geçmedi; yalnız kurulu alternatifler deneniyor." | tee -a "$LOG"
 
-        FALLBACK_MODEL="$(select_tool_fallback_model "$MODEL" || true)"
-        if [ -z "$FALLBACK_MODEL" ]; then
-            write_status "local_tool_probe_failed|Yerel model native tool-call probe geçemedi: $MODEL"
-            return 1
-        fi
-
-        write_status "local_model_fallback|Tool-capable yerel modele geçiliyor: $FALLBACK_MODEL"
-
-        if ! ensure_ollama_model "$FALLBACK_MODEL"; then
-            write_status "local_model_failed|Fallback yerel model indirilemedi: $FALLBACK_MODEL"
-            return 1
-        fi
-
-        if ! probe_ollama_model "$FALLBACK_MODEL"; then
-            write_status "local_tool_probe_failed|Yerel modeller native tool-call probe geçemedi"
+        if ! select_installed_tool_fallback "$MODEL"; then
+            write_status "local_tool_probe_failed|Kurulu yerel modeller native tool-call probe geçemedi"
             return 1
         fi
 
         MODEL="$FALLBACK_MODEL"
+        write_status "local_model_fallback|Kurulu tool-capable yerel modele geçildi: $MODEL"
     fi
 
     write_status "local_ai_ready|Ücretsiz yerel Developer AI hazır ve tool-call doğrulandı: $MODEL"
@@ -400,10 +453,12 @@ if ! cline_probe; then
 fi
 
 if [ "$PROVIDER" = "ollama" ]; then
-    USE_SDK_FALLBACK=1
-
     if ! prepare_ollama_runtime; then
         exit 11
+    fi
+
+    if [ "$LOCAL_AGENT_ENGINE" != "native-ollama" ]; then
+        USE_SDK_FALLBACK=1
     fi
 elif [ "$USE_SDK_FALLBACK" -eq 0 ]; then
     echo "Cline version: $CLINE_PROBE_OUTPUT" | tee -a "$LOG"
@@ -765,7 +820,26 @@ CLINE_RUN_LOG="$LOG_DIR/KRALI-Developer-Agent-Cline-$STAMP.log"
 
 CLINE_STARTED_AT="$(date +%s)"
 
-if [ "$USE_SDK_FALLBACK" -eq 1 ]; then
+if [ "$PROVIDER" = "ollama" ] &&
+   [ "$LOCAL_AGENT_ENGINE" = "native-ollama" ]; then
+    CLINE_RUN_LOG="$LOG_DIR/KRALI-Developer-Agent-Local-$STAMP.log"
+    write_status "local_agent_starting|$GAP_LABEL native Ollama Developer Agent ile öğreniliyor|$BRANCH|$WORKTREE"
+
+    KRALI_WORKTREE="$WORKTREE" \
+    KRALI_PROMPT_FILE="$PROMPT_FILE" \
+    KRALI_DEV_MODEL="$MODEL" \
+    KRALI_OLLAMA_BASE_URL="$OLLAMA_BASE_URL" \
+    KRALI_STATUS_FILE="$STATUS" \
+    KRALI_BRANCH="$BRANCH" \
+    KRALI_GAP_LABEL="$GAP_LABEL" \
+    KRALI_APP_VERSION="$(/bin/cat "$ROOT/VERSION" 2>/dev/null | /usr/bin/tr -d '[:space:]')" \
+    KRALI_RUN_ID="$STAMP" \
+    KRALI_LOCAL_AGENT_MAX_ITERATIONS="36" \
+    "$NODE_BIN" "$ROOT/Scripts/ollama-developer-agent.mjs" \
+        > >(tee "$CLINE_RUN_LOG" >>"$LOG") \
+        2> >(tee -a "$CLINE_RUN_LOG" >>"$LOG" >&2)
+    CLINE_EXIT=$?
+elif [ "$USE_SDK_FALLBACK" -eq 1 ]; then
     if prepare_sdk_fallback; then
         write_status "sdk_fallback_running|$GAP_LABEL ClineCore SDK üzerinden öğreniliyor|$BRANCH|$WORKTREE"
         KRALI_CLINE_SDK_HOST="$SDK_HOST" \
@@ -803,8 +877,10 @@ CLINE_DURATION="$(( $(date +%s) - CLINE_STARTED_AT ))"
 cat "$CLINE_RUN_LOG" >>"$LOG"
 
 if [ "$CLINE_EXIT" -eq 25 ] &&
-   [ "$PROVIDER" = "ollama" ]; then
-    FALLBACK_MODEL="$(select_tool_fallback_model "$MODEL" || true)"
+   [ "$PROVIDER" = "ollama" ] &&
+   [ "$LOCAL_AGENT_ENGINE" != "native-ollama" ]; then
+    FALLBACK_MODEL=""
+    select_installed_tool_fallback "$MODEL" || true
 
     if [ -n "$FALLBACK_MODEL" ]; then
         echo "⚠️ Cline local tool protocol doğrulanmadı; $FALLBACK_MODEL ile tek kontrollü retry." | tee -a "$LOG"
@@ -864,6 +940,19 @@ if [ "$CLINE_EXIT" -eq 137 ] &&
 fi
 
 if [ "$CLINE_EXIT" -ne 0 ]; then
+    FAILURE_BASE="$(
+        /bin/cat "$STATUS" 2>/dev/null |
+        /usr/bin/sed 's/|@meta.*//'
+    )"
+    FAILURE_STATE="$(
+        printf '%s' "$FAILURE_BASE" |
+        /usr/bin/awk -F'|' '{print $1}'
+    )"
+    FAILURE_MESSAGE="$(
+        printf '%s' "$FAILURE_BASE" |
+        /usr/bin/awk -F'|' '{print $2}'
+    )"
+
     ERROR_SOURCE="$CLINE_RUN_LOG"
     if [ -f "$LOG_DIR/KRALI-Developer-Agent-Cline-$STAMP-tool-retry.log" ]; then
         ERROR_SOURCE="$LOG_DIR/KRALI-Developer-Agent-Cline-$STAMP-tool-retry.log"
@@ -891,8 +980,8 @@ if [ "$CLINE_EXIT" -ne 0 ]; then
     DIRTY_CANDIDATE="$(git -C "$WORKTREE" status --porcelain 2>/dev/null || true)"
 
     if [ -n "$DIRTY_CANDIDATE" ]; then
-        echo "🧩 Cline hata verdi ancak candidate değişiklik üretti; recovery başlatılıyor." | tee -a "$LOG"
-        write_status "recovering_candidate|Cline oturumu tamamlanmadı ancak üretilen candidate değişiklikler korunuyor|$BRANCH|$WORKTREE"
+        echo "🧩 Developer Agent hata verdi ancak candidate değişiklik üretti; recovery başlatılıyor." | tee -a "$LOG"
+        write_status "recovering_candidate|Developer Agent oturumu tamamlanmadı ancak üretilen candidate değişiklikler korunuyor|$BRANCH|$WORKTREE"
 
         /bin/zsh "$ROOT/Scripts/recover-developer-candidate.command" >>"$LOG" 2>&1 || true
 
@@ -920,8 +1009,17 @@ if [ "$CLINE_EXIT" -ne 0 ]; then
         git -C "$ROOT" branch -D "$BRANCH" >>"$LOG" 2>&1 || true
     fi
 
-    write_status "failed|Cline exit $CLINE_EXIT (${CLINE_DURATION}s): $CLINE_ERROR|$BRANCH|$WORKTREE"
-    echo "❌ Cline görevi başarısız oldu (exit $CLINE_EXIT, ${CLINE_DURATION}s): $CLINE_ERROR" | tee -a "$LOG"
+    if [ "$PROVIDER" = "ollama" ] &&
+       [ "$LOCAL_AGENT_ENGINE" = "native-ollama" ] &&
+       echo "$FAILURE_STATE" |
+       /usr/bin/grep -Eq '^local_(agent_|storage_|tool_|ai_|model_)'; then
+        write_status "$FAILURE_STATE|${FAILURE_MESSAGE:-Native yerel agent başarısız}|$BRANCH|$WORKTREE"
+        echo "❌ Native yerel Developer Agent durdu: ${FAILURE_MESSAGE:-$CLINE_ERROR}" | tee -a "$LOG"
+        exit 20
+    fi
+
+    write_status "failed|Developer Agent exit $CLINE_EXIT (${CLINE_DURATION}s): $CLINE_ERROR|$BRANCH|$WORKTREE"
+    echo "❌ Developer Agent görevi başarısız oldu (exit $CLINE_EXIT, ${CLINE_DURATION}s): $CLINE_ERROR" | tee -a "$LOG"
     exit 20
 fi
 

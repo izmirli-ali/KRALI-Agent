@@ -159,6 +159,9 @@ struct AgentTrainingLab {
             duplicateApplicationAliasMergeResult()
         )
         results.append(
+            localizedApplicationDisplayTargetResult()
+        )
+        results.append(
             prohibitedAppMutationDoesNotAddWorkflowResult()
         )
         results.append(
@@ -775,6 +778,60 @@ struct AgentTrainingLab {
                 ? []
                 : [
                     "Duplicate bundle birleştirmesi yerelleştirilmiş aliası kaybetti."
+                ]
+        )
+    }
+
+    private func localizedApplicationDisplayTargetResult()
+        -> TrainingScenarioResult {
+        let settingsPrompt =
+            "Sistem Ayarları uygulamasını aç ve gerçekten ön planda olduğunu doğrula."
+
+        let safariPrompt =
+            "Safari’yi aç. Başka hiçbir işlem yapma."
+
+        let settings =
+            languageResolver
+                .applicationTargetDisplayPhrase(
+                    from: settingsPrompt
+                )
+
+        let safari =
+            languageResolver
+                .applicationTargetDisplayPhrase(
+                    from: safariPrompt
+                )
+
+        let passed =
+            settings == "Sistem Ayarları" &&
+            safari == "Safari"
+
+        return TrainingScenarioResult(
+            scenarioID:
+                "localized-application-display-target",
+            title:
+                "LaunchServices için kullanıcıdaki uygulama adını koruma",
+            tier: .core,
+            prompt: settingsPrompt,
+            passed: passed,
+            goal:
+                "Yerelleştirilmiş uygulama adını normalize etmeden macOS çözümleyicisine aktar",
+            route: [
+                "Core",
+                "Desktop",
+                "LaunchServices"
+            ],
+            selectedCapabilities: [
+                "desktop.app"
+            ],
+            unavailableCapabilities: [],
+            diagnostics: passed
+                ? []
+                : [
+                    "Yerelleştirilmiş uygulama hedefi korunamadı: settings=" +
+                    (settings ?? "nil") +
+                    " safari=" +
+                    (safari ?? "nil")
                 ]
         )
     }
@@ -1775,6 +1832,12 @@ struct AgentTrainingLab {
                 $0.capabilityID ==
                     "browser.control"
             } &&
+            graph.steps.first(
+                where: {
+                    $0.capabilityID ==
+                        "browser.control"
+                }
+            )?.requiresApproval == false &&
             !normalized.steps.contains {
                 $0.capabilityID ==
                     "app.workflow"
@@ -1814,7 +1877,7 @@ struct AgentTrainingLab {
             diagnostics: passed
                 ? []
                 : [
-                    "Safari/URL görevi desktop.app + browser.control contract'ına normalize edilmedi."
+                    "Safari/URL görevi desktop.app + browser.control contract'ına doğru normalize edilmedi veya salt-okunur gezinme gereksiz approval istedi."
                 ]
         )
     }

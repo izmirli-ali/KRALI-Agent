@@ -319,6 +319,18 @@ actor AgentDesktopControl {
             from: userText
         )
 
+        // Ask LaunchServices first. It knows the user's localized
+        // application display names even when the on-disk .app filename and
+        // InfoPlist remain English.
+        for query in queries {
+            if let candidate =
+                launchServicesApplicationCandidate(
+                    named: query
+                ) {
+                return candidate
+            }
+        }
+
         let installed =
             installedApplicationCandidates()
 
@@ -372,18 +384,34 @@ actor AgentDesktopControl {
     private func applicationResolutionQueries(
         from userText: String
     ) -> [String] {
-        let explicitTarget =
+        let displayTarget =
+            languageResolver
+                .applicationTargetDisplayPhrase(
+                    from: userText
+                )
+
+        let normalizedTarget =
             languageResolver
                 .applicationTargetPhrase(
                     from: userText
                 )
 
-        // A user-named application target is authoritative. Falling back to
-        // the entire compound command can accidentally match a secondary
-        // noun (for example a section/device name) to another application.
-        let values =
-            explicitTarget.map { [$0] } ??
-            [userText]
+        // An explicit app target is authoritative. Keep the user's original
+        // localized spelling for LaunchServices, then the normalized variant
+        // for fuzzy alias matching. Never fall back to secondary nouns from
+        // the compound command once an app target is known.
+        let values: [String]
+        if displayTarget != nil ||
+           normalizedTarget != nil {
+            values =
+                [
+                    displayTarget,
+                    normalizedTarget
+                ]
+                .compactMap { $0 }
+        } else {
+            values = [userText]
+        }
 
         var seen = Set<String>()
 
@@ -400,6 +428,94 @@ actor AgentDesktopControl {
 
             return true
         }
+    }
+
+    private func launchServicesApplicationCandidate(
+        named rawName: String
+    ) -> ApplicationCandidate? {
+        let requestedName =
+            rawName.trimmingCharacters(
+                in: .whitespacesAndNewlines
+            )
+
+        guard !requestedName.isEmpty else {
+            return nil
+        }
+
+        guard let path =
+            NSWorkspace.shared
+                .fullPath(
+                    forApplication:
+                        requestedName
+                )
+        else {
+            return nil
+        }
+
+        let url =
+            URL(
+                fileURLWithPath: path
+            )
+
+        guard
+            url.pathExtension
+                .lowercased() == "app"
+        else {
+            return nil
+        }
+
+        let bundle = Bundle(url: url)
+        let baseName =
+            url.deletingPathExtension()
+                .lastPathComponent
+        let finderDisplayName =
+            fileManager.displayName(
+                atPath: url.path
+            )
+        let localizedName =
+            bundle?
+                .localizedInfoDictionary?[
+                    "CFBundleDisplayName"
+                ] as? String ??
+            bundle?
+                .localizedInfoDictionary?[
+                    "CFBundleName"
+                ] as? String ??
+            finderDisplayName
+
+        let aliases =
+            languageResolver
+                .mergedAliases(
+                    [
+                        [
+                            requestedName,
+                            baseName,
+                            finderDisplayName,
+                            localizedName,
+                            (
+                                try? url.resourceValues(
+                                    forKeys: [
+                                        .localizedNameKey
+                                    ]
+                                )
+                            )?.localizedName ?? ""
+                        ],
+                        localizedBundleAliases(
+                            bundle
+                        )
+                    ]
+                )
+
+        return ApplicationCandidate(
+            name:
+                finderDisplayName.isEmpty
+                    ? localizedName
+                    : finderDisplayName,
+            aliases: aliases,
+            bundleIdentifier:
+                bundle?.bundleIdentifier,
+            url: url
+        )
     }
 
     private func bestApplicationCandidate(

@@ -222,24 +222,6 @@ struct AgentTaskOrchestrator {
         let purposeCorpus =
             normalize(step.purpose)
 
-        let commitTerms = [
-            "send", "gonder",
-            "submit", "publish", "yayinla",
-            "post", "paylas",
-            "delete", "sil",
-            "purchase", "satinal",
-            "confirm", "onayla",
-            "commit"
-        ]
-
-        if commitTerms.contains(
-            where: {
-                actionCorpus.contains($0)
-            }
-        ) {
-            return true
-        }
-
         let explicitNonCommitTerms = [
             "gondermeden",
             "gonderme",
@@ -248,7 +230,6 @@ struct AgentTaskOrchestrator {
             "degisiklik yapma",
             "yalniz hazirla",
             "sadece hazirla",
-            "henüz dis dunyaya",
             "henuz dis dunyaya"
         ]
 
@@ -260,9 +241,59 @@ struct AgentTaskOrchestrator {
             return false
         }
 
-        return commitTerms.contains {
-            purposeCorpus.contains($0)
-        }
+        let commitTerms = Set([
+            "send", "gonder",
+            "submit", "publish", "yayinla",
+            "post", "paylas",
+            "delete", "sil",
+            "purchase", "satinal",
+            "confirm", "onayla",
+            "commit"
+        ])
+
+        let actionTokens =
+            approvalTokens(
+                actionCorpus
+            )
+        let purposeTokens =
+            approvalTokens(
+                purposeCorpus
+            )
+
+        return !actionTokens
+            .intersection(commitTerms)
+            .isEmpty ||
+        !purposeTokens
+            .intersection(commitTerms)
+            .isEmpty
+    }
+
+    private func approvalTokens(
+        _ value: String
+    ) -> Set<String> {
+        let normalizedValue =
+            normalize(value)
+
+        let scalars =
+            normalizedValue
+                .unicodeScalars
+                .map {
+                    CharacterSet
+                        .alphanumerics
+                        .contains($0)
+                        ? Character($0)
+                        : " "
+                }
+
+        return Set(
+            String(scalars)
+                .split(
+                    whereSeparator: {
+                        $0.isWhitespace
+                    }
+                )
+                .map(String.init)
+        )
     }
 
     private func normalize(

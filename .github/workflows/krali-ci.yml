@@ -2,9 +2,7 @@ name: KRALI CI
 
 on:
   pull_request:
-  push:
-    branches:
-      - "krali-*"
+  workflow_dispatch:
 
 jobs:
   validate:

@@ -122,6 +122,126 @@ struct AgentNaturalLanguageResolver: Sendable {
         return !targetTokens(raw).isEmpty
     }
 
+    func applicationTargetDisplayPhrase(
+        from raw: String
+    ) -> String? {
+        let clauses = raw
+            .split(
+                whereSeparator: {
+                    ".!?;\n".contains($0)
+                }
+            )
+            .map(String.init)
+
+        for clause in clauses {
+            let rawWords =
+                clause.split(
+                    whereSeparator: {
+                        $0.isWhitespace
+                    }
+                )
+                .map {
+                    String($0)
+                        .trimmingCharacters(
+                            in:
+                                .punctuationCharacters
+                        )
+                }
+                .filter {
+                    !$0.isEmpty
+                }
+
+            guard !rawWords.isEmpty else {
+                continue
+            }
+
+            let normalizedWords =
+                rawWords.map(normalized)
+
+            let endIndex: Int?
+            if let appIndex =
+                normalizedWords
+                    .firstIndex(
+                        where: {
+                            $0 == "uygulama" ||
+                            $0.hasPrefix("uygulama")
+                        }
+                    ),
+               appIndex > 0 {
+                endIndex = appIndex
+            } else if let openIndex =
+                normalizedWords
+                    .firstIndex(
+                        where: {
+                            openVerbs.contains($0)
+                        }
+                    ),
+                openIndex > 0 {
+                endIndex = openIndex
+            } else {
+                endIndex = nil
+            }
+
+            guard let endIndex else {
+                continue
+            }
+
+            var values: [String] = []
+
+            for index in 0..<endIndex {
+                let normalizedWord =
+                    normalizedWords[index]
+
+                guard
+                    !commandNoise.contains(
+                        normalizedWord
+                    ),
+                    !openVerbs.contains(
+                        normalizedWord
+                    ),
+                    !nonAppObjectWords.contains(
+                        normalizedWord
+                    )
+                else {
+                    continue
+                }
+
+                var value = rawWords[index]
+
+                if let apostrophe =
+                    value.firstIndex(
+                        where: {
+                            $0 == "'" ||
+                            $0 == "’"
+                        }
+                    ) {
+                    value =
+                        String(
+                            value[..<apostrophe]
+                        )
+                }
+
+                if !value.isEmpty {
+                    values.append(value)
+                }
+            }
+
+            let phrase =
+                values.suffix(4)
+                    .joined(separator: " ")
+                    .trimmingCharacters(
+                        in:
+                            .whitespacesAndNewlines
+                    )
+
+            if !phrase.isEmpty {
+                return phrase
+            }
+        }
+
+        return nil
+    }
+
     func applicationTargetPhrase(
         from raw: String
     ) -> String? {
