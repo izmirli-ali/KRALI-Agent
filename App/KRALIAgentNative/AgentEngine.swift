@@ -1167,7 +1167,7 @@ final class AgentEngine: ObservableObject {
 
                     let verified =
                         result.launchOrActivateSucceeded &&
-                        result.screenVerifiedFrontmost
+                        result.frontmostVerified
 
                     desktopControlStatus =
                         result.resolvedApplicationName +
@@ -1182,16 +1182,18 @@ final class AgentEngine: ObservableObject {
                         String(
                             result.launchOrActivateSucceeded
                         ) +
-                        "|screen=" +
+                        "|frontmost=" +
                         String(
-                            result.screenVerifiedFrontmost
-                        )
+                            result.frontmostVerified
+                        ) +
+                        "|source=" +
+                        result.verificationSource
                     )
 
                     outputs.append(
                         verified
                             ? result.resolvedApplicationName +
-                                " uygulamasını açtım ve öne geldiğini ekran üzerinden doğruladım."
+                                " uygulamasını açtım ve öne geldiğini doğruladım."
                             : result.resolvedApplicationName +
                                 " uygulamasını açmayı denedim; ekran doğrulaması tamamlanmadı."
                     )
