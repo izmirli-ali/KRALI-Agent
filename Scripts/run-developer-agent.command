@@ -275,10 +275,10 @@ prepare_ollama_runtime() {
         fi
     fi
 
-    if [ -z "$MODEL" ]; then
-        MEMORY_BYTES="$(/usr/sbin/sysctl -n hw.memsize 2>/dev/null || echo 0)"
-        MEMORY_GB="$(( MEMORY_BYTES / 1024 / 1024 / 1024 ))"
+    MEMORY_BYTES="$(/usr/sbin/sysctl -n hw.memsize 2>/dev/null || echo 0)"
+    MEMORY_GB="$(( MEMORY_BYTES / 1024 / 1024 / 1024 ))"
 
+    if [ -z "$MODEL" ]; then
         if [ "$MEMORY_GB" -ge 32 ]; then
             MODEL="devstral:24b"
         elif [ "$MEMORY_GB" -ge 20 ]; then
