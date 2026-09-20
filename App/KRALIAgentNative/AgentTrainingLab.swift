@@ -329,7 +329,7 @@ struct AgentTrainingLab {
             kind: .userRule,
             title: "Çalışma kuralı",
             summary:
-                "Dış dünyaya gönderim yapmadan önce kullanıcı onayı iste."
+                "Mail gönderiminde dış dünyaya göndermeden önce kullanıcı onayı iste."
         )
 
         let query =
