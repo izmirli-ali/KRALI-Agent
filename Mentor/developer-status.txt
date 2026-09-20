@@ -1,1 +1,1 @@
-failed|Cline exit 1 (8s): Error [ERR_PACKAGE_PATH_NOT_EXPORTED]: No "exports" main defined in /Users/medusa/Library/Application Support/KRALI Agent/Developer/cline-sdk-host/node_modules/@cline/sdk/package.json|krali-dev-agent/20260920-190315|/Users/medusa/Developer/KRALI-Agent-Dev-20260920-190315
+sdk_fallback_running|Mail (mail.work) ClineCore SDK üzerinden öğreniliyor|krali-dev-agent/20260920-192625|/Users/medusa/Developer/KRALI-Agent-Dev-20260920-192625

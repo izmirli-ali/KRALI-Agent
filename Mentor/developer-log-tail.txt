@@ -1,56 +1,3 @@
-node@22 is keg-only, which means it was not symlinked into /opt/homebrew,
-because this is an alternate version of another formula.
-
-If you need to have node@22 first in your PATH, run:
-  echo 'export PATH="/opt/homebrew/opt/node@22/bin:$PATH"' >> ~/.zshrc
-
-For compilers to find node@22 you may need to set:
-  export LDFLAGS="-L/opt/homebrew/opt/node@22/lib"
-  export CPPFLAGS="-I/opt/homebrew/opt/node@22/include"
-
-The following node@22 executables are shadowed by other linked Homebrew commands:
-  node (shadowed by /opt/homebrew/bin/node from node)
-Running these by name will not invoke the version provided by this formula.
-Run `brew link node@22` to switch the active version to this keg.
-Disable this behaviour by setting `HOMEBREW_NO_PATH_SHADOW_CHECK=1`.
-Hide these hints with `HOMEBREW_NO_ENV_HINTS=1` (see `man brew`).
-✅ Developer Agent runtime: v22.23.2
-⚠️ Cline health probe başarısız. exit=137 output=
-Cline path: /opt/homebrew/bin/cline
-Machine arch: arm64
-/opt/homebrew/bin/cline: a /usr/bin/env node script text executable, ASCII text
-Cline doctor fix deneniyor...
-Cline CLI yeniden kuruluyor: npm install -g --allow-scripts=cline,protobufjs cline@latest
-npm warn deprecated node-domexception@1.0.0: Use your platform's native DOMException instead
-
-changed 329 packages in 18s
-
-47 packages are looking for funding
-  run `npm fund` for details
-❌ Cline CLI otomatik onarılamadı.
-
-━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
- KRALİ DEVELOPER AGENT
- 20260920-190315
-━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-⚠️ Global Node.js v26 Cline bağımlılıklarıyla uyumlu değil; izole Node 22 runtime hazırlanıyor.
-✅ Developer Agent runtime: v22.23.2
-⚠️ Cline health probe başarısız. exit=137 output=
-Cline path: /opt/homebrew/bin/cline
-Machine arch: arm64
-/opt/homebrew/bin/cline: a /usr/bin/env node script text executable, ASCII text
-Cline doctor fix deneniyor...
-Cline CLI yeniden kuruluyor: npm install -g --allow-scripts=cline,protobufjs cline@latest
-npm warn deprecated node-domexception@1.0.0: Use your platform's native DOMException instead
-
-changed 329 packages in 17s
-
-47 packages are looking for funding
-  run `npm fund` for details
-Native Cline binary: /opt/homebrew/lib/node_modules/cline/bin/.cline
-/opt/homebrew/lib/node_modules/cline/bin/.cline: Mach-O 64-bit executable arm64
-Executable=/opt/homebrew/lib/node_modules/cline/bin/.cline
-Identifier=a.out
 Format=Mach-O thin (arm64)
 CodeDirectory v=20400 size=693054 flags=0x20002(adhoc,linker-signed) hashes=21655+0 location=embedded
 VersionPlatform=1
@@ -118,3 +65,56 @@ Error [ERR_PACKAGE_PATH_NOT_EXPORTED]: No "exports" main defined in /Users/medus
 
 Node.js v22.23.2
 ❌ Cline görevi başarısız oldu (exit 1, 8s): Error [ERR_PACKAGE_PATH_NOT_EXPORTED]: No "exports" main defined in /Users/medusa/Library/Application Support/KRALI Agent/Developer/cline-sdk-host/node_modules/@cline/sdk/package.json
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+ KRALİ DEVELOPER AGENT
+ 20260920-192625
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+⚠️ Global Node.js v26 Cline bağımlılıklarıyla uyumlu değil; izole Node 22 runtime hazırlanıyor.
+✅ Developer Agent runtime: v22.23.2
+⚠️ Cline health probe başarısız. exit=137 output=
+Cline path: /opt/homebrew/bin/cline
+Machine arch: arm64
+/opt/homebrew/bin/cline: a /usr/bin/env node script text executable, ASCII text
+Cline doctor fix deneniyor...
+Cline CLI yeniden kuruluyor: npm install -g --allow-scripts=cline,protobufjs cline@latest
+npm warn deprecated node-domexception@1.0.0: Use your platform's native DOMException instead
+
+changed 329 packages in 16s
+
+47 packages are looking for funding
+  run `npm fund` for details
+Native Cline binary: /opt/homebrew/lib/node_modules/cline/bin/.cline
+/opt/homebrew/lib/node_modules/cline/bin/.cline: Mach-O 64-bit executable arm64
+Executable=/opt/homebrew/lib/node_modules/cline/bin/.cline
+Identifier=a.out
+Format=Mach-O thin (arm64)
+CodeDirectory v=20400 size=693054 flags=0x20002(adhoc,linker-signed) hashes=21655+0 location=embedded
+VersionPlatform=1
+VersionMin=851968
+VersionSDK=983552
+Hash type=sha256 size=32
+CandidateCDHash sha256=f3309838ca62270b6e3f898de565eca34cc271cb
+CandidateCDHashFull sha256=f3309838ca62270b6e3f898de565eca34cc271cba8d4fcb29283c6ca03bd5f7a
+Hash choices=sha256
+CMSDigest=f3309838ca62270b6e3f898de565eca34cc271cba8d4fcb29283c6ca03bd5f7a
+CMSDigestType=2
+Executable Segment base=0
+Executable Segment limit=60899328
+Executable Segment flags=0x1
+Page size=4096
+CDHash=f3309838ca62270b6e3f898de565eca34cc271cb
+Signature=adhoc
+Info.plist=not bound
+TeamIdentifier=not set
+Sealed Resources=none
+Internal requirements=none
+spctl exit=1 • /opt/homebrew/lib/node_modules/cline/bin/.cline: invalid signature (code or signature have been modified)
+🧩 Native Cline platform hatası sınıflandırıldı; Node SDK fallback'e geçiliyor.
+From https://github.com/izmirli-ali/KRALI-Agent
+ * branch            main       -> FETCH_HEAD
+Already up to date.
+Preparing worktree (new branch 'krali-dev-agent/20260920-192625')
+branch 'krali-dev-agent/20260920-192625' set up to track 'origin/main'.
+HEAD is now at dd74eb7 v0.8.40 SDK ESM loader and foreground recovery
+Developer prompt mode: gap • 2390 bytes
