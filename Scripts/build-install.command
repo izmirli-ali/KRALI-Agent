@@ -5,6 +5,11 @@ ROOT="$HOME/Developer/KRALI-Agent"
 PROJECT="$ROOT/App/KRALIAgentNative.xcodeproj"
 SCHEME="KRALIAgentNative"
 BUILD_DIR="$ROOT/.build"
+APP_VERSION="$(/bin/cat "$ROOT/VERSION" 2>/dev/null | /usr/bin/tr -d '[:space:]')"
+if [ -z "$APP_VERSION" ]; then
+    echo "❌ VERSION dosyası okunamadı."
+    exit 1
+fi
 PRODUCT="$BUILD_DIR/Build/Products/Debug/KRALIAgentNative.app"
 
 TARGET="/Applications/KRALI Agent.app"
@@ -68,6 +73,7 @@ if ! xcodebuild \
     -configuration Debug \
     -derivedDataPath "$BUILD_DIR" \
     -allowProvisioningUpdates \
+    MARKETING_VERSION="$APP_VERSION" \
     build
 then
     echo ""
