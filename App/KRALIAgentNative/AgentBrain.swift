@@ -58,6 +58,8 @@ struct AgentContextSnapshot {
     let previousFolderResultCount: Int
     let lastTarget: AgentTargetKind?
     let lastGoal: String?
+    let relevantMemoryCount: Int
+    let lastMemoryGoal: String?
 }
 
 struct AgentDecision {
@@ -177,6 +179,22 @@ struct AgentBrain {
                 proactiveSuggestion: nil,
                 usePreviousResults: true,
                 resultSelection: nil
+            )
+        }
+
+        if context.relevantMemoryCount > 0 &&
+           hasContextReference(text) {
+            return decision(
+                intent: .general,
+                route: ["Core", "Context", "Planner"],
+                goal: context.lastMemoryGoal
+                    ?? "Önceki görev bağlamını kullanarak devam et",
+                plan: "İlgili önceki görev bağlamını geri çağır; yeni isteği ona bağla ve gerekmedikçe aynı araştırmayı baştan yapma",
+                alternatives: [
+                    "Önceki sonucu genişlet",
+                    "Önceki bulgulardan yeni fikir üret",
+                    "Gerekirse yalnızca eksik noktayı yeniden araştır"
+                ]
             )
         }
 
