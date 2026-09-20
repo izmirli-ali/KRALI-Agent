@@ -1,127 +1,127 @@
 {
   "activityTail" : [
     {
-      "date" : "2026-09-20T19:00:56Z",
-      "text" : "Seçilen kabiliyetler: Akıl yürütme, Bağlam, Uygulama kontrolü"
-    },
-    {
-      "date" : "2026-09-20T19:00:56Z",
+      "date" : "2026-09-20T19:22:33Z",
       "text" : "Otomatik rota: Core → Goal → Context → Plan → Desktop → Response"
     },
     {
-      "date" : "2026-09-20T19:00:56Z",
+      "date" : "2026-09-20T19:22:33Z",
       "text" : "Seçilen plan: Uygulama adını çöz, uygulamayı aç veya öne getir ve sonucu doğrula"
     },
     {
-      "date" : "2026-09-20T19:00:56Z",
+      "date" : "2026-09-20T19:22:33Z",
       "text" : "KRALİ Core hedef sözleşmesi: istenen uygulamayı aç veya öne getir"
     },
     {
-      "date" : "2026-09-20T19:00:56Z",
+      "date" : "2026-09-20T19:22:33Z",
       "text" : "Bağlam hafızası: Çalışma kuralı"
     },
     {
-      "date" : "2026-09-20T19:00:48Z",
-      "text" : "Developer Agent Learning Queue job'u başlatıldı"
-    },
-    {
-      "date" : "2026-09-20T19:00:48Z",
-      "text" : "Learning Queue worker başlatılıyor • desktop.app • job=727211DE"
-    },
-    {
-      "date" : "2026-09-20T19:00:48Z",
+      "date" : "2026-09-20T19:22:25Z",
       "text" : "Capability gap Learning Queue'ya alındı • sırada=1"
     },
     {
-      "date" : "2026-09-20T19:00:48Z",
-      "text" : "Görev tamamlandı • 1.12 sn"
+      "date" : "2026-09-20T19:22:25Z",
+      "text" : "Görev tamamlandı • 1.09 sn"
     },
     {
-      "date" : "2026-09-20T19:00:48Z",
+      "date" : "2026-09-20T19:22:25Z",
       "text" : "Mentor trace yerel olarak kaydedildi"
     },
     {
-      "date" : "2026-09-20T19:00:48Z",
+      "date" : "2026-09-20T19:22:25Z",
       "text" : "Runtime Capability Gap: desktop.app • Provider available olmasına rağmen runtime step tamamlanamadı veya postcondition doğrulanamadı: desktop.app • app.open"
     },
     {
-      "date" : "2026-09-20T19:00:48Z",
+      "date" : "2026-09-20T19:22:25Z",
       "text" : "Uygulama kontrolü başarısız: Uygulama bulunamadı: notlar"
     },
     {
-      "date" : "2026-09-20T19:00:48Z",
+      "date" : "2026-09-20T19:22:25Z",
       "text" : "Debug/Recovery: Bilinmeyen hata • Hata ayıklanıyor • desktop.app"
     },
     {
-      "date" : "2026-09-20T19:00:47Z",
+      "date" : "2026-09-20T19:22:24Z",
       "text" : "Semantic rota: Core → Goal → Context → Plan → Desktop → Verify → Response"
     },
     {
-      "date" : "2026-09-20T19:00:47Z",
+      "date" : "2026-09-20T19:22:24Z",
       "text" : "Task Graph: 0:context.local[reason] → 1:desktop.app[act] → 2:app.workflow[act]"
     },
     {
-      "date" : "2026-09-20T19:00:47Z",
+      "date" : "2026-09-20T19:22:24Z",
       "text" : "Semantic capability planı: app.workflow, context.local, core.reasoning, desktop.app"
     },
     {
-      "date" : "2026-09-20T19:00:47Z",
+      "date" : "2026-09-20T19:22:24Z",
       "text" : "Semantic planner sağlayıcısı: Apple Foundation Models"
     },
     {
-      "date" : "2026-09-20T19:00:47Z",
+      "date" : "2026-09-20T19:22:24Z",
       "text" : "Semantic Mission: Notlar uygulamasını aç. Şu anda açık olan notun başlığını ve ekranda görünen ilk iki satırı bana söyle. Hiçbir şeyi değiştirme"
     },
     {
-      "date" : "2026-09-20T19:00:47Z",
+      "date" : "2026-09-20T19:22:24Z",
       "text" : "Seçilen kabiliyetler: Akıl yürütme, Bağlam, Uygulama kontrolü"
     },
     {
-      "date" : "2026-09-20T19:00:47Z",
+      "date" : "2026-09-20T19:22:24Z",
       "text" : "Otomatik rota: Core → Goal → Context → Plan → Desktop → Response"
     },
     {
-      "date" : "2026-09-20T19:00:47Z",
+      "date" : "2026-09-20T19:22:24Z",
       "text" : "Seçilen plan: Uygulama adını çöz, uygulamayı aç veya öne getir ve sonucu doğrula"
     },
     {
-      "date" : "2026-09-20T19:00:47Z",
+      "date" : "2026-09-20T19:22:24Z",
       "text" : "KRALİ Core hedef sözleşmesi: istenen uygulamayı aç veya öne getir"
     },
     {
-      "date" : "2026-09-20T19:00:47Z",
+      "date" : "2026-09-20T19:22:24Z",
       "text" : "Bağlam hafızası: Çalışma kuralı"
     },
     {
-      "date" : "2026-09-20T19:00:20Z",
+      "date" : "2026-09-20T19:21:55Z",
+      "text" : "Debug/Recovery: Bağımlılık • Recovery uygulanıyor • Developer Agent"
+    },
+    {
+      "date" : "2026-09-20T19:21:55Z",
       "text" : "Apple yerel zeka hazır"
     },
     {
-      "date" : "2026-09-20T19:00:20Z",
+      "date" : "2026-09-20T19:21:55Z",
+      "text" : "Developer Agent Learning Queue job'u başlatıldı"
+    },
+    {
+      "date" : "2026-09-20T19:21:55Z",
+      "text" : "Learning Queue worker başlatılıyor • desktop.app • job=727211DE"
+    },
+    {
+      "date" : "2026-09-20T19:21:54Z",
       "text" : "Çalışma klasörü geri yüklendi: Desktop"
     },
     {
-      "date" : "2026-09-20T19:00:20Z",
-      "text" : "0 ekran görüntüsü adayı bulundu"
+      "date" : "2026-09-20T19:21:54Z",
+      "text" : "1 ekran görüntüsü adayı bulundu"
     },
     {
-      "date" : "2026-09-20T19:00:20Z",
-      "text" : "1766 dosya ve 68 klasör indekslendi"
+      "date" : "2026-09-20T19:21:54Z",
+      "text" : "1767 dosya ve 68 klasör indekslendi"
     },
     {
-      "date" : "2026-09-20T19:00:20Z",
+      "date" : "2026-09-20T19:21:54Z",
       "text" : "Ağır geliştirici testleri normal açılışta otomatik çalıştırılmıyor"
     },
     {
-      "date" : "2026-09-20T19:00:20Z",
+      "date" : "2026-09-20T19:21:54Z",
       "text" : "Dinamik hedef ve kabiliyet yönlendirme aktif"
     },
     {
-      "date" : "2026-09-20T19:00:20Z",
+      "date" : "2026-09-20T19:21:54Z",
       "text" : "KRALİ Core hazır"
     }
   ],
-  "appVersion" : "0.8.51",
+  "appVersion" : "0.8.52",
   "capabilities" : [
     {
       "available" : true,
@@ -186,7 +186,7 @@
       "title" : "Çalışma kuralı"
     }
   ],
-  "createdAt" : "2026-09-20T19:01:37Z",
+  "createdAt" : "2026-09-20T19:23:56Z",
   "executionSteps" : [
     {
       "capabilityID" : "context.local",
@@ -335,13 +335,13 @@
       ],
       "index" : 2,
       "operation" : "browser.navigate.observe",
-      "requiresApproval" : true,
+      "requiresApproval" : false,
       "risk" : "external",
       "role" : "act",
       "title" : "Web hedefini tarayıcıda yürüt"
     }
   ],
-  "traceID" : "9244F354-B904-4DD2-BD50-BD49BB6FF1A1",
+  "traceID" : "67E6B74A-2337-4D9D-B087-E301E356709B",
   "userInput" : "Safari’yi aç. example.com adresine git ve sayfadaki ana başlığı bana söyle. Başka hiçbir işlem yapma",
   "verificationState" : "attention",
   "verificationSummary" : "Semantic mission içindeki zorunlu action step'lerinden bazıları tamamlanmadı: browser.control, desktop.app"
