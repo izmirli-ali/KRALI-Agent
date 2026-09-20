@@ -96,13 +96,31 @@ struct AgentGoalInterpreter {
             capabilityIDs.insert("perception.media")
         }
 
+        let asksComparison = containsAny(text, [
+            "karşılaştır", "karsilastir",
+            "arasındaki fark", "arasindaki fark",
+            "farklar neler", "farkı nedir", "farki nedir",
+            " vs ", "versus"
+        ])
+
         if containsAny(text, [
             "analiz et", "analizini yap", "değerlendir", "degerlendir",
             "karşılaştır", "karsilastir", "çıkarım", "cikarim",
             "güçlü ve zayıf", "guclu ve zayif", "fırsat", "firsat",
-            "eksik gördüğün", "eksik gordugun"
+            "eksik gördüğün", "eksik gordugun",
+            "arasındaki fark", "arasindaki fark",
+            "farklar neler", "farkı nedir", "farki nedir"
         ]) {
             outcomes.insert(.analyze)
+        }
+
+        if asksComparison {
+            outcomes.insert(.explain)
+
+            if context.relevantMemoryCount == 0 {
+                outcomes.insert(.research)
+                capabilityIDs.insert("research.web")
+            }
         }
 
         if containsAny(text, [
@@ -165,8 +183,25 @@ struct AgentGoalInterpreter {
                 "fikir", "öneri", "oneri", "strateji",
                 "çıkar", "cikar", "üret", "uret",
                 "devam et", "devam edelim",
-                "az önce", "az once", "bunlardan"
+                "az önce", "az once", "bunlardan",
+                "senaryo", "senaryoya", "senaryosuna",
+                "çekim plan", "cekim plan",
+                "çevir", "cevir", "uyarla",
+                "dönüştür", "donustur"
             ])
+
+        let isContextualTransformation =
+            context.relevantMemoryCount > 0 &&
+            containsAny(text, [
+                "senaryo", "senaryoya", "senaryosuna",
+                "çekim plan", "cekim plan",
+                "çevir", "cevir", "uyarla",
+                "dönüştür", "donustur"
+            ])
+
+        if isContextualTransformation {
+            outcomes.insert(.ideate)
+        }
 
         if mentionsSocialProfile &&
            asksSocialProfileFacts &&
