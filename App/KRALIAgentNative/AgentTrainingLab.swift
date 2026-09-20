@@ -58,6 +58,7 @@ struct AgentTrainingLab {
     private let planner = AgentPlanner()
     private let routeBuilder = AgentRouteBuilder()
     private let researchQueryPlanner = AgentResearchQueryPlanner()
+    private let verifier = AgentVerifier()
 
     func run() -> TrainingLabReport {
         let scenarios = makeScenarios()
@@ -124,6 +125,9 @@ struct AgentTrainingLab {
         )
         results.append(
             namedTopicMemoryIsolationResult()
+        )
+        results.append(
+            staleGoalVerifierIsolationResult()
         )
 
         let core = results.filter { $0.tier == .core }
@@ -330,6 +334,79 @@ struct AgentTrainingLab {
             ],
             unavailableCapabilities: [],
             diagnostics: diagnostics
+        )
+    }
+
+    private func staleGoalVerifierIsolationResult()
+        -> TrainingScenarioResult {
+        let prompt =
+            "Bu yaptığımız çalışma biçimini ileride benzer sosyal medya video işleri için de kullan. Ama Estafiz'e özel marka detaylarını başka markalara otomatik uygulama."
+
+        let staleDecision = AgentDecision(
+            intent: .fileSearch,
+            target: .video,
+            dateRange: nil,
+            dateField: .either,
+            sortMode: .relevance,
+            route: ["Core", "Context", "File Search"],
+            goal: "videoları bul",
+            selectedPlan: "Seçili çalışma alanını salt-okunur tara",
+            alternatives: [],
+            proactiveSuggestion: nil,
+            usePreviousResults: false,
+            resultSelection: nil
+        )
+
+        let staleGoal = goalInterpreter.interpret(
+            "videoları bul",
+            decision: staleDecision,
+            context: context(
+                hasWorkspace: true,
+                videoCount: 20
+            )
+        )
+
+        let result = verifier.verify(
+            decision: staleDecision,
+            currentUserInput: prompt,
+            goal: staleGoal,
+            snapshot: AgentVerificationSnapshot(
+                hasWorkspace: true,
+                fileResultCount: 12,
+                folderResultCount: 0,
+                hasPendingAction: false,
+                hasUndoAction: false,
+                unavailableCapabilityIDs: [],
+                selectedCapabilityIDs: [
+                    "files.search",
+                    "files.metadata"
+                ],
+                webResearchResultCount: 0,
+                webResearchEvidenceCount: 0,
+                webResearchUniqueDomainCount: 0,
+                webResearchCanonicalEvidenceCount: 0
+            )
+        )
+
+        let passed =
+            result.state == .attention &&
+            result.summary.contains("mevcut kullanıcı girdisiyle uyuşmuyor")
+
+        return TrainingScenarioResult(
+            scenarioID: "stale-goal-verifier-isolation",
+            title: "Verifier eski dosya hedefini reddetmeli",
+            tier: .core,
+            prompt: prompt,
+            passed: passed,
+            goal: "Yeni kullanıcı girdisini stale fileSearch goal'ünden ayır",
+            route: ["Core", "Goal", "Verify"],
+            selectedCapabilities: ["core.reasoning"],
+            unavailableCapabilities: [],
+            diagnostics: passed
+                ? []
+                : [
+                    "Verifier stale fileSearch hedefini mevcut memory komutundan ayıramadı."
+                ]
         )
     }
 
@@ -729,6 +806,21 @@ struct AgentTrainingLab {
                 forbiddenCapabilities: ["research.web"],
                 requiredRouteStages: ["Files", "Verify"],
                 requiredStepTitles: ["Taşıma planı hazırla", "Onay bekle"],
+                requiredLearningCapabilities: [],
+                minimumResearchConceptGroups: 0,
+                minimumMandatoryResearchConceptGroups: 0
+            ),
+            TrainingScenario(
+                id: "scoped-workflow-rule-after-file-search",
+                title: "Eski dosya araması sonrası kapsamlı çalışma kuralı",
+                tier: .core,
+                prompt: "Bu yaptığımız çalışma biçimini ileride benzer sosyal medya video işleri için de kullan. Ama Estafiz'e özel marka detaylarını başka markalara otomatik uygulama.",
+                context: previous,
+                requiredOutcomes: [.remember],
+                requiredCapabilities: ["memory.local"],
+                forbiddenCapabilities: ["files.search", "files.metadata"],
+                requiredRouteStages: ["Memory"],
+                requiredStepTitles: ["Yerel hafızaya kaydet"],
                 requiredLearningCapabilities: [],
                 minimumResearchConceptGroups: 0,
                 minimumMandatoryResearchConceptGroups: 0
