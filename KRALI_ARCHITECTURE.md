@@ -208,3 +208,10 @@ Web Research direct adayları arama sonuçlarıyla birlikte değerlendirir. Sour
 Direct hedef çözüldüğü halde page evidence alınamazsa Core bunu “kaynak yok” yerine “etkileşimli/live erişim eksik” olarak sınıflandırır. `browser.control` runtime capability olarak seçilir, Learning backlog'a güvenli browser/session bridge araştırma görevi eklenir ve Verifier sonucu partial verir. Bu davranış yalnızca Instagram'a özgü değil; ileride deterministic URL/ID çözümü yapılabilen diğer public resources için aynı resolver → retriever → verifier zinciri kullanılabilir.
 
 Training Lab sosyal profil senaryosunda artık en az bir direct resource candidate üretildiğini de regression olarak doğrular.
+
+
+**v0.7.29 source authority verification:** Public profile testinde KRALİ Instagram profilinin gerçek sayfa kanıtından takipçi, bio ve içerik bilgileri çıkarabildiği halde genel verifier “yalnızca 1 kaynak” kuralı nedeniyle sonucu `partial` sayıyordu. Bu, kaynak çeşitliliği ile kaynak otoritesini aynı şey sanan bir hatadır.
+
+Direct resolver tarafından çözülen kanonik kaynak, yalnızca URL olarak bulunduğunda hâlâ evidence sayılmaz. Ancak Source Reader o kanonik kaynağın gerçek içeriğini okuyup entity-grounded kanıt çıkarırsa bu `canonical-direct evidence` olarak işaretlenir. Böyle bir birincil kaynak kendi profil/hesap bilgileri için yeterli otorite kabul edilir; verifier ikinci bir domaini sırf sayı tamamlamak için zorunlu tutmaz. Geniş marka/pazar araştırmalarında bu istisna uygulanmaz; normal çok-kaynak/domain çeşitliliği kuralları devam eder.
+
+Mentor trace artık her araştırma kaynağı/evidence için `sourceType` alanı yazar: `canonical-direct` veya `search-result`. Böylece sonraki mentor analizlerinde “tek kaynak ama birincil resmi kaynak” ile “tek arama sonucu” ayrımı görünür hale gelir.
