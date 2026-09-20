@@ -618,6 +618,14 @@ struct ContentView: View {
                                         .font(.caption2)
                                         .foregroundStyle(.secondary)
                                         .lineLimit(3)
+
+                                    if let timing =
+                                        engine.developerAgentStatus
+                                            .learningTimingText {
+                                        Text(timing)
+                                            .font(.caption2.monospacedDigit())
+                                            .foregroundStyle(.tertiary)
+                                    }
                                 }
 
                                 Spacer()

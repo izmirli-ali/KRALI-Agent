@@ -158,6 +158,104 @@ struct DeveloperAgentStatus: Hashable {
         }
     }
 
+    var learningTimingText: String? {
+        guard isLearningActive else {
+            return nil
+        }
+
+        let elapsedText: String
+        if let elapsedMinutes {
+            elapsedText =
+                "Geçen: " +
+                String(elapsedMinutes) +
+                " dk"
+        } else {
+            elapsedText = "Geçen süre hesaplanıyor"
+        }
+
+        guard let estimate =
+            estimatedRemainingRange
+        else {
+            return elapsedText
+        }
+
+        return elapsedText +
+            " • Tahmini kalan: " +
+            estimate
+    }
+
+    private var elapsedMinutes: Int? {
+        guard let runStartedAt else {
+            return nil
+        }
+
+        let seconds = max(
+            0,
+            Date().timeIntervalSince(
+                runStartedAt
+            )
+        )
+
+        return Int(seconds / 60)
+    }
+
+    private var runStartedAt: Date? {
+        guard
+            let runID,
+            !runID.isEmpty
+        else {
+            return nil
+        }
+
+        let formatter = DateFormatter()
+        formatter.locale =
+            Locale(identifier: "en_US_POSIX")
+        formatter.calendar =
+            Calendar(identifier: .gregorian)
+        formatter.timeZone = .current
+        formatter.dateFormat =
+            "yyyyMMdd-HHmmss"
+
+        return formatter.date(
+            from: runID
+        )
+    }
+
+    private var estimatedRemainingRange: String? {
+        switch state {
+        case "repairing_cline",
+             "repairing_runtime",
+             "sdk_fallback_preparing",
+             "sdk_importing",
+             "sdk_import_ready",
+             "sdk_provider_ready",
+             "sdk_runtime_starting",
+             "sdk_runtime_ready":
+            return "4–8 dk"
+
+        case "sdk_session_starting",
+             "sdk_session_running",
+             "learning",
+             "running":
+            return "3–7 dk"
+
+        case "sdk_tools_running",
+             "sdk_tool_completed":
+            return "2–6 dk"
+
+        case "sdk_session_ended",
+             "sdk_session_completed",
+             "verifying":
+            return "1–3 dk"
+
+        case "retrying":
+            return "3–7 dk"
+
+        default:
+            return nil
+        }
+    }
+
     var isSetupRequired: Bool {
         [
             "setup_required",
