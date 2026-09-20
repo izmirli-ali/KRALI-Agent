@@ -1230,6 +1230,7 @@ actor AgentArena {
         let allCapabilities = capabilityRegistry.all
         let memories = memoryStore.load()
         var results: [AgentArenaScenarioResult] = []
+        var subscriptionFallbackBudget = 2
 
         for scenario in scenarios {
             let relevantMemory = memoryStore.relevant(
@@ -1259,8 +1260,11 @@ actor AgentArena {
                 diagnostics = localDiagnostics
             }
 
-            if selectedMission == nil ||
-               !diagnostics.isEmpty {
+            if (selectedMission == nil ||
+                !diagnostics.isEmpty) &&
+               subscriptionFallbackBudget > 0 {
+                subscriptionFallbackBudget -= 1
+
                 if let fallback =
                     await subscriptionIntelligence.planMission(
                         userInput: scenario.prompt,
