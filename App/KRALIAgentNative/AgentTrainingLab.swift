@@ -47,6 +47,7 @@ private struct TrainingScenario {
     let requiredLearningCapabilities: Set<String>
     let minimumResearchConceptGroups: Int
     let minimumMandatoryResearchConceptGroups: Int
+    var minimumDirectResearchCandidates: Int = 0
 }
 
 struct AgentTrainingLab {
@@ -250,6 +251,14 @@ struct AgentTrainingLab {
                     String(queryPlan.mandatoryConceptGroups.count)
                 )
             }
+
+            if queryPlan.directCandidates.count <
+                scenario.minimumDirectResearchCandidates {
+                diagnostics.append(
+                    "Doğrudan kaynak çözümleme adayı eksik: " +
+                    String(queryPlan.directCandidates.count)
+                )
+            }
         }
 
         let unavailable = capabilities
@@ -381,7 +390,8 @@ struct AgentTrainingLab {
                 requiredStepTitles: ["Web'de araştır", "Kaynakları oku"],
                 requiredLearningCapabilities: [],
                 minimumResearchConceptGroups: 2,
-                minimumMandatoryResearchConceptGroups: 1
+                minimumMandatoryResearchConceptGroups: 1,
+                minimumDirectResearchCandidates: 1
             ),
             TrainingScenario(
                 id: "local-file-search",
