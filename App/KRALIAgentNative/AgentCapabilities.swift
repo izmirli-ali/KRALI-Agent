@@ -107,6 +107,30 @@ struct AgentCapabilityRegistry {
             requiresWorkspace: false
         ),
         AgentCapability(
+            id: "perception.screen",
+            name: "Ekran algısı",
+            summary: "Ekran görüntüsünü okuyarak uygulama durumu, UI elemanları ve işlem sonucunu görsel olarak değerlendirir.",
+            risk: .readOnly,
+            isAvailable: false,
+            requiresWorkspace: false
+        ),
+        AgentCapability(
+            id: "desktop.control",
+            name: "macOS kontrolü",
+            summary: "Uygulama açma, pencere odaklama, klavye, mouse, clipboard ve sistem arayüzü etkileşimlerini yürütür.",
+            risk: .external,
+            isAvailable: false,
+            requiresWorkspace: false
+        ),
+        AgentCapability(
+            id: "photoshop.control",
+            name: "Photoshop kontrolü",
+            summary: "Photoshop içinde belge oluşturma, asset yerleştirme, katman düzenleme ve tasarım işlemlerini uygular.",
+            risk: .external,
+            isAvailable: false,
+            requiresWorkspace: false
+        ),
+        AgentCapability(
             id: "browser.control",
             name: "Tarayıcı kontrolü",
             summary: "Web arayüzlerinde gezinir ve izin verilen işlemleri tamamlar.",
@@ -213,6 +237,24 @@ struct AgentCapabilityRegistry {
             guard !seen.contains(id) else { return nil }
             seen.insert(id)
             return all.first { $0.id == id }
+        }
+    }
+
+    func resolve(
+        ids: [String]
+    ) -> [AgentCapability] {
+        var seen = Set<String>()
+
+        return ids.compactMap { id in
+            guard !seen.contains(id),
+                  let capability = all.first(
+                    where: { $0.id == id }
+                  ) else {
+                return nil
+            }
+
+            seen.insert(id)
+            return capability
         }
     }
 
