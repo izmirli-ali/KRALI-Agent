@@ -413,6 +413,41 @@ actor AgentLocalIntelligence {
                 ]
             )
 
+        let explicitAppAnalysisTask =
+            containsMissionConcept(
+                corpus,
+                [
+                    "analiz et",
+                    "incele",
+                    "ekrana bak",
+                    "ekranda ne var",
+                    "kontrol et",
+                    "durumunu söyle",
+                    "ne gördüğünü söyle"
+                ]
+            )
+
+        let explicitFileNeed =
+            containsMissionConcept(
+                corpus,
+                [
+                    "dosya", "pdf", "belge",
+                    "klasor", "klasör",
+                    "finder", "indirilenler",
+                    "masaustu", "masaüstü"
+                ]
+            )
+
+        let explicitWebNeed =
+            containsMissionConcept(
+                corpus,
+                [
+                    "web", "site", "internet",
+                    "tarayici", "tarayıcı",
+                    "url", "sayfa"
+                ]
+            )
+
         let genericFileOpenTask =
             containsMissionConcept(
                 corpus,
@@ -571,6 +606,28 @@ actor AgentLocalIntelligence {
             if !deepDesktopInteractionTask {
                 requiredIDs.remove("desktop.control")
             }
+
+            if !explicitAppAnalysisTask {
+                requiredIDs.remove("perception.screen")
+                outcomes.remove("assessContent")
+                outcomes.remove("analyze")
+                outcomes.remove("explain")
+            }
+
+            if !explicitFileNeed {
+                requiredIDs.remove("files.search")
+                requiredIDs.remove("files.metadata")
+                requiredIDs.remove("files.reveal")
+                requiredIDs.remove("perception.media")
+                outcomes.remove("locate")
+                outcomes.remove("shortlist")
+            }
+
+            if !explicitWebNeed {
+                requiredIDs.remove("research.web")
+                requiredIDs.remove("browser.control")
+                outcomes.remove("research")
+            }
         }
 
         if deepDesktopInteractionTask {
@@ -682,7 +739,7 @@ actor AgentLocalIntelligence {
         }
 
         return AgentSemanticMission(
-            objective: mission.objective,
+            objective: userInput,
             outcomes: outcomes.sorted(),
             steps: repairedSteps,
             requiredCapabilityIDs:
