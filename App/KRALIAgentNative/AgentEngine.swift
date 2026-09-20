@@ -1526,12 +1526,52 @@ final class AgentEngine: ObservableObject {
         goal: AgentGoalProfile,
         output: String
     ) -> Bool {
+        let input = normalize(userInput)
+        let response = normalize(output)
+
+        if response.contains(
+            "hedefi analiz ettim fakat mevcut yerel araclardan biriyle guvenilir bicimde eslestiremedim"
+        ) ||
+        response.contains(
+            "su an en guvenli planim"
+        ) {
+            return false
+        }
+
+        if goal.outcomes.contains(.compose),
+           containsAny(input, [
+                "3 bölüm", "3 bolum"
+           ]) {
+            let hasRequestedSections =
+                containsAny(response, ["açılış", "acilis"]) &&
+                containsAny(response, ["ana mesaj", "ana bölüm", "ana bolum"]) &&
+                containsAny(response, ["kapanış", "kapanis"])
+
+            guard hasRequestedSections else {
+                return false
+            }
+        }
+
+        if containsAny(input, [
+            "düzgün türkçeyle", "duzgun turkceyle",
+            "yazım hatalarını düzelt", "yazim hatalarini duzelt",
+            "metni düzelt", "metni duzelt"
+        ]) {
+            let knownErrors = [
+                "şuan", "birşey", " yada ",
+                "herkez", "kapanışda"
+            ]
+
+            if knownErrors.contains(
+                where: { response.contains($0) }
+            ) {
+                return false
+            }
+        }
+
         guard goal.outcomes.contains(.transform) else {
             return true
         }
-
-        let input = normalize(userInput)
-        let response = normalize(output)
 
         if containsAny(input, [
             "senaryo", "senaryoya", "senaryosuna",
