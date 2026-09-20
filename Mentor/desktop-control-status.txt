@@ -1,1 +1,1 @@
-success|activate=true|ax=true|screen=true
+runtime_failed|Uygulama bulunamadı: xyz123 diye bir uygulama aç

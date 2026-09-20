@@ -1,12 +1,12 @@
 {
-  "appVersion" : "0.8.26",
-  "corePassed" : 26,
+  "appVersion" : "0.8.27",
+  "corePassed" : 27,
   "coreTotal" : 27,
-  "createdAt" : "2026-09-20T12:32:24Z",
-  "failed" : 1,
+  "createdAt" : "2026-09-20T12:41:52Z",
+  "failed" : 0,
   "northStarPassed" : 4,
   "northStarTotal" : 4,
-  "passed" : 30,
+  "passed" : 31,
   "results" : [
     {
       "diagnostics" : [
@@ -809,10 +809,10 @@
     },
     {
       "diagnostics" : [
-        "desktop.app yürütülmeden verifier passed/partial verdi."
+
       ],
       "goal" : "Kullanıcının hedefini anlamlandır ve uygulanabilir bir sonraki adımı seç",
-      "passed" : false,
+      "passed" : true,
       "prompt" : "Notlar uygulamasını aç.",
       "route" : [
 

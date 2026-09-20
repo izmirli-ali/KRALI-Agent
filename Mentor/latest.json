@@ -1,127 +1,127 @@
 {
   "activityTail" : [
     {
-      "date" : "2026-09-20T12:34:24Z",
-      "text" : "Bağlam hafızası: Çalışma kuralı"
+      "date" : "2026-09-20T12:43:14Z",
+      "text" : "Semantic planner sağlayıcısı: Apple + Contract Repair"
     },
     {
-      "date" : "2026-09-20T12:34:20Z",
-      "text" : "Desktop Control Probe tamamlandı: Notlar açıldı/öne geldi • AX izinli • Screen doğrulandı"
-    },
-    {
-      "date" : "2026-09-20T12:33:56Z",
-      "text" : "Desktop Control Probe başladı"
-    },
-    {
-      "date" : "2026-09-20T12:33:53Z",
-      "text" : "Mentor trace yerel olarak kaydedildi"
-    },
-    {
-      "date" : "2026-09-20T12:33:53Z",
-      "text" : "Uygulama kontrolü başarısız: Uygulama açılamadı veya öne getirilemedi: WhatsApp"
-    },
-    {
-      "date" : "2026-09-20T12:33:53Z",
-      "text" : "Semantic rota: Core → Goal → Context → Plan → Desktop → Verify → Response"
-    },
-    {
-      "date" : "2026-09-20T12:33:53Z",
-      "text" : "Semantic capability planı: context.local, core.reasoning, desktop.app"
-    },
-    {
-      "date" : "2026-09-20T12:33:53Z",
-      "text" : "Semantic planner sağlayıcısı: Local Contract Repair"
-    },
-    {
-      "date" : "2026-09-20T12:33:53Z",
-      "text" : "Semantic Mission: whatsapp uygulamasını aç"
-    },
-    {
-      "date" : "2026-09-20T12:33:36Z",
-      "text" : "Seçilen kabiliyetler: Akıl yürütme, Bağlam"
-    },
-    {
-      "date" : "2026-09-20T12:33:36Z",
-      "text" : "Otomatik rota: Core → Goal → Context → Response"
-    },
-    {
-      "date" : "2026-09-20T12:33:36Z",
-      "text" : "Seçilen plan: Bağlamı incele; doğrudan araç eşleşmesi yoksa güvenli alternatifler üret"
-    },
-    {
-      "date" : "2026-09-20T12:33:36Z",
-      "text" : "KRALİ Core hedef sözleşmesi: Kullanıcının hedefini anlamlandır ve uygulanabilir bir sonraki adımı seç"
-    },
-    {
-      "date" : "2026-09-20T12:33:23Z",
-      "text" : "Mentor trace yerel olarak kaydedildi"
-    },
-    {
-      "date" : "2026-09-20T12:33:23Z",
-      "text" : "Uygulama kontrolü başarısız: Uygulama bulunamadı: takvim uygulamasını aç"
-    },
-    {
-      "date" : "2026-09-20T12:33:23Z",
-      "text" : "Semantic rota: Core → Goal → Context → Plan → Desktop → Verify → Response"
-    },
-    {
-      "date" : "2026-09-20T12:33:23Z",
-      "text" : "Semantic capability planı: context.local, core.reasoning, desktop.app"
-    },
-    {
-      "date" : "2026-09-20T12:33:23Z",
-      "text" : "Semantic planner sağlayıcısı: Local Contract Repair"
-    },
-    {
-      "date" : "2026-09-20T12:33:23Z",
+      "date" : "2026-09-20T12:43:14Z",
       "text" : "Semantic Mission: takvim uygulamasını aç"
     },
     {
-      "date" : "2026-09-20T12:33:01Z",
+      "date" : "2026-09-20T12:43:03Z",
       "text" : "Seçilen kabiliyetler: Akıl yürütme, Bağlam"
     },
     {
-      "date" : "2026-09-20T12:33:01Z",
+      "date" : "2026-09-20T12:43:03Z",
       "text" : "Otomatik rota: Core → Goal → Context → Response"
     },
     {
-      "date" : "2026-09-20T12:33:01Z",
+      "date" : "2026-09-20T12:43:03Z",
       "text" : "Seçilen plan: Bağlamı incele; doğrudan araç eşleşmesi yoksa güvenli alternatifler üret"
     },
     {
-      "date" : "2026-09-20T12:33:01Z",
+      "date" : "2026-09-20T12:43:03Z",
       "text" : "KRALİ Core hedef sözleşmesi: Kullanıcının hedefini anlamlandır ve uygulanabilir bir sonraki adımı seç"
     },
     {
-      "date" : "2026-09-20T12:32:48Z",
+      "date" : "2026-09-20T12:42:55Z",
+      "text" : "Mentor trace yerel olarak kaydedildi"
+    },
+    {
+      "date" : "2026-09-20T12:42:30Z",
+      "text" : "Seçilen kabiliyetler: Akıl yürütme, Bağlam"
+    },
+    {
+      "date" : "2026-09-20T12:42:30Z",
+      "text" : "Otomatik rota: Core → Goal → Context → Response"
+    },
+    {
+      "date" : "2026-09-20T12:42:30Z",
+      "text" : "Seçilen plan: Bağlamı incele; doğrudan araç eşleşmesi yoksa güvenli alternatifler üret"
+    },
+    {
+      "date" : "2026-09-20T12:42:30Z",
+      "text" : "KRALİ Core hedef sözleşmesi: Kullanıcının hedefini anlamlandır ve uygulanabilir bir sonraki adımı seç"
+    },
+    {
+      "date" : "2026-09-20T12:42:14Z",
+      "text" : "Semantic rota: Core → Goal → Context → Plan → Desktop → Verify → Response"
+    },
+    {
+      "date" : "2026-09-20T12:42:14Z",
+      "text" : "Semantic capability planı: context.local, core.reasoning, desktop.app"
+    },
+    {
+      "date" : "2026-09-20T12:42:14Z",
+      "text" : "Semantic planner sağlayıcısı: Apple + Contract Repair"
+    },
+    {
+      "date" : "2026-09-20T12:42:14Z",
+      "text" : "Semantic Mission: whatsapp uygulamasını aç"
+    },
+    {
+      "date" : "2026-09-20T12:42:04Z",
+      "text" : "Live Research Eval tamamlandı: 2/2"
+    },
+    {
+      "date" : "2026-09-20T12:42:00Z",
+      "text" : "Seçilen kabiliyetler: Akıl yürütme, Bağlam"
+    },
+    {
+      "date" : "2026-09-20T12:42:00Z",
+      "text" : "Otomatik rota: Core → Goal → Context → Response"
+    },
+    {
+      "date" : "2026-09-20T12:42:00Z",
+      "text" : "Seçilen plan: Bağlamı incele; doğrudan araç eşleşmesi yoksa güvenli alternatifler üret"
+    },
+    {
+      "date" : "2026-09-20T12:42:00Z",
+      "text" : "KRALİ Core hedef sözleşmesi: Kullanıcının hedefini anlamlandır ve uygulanabilir bir sonraki adımı seç"
+    },
+    {
+      "date" : "2026-09-20T12:41:54Z",
       "text" : "KRALİ Arena başladı"
     },
     {
-      "date" : "2026-09-20T12:32:45Z",
+      "date" : "2026-09-20T12:41:53Z",
+      "text" : "Live Research Eval başladı"
+    },
+    {
+      "date" : "2026-09-20T12:41:52Z",
+      "text" : "Training Lab tamamlandı: 31/31"
+    },
+    {
+      "date" : "2026-09-20T12:41:52Z",
+      "text" : "Training Lab başladı"
+    },
+    {
+      "date" : "2026-09-20T12:41:51Z",
       "text" : "Apple yerel zeka hazır"
     },
     {
-      "date" : "2026-09-20T12:32:44Z",
+      "date" : "2026-09-20T12:41:51Z",
       "text" : "Çalışma klasörü geri yüklendi: Desktop"
     },
     {
-      "date" : "2026-09-20T12:32:44Z",
+      "date" : "2026-09-20T12:41:51Z",
       "text" : "6 ekran görüntüsü adayı bulundu"
     },
     {
-      "date" : "2026-09-20T12:32:44Z",
+      "date" : "2026-09-20T12:41:51Z",
       "text" : "1772 dosya ve 68 klasör indekslendi"
     },
     {
-      "date" : "2026-09-20T12:32:44Z",
+      "date" : "2026-09-20T12:41:51Z",
       "text" : "Dinamik hedef ve kabiliyet yönlendirme aktif"
     },
     {
-      "date" : "2026-09-20T12:32:44Z",
+      "date" : "2026-09-20T12:41:51Z",
       "text" : "KRALİ Core hazır"
     }
   ],
-  "appVersion" : "0.8.26",
+  "appVersion" : "0.8.27",
   "capabilities" : [
     {
       "available" : true,
@@ -137,21 +137,9 @@
     },
     {
       "available" : true,
-      "id" : "files.reveal",
-      "name" : "Finder",
-      "risk" : "readOnly"
-    },
-    {
-      "available" : true,
-      "id" : "files.search",
-      "name" : "Dosya arama",
-      "risk" : "readOnly"
-    },
-    {
-      "available" : true,
-      "id" : "perception.screen",
-      "name" : "Ekran algısı",
-      "risk" : "readOnly"
+      "id" : "desktop.app",
+      "name" : "Uygulama kontrolü",
+      "risk" : "external"
     }
   ],
   "contextMemory" : [
@@ -162,42 +150,28 @@
       "title" : "Çalışma kuralı"
     }
   ],
-  "createdAt" : "2026-09-20T12:34:46Z",
+  "createdAt" : "2026-09-20T12:43:47Z",
   "executionSteps" : [
     {
-      "capabilityID" : "files.search",
-      "detail" : "Çalışma alanı olan evde uygulamanın yerini tespit etmek için gerekli Operation: Salt-okunur dosya tarama ve filtreleme",
-      "kind" : "action",
-      "state" : "completed",
-      "title" : "xyz123 uygulamasını bul"
-    },
-    {
-      "capabilityID" : "files.reveal",
-      "detail" : "Dosyayı yerinden çıkarıp doğrudan kullanımına izin vermek için Ön koşul adımları: 1. Operation: Finder'da dosya gösterimi",
-      "kind" : "action",
-      "state" : "partial",
-      "title" : "bulunan uygulamayı aç"
-    },
-    {
-      "capabilityID" : "perception.screen",
-      "detail" : "Ekran üzerinde etkileşimi doğrulamak için gerekli Ön koşul adımları: 2. Operation: ScreenCaptureKit + Vision ile ekran gözlemi ve OCR kanıtı doğrulaması",
-      "kind" : "action",
-      "state" : "partial",
-      "title" : "uygulamanın işlevselliğini doğrulama"
-    },
-    {
       "capabilityID" : "core.reasoning",
-      "detail" : "Mission hedefini uçtan uca tamamlamak için gerekli capability sözleşmesi. Ön koşul adımları: 3. Operation: capability.contract",
+      "detail" : "Hedef uygulama sistemde mevcutsa ve çalışma alanı doğrulanabiliyorsa uygulama açılmalıdır. Operation: uygulama sistemi içinde konum ve erişim kontrolü",
       "kind" : "reasoning",
       "state" : "completed",
-      "title" : "Akıl yürütme"
+      "title" : "uygulamayı bul ve aç"
     },
     {
       "capabilityID" : "context.local",
-      "detail" : "Mission hedefini uçtan uca tamamlamak için gerekli capability sözleşmesi. Ön koşul adımları: 4. Operation: capability.contract",
+      "detail" : "Mission hedefini uçtan uca tamamlamak için gerekli capability sözleşmesi. Ön koşul adımları: 1. Operation: capability.contract",
       "kind" : "reasoning",
       "state" : "completed",
       "title" : "Bağlam"
+    },
+    {
+      "capabilityID" : "desktop.app",
+      "detail" : "Mission hedefini uçtan uca tamamlamak için gerekli capability sözleşmesi. Ön koşul adımları: 2. Operation: capability.contract",
+      "kind" : "action",
+      "state" : "partial",
+      "title" : "Uygulama kontrolü"
     },
     {
       "capabilityID" : "core.reasoning",
@@ -214,13 +188,13 @@
     }
   ],
   "fallbackPlan" : "Tamamlanmayan action step'ini yeniden planla; yürütülmeyen işi başarılı sayma.",
-  "finalResponse" : "“xyz123 diye uygulama aç” araması için eşleşme bulamadım.\n\nDoğrulama: Semantic mission içindeki zorunlu action step'lerinden bazıları tamamlanmadı: files.reveal, perception.screen\nAlternatif plan: Tamamlanmayan action step'ini yeniden planla; yürütülmeyen işi başarılı sayma.",
+  "finalResponse" : "Hedefi “xyz123 diye bir uygulama aç” olarak çözdüm ve mevcut capability'lerle uygulanabilir adımları yürüttüm.\n\nDoğrulama: Semantic mission içindeki zorunlu action step'lerinden bazıları tamamlanmadı: desktop.app\nAlternatif plan: Tamamlanmayan action step'ini yeniden planla; yürütülmeyen işi başarılı sayma.",
   "goal" : "xyz123 diye bir uygulama aç",
   "inputSource" : "text",
   "learningPlans" : [
 
   ],
-  "plan" : "xyz123 uygulamasını bul → bulunan uygulamayı aç → uygulamanın işlevselliğini doğrulama → Akıl yürütme → Bağlam",
+  "plan" : "uygulamayı bul ve aç → Bağlam → Uygulama kontrolü",
   "researchEvidence" : [
 
   ],
@@ -232,8 +206,7 @@
     "Goal",
     "Context",
     "Plan",
-    "Files",
-    "Screen",
+    "Desktop",
     "Verify",
     "Response"
   ],
@@ -241,69 +214,47 @@
     "confidence" : 0.8,
     "objective" : "xyz123 diye bir uygulama aç",
     "outcomes" : [
-      "assessContent",
-      "locate",
       "open"
     ],
     "requiredCapabilityIDs" : [
       "context.local",
       "core.reasoning",
-      "files.reveal",
-      "files.search",
-      "perception.screen"
+      "desktop.app"
     ],
     "requiresUserInput" : false,
     "steps" : [
       {
-        "capabilityID" : "files.search",
+        "capabilityID" : "core.reasoning",
         "dependsOn" : [
 
         ],
-        "operation" : "Salt-okunur dosya tarama ve filtreleme",
-        "purpose" : "Çalışma alanı olan evde uygulamanın yerini tespit etmek için gerekli",
-        "title" : "xyz123 uygulamasını bul"
-      },
-      {
-        "capabilityID" : "files.reveal",
-        "dependsOn" : [
-          0
-        ],
-        "operation" : "Finder'da dosya gösterimi",
-        "purpose" : "Dosyayı yerinden çıkarıp doğrudan kullanımına izin vermek için",
-        "title" : "bulunan uygulamayı aç"
-      },
-      {
-        "capabilityID" : "perception.screen",
-        "dependsOn" : [
-          1
-        ],
-        "operation" : "ScreenCaptureKit + Vision ile ekran gözlemi ve OCR kanıtı doğrulaması",
-        "purpose" : "Ekran üzerinde etkileşimi doğrulamak için gerekli",
-        "title" : "uygulamanın işlevselliğini doğrulama"
-      },
-      {
-        "capabilityID" : "core.reasoning",
-        "dependsOn" : [
-          2
-        ],
-        "operation" : "capability.contract",
-        "purpose" : "Mission hedefini uçtan uca tamamlamak için gerekli capability sözleşmesi.",
-        "title" : "Akıl yürütme"
+        "operation" : "uygulama sistemi içinde konum ve erişim kontrolü",
+        "purpose" : "Hedef uygulama sistemde mevcutsa ve çalışma alanı doğrulanabiliyorsa uygulama açılmalıdır.",
+        "title" : "uygulamayı bul ve aç"
       },
       {
         "capabilityID" : "context.local",
         "dependsOn" : [
-          3
+          0
         ],
         "operation" : "capability.contract",
         "purpose" : "Mission hedefini uçtan uca tamamlamak için gerekli capability sözleşmesi.",
         "title" : "Bağlam"
+      },
+      {
+        "capabilityID" : "desktop.app",
+        "dependsOn" : [
+          1
+        ],
+        "operation" : "capability.contract",
+        "purpose" : "Mission hedefini uçtan uca tamamlamak için gerekli capability sözleşmesi.",
+        "title" : "Uygulama kontrolü"
       }
     ]
   },
   "semanticPlannerProvider" : "Apple + Contract Repair",
-  "traceID" : "FF823256-2DF3-4F48-B740-283FFDAA4C2B",
+  "traceID" : "77997399-DE69-4A97-9408-60D1E01F4CC7",
   "userInput" : "xyz123 diye bir uygulama aç",
   "verificationState" : "attention",
-  "verificationSummary" : "Semantic mission içindeki zorunlu action step'lerinden bazıları tamamlanmadı: files.reveal, perception.screen"
+  "verificationSummary" : "Semantic mission içindeki zorunlu action step'lerinden bazıları tamamlanmadı: desktop.app"
 }

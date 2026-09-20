@@ -1,6 +1,6 @@
 {
-  "appVersion" : "0.8.24",
-  "createdAt" : "2026-09-20T12:10:59Z",
+  "appVersion" : "0.8.26",
+  "createdAt" : "2026-09-20T12:36:17Z",
   "failed" : 0,
   "passed" : 9,
   "results" : [
@@ -10,13 +10,14 @@
       ],
       "mission" : {
         "confidence" : 0.8,
-        "objective" : "Aynı hareket, üç farklı beden üzerinden 45 saniyelik, enerjik bir Reels çekim senaryosuna dönüştürmek.",
+        "objective" : "Son çekimlerden hızlı ve enerjik bir kurgu çıkarmamız gerekiyor.",
         "outcomes" : [
-          "analyze",
           "assessContent",
           "compose",
           "edit",
-          "locate"
+          "explain",
+          "locate",
+          "transform"
         ],
         "requiredCapabilityIDs" : [
           "context.local",
@@ -102,7 +103,11 @@
       ],
       "reviewerPassed" : true,
       "reviewerRiskNotes" : [
-        "perception.media: Gerçek kurgu/tasarım hedefinde uygulama provider'ının olmaması."
+        "perception.media eksik; gerçek kurgu/tasarım hedefinde medya içeriğini değerlendirme eksikliği.",
+        "perception.screen eksik; uygulama sonucunu doğrulaması gereken işte algı eksikliği.",
+        "files.search gereksiz; yerel dosya işi için gereksiz web araştırması.",
+        "context.local eski marka bağlamı taşınıyor; yeni marka görevine alakasızlık.",
+        "perception.screen için desktop.app kullanımı gereksiz; uygulama sonucu doğrulaması eksik."
       ],
       "reviewerSummary" : "kısa değerlendirme",
       "reviewerUnnecessaryCapabilityIDs" : [
@@ -196,12 +201,15 @@
       ],
       "reviewerPassed" : true,
       "reviewerRiskNotes" : [
-        "perception.media eksik: Medya içeriği değerlendirmesi kritik.",
-        "files.search eksik: Dosya bulma gerektiren görevde kullanılmalı.",
-        "perception.screen eksik: Uygulama sonucunu doğrulamak için gerekli.",
-        "new_brand_task: Eski marka bağlamı yeniden kullanıldı, alakasız."
+        "Yerel dosya işi için gereksiz web araştırması",
+        "Gerçek kurgu/tasarım hedefinde uygulama provider'ının olmaması",
+        "Dosya bulma gereken işte files.search eksikliği",
+        "Medya içeriğini değerlendiren işte perception eksikliği",
+        "Uygulama sonucunu doğrulaması gereken işte perception.screen eksikliği",
+        "Yeni marka görevine alakasız eski marka bağlamı taşınması",
+        "Kullanıcıdan gereksiz bilgi isteme"
       ],
-      "reviewerSummary" : "Sosyal medya tasarımı için gereken uçtan uca görevler tamamlanmadı. Yerel bağlam ve araştırma yapılmasına rağmen, medya içeriğinin algılanması için perception.media yetersiz. Dosya arama gerektiren bir görevde files.search eksik. Perception.screen, uygulama sonucunu doğrulamak için gerekli değil. Eski marka bağlamı yeni marka görevinde alakasız. Kullanıcıdan gereksiz bilgi istenmedi.",
+      "reviewerSummary" : "Köfteci Tame markası için sosyal medya tasarımı hazırlama görevi uçtan uca tamamlanmadı. Konuşma bağlamı ve önceki görevler dikkate alınsa da gerçek kurgu/tasarım hedefinde uygulama provider'ının olmaması, dosya bulma gereksinimi için files.search'in eksik olması ve medyanın değerlendirilmesi için perception.media'nın bulunmaması temel eksikliklerdir. Yerel dosya işi için gereksiz web araştırması yapılması ve yeni marka görevinde alakasız eski marka bağlamının taşınması da gözlemlenmiştir. Perception.screen'in uygulama sonucunu doğrulaması gereken işte eksik olması ve gereksiz araç kullanımının risk oluşturması mevcuttur.",
       "reviewerUnnecessaryCapabilityIDs" : [
 
       ],
@@ -220,8 +228,8 @@
 
       ],
       "mission" : {
-        "confidence" : 0.9,
-        "objective" : "Masaüstündeki ekran görüntülerini toparlayıp ayrı bir klasöre düzenlemek",
+        "confidence" : 0.85,
+        "objective" : "Masaüstündeki ekran görüntülerini toparlayıp ayrı bir klasöre düzenle.",
         "outcomes" : [
           "locate",
           "open",
@@ -230,7 +238,6 @@
         "requiredCapabilityIDs" : [
           "context.local",
           "core.reasoning",
-          "files.metadata",
           "files.move.reversible",
           "files.reveal",
           "files.search"
@@ -242,50 +249,41 @@
             "dependsOn" : [
 
             ],
-            "operation" : "seçili çalışma alanını salt-okunur tarar ve filtreler",
-            "purpose" : "Masaüstü alanındaki görüntüleri sistematik olarak tanımlamak ve filtrelemek için gereklidir.",
+            "operation" : "seçili çalışma alanında salt-okunur tarama ve filtreleme",
+            "purpose" : "Masaüstünde bulunan ekran görüntülerini sistematik olarak bulup filtrelemek için gereklidir",
             "title" : "ekran görüntülerini toplama"
-          },
-          {
-            "capabilityID" : "files.metadata",
-            "dependsOn" : [
-
-            ],
-            "operation" : "dosya türü, yol ve tarih bilgilerini değerlendirir",
-            "purpose" : "Her bir görüntünün türünü, yolunu ve tarihini kontrol ederek doğru sınıflandırmayı sağlamak için gereklidir.",
-            "title" : "dosyaları doğrulama ve metadata ile değerlendirme"
           },
           {
             "capabilityID" : "files.reveal",
             "dependsOn" : [
-
+              0
             ],
-            "operation" : "çözülen dosya veya klasörü Finder'da gösterir",
-            "purpose" : "Toplanan ve doğrulanmış görüntüleri kullanıcıya görsel olarak sunmak için gereklidir.",
+            "operation" : "çözülen dosya veya klasörü Finder'da sergileme",
+            "purpose" : "Bulunan görüntüleri kullanıcıya doğrudan erişim için Finder'da görüntüleme gereklidir",
             "title" : "dosyaları Finder'da gösterme"
           },
           {
             "capabilityID" : "files.move.reversible",
             "dependsOn" : [
-
+              1
             ],
-            "operation" : "seçili alan içindeki izinli dosyaları çakışma güvenliğiyle taşır",
-            "purpose" : "İzinli dosyaları çakışma güvenliğiyle yeni bir klasöre aktarmak için gereklidir.",
-            "title" : "dosyaları güvenli şekilde taşımak"
+            "operation" : "seçili alan içindeki izinli dosyaları çakışma güvenliğiyle taşıma",
+            "purpose" : "Filtrelenen görüntüleri bir klasöre taşıyarak düzenlemek, tekrarları ayıklamak ve yapısal bir düzen oluşturmak için gereklidir",
+            "title" : "dosyaları düzenleme"
           },
           {
             "capabilityID" : "core.reasoning",
             "dependsOn" : [
-
+              2
             ],
-            "operation" : "hedef kısıt, alternatif ve sonuç ilişkisini işler",
-            "purpose" : "Tüm adımlar tamamlandıktan sonra görüntülerin düzenli ve erişilebilir bir şekilde saklanmasını sağlamak için gereklidir.",
-            "title" : "klasörü son haliyle düzenleme"
+            "operation" : "capability.contract",
+            "purpose" : "Mission hedefini uçtan uca tamamlamak için gerekli capability sözleşmesi.",
+            "title" : "Akıl yürütme"
           },
           {
             "capabilityID" : "context.local",
             "dependsOn" : [
-              4
+              3
             ],
             "operation" : "capability.contract",
             "purpose" : "Mission hedefini uçtan uca tamamlamak için gerekli capability sözleşmesi.",
@@ -309,7 +307,6 @@
       "selectedCapabilityIDs" : [
         "context.local",
         "core.reasoning",
-        "files.metadata",
         "files.move.reversible",
         "files.reveal",
         "files.search"
@@ -321,11 +318,9 @@
 
       ],
       "mission" : {
-        "confidence" : 0.95,
-        "objective" : "Masaüstündeki videoları bulmak ve @estafizsym için 3 özgün Reels fikri çıkarmak.",
+        "confidence" : 0.65,
+        "objective" : "Bu firmanın sitesine girip iletişim sayfasını bul ve iletişim bilgilerini çıkar.",
         "outcomes" : [
-          "analyze",
-          "compose",
           "research"
         ],
         "requiredCapabilityIDs" : [
@@ -340,9 +335,9 @@
             "dependsOn" : [
 
             ],
-            "operation" : "Doğrulanmış faaliyet alanına göre Reels konseptlerini değerlendir",
-            "purpose" : "@estafizsym'in mevcut paylaşımlarını ve konumlandırmasını kullanarak Reels fikirlerini analiz etmek.",
-            "title" : "Reels fikirlerini analiz etmek"
+            "operation" : "semantic.fallback",
+            "purpose" : "Semantic model geçici olarak mission üretemedi; capability contract güncel kullanıcı mesajından güvenli fallback oluşturuyor.",
+            "title" : "Hedefi çöz"
           },
           {
             "capabilityID" : "context.local",
@@ -365,14 +360,20 @@
         ]
       },
       "passed" : true,
-      "plannerProvider" : "Apple + Contract Repair",
+      "plannerProvider" : "Local Contract Repair",
       "prompt" : "Bu firmanın sitesine girip iletişim sayfasını bul ve iletişim bilgilerini çıkar.",
       "reviewerMissingCapabilityIDs" : [
 
       ],
+      "reviewerPassed" : true,
       "reviewerRiskNotes" : [
-
+        "browser.control kullanımı, yerel dosya işi için gereksiz web araştırmasına yol açtı.",
+        "perception.screen eksikliği: Uygulama sonucunu doğrulamak için ekran analizi yapılmadı.",
+        "files.search eksikliği: Dosya bulma gereken işte dosya tarama yapılmadı.",
+        "context.local eksikliği: Gerçek kurgu/tasarım hedefinde uygulama provider'ının olmaması göz ardı edildi.",
+        "Yeni marka görevine alakasız eski marka bağlamı taşınması."
       ],
+      "reviewerSummary" : "Hedef uçtan uca tamamlanmadı. browser.control kullanıldı ama gerçek web araştırması veya yerel dosya işi için gereksiz web araması yapılmadı. perception eksikliği: Medya içeriği değerlendirmesi için perception.media kullanılmadı. perception.screen eksikliği: Uygulama sonucunu doğrulamak için ekran analizi yapılmadı. context.local eksikliği: Gerçek kurgu/tasarım hedefinde uygulama provider'ının olmaması göz ardı edildi.",
       "reviewerUnnecessaryCapabilityIDs" : [
 
       ],
@@ -439,14 +440,12 @@
       "reviewerPassed" : true,
       "reviewerRiskNotes" : [
         "Yerel dosya işi için gereksiz web araştırması",
-        "Gerçek kurgu/tasarım hedefinde uygulama provider'ının olmaması",
-        "Dosya bulma gereken işte files.search eksikliği",
-        "Medya içeriğini değerlendiren işte perception eksikliği",
-        "Uygulama sonucunu doğrulaması gereken işte perception.screen eksikliği",
+        "Medya içeriğini değerlendiren işte perception eksik",
+        "Uygulama sonucunu doğrulaması gereken işte perception.screen eksik",
         "Yeni marka görevine alakasız eski marka bağlamı taşınması",
         "Kullanıcıdan gereksiz bilgi isteme"
       ],
-      "reviewerSummary" : "Hedef uçtan uca tamamlanamadı. context.local ve mail.work gerekliydi ama execution başarısız oldu. Capability contract güncel kullanıcı mesajından güvenli fallback oluşturdu ama gerçek çalışma için gerekli local bağlam ve mail iş akışı eksik. research.web gereksiz web araması olarak kullanıldı.",
+      "reviewerSummary" : "Görev tam olarak uçtan uca tamamlanmadı. context.local mevcut olsa da, yerel dosya işi için gereksiz web araştırması yapıldı. perception eksikliği, medya içeriğini değerlendirme işinde gözlemlendi. mail.work mevcut olsa da, uygulama sonucunu doğrulaması gereken işte perception.screen eksik. Yeni marka görevine alakasız eski marka bağlamı taşındı. Kullanıcıdan gereksiz bilgi isteme yapılmadı.",
       "reviewerUnnecessaryCapabilityIDs" : [
 
       ],
@@ -463,11 +462,13 @@
 
       ],
       "mission" : {
-        "confidence" : 0.65,
+        "confidence" : 0.8,
         "objective" : "Yeni açılan bir kahve markasını araştırıp görsel dilini analiz edelim ve Photoshop'ta örnek bir Instagram postu hazırlayalım.",
         "outcomes" : [
           "analyze",
+          "compose",
           "edit",
+          "explain",
           "research"
         ],
         "requiredCapabilityIDs" : [
@@ -484,9 +485,9 @@
             "dependsOn" : [
 
             ],
-            "operation" : "semantic.fallback",
-            "purpose" : "Semantic model geçici olarak mission üretemedi; capability contract güncel kullanıcı mesajından güvenli fallback oluşturuyor.",
-            "title" : "Hedefi çöz"
+            "operation" : "capability.contract",
+            "purpose" : "Mission hedefini uçtan uca tamamlamak için gerekli capability sözleşmesi.",
+            "title" : "Akıl yürütme"
           },
           {
             "capabilityID" : "context.local",
@@ -527,21 +528,16 @@
         ]
       },
       "passed" : true,
-      "plannerProvider" : "Local Contract Repair",
+      "plannerProvider" : "Apple + Contract Repair",
       "prompt" : "Yeni açılan bir kahve markasını araştırıp görsel dilini analiz edelim ve Photoshop'ta örnek bir Instagram postu hazırlayalım.",
       "reviewerMissingCapabilityIDs" : [
 
       ],
       "reviewerPassed" : true,
       "reviewerRiskNotes" : [
-        "Yerel dosya işi için gereksiz web araştırması",
-        "Medya içeriğini değerlendiren perception eksik",
-        "Uygulama sonucunu doğrulaması gereken ekran algısı eksik",
-        "Dosya bulma gereken işte files.search eksik",
-        "Yeni marka görevine alakasız eski marka bağlamı taşınması",
-        "Kullanıcıdan gereksiz bilgi isteme"
+
       ],
-      "reviewerSummary" : "Yeni kahve markasını araştırma, görsel dil analizi ve Photoshop ile Instagram postu oluşturma görevi uçtan uca tamamlanamadı. Araştırma için web arama yapıldı ancak yerel dosya işi için gereksiz web araştırması yapıldı. Medya içeriğini değerlendirme için perception eksik. Uygulama sonucunu doğrulaması gereken ekran algısı eksik. Dosya bulma gereken işte files.search eksik. Yeni marka görevine alakasız eski marka bağlamı taşınması. Kullanıcıdan gereksiz bilgi isteme yapılmadı.",
+      "reviewerSummary" : "Hedef, yeni bir kahve markasını araştırmak, görsel dili analiz etmek ve Photoshop'ta bir Instagram postu hazırlamaktır. Ancak, perception.screen yeteneği medya içeriğinin doğrulanması ve ekran gözlemi için gerekli olmadığından ve photoshop.control yeteneği tasarım işlemleri için gerekli olmadığından bu görev tamamlanamamıştır.",
       "reviewerUnnecessaryCapabilityIDs" : [
 
       ],
@@ -561,42 +557,21 @@
       ],
       "mission" : {
         "confidence" : 0.8,
-        "objective" : "Notlar uygulamasını açmak ve pencereyi öne getirmek",
+        "objective" : "Notlar uygulamasını aç ve pencereyi öne getir.",
         "outcomes" : [
-          "locate",
           "open"
         ],
         "requiredCapabilityIDs" : [
           "context.local",
           "core.reasoning",
-          "desktop.app",
-          "files.search",
-          "perception.screen"
+          "desktop.app"
         ],
         "requiresUserInput" : false,
         "steps" : [
           {
-            "capabilityID" : "files.search",
-            "dependsOn" : [
-
-            ],
-            "operation" : "aktif çalışma alanında uygulama tanımlama ve açma",
-            "purpose" : "Çalışma alanı bağlamında Notlar uygulamasını tanımlamak ve başlatmak için gereklidir.",
-            "title" : "Notlar uygulamasını bul ve aç"
-          },
-          {
-            "capabilityID" : "perception.screen",
-            "dependsOn" : [
-              0
-            ],
-            "operation" : "ekran gözlemi ve pencere kontrolü ile konum ayarı",
-            "purpose" : "Açılan uygulamada pencere konumunu ayarlayarak kullanıcı deneyimini optimize etmek gerekir.",
-            "title" : "Pencereyi öne getir"
-          },
-          {
             "capabilityID" : "core.reasoning",
             "dependsOn" : [
-              1
+
             ],
             "operation" : "capability.contract",
             "purpose" : "Mission hedefini uçtan uca tamamlamak için gerekli capability sözleşmesi.",
@@ -605,7 +580,7 @@
           {
             "capabilityID" : "context.local",
             "dependsOn" : [
-              2
+              0
             ],
             "operation" : "capability.contract",
             "purpose" : "Mission hedefini uçtan uca tamamlamak için gerekli capability sözleşmesi.",
@@ -614,7 +589,7 @@
           {
             "capabilityID" : "desktop.app",
             "dependsOn" : [
-              3
+              1
             ],
             "operation" : "capability.contract",
             "purpose" : "Mission hedefini uçtan uca tamamlamak için gerekli capability sözleşmesi.",
@@ -630,15 +605,9 @@
       ],
       "reviewerPassed" : true,
       "reviewerRiskNotes" : [
-        "Yerel dosya işi için gereksiz web araştırması",
-        "Gerçek kurgu/tasarım hedefinde uygulama provider'ının olmaması",
-        "Dosya bulma gereken işte files.search eksik",
-        "Medya içeriğini değerlendiren işte perception eksik",
-        "Uygulama sonucunu doğrulaması gereken işte perception.screen eksik",
-        "Yeni marka görevine alakasız eski marka bağlamı taşınması",
-        "Kullanıcıdan gereksiz bilgi isteme"
+
       ],
-      "reviewerSummary" : "Notlar uygulamasını açmak ve pencereyi öne getirmek için gereken tüm adımlar tamamlanmadı. files.search, desktop.app ve perception.screen dahil olmak üzere gerekli yetenekler kullanıldı ancak yerel dosya işi için gereksiz web araştırması yapıldı. Gerçek kurgu/tasarım hedefinde uygulama provider'ının olmaması nedeniyle uygulama tanımlanamadı. Dosya bulma gereken işte files.search eksik. Medya içeriğini değerlendiren işte perception eksik. Uygulama sonucunu doğrulaması gereken işte perception.screen eksik. Yeni marka görevine alakasız eski marka bağlamı taşındı. Kullanıcıdan gereksiz bilgi isteme yapılmadı.",
+      "reviewerSummary" : "Notlar uygulamasını açma ve pencereyi öne getirme görevi, gerekli capability'ler kullanılarak tamamlandı. context.local ve desktop.app yeterliydi. perception.screen kullanımı ekran doğrulama için uygun. research.web gereksizdi çünkü yerel uygulama kontrolü yeterliydi.",
       "reviewerUnnecessaryCapabilityIDs" : [
 
       ],
@@ -646,9 +615,7 @@
       "selectedCapabilityIDs" : [
         "context.local",
         "core.reasoning",
-        "desktop.app",
-        "files.search",
-        "perception.screen"
+        "desktop.app"
       ],
       "title" : "Genel masaüstü uygulama kontrolü"
     },
@@ -657,8 +624,8 @@
 
       ],
       "mission" : {
-        "confidence" : 0.95,
-        "objective" : "İndirilenler klasöründeki en son PDF dosyasını bulup Finder'da açmak",
+        "confidence" : 1,
+        "objective" : "İndirilenler klasöründeki en son PDF dosyasını bul ve Finder'da aç.",
         "outcomes" : [
           "locate",
           "open"
@@ -676,32 +643,41 @@
             "dependsOn" : [
 
             ],
-            "operation" : "Salt-okunur dosya tarama ve filtreleme",
-            "purpose" : "Dosyaları çalışma alanındaki klasörde salt-okunur olarak bulmak için tarama yapmak gerekir.",
-            "title" : "İndirilenler klasörünü tarama"
+            "operation" : "Salt-okunur tarama ve filtreleme",
+            "purpose" : "Dosyaların konumunu ve tarihini belirleyerek en son PDF'i bulmak",
+            "title" : "İndirilenler klasörünü taramak"
           },
           {
             "capabilityID" : "files.reveal",
             "dependsOn" : [
-              0
+
             ],
-            "operation" : "Dosya ve klasörün Finder'da gösterilmesi",
-            "purpose" : "Bulunan PDF dosyasını Finder arayüzünde görünür hale getirmek için yerel dosya gösterimi kullanılmalıdır.",
-            "title" : "Dosyayı Finder'da gösterme"
+            "operation" : "Dosya veya klasörün doğrudan gösterimi",
+            "purpose" : "Bulunan PDF dosyasını sistemde görünür hale getirmek",
+            "title" : "Dosyayı Finder'da göstermek"
+          },
+          {
+            "capabilityID" : "files.reveal",
+            "dependsOn" : [
+
+            ],
+            "operation" : "Dosyanın doğrudan etkileşime geçirilmesi",
+            "purpose" : "PDF dosyasını okuyucu uygulamada açarak içeriğe erişim sağlamak",
+            "title" : "Finder'da dosyayı açmak"
           },
           {
             "capabilityID" : "core.reasoning",
             "dependsOn" : [
-              1
+              2
             ],
-            "operation" : "Dosyanın sistem düzeyinde açılması",
-            "purpose" : "Görünen PDF dosyasını doğrudan açarak kullanımına başlanmasını sağlamak için sistemdeki dosya açma yeteneği gereklidir.",
-            "title" : "Finder'da dosyayı açma"
+            "operation" : "capability.contract",
+            "purpose" : "Mission hedefini uçtan uca tamamlamak için gerekli capability sözleşmesi.",
+            "title" : "Akıl yürütme"
           },
           {
             "capabilityID" : "context.local",
             "dependsOn" : [
-              2
+              3
             ],
             "operation" : "capability.contract",
             "purpose" : "Mission hedefini uçtan uca tamamlamak için gerekli capability sözleşmesi.",
@@ -785,14 +761,15 @@
       ],
       "reviewerPassed" : true,
       "reviewerRiskNotes" : [
-        "Yerel dosya işi için gereksiz web araştırması yapıldı.",
-        "Gerçek kurgu/tasarım hedefinde uygulama provider'ının olmaması ve dosyaları bulma gereksinimi için files.search'in eksik olması.",
-        "Medya içeriğini değerlendiren işte perception eksikliği.",
-        "Uygulama sonucunu doğrulaması gereken işte perception.screen eksikliği.",
-        "Yeni marka görevine alakasız eski marka bağlamı taşınması.",
-        "Kullanıcıdan gereksiz bilgi isteme yapılmadı."
+        "Yerel dosya işi için gereksiz web araştırması",
+        "Gerçek kurgu/tasarım hedefinde uygulama provider'ının olmaması",
+        "Dosya bulma gereken işte files.search eksikliği",
+        "Medya içeriğini değerlendiren işte perception eksikliği",
+        "Uygulama sonucunu doğrulaması gereken işte perception.screen eksikliği",
+        "Yeni marka görevine alakasız eski marka bağlamı taşınması",
+        "Kullanıcıdan gereksiz bilgi isteme"
       ],
-      "reviewerSummary" : "Hedef tam olarak uçtan uca tamamlanmadı. Perception.screen mevcut olsa da, yerel dosya işi için gereksiz web araştırması yapıldı. Gerçek kurgu/tasarım hedefinde uygulama provider'ının olmaması ve dosyaları bulma gereksinimi için files.search'in eksik olması hedef için gerekli kapasiteyi tamamlamadı. Perception eksikliği, medya içeriğinin değerlendirilmesinde sorun yarattı. Uygulama sonucunu doğrulaması gereken işte perception.screen eksikliği, görev tamamlanmasını engelledi. Yeni marka görevine alakasız eski marka bağlamı taşındı. Kullanıcıdan gereksiz bilgi isteme yapılmadı.",
+      "reviewerSummary" : "Hedef tam olarak uçtan uca tamamlanamadı. perception.screen mevcut olsa da, yerel dosya işi için gereksiz web araştırması yapıldı. Gerçek kurgu/tasarım hedefinde uygulama provider'ının olmaması, dosya bulma gereken işte files.search eksikliği, medya içeriğini değerlendiren işte perception eksikliği, uygulama sonucunu doğrulaması gereken işte perception.screen eksikliği, yeni marka görevine alakasız eski marka bağlamı taşınması ve kullanıcının gereksiz bilgi istemesi gibi durumlar var.",
       "reviewerUnnecessaryCapabilityIDs" : [
 
       ],
