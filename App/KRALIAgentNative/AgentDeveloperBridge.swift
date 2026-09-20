@@ -99,6 +99,32 @@ struct AgentDeveloperBridge {
         )
     }
 
+    func writeStatus(
+        _ status: DeveloperAgentStatus
+    ) {
+        let directory = statusURL
+            .deletingLastPathComponent()
+
+        try? fileManager.createDirectory(
+            at: directory,
+            withIntermediateDirectories: true
+        )
+
+        let value = [
+            status.state,
+            status.message,
+            status.branch ?? "",
+            status.worktree ?? ""
+        ]
+        .joined(separator: "|")
+
+        try? value.write(
+            to: statusURL,
+            atomically: true,
+            encoding: .utf8
+        )
+    }
+
     func run() async -> DeveloperAgentStatus {
         guard fileManager.fileExists(
             atPath: scriptURL.path
