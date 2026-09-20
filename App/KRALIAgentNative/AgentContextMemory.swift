@@ -245,9 +245,30 @@ struct AgentContextMemoryStore {
                 .count
         }
 
+        func identityOverlapCount(
+            for entry: AgentContextMemoryEntry
+        ) -> Int {
+            let identityCorpus = normalize(
+                [
+                    entry.title,
+                    entry.userInput ?? ""
+                ]
+                .joined(separator: " ")
+            )
+
+            return queryTokens
+                .intersection(Set(tokens(identityCorpus)))
+                .count
+        }
+
         let strongestContextOverlap = entries
             .filter { $0.kind != .userRule }
             .map(overlapCount)
+            .max() ?? 0
+
+        let strongestIdentityOverlap = entries
+            .filter { $0.kind != .userRule }
+            .map(identityOverlapCount)
             .max() ?? 0
 
         var scored: [
@@ -268,6 +289,9 @@ struct AgentContextMemoryStore {
             )
 
             let tokenOverlap = overlapCount(
+                for: entry
+            )
+            let identityOverlap = identityOverlapCount(
                 for: entry
             )
             let exactMatch =
@@ -310,6 +334,10 @@ struct AgentContextMemoryStore {
                 } else {
                     isRelevant = true
                 }
+            } else if strongestIdentityOverlap > 0 {
+                isRelevant =
+                    identityOverlap > 0 ||
+                    exactMatch
             } else {
                 isRelevant =
                     tokenOverlap >= 2 ||
@@ -321,6 +349,7 @@ struct AgentContextMemoryStore {
             }
 
             score += tokenOverlap * 4
+            score += identityOverlap * 6
 
             if entry.kind == .userRule,
                tokenOverlap > 0 {
