@@ -18,7 +18,10 @@ struct DeveloperAgentStatus: Hashable {
             "retrying",
             "verifying",
             "repairing_cline",
-            "repairing_runtime"
+            "repairing_runtime",
+            "sdk_fallback_preparing",
+            "sdk_fallback_running",
+            "provider_platform_bug"
         ].contains(state)
     }
 
@@ -45,6 +48,12 @@ struct DeveloperAgentStatus: Hashable {
             return "Cline onarılıyor"
         case "repairing_runtime":
             return "Runtime hazırlanıyor"
+        case "provider_platform_bug":
+            return "Provider platform hatası bulundu"
+        case "sdk_fallback_preparing":
+            return "SDK fallback hazırlanıyor"
+        case "sdk_fallback_running":
+            return "SDK üzerinden öğreniyor"
         case "ready_for_review":
             return "Öğrenme adayı hazır"
         case "build_failed":
