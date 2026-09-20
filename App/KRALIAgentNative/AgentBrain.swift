@@ -187,8 +187,7 @@ struct AgentBrain {
             return decision(
                 intent: .general,
                 route: ["Core", "Context", "Planner"],
-                goal: context.lastMemoryGoal
-                    ?? "Önceki görev bağlamını kullanarak devam et",
+                goal: "Önceki görev bağlamını kullanarak devam et",
                 plan: "İlgili önceki görev bağlamını geri çağır; yeni isteği ona bağla ve gerekmedikçe aynı araştırmayı baştan yapma",
                 alternatives: [
                     "Önceki sonucu genişlet",
@@ -515,6 +514,26 @@ struct AgentBrain {
     }
 
     private func isFileSearchIntent(_ text: String) -> Bool {
+        let explicitLocalScope = containsAny(text, [
+            "dosya", "klasör", "klasor", "finder",
+            "masaüst", "masaustu", "desktop",
+            "bilgisayarımda", "bilgisayarimda",
+            "mac'imde", "macimde",
+            "videolarım", "videolarim",
+            "çekimlerim", "cekimlerim",
+            "arşiv", "arsiv"
+        ])
+
+        let looksLikeKnowledgeComparison = containsAny(text, [
+            "arasındaki fark", "arasindaki fark",
+            "farklar neler", "farkı nedir", "farki nedir",
+            "karşılaştır", "karsilastir", " vs ", "versus"
+        ])
+
+        if looksLikeKnowledgeComparison && !explicitLocalScope {
+            return false
+        }
+
         let actions = [
             "bul", "ara", "göster", "goster", "listele", "nerede", "hangileri",
             "neler", "ne var", "incele", "inceler misin", "bak", "getir", "çıkar", "cikar"
