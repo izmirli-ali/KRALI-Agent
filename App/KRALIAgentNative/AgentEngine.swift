@@ -1901,6 +1901,8 @@ final class AgentEngine: ObservableObject {
     private func resetTransientTaskStateForNewInput() {
         currentSemanticMission = nil
         currentSemanticPlannerProvider = nil
+        currentTaskGraph = nil
+        taskGraphStatus = "Yeni görev için görev grafiği bekleniyor."
         activeRoute = ["Core"]
         selectedCapabilities = []
         capabilityLearningPlans = []
