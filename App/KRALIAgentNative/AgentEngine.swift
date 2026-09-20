@@ -308,30 +308,44 @@ final class AgentEngine: ObservableObject {
 
         resetTransientTaskStateForNewInput()
 
-        activeContextMemories = contextMemoryStore.relevant(
-            to: text,
-            from: contextMemoryEntries,
-            limit: 4
-        )
+        let recalledContextMemories =
+            contextMemoryStore.relevant(
+                to: text,
+                from: contextMemoryEntries,
+                limit: 4
+            )
 
         let executionContextMemories =
             contextMemoryStore.executionContext(
                 to: text,
-                from: activeContextMemories,
+                from: recalledContextMemories,
                 limit: 4
             )
 
-        if !activeContextMemories.isEmpty {
+        // Only execution-safe context is allowed to influence routing,
+        // planning and verification. Broader recall may still exist in the
+        // persistent store but must not poison an unrelated new task.
+        activeContextMemories =
+            executionContextMemories
+
+        if !executionContextMemories.isEmpty {
             contextMemoryStatus =
-                "\(activeContextMemories.count) ilgili önceki bağlam geri çağrıldı."
+                "\(executionContextMemories.count) güvenli bağlam kaydı bu tura taşındı."
             log(
                 "Bağlam hafızası: " +
-                activeContextMemories
+                executionContextMemories
                     .map(\.title)
                     .joined(separator: " • ")
             )
+        } else if !recalledContextMemories.isEmpty {
+            contextMemoryStatus =
+                "Önceki görev bağlamları bulundu ancak yeni hedef bağımsız olduğu için izole edildi."
+            log(
+                "Bağlam firewall: önceki görev bağlamları bu tura taşınmadı"
+            )
         } else {
-            contextMemoryStatus = "Bu tur için ilgili önceki bağlam bulunmadı."
+            contextMemoryStatus =
+                "Bu tur için ilgili önceki bağlam bulunmadı."
         }
 
         messages.append(ChatMessage(role: .user, text: text))
@@ -2189,7 +2203,12 @@ final class AgentEngine: ObservableObject {
     }
 
     private func brainContext() -> AgentContextSnapshot {
-        AgentContextSnapshot(
+        let taskContext =
+            activeContextMemories.filter {
+                $0.kind != .userRule
+            }
+
+        return AgentContextSnapshot(
             hasWorkspace: selectedRootURL != nil,
             workspaceName: selectedRootURL?.lastPathComponent,
             fileCount: indexedFiles.count,
@@ -2203,8 +2222,8 @@ final class AgentEngine: ObservableObject {
             previousFolderResultCount: folderSearchResults.count,
             lastTarget: lastDecision?.target,
             lastGoal: lastDecision?.goal,
-            relevantMemoryCount: activeContextMemories.count,
-            lastMemoryGoal: activeContextMemories
+            relevantMemoryCount: taskContext.count,
+            lastMemoryGoal: taskContext
                 .first(where: { $0.goal != nil })?
                 .goal
         )
