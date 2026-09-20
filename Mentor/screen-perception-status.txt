@@ -1,1 +1,1 @@
-success|20 metin satırı|9 pencere|runtime
+success|34 metin satırı|9 pencere|runtime
