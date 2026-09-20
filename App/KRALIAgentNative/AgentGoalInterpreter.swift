@@ -131,6 +131,16 @@ struct AgentGoalInterpreter {
         ]) {
             outcomes.insert(.research)
             capabilityIDs.insert("research.web")
+
+            if containsAny(text, [
+                "detaylı araştır", "detayli arastir",
+                "detaylı incele", "detayli incele",
+                "detaylı bak", "detayli bak",
+                "araştırır mısın", "arastirir misin",
+                "hakkında detaylı", "hakkinda detayli"
+            ]) {
+                outcomes.insert(.explain)
+            }
         }
 
         if containsAny(text, [
