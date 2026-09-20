@@ -143,6 +143,24 @@ struct AgentGoalInterpreter {
             }
         }
 
+        let mentionsSocialProfile = containsAny(text, [
+            "instagram", "tiktok", "linkedin", "youtube",
+            "sosyal medya", "sosyalmedya", "profil", "hesabı", "hesabi"
+        ])
+
+        let asksSocialProfileFacts = containsAny(text, [
+            "takipçi", "takipci", "takipçisi", "takipcisi",
+            "içerik", "icerik", "paylaşım", "paylasim",
+            "gönderi", "gonderi", "reels", "reel",
+            "kaç", "kac", "bakabilir", "bakabilir misin",
+            "incele", "neler", "bio"
+        ])
+
+        if mentionsSocialProfile && asksSocialProfileFacts {
+            outcomes.formUnion([.research, .explain])
+            capabilityIDs.insert("research.web")
+        }
+
         if containsAny(text, [
             "hangi yeteneğin eksik", "hangi yetenegin eksik",
             "neyin eksik olduğunu bul", "neyin eksik oldugunu bul",
