@@ -31,7 +31,7 @@ struct AgentResponseComposer {
                 reply += "\nYetkinlik kazanma planı: " + learning.nextStep
             }
 
-            return reply
+            return polish(reply)
 
         case .attention:
             var reply = baseReply
@@ -48,11 +48,53 @@ struct AgentResponseComposer {
             return reply
 
         case .passed, .skipped:
-            return baseReply
+            return polish(baseReply)
 
         case .idle, .checking:
-            return baseReply
+            return polish(baseReply)
         }
+    }
+
+    private func polish(
+        _ text: String
+    ) -> String {
+        let replacements: [
+            (String, String)
+        ] = [
+            ("Kapanışda", "Kapanışta"),
+            ("kapanışda", "kapanışta"),
+            ("Şuan", "Şu an"),
+            ("şuan", "şu an"),
+            ("Birşey", "Bir şey"),
+            ("birşey", "bir şey"),
+            ("Yada", "Ya da"),
+            ("yada", "ya da"),
+            ("Yanlız", "Yalnız"),
+            ("yanlız", "yalnız"),
+            ("Herkez", "Herkes"),
+            ("herkez", "herkes"),
+            ("Değilmi", "Değil mi"),
+            ("değilmi", "değil mi")
+        ]
+
+        var result = text
+
+        for pair in replacements {
+            result = result.replacingOccurrences(
+                of: pair.0,
+                with: pair.1
+            )
+        }
+
+        return result
+            .replacingOccurrences(
+                of: #"\n{3,}"#,
+                with: "\n\n",
+                options: .regularExpression
+            )
+            .trimmingCharacters(
+                in: .whitespacesAndNewlines
+            )
     }
 
     private func removeCompletionClaim(from text: String) -> String {
