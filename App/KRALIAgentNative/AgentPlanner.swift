@@ -335,7 +335,7 @@ struct AgentPlanner {
            }) {
             let transformStep = AgentExecutionStep(
                 title: "İstenen formata dönüştür",
-                detail: "Önceki bağlamda kullanıcının referans verdiği öğeyi seç; yeni alternatifler üretmeden o öğeyi istenen süre, biçim veya yapıya sadık kalarak dönüştür.",
+                detail: "Dönüştürülecek kaynak kullanıcı mesajında doğrudan verilmişse onu kullan; aksi halde önceki bağlamda referans verilen öğeyi seç. Yeni alternatifler üretmeden kaynak içeriği istenen süre, biçim veya yapıya sadık kalarak dönüştür.",
                 kind: .reasoning,
                 capabilityID: "core.reasoning"
             )
@@ -350,6 +350,30 @@ struct AgentPlanner {
                 steps.insert(transformStep, at: verificationIndex)
             } else {
                 steps.append(transformStep)
+            }
+        }
+
+        if goal.outcomes.contains(.compose) &&
+           !steps.contains(where: {
+               normalizeStepTitle($0.title).contains("icerigi olustur")
+           }) {
+            let composeStep = AgentExecutionStep(
+                title: "İçeriği oluştur",
+                detail: "Kullanıcının verdiği konu, süre, bölüm sayısı, ton ve biçim kısıtlarını koruyarak doğrudan kullanılabilir içeriği oluştur.",
+                kind: .reasoning,
+                capabilityID: "core.reasoning"
+            )
+
+            if let responseIndex = steps.firstIndex(
+                where: { $0.kind == .response }
+            ) {
+                steps.insert(composeStep, at: responseIndex)
+            } else if let verificationIndex = steps.firstIndex(
+                where: { $0.kind == .verification }
+            ) {
+                steps.insert(composeStep, at: verificationIndex)
+            } else {
+                steps.append(composeStep)
             }
         }
 
