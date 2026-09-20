@@ -19,16 +19,60 @@ struct AgentVerifier {
         decision: AgentDecision,
         currentUserInput: String,
         goal: AgentGoalProfile,
+        semanticMission: AgentSemanticMission? = nil,
         snapshot: AgentVerificationSnapshot
     ) -> AgentVerificationResult {
         if let mismatch = alignmentMismatch(
             decision: decision,
             currentUserInput: currentUserInput,
-            goal: goal
+            goal: goal,
+            semanticMission: semanticMission
         ) {
             return attention(
                 mismatch,
                 fallback: "Mevcut kullanıcı girdisinden hedefi yeniden türet; önceki turun goal / plan state'ini bu tura taşıma."
+            )
+        }
+
+        if let mission = semanticMission,
+           !snapshot.selectedCapabilityIDs.contains("research.web") {
+            if mission.requiresUserInput {
+                return attention(
+                    mission.userInputReason ??
+                        "Görevin güvenilir biçimde ilerlemesi için zorunlu kullanıcı bilgisi eksik.",
+                    fallback: "Eksik zorunlu bilgiyi al ve aynı semantic mission'ı yeniden planla."
+                )
+            }
+
+            if mission.requiredCapabilityIDs.contains("files.search") {
+                guard snapshot.hasWorkspace else {
+                    return attention(
+                        "Semantic mission dosya erişimi gerektiriyor fakat aktif çalışma alanı yok.",
+                        fallback: "Bir çalışma klasörü seç ve mission'ı yeniden yürüt."
+                    )
+                }
+
+                guard snapshot.fileResultCount > 0 ||
+                      snapshot.folderResultCount > 0 else {
+                    return attention(
+                        "Semantic mission içindeki dosya bulma adımı sonuç üretmedi.",
+                        fallback: "Dosya kapsamını veya hedef türünü yeniden planla ve güvenli biçimde tekrar ara."
+                    )
+                }
+            }
+
+            if !snapshot.unavailableCapabilityIDs.isEmpty {
+                return AgentVerificationResult(
+                    state: .partial,
+                    summary: "Semantic mission doğru oluşturuldu ve mevcut adımlar yürütüldü; ancak gereken capability'lerden en az biri henüz bağlı değil.",
+                    fallback: nil
+                )
+            }
+
+            return AgentVerificationResult(
+                state: .passed,
+                summary: "Semantic mission ile seçilen mevcut capability adımları yürütüldü ve hedefle uyumlu sonuç doğrulandı.",
+                fallback: nil
             )
         }
 
@@ -281,7 +325,8 @@ struct AgentVerifier {
     private func alignmentMismatch(
         decision: AgentDecision,
         currentUserInput: String,
-        goal: AgentGoalProfile
+        goal: AgentGoalProfile,
+        semanticMission: AgentSemanticMission?
     ) -> String? {
         let input = normalize(currentUserInput)
 
@@ -302,9 +347,15 @@ struct AgentVerifier {
             return "Doğrulama durduruldu: memory hedefi farklı bir eski intent ile eşleşti."
         }
 
+        let semanticLocate =
+            semanticMission?.requiredCapabilityIDs.contains(
+                "files.search"
+            ) == true
+
         if decision.intent == .general,
            goal.outcomes.contains(.locate),
-           !looksLikeFileSearch(input) {
+           !looksLikeFileSearch(input),
+           !semanticLocate {
             return "Doğrulama durduruldu: mevcut cümle dosya araması istemediği halde eski bir locate hedefi taşındı."
         }
 
