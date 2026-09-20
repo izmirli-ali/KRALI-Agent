@@ -4,7 +4,7 @@ import AppKit
 struct ContentView: View {
     @EnvironmentObject private var engine: AgentEngine
     @State private var prompt = ""
-    @State private var memoryDraft = ""
+    @State private var developerToolsExpanded = false
     @StateObject private var updater = UpdateController()
 
     var body: some View {
@@ -265,201 +265,185 @@ struct ContentView: View {
 
     private var sidePane: some View {
         ScrollView {
-            VStack(alignment: .leading, spacing: 18) {
-                sectionTitle("KRALİ'nin planı")
+            VStack(alignment: .leading, spacing: 14) {
+                sectionTitle("Durum")
 
-                VStack(alignment: .leading, spacing: 8) {
-                    Text(engine.currentGoal)
-                        .font(.headline)
+                VStack(alignment: .leading, spacing: 9) {
+                    HStack(alignment: .top, spacing: 8) {
+                        Image(
+                            systemName: engine.busy
+                                ? "sparkles"
+                                : engine.verificationState.systemImage
+                        )
+                        .foregroundStyle(
+                            engine.verificationState == .attention ||
+                            engine.verificationState == .partial
+                                ? Color.orange
+                                : Color.secondary
+                        )
 
-                    Text(engine.currentPlan)
-                        .font(.caption)
-                        .foregroundStyle(.secondary)
+                        VStack(alignment: .leading, spacing: 3) {
+                            Text(engine.currentGoal)
+                                .font(.headline)
+
+                            Text(
+                                engine.busy
+                                    ? "KRALİ çalışıyor…"
+                                    : engine.verificationSummary
+                            )
+                            .font(.caption2)
+                            .foregroundStyle(.secondary)
+                            .lineLimit(3)
+                        }
+
+                        Spacer()
+                    }
+
+                    if engine.currentPlan != "Yeni görevi bekliyor" {
+                        Divider()
+
+                        Text(engine.currentPlan)
+                            .font(.caption)
+                            .foregroundStyle(.secondary)
+                            .lineLimit(3)
+                    }
 
                     if !engine.selectedCapabilities.isEmpty {
                         Divider()
 
-                        Text("Kabiliyetler")
-                            .font(.caption2.weight(.semibold))
-                            .foregroundStyle(.secondary)
-
-                        VStack(alignment: .leading, spacing: 4) {
-                            ForEach(engine.selectedCapabilities) { capability in
-                                HStack(spacing: 6) {
-                                    Image(
-                                        systemName: capability.isAvailable
-                                            ? "checkmark.circle.fill"
-                                            : "clock.badge.exclamationmark"
-                                    )
+                        HStack(spacing: 6) {
+                            ForEach(
+                                engine.selectedCapabilities.prefix(4)
+                            ) { capability in
+                                Text(capability.name)
                                     .font(.caption2)
-                                    .foregroundStyle(
+                                    .lineLimit(1)
+                                    .padding(.horizontal, 7)
+                                    .padding(.vertical, 4)
+                                    .background(
                                         capability.isAvailable
-                                            ? Color.secondary
-                                            : Color.orange
+                                            ? Color.accentColor.opacity(0.10)
+                                            : Color.orange.opacity(0.10)
                                     )
-
-                                    Text(capability.name)
-                                        .font(.caption2)
-
-                                    if !capability.isAvailable {
-                                        Text("henüz bağlı değil")
-                                            .font(.caption2)
-                                            .foregroundStyle(.orange)
-                                    }
-
-                                    Spacer()
-                                }
-                            }
-                        }
-                    }
-
-                    if !engine.capabilityLearningPlans.isEmpty {
-                        Divider()
-
-                        Text("Yetkinlik kazanma")
-                            .font(.caption2.weight(.semibold))
-                            .foregroundStyle(.secondary)
-
-                        VStack(alignment: .leading, spacing: 7) {
-                            ForEach(engine.capabilityLearningPlans) { plan in
-                                HStack(alignment: .top, spacing: 7) {
-                                    Image(systemName: plan.state.systemImage)
-                                        .font(.caption)
-                                        .foregroundStyle(.orange)
-
-                                    VStack(alignment: .leading, spacing: 2) {
-                                        Text(plan.capabilityName)
-                                            .font(.caption.weight(.medium))
-
-                                        Text(plan.state.title)
-                                            .font(.caption2)
-                                            .foregroundStyle(.orange)
-
-                                        Text(plan.nextStep)
-                                            .font(.caption2)
-                                            .foregroundStyle(.secondary)
-
-                                        if plan.requiresApprovalBeforeActivation {
-                                            Text("Etkinleştirme öncesi kullanıcı onayı gerekir.")
-                                                .font(.caption2)
-                                                .foregroundStyle(.secondary)
-                                        }
-                                    }
-
-                                    Spacer()
-                                }
-                            }
-                        }
-                    }
-
-                    if !engine.executionSteps.isEmpty {
-                        Divider()
-
-                        Text("Dinamik işlem planı")
-                            .font(.caption2.weight(.semibold))
-                            .foregroundStyle(.secondary)
-
-                        ForEach(engine.executionSteps) { step in
-                            HStack(alignment: .top, spacing: 7) {
-                                Image(systemName: step.state.systemImage)
-                                    .font(.caption)
-                                    .foregroundStyle(
-                                        (step.state == .attention ||
-                                         step.state == .partial ||
-                                         step.state == .blocked)
-                                            ? Color.orange
-                                            : Color.secondary
-                                    )
-
-                                VStack(alignment: .leading, spacing: 2) {
-                                    Text(step.title)
-                                        .font(.caption.weight(.medium))
-
-                                    Text(step.detail)
-                                        .font(.caption2)
-                                        .foregroundStyle(.secondary)
-                                }
-
-                                Spacer()
-                            }
-                        }
-
-                        HStack(alignment: .top, spacing: 7) {
-                            Image(systemName: engine.verificationState.systemImage)
-                                .foregroundStyle(
-                                    (engine.verificationState == .attention ||
-                                     engine.verificationState == .partial)
-                                        ? Color.orange
-                                        : Color.secondary
-                                )
-
-                            VStack(alignment: .leading, spacing: 2) {
-                                Text("Verifier")
-                                    .font(.caption.weight(.medium))
-
-                                Text(engine.verificationSummary)
-                                    .font(.caption2)
-                                    .foregroundStyle(.secondary)
-
-                                if let recovery = engine.recoverySummary {
-                                    Text("Otomatik Plan B: \(recovery)")
-                                        .font(.caption2)
-                                        .foregroundStyle(.secondary)
-                                }
-
-                                if let fallback = engine.fallbackPlan,
-                                   engine.verificationState == .attention {
-                                    Text("Plan B: \(fallback)")
-                                        .font(.caption2)
-                                        .foregroundStyle(.orange)
-                                }
+                                    .clipShape(Capsule())
                             }
 
                             Spacer()
                         }
                     }
 
-                    if !engine.currentAlternatives.isEmpty {
-                        Text("Alternatifler")
-                            .font(.caption2.weight(.semibold))
-                            .foregroundStyle(.secondary)
+                    if let root = engine.selectedRootURL {
+                        Divider()
 
-                        ForEach(engine.currentAlternatives.prefix(3), id: \.self) { item in
-                            HStack(alignment: .top, spacing: 6) {
-                                Image(systemName: "lightbulb")
+                        Label(
+                            "\(root.lastPathComponent) • \(engine.indexedFiles.count) dosya",
+                            systemImage: "folder"
+                        )
+                        .font(.caption2)
+                        .foregroundStyle(.secondary)
+                    }
+
+                    if engine.intelligenceProviderStatus !=
+                        "Sentez sağlayıcısı henüz kullanılmadı." {
+                        Text(engine.intelligenceProviderStatus)
+                            .font(.caption2)
+                            .foregroundStyle(.secondary)
+                            .lineLimit(2)
+                    }
+                }
+                .padding(11)
+                .background(Color(nsColor: .controlBackgroundColor))
+                .clipShape(RoundedRectangle(cornerRadius: 11))
+
+                sectionTitle("Bağlam")
+
+                VStack(alignment: .leading, spacing: 8) {
+                    HStack {
+                        Label(
+                            engine.contextMemoryStatus,
+                            systemImage: "brain"
+                        )
+                        .font(.caption)
+                        .foregroundStyle(.secondary)
+
+                        Spacer()
+
+                        Text("\(engine.contextMemoryEntries.count)")
+                            .font(.caption2.monospacedDigit())
+                            .foregroundStyle(.secondary)
+                    }
+
+                    let visibleContext =
+                        engine.activeContextMemories.isEmpty
+                            ? Array(engine.contextMemoryEntries.prefix(3))
+                            : Array(engine.activeContextMemories.prefix(3))
+
+                    if visibleContext.isEmpty {
+                        Text(
+                            "KRALİ tamamlanan görevlerden henüz yeniden kullanılabilir bir bağlam oluşturmadı."
+                        )
+                        .font(.caption2)
+                        .foregroundStyle(.secondary)
+                    } else {
+                        ForEach(visibleContext) { memory in
+                            VStack(alignment: .leading, spacing: 2) {
+                                HStack(spacing: 5) {
+                                    Image(
+                                        systemName: memory.kind == .userRule
+                                            ? "bookmark.fill"
+                                            : memory.kind == .research
+                                                ? "globe"
+                                                : "clock.arrow.circlepath"
+                                    )
                                     .font(.caption2)
                                     .foregroundStyle(.secondary)
 
-                                Text(item)
-                                    .font(.caption2)
+                                    Text(memory.title)
+                                        .font(.caption.weight(.medium))
+                                        .lineLimit(1)
 
-                                Spacer()
+                                    Spacer()
+                                }
+
+                                Text(memory.summary)
+                                    .font(.caption2)
+                                    .foregroundStyle(.secondary)
+                                    .lineLimit(3)
                             }
                         }
                     }
                 }
-                .padding(10)
+                .padding(11)
                 .background(Color(nsColor: .controlBackgroundColor))
-                .clipShape(RoundedRectangle(cornerRadius: 10))
+                .clipShape(RoundedRectangle(cornerRadius: 11))
 
                 if !engine.webResearchResults.isEmpty {
-                    sectionTitle("Web araştırma")
+                    sectionTitle("Kaynaklar")
 
                     VStack(alignment: .leading, spacing: 8) {
-                        Text(engine.webResearchStatus)
+                        HStack {
+                            Text(
+                                "\(engine.webResearchResults.count) kaynak • \(engine.webResearchEvidence.count) doğrulanmış kanıt"
+                            )
                             .font(.caption2)
                             .foregroundStyle(.secondary)
 
-                        ForEach(engine.webResearchResults.prefix(5)) { result in
+                            Spacer()
+                        }
+
+                        ForEach(
+                            engine.webResearchResults.prefix(4)
+                        ) { result in
                             Link(destination: result.url) {
                                 HStack(alignment: .top, spacing: 7) {
                                     Image(systemName: "globe")
-                                        .font(.caption)
+                                        .font(.caption2)
                                         .foregroundStyle(.secondary)
 
-                                    VStack(alignment: .leading, spacing: 2) {
+                                    VStack(alignment: .leading, spacing: 1) {
                                         Text(result.title)
                                             .font(.caption.weight(.medium))
+                                            .lineLimit(2)
                                             .multilineTextAlignment(.leading)
 
                                         Text(result.domain)
@@ -477,464 +461,92 @@ struct ContentView: View {
                             .buttonStyle(.plain)
                         }
                     }
-                    .padding(10)
+                    .padding(11)
                     .background(Color(nsColor: .controlBackgroundColor))
-                    .clipShape(RoundedRectangle(cornerRadius: 10))
+                    .clipShape(RoundedRectangle(cornerRadius: 11))
                 }
 
-                if !engine.webResearchEvidence.isEmpty {
-                    sectionTitle("Kaynak kanıtı")
+                if !engine.capabilityLearningPlans.isEmpty ||
+                   !engine.capabilityLearningBacklog.isEmpty {
+                    sectionTitle("Öğrenme")
 
                     VStack(alignment: .leading, spacing: 8) {
-                        ForEach(engine.webResearchEvidence.prefix(4)) { evidence in
-                            VStack(alignment: .leading, spacing: 4) {
-                                HStack(spacing: 6) {
-                                    Image(systemName: "doc.text.magnifyingglass")
-                                        .font(.caption)
-                                        .foregroundStyle(.secondary)
-
-                                    Text(evidence.source.title)
-                                        .font(.caption.weight(.medium))
-                                        .lineLimit(2)
-
-                                    Spacer()
-
-                                    Text("\(evidence.conceptCoverage) kavram")
-                                        .font(.caption2)
-                                        .foregroundStyle(.secondary)
-                                }
-
-                                Text(evidence.excerpt)
-                                    .font(.caption2)
-                                    .foregroundStyle(.secondary)
-                                    .lineLimit(5)
-                            }
-                        }
-                    }
-                    .padding(10)
-                    .background(Color(nsColor: .controlBackgroundColor))
-                    .clipShape(RoundedRectangle(cornerRadius: 10))
-                }
-
-                if !engine.capabilityLearningBacklog.isEmpty {
-                    sectionTitle("Öğrenme kuyruğu")
-
-                    VStack(alignment: .leading, spacing: 8) {
-                        ForEach(engine.capabilityLearningBacklog.prefix(5)) { task in
-                            HStack(alignment: .top, spacing: 8) {
-                                Image(systemName: task.progress.systemImage)
-                                    .font(.caption)
-                                    .foregroundStyle(
-                                        task.progress == .enabled
-                                            ? Color.green
-                                            : Color.orange
-                                    )
-
-                                VStack(alignment: .leading, spacing: 2) {
-                                    Text(task.capabilityName)
-                                        .font(.caption.weight(.medium))
-
-                                    Text(task.progress.title)
-                                        .font(.caption2)
-                                        .foregroundStyle(.secondary)
-
-                                    Text(task.nextStep)
-                                        .font(.caption2)
-                                        .foregroundStyle(.secondary)
-                                        .lineLimit(3)
-
-                                    if task.encounterCount > 1 {
-                                        Text("\(task.encounterCount) görevde ihtiyaç duyuldu")
-                                            .font(.caption2)
-                                            .foregroundStyle(.secondary)
-                                    }
-                                }
-
-                                Spacer()
-                            }
-                        }
-                    }
-                    .padding(10)
-                    .background(Color(nsColor: .controlBackgroundColor))
-                    .clipShape(RoundedRectangle(cornerRadius: 10))
-                }
-
-                sectionTitle("Zeka katmanı")
-
-                VStack(alignment: .leading, spacing: 8) {
-                    HStack(alignment: .top, spacing: 8) {
-                        Image(
-                            systemName: engine.localIntelligenceState.isAvailable
-                                ? "brain.head.profile.fill"
-                                : "brain.head.profile"
-                        )
-                        .font(.caption)
-                        .foregroundStyle(
-                            engine.localIntelligenceState.isAvailable
-                                ? Color.green
-                                : Color.secondary
-                        )
-
-                        VStack(alignment: .leading, spacing: 2) {
-                            Text(engine.localIntelligenceState.title)
-                                .font(.caption.weight(.medium))
-
-                            Text(
-                                engine.localIntelligenceState.isAvailable
-                                    ? "Öncelik cihaz üzerindeki Apple modelinde."
-                                    : "Apple modeli hazır değilse KRALİ, yalnızca analiz/yorum gereken görevlerde ChatGPT Subscription sentezini yedek katman olarak kullanabilir."
-                            )
-                            .font(.caption2)
-                            .foregroundStyle(.secondary)
-                        }
-
-                        Spacer()
-                    }
-
-                    Divider()
-
-                    HStack(alignment: .top, spacing: 8) {
-                        Image(systemName: "sparkles")
-                            .font(.caption)
-                            .foregroundStyle(.secondary)
-
-                        VStack(alignment: .leading, spacing: 2) {
-                            Text("Sentez durumu")
-                                .font(.caption2.weight(.semibold))
-
-                            Text(engine.intelligenceProviderStatus)
-                                .font(.caption2)
-                                .foregroundStyle(.secondary)
-                        }
-
-                        Spacer()
-                    }
-                }
-                .padding(10)
-                .background(Color(nsColor: .controlBackgroundColor))
-                .clipShape(RoundedRectangle(cornerRadius: 10))
-
-                sectionTitle("Live Research Eval")
-
-                VStack(alignment: .leading, spacing: 8) {
-                    Text(engine.liveResearchEvalStatus)
-                        .font(.caption2)
-                        .foregroundStyle(.secondary)
-
-                    if let report = engine.liveResearchEvalReport {
-                        ForEach(report.probes) { probe in
+                        ForEach(
+                            engine.capabilityLearningPlans.prefix(3)
+                        ) { plan in
                             HStack(alignment: .top, spacing: 7) {
-                                Image(
-                                    systemName: probe.passed
-                                        ? "checkmark.circle.fill"
-                                        : "exclamationmark.triangle.fill"
-                                )
-                                .font(.caption)
-                                .foregroundStyle(
-                                    probe.passed
-                                        ? Color.green
-                                        : Color.orange
-                                )
+                                Image(systemName: plan.state.systemImage)
+                                    .font(.caption)
+                                    .foregroundStyle(.orange)
 
                                 VStack(alignment: .leading, spacing: 2) {
-                                    Text(probe.title)
+                                    Text(plan.capabilityName)
                                         .font(.caption.weight(.medium))
 
-                                    Text(
-                                        "\(probe.sourceCount) kaynak • \(probe.evidenceCount) derin okuma • \(probe.uniqueDomainCount) domain"
-                                    )
-                                    .font(.caption2)
-                                    .foregroundStyle(.secondary)
-
-                                    if let first = probe.diagnostics.first {
-                                        Text(first)
-                                            .font(.caption2)
-                                            .foregroundStyle(.orange)
-                                            .lineLimit(2)
-                                    }
+                                    Text(plan.nextStep)
+                                        .font(.caption2)
+                                        .foregroundStyle(.secondary)
+                                        .lineLimit(2)
                                 }
 
                                 Spacer()
                             }
                         }
-                    }
 
-                    Button {
-                        engine.runLiveResearchEval()
-                    } label: {
-                        if engine.liveResearchEvalBusy {
-                            ProgressView()
-                                .controlSize(.small)
-                        } else {
-                            Label(
-                                "Gerçek araştırma testini çalıştır",
-                                systemImage: "globe.badge.chevron.backward"
-                            )
-                        }
-                    }
-                    .buttonStyle(.bordered)
-                    .controlSize(.small)
-                    .disabled(engine.liveResearchEvalBusy)
-                }
-                .padding(10)
-                .background(Color(nsColor: .controlBackgroundColor))
-                .clipShape(RoundedRectangle(cornerRadius: 10))
+                        if engine.capabilityLearningPlans.isEmpty {
+                            ForEach(
+                                engine.capabilityLearningBacklog
+                                    .filter { $0.progress != .enabled }
+                                    .prefix(3)
+                            ) { task in
+                                HStack(alignment: .top, spacing: 7) {
+                                    Image(systemName: task.progress.systemImage)
+                                        .font(.caption)
+                                        .foregroundStyle(.orange)
 
-                sectionTitle("Training Lab")
-
-                VStack(alignment: .leading, spacing: 8) {
-                    HStack {
-                        VStack(alignment: .leading, spacing: 2) {
-                            Text(engine.trainingLabStatus)
-                                .font(.caption2)
-                                .foregroundStyle(.secondary)
-
-                            if let report = engine.trainingLabReport {
-                                Text(
-                                    "Core: \(report.corePassed)/\(report.coreTotal) • North Star: \(report.northStarPassed)/\(report.northStarTotal)"
-                                )
-                                .font(.caption2.weight(.medium))
-                            }
-                        }
-
-                        Spacer()
-                    }
-
-                    if let report = engine.trainingLabReport {
-                        let failures = report.results
-                            .filter { !$0.passed }
-                            .prefix(5)
-
-                        if !failures.isEmpty {
-                            Divider()
-
-                            Text("Geliştirme kuyruğuna düşen testler")
-                                .font(.caption2.weight(.semibold))
-                                .foregroundStyle(.secondary)
-
-                            ForEach(Array(failures)) { result in
-                                VStack(alignment: .leading, spacing: 2) {
-                                    HStack(spacing: 6) {
-                                        Image(systemName: "exclamationmark.triangle.fill")
-                                            .font(.caption2)
-                                            .foregroundStyle(.orange)
-
-                                        Text(result.title)
+                                    VStack(alignment: .leading, spacing: 2) {
+                                        Text(task.capabilityName)
                                             .font(.caption.weight(.medium))
 
-                                        Spacer()
-
-                                        Text(
-                                            result.tier == .core
-                                                ? "CORE"
-                                                : "NORTH STAR"
-                                        )
-                                        .font(.caption2)
-                                        .foregroundStyle(.secondary)
-                                    }
-
-                                    if let first = result.diagnostics.first {
-                                        Text(first)
+                                        Text(task.nextStep)
                                             .font(.caption2)
                                             .foregroundStyle(.secondary)
                                             .lineLimit(2)
                                     }
+
+                                    Spacer()
                                 }
                             }
                         }
                     }
-
-                    Button {
-                        engine.runTrainingLab()
-                    } label: {
-                        if engine.trainingLabBusy {
-                            ProgressView()
-                                .controlSize(.small)
-                        } else {
-                            Label(
-                                "Training Lab'i çalıştır",
-                                systemImage: "checklist.checked"
-                            )
-                        }
-                    }
-                    .buttonStyle(.borderedProminent)
-                    .controlSize(.small)
-                    .disabled(engine.trainingLabBusy)
-                }
-                .padding(10)
-                .background(Color(nsColor: .controlBackgroundColor))
-                .clipShape(RoundedRectangle(cornerRadius: 10))
-
-                sectionTitle("Developer Agent")
-
-                VStack(alignment: .leading, spacing: 8) {
-                    HStack(alignment: .top, spacing: 8) {
-                        Image(
-                            systemName: engine.developerAgentStatus.isReadyForReview
-                                ? "hammer.circle.fill"
-                                : "hammer.circle"
-                        )
-                        .font(.caption)
-                        .foregroundStyle(
-                            engine.developerAgentStatus.isReadyForReview
-                                ? Color.orange
-                                : Color.secondary
-                        )
-
-                        VStack(alignment: .leading, spacing: 2) {
-                            Text(engine.developerAgentStatus.message)
-                                .font(.caption.weight(.medium))
-
-                            Text(
-                                "İzole branch/worktree • main otomatik değişmez • ChatGPT Subscription OAuth"
-                            )
-                            .font(.caption2)
-                            .foregroundStyle(.secondary)
-
-                            if let branch = engine.developerAgentStatus.branch {
-                                Text(branch)
-                                    .font(.caption2.monospaced())
-                                    .foregroundStyle(.secondary)
-                                    .textSelection(.enabled)
-                            }
-
-                            if engine.developerAgentStatus.isSetupRequired,
-                               let hint = engine.developerAgentStatus.setupHint {
-                                Text(hint)
-                                    .font(.caption2)
-                                    .foregroundStyle(.orange)
-                                    .textSelection(.enabled)
-                            }
-                        }
-
-                        Spacer()
-                    }
-
-                    Button {
-                        engine.runDeveloperAgent()
-                    } label: {
-                        if engine.developerAgentBusy {
-                            ProgressView()
-                                .controlSize(.small)
-                        } else {
-                            Label(
-                                "Developer Agent'i çalıştır",
-                                systemImage: "hammer"
-                            )
-                        }
-                    }
-                    .buttonStyle(.bordered)
-                    .controlSize(.small)
-                    .disabled(engine.developerAgentBusy)
-                }
-                .padding(10)
-                .background(Color(nsColor: .controlBackgroundColor))
-                .clipShape(RoundedRectangle(cornerRadius: 10))
-
-                sectionTitle("Mentor bridge")
-
-                VStack(alignment: .leading, spacing: 7) {
-                    HStack(alignment: .top, spacing: 7) {
-                        Image(
-                            systemName: engine.mentorTraceReady
-                                ? "doc.text.fill"
-                                : "doc.text"
-                        )
-                        .font(.caption)
-                        .foregroundStyle(.secondary)
-
-                        VStack(alignment: .leading, spacing: 2) {
-                            Text(engine.mentorTraceStatus)
-                                .font(.caption2)
-                                .foregroundStyle(.secondary)
-
-                            Text("API kullanmaz • sen gönderene kadar yerelde kalır")
-                                .font(.caption2)
-                                .foregroundStyle(.secondary)
-                        }
-
-                        Spacer()
-                    }
-
-                    Button {
-                        engine.syncMentorTrace()
-                    } label: {
-                        Label(
-                            "Son kaydı Mentora gönder",
-                            systemImage: "arrow.up.doc"
-                        )
-                    }
-                    .buttonStyle(.bordered)
-                    .controlSize(.small)
-                    .disabled(
-                        !engine.mentorTraceReady ||
-                        engine.mentorSyncBusy
-                    )
-                }
-                .padding(10)
-                .background(Color(nsColor: .controlBackgroundColor))
-                .clipShape(RoundedRectangle(cornerRadius: 10))
-
-                sectionTitle("Aktif rota")
-                LazyVGrid(
-                    columns: [
-                        GridItem(
-                            .adaptive(minimum: 72),
-                            spacing: 6,
-                            alignment: .leading
-                        )
-                    ],
-                    alignment: .leading,
-                    spacing: 6
-                ) {
-                    ForEach(engine.activeRoute, id: \.self) { item in
-                        Text(item)
-                            .font(.caption2)
-                            .lineLimit(1)
-                            .minimumScaleFactor(0.8)
-                            .padding(.horizontal, 8)
-                            .padding(.vertical, 5)
-                            .frame(
-                                maxWidth: .infinity,
-                                alignment: .leading
-                            )
-                            .background(
-                                Color.accentColor.opacity(0.12)
-                            )
-                            .overlay(
-                                RoundedRectangle(cornerRadius: 8)
-                                    .stroke(
-                                        Color.accentColor.opacity(0.28),
-                                        lineWidth: 1
-                                    )
-                            )
-                            .clipShape(
-                                RoundedRectangle(cornerRadius: 8)
-                            )
-                    }
+                    .padding(11)
+                    .background(Color(nsColor: .controlBackgroundColor))
+                    .clipShape(RoundedRectangle(cornerRadius: 11))
                 }
 
                 if let action = engine.pendingFileAction {
-                    sectionTitle("Onay bekleyen gerçek işlem")
+                    sectionTitle("Onay bekliyor")
 
                     VStack(alignment: .leading, spacing: 9) {
-                        Label(action.title, systemImage: "folder.badge.gearshape")
-                            .font(.headline)
+                        Label(
+                            action.title,
+                            systemImage: "folder.badge.gearshape"
+                        )
+                        .font(.headline)
 
                         Text(action.detail)
                             .font(.caption)
                             .foregroundStyle(.secondary)
 
-                        Text("Hedef: \(action.destinationFolderURL.path)")
-                            .font(.caption2.monospaced())
-                            .foregroundStyle(.secondary)
-                            .textSelection(.enabled)
-
                         HStack {
-                            Button("Onayla ve Taşı") {
-                                let reply = engine.approvePendingFileAction()
+                            Button("Onayla") {
+                                let reply =
+                                    engine.approvePendingFileAction()
                                 engine.messages.append(
-                                    ChatMessage(role: .assistant, text: reply)
+                                    ChatMessage(
+                                        role: .assistant,
+                                        text: reply
+                                    )
                                 )
                             }
                             .buttonStyle(.borderedProminent)
@@ -948,254 +560,174 @@ struct ContentView: View {
                     .padding(11)
                     .background(Color.orange.opacity(0.09))
                     .overlay(
-                        RoundedRectangle(cornerRadius: 10)
-                            .stroke(Color.orange.opacity(0.35), lineWidth: 1)
+                        RoundedRectangle(cornerRadius: 11)
+                            .stroke(
+                                Color.orange.opacity(0.35),
+                                lineWidth: 1
+                            )
                     )
-                    .clipShape(RoundedRectangle(cornerRadius: 10))
+                    .clipShape(RoundedRectangle(cornerRadius: 11))
+                }
+
+                if !engine.fileSearchResults.isEmpty ||
+                   !engine.folderSearchResults.isEmpty {
+                    sectionTitle("Sonuçlar")
+
+                    VStack(spacing: 6) {
+                        ForEach(
+                            engine.folderSearchResults.prefix(5)
+                        ) { folder in
+                            Button {
+                                engine.revealFolder(folder)
+                            } label: {
+                                HStack(spacing: 8) {
+                                    Image(systemName: "folder.fill")
+
+                                    Text(folder.name)
+                                        .font(.caption)
+                                        .lineLimit(1)
+
+                                    Spacer()
+
+                                    Image(
+                                        systemName: "arrow.forward.circle"
+                                    )
+                                    .foregroundStyle(.secondary)
+                                }
+                                .contentShape(Rectangle())
+                            }
+                            .buttonStyle(.plain)
+                        }
+
+                        ForEach(
+                            engine.fileSearchResults.prefix(5)
+                        ) { file in
+                            Button {
+                                engine.revealFile(file)
+                            } label: {
+                                HStack(spacing: 8) {
+                                    Image(
+                                        systemName: file.isScreenshot
+                                            ? "photo"
+                                            : "doc"
+                                    )
+
+                                    Text(file.name)
+                                        .font(.caption)
+                                        .lineLimit(1)
+
+                                    Spacer()
+
+                                    Image(
+                                        systemName: "arrow.forward.circle"
+                                    )
+                                    .foregroundStyle(.secondary)
+                                }
+                                .contentShape(Rectangle())
+                            }
+                            .buttonStyle(.plain)
+                        }
+                    }
+                    .padding(11)
+                    .background(Color(nsColor: .controlBackgroundColor))
+                    .clipShape(RoundedRectangle(cornerRadius: 11))
                 }
 
                 if engine.lastUndoAction != nil {
                     Button {
                         let reply = engine.undoLastFileAction()
                         engine.messages.append(
-                            ChatMessage(role: .assistant, text: reply)
+                            ChatMessage(
+                                role: .assistant,
+                                text: reply
+                            )
                         )
                     } label: {
-                        Label("Son dosya taşıma işlemini geri al", systemImage: "arrow.uturn.backward")
+                        Label(
+                            "Son dosya işlemini geri al",
+                            systemImage: "arrow.uturn.backward"
+                        )
                     }
+                    .buttonStyle(.bordered)
+                    .controlSize(.small)
                 }
 
-                if !engine.folderSearchResults.isEmpty {
-                    sectionTitle(engine.fileSearchTitle)
+                DisclosureGroup(
+                    "Geliştirici araçları",
+                    isExpanded: $developerToolsExpanded
+                ) {
+                    VStack(alignment: .leading, spacing: 10) {
+                        Divider()
 
-                    VStack(spacing: 7) {
-                        ForEach(engine.folderSearchResults.prefix(12)) { folder in
-                            Button {
-                                engine.revealFolder(folder)
-                            } label: {
-                                HStack(spacing: 8) {
-                                    Image(systemName: "folder.fill")
-                                        .frame(width: 18)
-
-                                    VStack(alignment: .leading, spacing: 2) {
-                                        Text(folder.name)
-                                            .font(.caption)
-                                            .lineLimit(1)
-                                            .truncationMode(.middle)
-
-                                        Text(folder.relativePath)
-                                            .font(.caption2)
-                                            .foregroundStyle(.secondary)
-                                            .lineLimit(1)
-                                            .truncationMode(.middle)
-                                    }
-
-                                    Spacer()
-
-                                    Image(systemName: "arrow.forward.circle")
-                                        .foregroundStyle(.secondary)
-                                }
-                                .contentShape(Rectangle())
+                        HStack {
+                            VStack(alignment: .leading, spacing: 2) {
+                                Text("Training Lab")
+                                    .font(.caption.weight(.medium))
+                                Text(engine.trainingLabStatus)
+                                    .font(.caption2)
+                                    .foregroundStyle(.secondary)
+                                    .lineLimit(2)
                             }
-                            .buttonStyle(.plain)
-                            .padding(8)
-                            .background(Color(nsColor: .controlBackgroundColor))
-                            .clipShape(RoundedRectangle(cornerRadius: 8))
-                        }
-                    }
-
-                    if engine.folderSearchResults.count > 12 {
-                        Text("+ \(engine.folderSearchResults.count - 12) klasör daha")
-                            .font(.caption2)
-                            .foregroundStyle(.secondary)
-                    }
-                }
-
-                if !engine.fileSearchResults.isEmpty {
-                    sectionTitle(engine.fileSearchTitle)
-
-                    VStack(spacing: 7) {
-                        ForEach(engine.fileSearchResults.prefix(12)) { file in
-                            Button {
-                                engine.revealFile(file)
-                            } label: {
-                                HStack(spacing: 8) {
-                                    Image(systemName: file.isScreenshot ? "photo" : "doc")
-                                        .frame(width: 18)
-
-                                    VStack(alignment: .leading, spacing: 2) {
-                                        Text(file.name)
-                                            .font(.caption)
-                                            .lineLimit(1)
-                                            .truncationMode(.middle)
-
-                                        Text(file.relativePath)
-                                            .font(.caption2)
-                                            .foregroundStyle(.secondary)
-                                            .lineLimit(1)
-                                            .truncationMode(.middle)
-                                    }
-
-                                    Spacer()
-
-                                    Image(systemName: "arrow.forward.circle")
-                                        .foregroundStyle(.secondary)
-                                }
-                                .contentShape(Rectangle())
-                            }
-                            .buttonStyle(.plain)
-                            .padding(8)
-                            .background(Color(nsColor: .controlBackgroundColor))
-                            .clipShape(RoundedRectangle(cornerRadius: 8))
-                        }
-                    }
-
-                    if engine.fileSearchResults.count > 12 {
-                        Text("+ \(engine.fileSearchResults.count - 12) sonuç daha")
-                            .font(.caption2)
-                            .foregroundStyle(.secondary)
-                    }
-                }
-
-                sectionTitle("Şu anda ne yapıyor?")
-
-                VStack(spacing: 7) {
-                    ForEach(engine.activities.prefix(12)) { item in
-                        HStack(alignment: .top, spacing: 7) {
-                            Circle()
-                                .fill(Color.accentColor)
-                                .frame(width: 5, height: 5)
-                                .padding(.top, 6)
-
-                            Text(item.text)
-                                .font(.caption)
 
                             Spacer()
+
+                            Button("Çalıştır") {
+                                engine.runTrainingLab()
+                            }
+                            .controlSize(.small)
+                            .disabled(engine.trainingLabBusy)
                         }
-                        .padding(8)
-                        .background(
-                            Color(nsColor: .controlBackgroundColor)
+
+                        HStack {
+                            VStack(alignment: .leading, spacing: 2) {
+                                Text("Live Research Eval")
+                                    .font(.caption.weight(.medium))
+                                Text(engine.liveResearchEvalStatus)
+                                    .font(.caption2)
+                                    .foregroundStyle(.secondary)
+                                    .lineLimit(2)
+                            }
+
+                            Spacer()
+
+                            Button("Çalıştır") {
+                                engine.runLiveResearchEval()
+                            }
+                            .controlSize(.small)
+                            .disabled(engine.liveResearchEvalBusy)
+                        }
+
+                        HStack {
+                            VStack(alignment: .leading, spacing: 2) {
+                                Text("Developer Agent")
+                                    .font(.caption.weight(.medium))
+                                Text(engine.developerAgentStatus.message)
+                                    .font(.caption2)
+                                    .foregroundStyle(.secondary)
+                                    .lineLimit(2)
+                            }
+
+                            Spacer()
+
+                            Button("Çalıştır") {
+                                engine.runDeveloperAgent()
+                            }
+                            .controlSize(.small)
+                            .disabled(engine.developerAgentBusy)
+                        }
+
+                        Text(
+                            "Mentor gönderimi üst çubuktaki Mentor düğmesinden yapılır."
                         )
-                        .clipShape(
-                            RoundedRectangle(cornerRadius: 8)
-                        )
-                    }
-                }
-
-                sectionTitle("Öğrendikleri")
-
-                VStack(spacing: 7) {
-                    ForEach(engine.memories.reversed(), id: \.self) { item in
-                        Text(item)
-                            .font(.caption)
-                            .frame(
-                                maxWidth: .infinity,
-                                alignment: .leading
-                            )
-                            .padding(8)
-                            .background(
-                                Color(nsColor: .controlBackgroundColor)
-                            )
-                            .clipShape(
-                                RoundedRectangle(cornerRadius: 8)
-                            )
-                    }
-                }
-
-                HStack {
-                    TextField(
-                        "Yeni kural…",
-                        text: $memoryDraft
-                    )
-                    .textFieldStyle(.roundedBorder)
-
-                    Button("Ekle") {
-                        engine.addMemory(memoryDraft)
-                        memoryDraft = ""
-                    }
-                    .disabled(
-                        memoryDraft
-                            .trimmingCharacters(
-                                in: .whitespacesAndNewlines
-                            )
-                            .isEmpty
-                    )
-                }
-
-                sectionTitle("Yerel File Agent")
-
-                HStack {
-                    Button {
-                        engine.chooseFolder()
-                    } label: {
-                        Label(
-                            "Çalışma klasörü seç",
-                            systemImage: "folder.badge.plus"
-                        )
-                    }
-
-                    Button {
-                        engine.indexSelectedFolder()
-                    } label: {
-                        Label(
-                            "Yenile",
-                            systemImage: "arrow.clockwise"
-                        )
-                    }
-                    .disabled(engine.selectedRootURL == nil)
-                }
-
-                if let root = engine.selectedRootURL {
-                    Text("Seçili klasör: \(root.path)")
-                        .font(.caption2.monospaced())
+                        .font(.caption2)
                         .foregroundStyle(.secondary)
-                        .textSelection(.enabled)
-
-                    FlowLayout(
-                        items: [
-                            "Dosya \(engine.indexedFiles.count)",
-                            "Klasör \(engine.indexedFolders.count)",
-                            "Görsel \(engine.imageCount)",
-                            "Video \(engine.videoCount)",
-                            "Proje \(engine.projectCount)",
-                            "Belge \(engine.documentCount)",
-                            "Ekran Görüntüsü \(engine.screenshotCount)"
-                        ]
-                    )
-                } else {
-                    Text("Henüz çalışma klasörü seçilmedi.")
-                        .font(.caption)
-                        .foregroundStyle(.secondary)
-                }
-
-                ForEach(
-                    engine.indexedFiles.prefix(10)
-                ) { file in
-                    HStack(spacing: 7) {
-                        Image(systemName: file.isScreenshot ? "photo" : "doc")
-                            .foregroundStyle(
-                                file.isScreenshot ? Color.accentColor : Color.secondary
-                            )
-
-                        Text(file.name)
-                            .font(.caption2.monospaced())
-                            .lineLimit(1)
-                            .truncationMode(.middle)
                     }
+                    .padding(.top, 4)
                 }
-
-                Text(
-                    "v0.7.29: Doğrulama artık kaynak sayısından önce kaynak otoritesini dikkate alıyor. Kanonik/resmi bir profil gerçekten okunmuş ve entity kanıtı çıkarılmışsa, o profilin kendi canlı profil bilgileri için ikinci bir bağımsız domain zorunlu tutulmuyor. Mentor trace kaynakların “canonical-direct” veya “search-result” olduğunu ayrı kaydediyor."
-                )
-                .font(.caption2)
-                .foregroundStyle(.orange)
-                .padding(9)
-                .background(
-                    Color.orange.opacity(0.08)
-                )
-                .clipShape(
-                    RoundedRectangle(cornerRadius: 8)
-                )
+                .font(.caption.weight(.medium))
+                .padding(11)
+                .background(Color(nsColor: .controlBackgroundColor))
+                .clipShape(RoundedRectangle(cornerRadius: 11))
             }
             .padding(14)
         }
