@@ -296,7 +296,7 @@ final class AgentEngine: ObservableObject {
             }
 
             if let learningSummary = await researchCapabilityGapIfNeeded(
-                plans: learningPlans
+                plans: capabilityLearningPlans
             ) {
                 baseReply += "\n\nÖğrenme araştırması: " + learningSummary
             }
@@ -378,7 +378,7 @@ final class AgentEngine: ObservableObject {
                     goal: goalProfile.summary,
                     draft: finalBaseReply,
                     verification: finalVerification,
-                    capabilities: capabilities,
+                    capabilities: selectedCapabilities,
                     researchEvidence: webResearchEvidence
                 ) {
                     finalBaseReply = synthesized
@@ -392,7 +392,7 @@ final class AgentEngine: ObservableObject {
                     goal: goalProfile.summary,
                     draft: finalBaseReply,
                     verification: finalVerification,
-                    capabilities: capabilities,
+                    capabilities: selectedCapabilities,
                     researchEvidence: webResearchEvidence
                 ) {
                     finalBaseReply = subscription.text
@@ -472,8 +472,8 @@ final class AgentEngine: ObservableObject {
                 baseReply: replyWithSuggestion,
                 verification: finalVerification,
                 goal: goalProfile,
-                capabilities: capabilities,
-                learningPlans: learningPlans,
+                capabilities: selectedCapabilities,
+                learningPlans: capabilityLearningPlans,
                 fallbackPlan: fallbackPlan
             )
 
@@ -483,8 +483,8 @@ final class AgentEngine: ObservableObject {
                 goal: goalProfile.summary,
                 plan: decision.selectedPlan,
                 route: activeRoute,
-                capabilities: capabilities,
-                learningPlans: learningPlans,
+                capabilities: selectedCapabilities,
+                learningPlans: capabilityLearningPlans,
                 verification: finalVerification,
                 intelligenceProvider: intelligenceProvider,
                 finalResponse: reply
@@ -931,6 +931,29 @@ final class AgentEngine: ObservableObject {
             }
             .joined(separator: "\n")
 
+            let resolvedTargets = report.results.filter {
+                !$0.evidenceEligible
+            }
+
+            if evidence.isEmpty,
+               let resolved = resolvedTargets.first {
+                queueInteractiveAccessCapability()
+
+                var reply =
+                    "Hedefin doğrudan adresini çözdüm: " +
+                    resolved.url.absoluteString +
+                    "\n\nAncak bu kaynak canlı içeriğini statik web isteğine açmadığı için güncel veriyi doğrulayamadım."
+
+                reply +=
+                    "\n\nKRALİ bunu 'hedef yok' diye yorumlamıyor; bir sonraki gerekli yetkinlik olarak güvenli tarayıcı/oturum erişimini öğrenme kuyruğuna aldı."
+
+                if !lines.isEmpty {
+                    reply += "\n\nÇözülen / bulunan kaynaklar:\n" + lines
+                }
+
+                return reply
+            }
+
             var reply =
                 "Web'de araştırdım ve \(webResearchResults.count) alakalı kaynak buldum."
 
@@ -957,6 +980,75 @@ final class AgentEngine: ObservableObject {
             return "Web araştırmasını başlattım fakat doğrulanabilir sonuç kümesi alamadım: " +
                 error.localizedDescription
         }
+    }
+
+    private func queueInteractiveAccessCapability() {
+        guard
+            let browser = capabilityRegistry.all.first(
+                where: { $0.id == "browser.control" }
+            ),
+            !selectedCapabilities.contains(
+                where: { $0.id == browser.id }
+            )
+        else {
+            return
+        }
+
+        selectedCapabilities.append(browser)
+
+        let plans = capabilityLearner.makePlans(
+            for: [browser],
+            webResearchAvailable: true
+        )
+
+        for plan in plans where !capabilityLearningPlans.contains(
+            where: { $0.capabilityID == plan.capabilityID }
+        ) {
+            capabilityLearningPlans.append(plan)
+        }
+
+        capabilityLearningBacklog = learningStore.merge(
+            existing: capabilityLearningBacklog,
+            plans: plans,
+            capabilities: selectedCapabilities
+        )
+
+        if !activeRoute.contains("Browser") {
+            if let verifyIndex = activeRoute.firstIndex(
+                of: "Verify"
+            ) {
+                activeRoute.insert(
+                    "Browser",
+                    at: verifyIndex
+                )
+            } else if let responseIndex = activeRoute.firstIndex(
+                of: "Response"
+            ) {
+                activeRoute.insert(
+                    "Browser",
+                    at: responseIndex
+                )
+            } else {
+                activeRoute.append("Browser")
+            }
+        }
+
+        if !activeRoute.contains("Learn") {
+            if let verifyIndex = activeRoute.firstIndex(
+                of: "Verify"
+            ) {
+                activeRoute.insert(
+                    "Learn",
+                    at: verifyIndex
+                )
+            } else {
+                activeRoute.append("Learn")
+            }
+        }
+
+        log(
+            "Statik araştırma hedefi çözdü ancak içerik erişimi doğrulanamadı; browser.control öğrenme kuyruğuna eklendi"
+        )
     }
 
     private func researchCapabilityGapIfNeeded(
