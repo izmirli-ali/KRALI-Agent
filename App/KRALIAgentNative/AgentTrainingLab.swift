@@ -468,6 +468,10 @@ struct AgentTrainingLab {
                     "files.search",
                     "files.metadata"
                 ],
+                executedCapabilityIDs: [
+                    "files.search",
+                    "files.metadata"
+                ],
                 webResearchResultCount: 0,
                 webResearchEvidenceCount: 0,
                 webResearchUniqueDomainCount: 0,
