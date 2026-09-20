@@ -122,6 +122,9 @@ struct AgentTrainingLab {
         results.append(
             memoryTransformSourceResolutionResult()
         )
+        results.append(
+            namedTopicMemoryIsolationResult()
+        )
 
         let core = results.filter { $0.tier == .core }
         let northStar = results.filter { $0.tier == .northStar }
@@ -139,6 +142,104 @@ struct AgentTrainingLab {
             northStarPassed: northStar.filter(\.passed).count,
             northStarTotal: northStar.count,
             results: results
+        )
+    }
+
+    private func namedTopicMemoryIsolationResult()
+        -> TrainingScenarioResult {
+        let store = AgentContextMemoryStore()
+
+        let estafizResearch = AgentContextMemoryEntry(
+            kind: .research,
+            title:
+                "estafizsym instagram sayfasını incele ve bana detaylı bir rapor sun",
+            summary:
+                "Estafiz SYM; Reformer ve Klinik Pilates odaklı marka araştırması.",
+            userInput:
+                "estafizsym instagram sayfasını incele ve bana detaylı bir rapor sun",
+            goal:
+                "güncel kaynaklarla araştır"
+        )
+
+        let estafizIdeas = AgentContextMemoryEntry(
+            kind: .task,
+            title:
+                "bu hesap için az önce söylediklerinden 3 özgün reels fikri çıkar",
+            summary:
+                "@estafizsym için Reformer ve Klinik Pilates konumlandırmasına dayalı üç Reels fikri.",
+            userInput:
+                "bu hesap için az önce söylediklerinden 3 özgün reels fikri çıkar",
+            goal:
+                "bağımsız fikir ve çıkarım üret"
+        )
+
+        let sonyComparison = AgentContextMemoryEntry(
+            kind: .task,
+            title:
+                "Sony A7 IV ile Fuji X-T5 arasında video açısından temel farklar neler?",
+            summary:
+                "Sony ve Fuji video özelliklerinin karşılaştırması; profesyonel video üretimi ve renk profilleri.",
+            userInput:
+                "Sony A7 IV ile Fuji X-T5 arasında video açısından temel farklar neler?",
+            goal:
+                "bulguları analiz et"
+        )
+
+        let query =
+            "Estafiz için 30 saniyelik bir Reels çekim planı hazırla. 3 bölüm olsun: açılış, ana mesaj ve kapanış."
+
+        let selected = store.relevant(
+            to: query,
+            from: [
+                sonyComparison,
+                estafizResearch,
+                estafizIdeas
+            ],
+            limit: 4
+        )
+
+        var diagnostics: [String] = []
+
+        if selected.contains(
+            where: { $0.id == sonyComparison.id }
+        ) {
+            diagnostics.append(
+                "Açık Estafiz görevi sırasında alakasız Sony/Fuji bağlamı geri çağrıldı."
+            )
+        }
+
+        if !selected.contains(
+            where: {
+                $0.id == estafizResearch.id ||
+                $0.id == estafizIdeas.id
+            }
+        ) {
+            diagnostics.append(
+                "Estafiz ile ilgili bağlam bulunamadı."
+            )
+        }
+
+        return TrainingScenarioResult(
+            scenarioID:
+                "named-topic-memory-isolation",
+            title:
+                "Adı verilen konuyu alakasız hafızadan ayırma",
+            tier: .core,
+            prompt: query,
+            passed: diagnostics.isEmpty,
+            goal:
+                "Estafiz bağlamını seç; alakasız kamera hafızasını dışarıda bırak",
+            route: [
+                "Core",
+                "Context",
+                "Memory"
+            ],
+            selectedCapabilities: [
+                "context.local",
+                "core.reasoning"
+            ],
+            unavailableCapabilities: [],
+            diagnostics: diagnostics
         )
     }
 
@@ -555,6 +656,36 @@ struct AgentTrainingLab {
                 requiredStepTitles: ["Analiz et", "Kaynakları oku"],
                 requiredLearningCapabilities: [],
                 minimumResearchConceptGroups: 1,
+                minimumMandatoryResearchConceptGroups: 0
+            ),
+            TrainingScenario(
+                id: "content-plan-not-file-search",
+                title: "İçerik planını dosya aramasından ayırma",
+                tier: .core,
+                prompt: "Estafiz için 30 saniyelik bir Reels çekim planı hazırla. 3 bölüm olsun: açılış, ana mesaj ve kapanış. Her bölüm için süre aralığını yaz. Önemli cümleleri kalın göster, maddeler kullan ve kısa bir Neden işe yarar bölümü ekle.",
+                context: rememberedResearch,
+                requiredOutcomes: [.compose],
+                requiredCapabilities: ["core.reasoning", "context.local"],
+                forbiddenCapabilities: ["research.web", "files.search"],
+                requiredRouteStages: ["Context"],
+                requiredStepTitles: ["İçeriği oluştur"],
+                requiredLearningCapabilities: [],
+                minimumResearchConceptGroups: 0,
+                minimumMandatoryResearchConceptGroups: 0
+            ),
+            TrainingScenario(
+                id: "inline-turkish-rewrite",
+                title: "Verilen metni doğrudan yeniden yazma",
+                tier: .core,
+                prompt: "şu metni düzgün Türkçeyle yeniden yaz: “şuan birşey yapmıyorum ama yada yarın devam ederiz, herkez gelirse kapanışda konuşuruz”",
+                context: rememberedResearch,
+                requiredOutcomes: [.transform],
+                requiredCapabilities: ["core.reasoning", "context.local"],
+                forbiddenCapabilities: ["research.web", "files.search"],
+                requiredRouteStages: ["Context"],
+                requiredStepTitles: ["İstenen formata dönüştür"],
+                requiredLearningCapabilities: [],
+                minimumResearchConceptGroups: 0,
                 minimumMandatoryResearchConceptGroups: 0
             ),
             TrainingScenario(
