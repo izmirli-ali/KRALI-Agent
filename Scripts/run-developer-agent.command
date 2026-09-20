@@ -100,8 +100,9 @@ esac
 NODE_RUNTIME_BIN_DIR="$(dirname "$NODE_BIN")"
 
 CLINE_BIN="$(command -v cline || true)"
-PROVIDER="${KRALI_DEV_PROVIDER:-openai-codex}"
+PROVIDER="${KRALI_DEV_PROVIDER:-ollama}"
 MODEL="${KRALI_DEV_MODEL:-}"
+OLLAMA_BASE_URL="${KRALI_OLLAMA_BASE_URL:-http://127.0.0.1:11434}"
 CLINE_SETTINGS="${CLINE_PROVIDER_SETTINGS_PATH:-$HOME/.cline/data/settings/providers.json}"
 USE_SDK_FALLBACK=0
 SDK_HOST="$STATUS_DIR/cline-sdk-host"
@@ -110,6 +111,12 @@ NATIVE_CLINE_BINARY=""
 cline_probe() {
     CLINE_PROBE_OUTPUT=""
     CLINE_PROBE_EXIT=127
+
+    if [ "$PROVIDER" = "ollama" ]; then
+        CLINE_PROBE_OUTPUT="local-ollama"
+        CLINE_PROBE_EXIT=0
+        return 0
+    fi
 
     if [ -n "$CLINE_BIN" ] && [ -x "$CLINE_BIN" ]; then
         CLINE_PROBE_OUTPUT="$("$CLINE_BIN" -V 2>&1)"
@@ -194,6 +201,86 @@ prepare_sdk_fallback() {
     return 0
 }
 
+prepare_ollama_runtime() {
+    write_status "local_ai_checking|Yerel Developer AI hazırlanıyor"
+
+    OLLAMA_BIN="$(command -v ollama || true)"
+
+    if [ -z "$OLLAMA_BIN" ]; then
+        if [ -z "$BREW_BIN" ]; then
+            write_status "setup_local_ai|Ollama bulunamadı ve Homebrew ile otomatik kurulum yapılamıyor"
+            echo "❌ Yerel AI runtime kurulamadı: Ollama ve Homebrew bulunamadı." | tee -a "$LOG"
+            return 1
+        fi
+
+        write_status "local_ai_installing|Ücretsiz yerel AI runtime Ollama kuruluyor"
+        echo "Ollama kuruluyor..." | tee -a "$LOG"
+
+        if ! "$BREW_BIN" install ollama >>"$LOG" 2>&1; then
+            write_status "setup_local_ai|Ollama otomatik kurulamadı"
+            return 1
+        fi
+
+        rehash 2>/dev/null || true
+        OLLAMA_BIN="$(command -v ollama || true)"
+    fi
+
+    if [ -z "$OLLAMA_BIN" ]; then
+        write_status "setup_local_ai|Ollama binary yolu çözülemedi"
+        return 1
+    fi
+
+    if ! /usr/bin/curl -fsS "$OLLAMA_BASE_URL/api/tags" >/dev/null 2>&1; then
+        write_status "local_ai_starting|Yerel AI servisi başlatılıyor"
+        echo "Ollama servisi başlatılıyor..." | tee -a "$LOG"
+
+        /usr/bin/nohup "$OLLAMA_BIN" serve >>"$LOG_DIR/KRALI-Ollama.log" 2>&1 &
+
+        OLLAMA_READY=0
+        for _ in {1..30}; do
+            if /usr/bin/curl -fsS "$OLLAMA_BASE_URL/api/tags" >/dev/null 2>&1; then
+                OLLAMA_READY=1
+                break
+            fi
+            /bin/sleep 1
+        done
+
+        if [ "$OLLAMA_READY" -ne 1 ]; then
+            write_status "local_ai_failed|Ollama servisi health probe geçmedi"
+            return 1
+        fi
+    fi
+
+    if [ -z "$MODEL" ]; then
+        MEMORY_BYTES="$(/usr/sbin/sysctl -n hw.memsize 2>/dev/null || echo 0)"
+        MEMORY_GB="$(( MEMORY_BYTES / 1024 / 1024 / 1024 ))"
+
+        if [ "$MEMORY_GB" -ge 32 ]; then
+            MODEL="devstral:24b"
+        elif [ "$MEMORY_GB" -ge 20 ]; then
+            MODEL="qwen2.5-coder:14b-instruct"
+        else
+            MODEL="qwen2.5-coder:7b-instruct"
+        fi
+
+        echo "Yerel model seçimi: $MODEL • RAM≈${MEMORY_GB}GB" | tee -a "$LOG"
+    fi
+
+    if ! "$OLLAMA_BIN" show "$MODEL" >/dev/null 2>&1; then
+        write_status "local_model_downloading|Yerel model indiriliyor: $MODEL"
+        echo "Yerel model indiriliyor: $MODEL" | tee -a "$LOG"
+
+        if ! "$OLLAMA_BIN" pull "$MODEL" >>"$LOG" 2>&1; then
+            write_status "local_model_failed|Yerel model indirilemedi: $MODEL"
+            return 1
+        fi
+    fi
+
+    write_status "local_ai_ready|Ücretsiz yerel Developer AI hazır: $MODEL"
+    echo "✅ Yerel Developer AI hazır: $MODEL" | tee -a "$LOG"
+    return 0
+}
+
 repair_cline() {
     write_status "repairing_cline|Cline CLI sağlığı kontrol ediliyor ve otomatik onarım deneniyor"
 
@@ -246,7 +333,13 @@ if ! cline_probe; then
     fi
 fi
 
-if [ "$USE_SDK_FALLBACK" -eq 0 ]; then
+if [ "$PROVIDER" = "ollama" ]; then
+    USE_SDK_FALLBACK=1
+
+    if ! prepare_ollama_runtime; then
+        exit 11
+    fi
+elif [ "$USE_SDK_FALLBACK" -eq 0 ]; then
     echo "Cline version: $CLINE_PROBE_OUTPUT" | tee -a "$LOG"
     echo "Cline doctor:" | tee -a "$LOG"
     "$CLINE_BIN" doctor >>"$LOG" 2>&1 || true
@@ -613,7 +706,9 @@ if [ "$USE_SDK_FALLBACK" -eq 1 ]; then
         KRALI_WORKTREE="$WORKTREE" \
         KRALI_PROMPT_FILE="$PROMPT_FILE" \
         KRALI_CLINE_SETTINGS="$CLINE_SETTINGS" \
+        KRALI_DEV_PROVIDER="$PROVIDER" \
         KRALI_DEV_MODEL="$MODEL" \
+        KRALI_OLLAMA_BASE_URL="$OLLAMA_BASE_URL" \
         KRALI_STATUS_FILE="$STATUS" \
         KRALI_BRANCH="$BRANCH" \
         KRALI_GAP_LABEL="$GAP_LABEL" \
