@@ -8,6 +8,7 @@ struct AgentVerificationSnapshot {
     let hasUndoAction: Bool
     let unavailableCapabilityIDs: Set<String>
     let selectedCapabilityIDs: Set<String>
+    let executedCapabilityIDs: Set<String>
     let webResearchResultCount: Int
     let webResearchEvidenceCount: Int
     let webResearchUniqueDomainCount: Int
@@ -40,6 +41,36 @@ struct AgentVerifier {
                     mission.userInputReason ??
                         "Görevin güvenilir biçimde ilerlemesi için zorunlu kullanıcı bilgisi eksik.",
                     fallback: "Eksik zorunlu bilgiyi al ve aynı semantic mission'ı yeniden planla."
+                )
+            }
+
+            let executableRequired =
+                Set(mission.requiredCapabilityIDs)
+                    .intersection(
+                        snapshot.selectedCapabilityIDs
+                    )
+                    .subtracting(
+                        snapshot.unavailableCapabilityIDs
+                    )
+                    .subtracting(
+                        Set([
+                            "core.reasoning",
+                            "context.local"
+                        ])
+                    )
+
+            let missingExecuted =
+                executableRequired.subtracting(
+                    snapshot.executedCapabilityIDs
+                )
+
+            if !missingExecuted.isEmpty {
+                return attention(
+                    "Semantic mission içindeki mevcut capability adımlarından bazıları gerçekten yürütülmedi: " +
+                    missingExecuted.sorted()
+                        .joined(separator: ", "),
+                    fallback:
+                        "Yürütülmeyen capability adımını yeniden planla; hedef tamamlanmadan başarılı sayma."
                 )
             }
 
