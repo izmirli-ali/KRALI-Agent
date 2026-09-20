@@ -34,7 +34,23 @@ struct AgentResponseComposer {
             return polish(reply)
 
         case .attention:
-            var reply = baseReply
+            var reply: String
+
+            if !unavailable.isEmpty {
+                reply =
+                    "Görev tamamlanamadı. Eksik kabiliyet: " +
+                    unavailable.map(\.name).joined(separator: ", ") +
+                    "."
+            } else {
+                let cleaned =
+                    removeCompletionClaim(
+                        from: baseReply
+                    )
+                reply = cleaned.isEmpty
+                    ? "Görev doğrulanamadı."
+                    : cleaned
+            }
+
             reply += "\n\nDoğrulama: " + verification.summary
 
             if let fallbackPlan, !fallbackPlan.isEmpty {
