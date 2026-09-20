@@ -692,6 +692,7 @@ fi
 write_status "verifying|$GAP_LABEL için aday değişiklik doğrulanıyor ve build ediliyor|$BRANCH|$WORKTREE"
 
 if ! /bin/zsh "$WORKTREE/Scripts/build-check.command" "$WORKTREE" >>"$LOG" 2>&1; then
+    rm -rf "$WORKTREE/.build-check"
     git add -A
     git commit -m "Developer Agent candidate (build failed)" >>"$LOG" 2>&1 || true
     git push -u origin "$BRANCH" >>"$LOG" 2>&1 || true
@@ -700,6 +701,7 @@ if ! /bin/zsh "$WORKTREE/Scripts/build-check.command" "$WORKTREE" >>"$LOG" 2>&1;
     exit 21
 fi
 
+rm -rf "$WORKTREE/.build-check"
 git add -A
 if ! git commit -m "Developer Agent candidate" >>"$LOG" 2>&1; then
     write_status "failed|Aday değişiklik commit edilemedi|$BRANCH|$WORKTREE"
