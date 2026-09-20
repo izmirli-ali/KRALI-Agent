@@ -120,6 +120,27 @@ struct AgentExecutionPlan {
     let requiresVerification: Bool
 }
 
+struct AgentSemanticMission: Codable, Hashable {
+    let objective: String
+    let steps: [AgentSemanticMissionStep]
+    let requiredCapabilityIDs: [String]
+    let requiresUserInput: Bool
+    let userInputReason: String?
+    let confidence: Double
+
+    var normalizedConfidence: Double {
+        min(1, max(0, confidence))
+    }
+}
+
+struct AgentSemanticMissionStep: Codable, Hashable {
+    let title: String
+    let purpose: String
+    let capabilityID: String
+    let operation: String
+    let dependsOn: [Int]
+}
+
 enum AgentVerificationState: String, Hashable {
     case idle
     case checking
