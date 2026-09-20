@@ -180,6 +180,16 @@ final class AgentEngine: ObservableObject {
                 String(report.visibleWindows.count) +
                 " pencere"
             mentorTraceReady = true
+        } else if let status =
+            screenPerceptionStore.readStatus(),
+                  !status.isEmpty {
+            screenPerceptionStatus = status
+        } else {
+            screenPerceptionStatus =
+                "Screen Perception Probe henüz çalıştırılmadı."
+            screenPerceptionStore.saveStatus(
+                "not_run|Screen Perception Probe henüz çalıştırılmadı."
+            )
         }
 
         developerAgentStatus = developerBridge.readStatus()
