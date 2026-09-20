@@ -4,6 +4,8 @@ set -u
 ROOT="$HOME/Developer/KRALI-Agent"
 TARGET="/Applications/KRALI Agent.app"
 LOG="$HOME/Library/Logs/KRALI-Agent-Updater.log"
+STATE_DIR="$HOME/Library/Application Support/KRALI Agent"
+FAILURE_MARKER="$STATE_DIR/update-failure.txt"
 
 cd "$ROOT"
 
@@ -15,11 +17,24 @@ reopen_existing_app() {
     fi
 }
 
+record_failure() {
+    local message="$1"
+    local version="unknown"
+
+    if [ -f "$ROOT/VERSION" ]; then
+        version="$(tr -d '[:space:]' < "$ROOT/VERSION")"
+    fi
+
+    mkdir -p "$STATE_DIR"
+    printf '%s|%s\n' "$version" "$message" > "$FAILURE_MARKER"
+}
+
 fail() {
     local code="$1"
     local message="$2"
     echo ""
     echo "❌ $message"
+    record_failure "$message"
     reopen_existing_app
     exit "$code"
 }
@@ -38,3 +53,5 @@ else
 fi
 
 "$ROOT/Scripts/build-install.command" || fail $? "Build / kurulum tamamlanamadı."
+
+rm -f "$FAILURE_MARKER"
