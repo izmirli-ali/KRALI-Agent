@@ -134,27 +134,20 @@ actor AgentDesktopControl {
                 preferredBundleIdentifier:
                     candidate.bundleIdentifier
            ) {
-            for _ in 0..<3 {
-                requestActivation(
-                    running
+            let recovered =
+                await recoverForeground(
+                    candidate,
+                    running: running
                 )
 
-                try? await Task.sleep(
-                    for: .milliseconds(220)
-                )
-
-                if await visuallyForeground(
-                    candidate
-                ) {
-                    frontmostVerified = true
-                    verificationSource =
-                        "AX raise + ScreenCaptureKit z-order"
-                    after =
-                        NSWorkspace.shared
-                            .frontmostApplication?
-                            .localizedName
-                    break
-                }
+            if recovered {
+                frontmostVerified = true
+                verificationSource =
+                    "activation recovery + AX raise + ScreenCaptureKit z-order"
+                after =
+                    NSWorkspace.shared
+                        .frontmostApplication?
+                        .localizedName
             }
         }
 
@@ -815,8 +808,46 @@ actor AgentDesktopControl {
         return false
     }
 
+    private func recoverForeground(
+        _ candidate: ApplicationCandidate,
+        running app: NSRunningApplication
+    ) async -> Bool {
+        let delays = [220, 360, 520, 700]
+
+        for (index, delay) in delays.enumerated() {
+            if index >= 1,
+               let current =
+                NSWorkspace.shared
+                    .frontmostApplication,
+               current.processIdentifier ==
+                ProcessInfo.processInfo
+                    .processIdentifier {
+                _ = current.hide()
+            }
+
+            requestActivation(
+                app,
+                aggressive:
+                    index >= 1
+            )
+
+            try? await Task.sleep(
+                for: .milliseconds(delay)
+            )
+
+            if await visuallyForeground(
+                candidate
+            ) {
+                return true
+            }
+        }
+
+        return false
+    }
+
     private func requestActivation(
-        _ app: NSRunningApplication
+        _ app: NSRunningApplication,
+        aggressive: Bool = false
     ) {
         if app.isHidden {
             _ = app.unhide()
@@ -827,8 +858,16 @@ actor AgentDesktopControl {
                 .yieldActivation(to: app)
         }
 
+        let options: NSApplication.ActivationOptions =
+            aggressive
+                ? [
+                    .activateAllWindows,
+                    .activateIgnoringOtherApps
+                ]
+                : [.activateAllWindows]
+
         _ = app.activate(
-            options: [.activateAllWindows]
+            options: options
         )
 
         if accessibilityTrusted(
