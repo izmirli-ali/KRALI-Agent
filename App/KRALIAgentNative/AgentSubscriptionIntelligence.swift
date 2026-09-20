@@ -73,6 +73,7 @@ actor AgentSubscriptionIntelligence {
         - Kullanıcı tek tek araç söylemese bile gereken capability'leri kendin seç.
         - Capability unavailable olsa bile hedef için gerekliyse plana dahil et.
         - Yalnızca hazırlık/analizde durma; gerekiyorsa gerçek uygulama/üretim ve sonuç doğrulamasını da planla.
+        - Yerel dosya ve uygulama capability'leriyle çözülebilen görevlerde gereksiz research.web ekleme. Yalnızca dış/güncel/bilinmeyen bilgi gerçekten gerekiyorsa araştırma planla.
         - Yeni marka/şirket/işletmeye eski başka bir markanın task/research bağlamını taşıma.
         - Makul ve geri alınabilir varsayımla ilerlenebiliyorsa kullanıcıdan gereksiz bilgi isteme.
 
