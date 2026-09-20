@@ -1,95 +1,95 @@
 {
   "activityTail" : [
     {
-      "date" : "2026-09-20T14:55:25Z",
+      "date" : "2026-09-20T15:11:51Z",
       "text" : "Desktop runtime: Mail • foreground=true • source=AX raise + ScreenCaptureKit z-order"
     },
     {
-      "date" : "2026-09-20T14:55:24Z",
+      "date" : "2026-09-20T15:11:48Z",
       "text" : "Semantic rota: Core → Goal → Context → Plan → Desktop → Mail → Learn → Verify → Response"
     },
     {
-      "date" : "2026-09-20T14:55:24Z",
+      "date" : "2026-09-20T15:11:48Z",
       "text" : "Task Graph kullanıcı onayı bekleyen step: 4, 5"
     },
     {
-      "date" : "2026-09-20T14:55:24Z",
+      "date" : "2026-09-20T15:11:48Z",
       "text" : "Capability Gap: mail.work • integration • strategy=yok"
     },
     {
-      "date" : "2026-09-20T14:55:24Z",
+      "date" : "2026-09-20T15:11:48Z",
       "text" : "Task Graph blocked capability: mail.work"
     },
     {
-      "date" : "2026-09-20T14:55:24Z",
+      "date" : "2026-09-20T15:11:48Z",
       "text" : "Task Graph: 0:context.local[reason] → 1:desktop.app[act] → 2:mail.work[communicate] → 3:core.reasoning[transform] → 4:mail.work[communicate] → 5:mail.work[communicate]"
     },
     {
-      "date" : "2026-09-20T14:55:24Z",
+      "date" : "2026-09-20T15:11:48Z",
       "text" : "Semantic capability planı: context.local, core.reasoning, desktop.app, mail.work"
     },
     {
-      "date" : "2026-09-20T14:55:24Z",
+      "date" : "2026-09-20T15:11:48Z",
       "text" : "Semantic planner sağlayıcısı: Apple Foundation Models"
     },
     {
-      "date" : "2026-09-20T14:55:24Z",
+      "date" : "2026-09-20T15:11:48Z",
       "text" : "Semantic Mission: Mail uygulamasını aç, son gelen maili incele, ne yapmamız gerektiğini analiz et, uygun cevap taslağını hazırla ama göndermeden önce benden onay iste."
     },
     {
-      "date" : "2026-09-20T14:55:09Z",
+      "date" : "2026-09-20T15:11:34Z",
       "text" : "Yetkinlik öğrenme planı: Mail → Entegrasyon gerekli"
     },
     {
-      "date" : "2026-09-20T14:55:09Z",
+      "date" : "2026-09-20T15:11:34Z",
       "text" : "Seçilen kabiliyetler: Akıl yürütme, Bağlam, Mail [bekliyor]"
     },
     {
-      "date" : "2026-09-20T14:55:09Z",
+      "date" : "2026-09-20T15:11:34Z",
       "text" : "Otomatik rota: Core → Goal → Context → Plan → Mail → Learn → Verify → Response"
     },
     {
-      "date" : "2026-09-20T14:55:09Z",
+      "date" : "2026-09-20T15:11:34Z",
       "text" : "Seçilen plan: Kaynağı belirle, taslağı hazırla ve gönderimden önce onay iste"
     },
     {
-      "date" : "2026-09-20T14:55:09Z",
+      "date" : "2026-09-20T15:11:34Z",
       "text" : "KRALİ Core hedef sözleşmesi: bulguları analiz et → iletişim görevini yürüt"
     },
     {
-      "date" : "2026-09-20T14:55:09Z",
+      "date" : "2026-09-20T15:11:34Z",
       "text" : "Bağlam hafızası: Mail uygulamasını aç, son gelen maili incele, ne yapmamız gerektiğini… • mail uygulamasını aç son gelen maili kontrol et ve bana içeriği özetle • Son çekimle ilgili bir kurgu yapmamız gerekiyor. • Spotify uygulamasını aç, şu anda açık olan şarkıyı bul, şarkı hakkınd…"
     },
     {
-      "date" : "2026-09-20T14:54:55Z",
+      "date" : "2026-09-20T15:11:25Z",
       "text" : "Apple yerel zeka hazır"
     },
     {
-      "date" : "2026-09-20T14:54:55Z",
+      "date" : "2026-09-20T15:11:24Z",
       "text" : "Çalışma klasörü geri yüklendi: Desktop"
     },
     {
-      "date" : "2026-09-20T14:54:55Z",
+      "date" : "2026-09-20T15:11:24Z",
       "text" : "6 ekran görüntüsü adayı bulundu"
     },
     {
-      "date" : "2026-09-20T14:54:55Z",
+      "date" : "2026-09-20T15:11:24Z",
       "text" : "1772 dosya ve 68 klasör indekslendi"
     },
     {
-      "date" : "2026-09-20T14:54:55Z",
+      "date" : "2026-09-20T15:11:24Z",
       "text" : "Ağır geliştirici testleri normal açılışta otomatik çalıştırılmıyor"
     },
     {
-      "date" : "2026-09-20T14:54:55Z",
+      "date" : "2026-09-20T15:11:24Z",
       "text" : "Dinamik hedef ve kabiliyet yönlendirme aktif"
     },
     {
-      "date" : "2026-09-20T14:54:55Z",
+      "date" : "2026-09-20T15:11:24Z",
       "text" : "KRALİ Core hazır"
     }
   ],
-  "appVersion" : "0.8.35",
+  "appVersion" : "0.8.36",
   "capabilities" : [
     {
       "available" : true,
@@ -155,7 +155,7 @@
       "title" : "Spotify uygulamasını aç, şu anda açık olan şarkıyı bul, şarkı hakkınd…"
     }
   ],
-  "createdAt" : "2026-09-20T14:55:25Z",
+  "createdAt" : "2026-09-20T15:11:51Z",
   "executionSteps" : [
     {
       "capabilityID" : "context.local",
@@ -245,7 +245,7 @@
     "Response"
   ],
   "semanticMission" : {
-    "confidence" : 0.88,
+    "confidence" : 0.95,
     "objective" : "Mail uygulamasını aç, son gelen maili incele, ne yapmamız gerektiğini analiz et, uygun cevap taslağını hazırla ama göndermeden önce benden onay iste.",
     "outcomes" : [
       "analyze",
@@ -399,7 +399,7 @@
       "title" : "Gönder"
     }
   ],
-  "traceID" : "1E9F8417-B358-4415-BF40-6F4DFD7D8C78",
+  "traceID" : "D6A94B15-142F-443F-9E97-4426E2BEA84C",
   "userInput" : "Mail uygulamasını aç, son gelen maili incele, ne yapmamız gerektiğini analiz et, uygun cevap taslağını hazırla ama göndermeden önce benden onay iste.",
   "verificationState" : "attention",
   "verificationSummary" : "Semantic mission içindeki zorunlu action step'lerinden bazıları tamamlanmadı: mail.work"
