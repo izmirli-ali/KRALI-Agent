@@ -13,6 +13,12 @@ final class UpdateController: ObservableObject {
     private let rootURL = FileManager.default.homeDirectoryForCurrentUser
         .appendingPathComponent("Developer/KRALI-Agent", isDirectory: true)
 
+    private let failureMarkerURL = FileManager.default.homeDirectoryForCurrentUser
+        .appendingPathComponent(
+            "Library/Application Support/KRALI Agent/update-failure.txt",
+            isDirectory: false
+        )
+
     init() {
         currentVersion = Bundle.main.object(
             forInfoDictionaryKey: "CFBundleShortVersionString"
@@ -137,6 +143,38 @@ final class UpdateController: ObservableObject {
             isLaunchingUpdate = false
             statusText = "Updater başlatılamadı"
         }
+    }
+
+    private func readFailureMarker()
+        -> (version: String, message: String)? {
+        guard
+            let content = try? String(
+                contentsOf: failureMarkerURL,
+                encoding: .utf8
+            )
+        else {
+            return nil
+        }
+
+        let parts = content
+            .trimmingCharacters(in: .whitespacesAndNewlines)
+            .split(
+                separator: "|",
+                maxSplits: 1,
+                omittingEmptySubsequences: false
+            )
+
+        guard !parts.isEmpty else {
+            return nil
+        }
+
+        let version = String(parts[0])
+        let message =
+            parts.count > 1
+                ? String(parts[1])
+                : "Güncelleme başarısız"
+
+        return (version, message)
     }
 
     nonisolated private static func run(
