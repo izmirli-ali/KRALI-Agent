@@ -86,6 +86,8 @@ case "$NODE_MAJOR" in
         ;;
 esac
 
+NODE_RUNTIME_BIN_DIR="$(dirname "$NODE_BIN")"
+
 CLINE_BIN="$(command -v cline || true)"
 PROVIDER="${KRALI_DEV_PROVIDER:-openai-codex}"
 MODEL="${KRALI_DEV_MODEL:-}"
@@ -199,7 +201,7 @@ NODE
 
         cat > "$AUTH_SCRIPT" <<EOF
 #!/bin/zsh
-export PATH="/opt/homebrew/bin:/usr/local/bin:$HOME/.npm-global/bin:/usr/bin:/bin:/usr/sbin:/sbin:\$PATH"
+export PATH="$NODE_RUNTIME_BIN_DIR:/opt/homebrew/bin:/usr/local/bin:$HOME/.npm-global/bin:/usr/bin:/bin:/usr/sbin:/sbin:\$PATH"
 
 echo ""
 echo "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
