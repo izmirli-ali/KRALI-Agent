@@ -435,3 +435,14 @@ Mission Contract Repair'de yalnız “uygulamayı aç / uygulamaya geç / pencer
 Desktop Probe artık Accessibility trust durumunu prompt öncesi ve prompt sonrası ayrı izler. İzin penceresinden sonra trust yaklaşık 6 saniyeye kadar yeniden kontrol edilir; kullanıcının izin vermesi aynı turda yakalanabiliyorsa final `accessibilityTrusted=true` raporlanır.
 
 Arena'daki genel uygulama açma senaryosu artık `desktop.app` capability'sini bekler. Böylece düşük riskli app activation regression'ı, gelecekteki AX UI control geliştirmelerinden bağımsız test edilir.
+
+
+**v0.8.25 app-open runtime hardening + verifier truthfulness:** v0.8.24 Mentor turunda automatic Arena raporu henüz v0.8.23 dosyasını taşıyordu; ancak v0.8.24 runtime trace'leri gerçek iki desktop.app problemi gösterdi. “takvim uygulamasını aç” mission'ında model önce screen observation, sonra desktop.app sırası üretmiş ve desktop.app partial kalmasına rağmen verifier yanlışlıkla PASS vermişti. “whatsapp uygulamasını aç” testinde ise gereksiz files.search capability mission'a sızmış ve app resolver uygulamayı çözememişti.
+
+Generic app-open mission contract artık mevcut repo'daki explicit intent guard'larla birlikte yalnız güncel kullanıcı mesajına göre davranır. Basit uygulama açma/öne getirme görevleri `desktop.app` odaklı kalır; açıkça dosya, web veya uygulama içeriği analizi istenmedikçe Files/Web/Screen capability'leri mission'dan temizlenir. Derin UI interaction istenirse `desktop.control + perception.screen` ayrı tutulur.
+
+Verifier'a doğrudan execution-state truth gate eklendi. Semantic mission içindeki herhangi bir zorunlu action step `partial`, `pending` veya `blocked` kaldıysa verification artık PASS veremez. Bu kontrol yalnız capability setlerinden dolaylı çıkarım yapmaz; gerçek executionSteps state'ini snapshot üzerinden verifier'a taşır. Böylece desktop.app veya başka bir gerçek action yürütülmediyse sonuç “tamamlandı” diye raporlanamaz.
+
+Generic macOS app resolver localized ad konusunda güçlendirildi. Her uygulama için base bundle name, localized bundle display name ve Finder'ın macOS dilinde gösterdiği `FileManager.displayName(atPath:)` alias olarak indekslenir. Bu özellikle `Calendar.app → Takvim` gibi sistem yerelleştirmelerinde kullanıcı Türkçe uygulama adını yazdığında doğru eşleşmeyi sağlar. Resolver hala yalnız yüklü uygulamalar arasından seçim yapar; bulunmayan uygulama için dosya aramasına veya sahte başarıya düşmez.
+
+v0.8.25'in doğrulama hedefi: startup Arena güncel sürümle yeniden 9/9 olmalı; ardından “Takvim uygulamasını aç” gibi düşük riskli app-open komutu `desktop.app` ile gerçekten çalışmalı ve Screen Perception ile frontmost doğrulanmalı. Accessibility/AXUIElement tabanlı `desktop.control` bu sürümde yine unavailable kalır.
