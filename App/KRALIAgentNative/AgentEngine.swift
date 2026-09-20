@@ -88,6 +88,7 @@ final class AgentEngine: ObservableObject {
     private let brain = AgentBrain()
     private let planner = AgentPlanner()
     private let taskOrchestrator = AgentTaskOrchestrator()
+    private let missionNormalizer = AgentMissionNormalizer()
     private let capabilityGapResolver = AgentCapabilityGapResolver()
     private let verifier = AgentVerifier()
     private let capabilityRegistry = AgentCapabilityRegistry()
@@ -438,7 +439,15 @@ final class AgentEngine: ObservableObject {
                         subscriptionMission.provider
                 }
 
-                if let mission = plannedMission {
+                if let rawMission = plannedMission {
+                    let mission =
+                        missionNormalizer.normalize(
+                            rawMission,
+                            userInput: text,
+                            capabilities:
+                                capabilityRegistry.all
+                        )
+
                     semanticMission = mission
                     currentSemanticMission = mission
                     currentSemanticPlannerProvider =
