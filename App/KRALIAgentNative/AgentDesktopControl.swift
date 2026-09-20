@@ -17,6 +17,7 @@ struct DesktopControlProbeReport: Codable, Hashable, Sendable {
     let createdAt: Date
     let requestedApplication: String
     let resolvedApplicationURL: String?
+    let accessibilityTrustedBeforePrompt: Bool
     let accessibilityTrusted: Bool
     let wasRunning: Bool
     let launchOrActivateSucceeded: Bool
@@ -96,6 +97,12 @@ actor AgentDesktopControl {
             for: .milliseconds(700)
         )
 
+        let trusted =
+            await waitForAccessibilityTrust(
+                maxAttempts: 12,
+                delayMilliseconds: 500
+            )
+
         let after =
             NSWorkspace.shared.frontmostApplication?
                 .localizedName
@@ -150,7 +157,12 @@ actor AgentDesktopControl {
             NSWorkspace.shared.frontmostApplication?
                 .localizedName
 
-        let trusted = accessibilityTrusted(
+        let trustedBefore =
+            accessibilityTrusted(
+                promptIfNeeded: false
+            )
+
+        _ = accessibilityTrusted(
             promptIfNeeded: true
         )
 
@@ -236,6 +248,8 @@ actor AgentDesktopControl {
             requestedApplication: name,
             resolvedApplicationURL:
                 appURL?.path,
+            accessibilityTrustedBeforePrompt:
+                trustedBefore,
             accessibilityTrusted: trusted,
             wasRunning: runningBefore != nil,
             launchOrActivateSucceeded: activated,
@@ -380,6 +394,33 @@ actor AgentDesktopControl {
         }
 
         return results
+    }
+
+    private func waitForAccessibilityTrust(
+        maxAttempts: Int,
+        delayMilliseconds: Int
+    ) async -> Bool {
+        if accessibilityTrusted(
+            promptIfNeeded: false
+        ) {
+            return true
+        }
+
+        for _ in 0..<maxAttempts {
+            try? await Task.sleep(
+                for: .milliseconds(
+                    delayMilliseconds
+                )
+            )
+
+            if accessibilityTrusted(
+                promptIfNeeded: false
+            ) {
+                return true
+            }
+        }
+
+        return false
     }
 
     private func matchingRunningApplication(
