@@ -217,10 +217,6 @@ struct AgentContextMemoryStore {
         for (index, entry) in entries.enumerated() {
             var score = 0
 
-            if entry.kind == .userRule {
-                score += 2
-            }
-
             let corpus = normalize(
                 [
                     entry.title,
@@ -232,9 +228,16 @@ struct AgentContextMemoryStore {
             )
 
             let corpusTokens = Set(tokens(corpus))
-            score += queryTokens
+            let tokenOverlap = queryTokens
                 .intersection(corpusTokens)
-                .count * 4
+                .count
+
+            score += tokenOverlap * 4
+
+            if entry.kind == .userRule,
+               tokenOverlap > 0 {
+                score += 3
+            }
 
             if !query.isEmpty,
                corpus.contains(query) {
