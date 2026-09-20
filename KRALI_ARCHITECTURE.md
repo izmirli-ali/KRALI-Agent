@@ -173,3 +173,10 @@ Ses, ekran/görsel ve dosya içeriğini ortak bir bağlam modelinde birleştirme
 
 ### 1.0 — Tool-using KRALİ
 Core olgunlaştıktan sonra Browser, Work/Mail, Premiere ve harici model bağlantılarının güvenli orkestrasyonu.
+
+
+**v0.7.24 grounded synthesis + goal completion:** Gerçek mentor trace, araştırma kaynaklarının başarıyla bulunmasının kullanıcının istediği analiz ve özgün fikir hedeflerinin tamamlandığı anlamına gelmediğini gösterdi. Bu sürümde araç doğrulaması ile hedef tamamlama ayrıldı. Analiz/ideation adımları gerçek bir sentez sonucu gelmeden tamamlanmış sayılmıyor.
+
+Öncelik cihazdaki Apple Foundation Models katmanında. Apple modeli hazır değilse ve kullanıcı Cline üzerinden ChatGPT Subscription ile giriş yaptıysa, doğrulanmış kaynak kanıtlarından son kullanıcı cevabı üretmek için ayrı bir subscription synthesis katmanı kullanılabiliyor. Sentez sağlayıcısı yoksa araştırma başarılı olsa bile analiz/ideation görevi kısmi sayılıyor. Mentor trace kullanılan zeka sağlayıcısını da kaydediyor.
+
+Deep-source kanıtlarında HTML entity çözümü ve sayfa boilerplate temizliği de iyileştirildi.
