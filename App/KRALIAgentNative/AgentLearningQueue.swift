@@ -134,7 +134,8 @@ struct AgentLearningQueueStore {
     func enqueue(
         gaps: [CapabilityGapResolution],
         sourceGoal: String,
-        into existing: [AgentLearningJob]
+        into existing: [AgentLearningJob],
+        persist: Bool = true
     ) -> [AgentLearningJob] {
         var jobs = existing
 
@@ -204,7 +205,10 @@ struct AgentLearningQueueStore {
             )
         }
 
-        save(jobs)
+        if persist {
+            save(jobs)
+        }
+
         return jobs
     }
 
