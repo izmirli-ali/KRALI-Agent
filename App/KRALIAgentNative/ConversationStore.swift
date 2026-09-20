@@ -120,7 +120,7 @@ struct ConversationStore {
             .replacingOccurrences(of: ":", with: "-")
 
         let url = archiveURL.appendingPathComponent(
-            "conversation-(stamp)-(UUID().uuidString.prefix(8)).json",
+            "conversation-\(stamp)-\(UUID().uuidString.prefix(8)).json",
             isDirectory: false
         )
 
