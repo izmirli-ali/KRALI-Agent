@@ -535,7 +535,7 @@ actor AgentLocalIntelligence {
         var repairedSteps: [AgentSemanticMissionStep] = []
         var represented = Set<String>()
 
-        for step in mission.steps {
+        for step in mission.steps.prefix(10) {
             guard knownIDs.contains(step.capabilityID) else {
                 continue
             }
@@ -570,6 +570,10 @@ actor AgentLocalIntelligence {
             }
 
         for capabilityID in orderedMissing {
+            guard repairedSteps.count < 10 else {
+                break
+            }
+
             guard let capability = capabilities.first(
                 where: { $0.id == capabilityID }
             ) else {
