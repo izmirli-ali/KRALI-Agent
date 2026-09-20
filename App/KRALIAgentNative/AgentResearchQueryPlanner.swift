@@ -36,7 +36,9 @@ struct AgentResearchQueryPlanner {
             containsAny(normalized, [
                 "marka", "sirket", "firma", "rakip",
                 "tarihce", "urun", "pazar", "sektor",
-                "guclu", "zayif", "firsat"
+                "guclu", "zayif", "firsat",
+                "isletme", "salon", "merkez", "studio",
+                "klinik", "restoran", "kafe", "cafe"
             ])
 
         if let entity, isBrandResearch {
@@ -117,7 +119,9 @@ struct AgentResearchQueryPlanner {
                 entityGroup,
                 [
                     "company", "sirket", "firma", "marka",
-                    "group", "holding", "corporation"
+                    "group", "holding", "corporation",
+                    "isletme", "salon", "merkez", "studio",
+                    "klinik"
                 ]
             ],
             mandatoryConceptGroups: [
@@ -315,7 +319,9 @@ struct AgentResearchQueryPlanner {
             " firmasını",
             " firmasini",
             " firması",
-            " firmasi"
+            " firmasi",
+            " adında",
+            " adinda"
         ]
 
         for marker in markers {
