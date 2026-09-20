@@ -31,7 +31,7 @@ struct DeveloperAgentStatus: Hashable {
         _ currentAppVersion: String,
         maxHeartbeatAge: TimeInterval = 300
     ) -> DeveloperAgentStatus {
-        guard isLearningActive else {
+        guard shouldShowLearningStatus else {
             return self
         }
 
