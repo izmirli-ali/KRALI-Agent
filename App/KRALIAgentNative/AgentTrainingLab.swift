@@ -61,6 +61,8 @@ struct AgentTrainingLab {
     private let verifier = AgentVerifier()
     private let languageResolver =
         AgentNaturalLanguageResolver()
+    private let taskOrchestrator =
+        AgentTaskOrchestrator()
 
     func run() -> TrainingLabReport {
         let scenarios = makeScenarios()
@@ -166,6 +168,12 @@ struct AgentTrainingLab {
         )
         results.append(
             mailWorkflowRoutingResult()
+        )
+        results.append(
+            crossProviderTaskGraphResult()
+        )
+        results.append(
+            externalCommitApprovalGraphResult()
         )
 
         let core = results.filter { $0.tier == .core }
@@ -703,6 +711,250 @@ struct AgentTrainingLab {
                 ? []
                 : [
                     "Mail workflow ile Mail.app açma intent'i ayrıştırılamadı."
+                ]
+        )
+    }
+
+    private func crossProviderTaskGraphResult()
+        -> TrainingScenarioResult {
+        let mission = AgentSemanticMission(
+            objective:
+                "Bir uygulamadaki mevcut içeriği oku, dış kaynaktan zenginleştir, analiz et ve çalışma alanına metin dosyası olarak kaydet.",
+            outcomes: [
+                "open",
+                "research",
+                "analyze",
+                "compose"
+            ],
+            steps: [
+                AgentSemanticMissionStep(
+                    title: "Uygulamayı aç",
+                    purpose:
+                        "Kaynak uygulamayı görünür hale getir.",
+                    capabilityID:
+                        "desktop.app",
+                    operation:
+                        "app.open",
+                    dependsOn: []
+                ),
+                AgentSemanticMissionStep(
+                    title: "Mevcut içeriği oku",
+                    purpose:
+                        "Uygulamadaki mevcut içeriği kanıt olarak çıkar.",
+                    capabilityID:
+                        "perception.screen",
+                    operation:
+                        "screen.read",
+                    dependsOn: [0]
+                ),
+                AgentSemanticMissionStep(
+                    title: "Dış bilgiyi araştır",
+                    purpose:
+                        "Önceki adımda çözülen içeriği dış kaynaklarla zenginleştir.",
+                    capabilityID:
+                        "research.web",
+                    operation:
+                        "web.research",
+                    dependsOn: [1]
+                ),
+                AgentSemanticMissionStep(
+                    title: "Analiz et",
+                    purpose:
+                        "Okunan ve araştırılan içeriği birlikte analiz et.",
+                    capabilityID:
+                        "core.reasoning",
+                    operation:
+                        "content.analyze",
+                    dependsOn: [1, 2]
+                ),
+                AgentSemanticMissionStep(
+                    title: "Metin dosyasına yaz",
+                    purpose:
+                        "Analiz çıktısını hedef çalışma alanına yeni bir metin dosyası olarak kaydet.",
+                    capabilityID:
+                        "files.write.text",
+                    operation:
+                        "file.write.text",
+                    dependsOn: [3]
+                )
+            ],
+            requiredCapabilityIDs: [
+                "desktop.app",
+                "perception.screen",
+                "research.web",
+                "core.reasoning",
+                "files.write.text"
+            ],
+            requiresUserInput: false,
+            userInputReason: nil,
+            confidence: 1
+        )
+
+        let graph =
+            taskOrchestrator.compile(
+                mission: mission,
+                capabilities:
+                    capabilityRegistry.all
+            )
+
+        let roles =
+            Dictionary(
+                uniqueKeysWithValues:
+                    graph.steps.map {
+                        ($0.index, $0.role)
+                    }
+            )
+
+        let passed =
+            graph.steps.count == 5 &&
+            roles[0] == .act &&
+            roles[1] == .observe &&
+            roles[2] == .retrieve &&
+            roles[3] == .transform &&
+            roles[4] == .persist &&
+            graph.blockedCapabilityIDs ==
+                ["files.write.text"] &&
+            graph.approvalStepIndexes
+                .isEmpty
+
+        return TrainingScenarioResult(
+            scenarioID:
+                "task-graph-cross-provider-dataflow",
+            title:
+                "Cross-provider veri akışı görev grafiği",
+            tier: .core,
+            prompt:
+                "Uygulama verisini oku, araştır, analiz et ve dosyaya yaz.",
+            passed: passed,
+            goal:
+                "Provider bağımsız dependency zinciri kur",
+            route: [
+                "Core",
+                "Desktop",
+                "Screen",
+                "Research",
+                "Files"
+            ],
+            selectedCapabilities:
+                graph.steps.map(
+                    \.capabilityID
+                ),
+            unavailableCapabilities:
+                graph.blockedCapabilityIDs,
+            diagnostics: passed
+                ? []
+                : [
+                    "Cross-provider task graph rol/dependency/blocked capability sözleşmesi bozuldu."
+                ]
+        )
+    }
+
+    private func externalCommitApprovalGraphResult()
+        -> TrainingScenarioResult {
+        let mission = AgentSemanticMission(
+            objective:
+                "Bir iletiyi oku, analiz et, cevap taslağı hazırla ve kullanıcı onayından sonra gönder.",
+            outcomes: [
+                "analyze",
+                "compose",
+                "communicate"
+            ],
+            steps: [
+                AgentSemanticMissionStep(
+                    title: "İletiyi oku",
+                    purpose:
+                        "Son gelen iletiyi salt-okunur al.",
+                    capabilityID:
+                        "mail.work",
+                    operation:
+                        "mail.read",
+                    dependsOn: []
+                ),
+                AgentSemanticMissionStep(
+                    title: "İçeriği analiz et",
+                    purpose:
+                        "Okunan içeriğe göre yapılması gerekeni değerlendir.",
+                    capabilityID:
+                        "core.reasoning",
+                    operation:
+                        "content.analyze",
+                    dependsOn: [0]
+                ),
+                AgentSemanticMissionStep(
+                    title: "Cevap taslağı hazırla",
+                    purpose:
+                        "Analiz sonucuna uygun cevap taslağı oluştur.",
+                    capabilityID:
+                        "mail.work",
+                    operation:
+                        "mail.draft",
+                    dependsOn: [1]
+                ),
+                AgentSemanticMissionStep(
+                    title: "Gönder",
+                    purpose:
+                        "Hazırlanan taslağı kullanıcı onayından sonra dış dünyaya gönder.",
+                    capabilityID:
+                        "mail.work",
+                    operation:
+                        "mail.send",
+                    dependsOn: [2]
+                )
+            ],
+            requiredCapabilityIDs: [
+                "mail.work",
+                "core.reasoning"
+            ],
+            requiresUserInput: false,
+            userInputReason: nil,
+            confidence: 1
+        )
+
+        let graph =
+            taskOrchestrator.compile(
+                mission: mission,
+                capabilities:
+                    capabilityRegistry.all
+            )
+
+        let passed =
+            graph.approvalStepIndexes ==
+                [3] &&
+            graph.steps[0]
+                .requiresApproval == false &&
+            graph.steps[2]
+                .requiresApproval == false &&
+            graph.steps[3]
+                .requiresApproval == true &&
+            graph.blockedCapabilityIDs ==
+                ["mail.work"]
+
+        return TrainingScenarioResult(
+            scenarioID:
+                "task-graph-external-commit-approval",
+            title:
+                "External commit öncesi kullanıcı onayı",
+            tier: .core,
+            prompt:
+                "Oku, analiz et, taslak oluştur; gönderimi onay kapısında durdur.",
+            passed: passed,
+            goal:
+                "Hazırlık step'lerini commit step'inden ayır",
+            route: [
+                "Core",
+                "Mail",
+                "Approval"
+            ],
+            selectedCapabilities:
+                graph.steps.map(
+                    \.capabilityID
+                ),
+            unavailableCapabilities:
+                graph.blockedCapabilityIDs,
+            diagnostics: passed
+                ? []
+                : [
+                    "External commit approval gate yanlış step'e uygulandı."
                 ]
         )
     }
