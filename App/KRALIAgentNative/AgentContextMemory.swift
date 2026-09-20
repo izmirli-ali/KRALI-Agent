@@ -276,7 +276,7 @@ struct AgentContextMemoryStore {
             Array(rules) +
             Array(contextual)
         )
-        .map(\.entry)
+        .map { $0.entry }
     }
 
     private func trimmed(
