@@ -1344,13 +1344,17 @@ actor AgentArena {
     func run() async -> AgentArenaReport {
         let scenarios = makeScenarios()
         let allCapabilities = capabilityRegistry.all
+        let appVersion = Bundle.main.object(
+            forInfoDictionaryKey:
+                "CFBundleShortVersionString"
+        ) as? String ?? "unknown"
         let memories = memoryStore.load()
         var results: [AgentArenaScenarioResult] = []
         var subscriptionFallbackBudget = 2
 
         for (index, scenario) in scenarios.enumerated() {
             arenaStore.saveProgress(
-                "\(index + 1)/\(scenarios.count) • \(scenario.title) • Apple Planner"
+                "v\(appVersion) • \(index + 1)/\(scenarios.count) • \(scenario.title) • Apple Planner"
             )
 
             let relevantMemory = memoryStore.relevant(
@@ -1434,7 +1438,7 @@ actor AgentArena {
             }
 
             arenaStore.saveProgress(
-                "\(index + 1)/\(scenarios.count) • \(scenario.title) • Reviewer"
+                "v\(appVersion) • \(index + 1)/\(scenarios.count) • \(scenario.title) • Reviewer"
             )
 
             let review: AgentMissionReview?
@@ -1515,7 +1519,7 @@ actor AgentArena {
         .count
 
         arenaStore.saveProgress(
-            "\(scenarios.count)/\(scenarios.count) • Arena tamamlandı"
+            "v\(appVersion) • \(scenarios.count)/\(scenarios.count) • Arena tamamlandı"
         )
 
         return AgentArenaReport(
