@@ -1,12 +1,12 @@
 {
-  "appVersion" : "0.7.24",
-  "corePassed" : 12,
-  "coreTotal" : 12,
-  "createdAt" : "2026-09-20T00:08:31Z",
+  "appVersion" : "0.7.29",
+  "corePassed" : 14,
+  "coreTotal" : 14,
+  "createdAt" : "2026-09-20T00:37:45Z",
   "failed" : 0,
   "northStarPassed" : 4,
   "northStarTotal" : 4,
-  "passed" : 16,
+  "passed" : 18,
   "results" : [
     {
       "diagnostics" : [
@@ -112,6 +112,62 @@
       ],
       "tier" : "core",
       "title" : "Genel analiz ve çıkarım",
+      "unavailableCapabilities" : [
+
+      ]
+    },
+    {
+      "diagnostics" : [
+
+      ],
+      "goal" : "güncel kaynaklarla araştır → sonucu ve gerekçeyi açıkla",
+      "passed" : true,
+      "prompt" : "Estafiz adında bir pilates salonu var onu detaylı araştırır mısın?",
+      "route" : [
+        "Core",
+        "Goal",
+        "Context",
+        "Plan",
+        "Research",
+        "Verify",
+        "Response"
+      ],
+      "scenarioID" : "local-business-detailed-research",
+      "selectedCapabilities" : [
+        "context.local",
+        "core.reasoning",
+        "research.web"
+      ],
+      "tier" : "core",
+      "title" : "Doğal dilde detaylı yerel işletme araştırması",
+      "unavailableCapabilities" : [
+
+      ]
+    },
+    {
+      "diagnostics" : [
+
+      ],
+      "goal" : "güncel kaynaklarla araştır → sonucu ve gerekçeyi açıkla",
+      "passed" : true,
+      "prompt" : "estafizsym instagram hesabının kaç takipçisi var içerikleri neler bakabilir misin",
+      "route" : [
+        "Core",
+        "Goal",
+        "Context",
+        "Plan",
+        "Research",
+        "Verify",
+        "Response"
+      ],
+      "scenarioID" : "social-profile-public-metadata",
+      "selectedCapabilities" : [
+        "context.local",
+        "core.reasoning",
+        "research.web"
+      ],
+      "tier" : "core",
+      "title" : "Sosyal medya profil bilgisi araştırması",
       "unavailableCapabilities" : [
 
       ]
@@ -458,5 +514,5 @@
       ]
     }
   ],
-  "total" : 16
+  "total" : 18
 }
