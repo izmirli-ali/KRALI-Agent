@@ -1,67 +1,3 @@
-Preparing worktree (new branch 'krali-dev-agent/20260920-141855')
-branch 'krali-dev-agent/20260920-141855' set up to track 'origin/main'.
-HEAD is now at 31dd11f Set app marketing version to 0.8.18
-❌ Cline görevi başarısız oldu.
-
-━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
- KRALİ DEVELOPER AGENT
- 20260920-142552
-━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-Cline version: 
-Cline doctor:
-From https://github.com/izmirli-ali/KRALI-Agent
- * branch            main       -> FETCH_HEAD
-Already up to date.
-Preparing worktree (new branch 'krali-dev-agent/20260920-142552')
-branch 'krali-dev-agent/20260920-142552' set up to track 'origin/main'.
-HEAD is now at dd2aebf Set app marketing version to 0.8.19
-❌ Cline görevi başarısız oldu.
-
-━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
- KRALİ DEVELOPER AGENT
- 20260920-143431
-━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-Cline version: 
-Cline doctor:
-From https://github.com/izmirli-ali/KRALI-Agent
- * branch            main       -> FETCH_HEAD
-Already up to date.
-Preparing worktree (new branch 'krali-dev-agent/20260920-143431')
-branch 'krali-dev-agent/20260920-143431' set up to track 'origin/main'.
-HEAD is now at 20e3c93 Set app marketing version to 0.8.20
-❌ Cline görevi başarısız oldu.
-
-━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
- KRALİ DEVELOPER AGENT
- 20260920-173055
-━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-Cline version: 
-Cline doctor:
-From https://github.com/izmirli-ali/KRALI-Agent
- * branch            main       -> FETCH_HEAD
-Already up to date.
-Preparing worktree (new branch 'krali-dev-agent/20260920-173055')
-branch 'krali-dev-agent/20260920-173055' set up to track 'origin/main'.
-HEAD is now at 6d41474 v0.8.33 context isolation, freshness gates, self-evolution
-❌ Cline görevi başarısız oldu.
-
-━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
- KRALİ DEVELOPER AGENT
- 20260920-174655
-━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-Cline version: 
-Cline doctor:
-From https://github.com/izmirli-ali/KRALI-Agent
- * branch            main       -> FETCH_HEAD
-Already up to date.
-Preparing worktree (new branch 'krali-dev-agent/20260920-174655')
-branch 'krali-dev-agent/20260920-174655' set up to track 'origin/main'.
-HEAD is now at f8f8527 v0.8.34 automate terminal, CI and Cline auth flow
-❌ Cline görevi başarısız oldu (exit 137): ayrıntılı hata satırı üretilemedi
-
-━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
- KRALİ DEVELOPER AGENT
- 20260920-175525
 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 Cline version: 
 Cline doctor:
@@ -117,4 +53,68 @@ npm warn install-scripts   cline@3.0.62 (postinstall: node ./postinstall.mjs || 
 npm warn install-scripts   protobufjs@7.6.6 (postinstall: node scripts/postinstall)
 npm warn install-scripts
 npm warn install-scripts Run `npm install -g --allow-scripts=cline,protobufjs` to allow these scripts once, or `npm config set allow-scripts=cline,protobufjs --location=user` to allow them for all global installs.
+❌ Cline CLI otomatik onarılamadı.
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+ KRALİ DEVELOPER AGENT
+ 20260920-185530
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+⚠️ Global Node.js v26 Cline bağımlılıklarıyla uyumlu değil; izole Node 22 runtime hazırlanıyor.
+==> Downloading bottle manifests
+✔︎ Bottle Manifest node@22 (22.23.2_2)
+==> Would install 1 formula:
+node@22 22.23.2_2
+==> Would install 2 dependencies for node@22:
+libnghttp3
+libngtcp2
+==> Fetching downloads for: node@22
+✔︎ Bottle Manifest libnghttp3 (1.18.0)
+✔︎ Bottle Manifest libngtcp2 (1.25.0)
+✔︎ Bottle libnghttp3 (1.18.0)
+✔︎ Bottle libngtcp2 (1.25.0)
+✔︎ Bottle node@22 (22.23.2_2)
+==> Installing dependencies for node@22: libnghttp3 and libngtcp2
+==> Installing node@22 dependency: libnghttp3
+==> Pouring libnghttp3--1.18.0.arm64_golden_gate.bottle.tar.gz
+🍺  /opt/homebrew/Cellar/libnghttp3/1.18.0: 20 files, 600.7KB
+==> Installing node@22 dependency: libngtcp2
+==> Pouring libngtcp2--1.25.0.arm64_golden_gate.bottle.tar.gz
+🍺  /opt/homebrew/Cellar/libngtcp2/1.25.0: 21 files, 1.4MB
+==> Installing node@22
+Warning: node@22 was installed but not linked because node is already linked.
+To link this version, run:
+  brew link node@22
+==> Pouring node@22--22.23.2_2.arm64_golden_gate.bottle.tar.gz
+🍺  /opt/homebrew/Cellar/node@22/22.23.2_2: 2,140 files, 55MB
+==> Caveats
+==> node@22
+node@22 is keg-only, which means it was not symlinked into /opt/homebrew,
+because this is an alternate version of another formula.
+
+If you need to have node@22 first in your PATH, run:
+  echo 'export PATH="/opt/homebrew/opt/node@22/bin:$PATH"' >> ~/.zshrc
+
+For compilers to find node@22 you may need to set:
+  export LDFLAGS="-L/opt/homebrew/opt/node@22/lib"
+  export CPPFLAGS="-I/opt/homebrew/opt/node@22/include"
+
+The following node@22 executables are shadowed by other linked Homebrew commands:
+  node (shadowed by /opt/homebrew/bin/node from node)
+Running these by name will not invoke the version provided by this formula.
+Run `brew link node@22` to switch the active version to this keg.
+Disable this behaviour by setting `HOMEBREW_NO_PATH_SHADOW_CHECK=1`.
+Hide these hints with `HOMEBREW_NO_ENV_HINTS=1` (see `man brew`).
+✅ Developer Agent runtime: v22.23.2
+⚠️ Cline health probe başarısız. exit=137 output=
+Cline path: /opt/homebrew/bin/cline
+Machine arch: arm64
+/opt/homebrew/bin/cline: a /usr/bin/env node script text executable, ASCII text
+Cline doctor fix deneniyor...
+Cline CLI yeniden kuruluyor: npm install -g --allow-scripts=cline,protobufjs cline@latest
+npm warn deprecated node-domexception@1.0.0: Use your platform's native DOMException instead
+
+changed 329 packages in 18s
+
+47 packages are looking for funding
+  run `npm fund` for details
 ❌ Cline CLI otomatik onarılamadı.
