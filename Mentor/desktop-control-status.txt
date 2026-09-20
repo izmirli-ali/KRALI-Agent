@@ -1,1 +1,1 @@
-runtime_failed|Uygulama bulunamadı: Takvim uygulamasını aç. Yarınki ilk etkinliği bul, başlığını ve saatini bana söyle. Ardından bu etkinlik için 15 dakika öncesine bir hatırlatma eklemeyi hazırla ama benden onay almadan hiçbir değişiklik yapma.
+runtime_failed|Uygulama bulunamadı: takvim
