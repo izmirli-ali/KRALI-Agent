@@ -170,14 +170,20 @@ actor AgentLocalIntelligence {
                         capabilities: capabilities
                     )
 
-                    guard validateMission(
+                    if validateMission(
                         repaired,
                         knownCapabilityIDs: knownIDs
-                    ) else {
+                    ) {
+                        mission = repaired
+                    } else if let fallbackMission =
+                        contractFallbackMission(
+                            userInput: userInput,
+                            capabilities: capabilities
+                        ) {
+                        mission = fallbackMission
+                    } else {
                         return nil
                     }
-
-                    mission = repaired
                 } else {
                     guard let fallbackMission =
                         contractFallbackMission(
@@ -340,7 +346,7 @@ actor AgentLocalIntelligence {
             ],
             requiresUserInput: false,
             userInputReason: nil,
-            confidence: 0.35
+            confidence: 0.65
         )
 
         let repaired = repairMission(
