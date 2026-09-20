@@ -179,13 +179,13 @@ actor AgentLocalIntelligence {
                 İlk mission taslağını şimdi eleştirel olarak denetle.
 
                 Orijinal kullanıcı mesajı:
-                (userInput)
+                \(userInput)
 
                 İlk mission:
-                (missionJSON)
+                \(missionJSON)
 
                 Capability kataloğu:
-                (capabilityCatalog)
+                \(capabilityCatalog)
 
                 Denetim kuralları:
                 - Mission kullanıcının nihai hedefini gerçekten uçtan uca tamamlıyor mu?
