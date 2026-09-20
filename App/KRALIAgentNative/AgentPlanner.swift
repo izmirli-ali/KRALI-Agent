@@ -329,6 +329,30 @@ struct AgentPlanner {
             }
         }
 
+        if goal.outcomes.contains(.transform) &&
+           !steps.contains(where: {
+               normalizeStepTitle($0.title).contains("istenen formata")
+           }) {
+            let transformStep = AgentExecutionStep(
+                title: "İstenen formata dönüştür",
+                detail: "Önceki bağlamda kullanıcının referans verdiği öğeyi seç; yeni alternatifler üretmeden o öğeyi istenen süre, biçim veya yapıya sadık kalarak dönüştür.",
+                kind: .reasoning,
+                capabilityID: "core.reasoning"
+            )
+
+            if let responseIndex = steps.firstIndex(
+                where: { $0.kind == .response }
+            ) {
+                steps.insert(transformStep, at: responseIndex)
+            } else if let verificationIndex = steps.firstIndex(
+                where: { $0.kind == .verification }
+            ) {
+                steps.insert(transformStep, at: verificationIndex)
+            } else {
+                steps.append(transformStep)
+            }
+        }
+
         if goal.outcomes.contains(.ideate) &&
            !steps.contains(where: {
                normalizeStepTitle($0.title).contains("bagimsiz fikir")
