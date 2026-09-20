@@ -404,11 +404,15 @@ final class AgentEngine: ObservableObject {
                         "ChatGPT Subscription sentezi uygulandı"
                     )
                 } else {
+                    let reason = await subscriptionIntelligence
+                        .lastFailureReason()
+
                     intelligenceProviderStatus =
-                        "Analiz/fikir sentezi sağlayıcısı kullanılamadı."
-                    log(
-                        "Analiz/fikir sentezi sağlayıcısı kullanılamadı"
-                    )
+                        reason.map {
+                            "ChatGPT Subscription sentezi kullanılamadı: " + $0
+                        } ?? "Analiz/fikir sentezi sağlayıcısı kullanılamadı."
+
+                    log(intelligenceProviderStatus)
                 }
 
                 completeSynthesisSteps(
@@ -739,6 +743,10 @@ final class AgentEngine: ObservableObject {
                 locale: Locale(identifier: "tr_TR")
             )
             .lowercased()
+            .replacingOccurrences(
+                of: "ı",
+                with: "i"
+            )
 
         return normalized.contains("analiz et") ||
             normalized.contains("bagimsiz fikir")
