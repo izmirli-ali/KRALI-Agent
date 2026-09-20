@@ -130,9 +130,23 @@ struct AgentTaskOrchestrator {
         )
 
         if step.capabilityID ==
-            "core.reasoning" ||
-           step.capabilityID ==
             "context.local" {
+            return .reason
+        }
+
+        if step.capabilityID ==
+            "core.reasoning" {
+            if corpus.contains("analiz") ||
+               corpus.contains("analyze") ||
+               corpus.contains("sentez") ||
+               corpus.contains("synthesize") ||
+               corpus.contains("donustur") ||
+               corpus.contains("transform") ||
+               corpus.contains("ozet") ||
+               corpus.contains("summar") {
+                return .transform
+            }
+
             return .reason
         }
 
