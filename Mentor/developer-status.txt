@@ -1,1 +1,1 @@
-local_model_downloading|Yerel model indiriliyor: qwen2.5-coder:14b-instruct|@meta|app=0.8.50|at=1789929678|run=20260920-214049
+no_change|Diagnostic yeşil; değişiklik gerekmedi|krali-dev-agent/20260920-214049|/Users/medusa/Developer/KRALI-Agent-Dev-20260920-214049|@meta|app=0.8.50|at=1789929833|run=20260920-214049
