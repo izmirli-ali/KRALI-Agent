@@ -419,6 +419,34 @@ struct AgentNaturalLanguageResolver: Sendable {
         return score >= 0.88
     }
 
+    func affirmativeWorkflowText(
+        _ raw: String
+    ) -> String {
+        var value = normalized(raw)
+
+        let prohibitions = [
+            "degistirmeden",
+            "degistirme",
+            "degisiklik yapma",
+            "olusturma",
+            "ekleme",
+            "gonderme",
+            "silme",
+            "kaydetme",
+            "oynatma",
+            "tiklama"
+        ]
+
+        for prohibition in prohibitions {
+            value = value.replacingOccurrences(
+                of: prohibition,
+                with: " "
+            )
+        }
+
+        return value
+    }
+
     func mergedAliases(
         _ groups: [[String]]
     ) -> [String] {
