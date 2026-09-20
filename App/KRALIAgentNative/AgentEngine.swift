@@ -5163,7 +5163,9 @@ final class AgentEngine: ObservableObject {
         guard pendingFileAction != nil else { return }
         pendingFileAction = nil
         log("Bekleyen dosya işlemi kullanıcı tarafından iptal edildi")
-        messages.append(ChatMessage(role: .assistant, text: "Dosya işlemini iptal ettim."))
+        postAssistantMessage(
+            "Dosya işlemini iptal ettim."
+        )
     }
 
     func undoLastFileAction() -> String {
