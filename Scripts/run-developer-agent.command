@@ -148,7 +148,18 @@ const mentorNeedsAttention =
   mentorCurrent &&
   !["passed", "skipped"].includes(String(mentor.verificationState || ""));
 
-if (trainingGreen && liveGreen && arenaGreen && !mentorNeedsAttention) {
+const mentorHasCapabilityGap =
+  mentorCurrent &&
+  Array.isArray(mentor.capabilityGaps) &&
+  mentor.capabilityGaps.length > 0;
+
+if (
+  trainingGreen &&
+  liveGreen &&
+  arenaGreen &&
+  !mentorNeedsAttention &&
+  !mentorHasCapabilityGap
+) {
   process.stdout.write("green");
 } else {
   process.stdout.write("run");
@@ -200,12 +211,20 @@ Değişmez kurallar:
 10. İşin sonunda Scripts/build-check.command çalıştır. Build geçmiyorsa düzeltmeye devam et; geçiremiyorsan durumu açıkça raporla.
 
 Öncelik sırası:
+- Mentor/latest.json içindeki capabilityGaps ve her gap'in developerBrief alanı
 - KRALİ Arena açık-dünya semantic planning / reviewer başarısızlıkları
 - Gerçek Live Eval başarısızlıkları
 - Güncel mentor trace başarısızlıkları
 - Training Lab regression'ları
-- Açık capability gap'leri
 - Son olarak açık ve düşük riskli kalite iyileştirmeleri
+
+Capability Gap kuralları:
+- capabilityGaps boş değilse, testler yeşil olsa bile gap'i "değişiklik gerekmedi" diye atlama.
+- Önce candidateCapabilityIDs ile mevcut generic strategy gerçekten yeterli mi değerlendir.
+- Strategy yeterliyse yeni provider yazmadan generic recipe/strategy geliştir.
+- Yeni kod gerekiyorsa developerBrief kabul kriterlerini esas al.
+- Tek uygulama/marka/örneğe özel hard-code yazma.
+- Main branch'e merge/push yapma; yalnız candidate branch/worktree.
 
 Arena ilkeleri:
 - arena-latest.json içindeki deterministic diagnostic ile AI Reviewer görüşünü ayır.
