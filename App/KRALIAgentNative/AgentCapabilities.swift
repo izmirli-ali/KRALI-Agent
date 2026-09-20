@@ -115,9 +115,17 @@ struct AgentCapabilityRegistry {
             requiresWorkspace: false
         ),
         AgentCapability(
+            id: "desktop.app",
+            name: "Uygulama kontrolü",
+            summary: "Yüklü macOS uygulamasını ada göre bulur, açar veya öne getirir ve sonucu Screen Perception ile doğrular.",
+            risk: .external,
+            isAvailable: true,
+            requiresWorkspace: false
+        ),
+        AgentCapability(
             id: "desktop.control",
-            name: "macOS kontrolü",
-            summary: "Uygulama açma, pencere odaklama, klavye, mouse, clipboard ve sistem arayüzü etkileşimlerini yürütür.",
+            name: "macOS UI kontrolü",
+            summary: "Accessibility / AXUIElement ile menü, buton, alan, klavye, mouse, clipboard ve sistem arayüzü etkileşimlerini yürütür.",
             risk: .external,
             isAvailable: false,
             requiresWorkspace: false
