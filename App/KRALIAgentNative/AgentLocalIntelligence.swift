@@ -331,11 +331,14 @@ actor AgentLocalIntelligence {
         if !requiredIDs.intersection(
             Set([
                 "premiere.control",
-                "photoshop.control",
-                "desktop.control"
+                "photoshop.control"
             ])
         ).isEmpty {
             outcomes.insert("edit")
+        }
+
+        if requiredIDs.contains("files.reveal") {
+            outcomes.insert("open")
         }
 
         let videoEditTask = containsMissionConcept(
