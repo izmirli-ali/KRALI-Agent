@@ -511,7 +511,15 @@ struct AgentTrainingLab {
         let passed =
             result.state == .attention &&
             result.summary.contains(
-                "gerçekten yürütülmedi"
+                "desktop.app"
+            ) &&
+            (
+                result.summary.contains(
+                    "tamamlanmadı"
+                ) ||
+                result.summary.contains(
+                    "gerçekten yürütülmedi"
+                )
             )
 
         return TrainingScenarioResult(
