@@ -540,7 +540,7 @@ struct AgentMissionNormalizer {
                     $0.element.capabilityID
                 )
             }
-            .map(\.element)
+            .map { $0.element }
 
         let required =
             mission.requiredCapabilityIDs
