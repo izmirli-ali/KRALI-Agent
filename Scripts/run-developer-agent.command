@@ -51,12 +51,42 @@ if [ -z "$NPM_BIN" ] || [ -z "$NODE_BIN" ]; then
 fi
 
 NODE_MAJOR="$("$NODE_BIN" -p 'process.versions.node.split(".")[0]' 2>/dev/null || echo 0)"
-if [ "$NODE_MAJOR" -lt 20 ]; then
-    write_status "setup_node_upgrade|Node.js 20+ gerekiyor|brew upgrade node"
-    echo "❌ Node.js sürümü eski: $("$NODE_BIN" -v 2>/dev/null || true)" | tee -a "$LOG"
-    echo "Cline için Node.js 20+ gerekiyor (22+ önerilir)." | tee -a "$LOG"
-    exit 11
-fi
+
+case "$NODE_MAJOR" in
+    20|22|24)
+        ;;
+    *)
+        if [ -n "$BREW_BIN" ]; then
+            write_status "repairing_runtime|Developer Agent için desteklenen Node.js 22 runtime hazırlanıyor"
+            echo "⚠️ Global Node.js v$NODE_MAJOR Cline bağımlılıklarıyla uyumlu değil; izole Node 22 runtime hazırlanıyor." | tee -a "$LOG"
+
+            if ! "$BREW_BIN" list node@22 >/dev/null 2>&1; then
+                if ! "$BREW_BIN" install node@22 >>"$LOG" 2>&1; then
+                    write_status "setup_node_supported|Node.js 22 otomatik kurulamadı; Developer Agent runtime onarımı gerekli"
+                    exit 11
+                fi
+            fi
+
+            NODE22_PREFIX="$("$BREW_BIN" --prefix node@22 2>/dev/null || true)"
+            if [ -z "$NODE22_PREFIX" ]; then
+                write_status "setup_node_supported|Node.js 22 yolu çözülemedi"
+                exit 11
+            fi
+
+            export PATH="$NODE22_PREFIX/bin:$PATH"
+            rehash 2>/dev/null || true
+            NODE_BIN="$(command -v node || true)"
+            NPM_BIN="$(command -v npm || true)"
+            NODE_MAJOR="$("$NODE_BIN" -p 'process.versions.node.split(".")[0]' 2>/dev/null || echo 0)"
+            echo "✅ Developer Agent runtime: $("$NODE_BIN" -v 2>/dev/null || true)" | tee -a "$LOG"
+        else
+            write_status "setup_node_supported|Developer Agent için Node.js 20/22/24 gerekiyor"
+            exit 11
+        fi
+        ;;
+esac
+
+NODE_RUNTIME_BIN_DIR="$(dirname "$NODE_BIN")"
 
 CLINE_BIN="$(command -v cline || true)"
 PROVIDER="${KRALI_DEV_PROVIDER:-openai-codex}"
@@ -98,10 +128,10 @@ repair_cline() {
         return 0
     fi
 
-    echo "Cline CLI yeniden kuruluyor: npm install -g cline@latest" | tee -a "$LOG"
-    write_status "repairing_cline|Cline CLI yeniden kuruluyor; kullanıcı müdahalesi gerekmiyor"
+    echo "Cline CLI yeniden kuruluyor: npm install -g --allow-scripts=cline,protobufjs cline@latest" | tee -a "$LOG"
+    write_status "repairing_cline|Cline CLI resmi paketle ve gerekli install script izinleriyle yeniden kuruluyor"
 
-    if ! "$NPM_BIN" install -g cline@latest >>"$LOG" 2>&1; then
+    if ! "$NPM_BIN" install -g --allow-scripts=cline,protobufjs cline@latest >>"$LOG" 2>&1; then
         return 1
     fi
 
@@ -171,7 +201,7 @@ NODE
 
         cat > "$AUTH_SCRIPT" <<EOF
 #!/bin/zsh
-export PATH="/opt/homebrew/bin:/usr/local/bin:$HOME/.npm-global/bin:/usr/bin:/bin:/usr/sbin:/sbin:\$PATH"
+export PATH="$NODE_RUNTIME_BIN_DIR:/opt/homebrew/bin:/usr/local/bin:$HOME/.npm-global/bin:/usr/bin:/bin:/usr/sbin:/sbin:\$PATH"
 
 echo ""
 echo "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"

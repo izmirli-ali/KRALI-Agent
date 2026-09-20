@@ -17,7 +17,8 @@ struct DeveloperAgentStatus: Hashable {
             "running",
             "retrying",
             "verifying",
-            "repairing_cline"
+            "repairing_cline",
+            "repairing_runtime"
         ].contains(state)
     }
 
@@ -42,6 +43,8 @@ struct DeveloperAgentStatus: Hashable {
             return "Adayı doğruluyor"
         case "repairing_cline":
             return "Cline onarılıyor"
+        case "repairing_runtime":
+            return "Runtime hazırlanıyor"
         case "ready_for_review":
             return "Öğrenme adayı hazır"
         case "build_failed":
@@ -60,6 +63,7 @@ struct DeveloperAgentStatus: Hashable {
             "setup_homebrew",
             "setup_node_upgrade",
             "setup_cline",
+            "setup_node_supported",
             "setup_cline_repair",
             "setup_cline_auth",
             "waiting_cline_auth"
@@ -74,6 +78,8 @@ struct DeveloperAgentStatus: Hashable {
             return "Önce Homebrew kur; ardından brew install node"
         case "setup_node_upgrade":
             return "Node.js 20+ gerekiyor; Homebrew kullanıyorsan brew upgrade node"
+        case "setup_node_supported":
+            return "Developer Agent için desteklenen Node.js runtime hazırlanamadı."
         case "waiting_cline_auth":
             return "Cline giriş penceresi otomatik açıldı; tarayıcıdaki girişi tamamla."
         case "setup_cline_repair":
@@ -84,6 +90,228 @@ struct DeveloperAgentStatus: Hashable {
             return "Terminal: npm install -g cline → cline auth openai-codex"
         default:
             return nil
+        }
+    }
+}
+
+enum AgentDebugKind: String, Hashable {
+    case dependency
+    case authentication
+    case permission
+    case providerRuntime
+    case verificationMismatch
+    case externalState
+    case unknown
+
+    var title: String {
+        switch self {
+        case .dependency:
+            return "Bağımlılık"
+        case .authentication:
+            return "Kimlik doğrulama"
+        case .permission:
+            return "İzin"
+        case .providerRuntime:
+            return "Provider / Runtime"
+        case .verificationMismatch:
+            return "Doğrulama uyuşmazlığı"
+        case .externalState:
+            return "Dış durum"
+        case .unknown:
+            return "Bilinmeyen hata"
+        }
+    }
+
+    var systemImage: String {
+        switch self {
+        case .dependency:
+            return "shippingbox"
+        case .authentication:
+            return "person.badge.key"
+        case .permission:
+            return "lock.trianglebadge.exclamationmark"
+        case .providerRuntime:
+            return "terminal"
+        case .verificationMismatch:
+            return "checkmark.circle.trianglebadge.exclamationmark"
+        case .externalState:
+            return "arrow.triangle.2.circlepath"
+        case .unknown:
+            return "questionmark.circle"
+        }
+    }
+}
+
+enum AgentDebugProgress: String, Hashable {
+    case investigating
+    case recovering
+    case recovered
+    case escalated
+
+    var title: String {
+        switch self {
+        case .investigating:
+            return "Hata ayıklanıyor"
+        case .recovering:
+            return "Recovery uygulanıyor"
+        case .recovered:
+            return "Düzeldi"
+        case .escalated:
+            return "Geliştirmeye yükseltildi"
+        }
+    }
+
+    var isActive: Bool {
+        self == .investigating ||
+        self == .recovering
+    }
+}
+
+struct AgentDebugIncident: Identifiable, Hashable {
+    let id: UUID
+    let createdAt: Date
+    let source: String
+    let kind: AgentDebugKind
+    let progress: AgentDebugProgress
+    let summary: String
+    let evidence: String?
+    let recoveryPlan: String
+    let attempt: Int
+
+    init(
+        source: String,
+        kind: AgentDebugKind,
+        progress: AgentDebugProgress,
+        summary: String,
+        evidence: String? = nil,
+        recoveryPlan: String,
+        attempt: Int = 1
+    ) {
+        self.id = UUID()
+        self.createdAt = Date()
+        self.source = source
+        self.kind = kind
+        self.progress = progress
+        self.summary = summary
+        self.evidence = evidence
+        self.recoveryPlan = recoveryPlan
+        self.attempt = attempt
+    }
+}
+
+struct AgentDebugRecoveryCenter {
+    func classify(
+        source: String,
+        message: String,
+        evidence: String? = nil,
+        exitCode: Int? = nil,
+        progress: AgentDebugProgress = .investigating
+    ) -> AgentDebugIncident {
+        let text = (
+            source + " " +
+            message + " " +
+            (evidence ?? "")
+        ).lowercased()
+
+        let kind: AgentDebugKind
+
+        if text.contains("oauth") ||
+           text.contains("auth") ||
+           text.contains("login") ||
+           text.contains("sign in") {
+            kind = .authentication
+        } else if text.contains("permission") ||
+                  text.contains("not authorized") ||
+                  text.contains("accessibility") ||
+                  text.contains("izin") {
+            kind = .permission
+        } else if text.contains("node") ||
+                  text.contains("npm") ||
+                  text.contains("dependency") ||
+                  text.contains("package") ||
+                  text.contains("install") ||
+                  text.contains("engine") ||
+                  text.contains("module") {
+            kind = .dependency
+        } else if exitCode == 137 ||
+                  text.contains("sigkill") ||
+                  text.contains("killed") ||
+                  text.contains("timeout") ||
+                  text.contains("provider") ||
+                  text.contains("runtime") {
+            kind = .providerRuntime
+        } else if text.contains("foreground=false") ||
+                  text.contains("doğrulanamad") ||
+                  text.contains("verification") ||
+                  text.contains("verify") {
+            kind = .verificationMismatch
+        } else if text.contains("window") ||
+                  text.contains("state") ||
+                  text.contains("external") {
+            kind = .externalState
+        } else {
+            kind = .unknown
+        }
+
+        return AgentDebugIncident(
+            source: source,
+            kind: kind,
+            progress: progress,
+            summary: message,
+            evidence: evidence,
+            recoveryPlan: recoveryPlan(for: kind),
+            attempt: 1
+        )
+    }
+
+    func recovered(
+        from incident: AgentDebugIncident,
+        summary: String
+    ) -> AgentDebugIncident {
+        AgentDebugIncident(
+            source: incident.source,
+            kind: incident.kind,
+            progress: .recovered,
+            summary: summary,
+            evidence: incident.evidence,
+            recoveryPlan: incident.recoveryPlan,
+            attempt: incident.attempt
+        )
+    }
+
+    func escalated(
+        from incident: AgentDebugIncident,
+        summary: String
+    ) -> AgentDebugIncident {
+        AgentDebugIncident(
+            source: incident.source,
+            kind: incident.kind,
+            progress: .escalated,
+            summary: summary,
+            evidence: incident.evidence,
+            recoveryPlan: incident.recoveryPlan,
+            attempt: incident.attempt
+        )
+    }
+
+    private func recoveryPlan(
+        for kind: AgentDebugKind
+    ) -> String {
+        switch kind {
+        case .dependency:
+            return "Runtime/dependency sürümünü doğrula → güvenli self-heal uygula → health probe ile tekrar doğrula."
+        case .authentication:
+            return "Credential durumunu doğrula → gerekli kullanıcı girişini başlat → provider probe'u yeniden çalıştır."
+        case .permission:
+            return "İzin durumunu doğrula → yalnız gereken izni iste → aynı postcondition'ı tekrar ölç."
+        case .providerRuntime:
+            return "Provider health probe → tek kontrollü retry → uygun fallback → hâlâ başarısızsa Developer Agent."
+        case .verificationMismatch:
+            return "Gerçek observation'ı yeniden al → beklenen postcondition ile karşılaştır → alternatif verifier dene → sahte PASS verme."
+        case .externalState:
+            return "Dış uygulama/durum değişimini yeniden gözle → state'i tazele → görevi idempotent biçimde tekrar planla."
+        case .unknown:
+            return "Kanıt topla → minimal failure sınıfını belirle → güvenli retry veya Developer Agent'a yükselt."
         }
     }
 }

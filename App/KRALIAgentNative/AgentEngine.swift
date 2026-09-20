@@ -67,6 +67,7 @@ final class AgentEngine: ObservableObject {
         worktree: nil
     )
     @Published var developerAgentBusy = false
+    @Published var debugIncident: AgentDebugIncident?
     @Published var localIntelligenceState: LocalIntelligenceState = .checking
     @Published var intelligenceProviderStatus = "Sentez sağlayıcısı henüz kullanılmadı."
 
@@ -112,6 +113,7 @@ final class AgentEngine: ObservableObject {
     private let desktopControlStore = DesktopControlProbeStore()
     private let textFileWriter = AgentTextFileWriter()
     private let developerBridge = AgentDeveloperBridge()
+    private let debugRecoveryCenter = AgentDebugRecoveryCenter()
     private let localIntelligence = AgentLocalIntelligence()
     private let subscriptionIntelligence = AgentSubscriptionIntelligence()
     private let contextMemoryStore = AgentContextMemoryStore()
@@ -933,6 +935,17 @@ final class AgentEngine: ObservableObject {
             }
         }
 
+        if finalVerification.state == .attention &&
+           currentCapabilityGaps.isEmpty &&
+           debugIncident == nil {
+            registerDebugIncident(
+                source: "verifier",
+                message: finalVerification.summary,
+                evidence: finalVerification.fallback,
+                progress: .investigating
+            )
+        }
+
         let replyWithSuggestion = appendSuggestion(
             to: finalBaseReply,
             suggestion: decision.proactiveSuggestion
@@ -1720,6 +1733,17 @@ final class AgentEngine: ObservableObject {
                                 stepIndex
                             )
                     } else {
+                        let debugMessage =
+                            result.resolvedApplicationName +
+                            " uygulaması için foreground postcondition doğrulanamadı."
+
+                        registerDebugIncident(
+                            source: "desktop.app",
+                            message: debugMessage,
+                            evidence: appEvidence,
+                            progress: .investigating
+                        )
+
                         outputs.append(
                             result
                                 .resolvedApplicationName +
@@ -1735,6 +1759,12 @@ final class AgentEngine: ObservableObject {
                             "runtime_failed|" +
                             error.localizedDescription
                         )
+                    registerDebugIncident(
+                        source: "desktop.app",
+                        message: desktopControlStatus,
+                        evidence: error.localizedDescription,
+                        progress: .investigating
+                    )
                     log(
                         desktopControlStatus
                     )
@@ -2139,6 +2169,7 @@ final class AgentEngine: ObservableObject {
         verificationSummary = "Yeni görev için doğrulama bekleniyor."
         fallbackPlan = nil
         recoverySummary = nil
+        debugIncident = nil
         webResearchResults = []
         webResearchEvidence = []
         webResearchStatus = "Bu tur için araştırma henüz başlamadı."
@@ -3166,6 +3197,13 @@ final class AgentEngine: ObservableObject {
                 mentorTraceStatus =
                     "Screen Perception hata raporu hazır • Mentora gönderilebilir"
 
+                registerDebugIncident(
+                    source: "perception.screen",
+                    message: screenPerceptionStatus,
+                    evidence: error.localizedDescription,
+                    progress: .investigating
+                )
+
                 log(screenPerceptionStatus)
             }
 
@@ -3242,6 +3280,13 @@ final class AgentEngine: ObservableObject {
                 mentorTraceStatus =
                     "Desktop Control hata raporu hazır • Mentora gönderilebilir"
 
+                registerDebugIncident(
+                    source: "desktop.app",
+                    message: desktopControlStatus,
+                    evidence: error.localizedDescription,
+                    progress: .investigating
+                )
+
                 log(desktopControlStatus)
             }
 
@@ -3272,6 +3317,16 @@ final class AgentEngine: ObservableObject {
                     let liveStatus = self.developerBridge.readStatus()
                     if liveStatus.state != "idle" {
                         self.developerAgentStatus = liveStatus
+
+                        if liveStatus.state == "repairing_cline" ||
+                           liveStatus.state == "repairing_runtime" {
+                            self.registerDebugIncident(
+                                source: "Developer Agent",
+                                message: liveStatus.message,
+                                evidence: liveStatus.state,
+                                progress: .recovering
+                            )
+                        }
                     }
 
                     try? await Task.sleep(
@@ -3288,31 +3343,112 @@ final class AgentEngine: ObservableObject {
 
             switch status.state {
             case "ready_for_review":
+                resolveDebugIncident(
+                    summary:
+                        "Developer Agent recovery/öğrenme adayını build doğrulamasından geçirdi."
+                )
                 log(
                     "Developer Agent adayı incelemeye hazır: " +
                     (status.branch ?? "branch bilinmiyor")
                 )
 
             case "no_change":
+                resolveDebugIncident(
+                    summary:
+                        "Diagnostic recovery gerektirmedi; mevcut sistem sağlıklı."
+                )
                 log("Developer Agent değişiklik gerekmedi sonucuna vardı")
 
             case "setup_required",
                  "setup_node",
                  "setup_homebrew",
                  "setup_node_upgrade",
-                 "setup_cline":
-                log("Developer Agent kurulumu tamamlanmalı")
+                 "setup_node_supported",
+                 "setup_cline",
+                 "setup_cline_repair",
+                 "setup_cline_auth":
+                registerDebugIncident(
+                    source: "Developer Agent",
+                    message: status.message,
+                    evidence: status.state,
+                    progress: .escalated
+                )
+                log("Developer Agent kurulumu/recovery tamamlanmalı")
 
             case "build_failed":
+                registerDebugIncident(
+                    source: "Developer Agent",
+                    message: status.message,
+                    evidence: status.branch,
+                    progress: .escalated
+                )
                 log(
                     "Developer Agent adayı build geçmedi: " +
                     (status.branch ?? "branch bilinmiyor")
                 )
 
+            case "failed":
+                registerDebugIncident(
+                    source: "Developer Agent",
+                    message: status.message,
+                    evidence: status.state,
+                    exitCode:
+                        status.message.contains("137")
+                            ? 137
+                            : nil,
+                    progress: .escalated
+                )
+                log("Developer Agent durumu: " + status.message)
+
             default:
                 log("Developer Agent durumu: " + status.message)
             }
         }
+    }
+
+    private func registerDebugIncident(
+        source: String,
+        message: String,
+        evidence: String? = nil,
+        exitCode: Int? = nil,
+        progress: AgentDebugProgress
+    ) {
+        let incident = debugRecoveryCenter.classify(
+            source: source,
+            message: message,
+            evidence: evidence,
+            exitCode: exitCode,
+            progress: progress
+        )
+
+        debugIncident = incident
+
+        log(
+            "Debug/Recovery: " +
+            incident.kind.title +
+            " • " +
+            incident.progress.title +
+            " • " +
+            incident.source
+        )
+    }
+
+    private func resolveDebugIncident(
+        summary: String
+    ) {
+        guard let incident = debugIncident else {
+            return
+        }
+
+        debugIncident = debugRecoveryCenter.recovered(
+            from: incident,
+            summary: summary
+        )
+
+        log(
+            "Debug/Recovery düzeldi: " +
+            incident.source
+        )
     }
 
     func syncMentorTrace() {
