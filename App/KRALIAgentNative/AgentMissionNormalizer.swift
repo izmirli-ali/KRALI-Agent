@@ -203,6 +203,52 @@ struct AgentMissionNormalizer {
                 ]
             )
 
+        let specializedAppDomain =
+            mailDomain ||
+            containsAny(
+                corpus,
+                [
+                    "premiere",
+                    "photoshop",
+                    "tarayici",
+                    "tarayıcı",
+                    "web sitesi",
+                    "siteye gir"
+                ]
+            )
+
+        let genericAppWorkflow =
+            appOpen &&
+            !specializedAppDomain &&
+            containsAny(
+                corpus,
+                [
+                    "bul",
+                    "oku",
+                    "incele",
+                    "listele",
+                    "soyle",
+                    "söyle",
+                    "goster",
+                    "göster",
+                    "sec",
+                    "seç",
+                    "ekle",
+                    "hazirla",
+                    "hazırla",
+                    "ayarla",
+                    "degistir",
+                    "değiştir",
+                    "hatirlatma",
+                    "hatırlatma",
+                    "etkinlik",
+                    "randevu",
+                    "mesaj",
+                    "sarki",
+                    "şarkı"
+                ]
+            )
+
         let compoundFacetCount = [
             appOpen,
             appContentRead,
@@ -212,7 +258,8 @@ struct AgentMissionNormalizer {
             namedLocalTarget,
             mailRead,
             mailDraft,
-            mailSend
+            mailSend,
+            genericAppWorkflow
         ]
         .filter { $0 }
         .count
@@ -301,6 +348,23 @@ struct AgentMissionNormalizer {
             }
 
             outcomes.insert("communicate")
+        } else if genericAppWorkflow {
+            append(
+                title: "Uygulama içi hedefi yürüt",
+                purpose:
+                    "Uygulamayı açmanın ötesindeki kullanıcı hedefini çöz: gerekli veriyi oku/bul, sonucu doğrula ve istenen değişiklik yalnız hazırlık düzeyindeyse dış dünyaya commit etmeden hazırla. Özel provider yoksa bu generic contract yeni strategy/provider öğrenimini tetiklemeli.",
+                capabilityID: "app.workflow",
+                operation: "app.workflow.execute",
+                dependsOn:
+                    latestDataStep.map { [$0] } ?? []
+            )
+
+            if !steps.isEmpty {
+                latestDataStep =
+                    steps.count - 1
+            }
+
+            outcomes.insert("analyze")
         } else if appContentRead {
             append(
                 title: "Uygulamadaki mevcut içeriği oku",
