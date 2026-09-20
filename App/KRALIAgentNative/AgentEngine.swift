@@ -3197,6 +3197,13 @@ final class AgentEngine: ObservableObject {
                 mentorTraceStatus =
                     "Screen Perception hata raporu hazır • Mentora gönderilebilir"
 
+                registerDebugIncident(
+                    source: "perception.screen",
+                    message: screenPerceptionStatus,
+                    evidence: error.localizedDescription,
+                    progress: .investigating
+                )
+
                 log(screenPerceptionStatus)
             }
 
@@ -3272,6 +3279,13 @@ final class AgentEngine: ObservableObject {
                 mentorTraceReady = true
                 mentorTraceStatus =
                     "Desktop Control hata raporu hazır • Mentora gönderilebilir"
+
+                registerDebugIncident(
+                    source: "desktop.app",
+                    message: desktopControlStatus,
+                    evidence: error.localizedDescription,
+                    progress: .investigating
+                )
 
                 log(desktopControlStatus)
             }
@@ -3362,6 +3376,12 @@ final class AgentEngine: ObservableObject {
                 log("Developer Agent kurulumu/recovery tamamlanmalı")
 
             case "build_failed":
+                registerDebugIncident(
+                    source: "Developer Agent",
+                    message: status.message,
+                    evidence: status.branch,
+                    progress: .escalated
+                )
                 log(
                     "Developer Agent adayı build geçmedi: " +
                     (status.branch ?? "branch bilinmiyor")
