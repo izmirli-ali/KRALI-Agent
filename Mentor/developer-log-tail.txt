@@ -1,120 +1,120 @@
-(node:28445) Warning: AI SDK Warning (openai-codex.responses / gpt-5.6-sol): Non-OpenAI reasoning parts are not supported. Skipping reasoning part: {"type":"reasoning","text":"**Inspecting registry executor files**"}.
-(node:28445) Warning: AI SDK Warning (openai-codex.responses / gpt-5.6-sol): Non-OpenAI reasoning parts are not supported. Skipping reasoning part: {"type":"reasoning","text":"**Planning engine inspection**"}.
-(node:28445) Warning: AI SDK Warning (openai-codex.responses / gpt-5.6-sol): Non-OpenAI reasoning parts are not supported. Skipping reasoning part: {"type":"reasoning","text":"**Inspecting executor 1288-1900**"}.
-(node:28445) Warning: AI SDK Warning (openai-codex.responses / gpt-5.6-sol): Non-OpenAI reasoning parts are not supported. Skipping reasoning part: {"type":"reasoning","text":"**Inspecting missing middle cases**"}.
-KRALI_STAGE sdk_tools_running • Uygulama içi iş akışı (app.workflow) için araç çalışıyor: read_files
-KRALI_STAGE sdk_tool_completed • Uygulama içi iş akışı (app.workflow) araç adımı tamamlandı: read_files
-KRALI_STAGE sdk_tools_running • Uygulama içi iş akışı (app.workflow) için araç çalışıyor: search_codebase
-KRALI_STAGE sdk_tool_completed • Uygulama içi iş akışı (app.workflow) araç adımı tamamlandı: search_codebase
-(node:28445) Warning: AI SDK Warning (openai-codex.responses / gpt-5.6-sol): Non-OpenAI reasoning parts are not supported. Skipping reasoning part: {"type":"reasoning","text":"**Planning code inspection and connections**"}.
-(node:28445) Warning: AI SDK Warning (openai-codex.responses / gpt-5.6-sol): Non-OpenAI reasoning parts are not supported. Skipping reasoning part: {"type":"reasoning","text":"**Inspecting registry executor files**"}.
-(node:28445) Warning: AI SDK Warning (openai-codex.responses / gpt-5.6-sol): Non-OpenAI reasoning parts are not supported. Skipping reasoning part: {"type":"reasoning","text":"**Planning engine inspection**"}.
-(node:28445) Warning: AI SDK Warning (openai-codex.responses / gpt-5.6-sol): Non-OpenAI reasoning parts are not supported. Skipping reasoning part: {"type":"reasoning","text":"**Inspecting executor 1288-1900**"}.
-(node:28445) Warning: AI SDK Warning (openai-codex.responses / gpt-5.6-sol): Non-OpenAI reasoning parts are not supported. Skipping reasoning part: {"type":"reasoning","text":"**Inspecting missing middle cases**"}.
-(node:28445) Warning: AI SDK Warning (openai-codex.responses / gpt-5.6-sol): Non-OpenAI reasoning parts are not supported. Skipping reasoning part: {"type":"reasoning","text":"**Designing desktop app observation strategy****Planning read-only calendar observation strategy****Assessing runtime reasoning availability**"}.
-KRALI_STAGE sdk_tools_running • Uygulama içi iş akışı (app.workflow) için araç çalışıyor: run_commands
-KRALI_STAGE sdk_tools_running • Uygulama içi iş akışı (app.workflow) araç çıktısı güncelleniyor: run_commands
-KRALI_STAGE sdk_tools_running • Uygulama içi iş akışı (app.workflow) araç çıktısı güncelleniyor: run_commands
-KRALI_STAGE sdk_tools_running • Uygulama içi iş akışı (app.workflow) araç çıktısı güncelleniyor: run_commands
-KRALI_STAGE sdk_tool_completed • Uygulama içi iş akışı (app.workflow) araç adımı tamamlandı: run_commands
-KRALI_STAGE sdk_tools_running • Uygulama içi iş akışı (app.workflow) için araç çalışıyor: read_files
-KRALI_STAGE sdk_tool_completed • Uygulama içi iş akışı (app.workflow) araç adımı tamamlandı: read_files
-KRALI_STAGE sdk_tools_running • Uygulama içi iş akışı (app.workflow) için araç çalışıyor: search_codebase
-KRALI_STAGE sdk_tool_completed • Uygulama içi iş akışı (app.workflow) araç adımı tamamlandı: search_codebase
-(node:28445) Warning: AI SDK Warning (openai-codex.responses / gpt-5.6-sol): Non-OpenAI reasoning parts are not supported. Skipping reasoning part: {"type":"reasoning","text":"**Planning code inspection and connections**"}.
-(node:28445) Warning: AI SDK Warning (openai-codex.responses / gpt-5.6-sol): Non-OpenAI reasoning parts are not supported. Skipping reasoning part: {"type":"reasoning","text":"**Inspecting registry executor files**"}.
-(node:28445) Warning: AI SDK Warning (openai-codex.responses / gpt-5.6-sol): Non-OpenAI reasoning parts are not supported. Skipping reasoning part: {"type":"reasoning","text":"**Planning engine inspection**"}.
-(node:28445) Warning: AI SDK Warning (openai-codex.responses / gpt-5.6-sol): Non-OpenAI reasoning parts are not supported. Skipping reasoning part: {"type":"reasoning","text":"**Inspecting executor 1288-1900**"}.
-(node:28445) Warning: AI SDK Warning (openai-codex.responses / gpt-5.6-sol): Non-OpenAI reasoning parts are not supported. Skipping reasoning part: {"type":"reasoning","text":"**Inspecting missing middle cases**"}.
-(node:28445) Warning: AI SDK Warning (openai-codex.responses / gpt-5.6-sol): Non-OpenAI reasoning parts are not supported. Skipping reasoning part: {"type":"reasoning","text":"**Designing desktop app observation strategy****Planning read-only calendar observation strategy****Assessing runtime reasoning availability**"}.
-(node:28445) Warning: AI SDK Warning (openai-codex.responses / gpt-5.6-sol): Non-OpenAI reasoning parts are not supported. Skipping reasoning part: {"type":"reasoning","text":"**Planning virtual reminder strategy****Designing dynamic strategy availability checks****Defining conditional strategy availability****Planning reusable executor guard strategy**"}.
-KRALI_STAGE sdk_tools_running • Uygulama içi iş akışı (app.workflow) için araç çalışıyor: search_codebase
-KRALI_STAGE sdk_tool_completed • Uygulama içi iş akışı (app.workflow) araç adımı tamamlandı: search_codebase
-(node:28445) Warning: AI SDK Warning (openai-codex.responses / gpt-5.6-sol): Non-OpenAI reasoning parts are not supported. Skipping reasoning part: {"type":"reasoning","text":"**Planning code inspection and connections**"}.
-(node:28445) Warning: AI SDK Warning (openai-codex.responses / gpt-5.6-sol): Non-OpenAI reasoning parts are not supported. Skipping reasoning part: {"type":"reasoning","text":"**Inspecting registry executor files**"}.
-(node:28445) Warning: AI SDK Warning (openai-codex.responses / gpt-5.6-sol): Non-OpenAI reasoning parts are not supported. Skipping reasoning part: {"type":"reasoning","text":"**Planning engine inspection**"}.
-(node:28445) Warning: AI SDK Warning (openai-codex.responses / gpt-5.6-sol): Non-OpenAI reasoning parts are not supported. Skipping reasoning part: {"type":"reasoning","text":"**Inspecting executor 1288-1900**"}.
-(node:28445) Warning: AI SDK Warning (openai-codex.responses / gpt-5.6-sol): Non-OpenAI reasoning parts are not supported. Skipping reasoning part: {"type":"reasoning","text":"**Inspecting missing middle cases**"}.
-(node:28445) Warning: AI SDK Warning (openai-codex.responses / gpt-5.6-sol): Non-OpenAI reasoning parts are not supported. Skipping reasoning part: {"type":"reasoning","text":"**Designing desktop app observation strategy****Planning read-only calendar observation strategy****Assessing runtime reasoning availability**"}.
-(node:28445) Warning: AI SDK Warning (openai-codex.responses / gpt-5.6-sol): Non-OpenAI reasoning parts are not supported. Skipping reasoning part: {"type":"reasoning","text":"**Planning virtual reminder strategy****Designing dynamic strategy availability checks****Defining conditional strategy availability****Planning reusable executor guard strategy**"}.
-(node:28445) Warning: AI SDK Warning (openai-codex.responses / gpt-5.6-sol): Non-OpenAI reasoning parts are not supported. Skipping reasoning part: {"type":"reasoning","text":"**Planning read-only AX exploration**"}.
-KRALI_STAGE sdk_tools_running • Uygulama içi iş akışı (app.workflow) için araç çalışıyor: read_files
-KRALI_STAGE sdk_tool_completed • Uygulama içi iş akışı (app.workflow) araç adımı tamamlandı: read_files
-(node:28445) Warning: AI SDK Warning (openai-codex.responses / gpt-5.6-sol): Non-OpenAI reasoning parts are not supported. Skipping reasoning part: {"type":"reasoning","text":"**Planning code inspection and connections**"}.
-(node:28445) Warning: AI SDK Warning (openai-codex.responses / gpt-5.6-sol): Non-OpenAI reasoning parts are not supported. Skipping reasoning part: {"type":"reasoning","text":"**Inspecting registry executor files**"}.
-(node:28445) Warning: AI SDK Warning (openai-codex.responses / gpt-5.6-sol): Non-OpenAI reasoning parts are not supported. Skipping reasoning part: {"type":"reasoning","text":"**Planning engine inspection**"}.
-(node:28445) Warning: AI SDK Warning (openai-codex.responses / gpt-5.6-sol): Non-OpenAI reasoning parts are not supported. Skipping reasoning part: {"type":"reasoning","text":"**Inspecting executor 1288-1900**"}.
-(node:28445) Warning: AI SDK Warning (openai-codex.responses / gpt-5.6-sol): Non-OpenAI reasoning parts are not supported. Skipping reasoning part: {"type":"reasoning","text":"**Inspecting missing middle cases**"}.
-(node:28445) Warning: AI SDK Warning (openai-codex.responses / gpt-5.6-sol): Non-OpenAI reasoning parts are not supported. Skipping reasoning part: {"type":"reasoning","text":"**Designing desktop app observation strategy****Planning read-only calendar observation strategy****Assessing runtime reasoning availability**"}.
-(node:28445) Warning: AI SDK Warning (openai-codex.responses / gpt-5.6-sol): Non-OpenAI reasoning parts are not supported. Skipping reasoning part: {"type":"reasoning","text":"**Planning virtual reminder strategy****Designing dynamic strategy availability checks****Defining conditional strategy availability****Planning reusable executor guard strategy**"}.
-(node:28445) Warning: AI SDK Warning (openai-codex.responses / gpt-5.6-sol): Non-OpenAI reasoning parts are not supported. Skipping reasoning part: {"type":"reasoning","text":"**Planning read-only AX exploration**"}.
-(node:28445) Warning: AI SDK Warning (openai-codex.responses / gpt-5.6-sol): Non-OpenAI reasoning parts are not supported. Skipping reasoning part: {"type":"reasoning","text":"**Planning read-only calendar observation****Designing app workflow evidence verification****Implementing strict extraction via reasoning step****Identifying approval logic bug with commit terms****Planning approval semantic refinement**"}.
-KRALI_STAGE sdk_tools_running • Uygulama içi iş akışı (app.workflow) için araç çalışıyor: search_codebase
-KRALI_STAGE sdk_tool_completed • Uygulama içi iş akışı (app.workflow) araç adımı tamamlandı: search_codebase
-(node:28445) Warning: AI SDK Warning (openai-codex.responses / gpt-5.6-sol): Non-OpenAI reasoning parts are not supported. Skipping reasoning part: {"type":"reasoning","text":"**Planning code inspection and connections**"}.
-(node:28445) Warning: AI SDK Warning (openai-codex.responses / gpt-5.6-sol): Non-OpenAI reasoning parts are not supported. Skipping reasoning part: {"type":"reasoning","text":"**Inspecting registry executor files**"}.
-(node:28445) Warning: AI SDK Warning (openai-codex.responses / gpt-5.6-sol): Non-OpenAI reasoning parts are not supported. Skipping reasoning part: {"type":"reasoning","text":"**Planning engine inspection**"}.
-(node:28445) Warning: AI SDK Warning (openai-codex.responses / gpt-5.6-sol): Non-OpenAI reasoning parts are not supported. Skipping reasoning part: {"type":"reasoning","text":"**Inspecting executor 1288-1900**"}.
-(node:28445) Warning: AI SDK Warning (openai-codex.responses / gpt-5.6-sol): Non-OpenAI reasoning parts are not supported. Skipping reasoning part: {"type":"reasoning","text":"**Inspecting missing middle cases**"}.
-(node:28445) Warning: AI SDK Warning (openai-codex.responses / gpt-5.6-sol): Non-OpenAI reasoning parts are not supported. Skipping reasoning part: {"type":"reasoning","text":"**Designing desktop app observation strategy****Planning read-only calendar observation strategy****Assessing runtime reasoning availability**"}.
-(node:28445) Warning: AI SDK Warning (openai-codex.responses / gpt-5.6-sol): Non-OpenAI reasoning parts are not supported. Skipping reasoning part: {"type":"reasoning","text":"**Planning virtual reminder strategy****Designing dynamic strategy availability checks****Defining conditional strategy availability****Planning reusable executor guard strategy**"}.
-(node:28445) Warning: AI SDK Warning (openai-codex.responses / gpt-5.6-sol): Non-OpenAI reasoning parts are not supported. Skipping reasoning part: {"type":"reasoning","text":"**Planning read-only AX exploration**"}.
-(node:28445) Warning: AI SDK Warning (openai-codex.responses / gpt-5.6-sol): Non-OpenAI reasoning parts are not supported. Skipping reasoning part: {"type":"reasoning","text":"**Planning read-only calendar observation****Designing app workflow evidence verification****Implementing strict extraction via reasoning step****Identifying approval logic bug with commit terms****Planning approval semantic refinement**"}.
-(node:28445) Warning: AI SDK Warning (openai-codex.responses / gpt-5.6-sol): Non-OpenAI reasoning parts are not supported. Skipping reasoning part: {"type":"reasoning","text":"**Planning reminder extraction strategy****Designing AppWorkflowStrategy implementation****Planning structured evidence validation****Implementing new provider file and validation method****Designing AppWorkflowExtraction and validation logic****Creating AgentAppWorkflowStrategy with static validation****Searching for app CLI arguments**"}.
-KRALI_STAGE sdk_tools_running • Uygulama içi iş akışı (app.workflow) için araç çalışıyor: search_codebase
-KRALI_STAGE sdk_tool_completed • Uygulama içi iş akışı (app.workflow) araç adımı tamamlandı: search_codebase
-(node:28445) Warning: AI SDK Warning (openai-codex.responses / gpt-5.6-sol): Non-OpenAI reasoning parts are not supported. Skipping reasoning part: {"type":"reasoning","text":"**Planning code inspection and connections**"}.
-(node:28445) Warning: AI SDK Warning (openai-codex.responses / gpt-5.6-sol): Non-OpenAI reasoning parts are not supported. Skipping reasoning part: {"type":"reasoning","text":"**Inspecting registry executor files**"}.
-(node:28445) Warning: AI SDK Warning (openai-codex.responses / gpt-5.6-sol): Non-OpenAI reasoning parts are not supported. Skipping reasoning part: {"type":"reasoning","text":"**Planning engine inspection**"}.
-(node:28445) Warning: AI SDK Warning (openai-codex.responses / gpt-5.6-sol): Non-OpenAI reasoning parts are not supported. Skipping reasoning part: {"type":"reasoning","text":"**Inspecting executor 1288-1900**"}.
-(node:28445) Warning: AI SDK Warning (openai-codex.responses / gpt-5.6-sol): Non-OpenAI reasoning parts are not supported. Skipping reasoning part: {"type":"reasoning","text":"**Inspecting missing middle cases**"}.
-(node:28445) Warning: AI SDK Warning (openai-codex.responses / gpt-5.6-sol): Non-OpenAI reasoning parts are not supported. Skipping reasoning part: {"type":"reasoning","text":"**Designing desktop app observation strategy****Planning read-only calendar observation strategy****Assessing runtime reasoning availability**"}.
-(node:28445) Warning: AI SDK Warning (openai-codex.responses / gpt-5.6-sol): Non-OpenAI reasoning parts are not supported. Skipping reasoning part: {"type":"reasoning","text":"**Planning virtual reminder strategy****Designing dynamic strategy availability checks****Defining conditional strategy availability****Planning reusable executor guard strategy**"}.
-(node:28445) Warning: AI SDK Warning (openai-codex.responses / gpt-5.6-sol): Non-OpenAI reasoning parts are not supported. Skipping reasoning part: {"type":"reasoning","text":"**Planning read-only AX exploration**"}.
-(node:28445) Warning: AI SDK Warning (openai-codex.responses / gpt-5.6-sol): Non-OpenAI reasoning parts are not supported. Skipping reasoning part: {"type":"reasoning","text":"**Planning read-only calendar observation****Designing app workflow evidence verification****Implementing strict extraction via reasoning step****Identifying approval logic bug with commit terms****Planning approval semantic refinement**"}.
-(node:28445) Warning: AI SDK Warning (openai-codex.responses / gpt-5.6-sol): Non-OpenAI reasoning parts are not supported. Skipping reasoning part: {"type":"reasoning","text":"**Planning reminder extraction strategy****Designing AppWorkflowStrategy implementation****Planning structured evidence validation****Implementing new provider file and validation method****Designing AppWorkflowExtraction and validation logic****Creating AgentAppWorkflowStrategy with static validation****Searching for app CLI arguments**"}.
-(node:28445) Warning: AI SDK Warning (openai-codex.responses / gpt-5.6-sol): Non-OpenAI reasoning parts are not supported. Skipping reasoning part: {"type":"reasoning","text":"**Designing reminder preparation strategy****Planning adaptive workflow strategy validation****Defining grounded extraction verification****Evaluating runtime probing strategies****Designing dynamic capability strategy resolver****Planning integrated workflow provider implementation****Designing generic evidence execution strategy****Refining approval logic to exclude preparation steps****Adding workflow strategy selection logic****Searching AgentVerificationSnapshot initializations**"}.
-KRALI_STAGE sdk_tools_running • Uygulama içi iş akışı (app.workflow) için araç çalışıyor: apply_patch
-KRALI_STAGE sdk_tool_completed • Uygulama içi iş akışı (app.workflow) araç adımı tamamlandı: apply_patch
-(node:28445) Warning: AI SDK Warning (openai-codex.responses / gpt-5.6-sol): Non-OpenAI reasoning parts are not supported. Skipping reasoning part: {"type":"reasoning","text":"**Planning code inspection and connections**"}.
-(node:28445) Warning: AI SDK Warning (openai-codex.responses / gpt-5.6-sol): Non-OpenAI reasoning parts are not supported. Skipping reasoning part: {"type":"reasoning","text":"**Inspecting registry executor files**"}.
-(node:28445) Warning: AI SDK Warning (openai-codex.responses / gpt-5.6-sol): Non-OpenAI reasoning parts are not supported. Skipping reasoning part: {"type":"reasoning","text":"**Planning engine inspection**"}.
-(node:28445) Warning: AI SDK Warning (openai-codex.responses / gpt-5.6-sol): Non-OpenAI reasoning parts are not supported. Skipping reasoning part: {"type":"reasoning","text":"**Inspecting executor 1288-1900**"}.
-(node:28445) Warning: AI SDK Warning (openai-codex.responses / gpt-5.6-sol): Non-OpenAI reasoning parts are not supported. Skipping reasoning part: {"type":"reasoning","text":"**Inspecting missing middle cases**"}.
-(node:28445) Warning: AI SDK Warning (openai-codex.responses / gpt-5.6-sol): Non-OpenAI reasoning parts are not supported. Skipping reasoning part: {"type":"reasoning","text":"**Designing desktop app observation strategy****Planning read-only calendar observation strategy****Assessing runtime reasoning availability**"}.
-(node:28445) Warning: AI SDK Warning (openai-codex.responses / gpt-5.6-sol): Non-OpenAI reasoning parts are not supported. Skipping reasoning part: {"type":"reasoning","text":"**Planning virtual reminder strategy****Designing dynamic strategy availability checks****Defining conditional strategy availability****Planning reusable executor guard strategy**"}.
-(node:28445) Warning: AI SDK Warning (openai-codex.responses / gpt-5.6-sol): Non-OpenAI reasoning parts are not supported. Skipping reasoning part: {"type":"reasoning","text":"**Planning read-only AX exploration**"}.
-(node:28445) Warning: AI SDK Warning (openai-codex.responses / gpt-5.6-sol): Non-OpenAI reasoning parts are not supported. Skipping reasoning part: {"type":"reasoning","text":"**Planning read-only calendar observation****Designing app workflow evidence verification****Implementing strict extraction via reasoning step****Identifying approval logic bug with commit terms****Planning approval semantic refinement**"}.
-(node:28445) Warning: AI SDK Warning (openai-codex.responses / gpt-5.6-sol): Non-OpenAI reasoning parts are not supported. Skipping reasoning part: {"type":"reasoning","text":"**Planning reminder extraction strategy****Designing AppWorkflowStrategy implementation****Planning structured evidence validation****Implementing new provider file and validation method****Designing AppWorkflowExtraction and validation logic****Creating AgentAppWorkflowStrategy with static validation****Searching for app CLI arguments**"}.
-(node:28445) Warning: AI SDK Warning (openai-codex.responses / gpt-5.6-sol): Non-OpenAI reasoning parts are not supported. Skipping reasoning part: {"type":"reasoning","text":"**Designing reminder preparation strategy****Planning adaptive workflow strategy validation****Defining grounded extraction verification****Evaluating runtime probing strategies****Designing dynamic capability strategy resolver****Planning integrated workflow provider implementation****Designing generic evidence execution strategy****Refining approval logic to exclude preparation steps****Adding workflow strategy selection logic****Searching AgentVerificationSnapshot initializations**"}.
-(node:28445) Warning: AI SDK Warning (openai-codex.responses / gpt-5.6-sol): Non-OpenAI reasoning parts are not supported. Skipping reasoning part: {"type":"reasoning","text":"**Planning reminder preparation without UI****Designing observation-only provider verification****Planning runtime probe for provider availability****Planning build verification without runtime execution****Refining approval logic for commit detection****Improving approval gate logic with negation handling****Planning runtime workflow probing integration**"}.
-KRALI_STAGE sdk_tools_running • Uygulama içi iş akışı (app.workflow) için araç çalışıyor: apply_patch
-KRALI_STAGE sdk_tool_completed • Uygulama içi iş akışı (app.workflow) araç adımı tamamlandı: apply_patch
-(node:28445) Warning: AI SDK Warning (openai-codex.responses / gpt-5.6-sol): Non-OpenAI reasoning parts are not supported. Skipping reasoning part: {"type":"reasoning","text":"**Planning code inspection and connections**"}.
-(node:28445) Warning: AI SDK Warning (openai-codex.responses / gpt-5.6-sol): Non-OpenAI reasoning parts are not supported. Skipping reasoning part: {"type":"reasoning","text":"**Inspecting registry executor files**"}.
-(node:28445) Warning: AI SDK Warning (openai-codex.responses / gpt-5.6-sol): Non-OpenAI reasoning parts are not supported. Skipping reasoning part: {"type":"reasoning","text":"**Planning engine inspection**"}.
-(node:28445) Warning: AI SDK Warning (openai-codex.responses / gpt-5.6-sol): Non-OpenAI reasoning parts are not supported. Skipping reasoning part: {"type":"reasoning","text":"**Inspecting executor 1288-1900**"}.
-(node:28445) Warning: AI SDK Warning (openai-codex.responses / gpt-5.6-sol): Non-OpenAI reasoning parts are not supported. Skipping reasoning part: {"type":"reasoning","text":"**Inspecting missing middle cases**"}.
-(node:28445) Warning: AI SDK Warning (openai-codex.responses / gpt-5.6-sol): Non-OpenAI reasoning parts are not supported. Skipping reasoning part: {"type":"reasoning","text":"**Designing desktop app observation strategy****Planning read-only calendar observation strategy****Assessing runtime reasoning availability**"}.
-(node:28445) Warning: AI SDK Warning (openai-codex.responses / gpt-5.6-sol): Non-OpenAI reasoning parts are not supported. Skipping reasoning part: {"type":"reasoning","text":"**Planning virtual reminder strategy****Designing dynamic strategy availability checks****Defining conditional strategy availability****Planning reusable executor guard strategy**"}.
-(node:28445) Warning: AI SDK Warning (openai-codex.responses / gpt-5.6-sol): Non-OpenAI reasoning parts are not supported. Skipping reasoning part: {"type":"reasoning","text":"**Planning read-only AX exploration**"}.
-(node:28445) Warning: AI SDK Warning (openai-codex.responses / gpt-5.6-sol): Non-OpenAI reasoning parts are not supported. Skipping reasoning part: {"type":"reasoning","text":"**Planning read-only calendar observation****Designing app workflow evidence verification****Implementing strict extraction via reasoning step****Identifying approval logic bug with commit terms****Planning approval semantic refinement**"}.
-(node:28445) Warning: AI SDK Warning (openai-codex.responses / gpt-5.6-sol): Non-OpenAI reasoning parts are not supported. Skipping reasoning part: {"type":"reasoning","text":"**Planning reminder extraction strategy****Designing AppWorkflowStrategy implementation****Planning structured evidence validation****Implementing new provider file and validation method****Designing AppWorkflowExtraction and validation logic****Creating AgentAppWorkflowStrategy with static validation****Searching for app CLI arguments**"}.
-(node:28445) Warning: AI SDK Warning (openai-codex.responses / gpt-5.6-sol): Non-OpenAI reasoning parts are not supported. Skipping reasoning part: {"type":"reasoning","text":"**Designing reminder preparation strategy****Planning adaptive workflow strategy validation****Defining grounded extraction verification****Evaluating runtime probing strategies****Designing dynamic capability strategy resolver****Planning integrated workflow provider implementation****Designing generic evidence execution strategy****Refining approval logic to exclude preparation steps****Adding workflow strategy selection logic****Searching AgentVerificationSnapshot initializations**"}.
-(node:28445) Warning: AI SDK Warning (openai-codex.responses / gpt-5.6-sol): Non-OpenAI reasoning parts are not supported. Skipping reasoning part: {"type":"reasoning","text":"**Planning reminder preparation without UI****Designing observation-only provider verification****Planning runtime probe for provider availability****Planning build verification without runtime execution****Refining approval logic for commit detection****Improving approval gate logic with negation handling****Planning runtime workflow probing integration**"}.
-(node:28445) Warning: AI SDK Warning (openai-codex.responses / gpt-5.6-sol): Non-OpenAI reasoning parts are not supported. Skipping reasoning part: {"type":"reasoning","text":"**Refining project setup and request filtering****Implementing strategy approval gating and evidence verification****Planning runtime capability probing approach****Planning runtime probe limitations****Evaluating runtime probe alternatives**"}.
-KRALI_STAGE sdk_tools_running • Uygulama içi iş akışı (app.workflow) için araç çalışıyor: run_commands
-KRALI_STAGE sdk_tools_running • Uygulama içi iş akışı (app.workflow) araç çıktısı güncelleniyor: run_commands
-KRALI_STAGE sdk_tools_running • Uygulama içi iş akışı (app.workflow) araç çıktısı güncelleniyor: run_commands
-KRALI_STAGE sdk_tools_running • Uygulama içi iş akışı (app.workflow) araç çıktısı güncelleniyor: run_commands
-KRALI_STAGE sdk_tool_completed • Uygulama içi iş akışı (app.workflow) araç adımı tamamlandı: run_commands
-KRALI_STAGE sdk_tools_running • Uygulama içi iş akışı (app.workflow) için araç çalışıyor: run_commands
-KRALI_STAGE sdk_tools_running • Uygulama içi iş akışı (app.workflow) araç çıktısı güncelleniyor: run_commands
-KRALI_STAGE sdk_tools_running • Uygulama içi iş akışı (app.workflow) araç çıktısı güncelleniyor: run_commands
-KRALI_STAGE sdk_tools_running • Uygulama içi iş akışı (app.workflow) araç çıktısı güncelleniyor: run_commands
-KRALI_STAGE sdk_tool_completed • Uygulama içi iş akışı (app.workflow) araç adımı tamamlandı: run_commands
-KRALI_STAGE sdk_failed • ClineCore agent hatası: Agent runtime exceeded maxIterations (14)
-KRALI_STAGE sdk_session_ended • Uygulama içi iş akışı (app.workflow) SDK session sona erdi: unknown
-KRALI_STAGE sdk_session_completed • Uygulama içi iş akışı (app.workflow) SDK oturumu tamamlandı; candidate değişiklikler kontrol ediliyor
-Agent runtime exceeded maxIterations (14)
-KRALI SDK fallback başarısız. finishReason=error
+
+changed 329 packages in 14s
+
+47 packages are looking for funding
+  run `npm fund` for details
+Native Cline binary: /opt/homebrew/lib/node_modules/cline/bin/.cline
+/opt/homebrew/lib/node_modules/cline/bin/.cline: Mach-O 64-bit executable arm64
+Executable=/opt/homebrew/lib/node_modules/cline/bin/.cline
+Identifier=a.out
+Format=Mach-O thin (arm64)
+CodeDirectory v=20400 size=693054 flags=0x20002(adhoc,linker-signed) hashes=21655+0 location=embedded
+VersionPlatform=1
+VersionMin=851968
+VersionSDK=983552
+Hash type=sha256 size=32
+CandidateCDHash sha256=f3309838ca62270b6e3f898de565eca34cc271cb
+CandidateCDHashFull sha256=f3309838ca62270b6e3f898de565eca34cc271cba8d4fcb29283c6ca03bd5f7a
+Hash choices=sha256
+CMSDigest=f3309838ca62270b6e3f898de565eca34cc271cba8d4fcb29283c6ca03bd5f7a
+CMSDigestType=2
+Executable Segment base=0
+Executable Segment limit=60899328
+Executable Segment flags=0x1
+Page size=4096
+CDHash=f3309838ca62270b6e3f898de565eca34cc271cb
+Signature=adhoc
+Info.plist=not bound
+TeamIdentifier=not set
+Sealed Resources=none
+Internal requirements=none
+spctl exit=1 • /opt/homebrew/lib/node_modules/cline/bin/.cline: invalid signature (code or signature have been modified)
+🧩 Native Cline platform hatası sınıflandırıldı; Node SDK fallback'e geçiliyor.
+From https://github.com/izmirli-ali/KRALI-Agent
+ * branch            main       -> FETCH_HEAD
+Already up to date.
+Preparing worktree (new branch 'krali-dev-agent/20260920-210653')
+branch 'krali-dev-agent/20260920-210653' set up to track 'origin/main'.
+HEAD is now at b5abd67 v0.8.48 autonomous capability skeleton
+Developer prompt mode: gap • 2771 bytes
+KRALI_STAGE sdk_importing • Uygulama kontrolü (desktop.app) için Cline SDK yükleniyor
+KRALI_STAGE sdk_import_ready • Cline SDK yüklendi; provider ayarları doğrulanıyor
+KRALI_STAGE sdk_provider_ready • openai-codex provider ve model ayarı hazır
+KRALI_STAGE sdk_runtime_starting • ClineCore local runtime başlatılıyor
+KRALI_STAGE sdk_runtime_ready • ClineCore runtime hazır; agent session başlatılıyor
+KRALI_STAGE sdk_session_starting • Uygulama kontrolü (desktop.app) için ClineCore session isteği gönderildi
+KRALI_STAGE sdk_session_running • Uygulama kontrolü (desktop.app) için model oturumu aktif
+KRALI_STAGE sdk_tools_running • Uygulama kontrolü (desktop.app) için araç çalışıyor: run_commands
+KRALI_STAGE sdk_tools_running • Uygulama kontrolü (desktop.app) araç çıktısı güncelleniyor: run_commands
+KRALI_STAGE sdk_tools_running • Uygulama kontrolü (desktop.app) araç çıktısı güncelleniyor: run_commands
+KRALI_STAGE sdk_tools_running • Uygulama kontrolü (desktop.app) araç çıktısı güncelleniyor: run_commands
+KRALI_STAGE sdk_tool_completed • Uygulama kontrolü (desktop.app) araç adımı tamamlandı: run_commands
+KRALI_STAGE sdk_tools_running • Uygulama kontrolü (desktop.app) için araç çalışıyor: search_codebase
+KRALI_STAGE sdk_tool_completed • Uygulama kontrolü (desktop.app) araç adımı tamamlandı: search_codebase
+(node:31605) Warning: AI SDK Warning System: To turn off warning logging, set the AI_SDK_LOG_WARNINGS global to false.
+(Use `node --trace-warnings ...` to show where the warning was created)
+(node:31605) Warning: AI SDK Warning (openai-codex.responses / gpt-5.6-sol): Non-OpenAI reasoning parts are not supported. Skipping reasoning part: {"type":"reasoning","text":"**Inspecting repository status**"}.
+KRALI_STAGE sdk_tools_running • Uygulama kontrolü (desktop.app) için araç çalışıyor: read_files
+KRALI_STAGE sdk_tool_completed • Uygulama kontrolü (desktop.app) araç adımı tamamlandı: read_files
+KRALI_STAGE sdk_tools_running • Uygulama kontrolü (desktop.app) için araç çalışıyor: search_codebase
+KRALI_STAGE sdk_tool_completed • Uygulama kontrolü (desktop.app) araç adımı tamamlandı: search_codebase
+KRALI_STAGE sdk_tools_running • Uygulama kontrolü (desktop.app) için araç çalışıyor: run_commands
+KRALI_STAGE sdk_tools_running • Uygulama kontrolü (desktop.app) araç çıktısı güncelleniyor: run_commands
+KRALI_STAGE sdk_tools_running • Uygulama kontrolü (desktop.app) araç çıktısı güncelleniyor: run_commands
+KRALI_STAGE sdk_tools_running • Uygulama kontrolü (desktop.app) araç çıktısı güncelleniyor: run_commands
+KRALI_STAGE sdk_tool_completed • Uygulama kontrolü (desktop.app) araç adımı tamamlandı: run_commands
+(node:31605) Warning: AI SDK Warning (openai-codex.responses / gpt-5.6-sol): Non-OpenAI reasoning parts are not supported. Skipping reasoning part: {"type":"reasoning","text":"**Inspecting repository status**"}.
+(node:31605) Warning: AI SDK Warning (openai-codex.responses / gpt-5.6-sol): Non-OpenAI reasoning parts are not supported. Skipping reasoning part: {"type":"reasoning","text":"**Planning targeted file inspection**"}.
+KRALI_STAGE sdk_tools_running • Uygulama kontrolü (desktop.app) için araç çalışıyor: read_files
+KRALI_STAGE sdk_tool_completed • Uygulama kontrolü (desktop.app) araç adımı tamamlandı: read_files
+KRALI_STAGE sdk_tools_running • Uygulama kontrolü (desktop.app) için araç çalışıyor: read_files
+KRALI_STAGE sdk_tool_completed • Uygulama kontrolü (desktop.app) araç adımı tamamlandı: read_files
+KRALI_STAGE sdk_tools_running • Uygulama kontrolü (desktop.app) için araç çalışıyor: search_codebase
+KRALI_STAGE sdk_tool_completed • Uygulama kontrolü (desktop.app) araç adımı tamamlandı: search_codebase
+(node:31605) Warning: AI SDK Warning (openai-codex.responses / gpt-5.6-sol): Non-OpenAI reasoning parts are not supported. Skipping reasoning part: {"type":"reasoning","text":"**Inspecting repository status**"}.
+(node:31605) Warning: AI SDK Warning (openai-codex.responses / gpt-5.6-sol): Non-OpenAI reasoning parts are not supported. Skipping reasoning part: {"type":"reasoning","text":"**Planning targeted file inspection**"}.
+(node:31605) Warning: AI SDK Warning (openai-codex.responses / gpt-5.6-sol): Non-OpenAI reasoning parts are not supported. Skipping reasoning part: {"type":"reasoning","text":"**Inspecting omitted key sections**"}.
+KRALI_STAGE sdk_tools_running • Uygulama kontrolü (desktop.app) için araç çalışıyor: read_files
+KRALI_STAGE sdk_tool_completed • Uygulama kontrolü (desktop.app) araç adımı tamamlandı: read_files
+KRALI_STAGE sdk_tools_running • Uygulama kontrolü (desktop.app) için araç çalışıyor: run_commands
+KRALI_STAGE sdk_tool_completed • Uygulama kontrolü (desktop.app) araç adımı tamamlandı: run_commands
+(node:31605) Warning: AI SDK Warning (openai-codex.responses / gpt-5.6-sol): Non-OpenAI reasoning parts are not supported. Skipping reasoning part: {"type":"reasoning","text":"**Inspecting repository status**"}.
+(node:31605) Warning: AI SDK Warning (openai-codex.responses / gpt-5.6-sol): Non-OpenAI reasoning parts are not supported. Skipping reasoning part: {"type":"reasoning","text":"**Planning targeted file inspection**"}.
+(node:31605) Warning: AI SDK Warning (openai-codex.responses / gpt-5.6-sol): Non-OpenAI reasoning parts are not supported. Skipping reasoning part: {"type":"reasoning","text":"**Inspecting omitted key sections**"}.
+(node:31605) Warning: AI SDK Warning (openai-codex.responses / gpt-5.6-sol): Non-OpenAI reasoning parts are not supported. Skipping reasoning part: {"type":"reasoning","text":"**Planning key function inspection**"}.
+KRALI_STAGE sdk_tools_running • Uygulama kontrolü (desktop.app) için araç çalışıyor: read_files
+KRALI_STAGE sdk_tool_completed • Uygulama kontrolü (desktop.app) araç adımı tamamlandı: read_files
+KRALI_STAGE sdk_tools_running • Uygulama kontrolü (desktop.app) için araç çalışıyor: search_codebase
+KRALI_STAGE sdk_tool_completed • Uygulama kontrolü (desktop.app) araç adımı tamamlandı: search_codebase
+(node:31605) Warning: AI SDK Warning (openai-codex.responses / gpt-5.6-sol): Non-OpenAI reasoning parts are not supported. Skipping reasoning part: {"type":"reasoning","text":"**Inspecting repository status**"}.
+(node:31605) Warning: AI SDK Warning (openai-codex.responses / gpt-5.6-sol): Non-OpenAI reasoning parts are not supported. Skipping reasoning part: {"type":"reasoning","text":"**Planning targeted file inspection**"}.
+(node:31605) Warning: AI SDK Warning (openai-codex.responses / gpt-5.6-sol): Non-OpenAI reasoning parts are not supported. Skipping reasoning part: {"type":"reasoning","text":"**Inspecting omitted key sections**"}.
+(node:31605) Warning: AI SDK Warning (openai-codex.responses / gpt-5.6-sol): Non-OpenAI reasoning parts are not supported. Skipping reasoning part: {"type":"reasoning","text":"**Planning key function inspection**"}.
+(node:31605) Warning: AI SDK Warning (openai-codex.responses / gpt-5.6-sol): Non-OpenAI reasoning parts are not supported. Skipping reasoning part: {"type":"reasoning","text":"**Investigating focus handling conflict****Planning source log file inspection**"}.
+KRALI_STAGE sdk_tools_running • Uygulama kontrolü (desktop.app) için araç çalışıyor: run_commands
+KRALI_STAGE sdk_tools_running • Uygulama kontrolü (desktop.app) araç çıktısı güncelleniyor: run_commands
+KRALI_STAGE sdk_tools_running • Uygulama kontrolü (desktop.app) araç çıktısı güncelleniyor: run_commands
+KRALI_STAGE sdk_tools_running • Uygulama kontrolü (desktop.app) araç çıktısı güncelleniyor: run_commands
+KRALI_STAGE sdk_tool_completed • Uygulama kontrolü (desktop.app) araç adımı tamamlandı: run_commands
+(node:31605) Warning: AI SDK Warning (openai-codex.responses / gpt-5.6-sol): Non-OpenAI reasoning parts are not supported. Skipping reasoning part: {"type":"reasoning","text":"**Inspecting repository status**"}.
+(node:31605) Warning: AI SDK Warning (openai-codex.responses / gpt-5.6-sol): Non-OpenAI reasoning parts are not supported. Skipping reasoning part: {"type":"reasoning","text":"**Planning targeted file inspection**"}.
+(node:31605) Warning: AI SDK Warning (openai-codex.responses / gpt-5.6-sol): Non-OpenAI reasoning parts are not supported. Skipping reasoning part: {"type":"reasoning","text":"**Inspecting omitted key sections**"}.
+(node:31605) Warning: AI SDK Warning (openai-codex.responses / gpt-5.6-sol): Non-OpenAI reasoning parts are not supported. Skipping reasoning part: {"type":"reasoning","text":"**Planning key function inspection**"}.
+(node:31605) Warning: AI SDK Warning (openai-codex.responses / gpt-5.6-sol): Non-OpenAI reasoning parts are not supported. Skipping reasoning part: {"type":"reasoning","text":"**Investigating focus handling conflict****Planning source log file inspection**"}.
+(node:31605) Warning: AI SDK Warning (openai-codex.responses / gpt-5.6-sol): Non-OpenAI reasoning parts are not supported. Skipping reasoning part: {"type":"reasoning","text":"**Investigating unexpected Bluetooth File Exchange resolution****Diagnosing focus candidate discard bug****Separating launch action from verifier****Clarifying focus verification sources****Adding static helper for focus matching**"}.
+KRALI_STAGE sdk_tools_running • Uygulama kontrolü (desktop.app) için araç çalışıyor: run_commands
+KRALI_STAGE sdk_tool_completed • Uygulama kontrolü (desktop.app) araç adımı tamamlandı: run_commands
+KRALI_STAGE sdk_tools_running • Uygulama kontrolü (desktop.app) için araç çalışıyor: read_files
+KRALI_STAGE sdk_tool_completed • Uygulama kontrolü (desktop.app) araç adımı tamamlandı: read_files
+KRALI_STAGE sdk_tools_running • Uygulama kontrolü (desktop.app) için araç çalışıyor: search_codebase
+KRALI_STAGE sdk_tool_completed • Uygulama kontrolü (desktop.app) araç adımı tamamlandı: search_codebase
+(node:31605) Warning: AI SDK Warning (openai-codex.responses / gpt-5.6-sol): Non-OpenAI reasoning parts are not supported. Skipping reasoning part: {"type":"reasoning","text":"**Inspecting repository status**"}.
+(node:31605) Warning: AI SDK Warning (openai-codex.responses / gpt-5.6-sol): Non-OpenAI reasoning parts are not supported. Skipping reasoning part: {"type":"reasoning","text":"**Planning targeted file inspection**"}.
+(node:31605) Warning: AI SDK Warning (openai-codex.responses / gpt-5.6-sol): Non-OpenAI reasoning parts are not supported. Skipping reasoning part: {"type":"reasoning","text":"**Inspecting omitted key sections**"}.
+(node:31605) Warning: AI SDK Warning (openai-codex.responses / gpt-5.6-sol): Non-OpenAI reasoning parts are not supported. Skipping reasoning part: {"type":"reasoning","text":"**Planning key function inspection**"}.
+(node:31605) Warning: AI SDK Warning (openai-codex.responses / gpt-5.6-sol): Non-OpenAI reasoning parts are not supported. Skipping reasoning part: {"type":"reasoning","text":"**Investigating focus handling conflict****Planning source log file inspection**"}.
+(node:31605) Warning: AI SDK Warning (openai-codex.responses / gpt-5.6-sol): Non-OpenAI reasoning parts are not supported. Skipping reasoning part: {"type":"reasoning","text":"**Investigating unexpected Bluetooth File Exchange resolution****Diagnosing focus candidate discard bug****Separating launch action from verifier****Clarifying focus verification sources****Adding static helper for focus matching**"}.
+(node:31605) Warning: AI SDK Warning (openai-codex.responses / gpt-5.6-sol): Non-OpenAI reasoning parts are not supported. Skipping reasoning part: {"type":"reasoning","text":"**Diagnosing incorrect Bluetooth File Exchange resolution**"}.
+KRALI_STAGE sdk_tools_running • Uygulama kontrolü (desktop.app) için araç çalışıyor: run_commands
+KRALI_STAGE sdk_tool_completed • Uygulama kontrolü (desktop.app) araç adımı tamamlandı: run_commands
+KRALI_STAGE sdk_failed • ClineCore agent hatası: 1 tool call(s) failed: [run_commands] {"error":"Tool was not executed -- NOT a tool or system failure. Clarify with user before proceeding."}

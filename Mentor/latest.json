@@ -1,127 +1,127 @@
 {
   "activityTail" : [
     {
-      "date" : "2026-09-20T17:31:51Z",
-      "text" : "Semantic planner sağlayıcısı: Apple Foundation Models"
+      "date" : "2026-09-20T18:06:57Z",
+      "text" : "Debug/Recovery: İzin • Recovery uygulanıyor • Developer Agent"
     },
     {
-      "date" : "2026-09-20T17:31:51Z",
-      "text" : "Semantic Mission: Sistem Ayarları uygulamasını aç. Bluetooth bölümüne git ve şu anda bağlı olan cihazları bulup bana listele. Ardından Bluetooth’u kapatma işlemini hazırla ama benden onay almadan hiçbir ayarı değiştirme."
+      "date" : "2026-09-20T18:06:56Z",
+      "text" : "Debug/Recovery: İzin • Recovery uygulanıyor • Developer Agent"
     },
     {
-      "date" : "2026-09-20T17:31:51Z",
-      "text" : "Seçilen kabiliyetler: Akıl yürütme, Bağlam, Uygulama kontrolü"
+      "date" : "2026-09-20T18:06:55Z",
+      "text" : "Debug/Recovery: İzin • Recovery uygulanıyor • Developer Agent"
     },
     {
-      "date" : "2026-09-20T17:31:51Z",
-      "text" : "Otomatik rota: Core → Goal → Context → Plan → Desktop → Response"
+      "date" : "2026-09-20T18:06:55Z",
+      "text" : "Debug/Recovery: İzin • Recovery uygulanıyor • Developer Agent"
     },
     {
-      "date" : "2026-09-20T17:31:51Z",
-      "text" : "Seçilen plan: Uygulama adını çöz, uygulamayı aç veya öne getir ve sonucu doğrula"
+      "date" : "2026-09-20T18:06:54Z",
+      "text" : "Debug/Recovery: Bilinmeyen hata • Recovery uygulanıyor • Developer Agent"
     },
     {
-      "date" : "2026-09-20T17:31:51Z",
-      "text" : "KRALİ Core hedef sözleşmesi: istenen uygulamayı aç veya öne getir"
+      "date" : "2026-09-20T18:06:53Z",
+      "text" : "Developer Agent başlatıldı"
     },
     {
-      "date" : "2026-09-20T17:31:51Z",
-      "text" : "Bağlam hafızası: Çalışma kuralı"
+      "date" : "2026-09-20T18:06:53Z",
+      "text" : "Capability gap algılandı; Developer Agent izole candidate geliştirme için otomatik başlatılıyor"
     },
     {
-      "date" : "2026-09-20T17:29:08Z",
-      "text" : "Mentor trace GitHub'a senkronlandı"
+      "date" : "2026-09-20T18:06:53Z",
+      "text" : "Görev tamamlandı • 1.11 sn"
     },
     {
-      "date" : "2026-09-20T17:28:20Z",
-      "text" : "Görev tamamlandı • 18.14 sn"
-    },
-    {
-      "date" : "2026-09-20T17:28:20Z",
+      "date" : "2026-09-20T18:06:53Z",
       "text" : "Mentor trace yerel olarak kaydedildi"
     },
     {
-      "date" : "2026-09-20T17:28:20Z",
-      "text" : "Uygulama kontrolü başarısız: Uygulama bulunamadı: takvim"
+      "date" : "2026-09-20T18:06:53Z",
+      "text" : "Runtime Capability Gap: desktop.app • Provider available olmasına rağmen runtime step tamamlanamadı veya postcondition doğrulanamadı: desktop.app • app.open"
     },
     {
-      "date" : "2026-09-20T17:28:20Z",
+      "date" : "2026-09-20T18:06:53Z",
+      "text" : "Uygulama kontrolü başarısız: Uygulama bulunamadı: notlar"
+    },
+    {
+      "date" : "2026-09-20T18:06:53Z",
       "text" : "Debug/Recovery: Bilinmeyen hata • Hata ayıklanıyor • desktop.app"
     },
     {
-      "date" : "2026-09-20T17:28:18Z",
+      "date" : "2026-09-20T18:06:52Z",
       "text" : "Semantic rota: Core → Goal → Context → Plan → Desktop → Verify → Response"
     },
     {
-      "date" : "2026-09-20T17:28:18Z",
+      "date" : "2026-09-20T18:06:52Z",
       "text" : "Task Graph: 0:context.local[reason] → 1:desktop.app[act] → 2:app.workflow[act]"
     },
     {
-      "date" : "2026-09-20T17:28:18Z",
+      "date" : "2026-09-20T18:06:52Z",
       "text" : "Semantic capability planı: app.workflow, context.local, core.reasoning, desktop.app"
     },
     {
-      "date" : "2026-09-20T17:28:18Z",
+      "date" : "2026-09-20T18:06:52Z",
       "text" : "Semantic planner sağlayıcısı: Apple Foundation Models"
     },
     {
-      "date" : "2026-09-20T17:28:18Z",
-      "text" : "Semantic Mission: Takvim uygulamasını aç. Yarınki ilk etkinliği bul, başlığını ve saatini bana söyle. Ardından bu etkinlik için 15 dakika öncesine bir hatırlatma eklemeyi hazırla ama benden onay almadan hiçbir değişiklik yapma."
+      "date" : "2026-09-20T18:06:52Z",
+      "text" : "Semantic Mission: Notlar uygulamasını aç. Şu anda açık olan notun başlığını ve ekranda görünen ilk iki satırı bana söyle. Hiçbir şeyi değiştirme."
     },
     {
-      "date" : "2026-09-20T17:28:02Z",
-      "text" : "Seçilen kabiliyetler: Akıl yürütme, Bağlam, Uygulama içi iş akışı"
+      "date" : "2026-09-20T18:06:52Z",
+      "text" : "Seçilen kabiliyetler: Akıl yürütme, Bağlam, Uygulama kontrolü"
     },
     {
-      "date" : "2026-09-20T17:28:02Z",
-      "text" : "Otomatik rota: Core → Goal → Context → Plan → Response"
+      "date" : "2026-09-20T18:06:52Z",
+      "text" : "Otomatik rota: Core → Goal → Context → Plan → Desktop → Response"
     },
     {
-      "date" : "2026-09-20T17:28:02Z",
-      "text" : "Seçilen plan: Bağlamı incele; doğrudan araç eşleşmesi yoksa güvenli alternatifler üret"
+      "date" : "2026-09-20T18:06:52Z",
+      "text" : "Seçilen plan: Uygulama adını çöz, uygulamayı aç veya öne getir ve sonucu doğrula"
     },
     {
-      "date" : "2026-09-20T17:28:02Z",
-      "text" : "KRALİ Core hedef sözleşmesi: sonucu ve gerekçeyi açıkla"
+      "date" : "2026-09-20T18:06:52Z",
+      "text" : "KRALİ Core hedef sözleşmesi: istenen uygulamayı aç veya öne getir"
     },
     {
-      "date" : "2026-09-20T17:28:02Z",
-      "text" : "Bağlam firewall: önceki görev bağlamları bu tura taşınmadı"
+      "date" : "2026-09-20T18:06:52Z",
+      "text" : "Bağlam hafızası: Çalışma kuralı"
     },
     {
-      "date" : "2026-09-20T17:27:59Z",
-      "text" : "Developer candidate recovery: Kurtarılan öğrenme adayı build geçti ve incelemeye hazır"
+      "date" : "2026-09-20T18:05:24Z",
+      "text" : "Developer candidate recovery: Recovery sonrası anlamlı kaynak değişikliği kalmadı"
     },
     {
-      "date" : "2026-09-20T17:27:34Z",
+      "date" : "2026-09-20T18:05:24Z",
       "text" : "Apple yerel zeka hazır"
     },
     {
-      "date" : "2026-09-20T17:27:34Z",
+      "date" : "2026-09-20T18:05:24Z",
       "text" : "Çalışma klasörü geri yüklendi: Desktop"
     },
     {
-      "date" : "2026-09-20T17:27:34Z",
+      "date" : "2026-09-20T18:05:24Z",
       "text" : "0 ekran görüntüsü adayı bulundu"
     },
     {
-      "date" : "2026-09-20T17:27:34Z",
+      "date" : "2026-09-20T18:05:24Z",
       "text" : "1766 dosya ve 68 klasör indekslendi"
     },
     {
-      "date" : "2026-09-20T17:27:34Z",
+      "date" : "2026-09-20T18:05:24Z",
       "text" : "Ağır geliştirici testleri normal açılışta otomatik çalıştırılmıyor"
     },
     {
-      "date" : "2026-09-20T17:27:34Z",
+      "date" : "2026-09-20T18:05:24Z",
       "text" : "Dinamik hedef ve kabiliyet yönlendirme aktif"
     },
     {
-      "date" : "2026-09-20T17:27:34Z",
+      "date" : "2026-09-20T18:05:24Z",
       "text" : "KRALİ Core hazır"
     }
   ],
-  "appVersion" : "0.8.47",
+  "appVersion" : "0.8.48",
   "capabilities" : [
     {
       "available" : true,
@@ -134,57 +134,81 @@
       "id" : "context.local",
       "name" : "Bağlam",
       "risk" : "reasoning"
+    },
+    {
+      "available" : true,
+      "id" : "app.workflow",
+      "name" : "Uygulama içi iş akışı",
+      "risk" : "readOnly"
+    },
+    {
+      "available" : true,
+      "id" : "desktop.app",
+      "name" : "Uygulama kontrolü",
+      "risk" : "external"
     }
   ],
   "capabilityGaps" : [
+    {
+      "candidateCapabilityIDs" : [
 
+      ],
+      "capabilityID" : "desktop.app",
+      "capabilityName" : "Uygulama kontrolü",
+      "developerBrief" : "KRALİ Runtime Capability Failure Developer Brief\n\nKullanıcı hedefi:\nHesap Makinesi uygulamasını aç. Ekranda şu anda görünen değeri bana söyle. Yeni bir hesaplama yapma.\n\nRuntime'da başarısız capability:\ndesktop.app — Uygulama kontrolü\n\nStep:\n1: Kaynak uygulamayı aç veya öne getir\nOperation: app.open\nRole: act\n\nMevcut strategy adayları:\nYok\n\nSorun:\nProvider available olmasına rağmen runtime step tamamlanamadı veya postcondition doğrulanamadı: desktop.app • app.open\n\nTasarım kuralları:\n- Capability zaten available ise önce mevcut provider'ı ve postcondition verifier'ı debug et.\n- Uygulama/marka adına hard-code yazma; hatayı genel resolver/provider/strategy seviyesinde çöz.\n- Başarı gerçek observation/verification ile kanıtlanmadan PASS üretme.\n- Dış dünyaya commit eden eylemlerde kullanıcı onayı korunmalı.\n- Candidate branch/worktree kullan; ana branch'i doğrudan değiştirme.\n- Build + regression + mümkünse runtime probe geçmeden düzeltmeyi available/healthy sayma.\n\nKabul kriteri:\nAynı sınıftaki bilinmeyen hedeflerde de provider doğru hedefi çözebilmeli; başarısız runtime step tamamlanmalı ve verifier gerçek evidence ile PASS verebilmeli.",
+      "kind" : "strategy",
+      "reason" : "Provider available olmasına rağmen runtime step tamamlanamadı veya postcondition doğrulanamadı: desktop.app • app.open",
+      "researchGoal" : "Mevcut Uygulama kontrolü provider'ının neden runtime'da başarısız olduğunu kanıtla; önce mevcut provider/strategy'yi debug et, gerekirse generic recovery veya yeni provider stratejisi geliştir ve aynı postcondition'ı gerçek observation ile doğrula."
+    }
   ],
   "contextMemory" : [
-    {
-      "createdAt" : "2026-09-20T09:47:42Z",
-      "kind" : "userRule",
-      "summary" : "Estafiz'e özel marka detaylarını başka markalara otomatik uygulama",
-      "title" : "Çalışma kuralı"
-    },
-    {
-      "createdAt" : "2026-09-20T01:00:28Z",
-      "kind" : "userRule",
-      "summary" : "Ana projeyi doğrudan değiştirme; çalışma kopyasında ilerle.",
-      "title" : "Çalışma kuralı"
-    }
+
   ],
-  "createdAt" : "2026-09-20T17:34:04Z",
+  "createdAt" : "2026-09-20T18:09:14Z",
   "executionSteps" : [
     {
-      "capabilityID" : "core.reasoning",
-      "detail" : "Hedef sözleşmesi: sonucu ve gerekçeyi açıkla. Kısıtları ve mevcut bağlamı anlamlandır.",
+      "capabilityID" : "context.local",
+      "detail" : "Yalnızca bu kullanıcı hedefiyle ilgili bağlamı hazırla; eski görev hedeflerini yeni göreve taşıma. Operation: context.resolve",
       "kind" : "reasoning",
       "state" : "completed",
-      "title" : "Hedefi çöz"
+      "title" : "Görev bağlamını hazırla"
+    },
+    {
+      "capabilityID" : "desktop.app",
+      "detail" : "Kullanıcının adlandırdığı uygulamayı çöz ve görünür foreground durumuna getir. Ön koşul adımları: 1. Operation: app.open",
+      "kind" : "action",
+      "state" : "partial",
+      "title" : "Kaynak uygulamayı aç veya öne getir"
+    },
+    {
+      "capabilityID" : "app.workflow",
+      "detail" : "Uygulamayı açmanın ötesindeki kullanıcı hedefini çöz: gerekli veriyi oku/bul, sonucu doğrula ve istenen değişiklik yalnız hazırlık düzeyindeyse dış dünyaya commit etmeden hazırla. Özel provider yoksa bu generic contract yeni strategy/provider öğrenimini tetiklemeli. Ön koşul adımları: 2. Operation: app.workflow.execute",
+      "kind" : "action",
+      "state" : "partial",
+      "title" : "Uygulama içi hedefi yürüt"
     },
     {
       "capabilityID" : "core.reasoning",
-      "detail" : "Hedef için mevcut ve eksik capability'leri ayır.",
-      "kind" : "action",
-      "state" : "completed",
-      "title" : "Gerekli yetenekleri tara"
+      "detail" : "Gerçekleşen adımları hedefle, capability durumuyla ve üretilen sonuçla karşılaştır.",
+      "kind" : "verification",
+      "state" : "attention",
+      "title" : "Mission sonucunu doğrula"
     },
     {
-      "detail" : "Bağlamı incele; doğrudan araç eşleşmesi yoksa güvenli alternatifler üret",
+      "detail" : "Tamamlanan, bekleyen ve kullanıcı bilgisi gerektiren kısımları birbirinden ayır.",
       "kind" : "response",
       "state" : "completed",
-      "title" : "Uygulanabilir yolu açıkla"
+      "title" : "Sonucu kullanıcıya aktar"
     }
   ],
-  "fallbackPlan" : "Çalışma alanını incele",
-  "finalResponse" : "**Hedef başarısız**  \nMevcut araçlar, Safari’yi doğrudan açma veya web sayfalarını otomatik ziyaret etme işlemini desteklemiyor. Gerçek bir işlem gerçekleştirilemiyor.",
-  "goal" : "sonucu ve gerekçeyi açıkla",
+  "fallbackPlan" : "Tamamlanmayan action step'ini yeniden planla; yürütülmeyen işi başarılı sayma.",
+  "finalResponse" : "Hedefi “Hesap Makinesi uygulamasını aç. Ekranda şu anda görünen değeri bana söyle. Yeni bir hesaplama yapma.” olarak çözdüm ve mevcut capability'lerle uygulanabilir adımları yürüttüm.\n\nDoğrulama: Semantic mission içindeki zorunlu action step'lerinden bazıları tamamlanmadı: app.workflow, desktop.app\nAlternatif plan: Tamamlanmayan action step'ini yeniden planla; yürütülmeyen işi başarılı sayma.",
+  "goal" : "Hesap Makinesi uygulamasını aç. Ekranda şu anda görünen değeri bana söyle. Yeni bir hesaplama yapma.",
   "inputSource" : "text",
-  "intelligenceProvider" : "Apple Foundation Models",
   "learningPlans" : [
 
   ],
-  "plan" : "Bağlamı incele; doğrudan araç eşleşmesi yoksa güvenli alternatifler üret",
+  "plan" : "Görev bağlamını hazırla → Kaynak uygulamayı aç veya öne getir → Uygulama içi hedefi yürüt",
   "researchEvidence" : [
 
   ],
@@ -195,14 +219,99 @@
     "Core",
     "Goal",
     "Context",
-    "Intelligence",
+    "Plan",
+    "Desktop",
+    "Verify",
     "Response"
   ],
-  "taskGraph" : [
+  "semanticMission" : {
+    "confidence" : 0.88,
+    "objective" : "Hesap Makinesi uygulamasını aç. Ekranda şu anda görünen değeri bana söyle. Yeni bir hesaplama yapma.",
+    "outcomes" : [
+      "analyze",
+      "open"
+    ],
+    "requiredCapabilityIDs" : [
+      "app.workflow",
+      "context.local",
+      "core.reasoning",
+      "desktop.app"
+    ],
+    "requiresUserInput" : false,
+    "steps" : [
+      {
+        "capabilityID" : "context.local",
+        "dependsOn" : [
 
+        ],
+        "operation" : "context.resolve",
+        "purpose" : "Yalnızca bu kullanıcı hedefiyle ilgili bağlamı hazırla; eski görev hedeflerini yeni göreve taşıma.",
+        "title" : "Görev bağlamını hazırla"
+      },
+      {
+        "capabilityID" : "desktop.app",
+        "dependsOn" : [
+          0
+        ],
+        "operation" : "app.open",
+        "purpose" : "Kullanıcının adlandırdığı uygulamayı çöz ve görünür foreground durumuna getir.",
+        "title" : "Kaynak uygulamayı aç veya öne getir"
+      },
+      {
+        "capabilityID" : "app.workflow",
+        "dependsOn" : [
+          1
+        ],
+        "operation" : "app.workflow.execute",
+        "purpose" : "Uygulamayı açmanın ötesindeki kullanıcı hedefini çöz: gerekli veriyi oku/bul, sonucu doğrula ve istenen değişiklik yalnız hazırlık düzeyindeyse dış dünyaya commit etmeden hazırla. Özel provider yoksa bu generic contract yeni strategy/provider öğrenimini tetiklemeli.",
+        "title" : "Uygulama içi hedefi yürüt"
+      }
+    ]
+  },
+  "semanticPlannerProvider" : "Apple Foundation Models",
+  "taskGraph" : [
+    {
+      "available" : true,
+      "capabilityID" : "context.local",
+      "dependsOn" : [
+
+      ],
+      "index" : 0,
+      "operation" : "context.resolve",
+      "requiresApproval" : false,
+      "risk" : "reasoning",
+      "role" : "reason",
+      "title" : "Görev bağlamını hazırla"
+    },
+    {
+      "available" : true,
+      "capabilityID" : "desktop.app",
+      "dependsOn" : [
+        0
+      ],
+      "index" : 1,
+      "operation" : "app.open",
+      "requiresApproval" : false,
+      "risk" : "external",
+      "role" : "act",
+      "title" : "Kaynak uygulamayı aç veya öne getir"
+    },
+    {
+      "available" : true,
+      "capabilityID" : "app.workflow",
+      "dependsOn" : [
+        1
+      ],
+      "index" : 2,
+      "operation" : "app.workflow.execute",
+      "requiresApproval" : false,
+      "risk" : "readOnly",
+      "role" : "act",
+      "title" : "Uygulama içi hedefi yürüt"
+    }
   ],
-  "traceID" : "0167F22B-3331-4593-B93B-E5E922AB3A23",
-  "userInput" : "Safari’yi aç. example.com adresine git ve sayfadaki ana başlığı oku, bana söyle. Ardından yeni bir sekmede wikipedia.org adresini açmayı hazırla ama benden onay almadan yeni sekme açma veya başka bir işlem yapma.",
-  "verificationState" : "skipped",
-  "verificationSummary" : "Bu turda doğrulanacak gerçek araç işlemi yok."
+  "traceID" : "CA4C6035-844D-4B45-B703-AE865206E2B5",
+  "userInput" : "Hesap Makinesi uygulamasını aç. Ekranda şu anda görünen değeri bana söyle. Yeni bir hesaplama yapma.",
+  "verificationState" : "attention",
+  "verificationSummary" : "Semantic mission içindeki zorunlu action step'lerinden bazıları tamamlanmadı: app.workflow, desktop.app"
 }
