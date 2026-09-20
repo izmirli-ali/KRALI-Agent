@@ -107,6 +107,13 @@ actor AgentLocalIntelligence {
             Kullanıcı gerçek bir dijital çıktı, dosya, tasarım, kurgu, uygulama işlemi, web işlemi veya medya üzerinde çalışma istiyorsa yalnızca core.reasoning/context.local ile yetinme; hedefi gerçekten uygulayacak capability'leri ekle.
             Uygulama veya araç capability'si unavailable görünse bile görevin doğal olarak ihtiyacı varsa mission'a dahil et; availability planlama kararını bastırmamalı.
             Son adıma kadar düşün: yalnızca hazırlık/analiz değil, üretim/uygulama ve mümkünse sonucu doğrulama adımlarını da planla.
+            Karmaşık görevleri tek capability adımına sıkıştırma. Aynı capability farklı işlemler için birden fazla step olarak kullanılabilir.
+            Her step yalnız bir gerçek işi temsil etsin: örneğin uygulamayı aç, içeriği oku, dış kaynağı araştır, analiz et, dosyaya yaz, taslak oluştur, gönder.
+            Bir step'in ürettiği veri sonraki step için gerekiyorsa dependsOn ile açıkça bağla. Downstream step'in purpose alanında hangi önceki çıktıyı kullanacağını belirt.
+            Adlandırılmış bir uygulamadaki mevcut içeriği okumak gerekiyorsa önce uygulamayı görünür/aktif hale getirecek provider'ı, ardından uygun read/perception provider'ını planla.
+            Kullanıcı yeni bir metin dosyası oluşturulmasını veya metnin bir dosyaya kaydedilmesini istiyorsa files.write.text capability'sini planla; başka bir file capability'sini yazma işlemi gibi kullanma.
+            Mail, mesaj, yayın, gönderim veya başka bir external commit varsa hazırlama/okuma/taslak step'lerini gerçek send/publish step'inden ayır. Kullanıcı açıkça onay şartı koyduysa final commit step'i ayrı ve en sonda olsun.
+            Capability kullanılamıyorsa step'i yine planla; başka bir capability'yi o iş yapılmış gibi göstermek için kullanma.
             Yerel dosya, mevcut bağlam ve uygulama capability'leriyle çözülebilecek bir görev için sırf genel bilgi toplamak amacıyla research.web ekleme. Web araştırmasını yalnızca hedef için dış/güncel/bilinmeyen bilgi gerçekten gerekiyorsa kullan.
             Marka özelindeki hafızayı başka markalara taşımayı önleyen kullanıcı kurallarına uy.
             JSON dışında hiçbir metin üretme.
@@ -149,6 +156,9 @@ actor AgentLocalIntelligence {
             - dependsOn dizisinde 0 tabanlı önceki step indekslerini kullan.
             - outcomes yalnızca şu değerlerden oluşsun: converse, locate, shortlist, assessContent, analyze, ideate, compose, transform, explain, organize, open, remember, research, edit, communicate.
             - Kullanıcının nihai sonucunu tanımlayan outcome'ları seç; araç isimlerini outcome olarak kullanma.
+            - operation alanını mümkün olduğunca eylemi açık anlatan noktalı etiketle yaz: app.open, screen.read, web.research, content.analyze, file.write.text, mail.read, mail.draft, mail.send, result.verify gibi.
+            - Aynı capabilityID birden fazla step'te kullanılabilir; requiredCapabilityIDs yine tekilleştirilmiş olsun.
+            - Dış dünyaya commit eden send/publish/delete benzeri step'leri hazırlık veya analiz step'leriyle birleştirme.
             - requiredCapabilityIDs, steps içinde kullanılan capabilityID'lerin tekilleştirilmiş listesini içersin.
             - confidence 0 ile 1 arasında olsun.
             """
@@ -467,6 +477,18 @@ actor AgentLocalIntelligence {
                 ]
             )
 
+        let textFileOutputTask =
+            containsMissionConcept(
+                corpus,
+                [
+                    "txt", "metin dosyasi", "metin dosyası",
+                    "text file", "dosyaya yaz",
+                    "dosyaya kaydet", "dosya olarak kaydet",
+                    "dosya olarak ekle", "dosya olustur",
+                    "dosya oluştur"
+                ]
+            )
+
         let genericFileOpenTask =
             containsMissionConcept(
                 corpus,
@@ -613,7 +635,10 @@ actor AgentLocalIntelligence {
             }
         }
 
-        if mailTask {
+        if mailTask &&
+           !languageResolver.isSimpleOpenCommand(
+                userInput
+           ) {
             outcomes.insert("communicate")
             requiredIDs.insert("mail.work")
         }
@@ -654,6 +679,16 @@ actor AgentLocalIntelligence {
                 "desktop.control",
                 "perception.screen"
             ])
+        }
+
+        if textFileOutputTask {
+            outcomes.formUnion([
+                "compose",
+                "organize"
+            ])
+            requiredIDs.insert(
+                "files.write.text"
+            )
         }
 
         if genericFileOpenTask {
@@ -784,9 +819,10 @@ actor AgentLocalIntelligence {
         case "desktop.control": return 8
         case "premiere.control",
              "photoshop.control": return 9
+        case "files.write.text": return 10
         case "files.move.reversible",
-             "mail.work": return 10
-        case "perception.screen": return 11
+             "mail.work": return 11
+        case "perception.screen": return 12
         default: return 20
         }
     }
