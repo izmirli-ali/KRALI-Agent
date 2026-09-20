@@ -380,7 +380,10 @@ try {
       cwd: worktree,
       workspaceRoot: worktree,
       mode: "act",
-      maxIterations: 14,
+      maxIterations: Number(
+        process.env.KRALI_SDK_MAX_ITERATIONS ||
+          "24"
+      ),
       enableTools: true,
       enableSpawnAgent: false,
       enableAgentTeams: false,
