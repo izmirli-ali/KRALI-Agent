@@ -379,6 +379,120 @@ actor AgentLocalIntelligence {
         return String(raw[start...end])
     }
 
+    func reviewMission(
+        userInput: String,
+        mission: AgentSemanticMission,
+        capabilities: [AgentCapability]
+    ) async -> AgentMissionReview? {
+        #if canImport(FoundationModels)
+        if #available(macOS 26.0, *) {
+            let model = SystemLanguageModel.default
+            guard model.isAvailable else {
+                return nil
+            }
+
+            let capabilityCatalog = capabilities
+                .map {
+                    "- \($0.id): \($0.summary) [\($0.isAvailable ? "available" : "unavailable")]"
+                }
+                .joined(separator: "\n")
+
+            let encoder = JSONEncoder()
+            encoder.outputFormatting = [.sortedKeys]
+
+            guard
+                let missionData = try? encoder.encode(mission),
+                let missionJSON = String(
+                    data: missionData,
+                    encoding: .utf8
+                )
+            else {
+                return nil
+            }
+
+            let instructions = """
+            Sen KRALİ Arena'nın bağımsız Reviewer ajanısın.
+            Planner değilsin; sana verilen mission'ı eleştiriyorsun.
+            Kullanıcının gerçek hedefini uçtan uca tamamlayıp tamamlamadığını değerlendir.
+            Capability unavailable olsa bile hedef için gerekiyorsa eksik say.
+            Gereksiz tool/capability kullanımını da işaretle.
+            Özellikle şu hataları ara:
+            - Yerel dosya işi için gereksiz web araştırması
+            - Gerçek kurgu/tasarım hedefinde uygulama provider'ının olmaması
+            - Dosya bulma gereken işte files.search eksikliği
+            - Medya içeriğini değerlendiren işte perception eksikliği
+            - Uygulama sonucunu doğrulaması gereken işte perception.screen eksikliği
+            - Yeni marka görevine alakasız eski marka bağlamı taşınması
+            - Kullanıcıdan gereksiz bilgi isteme
+            JSON dışında hiçbir metin üretme.
+            """
+
+            let prompt = """
+            Kullanıcı isteği:
+            \(userInput)
+
+            Mission:
+            \(missionJSON)
+
+            Capability kataloğu:
+            \(capabilityCatalog)
+
+            Şu JSON şemasını döndür:
+            {
+              "passed": true,
+              "summary": "kısa değerlendirme",
+              "missingCapabilityIDs": [],
+              "unnecessaryCapabilityIDs": [],
+              "riskNotes": []
+            }
+            """
+
+            do {
+                let session = LanguageModelSession(
+                    model: model,
+                    instructions: instructions
+                )
+
+                let response = try await session.respond(
+                    to: prompt
+                )
+                let raw = response.content
+                    .trimmingCharacters(
+                        in: .whitespacesAndNewlines
+                    )
+
+                guard let json = extractJSONObject(from: raw),
+                      let data = json.data(using: .utf8),
+                      let review = try? JSONDecoder().decode(
+                        AgentMissionReview.self,
+                        from: data
+                      ) else {
+                    return nil
+                }
+
+                let knownIDs = Set(capabilities.map(\.id))
+
+                guard
+                    review.missingCapabilityIDs.allSatisfy({
+                        knownIDs.contains($0)
+                    }),
+                    review.unnecessaryCapabilityIDs.allSatisfy({
+                        knownIDs.contains($0)
+                    })
+                else {
+                    return nil
+                }
+
+                return review
+            } catch {
+                return nil
+            }
+        }
+        #endif
+
+        return nil
+    }
+
     func synthesize(
         userInput: String,
         goal: String,
