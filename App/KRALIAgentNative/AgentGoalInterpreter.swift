@@ -218,6 +218,11 @@ struct AgentGoalInterpreter {
             "senaryo oluştur", "senaryo olustur",
             "senaryo yaz",
             "reels senaryosu",
+            "reels planı hazırla", "reels plani hazirla",
+            "reels planı oluştur", "reels plani olustur",
+            "reel planı hazırla", "reel plani hazirla",
+            "video planı hazırla", "video plani hazirla",
+            "sosyal medya video planı", "sosyal medya video plani",
             "içerik planı hazırla", "icerik plani hazirla",
             "metin hazırla", "metin hazirla",
             "caption yaz", "açıklama yaz", "aciklama yaz"
