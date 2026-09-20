@@ -1,5 +1,6 @@
 import SwiftUI
 import AppKit
+import Foundation
 
 struct ContentView: View {
     @EnvironmentObject private var engine: AgentEngine
@@ -192,29 +193,57 @@ struct ContentView: View {
     }
 
     private func messageBubble(_ message: ChatMessage) -> some View {
-        HStack {
+        HStack(alignment: .top) {
             if message.role == .user {
-                Spacer(minLength: 80)
+                Spacer(minLength: 90)
             }
 
-            Text(message.text)
-                .textSelection(.enabled)
-                .padding(.horizontal, 12)
-                .padding(.vertical, 10)
-                .background(
-                    message.role == .user
-                        ? Color.accentColor.opacity(0.22)
-                        : Color(nsColor: .controlBackgroundColor)
+            Group {
+                if message.role == .assistant {
+                    AssistantMessageText(text: message.text)
+                } else {
+                    Text(message.text)
+                        .font(.system(size: 14.5, weight: .medium))
+                        .lineSpacing(2)
+                        .fixedSize(
+                            horizontal: false,
+                            vertical: true
+                        )
+                }
+            }
+            .textSelection(.enabled)
+            .frame(
+                maxWidth: message.role == .assistant ? 780 : 640,
+                alignment: .leading
+            )
+            .padding(.horizontal, 14)
+            .padding(.vertical, 12)
+            .background(
+                message.role == .user
+                    ? Color.accentColor.opacity(0.18)
+                    : Color(nsColor: .controlBackgroundColor)
+            )
+            .overlay(
+                RoundedRectangle(
+                    cornerRadius: 13,
+                    style: .continuous
                 )
-                .clipShape(
-                    RoundedRectangle(
-                        cornerRadius: 12,
-                        style: .continuous
-                    )
+                .stroke(
+                    message.role == .assistant
+                        ? Color.primary.opacity(0.06)
+                        : Color.accentColor.opacity(0.10),
+                    lineWidth: 1
                 )
+            )
+            .clipShape(
+                RoundedRectangle(
+                    cornerRadius: 13,
+                    style: .continuous
+                )
+            )
 
             if message.role == .assistant {
-                Spacer(minLength: 80)
+                Spacer(minLength: 90)
             }
         }
     }
@@ -405,9 +434,10 @@ struct ContentView: View {
                                     Spacer()
                                 }
 
-                                Text(memory.summary)
+                                Text(memoryPreview(memory.summary))
                                     .font(.caption2)
                                     .foregroundStyle(.secondary)
+                                    .lineSpacing(1.5)
                                     .lineLimit(3)
                             }
                         }
@@ -733,11 +763,233 @@ struct ContentView: View {
         }
     }
 
+    private func memoryPreview(
+        _ value: String
+    ) -> String {
+        value
+            .replacingOccurrences(of: "**", with: "")
+            .replacingOccurrences(of: "__", with: "")
+            .replacingOccurrences(of: "`", with: "")
+            .replacingOccurrences(
+                of: #"(?m)^#{1,6}\s*"#,
+                with: "",
+                options: .regularExpression
+            )
+            .replacingOccurrences(
+                of: #"(?m)^>\s*"#,
+                with: "",
+                options: .regularExpression
+            )
+            .replacingOccurrences(
+                of: #"\s+"#,
+                with: " ",
+                options: .regularExpression
+            )
+            .trimmingCharacters(
+                in: .whitespacesAndNewlines
+            )
+    }
+
     private func sectionTitle(_ title: String) -> some View {
         Text(title.uppercased())
             .font(.caption2.weight(.semibold))
             .tracking(1.0)
             .foregroundStyle(.secondary)
+    }
+}
+
+private struct AssistantMessageText: View {
+    let text: String
+
+    private var lines: [String] {
+        text.components(
+            separatedBy: .newlines
+        )
+    }
+
+    var body: some View {
+        VStack(alignment: .leading, spacing: 6) {
+            ForEach(
+                Array(lines.enumerated()),
+                id: \.offset
+            ) { _, rawLine in
+                lineView(rawLine)
+            }
+        }
+        .frame(
+            maxWidth: .infinity,
+            alignment: .leading
+        )
+    }
+
+    @ViewBuilder
+    private func lineView(
+        _ rawLine: String
+    ) -> some View {
+        let trimmed = rawLine.trimmingCharacters(
+            in: .whitespaces
+        )
+
+        if trimmed.isEmpty {
+            Color.clear
+                .frame(height: 3)
+        } else if trimmed == "---" ||
+                    trimmed == "___" {
+            Divider()
+                .padding(.vertical, 3)
+        } else if let heading = headingText(trimmed) {
+            inlineMarkdown(heading.text)
+                .font(
+                    .system(
+                        size: heading.level == 1 ? 18 : 16,
+                        weight: .semibold
+                    )
+                )
+                .foregroundStyle(.primary)
+                .padding(
+                    .top,
+                    heading.level == 1 ? 4 : 2
+                )
+        } else if trimmed.hasPrefix("> ") {
+            HStack(alignment: .top, spacing: 8) {
+                RoundedRectangle(cornerRadius: 1)
+                    .fill(Color.secondary.opacity(0.35))
+                    .frame(width: 3)
+
+                inlineMarkdown(
+                    String(trimmed.dropFirst(2))
+                )
+                .font(.system(size: 14, weight: .regular))
+                .foregroundStyle(.secondary)
+                .lineSpacing(3)
+            }
+        } else if let bullet = bulletText(trimmed) {
+            HStack(alignment: .firstTextBaseline, spacing: 8) {
+                Text("•")
+                    .font(.system(size: 14, weight: .semibold))
+                    .foregroundStyle(.secondary)
+
+                inlineMarkdown(bullet)
+                    .font(.system(size: 14.5, weight: .regular))
+                    .lineSpacing(3)
+            }
+        } else if let numbered = numberedText(trimmed) {
+            HStack(alignment: .firstTextBaseline, spacing: 8) {
+                Text(numbered.number)
+                    .font(.system(size: 14, weight: .semibold))
+                    .foregroundStyle(.secondary)
+                    .frame(minWidth: 22, alignment: .trailing)
+
+                inlineMarkdown(numbered.text)
+                    .font(.system(size: 14.5, weight: .regular))
+                    .lineSpacing(3)
+            }
+        } else {
+            inlineMarkdown(trimmed)
+                .font(.system(size: 14.5, weight: .regular))
+                .lineSpacing(3)
+        }
+    }
+
+    private func inlineMarkdown(
+        _ value: String
+    ) -> Text {
+        if let attributed = try? AttributedString(
+            markdown: value
+        ) {
+            return Text(attributed)
+        }
+
+        return Text(value)
+    }
+
+    private func headingText(
+        _ value: String
+    ) -> (level: Int, text: String)? {
+        var level = 0
+
+        for character in value {
+            guard character == "#" else {
+                break
+            }
+            level += 1
+        }
+
+        guard
+            level > 0,
+            level <= 6
+        else {
+            return nil
+        }
+
+        let index = value.index(
+            value.startIndex,
+            offsetBy: level
+        )
+
+        let remainder = value[index...]
+            .trimmingCharacters(
+                in: .whitespaces
+            )
+
+        guard !remainder.isEmpty else {
+            return nil
+        }
+
+        return (level, remainder)
+    }
+
+    private func bulletText(
+        _ value: String
+    ) -> String? {
+        for prefix in ["- ", "* ", "• "] {
+            if value.hasPrefix(prefix) {
+                return String(
+                    value.dropFirst(prefix.count)
+                )
+            }
+        }
+
+        return nil
+    }
+
+    private func numberedText(
+        _ value: String
+    ) -> (number: String, text: String)? {
+        guard
+            let regex = try? NSRegularExpression(
+                pattern: #"^([0-9]{1,3}[.)])\s+(.+)$"#
+            )
+        else {
+            return nil
+        }
+
+        let fullRange = NSRange(
+            value.startIndex..<value.endIndex,
+            in: value
+        )
+
+        guard
+            let match = regex.firstMatch(
+                in: value,
+                range: fullRange
+            ),
+            let numberRange = Range(
+                match.range(at: 1),
+                in: value
+            ),
+            let textRange = Range(
+                match.range(at: 2),
+                in: value
+            )
+        else {
+            return nil
+        }
+
+        return (
+            String(value[numberRange]),
+            String(value[textRange])
+        )
     }
 }
 
