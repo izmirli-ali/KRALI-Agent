@@ -1,0 +1,12 @@
+{
+  "accessibilityTrusted" : false,
+  "createdAt" : "2026-09-20T12:00:15Z",
+  "frontmostAfter" : "Notlar",
+  "frontmostBefore" : "KRALİ",
+  "launchOrActivateSucceeded" : true,
+  "requestedApplication" : "Notlar",
+  "resolvedApplicationURL" : "/System/Applications/Notes.app",
+  "screenSummary" : "1. Ekran durumu  \nNotlar uygulaması ön planda. Ekranda görünen pencere başlıkları: Notlar — Tümü (Mac’imde), Dock, universalAccessAuthWarn, Bildirim Merkezi, WindowManager, KRALİ, ChatGPT. Açık uygulamalar: Bildirim Merkezi, ChatGPT, Dock, Finder, KRALİ, Notlar, WindowManager, universalAccessAuthWarn. Ekranda okunan metin: Notlar uygulaması içinde \"Notlar\", \"Pr\", \"Aa\" gibi menü öğeleri ve not listesi.\n\n2. Hedefle ilgili kanıt  \n\"Notlar\" uygulaması ön planda ve Notlar pencere başlığı açık. Ekranda \"Notlar\" yazısı ve Notlar menü öğeleri görülüyor. \"Notlar\" uygulaması açık ve diğer uygulamalar arasında öncelikli konumda.\n\n3. Doğrulama / sonraki güvenli adım  \nNotlar uygulaması ekranın önünde ve kanıtlar doğrudan hedefi destekliyor. Gözlenen durum güvenilir. Şimdi, Notlar uygulaması üzerinde herhangi bir etkileşim yapmadan, ekran durumunu koruyarak bir sonraki adım için hazır bekliyor.",
+  "screenVerifiedFrontmost" : true,
+  "wasRunning" : false
+}
