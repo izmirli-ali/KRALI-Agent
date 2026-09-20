@@ -446,6 +446,7 @@ final class AgentEngine: ObservableObject {
                     decision: decision,
                     currentUserInput: text,
                     goal: resolvedGoal,
+                    semanticMission: semanticMission,
                     snapshot: verificationSnapshot()
                 )
 
