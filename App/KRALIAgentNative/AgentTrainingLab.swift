@@ -132,6 +132,9 @@ struct AgentTrainingLab {
         results.append(
             staleGoalVerifierIsolationResult()
         )
+        results.append(
+            semanticExecutionVerifierResult()
+        )
 
         let core = results.filter { $0.tier == .core }
         let northStar = results.filter { $0.tier == .northStar }
@@ -421,6 +424,114 @@ struct AgentTrainingLab {
             ],
             unavailableCapabilities: [],
             diagnostics: diagnostics
+        )
+    }
+
+    private func semanticExecutionVerifierResult()
+        -> TrainingScenarioResult {
+        let prompt = "Notlar uygulamasını aç."
+
+        let decision = brain.analyze(
+            prompt,
+            context: context(
+                hasWorkspace: true,
+                videoCount: 0
+            )
+        )
+
+        let goal = goalInterpreter.interpret(
+            prompt,
+            decision: decision,
+            context: context(
+                hasWorkspace: true,
+                videoCount: 0
+            )
+        )
+
+        let mission = AgentSemanticMission(
+            objective: prompt,
+            outcomes: ["open"],
+            steps: [
+                AgentSemanticMissionStep(
+                    title: "Hedefi çöz",
+                    purpose: "Kullanıcı hedefini çöz.",
+                    capabilityID: "core.reasoning",
+                    operation: "semantic.test",
+                    dependsOn: []
+                ),
+                AgentSemanticMissionStep(
+                    title: "Uygulamayı aç",
+                    purpose: "İstenen uygulamayı aç.",
+                    capabilityID: "desktop.app",
+                    operation: "app.open",
+                    dependsOn: [0]
+                )
+            ],
+            requiredCapabilityIDs: [
+                "core.reasoning",
+                "context.local",
+                "desktop.app"
+            ],
+            requiresUserInput: false,
+            userInputReason: nil,
+            confidence: 1
+        )
+
+        let result = verifier.verify(
+            decision: decision,
+            currentUserInput: prompt,
+            goal: goal,
+            semanticMission: mission,
+            snapshot: AgentVerificationSnapshot(
+                hasWorkspace: true,
+                fileResultCount: 0,
+                folderResultCount: 0,
+                hasPendingAction: false,
+                hasUndoAction: false,
+                unavailableCapabilityIDs: [],
+                selectedCapabilityIDs: [
+                    "core.reasoning",
+                    "context.local",
+                    "desktop.app"
+                ],
+                executedCapabilityIDs: [
+                    "core.reasoning",
+                    "context.local"
+                ],
+                webResearchResultCount: 0,
+                webResearchEvidenceCount: 0,
+                webResearchUniqueDomainCount: 0,
+                webResearchCanonicalEvidenceCount: 0
+            )
+        )
+
+        let passed =
+            result.state == .attention &&
+            result.summary.contains(
+                "gerçekten yürütülmedi"
+            )
+
+        return TrainingScenarioResult(
+            scenarioID:
+                "semantic-required-action-execution",
+            title:
+                "Verifier yürütülmeyen semantic action'ı başarılı saymamalı",
+            tier: .core,
+            prompt: prompt,
+            passed: passed,
+            goal: goal.summary,
+            route: [],
+            selectedCapabilities: [
+                "core.reasoning",
+                "context.local",
+                "desktop.app"
+            ],
+            unavailableCapabilities: [],
+            diagnostics: passed
+                ? []
+                : [
+                    "desktop.app yürütülmeden verifier passed/partial verdi."
+                ]
         )
     }
 
