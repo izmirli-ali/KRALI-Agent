@@ -8,6 +8,8 @@ LIVE_EVAL_SOURCE="$HOME/Library/Application Support/KRALI Agent/Mentor/live-eval
 ARENA_SOURCE="$HOME/Library/Application Support/KRALI Agent/Mentor/arena-latest.json"
 SCREEN_SOURCE="$HOME/Library/Application Support/KRALI Agent/Mentor/screen-perception-latest.json"
 SCREEN_STATUS_SOURCE="$HOME/Library/Application Support/KRALI Agent/Mentor/screen-perception-status.txt"
+DESKTOP_SOURCE="$HOME/Library/Application Support/KRALI Agent/Mentor/desktop-control-latest.json"
+DESKTOP_STATUS_SOURCE="$HOME/Library/Application Support/KRALI Agent/Mentor/desktop-control-status.txt"
 DEVELOPER_STATUS_SOURCE="$HOME/Library/Application Support/KRALI Agent/Developer/latest.txt"
 DEVELOPER_LOG_SOURCE="$HOME/Library/Logs/KRALI-Developer-Agent.log"
 SEMANTIC_LOG_SOURCE="$HOME/Library/Logs/KRALI-Semantic-Planner.log"
@@ -17,6 +19,8 @@ LIVE_EVAL_DEST="$ROOT/Mentor/live-eval-latest.json"
 ARENA_DEST="$ROOT/Mentor/arena-latest.json"
 SCREEN_DEST="$ROOT/Mentor/screen-perception-latest.json"
 SCREEN_STATUS_DEST="$ROOT/Mentor/screen-perception-status.txt"
+DESKTOP_DEST="$ROOT/Mentor/desktop-control-latest.json"
+DESKTOP_STATUS_DEST="$ROOT/Mentor/desktop-control-status.txt"
 DEVELOPER_STATUS_DEST="$ROOT/Mentor/developer-status.txt"
 DEVELOPER_LOG_DEST="$ROOT/Mentor/developer-log-tail.txt"
 SEMANTIC_LOG_DEST="$ROOT/Mentor/semantic-planner-log-tail.txt"
@@ -33,7 +37,7 @@ if [ ! -d "$ROOT/.git" ]; then
     exit 10
 fi
 
-if [ ! -f "$TRACE_SOURCE" ] && [ ! -f "$TRAINING_SOURCE" ] && [ ! -f "$LIVE_EVAL_SOURCE" ] && [ ! -f "$ARENA_SOURCE" ] && [ ! -f "$SCREEN_SOURCE" ] && [ ! -f "$SCREEN_STATUS_SOURCE" ]; then
+if [ ! -f "$TRACE_SOURCE" ] && [ ! -f "$TRAINING_SOURCE" ] && [ ! -f "$LIVE_EVAL_SOURCE" ] && [ ! -f "$ARENA_SOURCE" ] && [ ! -f "$SCREEN_SOURCE" ] && [ ! -f "$SCREEN_STATUS_SOURCE" ] && [ ! -f "$DESKTOP_SOURCE" ] && [ ! -f "$DESKTOP_STATUS_SOURCE" ]; then
     echo "❌ Gönderilecek mentor trace, Training Lab, Live Research Eval, Arena veya Screen Perception raporu yok."
     exit 11
 fi
@@ -85,6 +89,16 @@ fi
 if [ -f "$SCREEN_STATUS_SOURCE" ]; then
     cp "$SCREEN_STATUS_SOURCE" "$SCREEN_STATUS_DEST"
     FILES+=("Mentor/screen-perception-status.txt")
+fi
+
+if [ -f "$DESKTOP_SOURCE" ]; then
+    cp "$DESKTOP_SOURCE" "$DESKTOP_DEST"
+    FILES+=("Mentor/desktop-control-latest.json")
+fi
+
+if [ -f "$DESKTOP_STATUS_SOURCE" ]; then
+    cp "$DESKTOP_STATUS_SOURCE" "$DESKTOP_STATUS_DEST"
+    FILES+=("Mentor/desktop-control-status.txt")
 fi
 
 if [ -f "$DEVELOPER_STATUS_SOURCE" ]; then
