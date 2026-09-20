@@ -1326,6 +1326,29 @@ actor AgentArena {
                 .sorted()
             } ?? []
 
+            let selectedSet = Set(selectedIDs)
+
+            let groundedReviewerMissing =
+                (review?.missingCapabilityIDs ?? [])
+                    .filter {
+                        !selectedSet.contains($0)
+                    }
+
+            let groundedReviewerUnnecessary =
+                (review?.unnecessaryCapabilityIDs ?? [])
+                    .filter {
+                        selectedSet.contains($0)
+                    }
+
+            let groundedReviewerPassed: Bool?
+            if review == nil {
+                groundedReviewerPassed = nil
+            } else {
+                groundedReviewerPassed =
+                    groundedReviewerMissing.isEmpty &&
+                    groundedReviewerUnnecessary.isEmpty
+            }
+
             results.append(
                 AgentArenaScenarioResult(
                     scenarioID: scenario.id,
@@ -1336,12 +1359,12 @@ actor AgentArena {
                     mission: selectedMission,
                     selectedCapabilityIDs: selectedIDs,
                     diagnostics: diagnostics,
-                    reviewerPassed: review?.passed,
+                    reviewerPassed: groundedReviewerPassed,
                     reviewerSummary: review?.summary,
                     reviewerMissingCapabilityIDs:
-                        review?.missingCapabilityIDs ?? [],
+                        groundedReviewerMissing,
                     reviewerUnnecessaryCapabilityIDs:
-                        review?.unnecessaryCapabilityIDs ?? [],
+                        groundedReviewerUnnecessary,
                     reviewerRiskNotes:
                         review?.riskNotes ?? []
                 )
@@ -1501,7 +1524,12 @@ actor AgentArena {
                 requiredCapabilities: [
                     "browser.control"
                 ],
-                forbiddenCapabilities: [],
+                forbiddenCapabilities: [
+                    "files.search",
+                    "files.metadata",
+                    "files.reveal",
+                    "perception.media"
+                ],
                 requiredOutcomes: [
                     "research"
                 ],
