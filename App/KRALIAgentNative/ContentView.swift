@@ -1185,7 +1185,7 @@ struct ContentView: View {
                 }
 
                 Text(
-                    "v0.7.26: Doğal dilde “detaylı araştır” görevleri artık yalnızca kaynak listesi değil açıklanmış/sentezlenmiş sonuç hedefi olarak yorumlanıyor. “X adında bir salon/işletme” kalıbından varlık çıkarımı eklendi; araştırma doğrulaması kaynak sayısının yanında farklı domain çeşitliliğini de kontrol ediyor. Estafiz tipi yerel işletme araştırması Training Lab’e regression testi olarak eklendi."
+                    "v0.7.27: Sosyal medya profil soruları doğal dilde ayrı bir araştırma ihtiyacı olarak tanınıyor. “estafizsym instagram hesabının kaç takipçisi var, içerikleri neler?” gibi cümleler artık fallback’e düşmek yerine Web Research’e yönleniyor. Handle + platform için özel arama planı, resmi profil önceliği ve takipçi/içerik facet’leri eklendi. Canlı metrikler kanıtta yoksa tahmin edilmiyor."
                 )
                 .font(.caption2)
                 .foregroundStyle(.orange)
