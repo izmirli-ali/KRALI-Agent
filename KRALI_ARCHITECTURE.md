@@ -376,3 +376,14 @@ Semantic Planner artık repaired model mission validation'dan geçmezse current 
 Arena ve runtime diagnostic'leri planner kaynağını artık daha doğru ayırır: doğrudan model mission'ı `Apple Foundation Models`, model mission'ının deterministic capability contract ile tamamlandığı yol `Apple + Contract Repair`, model olmadan current-input contract seed ile üretilen yol ise `Local Contract Repair` olarak görünür. Böylece Mentor turunda hangi katmanın gerçekten mission'ı kurtardığı anlaşılır.
 
 Screen Perception Probe bu sürümde yine manuel probe olarak kalır ve runtime `perception.screen` availability açılmaz.
+
+
+**v0.8.20 provider-neutral Core + lean planner + broader Arena:** KRALİ'nin mimari hedefi genel amaçlı bilgisayar ajanı olarak netleştirildi. Premiere, Photoshop, Browser, Mail, Desktop veya Finder Core değildir; yalnızca capability provider'lardır. Core kullanıcı hedefini semantik olarak çözer, uygun capability'leri seçer, yürütür ve doğrular. Sık kullanılan Premiere görevleri mimariyi video-editöre daraltmamalıdır.
+
+Semantic Planner içindeki ikinci Apple Foundation Models self-review çağrısı kaldırıldı. Planner artık tek semantic model çağrısı → deterministic sanitize/contract repair → runtime coverage/verifier akışını kullanır. Arena zaten bağımsız Reviewer çalıştırdığı için planner içindeki ikinci LLM çağrısı gereksizdi ve model çağrısı kararsızlığını artırıyordu. Bu sadeleştirme daha az model çağrısıyla daha genel ve deterministik bir mission üretim hattı sağlar.
+
+Capability→outcome türetimi de provider-neutral hale getirildi. `desktop.control` artık otomatik olarak `edit` sonucu anlamına gelmez; masaüstü provider yalnızca uygulama açma veya pencere öne getirme gibi edit olmayan işler için de kullanılabilir. `files.reveal` seçimi `open` outcome'unu besler. Premiere/Photoshop gerçek edit provider'ları olmaya devam eder.
+
+KRALİ Arena 6 senaryodan 8 senaryoya genişletildi. Mevcut video edit, marka tasarımı, desktop cleanup, browser, mail ve research-to-design görevlerine iki medya-dışı genel bilgisayar görevi eklendi: Notlar uygulamasını açıp öne getirme (`desktop.control`) ve İndirilenler'deki en son PDF'i bulup Finder'da açma (`files.search + files.reveal`). Böylece gelecekteki değişiklikler KRALİ'yi Premiere/medya ajanına daraltırsa Arena bunu regression olarak yakalar.
+
+Screen Perception Probe artık yalnızca başarı JSON'u üretmez; `screen-perception-status.txt` dosyasına running/success/failed durumu da yazar ve Mentor Sync bu tanıyı GitHub'a taşır. Capture başarısızsa bir sonraki Mentor turunda macOS izin/capture hatası doğrudan görülebilir.
