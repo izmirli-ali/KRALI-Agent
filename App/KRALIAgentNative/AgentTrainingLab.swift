@@ -1832,6 +1832,12 @@ struct AgentTrainingLab {
                 $0.capabilityID ==
                     "browser.control"
             } &&
+            graph.steps.first(
+                where: {
+                    $0.capabilityID ==
+                        "browser.control"
+                }
+            )?.requiresApproval == false &&
             !normalized.steps.contains {
                 $0.capabilityID ==
                     "app.workflow"
@@ -1871,7 +1877,7 @@ struct AgentTrainingLab {
             diagnostics: passed
                 ? []
                 : [
-                    "Safari/URL görevi desktop.app + browser.control contract'ına normalize edilmedi."
+                    "Safari/URL görevi desktop.app + browser.control contract'ına doğru normalize edilmedi veya salt-okunur gezinme gereksiz approval istedi."
                 ]
         )
     }
