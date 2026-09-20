@@ -2241,6 +2241,23 @@ final class AgentEngine: ObservableObject {
                     "Arena açık-dünya problemi buldu; Developer Agent candidate düzeltme için otomatik başlatılıyor"
                 )
                 runDeveloperAgent()
+            } else if !arenaNeedsDevelopment &&
+                      trainingGreen &&
+                      liveGreen &&
+                      !developerAgentBusy {
+                let greenStatus =
+                    DeveloperAgentStatus(
+                        state: "no_change",
+                        message:
+                            "Training, Live Research ve Arena yeşil; candidate değişiklik gerekmiyor.",
+                        branch: nil,
+                        worktree: nil
+                    )
+
+                developerAgentStatus = greenStatus
+                developerBridge.writeStatus(
+                    greenStatus
+                )
             }
         }
     }
