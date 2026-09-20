@@ -3,9 +3,7 @@ import AppKit
 
 @MainActor
 final class AgentEngine: ObservableObject {
-    @Published var messages: [ChatMessage] = [
-        ChatMessage(role: .assistant, text: "Hazırım. Bana normal konuşur gibi hedefini söyle; gerekli kabiliyetleri seçip yolu kendim kuracağım.")
-    ]
+    @Published var messages: [ChatMessage] = []
 
     @Published var activities: [ActivityItem] = []
     @Published var activeRoute: [String] = ["Core"]
@@ -120,6 +118,7 @@ final class AgentEngine: ObservableObject {
     private let localIntelligence = AgentLocalIntelligence()
     private let subscriptionIntelligence = AgentSubscriptionIntelligence()
     private let contextMemoryStore = AgentContextMemoryStore()
+    private let conversationStore = ConversationStore()
     private var lastDecision: AgentDecision?
     private var activeLearningJobID: UUID?
 
@@ -130,6 +129,24 @@ final class AgentEngine: ObservableObject {
             voiceOutputEnabled = UserDefaults.standard.bool(
                 forKey: "krali.native.voiceOutputEnabled.v1"
             )
+        }
+
+        let restoredMessages =
+            conversationStore.loadActive()
+
+        if restoredMessages.isEmpty {
+            messages = [
+                ChatMessage(
+                    role: .assistant,
+                    text: "Hazırım. Bana normal konuşur gibi hedefini söyle; gerekli kabiliyetleri seçip yolu kendim kuracağım."
+                )
+            ]
+            messages =
+                conversationStore.persistActive(
+                    messages
+                )
+        } else {
+            messages = restoredMessages
         }
 
         loadMemory()
@@ -331,6 +348,16 @@ final class AgentEngine: ObservableObject {
 
     // MARK: - Chat
 
+    private func appendConversationMessage(
+        _ message: ChatMessage
+    ) {
+        messages.append(message)
+        messages =
+            conversationStore.persistActive(
+                messages
+            )
+    }
+
     func send(
         _ raw: String,
         source: ChatInputSource = .text
@@ -389,7 +416,12 @@ final class AgentEngine: ObservableObject {
                 "Bu tur için ilgili önceki bağlam bulunmadı."
         }
 
-        messages.append(ChatMessage(role: .user, text: text))
+        appendConversationMessage(
+            ChatMessage(
+                role: .user,
+                text: text
+            )
+        )
 
         let decision = brain.analyze(
             text,
@@ -1139,7 +1171,12 @@ final class AgentEngine: ObservableObject {
                 "\(contextMemoryEntries.count) bağlam kaydı hazır."
         }
 
-        messages.append(ChatMessage(role: .assistant, text: reply))
+        appendConversationMessage(
+            ChatMessage(
+                role: .assistant,
+                text: reply
+            )
+        )
 
         let elapsed =
             Date().timeIntervalSince(
