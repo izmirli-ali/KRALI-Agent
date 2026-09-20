@@ -198,6 +198,15 @@ struct AgentTrainingLab {
             compoundAppTargetExtractionResult()
         )
         results.append(
+            secondaryNounAppIsolationResult()
+        )
+        results.append(
+            browserWorkflowContractResult()
+        )
+        results.append(
+            runtimeProviderFailureEscalationResult()
+        )
+        results.append(
             nonCommitWorkflowApprovalResult()
         )
         results.append(
@@ -1465,6 +1474,302 @@ struct AgentTrainingLab {
                 : [
                     "Beklenen uygulama hedefi 'takvim', bulunan: " +
                     (extracted ?? "nil")
+                ]
+        )
+    }
+
+    private func secondaryNounAppIsolationResult()
+        -> TrainingScenarioResult {
+        let prompt =
+            "Sistem Ayarları uygulamasını aç. Bluetooth bölümüne git ve bağlı cihazları listele."
+
+        let extracted =
+            languageResolver
+                .applicationTargetPhrase(
+                    from: prompt
+                )
+
+        let passed =
+            extracted ==
+                "sistem ayarlari"
+
+        return TrainingScenarioResult(
+            scenarioID:
+                "secondary-noun-app-isolation",
+            title:
+                "İkinci görev nesnesini uygulama adı sanmama",
+            tier: .core,
+            prompt: prompt,
+            passed: passed,
+            goal:
+                "Açılacak uygulamayı sonraki bölüm/cihaz adlarından ayır",
+            route: [
+                "Core",
+                "Goal",
+                "Desktop"
+            ],
+            selectedCapabilities: [
+                "desktop.app",
+                "app.workflow"
+            ],
+            unavailableCapabilities: [],
+            diagnostics: passed
+                ? []
+                : [
+                    "Beklenen uygulama hedefi 'sistem ayarlari', bulunan: " +
+                    (extracted ?? "nil")
+                ]
+        )
+    }
+
+    private func browserWorkflowContractResult()
+        -> TrainingScenarioResult {
+        let prompt =
+            "Safari’yi aç. example.com adresine git ve sayfadaki ana başlığı oku, bana söyle. Ardından yeni bir sekmede wikipedia.org adresini açmayı hazırla ama benden onay almadan yeni sekme açma."
+
+        let snapshot =
+            context(
+                hasWorkspace: false
+            )
+
+        let decision =
+            brain.analyze(
+                prompt,
+                context: snapshot
+            )
+
+        let goal =
+            goalInterpreter.interpret(
+                prompt,
+                decision: decision,
+                context: snapshot
+            )
+
+        let rawMission =
+            AgentSemanticMission(
+                objective: prompt,
+                outcomes:
+                    goal.outcomes
+                        .map(\.rawValue)
+                        .sorted(),
+                steps: [],
+                requiredCapabilityIDs:
+                    Array(
+                        goal
+                            .requiredCapabilityIDs
+                    )
+                    .sorted(),
+                requiresUserInput: false,
+                userInputReason: nil,
+                confidence: 0.6
+            )
+
+        let normalized =
+            missionNormalizer.normalize(
+                rawMission,
+                userInput: prompt,
+                capabilities:
+                    capabilityRegistry.all
+            )
+
+        let graph =
+            taskOrchestrator.compile(
+                mission: normalized,
+                capabilities:
+                    capabilityRegistry.all
+            )
+
+        let gaps =
+            capabilityGapResolver.resolve(
+                graph: graph,
+                capabilities:
+                    capabilityRegistry.all
+            )
+
+        let required =
+            Set(
+                normalized
+                    .requiredCapabilityIDs
+            )
+
+        let passed =
+            languageResolver
+                .requestsBrowserWorkflow(
+                    prompt
+                ) &&
+            languageResolver
+                .applicationTargetPhrase(
+                    from: prompt
+                ) == "safari" &&
+            required.contains(
+                "desktop.app"
+            ) &&
+            required.contains(
+                "browser.control"
+            ) &&
+            normalized.steps.contains {
+                $0.capabilityID ==
+                    "desktop.app"
+            } &&
+            normalized.steps.contains {
+                $0.capabilityID ==
+                    "browser.control"
+            } &&
+            !normalized.steps.contains {
+                $0.capabilityID ==
+                    "app.workflow"
+            } &&
+            graph.blockedCapabilityIDs
+                .contains(
+                    "browser.control"
+                ) &&
+            gaps.contains {
+                $0.capabilityID ==
+                    "browser.control"
+            }
+
+        return TrainingScenarioResult(
+            scenarioID:
+                "browser-workflow-contract",
+            title:
+                "URL içeren tarayıcı görevini capability gap'e dönüştürme",
+            tier: .core,
+            prompt: prompt,
+            passed: passed,
+            goal:
+                "Planner başarısız olsa bile desktop + browser contract üret ve Learn hattına geçir",
+            route: [
+                "Core",
+                "Goal",
+                "Desktop",
+                "Browser",
+                "Learn"
+            ],
+            selectedCapabilities:
+                normalized
+                    .requiredCapabilityIDs,
+            unavailableCapabilities:
+                graph
+                    .blockedCapabilityIDs,
+            diagnostics: passed
+                ? []
+                : [
+                    "Safari/URL görevi desktop.app + browser.control contract'ına normalize edilmedi."
+                ]
+        )
+    }
+
+    private func runtimeProviderFailureEscalationResult()
+        -> TrainingScenarioResult {
+        let mission =
+            AgentSemanticMission(
+                objective:
+                    "Bir masaüstü uygulamasını aç ve içeriğini incele.",
+                outcomes: [
+                    "open",
+                    "analyze"
+                ],
+                steps: [
+                    AgentSemanticMissionStep(
+                        title:
+                            "Görev bağlamını hazırla",
+                        purpose:
+                            "Bağlamı hazırla.",
+                        capabilityID:
+                            "context.local",
+                        operation:
+                            "context.resolve",
+                        dependsOn: []
+                    ),
+                    AgentSemanticMissionStep(
+                        title:
+                            "Uygulamayı aç",
+                        purpose:
+                            "İstenen uygulamayı görünür foreground'a getir.",
+                        capabilityID:
+                            "desktop.app",
+                        operation:
+                            "app.open",
+                        dependsOn: [0]
+                    ),
+                    AgentSemanticMissionStep(
+                        title:
+                            "İçeriği incele",
+                        purpose:
+                            "Öndeki uygulamayı incele.",
+                        capabilityID:
+                            "app.workflow",
+                        operation:
+                            "app.workflow.execute",
+                        dependsOn: [1]
+                    )
+                ],
+                requiredCapabilityIDs: [
+                    "context.local",
+                    "desktop.app",
+                    "app.workflow"
+                ],
+                requiresUserInput: false,
+                userInputReason: nil,
+                confidence: 1
+            )
+
+        let graph =
+            taskOrchestrator.compile(
+                mission: mission,
+                capabilities:
+                    capabilityRegistry.all
+            )
+
+        let gaps =
+            capabilityGapResolver
+                .resolveRuntimeFailures(
+                    graph: graph,
+                    completedStepIndexes: [0],
+                    capabilities:
+                        capabilityRegistry.all
+                )
+
+        let passed =
+            gaps.count == 1 &&
+            gaps.first?
+                .capabilityID ==
+                "desktop.app" &&
+            gaps.first?
+                .kind ==
+                .strategy &&
+            gaps.first?
+                .developerBrief
+                .contains(
+                    "hard-code yazma"
+                ) == true
+
+        return TrainingScenarioResult(
+            scenarioID:
+                "runtime-provider-failure-escalation",
+            title:
+                "Available provider runtime hatasını Learn hattına eskale etme",
+            tier: .core,
+            prompt:
+                mission.objective,
+            passed: passed,
+            goal:
+                "Debug/retry sonrası tamamlanmayan root provider'ı generic runtime gap say",
+            route: [
+                "Core",
+                "Debug",
+                "GapResolver",
+                "Learn"
+            ],
+            selectedCapabilities:
+                gaps.map(
+                    \.capabilityID
+                ),
+            unavailableCapabilities: [],
+            diagnostics: passed
+                ? []
+                : [
+                    "Runtime'da başarısız desktop.app provider'ı tek root gap olarak üretilmedi."
                 ]
         )
     }
