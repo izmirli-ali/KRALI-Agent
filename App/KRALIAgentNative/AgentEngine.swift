@@ -1344,6 +1344,23 @@ final class AgentEngine: ObservableObject {
                     "/" +
                     String(report.total)
                 )
+
+                let failedScenarios = report.results.filter {
+                    !$0.passed
+                }
+
+                for failed in failedScenarios {
+                    let detail = failed.diagnostics.isEmpty
+                        ? "Tanı ayrıntısı yok"
+                        : failed.diagnostics.joined(separator: " | ")
+
+                    log(
+                        "Training Lab FAIL [\(failed.scenarioID)]: " +
+                        failed.title +
+                        " • " +
+                        detail
+                    )
+                }
             } catch {
                 trainingLabStatus =
                     "Training Lab tamamlandı fakat rapor kaydedilemedi: " +
