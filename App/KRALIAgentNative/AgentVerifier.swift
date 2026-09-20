@@ -34,8 +34,7 @@ struct AgentVerifier {
             )
         }
 
-        if let mission = semanticMission,
-           !snapshot.selectedCapabilityIDs.contains("research.web") {
+        if let mission = semanticMission {
             if mission.requiresUserInput {
                 return attention(
                     mission.userInputReason ??
@@ -61,19 +60,21 @@ struct AgentVerifier {
                 }
             }
 
-            if !snapshot.unavailableCapabilityIDs.isEmpty {
+            if !snapshot.selectedCapabilityIDs.contains("research.web") {
+                if !snapshot.unavailableCapabilityIDs.isEmpty {
+                    return AgentVerificationResult(
+                        state: .partial,
+                        summary: "Semantic mission doğru oluşturuldu ve mevcut adımlar yürütüldü; ancak gereken capability'lerden en az biri henüz bağlı değil.",
+                        fallback: nil
+                    )
+                }
+
                 return AgentVerificationResult(
-                    state: .partial,
-                    summary: "Semantic mission doğru oluşturuldu ve mevcut adımlar yürütüldü; ancak gereken capability'lerden en az biri henüz bağlı değil.",
+                    state: .passed,
+                    summary: "Semantic mission ile seçilen mevcut capability adımları yürütüldü ve hedefle uyumlu sonuç doğrulandı.",
                     fallback: nil
                 )
             }
-
-            return AgentVerificationResult(
-                state: .passed,
-                summary: "Semantic mission ile seçilen mevcut capability adımları yürütüldü ve hedefle uyumlu sonuç doğrulandı.",
-                fallback: nil
-            )
         }
 
         switch decision.intent {
