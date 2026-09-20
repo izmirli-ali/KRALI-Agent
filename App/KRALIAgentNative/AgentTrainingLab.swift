@@ -369,6 +369,21 @@ struct AgentTrainingLab {
                 minimumMandatoryResearchConceptGroups: 1
             ),
             TrainingScenario(
+                id: "social-profile-public-metadata",
+                title: "Sosyal medya profil bilgisi araştırması",
+                tier: .core,
+                prompt: "estafizsym instagram hesabının kaç takipçisi var içerikleri neler bakabilir misin",
+                context: empty,
+                requiredOutcomes: [.research, .explain],
+                requiredCapabilities: ["research.web", "core.reasoning"],
+                forbiddenCapabilities: ["files.search"],
+                requiredRouteStages: ["Research", "Verify"],
+                requiredStepTitles: ["Web'de araştır", "Kaynakları oku"],
+                requiredLearningCapabilities: [],
+                minimumResearchConceptGroups: 2,
+                minimumMandatoryResearchConceptGroups: 1
+            ),
+            TrainingScenario(
                 id: "local-file-search",
                 title: "Yerel dosya araması",
                 tier: .core,
