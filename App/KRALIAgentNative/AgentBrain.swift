@@ -559,6 +559,9 @@ struct AgentBrain {
 
         let looksLikeContentCreation = containsAny(text, [
             "çekim planı", "cekim plani",
+            "reels planı", "reels plani",
+            "reel planı", "reel plani",
+            "video planı", "video plani",
             "senaryo hazırla", "senaryo hazirla",
             "plan hazırla", "plan hazirla",
             "metni hazırla", "metni hazirla",
