@@ -63,6 +63,7 @@ struct MentorTrace: Codable {
     let plan: String
     let route: [String]
     let semanticMission: AgentSemanticMission?
+    let semanticPlannerProvider: String?
     let capabilities: [MentorTraceCapability]
     let learningPlans: [MentorTraceLearningPlan]
     let executionSteps: [MentorTraceStep]
@@ -102,6 +103,7 @@ struct MentorTraceStore {
         plan: String,
         route: [String],
         semanticMission: AgentSemanticMission?,
+        semanticPlannerProvider: String?,
         capabilities: [AgentCapability],
         learningPlans: [CapabilityLearningPlan],
         executionSteps: [AgentExecutionStep],
@@ -142,6 +144,8 @@ struct MentorTraceStore {
             plan: plan,
             route: route,
             semanticMission: semanticMission,
+            semanticPlannerProvider:
+                semanticPlannerProvider,
             capabilities: capabilities.map {
                 MentorTraceCapability(
                     id: $0.id,
