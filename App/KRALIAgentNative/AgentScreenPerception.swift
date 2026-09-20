@@ -9,6 +9,7 @@ struct ScreenPerceptionReport: Codable, Hashable, Sendable {
     let displayID: UInt32
     let pixelWidth: Int
     let pixelHeight: Int
+    let frontmostApplication: String?
     let visibleApplications: [String]
     let visibleWindows: [String]
     let recognizedText: [String]
@@ -90,11 +91,23 @@ actor AgentScreenPerception {
             in: image
         )
 
+        let frontmostApplication =
+            NSWorkspace.shared.frontmostApplication?
+                .localizedName?
+                .trimmingCharacters(
+                    in: .whitespacesAndNewlines
+                )
+
         let visibleApplications =
             Array(
                 Set(
                     content.applications.compactMap {
-                        $0.applicationName
+                        let name = $0.applicationName
+                            .trimmingCharacters(
+                                in: .whitespacesAndNewlines
+                            )
+
+                        return name.isEmpty ? nil : name
                     }
                 )
             )
@@ -128,6 +141,8 @@ actor AgentScreenPerception {
             await localIntelligence
                 .summarizeScreenState(
                     goal: goal,
+                    frontmostApplication:
+                        frontmostApplication,
                     visibleApplications:
                         visibleApplications,
                     visibleWindows:
@@ -150,6 +165,8 @@ actor AgentScreenPerception {
             displayID: display.displayID,
             pixelWidth: configuration.width,
             pixelHeight: configuration.height,
+            frontmostApplication:
+                frontmostApplication,
             visibleApplications:
                 visibleApplications,
             visibleWindows:
