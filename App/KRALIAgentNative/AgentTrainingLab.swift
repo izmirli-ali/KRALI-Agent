@@ -1599,7 +1599,7 @@ actor AgentArena {
                 prompt:
                     "Notlar uygulamasını aç ve pencereyi öne getir.",
                 requiredCapabilities: [
-                    "desktop.control"
+                    "desktop.app"
                 ],
                 forbiddenCapabilities: [
                     "premiere.control",
