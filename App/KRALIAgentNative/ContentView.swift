@@ -1185,7 +1185,7 @@ struct ContentView: View {
                 }
 
                 Text(
-                    "v0.7.25: ChatGPT Subscription sentez köprüsü sağlamlaştırıldı. Cline çıktısı pipe yerine dosyaya akıtılarak kilitlenme riski azaltıldı; güvenli scratch çalışma alanında otomatik onay kullanılıyor ve shell komutları kapalı kalıyor. Başarısızlık nedeni artık Mentor/activity loguna açıkça yazılıyor. “Bağımsız fikir üret” adımındaki Türkçe ı/i eşleşme hatası da düzeltildi."
+                    "v0.7.26: Doğal dilde “detaylı araştır” görevleri artık yalnızca kaynak listesi değil açıklanmış/sentezlenmiş sonuç hedefi olarak yorumlanıyor. “X adında bir salon/işletme” kalıbından varlık çıkarımı eklendi; araştırma doğrulaması kaynak sayısının yanında farklı domain çeşitliliğini de kontrol ediyor. Estafiz tipi yerel işletme araştırması Training Lab’e regression testi olarak eklendi."
                 )
                 .font(.caption2)
                 .foregroundStyle(.orange)
