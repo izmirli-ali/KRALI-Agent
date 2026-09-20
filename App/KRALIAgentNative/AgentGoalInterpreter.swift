@@ -109,7 +109,10 @@ struct AgentGoalInterpreter {
             "kendi fikir", "kendi yorum", "benim söylemediğim",
             "benim soylemedigim", "özgün fikir", "ozgun fikir",
             "fikir üret", "fikir uret", "fikri üret", "fikri uret",
-            "fikirleri üret", "fikirleri uret", "öneri üret", "oneri uret",
+            "fikirleri üret", "fikirleri uret",
+            "fikir çıkar", "fikir cikar", "fikri çıkar", "fikri cikar",
+            "fikirleri çıkar", "fikirleri cikar",
+            "öneri üret", "oneri uret",
             "özgün içerik", "ozgun icerik", "büyüme fikri", "buyume fikri",
             "olası fırsat", "olasi firsat"
         ]) {
