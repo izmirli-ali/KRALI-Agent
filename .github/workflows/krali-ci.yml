@@ -24,6 +24,16 @@ jobs:
             /bin/zsh -n "$script"
           done
 
+      - name: Validate Node scripts
+        shell: bash
+        run: |
+          set -euo pipefail
+          for script in Scripts/*.mjs; do
+            [ -e "$script" ] || continue
+            echo "Checking $script"
+            node --check "$script"
+          done
+
       - name: Select newest Xcode
         shell: bash
         run: |
