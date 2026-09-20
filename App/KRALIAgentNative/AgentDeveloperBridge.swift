@@ -724,6 +724,7 @@ struct AgentDeveloperBridge {
             process.arguments = [
                 scriptPath
             ]
+
             process.standardOutput = pipe
             process.standardError = pipe
 
@@ -748,7 +749,9 @@ struct AgentDeveloperBridge {
         return nil
     }
 
-    func run() async -> DeveloperAgentStatus {
+    func run(
+        learningJobBriefURL: URL? = nil
+    ) async -> DeveloperAgentStatus {
         guard fileManager.fileExists(
             atPath: scriptURL.path
         ) else {
@@ -774,6 +777,19 @@ struct AgentDeveloperBridge {
             process.arguments = [
                 scriptPath
             ]
+
+            if let learningJobBriefURL {
+                var environment =
+                    ProcessInfo.processInfo
+                        .environment
+                environment[
+                    "KRALI_LEARNING_JOB_FILE"
+                ] =
+                    learningJobBriefURL.path
+                process.environment =
+                    environment
+            }
+
             process.standardOutput = pipe
             process.standardError = pipe
 

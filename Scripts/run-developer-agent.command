@@ -11,6 +11,7 @@ LOG="$LOG_DIR/KRALI-Developer-Agent.log"
 STATUS_DIR="$HOME/Library/Application Support/KRALI Agent/Developer"
 STATUS="$STATUS_DIR/latest.txt"
 LOCAL_MENTOR_DIR="$HOME/Library/Application Support/KRALI Agent/Mentor"
+LEARNING_JOB_FILE="${KRALI_LEARNING_JOB_FILE:-}"
 
 export PATH="/opt/homebrew/bin:/usr/local/bin:$HOME/.npm-global/bin:/usr/bin:/bin:/usr/sbin:/sbin:$PATH"
 
@@ -423,6 +424,12 @@ if (
 NODE
 )"
 
+if [ -n "$LEARNING_JOB_FILE" ] &&
+   [ -f "$LEARNING_JOB_FILE" ]; then
+    DIAGNOSTIC_DECISION="run"
+    echo "Learning Queue job brief bulundu; mutable Mentor latest yerine immutable job kullanılacak." | tee -a "$LOG"
+fi
+
 if [ "$DIAGNOSTIC_DECISION" = "green" ]; then
     write_status "no_change|Training Lab, Live Research Eval ve Arena güncel sürümde yeşil; Developer Agent çalıştırılmadı"
     echo "✅ Güncel diagnostic'ler yeşil. Cline çağrısı gereksiz olduğu için atlandı." | tee -a "$LOG"
@@ -436,25 +443,49 @@ fi
 
 PROMPT_FILE="$WORKTREE/.krali-developer-agent-prompt.txt"
 
-GAP_MODE="$("$NODE_BIN" - "$LOCAL_MENTOR_DIR/latest.json" "$PROMPT_FILE" <<'NODE'
+GAP_SOURCE="$LOCAL_MENTOR_DIR/latest.json"
+if [ -n "$LEARNING_JOB_FILE" ] &&
+   [ -f "$LEARNING_JOB_FILE" ]; then
+    GAP_SOURCE="$LEARNING_JOB_FILE"
+fi
+
+GAP_MODE="$("$NODE_BIN" - "$GAP_SOURCE" "$PROMPT_FILE" <<'NODE'
 const fs = require("fs");
 
 const source = process.argv[2];
 const target = process.argv[3];
 
-let mentor = null;
-try { mentor = JSON.parse(fs.readFileSync(source, "utf8")); } catch {}
+let payload = null;
+try { payload = JSON.parse(fs.readFileSync(source, "utf8")); } catch {}
 
-const gaps = mentor && Array.isArray(mentor.capabilityGaps) ? mentor.capabilityGaps : [];
-if (gaps.length === 0) {
+const gap =
+  payload && payload.gap
+    ? payload.gap
+    : (
+        payload &&
+        Array.isArray(payload.capabilityGaps)
+          ? payload.capabilityGaps[0]
+          : null
+      );
+
+if (!gap) {
   process.stdout.write("full");
   process.exit(0);
 }
 
-const gap = gaps[0];
-const candidates = Array.isArray(gap.candidateCapabilityIDs) && gap.candidateCapabilityIDs.length > 0
-  ? gap.candidateCapabilityIDs.join(", ")
-  : "Yok";
+const candidates =
+  Array.isArray(gap.candidateCapabilityIDs) &&
+  gap.candidateCapabilityIDs.length > 0
+    ? gap.candidateCapabilityIDs.join(", ")
+    : "Yok";
+
+const sourceGoals =
+  payload && Array.isArray(payload.sourceGoals)
+    ? payload.sourceGoals
+    : [];
+
+const evidenceCount =
+  Number(payload && payload.evidenceCount || sourceGoals.length || 1);
 
 const prompt = [
   "Sen KRALİ projesinin Developer Agent\'ısın.",
@@ -472,6 +503,13 @@ const prompt = [
   "Araştırma hedefi:", String(gap.researchGoal || ""),
   "",
   "Mevcut strategy adayları:", candidates,
+  "",
+  "Birleştirilen kanıt sayısı:", String(evidenceCount),
+  "",
+  "Bu öğrenme işine kanıt sağlayan kullanıcı hedefleri:",
+  sourceGoals.length > 0
+    ? sourceGoals.map((goal, index) => String(index + 1) + ". " + goal).join("\n")
+    : "Tekil diagnostic / Mentor kanıtı",
   "",
   "Developer Brief:", String(gap.developerBrief || ""),
   "",
@@ -518,12 +556,19 @@ fi
 
 echo "Developer prompt mode: $GAP_MODE • $(wc -c < "$PROMPT_FILE" | tr -d ' ') bytes" | tee -a "$LOG"
 
-GAP_LABEL="$("$NODE_BIN" - "$LOCAL_MENTOR_DIR/latest.json" <<'NODE'
+GAP_LABEL="$("$NODE_BIN" - "$GAP_SOURCE" <<'NODE'
 const fs = require("fs");
 const file = process.argv[2];
 try {
-  const mentor = JSON.parse(fs.readFileSync(file, "utf8"));
-  const gap = Array.isArray(mentor.capabilityGaps) ? mentor.capabilityGaps[0] : null;
+  const payload = JSON.parse(fs.readFileSync(file, "utf8"));
+  const gap =
+    payload && payload.gap
+      ? payload.gap
+      : (
+          Array.isArray(payload.capabilityGaps)
+            ? payload.capabilityGaps[0]
+            : null
+        );
   if (gap) {
     process.stdout.write(
       String(gap.capabilityName || gap.capabilityID || "Capability") +

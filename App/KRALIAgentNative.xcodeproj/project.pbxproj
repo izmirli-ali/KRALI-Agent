@@ -41,6 +41,7 @@
 		A10000000000000000000032 /* AgentTextFileWriter.swift in Sources */ = {isa = PBXBuildFile; fileRef = B10000000000000000000032 /* AgentTextFileWriter.swift */; };
 		A10000000000000000000033 /* AgentCapabilityGapResolver.swift in Sources */ = {isa = PBXBuildFile; fileRef = B10000000000000000000033 /* AgentCapabilityGapResolver.swift */; };
 		A10000000000000000000034 /* AgentAppWorkflowStrategy.swift in Sources */ = {isa = PBXBuildFile; fileRef = B10000000000000000000034 /* AgentAppWorkflowStrategy.swift */; };
+		A10000000000000000000035 /* AgentLearningQueue.swift in Sources */ = {isa = PBXBuildFile; fileRef = B10000000000000000000035 /* AgentLearningQueue.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
@@ -79,6 +80,7 @@
 		B10000000000000000000032 /* AgentTextFileWriter.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AgentTextFileWriter.swift; sourceTree = "<group>"; };
 		B10000000000000000000033 /* AgentCapabilityGapResolver.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AgentCapabilityGapResolver.swift; sourceTree = "<group>"; };
 		B10000000000000000000034 /* AgentAppWorkflowStrategy.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AgentAppWorkflowStrategy.swift; sourceTree = "<group>"; };
+		B10000000000000000000035 /* AgentLearningQueue.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AgentLearningQueue.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -137,6 +139,7 @@
 				B10000000000000000000032 /* AgentTextFileWriter.swift */,
 				B10000000000000000000033 /* AgentCapabilityGapResolver.swift */,
 				B10000000000000000000034 /* AgentAppWorkflowStrategy.swift */,
+				B10000000000000000000035 /* AgentLearningQueue.swift */,
 			);
 			path = KRALIAgentNative;
 			sourceTree = "<group>";
@@ -252,6 +255,7 @@
 				A10000000000000000000032 /* AgentTextFileWriter.swift in Sources */,
 				A10000000000000000000033 /* AgentCapabilityGapResolver.swift in Sources */,
 				A10000000000000000000034 /* AgentAppWorkflowStrategy.swift in Sources */,
+				A10000000000000000000035 /* AgentLearningQueue.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -289,7 +293,7 @@
 				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
 				CODE_SIGN_STYLE = Automatic;
 				COMBINE_HIDPI_IMAGES = YES;
-				CURRENT_PROJECT_VERSION = 98;
+				CURRENT_PROJECT_VERSION = 99;
 				DEVELOPMENT_TEAM = 65244UMFCK;
 				ENABLE_HARDENED_RUNTIME = NO;
 				ENABLE_PREVIEWS = YES;
@@ -305,7 +309,7 @@
 					"@executable_path/../Frameworks",
 				);
 				MACOSX_DEPLOYMENT_TARGET = 14.0;
-				MARKETING_VERSION = 0.8.48;
+				MARKETING_VERSION = 0.8.49;
 				PRODUCT_BUNDLE_IDENTIFIER = com.aliihsancanuysal.kraliagent;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				SDKROOT = macosx;
@@ -321,7 +325,7 @@
 				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
 				CODE_SIGN_STYLE = Automatic;
 				COMBINE_HIDPI_IMAGES = YES;
-				CURRENT_PROJECT_VERSION = 98;
+				CURRENT_PROJECT_VERSION = 99;
 				DEVELOPMENT_TEAM = 65244UMFCK;
 				ENABLE_HARDENED_RUNTIME = NO;
 				GENERATE_INFOPLIST_FILE = YES;
@@ -336,7 +340,7 @@
 					"@executable_path/../Frameworks",
 				);
 				MACOSX_DEPLOYMENT_TARGET = 14.0;
-				MARKETING_VERSION = 0.8.48;
+				MARKETING_VERSION = 0.8.49;
 				PRODUCT_BUNDLE_IDENTIFIER = com.aliihsancanuysal.kraliagent;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				SDKROOT = macosx;

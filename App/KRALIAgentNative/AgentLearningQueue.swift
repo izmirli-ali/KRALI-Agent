@@ -1,0 +1,382 @@
+import Foundation
+
+enum AgentLearningJobState: String, Codable, Hashable, Sendable {
+    case queued
+    case running
+    case readyForReview
+    case completed
+    case failed
+
+    var title: String {
+        switch self {
+        case .queued:
+            return "Sırada"
+        case .running:
+            return "Çalışıyor"
+        case .readyForReview:
+            return "Aday hazır"
+        case .completed:
+            return "Tamamlandı"
+        case .failed:
+            return "Başarısız"
+        }
+    }
+
+    var isTerminal: Bool {
+        switch self {
+        case .readyForReview, .completed, .failed:
+            return true
+        case .queued, .running:
+            return false
+        }
+    }
+}
+
+struct AgentLearningJob: Identifiable, Codable, Hashable, Sendable {
+    let id: UUID
+    let fingerprint: String
+    let capabilityID: String
+    let capabilityName: String
+    let kind: CapabilityGapKind
+    let reason: String
+    let researchGoal: String
+    let developerBrief: String
+    let candidateCapabilityIDs: [String]
+    var sourceGoals: [String]
+    var evidenceCount: Int
+    let createdAt: Date
+    var updatedAt: Date
+    var state: AgentLearningJobState
+    var branch: String?
+    var worktree: String?
+    var lastStatus: String?
+
+    var shortID: String {
+        String(id.uuidString.prefix(8))
+    }
+}
+
+struct AgentLearningJobBrief: Codable, Sendable {
+    let jobID: UUID
+    let fingerprint: String
+    let gap: CapabilityGapResolution
+    let sourceGoals: [String]
+    let evidenceCount: Int
+    let createdAt: Date
+}
+
+struct AgentLearningQueueStore {
+    private let fileManager = FileManager.default
+
+    private var directoryURL: URL {
+        fileManager.homeDirectoryForCurrentUser
+            .appendingPathComponent(
+                "Library/Application Support/KRALI Agent/Developer",
+                isDirectory: true
+            )
+    }
+
+    var queueURL: URL {
+        directoryURL
+            .appendingPathComponent(
+                "learning-queue.json",
+                isDirectory: false
+            )
+    }
+
+    func load() -> [AgentLearningJob] {
+        guard
+            let data = try? Data(
+                contentsOf: queueURL
+            )
+        else {
+            return []
+        }
+
+        let decoder = JSONDecoder()
+        decoder.dateDecodingStrategy = .iso8601
+
+        return (
+            try? decoder.decode(
+                [AgentLearningJob].self,
+                from: data
+            )
+        ) ?? []
+    }
+
+    func save(
+        _ jobs: [AgentLearningJob]
+    ) {
+        do {
+            try fileManager.createDirectory(
+                at: directoryURL,
+                withIntermediateDirectories: true
+            )
+
+            let encoder = JSONEncoder()
+            encoder.outputFormatting = [
+                .prettyPrinted,
+                .sortedKeys,
+                .withoutEscapingSlashes
+            ]
+            encoder.dateEncodingStrategy = .iso8601
+
+            let data = try encoder.encode(jobs)
+            try data.write(
+                to: queueURL,
+                options: .atomic
+            )
+        } catch {
+            // Queue persistence failure must not block the user's task.
+        }
+    }
+
+    func enqueue(
+        gaps: [CapabilityGapResolution],
+        sourceGoal: String,
+        into existing: [AgentLearningJob],
+        persist: Bool = true
+    ) -> [AgentLearningJob] {
+        var jobs = existing
+
+        for gap in gaps {
+            let fingerprint =
+                self.fingerprint(
+                    for: gap
+                )
+
+            if let index =
+                jobs.firstIndex(
+                    where: {
+                        $0.fingerprint ==
+                            fingerprint &&
+                        (
+                            !$0.state.isTerminal ||
+                            $0.state ==
+                                .readyForReview
+                        )
+                    }
+                ) {
+                if !jobs[index]
+                    .sourceGoals
+                    .contains(sourceGoal) {
+                    jobs[index]
+                        .sourceGoals
+                        .append(sourceGoal)
+                    jobs[index]
+                        .evidenceCount += 1
+                }
+
+                jobs[index].updatedAt = Date()
+                jobs[index].lastStatus =
+                    "Yeni kanıt aynı öğrenme işine eklendi."
+                continue
+            }
+
+            let now = Date()
+            jobs.append(
+                AgentLearningJob(
+                    id: UUID(),
+                    fingerprint:
+                        fingerprint,
+                    capabilityID:
+                        gap.capabilityID,
+                    capabilityName:
+                        gap.capabilityName,
+                    kind: gap.kind,
+                    reason: gap.reason,
+                    researchGoal:
+                        gap.researchGoal,
+                    developerBrief:
+                        gap.developerBrief,
+                    candidateCapabilityIDs:
+                        gap.candidateCapabilityIDs,
+                    sourceGoals:
+                        [sourceGoal],
+                    evidenceCount: 1,
+                    createdAt: now,
+                    updatedAt: now,
+                    state: .queued,
+                    branch: nil,
+                    worktree: nil,
+                    lastStatus:
+                        "Öğrenme kuyruğuna eklendi."
+                )
+            )
+        }
+
+        if persist {
+            save(jobs)
+        }
+
+        return jobs
+    }
+
+    func nextQueued(
+        from jobs: [AgentLearningJob]
+    ) -> AgentLearningJob? {
+        jobs
+            .filter {
+                $0.state == .queued
+            }
+            .sorted {
+                if $0.evidenceCount !=
+                    $1.evidenceCount {
+                    return $0.evidenceCount >
+                        $1.evidenceCount
+                }
+
+                return $0.createdAt <
+                    $1.createdAt
+            }
+            .first
+    }
+
+    func materializeBrief(
+        for job: AgentLearningJob
+    ) -> URL? {
+        do {
+            try fileManager.createDirectory(
+                at: directoryURL,
+                withIntermediateDirectories: true
+            )
+
+            let url =
+                directoryURL
+                    .appendingPathComponent(
+                        "learning-job-" +
+                        job.id.uuidString +
+                        ".json",
+                        isDirectory: false
+                    )
+
+            let brief =
+                AgentLearningJobBrief(
+                    jobID: job.id,
+                    fingerprint:
+                        job.fingerprint,
+                    gap:
+                        CapabilityGapResolution(
+                            capabilityID:
+                                job.capabilityID,
+                            capabilityName:
+                                job.capabilityName,
+                            kind: job.kind,
+                            reason: job.reason,
+                            candidateCapabilityIDs:
+                                job.candidateCapabilityIDs,
+                            researchGoal:
+                                job.researchGoal,
+                            developerBrief:
+                                job.developerBrief
+                        ),
+                    sourceGoals:
+                        job.sourceGoals,
+                    evidenceCount:
+                        job.evidenceCount,
+                    createdAt:
+                        job.createdAt
+                )
+
+            let encoder = JSONEncoder()
+            encoder.outputFormatting = [
+                .prettyPrinted,
+                .sortedKeys,
+                .withoutEscapingSlashes
+            ]
+            encoder.dateEncodingStrategy = .iso8601
+
+            try encoder
+                .encode(brief)
+                .write(
+                    to: url,
+                    options: .atomic
+                )
+
+            return url
+        } catch {
+            return nil
+        }
+    }
+
+    func recoverInterruptedJobs(
+        _ jobs: [AgentLearningJob],
+        activeRunIsFresh: Bool
+    ) -> [AgentLearningJob] {
+        guard !activeRunIsFresh else {
+            return jobs
+        }
+
+        var recovered = jobs
+
+        for index in recovered.indices
+            where recovered[index].state ==
+                .running {
+            recovered[index].state =
+                .queued
+            recovered[index].updatedAt =
+                Date()
+            recovered[index].lastStatus =
+                "Önceki worker kesildi; iş tekrar sıraya alındı."
+        }
+
+        save(recovered)
+        return recovered
+    }
+
+    private func fingerprint(
+        for gap: CapabilityGapResolution
+    ) -> String {
+        let normalizedReason =
+            normalize(
+                gap.reason
+            )
+
+        let operationTail: String
+        if let separator =
+            normalizedReason
+                .range(
+                    of: " • ",
+                    options: .backwards
+                ) {
+            operationTail =
+                String(
+                    normalizedReason[
+                        separator.upperBound...
+                    ]
+                )
+        } else {
+            operationTail =
+                normalizedReason
+        }
+
+        return [
+            normalize(gap.capabilityID),
+            gap.kind.rawValue,
+            operationTail
+        ]
+        .joined(separator: "|")
+    }
+
+    private func normalize(
+        _ value: String
+    ) -> String {
+        value
+            .folding(
+                options: [
+                    .diacriticInsensitive,
+                    .caseInsensitive
+                ],
+                locale:
+                    Locale(identifier: "tr_TR")
+            )
+            .lowercased()
+            .replacingOccurrences(
+                of: "ı",
+                with: "i"
+            )
+            .trimmingCharacters(
+                in: .whitespacesAndNewlines
+            )
+    }
+}
