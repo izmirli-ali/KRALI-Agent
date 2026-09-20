@@ -839,6 +839,7 @@ if [ "$PROVIDER" = "ollama" ] &&
     KRALI_RUN_ID="$STAMP" \
     KRALI_REQUIRE_CHANGE="$([ "$GAP_MODE" = "gap" ] && echo 1 || echo 0)" \
     KRALI_LOCAL_AGENT_MAX_COMPLETION_REJECTIONS="4" \
+    KRALI_LOCAL_AGENT_MAX_STRUCTURED_ACTIONS="12" \
     KRALI_LOCAL_AGENT_MAX_ITERATIONS="36" \
     "$NODE_BIN" "$ROOT/Scripts/ollama-developer-agent.mjs" \
         > >(tee "$CLINE_RUN_LOG" >>"$LOG") \
@@ -982,7 +983,11 @@ if [ "$CLINE_EXIT" -ne 0 ]; then
         fi
     fi
 
-    DIRTY_CANDIDATE="$(git -C "$WORKTREE" status --porcelain 2>/dev/null || true)"
+    # Session prompt/build cache are orchestration artifacts, not source candidates.
+    rm -f "$PROMPT_FILE"
+    rm -rf "$WORKTREE/.build-check"
+
+    DIRTY_CANDIDATE="$(git -C "$WORKTREE" status --porcelain --untracked-files=all 2>/dev/null || true)"
 
     if [ -n "$DIRTY_CANDIDATE" ]; then
         echo "🧩 Developer Agent hata verdi ancak candidate değişiklik üretti; recovery başlatılıyor." | tee -a "$LOG"

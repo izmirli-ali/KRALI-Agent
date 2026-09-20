@@ -51,17 +51,20 @@ if [ ! -d "$WORKTREE/.git" ] && [ ! -f "$WORKTREE/.git" ]; then
     exit 0
 fi
 
-DIRTY="$(git -C "$WORKTREE" status --porcelain 2>/dev/null || true)"
+# Orchestration artifacts must never turn an empty worktree into a fake candidate.
+rm -f "$WORKTREE/.krali-developer-agent-prompt.txt"
+rm -rf "$WORKTREE/.build-check"
+
+DIRTY="$(git -C "$WORKTREE" status --porcelain --untracked-files=all 2>/dev/null || true)"
 if [ -z "$DIRTY" ]; then
+    write_status "no_change|Recovery öncesi gerçek kaynak candidate bulunamadı|$BRANCH|$WORKTREE"
+    echo "Recovery atlandı; yalnız orchestration artifact'ları vardı." >>"$LOG"
     exit 0
 fi
 
 write_status "recovering_candidate|Önceki Developer Agent değişiklikleri güvenli candidate branch'e kurtarılıyor|$BRANCH|$WORKTREE"
 echo "=== $(date) ===" >>"$LOG"
 echo "Recovering $BRANCH at $WORKTREE" >>"$LOG"
-
-rm -f "$WORKTREE/.krali-developer-agent-prompt.txt"
-rm -rf "$WORKTREE/.build-check"
 
 CURRENT_BRANCH="$(git -C "$WORKTREE" branch --show-current 2>/dev/null || true)"
 if [ "$CURRENT_BRANCH" != "$BRANCH" ]; then

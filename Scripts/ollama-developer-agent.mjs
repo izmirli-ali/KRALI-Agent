@@ -18,6 +18,9 @@ const requireChange =
 const maxCompletionRejections = Number(
   process.env.KRALI_LOCAL_AGENT_MAX_COMPLETION_REJECTIONS || "4"
 );
+const maxStructuredActions = Number(
+  process.env.KRALI_LOCAL_AGENT_MAX_STRUCTURED_ACTIONS || "12"
+);
 const maxIterations = Number(
   process.env.KRALI_LOCAL_AGENT_MAX_ITERATIONS || "36"
 );
@@ -628,6 +631,8 @@ const systemPrompt = [
   "Inspect relevant code before editing.",
   "If you edit code, inspect git_diff and run build_check before finishing.",
   "A capability gap is not resolved by merely explaining or summarizing source code.",
+  "If you say you need to inspect, read, search, change, diff, or build something, call the matching tool in the SAME turn instead of describing the next step.",
+  "Never say 'I will read more' or 'let me inspect' without a real tool call.",
   "For an active capability gap, a clean candidate worktree is not a successful completion.",
   "If a source change is required, use replace_text, write_file, or apply_patch instead of returning prose.",
   "A changed candidate may finish only after git_diff inspection and a successful build_check.",
@@ -644,6 +649,8 @@ let sawMutatingTool = false;
 let sawGitDiff = false;
 let buildCheckPassed = false;
 let completionRejections = 0;
+let structuredActions = 0;
+let inspectionToolCalls = 0;
 
 const promptRelative = path
   .relative(root, path.resolve(promptFile))
@@ -676,6 +683,184 @@ function candidateStatus() {
     ok: true,
     dirty: lines.length > 0,
     output: lines.join("\n"),
+  };
+}
+
+
+function recordToolEvidence(name, result) {
+  if (
+    result?.ok &&
+    ["list_files", "search_codebase", "read_file"].includes(name)
+  ) {
+    inspectionToolCalls += 1;
+  }
+
+  if (
+    result?.ok &&
+    ["replace_text", "write_file", "apply_patch"].includes(name)
+  ) {
+    sawMutatingTool = true;
+    sawGitDiff = false;
+    buildCheckPassed = false;
+    completionRejections = 0;
+  }
+
+  if (name === "git_diff" && result?.ok) {
+    sawGitDiff = true;
+  }
+
+  if (name === "build_check") {
+    buildCheckPassed = result?.ok === true;
+  }
+}
+
+async function requestStructuredToolDecision(
+  assistantText,
+  blockers
+) {
+  if (structuredActions >= maxStructuredActions) {
+    return null;
+  }
+
+  const toolContracts = tools.map((tool) => ({
+    name: tool.function.name,
+    description: tool.function.description,
+    parameters: tool.function.parameters,
+  }));
+
+  const recentContext = messages
+    .slice(-8)
+    .map((item) => ({
+      role: item.role,
+      name: item.name || item.tool_name || "",
+      content: truncate(
+        typeof item.content === "string"
+          ? item.content
+          : JSON.stringify(item.content ?? ""),
+        3500
+      ),
+    }));
+
+  const controller = new AbortController();
+  const timer = setTimeout(
+    () => controller.abort(),
+    Math.min(
+      120000,
+      Math.max(1000, hardTimeoutMs - (Date.now() - startedAt))
+    )
+  );
+
+  let response;
+
+  try {
+    response = await fetch(baseUrl + "/api/chat", {
+      method: "POST",
+      headers: {
+        "content-type": "application/json",
+      },
+      signal: controller.signal,
+      body: JSON.stringify({
+        model,
+        stream: false,
+        format: "json",
+        messages: [
+          {
+            role: "system",
+            content: [
+              "You are KRALI Tool Continuation Controller.",
+              "Return exactly one JSON object describing the NEXT tool KRALI should execute.",
+              "This is a controller protocol, not a conversational answer.",
+              "Do not claim success. Do not explain source code.",
+              "Choose only from the supplied tool contracts.",
+              "Arguments must satisfy that tool's schema.",
+              "If the assistant just said it needs to inspect/read/search something, select that actual inspection tool now.",
+              "If enough relevant code has already been inspected and an active gap still needs implementation, prefer a minimal mutation tool over more prose.",
+              "After mutation, prefer git_diff and then build_check.",
+            ].join("\n"),
+          },
+          {
+            role: "user",
+            content: JSON.stringify({
+              gap: gapLabel,
+              requireChange,
+              blockers,
+              assistantText: truncate(assistantText || "", 4000),
+              evidence: {
+                inspectionToolCalls,
+                sawMutatingTool,
+                sawGitDiff,
+                buildCheckPassed,
+                structuredActions,
+              },
+              tools: toolContracts,
+              recentContext,
+              outputContract: {
+                name: "one exact tool name",
+                arguments: "JSON object for that tool",
+                reason: "short internal reason",
+              },
+            }),
+          },
+        ],
+        options: {
+          temperature: 0,
+        },
+      }),
+    });
+  } catch {
+    clearTimeout(timer);
+    return null;
+  }
+
+  clearTimeout(timer);
+
+  if (!response.ok) {
+    return null;
+  }
+
+  let payload;
+
+  try {
+    payload = await response.json();
+  } catch {
+    return null;
+  }
+
+  const content = String(payload?.message?.content || "").trim();
+  if (!content) {
+    return null;
+  }
+
+  let decision;
+
+  try {
+    decision = JSON.parse(content);
+  } catch {
+    return null;
+  }
+
+  const name = String(decision?.name || "");
+  const args =
+    decision?.arguments &&
+    typeof decision.arguments === "object" &&
+    !Array.isArray(decision.arguments)
+      ? decision.arguments
+      : {};
+
+  const allowed = tools.some(
+    (tool) => tool.function.name === name
+  );
+
+  if (!allowed) {
+    return null;
+  }
+
+  structuredActions += 1;
+
+  return {
+    name,
+    args,
+    reason: truncate(decision?.reason || "", 500),
   };
 }
 
@@ -850,6 +1035,61 @@ for (let iteration = 1; iteration <= maxIterations; iteration++) {
     }
 
     if (blockers.length > 0) {
+      const decision = await requestStructuredToolDecision(
+        message.content,
+        blockers
+      );
+
+      if (decision) {
+        stage(
+          "local_agent_structured_tool",
+          gapLabel +
+            " yapılandırılmış devam aracı çalışıyor: " +
+            decision.name
+        );
+
+        let result;
+
+        try {
+          result = executeTool(decision.name, decision.args);
+        } catch (error) {
+          result = {
+            ok: false,
+            error:
+              error instanceof Error
+                ? error.message
+                : String(error),
+          };
+        }
+
+        recordToolEvidence(decision.name, result);
+
+        messages.push({
+          role: "user",
+          content: [
+            "KRALI Tool Continuation Controller gerçek aracı çalıştırdı.",
+            "Tool: " + decision.name,
+            decision.reason
+              ? "Reason: " + decision.reason
+              : "",
+            "Result: " + truncate(JSON.stringify(result), 12000),
+            "Şimdi bu gerçek tool sonucuna göre devam et.",
+            "Bir sonraki eylem gerekiyorsa onu native tool call ile çağır; düz metinle gelecek eylemi tarif etme.",
+          ]
+            .filter(Boolean)
+            .join("\n"),
+        });
+
+        if (!result?.ok) {
+          requestMoreWork([
+            "yapılandırılmış tool başarısız: " +
+              decision.name,
+          ]);
+        }
+
+        continue;
+      }
+
       requestMoreWork(blockers);
       continue;
     }
@@ -897,23 +1137,7 @@ for (let iteration = 1; iteration <= maxIterations; iteration++) {
       };
     }
 
-    if (
-      result?.ok &&
-      ["replace_text", "write_file", "apply_patch"].includes(name)
-    ) {
-      sawMutatingTool = true;
-      sawGitDiff = false;
-      buildCheckPassed = false;
-      completionRejections = 0;
-    }
-
-    if (name === "git_diff" && result?.ok) {
-      sawGitDiff = true;
-    }
-
-    if (name === "build_check") {
-      buildCheckPassed = result?.ok === true;
-    }
+    recordToolEvidence(name, result);
 
     messages.push({
       role: "tool",
