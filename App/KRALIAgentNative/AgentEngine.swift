@@ -27,6 +27,7 @@ final class AgentEngine: ObservableObject {
     @Published var currentPlan = "Yeni görevi bekliyor"
     @Published var currentAlternatives: [String] = []
     @Published var currentSemanticMission: AgentSemanticMission?
+    @Published var currentSemanticPlannerProvider: String?
     @Published var executionSteps: [AgentExecutionStep] = []
     @Published var verificationState: AgentVerificationState = .idle
     @Published var verificationSummary = "Henüz doğrulama yapılmadı."
@@ -330,21 +331,54 @@ final class AgentEngine: ObservableObject {
             if shouldUseSemanticMission(
                 decision: decision,
                 goal: resolvedGoal
-            ),
-               let mission = await localIntelligence.planMission(
-                    userInput: text,
-                    contextMemory: activeContextMemories,
-                    capabilities: capabilityRegistry.all,
-                    hasWorkspace: selectedRootURL != nil
-               ),
-               mission.normalizedConfidence >= 0.45 {
-                semanticMission = mission
-                currentSemanticMission = mission
+            ) {
+                var plannedMission: AgentSemanticMission?
+                var plannerProvider: String?
 
-                resolvedGoal = semanticGoalProfile(
-                    from: mission,
-                    fallback: goalProfile
-                )
+                if let localMission =
+                    await localIntelligence.planMission(
+                        userInput: text,
+                        contextMemory: activeContextMemories,
+                        capabilities: capabilityRegistry.all,
+                        hasWorkspace: selectedRootURL != nil
+                    ),
+                   localMission.normalizedConfidence >= 0.45,
+                   semanticMissionCoverageIsValid(
+                        localMission,
+                        fallbackGoal: goalProfile
+                   ) {
+                    plannedMission = localMission
+                    plannerProvider =
+                        "Apple Foundation Models"
+                } else if let subscriptionMission =
+                    await subscriptionIntelligence.planMission(
+                        userInput: text,
+                        contextMemory: activeContextMemories,
+                        capabilities: capabilityRegistry.all,
+                        hasWorkspace: selectedRootURL != nil
+                    ),
+                    subscriptionMission.mission
+                        .normalizedConfidence >= 0.45,
+                    semanticMissionCoverageIsValid(
+                        subscriptionMission.mission,
+                        fallbackGoal: goalProfile
+                    ) {
+                    plannedMission =
+                        subscriptionMission.mission
+                    plannerProvider =
+                        subscriptionMission.provider
+                }
+
+                if let mission = plannedMission {
+                    semanticMission = mission
+                    currentSemanticMission = mission
+                    currentSemanticPlannerProvider =
+                        plannerProvider
+
+                    resolvedGoal = semanticGoalProfile(
+                        from: mission,
+                        fallback: goalProfile
+                    )
                 resolvedCapabilities = semanticCapabilities(
                     from: mission,
                     fallback: capabilities
@@ -382,6 +416,10 @@ final class AgentEngine: ObservableObject {
 
                 log("Semantic Mission: \(mission.objective)")
                 log(
+                    "Semantic planner sağlayıcısı: " +
+                    (plannerProvider ?? "Bilinmiyor")
+                )
+                log(
                     "Semantic capability planı: " +
                     mission.requiredCapabilityIDs.joined(separator: ", ")
                 )
@@ -389,6 +427,11 @@ final class AgentEngine: ObservableObject {
                     "Semantic rota: " +
                     activeRoute.joined(separator: " → ")
                 )
+                } else {
+                    log(
+                        "Semantic planner geçerli mission üretemedi; deterministic fallback korunuyor"
+                    )
+                }
             }
 
             var baseReply: String
@@ -715,6 +758,71 @@ final class AgentEngine: ObservableObject {
             return goal.isCompound ||
                 goal.outcomes.contains(.edit)
         }
+    }
+
+    private func semanticMissionCoverageIsValid(
+        _ mission: AgentSemanticMission,
+        fallbackGoal: AgentGoalProfile
+    ) -> Bool {
+        let ids = Set(
+            mission.requiredCapabilityIDs +
+            mission.steps.map(\.capabilityID)
+        )
+        let outcomes = Set(
+            mission.outcomes.compactMap {
+                AgentGoalOutcome(rawValue: $0)
+            }
+        )
+
+        if fallbackGoal.outcomes.contains(.edit) {
+            guard outcomes.contains(.edit) else {
+                return false
+            }
+        }
+
+        if outcomes.contains(.locate) ||
+           outcomes.contains(.shortlist) {
+            guard ids.contains("files.search") ||
+                  ids.contains("browser.control") else {
+                return false
+            }
+        }
+
+        if outcomes.contains(.assessContent) {
+            guard ids.contains("perception.media") ||
+                  ids.contains("perception.screen") else {
+                return false
+            }
+        }
+
+        if outcomes.contains(.research) {
+            guard ids.contains("research.web") ||
+                  ids.contains("browser.control") else {
+                return false
+            }
+        }
+
+        if outcomes.contains(.edit) {
+            let providers = Set([
+                "premiere.control",
+                "photoshop.control",
+                "desktop.control",
+                "files.move.reversible"
+            ])
+
+            guard !ids.intersection(providers).isEmpty else {
+                return false
+            }
+        }
+
+        if outcomes.contains(.communicate) {
+            guard ids.contains("mail.work") ||
+                  ids.contains("browser.control") else {
+                return false
+            }
+        }
+
+        return true
     }
 
     private func semanticGoalProfile(
@@ -1216,6 +1324,7 @@ final class AgentEngine: ObservableObject {
 
     private func resetTransientTaskStateForNewInput() {
         currentSemanticMission = nil
+        currentSemanticPlannerProvider = nil
         activeRoute = ["Core"]
         selectedCapabilities = []
         capabilityLearningPlans = []
