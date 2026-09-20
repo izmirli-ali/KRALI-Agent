@@ -58,12 +58,16 @@ struct AgentContextMemoryStore {
         let decoder = JSONDecoder()
         decoder.dateDecodingStrategy = .iso8601
 
-        return (
+        let decoded = (
             try? decoder.decode(
                 [AgentContextMemoryEntry].self,
                 from: data
             )
         ) ?? []
+
+        return decoded.filter {
+            !isLowValueFallback($0.summary)
+        }
     }
 
     func save(_ entries: [AgentContextMemoryEntry]) {
@@ -107,7 +111,8 @@ struct AgentContextMemoryStore {
 
         guard
             input.count >= 4,
-            reply.count >= 20
+            reply.count >= 20,
+            !isLowValueFallback(reply)
         else {
             return nil
         }
@@ -341,6 +346,19 @@ struct AgentContextMemoryStore {
         return String(
             flattened.prefix(maximumCharacters - 1)
         ) + "…"
+    }
+
+    private func isLowValueFallback(
+        _ value: String
+    ) -> Bool {
+        let normalized = normalize(value)
+
+        return normalized.contains(
+            "hedefi analiz ettim fakat mevcut yerel araclardan biriyle guvenilir bicimde eslestiremedim"
+        ) ||
+        normalized.contains(
+            "su an en guvenli planim"
+        )
     }
 
     private func containsContinuationReference(
