@@ -21,6 +21,15 @@ struct DeveloperAgentStatus: Hashable {
             "repairing_runtime",
             "sdk_fallback_preparing",
             "sdk_fallback_running",
+            "sdk_importing",
+            "sdk_import_ready",
+            "sdk_provider_ready",
+            "sdk_runtime_starting",
+            "sdk_runtime_ready",
+            "sdk_session_starting",
+            "sdk_session_running",
+            "sdk_tools_running",
+            "sdk_session_completed",
             "provider_platform_bug"
         ].contains(state)
     }
@@ -30,6 +39,9 @@ struct DeveloperAgentStatus: Hashable {
         [
             "ready_for_review",
             "build_failed",
+            "sdk_provider_failed",
+            "sdk_failed",
+            "sdk_watchdog_timeout",
             "failed"
         ].contains(state)
     }
@@ -54,10 +66,34 @@ struct DeveloperAgentStatus: Hashable {
             return "SDK fallback hazırlanıyor"
         case "sdk_fallback_running":
             return "SDK üzerinden öğreniyor"
+        case "sdk_importing":
+            return "SDK yükleniyor"
+        case "sdk_import_ready":
+            return "SDK hazır"
+        case "sdk_provider_ready":
+            return "Provider / model hazır"
+        case "sdk_runtime_starting":
+            return "SDK runtime başlatılıyor"
+        case "sdk_runtime_ready":
+            return "SDK runtime hazır"
+        case "sdk_session_starting":
+            return "Model oturumu başlatılıyor"
+        case "sdk_session_running":
+            return "Model öğreniyor"
+        case "sdk_tools_running":
+            return "Araçlar çalışıyor"
+        case "sdk_session_completed":
+            return "Öğrenme oturumu tamamlandı"
         case "ready_for_review":
             return "Öğrenme adayı hazır"
         case "build_failed":
             return "Aday doğrulanamadı"
+        case "sdk_provider_failed":
+            return "Provider ayarı eksik"
+        case "sdk_failed":
+            return "SDK öğrenmesi durdu"
+        case "sdk_watchdog_timeout":
+            return "SDK oturumu takıldı"
         case "failed":
             return "Öğrenme durdu"
         default:
