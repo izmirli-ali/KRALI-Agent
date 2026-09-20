@@ -396,6 +396,23 @@ actor AgentLocalIntelligence {
                 ]
             )
 
+        let deepDesktopInteractionTask =
+            containsMissionConcept(
+                corpus,
+                [
+                    "tikla", "tıkla",
+                    "butona bas", "butonu ac",
+                    "butonu aç", "menuye gir",
+                    "menüye gir", "menuden",
+                    "menüden", "alana yaz",
+                    "metin yaz", "klavye",
+                    "mouse", "surukle",
+                    "sürükle", "sec",
+                    "seç", "isaretle",
+                    "işaretle"
+                ]
+            )
+
         let genericFileOpenTask =
             containsMissionConcept(
                 corpus,
@@ -550,6 +567,17 @@ actor AgentLocalIntelligence {
         if genericDesktopOpenTask {
             outcomes.insert("open")
             requiredIDs.insert("desktop.app")
+
+            if !deepDesktopInteractionTask {
+                requiredIDs.remove("desktop.control")
+            }
+        }
+
+        if deepDesktopInteractionTask {
+            requiredIDs.formUnion([
+                "desktop.control",
+                "perception.screen"
+            ])
         }
 
         if genericFileOpenTask {
