@@ -28,12 +28,14 @@ struct MentorTraceResearchSource: Codable {
     let url: String
     let domain: String
     let snippet: String?
+    let sourceType: String
 }
 
 struct MentorTraceEvidence: Codable {
     let title: String
     let url: String
     let domain: String
+    let sourceType: String
     let excerpt: String
     let conceptCoverage: Int
     let matchedConcepts: [String]
@@ -164,7 +166,10 @@ struct MentorTraceStore {
                     title: $0.title,
                     url: $0.url.absoluteString,
                     domain: $0.domain,
-                    snippet: $0.snippet
+                    snippet: $0.snippet,
+                    sourceType: $0.evidenceEligible
+                        ? "search-result"
+                        : "canonical-direct"
                 )
             },
             researchEvidence: researchEvidence.map {
@@ -172,6 +177,9 @@ struct MentorTraceStore {
                     title: $0.source.title,
                     url: $0.source.url.absoluteString,
                     domain: $0.source.domain,
+                    sourceType: $0.source.evidenceEligible
+                        ? "search-result"
+                        : "canonical-direct",
                     excerpt: String($0.excerpt.prefix(1400)),
                     conceptCoverage: $0.conceptCoverage,
                     matchedConcepts: $0.matchedConcepts
