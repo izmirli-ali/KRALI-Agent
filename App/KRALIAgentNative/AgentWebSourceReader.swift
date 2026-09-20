@@ -258,6 +258,11 @@ actor AgentWebSourceReader {
 
         for chunk in chunks.prefix(250) {
             let normalized = normalize(chunk)
+
+            if isBoilerplateChunk(normalized) {
+                continue
+            }
+
             var matches: [String] = []
             var score = 0
 
@@ -426,15 +431,116 @@ actor AgentWebSourceReader {
             )
     }
 
+    private func isBoilerplateChunk(
+        _ normalized: String
+    ) -> Bool {
+        let noiseTerms = [
+            "cerez", "cookie", "tumunu reddet",
+            "tum cerezleri kabul et", "kisisellestir",
+            "site ici arama", "uye girisi",
+            "gizlilik politikasi", "privacy policy",
+            "kullanim kosullari", "terms of use",
+            "reklam", "newsletter"
+        ]
+
+        return noiseTerms.contains {
+            normalized.contains($0)
+        }
+    }
+
     private func decodeHTMLEntities(
         _ value: String
     ) -> String {
-        value
-            .replacingOccurrences(of: "&amp;", with: "&")
-            .replacingOccurrences(of: "&quot;", with: "\"")
-            .replacingOccurrences(of: "&#39;", with: "'")
-            .replacingOccurrences(of: "&lt;", with: "<")
-            .replacingOccurrences(of: "&gt;", with: ">")
-            .replacingOccurrences(of: "&nbsp;", with: " ")
+        let named: [String: String] = [
+            "&amp;": "&",
+            "&quot;": "\"",
+            "&#39;": "'",
+            "&apos;": "'",
+            "&lt;": "<",
+            "&gt;": ">",
+            "&nbsp;": " ",
+            "&uuml;": "ü",
+            "&Uuml;": "Ü",
+            "&ouml;": "ö",
+            "&Ouml;": "Ö",
+            "&ccedil;": "ç",
+            "&Ccedil;": "Ç",
+            "&scedil;": "ş",
+            "&Scedil;": "Ş",
+            "&gbreve;": "ğ",
+            "&Gbreve;": "Ğ",
+            "&dot;": "ı",
+            "&Idot;": "İ"
+        ]
+
+        var result = value
+        for (entity, replacement) in named {
+            result = result.replacingOccurrences(
+                of: entity,
+                with: replacement
+            )
+        }
+
+        guard
+            let regex = try? NSRegularExpression(
+                pattern: #"&#(x?[0-9A-Fa-f]+);"#
+            )
+        else {
+            return result
+        }
+
+        let nsRange = NSRange(
+            result.startIndex..<result.endIndex,
+            in: result
+        )
+
+        let matches = regex.matches(
+            in: result,
+            range: nsRange
+        )
+
+        for match in matches.reversed() {
+            guard
+                let fullRange = Range(
+                    match.range(at: 0),
+                    in: result
+                ),
+                let codeRange = Range(
+                    match.range(at: 1),
+                    in: result
+                )
+            else {
+                continue
+            }
+
+            let code = String(result[codeRange])
+            let scalarValue: UInt32?
+
+            if code.lowercased().hasPrefix("x") {
+                scalarValue = UInt32(
+                    code.dropFirst(),
+                    radix: 16
+                )
+            } else {
+                scalarValue = UInt32(
+                    code,
+                    radix: 10
+                )
+            }
+
+            guard
+                let scalarValue,
+                let scalar = UnicodeScalar(scalarValue)
+            else {
+                continue
+            }
+
+            result.replaceSubrange(
+                fullRange,
+                with: String(Character(scalar))
+            )
+        }
+
+        return result
     }
 }
