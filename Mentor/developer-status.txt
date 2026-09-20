@@ -1,1 +1,1 @@
-sdk_tool_completed|Uygulama kontrolü (desktop.app) araç adımı tamamlandı: apply_patch|krali-dev-agent/20260920-210653|/Users/medusa/Developer/KRALI-Agent-Dev-20260920-210653|@meta|app=0.8.48|at=1789927776|run=20260920-210653
+sdk_tool_completed|Uygulama kontrolü (desktop.app) araç adımı tamamlandı: run_commands|krali-dev-agent/20260920-212954|/Users/medusa/Developer/KRALI-Agent-Dev-20260920-212954|@meta|app=0.8.49|at=1789929076|run=20260920-212954
