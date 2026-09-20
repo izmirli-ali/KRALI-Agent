@@ -122,6 +122,7 @@ struct AgentExecutionPlan {
 
 struct AgentSemanticMission: Codable, Hashable {
     let objective: String
+    let outcomes: [String]
     let steps: [AgentSemanticMissionStep]
     let requiredCapabilityIDs: [String]
     let requiresUserInput: Bool
