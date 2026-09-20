@@ -1224,6 +1224,7 @@ actor AgentArena {
         AgentSubscriptionIntelligence()
     private let capabilityRegistry = AgentCapabilityRegistry()
     private let memoryStore = AgentContextMemoryStore()
+    private let arenaStore = AgentArenaStore()
 
     func run() async -> AgentArenaReport {
         let scenarios = makeScenarios()
@@ -1232,7 +1233,11 @@ actor AgentArena {
         var results: [AgentArenaScenarioResult] = []
         var subscriptionFallbackBudget = 2
 
-        for scenario in scenarios {
+        for (index, scenario) in scenarios.enumerated() {
+            arenaStore.saveProgress(
+                "\(index + 1)/\(scenarios.count) • \(scenario.title) • Apple Planner"
+            )
+
             let relevantMemory = memoryStore.relevant(
                 to: scenario.prompt,
                 from: memories,
@@ -1264,6 +1269,9 @@ actor AgentArena {
                 !diagnostics.isEmpty) &&
                subscriptionFallbackBudget > 0 {
                 subscriptionFallbackBudget -= 1
+                arenaStore.saveProgress(
+                    "\(index + 1)/\(scenarios.count) • \(scenario.title) • ChatGPT fallback"
+                )
 
                 if let fallback =
                     await subscriptionIntelligence.planMission(
@@ -1292,6 +1300,10 @@ actor AgentArena {
                     "Hiçbir semantic planner geçerli mission üretemedi."
                 ]
             }
+
+            arenaStore.saveProgress(
+                "\(index + 1)/\(scenarios.count) • \(scenario.title) • Reviewer"
+            )
 
             let review: AgentMissionReview?
             if let selectedMission {
@@ -1342,6 +1354,10 @@ actor AgentArena {
             !$0.reviewerUnnecessaryCapabilityIDs.isEmpty
         }
         .count
+
+        arenaStore.saveProgress(
+            "\(scenarios.count)/\(scenarios.count) • Arena tamamlandı"
+        )
 
         return AgentArenaReport(
             createdAt: Date(),
@@ -1533,6 +1549,40 @@ actor AgentArena {
 
 struct AgentArenaStore {
     private let fileManager = FileManager.default
+
+    var progressURL: URL {
+        fileManager.homeDirectoryForCurrentUser
+            .appendingPathComponent(
+                "Library/Application Support/KRALI Agent/Mentor/arena-progress.txt",
+                isDirectory: false
+            )
+    }
+
+    func saveProgress(_ value: String) {
+        let directory = progressURL
+            .deletingLastPathComponent()
+
+        try? fileManager.createDirectory(
+            at: directory,
+            withIntermediateDirectories: true
+        )
+
+        try? value.write(
+            to: progressURL,
+            atomically: true,
+            encoding: .utf8
+        )
+    }
+
+    func readProgress() -> String? {
+        try? String(
+            contentsOf: progressURL,
+            encoding: .utf8
+        )
+        .trimmingCharacters(
+            in: .whitespacesAndNewlines
+        )
+    }
 
     var outputURL: URL {
         fileManager.homeDirectoryForCurrentUser
