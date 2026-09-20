@@ -9,7 +9,8 @@ struct DesktopAppActionResult: Codable, Hashable, Sendable {
     let wasRunning: Bool
     let launchOrActivateSucceeded: Bool
     let frontmostAfter: String?
-    let screenVerifiedFrontmost: Bool
+    let frontmostVerified: Bool
+    let verificationSource: String
     let screenSummary: String?
 }
 
@@ -99,40 +100,58 @@ actor AgentDesktopControl {
                 delayMilliseconds: 300
             )
 
-        let after =
+        var after =
             NSWorkspace.shared.frontmostApplication?
                 .localizedName
+        var frontmostVerified = activated
+        var verificationSource =
+            activated ? "NSWorkspace" : "unverified"
+        var fallbackScreenSummary: String?
 
-        let screenReport =
-            try? await screenPerception.observe(
-                goal:
-                    "\(candidate.name) uygulamasının açıldığını ve önde olduğunu yalnızca ekran kanıtından doğrula."
-            )
+        if !frontmostVerified {
+            let screenReport =
+                try? await screenPerception.observe(
+                    goal:
+                        "\(candidate.name) uygulamasının önde olduğunu yalnızca ekran kanıtından doğrula."
+                )
 
-        let afterNormalized =
-            normalize(after ?? "")
+            let afterNormalized =
+                normalize(after ?? "")
 
-        let candidateAliases =
-            Set(
-                candidate.aliases
-                    .map(normalize)
-                    .filter { !$0.isEmpty }
-            )
+            let candidateAliases =
+                Set(
+                    candidate.aliases
+                        .map(normalize)
+                        .filter { !$0.isEmpty }
+                )
 
-        let screenVerified =
-            screenReport.map {
-                let reportFrontmost =
-                    normalize(
-                        $0.frontmostApplication ?? ""
-                    )
+            frontmostVerified =
+                screenReport.map {
+                    let reportFrontmost =
+                        normalize(
+                            $0.frontmostApplication ?? ""
+                        )
 
-                return
-                    candidateAliases.contains(
-                        reportFrontmost
-                    ) ||
-                    (!afterNormalized.isEmpty &&
-                     reportFrontmost == afterNormalized)
-            } ?? false
+                    return
+                        candidateAliases.contains(
+                            reportFrontmost
+                        ) ||
+                        (!afterNormalized.isEmpty &&
+                         reportFrontmost ==
+                            afterNormalized)
+                } ?? false
+
+            if frontmostVerified {
+                verificationSource =
+                    "Screen Perception fallback"
+                after =
+                    screenReport?.frontmostApplication ??
+                    after
+            }
+
+            fallbackScreenSummary =
+                screenReport?.semanticSummary
+        }
 
         return DesktopAppActionResult(
             requestedText: userText,
@@ -142,12 +161,14 @@ actor AgentDesktopControl {
                 candidate.url.path,
             wasRunning: runningBefore != nil,
             launchOrActivateSucceeded:
-                activated,
+                frontmostVerified,
             frontmostAfter: after,
-            screenVerifiedFrontmost:
-                screenVerified,
+            frontmostVerified:
+                frontmostVerified,
+            verificationSource:
+                verificationSource,
             screenSummary:
-                screenReport?.semanticSummary
+                fallbackScreenSummary
         )
     }
 
