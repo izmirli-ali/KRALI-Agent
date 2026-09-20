@@ -1,0 +1,1 @@
+not_run|Screen Perception Probe henüz çalıştırılmadı.
