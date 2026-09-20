@@ -100,6 +100,9 @@ actor AgentSubscriptionIntelligence {
         Hedef sözleşmesi:
         \(goal)
 
+        Önceki ilgili bağlam:
+        \(memoryText.isEmpty ? "İlgili önceki bağlam yok." : memoryText)
+
         Executor taslağı:
         \(draft)
 
