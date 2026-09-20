@@ -77,6 +77,8 @@ actor AgentSubscriptionIntelligence {
         - Kullanıcı özgün fikir/fırsat istiyorsa istediği sayıya uymaya çalış ve her fikri kanıt/çıkarımla gerekçelendir.
         - Rakip, ürün, tarihçe veya güncel durum için kanıt yetersizse bunu açıkça söyle; boşluğu tahminle doldurma.
         - Aynı haberi tekrar eden kaynakları bağımsız doğrulama gibi sunma.
+        - Takipçi sayısı, gönderi sayısı, fiyat, stok gibi hızlı değişen canlı metrikleri yalnızca kanıtta açıkça mevcutsa sayı olarak ver. Güncel değer doğrulanamıyorsa bunu net söyle ve tahmin etme.
+        - Sosyal medya hesabı araştırmasında doğrulanabilen profil kimliği, içerik türleri ve sonuca dair belirsizlikleri ayrı belirt.
         - Cevabın sonunda kullandığın kaynakları kısa bir "Kaynaklar" bölümünde [1], [2] biçiminde göster.
         - Kullanıcının hedefini doğrudan cevapla; iç çalışma planını anlatma.
         """
