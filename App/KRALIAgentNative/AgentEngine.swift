@@ -1671,6 +1671,11 @@ final class AgentEngine: ObservableObject {
                     stepEvidence[stepIndex] =
                         appEvidence
 
+                    log(
+                        "Desktop runtime: " +
+                        appEvidence
+                    )
+
                     if verified {
                         outputs.append(
                             result
