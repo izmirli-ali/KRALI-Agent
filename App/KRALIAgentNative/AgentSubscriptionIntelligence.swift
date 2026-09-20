@@ -216,7 +216,8 @@ actor AgentSubscriptionIntelligence {
                 mission,
                 knownCapabilityIDs:
                     Set(capabilities.map(\.id))
-            )
+            ),
+            missionCoverageIsValid(mission)
         else {
             failureReason =
                 "Semantic planner fallback geçerli mission JSON üretmedi."
@@ -471,6 +472,60 @@ actor AgentSubscriptionIntelligence {
         return mission.outcomes.allSatisfy {
             allowedOutcomes.contains($0)
         }
+    }
+
+    private func missionCoverageIsValid(
+        _ mission: AgentSemanticMission
+    ) -> Bool {
+        let ids = Set(
+            mission.requiredCapabilityIDs +
+            mission.steps.map(\.capabilityID)
+        )
+        let outcomes = Set(mission.outcomes)
+
+        if outcomes.contains("locate") ||
+           outcomes.contains("shortlist") {
+            guard ids.contains("files.search") ||
+                  ids.contains("browser.control") else {
+                return false
+            }
+        }
+
+        if outcomes.contains("assessContent") {
+            guard ids.contains("perception.media") ||
+                  ids.contains("perception.screen") else {
+                return false
+            }
+        }
+
+        if outcomes.contains("research") {
+            guard ids.contains("research.web") ||
+                  ids.contains("browser.control") else {
+                return false
+            }
+        }
+
+        if outcomes.contains("edit") {
+            let editProviders = Set([
+                "premiere.control",
+                "photoshop.control",
+                "desktop.control",
+                "files.move.reversible"
+            ])
+
+            guard !ids.intersection(editProviders).isEmpty else {
+                return false
+            }
+        }
+
+        if outcomes.contains("communicate") {
+            guard ids.contains("mail.work") ||
+                  ids.contains("browser.control") else {
+                return false
+            }
+        }
+
+        return true
     }
 
     private func extractJSONObject(
