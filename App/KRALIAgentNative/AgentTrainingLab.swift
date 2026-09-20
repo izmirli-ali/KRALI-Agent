@@ -1331,13 +1331,17 @@ actor AgentArena {
             let groundedReviewerMissing =
                 (review?.missingCapabilityIDs ?? [])
                     .filter {
-                        !selectedSet.contains($0)
+                        !selectedSet.contains($0) &&
+                        scenario.requiredCapabilities
+                            .contains($0)
                     }
 
             let groundedReviewerUnnecessary =
                 (review?.unnecessaryCapabilityIDs ?? [])
                     .filter {
-                        selectedSet.contains($0)
+                        selectedSet.contains($0) &&
+                        scenario.forbiddenCapabilities
+                            .contains($0)
                     }
 
             let groundedReviewerPassed: Bool?
