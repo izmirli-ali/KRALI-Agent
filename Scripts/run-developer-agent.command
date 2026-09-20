@@ -63,19 +63,72 @@ PROVIDER="${KRALI_DEV_PROVIDER:-openai-codex}"
 MODEL="${KRALI_DEV_MODEL:-}"
 CLINE_SETTINGS="${CLINE_PROVIDER_SETTINGS_PATH:-$HOME/.cline/data/settings/providers.json}"
 
-if [ -n "$CLINE_BIN" ]; then
-    echo "Cline version: $("$CLINE_BIN" version 2>&1 || "$CLINE_BIN" --version 2>&1 || true)" | tee -a "$LOG"
-    echo "Cline doctor:" | tee -a "$LOG"
-    "$CLINE_BIN" doctor >>"$LOG" 2>&1 || true
+cline_probe() {
+    CLINE_PROBE_OUTPUT=""
+    CLINE_PROBE_EXIT=127
+
+    if [ -n "$CLINE_BIN" ] && [ -x "$CLINE_BIN" ]; then
+        CLINE_PROBE_OUTPUT="$("$CLINE_BIN" -V 2>&1)"
+        CLINE_PROBE_EXIT=$?
+    fi
+
+    if [ "$CLINE_PROBE_EXIT" -eq 0 ] &&
+       [ -n "$CLINE_PROBE_OUTPUT" ]; then
+        return 0
+    fi
+
+    return 1
+}
+
+repair_cline() {
+    write_status "repairing_cline|Cline CLI sağlığı kontrol ediliyor ve otomatik onarım deneniyor"
+
+    echo "Cline path: ${CLINE_BIN:-bulunamadı}" | tee -a "$LOG"
+    echo "Machine arch: $(/usr/bin/uname -m 2>/dev/null || true)" | tee -a "$LOG"
+
+    if [ -n "$CLINE_BIN" ]; then
+        /usr/bin/file "$CLINE_BIN" >>"$LOG" 2>&1 || true
+        echo "Cline doctor fix deneniyor..." | tee -a "$LOG"
+        "$CLINE_BIN" doctor fix >>"$LOG" 2>&1 || true
+    fi
+
+    CLINE_BIN="$(command -v cline || true)"
+    if cline_probe; then
+        echo "✅ Cline doctor fix sonrası sağlıklı: $CLINE_PROBE_OUTPUT" | tee -a "$LOG"
+        return 0
+    fi
+
+    echo "Cline CLI yeniden kuruluyor: npm install -g cline@latest" | tee -a "$LOG"
+    write_status "repairing_cline|Cline CLI yeniden kuruluyor; kullanıcı müdahalesi gerekmiyor"
+
+    if ! "$NPM_BIN" install -g cline@latest >>"$LOG" 2>&1; then
+        return 1
+    fi
+
+    rehash 2>/dev/null || true
+    CLINE_BIN="$(command -v cline || true)"
+
+    if cline_probe; then
+        echo "✅ Cline yeniden kuruldu: $CLINE_PROBE_OUTPUT" | tee -a "$LOG"
+        return 0
+    fi
+
+    return 1
+}
+
+if ! cline_probe; then
+    echo "⚠️ Cline health probe başarısız. exit=$CLINE_PROBE_EXIT output=$CLINE_PROBE_OUTPUT" | tee -a "$LOG"
+
+    if ! repair_cline; then
+        write_status "setup_cline_repair|Cline CLI otomatik onarılamadı; kurulum logu incelenmeli"
+        echo "❌ Cline CLI otomatik onarılamadı." | tee -a "$LOG"
+        exit 11
+    fi
 fi
 
-if [ -z "$CLINE_BIN" ]; then
-    write_status "setup_cline|Cline CLI bulunamadı|npm install -g cline"
-    echo "❌ Cline CLI bulunamadı." | tee -a "$LOG"
-    echo "Kurulum: npm install -g cline" | tee -a "$LOG"
-    echo "Ardından: cline auth openai-codex" | tee -a "$LOG"
-    exit 11
-fi
+echo "Cline version: $CLINE_PROBE_OUTPUT" | tee -a "$LOG"
+echo "Cline doctor:" | tee -a "$LOG"
+"$CLINE_BIN" doctor >>"$LOG" 2>&1 || true
 
 if [ "$PROVIDER" = "openai-codex" ]; then
     CLINE_AUTH_STATE="$("$NODE_BIN" - "$CLINE_SETTINGS" "$PROVIDER" <<'NODE'
@@ -373,10 +426,9 @@ if [ "$GAP_MODE" = "gap" ]; then
     TIMEOUT_SECONDS="600"
 fi
 
-# Güncel Cline CLI sözleşmesi:
-# --json, --auto-approve, --provider ve --timeout.
-# Çalışma klasörü --cwd ile değil process working directory ile verilir.
-# Model, "cline auth" sırasında provider ayarına kaydedilir.
+# Headless çağrıyı minimum argüman yüzeyinde tutuyoruz.
+# Güncel Cline ayrıca --cwd, --model, --thinking ve --retries destekler;
+# burada worktree çalışma dizini process cwd ile verilir.
 CLINE_ARGS=(
     --json
     --auto-approve true
