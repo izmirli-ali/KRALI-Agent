@@ -286,6 +286,22 @@ final class AgentEngine: ObservableObject {
             self.localIntelligenceState = state
             self.log(state.title)
         }
+
+        Task { @MainActor [weak self] in
+            guard let self else { return }
+
+            if let recovered =
+                await self.developerBridge
+                    .recoverPendingCandidate() {
+                self.developerAgentStatus =
+                    recovered
+
+                self.log(
+                    "Developer candidate recovery: " +
+                    recovered.message
+                )
+            }
+        }
     }
 
     // MARK: - Chat

@@ -642,7 +642,34 @@ if [ "$CLINE_EXIT" -ne 0 ]; then
         fi
     fi
 
-    if [ -z "$(git -C "$WORKTREE" status --porcelain 2>/dev/null)" ]; then
+    DIRTY_CANDIDATE="$(git -C "$WORKTREE" status --porcelain 2>/dev/null || true)"
+
+    if [ -n "$DIRTY_CANDIDATE" ]; then
+        echo "🧩 Cline hata verdi ancak candidate değişiklik üretti; recovery başlatılıyor." | tee -a "$LOG"
+        write_status "recovering_candidate|Cline oturumu tamamlanmadı ancak üretilen candidate değişiklikler korunuyor|$BRANCH|$WORKTREE"
+
+        /bin/zsh "$ROOT/Scripts/recover-developer-candidate.command" >>"$LOG" 2>&1 || true
+
+        RECOVERY_STATE="$(
+            /bin/cat "$STATUS" 2>/dev/null |
+            /usr/bin/awk -F'|' '{print $1}'
+        )"
+
+        case "$RECOVERY_STATE" in
+            recovered_candidate_ready)
+                echo "✅ Hatalı SDK oturumundaki candidate kurtarıldı ve build geçti." | tee -a "$LOG"
+                exit 0
+                ;;
+            recovered_candidate_build_failed)
+                echo "⚠️ Candidate GitHub'a korundu ancak build geçmedi." | tee -a "$LOG"
+                exit 21
+                ;;
+            candidate_recovery_failed)
+                echo "❌ Candidate recovery başarısız oldu." | tee -a "$LOG"
+                exit 24
+                ;;
+        esac
+    else
         git -C "$ROOT" worktree remove "$WORKTREE" --force >>"$LOG" 2>&1 || true
         git -C "$ROOT" branch -D "$BRANCH" >>"$LOG" 2>&1 || true
     fi
