@@ -1,6 +1,5 @@
 import fs from "node:fs";
 import path from "node:path";
-import { createRequire } from "node:module";
 import { pathToFileURL } from "node:url";
 
 const sdkHost = process.env.KRALI_CLINE_SDK_HOST;
@@ -16,8 +15,22 @@ if (!sdkHost || !worktree || !promptFile) {
   process.exit(2);
 }
 
-const requireFromHost = createRequire(path.join(sdkHost, "package.json"));
-const sdkEntry = requireFromHost.resolve("@cline/sdk");
+const sdkEntry = path.join(
+  sdkHost,
+  "node_modules",
+  "@cline",
+  "sdk",
+  "dist",
+  "index.js"
+);
+
+if (!fs.existsSync(sdkEntry)) {
+  console.error(
+    "KRALI SDK fallback: @cline/sdk ESM entry bulunamadı: " + sdkEntry
+  );
+  process.exit(3);
+}
+
 const { ClineCore } = await import(pathToFileURL(sdkEntry).href);
 
 function findProvider(value, providerId) {
@@ -55,7 +68,18 @@ const modelId =
   requestedModel ||
   providerSettings?.model ||
   providerSettings?.modelId ||
-  "gpt-5.6-terra";
+  providerSettings?.apiModelId ||
+  providerSettings?.actModeApiModelId ||
+  providerSettings?.planModeApiModelId ||
+  "";
+
+if (!modelId) {
+  console.error(
+    "KRALI SDK fallback: openai-codex için kayıtlı model bulunamadı. " +
+      "Provider settings içinde model/modelId bekleniyor."
+  );
+  process.exit(4);
+}
 
 const prompt = fs.readFileSync(promptFile, "utf8");
 
@@ -70,8 +94,10 @@ const deniedFragments = [
 ];
 
 function isSafeApproval(request) {
+  const toolName = String(request?.toolName || "").toLowerCase();
   const serialized = JSON.stringify(request?.input ?? request ?? {})
     .toLowerCase();
+  const worktreeLower = worktree.toLowerCase();
 
   if (deniedFragments.some((part) => serialized.includes(part))) {
     return false;
@@ -87,9 +113,29 @@ function isSafeApproval(request) {
 
   if (
     suspiciousPaths.some((part) => serialized.includes(part)) &&
-    !serialized.includes(worktree.toLowerCase())
+    !serialized.includes(worktreeLower)
   ) {
     return false;
+  }
+
+  const mutatingTools = new Set([
+    "run_commands",
+    "bash",
+    "editor",
+    "apply_patch",
+    "write_file",
+  ]);
+
+  if (mutatingTools.has(toolName)) {
+    if (
+      serialized.includes("../") ||
+      serialized.includes("~/.") ||
+      serialized.includes("$home") ||
+      serialized.includes("/users/") &&
+        !serialized.includes(worktreeLower)
+    ) {
+      return false;
+    }
   }
 
   return true;
@@ -123,8 +169,7 @@ try {
     toolPolicies: {
       read_files: { autoApprove: true },
       search_codebase: { autoApprove: true },
-      list_files: { autoApprove: true },
-      fetch_web: { autoApprove: true },
+      fetch_web_content: { autoApprove: true },
       run_commands: { autoApprove: false },
       bash: { autoApprove: false },
       editor: { autoApprove: false },
