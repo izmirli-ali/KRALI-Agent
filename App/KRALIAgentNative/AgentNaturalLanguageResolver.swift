@@ -122,6 +122,42 @@ struct AgentNaturalLanguageResolver: Sendable {
         return !targetTokens(raw).isEmpty
     }
 
+    func applicationTargetPhrase(
+        from raw: String
+    ) -> String? {
+        let words = tokens(raw)
+
+        guard
+            let appIndex = words.firstIndex(
+                where: {
+                    $0 == "uygulama" ||
+                    $0.hasPrefix("uygulama")
+                }
+            ),
+            appIndex > 0
+        else {
+            return nil
+        }
+
+        let prefix = words[..<appIndex]
+            .filter {
+                !commandNoise.contains($0) &&
+                !openVerbs.contains($0)
+            }
+
+        guard !prefix.isEmpty else {
+            return nil
+        }
+
+        let phrase =
+            prefix.suffix(4)
+                .joined(separator: " ")
+
+        return phrase.isEmpty
+            ? nil
+            : phrase
+    }
+
     func targetTokens(
         _ raw: String
     ) -> [String] {
