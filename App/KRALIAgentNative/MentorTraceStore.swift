@@ -46,6 +46,13 @@ struct MentorTraceActivity: Codable {
     let date: Date
 }
 
+struct MentorTraceContextMemory: Codable {
+    let kind: String
+    let title: String
+    let summary: String
+    let createdAt: Date
+}
+
 struct MentorTrace: Codable {
     let traceID: String
     let createdAt: Date
@@ -65,6 +72,7 @@ struct MentorTrace: Codable {
     let finalResponse: String
     let researchSources: [MentorTraceResearchSource]
     let researchEvidence: [MentorTraceEvidence]
+    let contextMemory: [MentorTraceContextMemory]
     let activityTail: [MentorTraceActivity]
 }
 
@@ -101,6 +109,7 @@ struct MentorTraceStore {
         finalResponse: String,
         researchSources: [WebResearchResult],
         researchEvidence: [WebSourceEvidence],
+        contextMemory: [AgentContextMemoryEntry],
         activities: [ActivityItem]
     ) throws -> URL {
         try fileManager.createDirectory(
@@ -183,6 +192,14 @@ struct MentorTraceStore {
                     excerpt: String($0.excerpt.prefix(1400)),
                     conceptCoverage: $0.conceptCoverage,
                     matchedConcepts: $0.matchedConcepts
+                )
+            },
+            contextMemory: contextMemory.map {
+                MentorTraceContextMemory(
+                    kind: $0.kind.rawValue,
+                    title: $0.title,
+                    summary: String($0.summary.prefix(1200)),
+                    createdAt: $0.createdAt
                 )
             },
             activityTail: activities.suffix(30).map {
