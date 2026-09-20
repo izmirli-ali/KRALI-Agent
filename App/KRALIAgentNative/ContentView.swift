@@ -751,6 +751,25 @@ struct ContentView: View {
 
                         HStack {
                             VStack(alignment: .leading, spacing: 2) {
+                                Text("Screen Perception Probe")
+                                    .font(.caption.weight(.medium))
+                                Text(engine.screenPerceptionStatus)
+                                    .font(.caption2)
+                                    .foregroundStyle(.secondary)
+                                    .lineLimit(3)
+                            }
+
+                            Spacer()
+
+                            Button("Çalıştır") {
+                                engine.runScreenPerceptionProbe()
+                            }
+                            .controlSize(.small)
+                            .disabled(engine.screenPerceptionBusy)
+                        }
+
+                        HStack {
+                            VStack(alignment: .leading, spacing: 2) {
                                 Text("Developer Agent")
                                     .font(.caption.weight(.medium))
                                 Text(engine.developerAgentStatus.message)
