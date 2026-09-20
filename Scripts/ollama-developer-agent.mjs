@@ -13,6 +13,11 @@ const branchName = process.env.KRALI_BRANCH || "";
 const gapLabel = process.env.KRALI_GAP_LABEL || "Capability";
 const appVersion = process.env.KRALI_APP_VERSION || "unknown";
 const runID = process.env.KRALI_RUN_ID || "";
+const requireChange =
+  (process.env.KRALI_REQUIRE_CHANGE || "0") === "1";
+const maxCompletionRejections = Number(
+  process.env.KRALI_LOCAL_AGENT_MAX_COMPLETION_REJECTIONS || "4"
+);
 const maxIterations = Number(
   process.env.KRALI_LOCAL_AGENT_MAX_ITERATIONS || "36"
 );
@@ -622,7 +627,10 @@ const systemPrompt = [
   "Prefer a minimal generic fix; never hard-code one app, brand, or exact user prompt.",
   "Inspect relevant code before editing.",
   "If you edit code, inspect git_diff and run build_check before finishing.",
-  "A capability gap is not resolved by merely explaining it.",
+  "A capability gap is not resolved by merely explaining or summarizing source code.",
+  "For an active capability gap, a clean candidate worktree is not a successful completion.",
+  "If a source change is required, use replace_text, write_file, or apply_patch instead of returning prose.",
+  "A changed candidate may finish only after git_diff inspection and a successful build_check.",
   "Do not emit fake tool JSON in prose. Call tools through native function calling.",
 ].join("\n");
 
@@ -632,6 +640,83 @@ const messages = [
 ];
 
 let sawToolCall = false;
+let sawMutatingTool = false;
+let sawGitDiff = false;
+let buildCheckPassed = false;
+let completionRejections = 0;
+
+const promptRelative = path
+  .relative(root, path.resolve(promptFile))
+  .replace(/\\/g, "/");
+
+function candidateStatus() {
+  const result = runGit([
+    "status",
+    "--short",
+    "--untracked-files=all",
+  ]);
+
+  if (result.status !== 0) {
+    return {
+      ok: false,
+      dirty: false,
+      output: truncate(result.stderr || result.stdout, 4000),
+    };
+  }
+
+  const lines = result.stdout
+    .split("\n")
+    .filter(Boolean)
+    .filter((line) => {
+      const normalized = line.replace(/\\/g, "/");
+      return !normalized.endsWith(" " + promptRelative);
+    });
+
+  return {
+    ok: true,
+    dirty: lines.length > 0,
+    output: lines.join("\n"),
+  };
+}
+
+function requestMoreWork(reasons) {
+  completionRejections += 1;
+
+  const detail = reasons.join("; ");
+  stage(
+    "local_agent_completion_rejected",
+    gapLabel +
+      " tamamlanma reddedildi • " +
+      detail +
+      " • deneme=" +
+      completionRejections +
+      "/" +
+      maxCompletionRejections
+  );
+
+  if (completionRejections >= maxCompletionRejections) {
+    fail(
+      gapLabel +
+        " yerel model açıklama ile erken tamamlanmaya devam etti: " +
+        detail,
+      27,
+      "local_agent_completion_gate_failed"
+    );
+  }
+
+  messages.push({
+    role: "user",
+    content: [
+      "KRALI completion gate bu final cevabı reddetti.",
+      "Aktif işi açıklamak veya özetlemek tamamlanma değildir.",
+      "Araçlarla çalışmaya devam et.",
+      "Gerekiyorsa minimum generic source değişikliğini replace_text, write_file veya apply_patch ile uygula.",
+      "Candidate değişiklik varsa git_diff ile incele ve build_check PASS almadan bitirme.",
+      "Şu anda kapanmamış koşullar: " + detail,
+      "Bir sonraki cevabın düz metin final değil, gerekli tool çağrıları olmalı.",
+    ].join("\n"),
+  });
+}
 
 stage(
   "local_agent_starting",
@@ -741,9 +826,39 @@ for (let iteration = 1; iteration <= maxIterations; iteration++) {
       process.stdout.write(message.content + "\n");
     }
 
+    const status = candidateStatus();
+    const blockers = [];
+
+    if (!status.ok) {
+      blockers.push("candidate git status okunamadı");
+    } else {
+      if (requireChange && !status.dirty) {
+        blockers.push("aktif capability gap için gerçek candidate değişikliği yok");
+      }
+
+      if (status.dirty && !sawMutatingTool) {
+        blockers.push("candidate değişikliği için mutation tool kanıtı yok");
+      }
+
+      if (status.dirty && !sawGitDiff) {
+        blockers.push("candidate diff henüz incelenmedi");
+      }
+
+      if (status.dirty && !buildCheckPassed) {
+        blockers.push("candidate build_check PASS almadı");
+      }
+    }
+
+    if (blockers.length > 0) {
+      requestMoreWork(blockers);
+      continue;
+    }
+
     stage(
       "local_agent_completed",
-      gapLabel + " native local agent tamamlandı"
+      status.dirty
+        ? gapLabel + " candidate diff + build doğrulamasıyla tamamlandı"
+        : gapLabel + " native local agent tamamlandı"
     );
     process.exit(0);
   }
@@ -780,6 +895,24 @@ for (let iteration = 1; iteration <= maxIterations; iteration++) {
             ? error.message
             : String(error),
       };
+    }
+
+    if (
+      result?.ok &&
+      ["replace_text", "write_file", "apply_patch"].includes(name)
+    ) {
+      sawMutatingTool = true;
+      sawGitDiff = false;
+      buildCheckPassed = false;
+      completionRejections = 0;
+    }
+
+    if (name === "git_diff" && result?.ok) {
+      sawGitDiff = true;
+    }
+
+    if (name === "build_check") {
+      buildCheckPassed = result?.ok === true;
     }
 
     messages.push({

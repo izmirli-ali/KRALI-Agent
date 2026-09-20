@@ -737,6 +737,9 @@ const prompt = [
   "- Main\'e push/merge yapma; yalnız bu worktree\'de candidate üret.",
   "- Gereksiz geniş refactor yapma; minimum güvenli değişiklik yap.",
   "- İş sonunda /bin/zsh Scripts/build-check.command çalıştır.",
+  "- Aktif gap varken yalnız kodu açıklayıp final cevap verme; açıklama ilerleme sayılmaz.",
+  "- Kaynak değişikliği gerekiyorsa replace_text/write_file/apply_patch ile gerçek candidate üret.",
+  "- Candidate değişiklikten sonra git_diff incelemesi ve build_check PASS zorunludur.",
   "",
   "Yalnız ihtiyaç duyduğun kaynak dosyalarını oku. Büyük diagnostic JSON\'larını açma."
 ].join("\n");
@@ -834,6 +837,8 @@ if [ "$PROVIDER" = "ollama" ] &&
     KRALI_GAP_LABEL="$GAP_LABEL" \
     KRALI_APP_VERSION="$(/bin/cat "$ROOT/VERSION" 2>/dev/null | /usr/bin/tr -d '[:space:]')" \
     KRALI_RUN_ID="$STAMP" \
+    KRALI_REQUIRE_CHANGE="$([ "$GAP_MODE" = "gap" ] && echo 1 || echo 0)" \
+    KRALI_LOCAL_AGENT_MAX_COMPLETION_REJECTIONS="4" \
     KRALI_LOCAL_AGENT_MAX_ITERATIONS="36" \
     "$NODE_BIN" "$ROOT/Scripts/ollama-developer-agent.mjs" \
         > >(tee "$CLINE_RUN_LOG" >>"$LOG") \
