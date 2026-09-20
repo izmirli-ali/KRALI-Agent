@@ -54,6 +54,9 @@ final class AgentEngine: ObservableObject {
     @Published var screenPerceptionReport: ScreenPerceptionReport?
     @Published var screenPerceptionStatus = "Henüz Screen Perception Probe çalıştırılmadı."
     @Published var screenPerceptionBusy = false
+    @Published var desktopControlReport: DesktopControlProbeReport?
+    @Published var desktopControlStatus = "Desktop Control Probe henüz çalıştırılmadı."
+    @Published var desktopControlBusy = false
     @Published var developerAgentStatus = DeveloperAgentStatus(
         state: "idle",
         message: "Developer Agent henüz çalıştırılmadı.",
@@ -99,6 +102,8 @@ final class AgentEngine: ObservableObject {
     private let arenaStore = AgentArenaStore()
     private let screenPerception = AgentScreenPerception()
     private let screenPerceptionStore = ScreenPerceptionStore()
+    private let desktopControl = AgentDesktopControl()
+    private let desktopControlStore = DesktopControlProbeStore()
     private let developerBridge = AgentDeveloperBridge()
     private let localIntelligence = AgentLocalIntelligence()
     private let subscriptionIntelligence = AgentSubscriptionIntelligence()
@@ -189,6 +194,30 @@ final class AgentEngine: ObservableObject {
                 "Screen Perception Probe henüz çalıştırılmadı."
             screenPerceptionStore.saveStatus(
                 "not_run|Screen Perception Probe henüz çalıştırılmadı."
+            )
+        }
+
+        desktopControlReport =
+            desktopControlStore.load()
+        if let report = desktopControlReport {
+            desktopControlStatus =
+                "Son Desktop Probe: " +
+                (report.launchOrActivateSucceeded
+                    ? "uygulama açıldı/öne geldi"
+                    : "başarısız") +
+                " • AX " +
+                (report.accessibilityTrusted
+                    ? "izinli"
+                    : "izin bekliyor")
+        } else if let status =
+            desktopControlStore.readStatus(),
+                  !status.isEmpty {
+            desktopControlStatus = status
+        } else {
+            desktopControlStatus =
+                "Desktop Control Probe henüz çalıştırılmadı."
+            desktopControlStore.saveStatus(
+                "not_run|Desktop Control Probe henüz çalıştırılmadı."
             )
         }
 
@@ -2443,6 +2472,82 @@ final class AgentEngine: ObservableObject {
             }
 
             screenPerceptionBusy = false
+        }
+    }
+
+    func runDesktopControlProbe() {
+        guard !desktopControlBusy else { return }
+
+        desktopControlBusy = true
+        desktopControlStatus =
+            "Accessibility kontrol ediliyor; Notlar güvenli test için açılıp doğrulanıyor…"
+        desktopControlStore.saveStatus(
+            "running|Accessibility kontrolü ve uygulama açma testi çalışıyor."
+        )
+        log("Desktop Control Probe başladı")
+
+        Task {
+            do {
+                let report =
+                    try await desktopControl
+                        .probeOpenApplication(
+                            named: "Notlar",
+                            preferredBundleIdentifier:
+                                "com.apple.Notes"
+                        )
+
+                desktopControlReport = report
+                try desktopControlStore.save(report)
+
+                desktopControlStatus =
+                    (report.launchOrActivateSucceeded
+                        ? "Notlar açıldı/öne geldi"
+                        : "Notlar doğrulanamadı") +
+                    " • AX " +
+                    (report.accessibilityTrusted
+                        ? "izinli"
+                        : "izin bekliyor") +
+                    " • Screen " +
+                    (report.screenVerifiedFrontmost
+                        ? "doğrulandı"
+                        : "doğrulanamadı")
+
+                desktopControlStore.saveStatus(
+                    "success|" +
+                    "activate=" +
+                    String(report.launchOrActivateSucceeded) +
+                    "|ax=" +
+                    String(report.accessibilityTrusted) +
+                    "|screen=" +
+                    String(report.screenVerifiedFrontmost)
+                )
+
+                mentorTraceReady = true
+                mentorTraceStatus =
+                    "Desktop Control probe raporu hazır • Mentora gönderilebilir"
+
+                log(
+                    "Desktop Control Probe tamamlandı: " +
+                    desktopControlStatus
+                )
+            } catch {
+                desktopControlStatus =
+                    "Desktop Control başarısız: " +
+                    error.localizedDescription
+
+                desktopControlStore.saveStatus(
+                    "failed|" +
+                    error.localizedDescription
+                )
+
+                mentorTraceReady = true
+                mentorTraceStatus =
+                    "Desktop Control hata raporu hazır • Mentora gönderilebilir"
+
+                log(desktopControlStatus)
+            }
+
+            desktopControlBusy = false
         }
     }
 
