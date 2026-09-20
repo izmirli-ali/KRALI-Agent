@@ -29,7 +29,7 @@ struct AgentCapabilityRegistry {
         AgentCapability(
             id: "context.local",
             name: "Bağlam",
-            summary: "Aktif konuşma, son sonuçlar ve çalışma alanı bağlamını taşır.",
+            summary: "Aktif konuşma, ilgili önceki görevler, son sonuçlar ve çalışma alanı bağlamını taşır.",
             risk: .reasoning,
             isAvailable: true,
             requiresWorkspace: false
@@ -68,8 +68,8 @@ struct AgentCapabilityRegistry {
         ),
         AgentCapability(
             id: "memory.local",
-            name: "Yerel öğrenme",
-            summary: "Açık kullanıcı çalışma kurallarını yerel olarak saklar.",
+            name: "Yerel hafıza",
+            summary: "Açık kullanıcı kurallarını ve tamamlanan görev bağlamını yapılandırılmış biçimde yerel olarak saklar.",
             risk: .reasoning,
             isAvailable: true,
             requiresWorkspace: false
