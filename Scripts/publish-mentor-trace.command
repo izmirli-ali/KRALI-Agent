@@ -7,11 +7,15 @@ TRAINING_SOURCE="$HOME/Library/Application Support/KRALI Agent/Mentor/training-l
 LIVE_EVAL_SOURCE="$HOME/Library/Application Support/KRALI Agent/Mentor/live-eval-latest.json"
 ARENA_SOURCE="$HOME/Library/Application Support/KRALI Agent/Mentor/arena-latest.json"
 DEVELOPER_STATUS_SOURCE="$HOME/Library/Application Support/KRALI Agent/Developer/latest.txt"
+DEVELOPER_LOG_SOURCE="$HOME/Library/Logs/KRALI-Developer-Agent.log"
+SEMANTIC_LOG_SOURCE="$HOME/Library/Logs/KRALI-Semantic-Planner.log"
 TRACE_DEST="$ROOT/Mentor/latest.json"
 TRAINING_DEST="$ROOT/Mentor/training-latest.json"
 LIVE_EVAL_DEST="$ROOT/Mentor/live-eval-latest.json"
 ARENA_DEST="$ROOT/Mentor/arena-latest.json"
 DEVELOPER_STATUS_DEST="$ROOT/Mentor/developer-status.txt"
+DEVELOPER_LOG_DEST="$ROOT/Mentor/developer-log-tail.txt"
+SEMANTIC_LOG_DEST="$ROOT/Mentor/semantic-planner-log-tail.txt"
 
 echo ""
 echo "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
@@ -72,6 +76,16 @@ fi
 if [ -f "$DEVELOPER_STATUS_SOURCE" ]; then
     cp "$DEVELOPER_STATUS_SOURCE" "$DEVELOPER_STATUS_DEST"
     FILES+=("Mentor/developer-status.txt")
+fi
+
+if [ -f "$DEVELOPER_LOG_SOURCE" ]; then
+    tail -n 120 "$DEVELOPER_LOG_SOURCE" > "$DEVELOPER_LOG_DEST"
+    FILES+=("Mentor/developer-log-tail.txt")
+fi
+
+if [ -f "$SEMANTIC_LOG_SOURCE" ]; then
+    tail -n 120 "$SEMANTIC_LOG_SOURCE" > "$SEMANTIC_LOG_DEST"
+    FILES+=("Mentor/semantic-planner-log-tail.txt")
 fi
 
 if [ -z "$(git status --porcelain -- ${FILES[@]})" ]; then
