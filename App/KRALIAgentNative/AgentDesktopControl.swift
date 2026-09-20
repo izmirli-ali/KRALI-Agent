@@ -1,6 +1,7 @@
 import Foundation
 import AppKit
 import ApplicationServices
+import ScreenCaptureKit
 
 struct DesktopAppActionResult: Codable, Hashable, Sendable {
     let requestedText: String
@@ -104,61 +105,65 @@ actor AgentDesktopControl {
             )
         }
 
-        let activated =
-            await focusCandidate(
-                candidate,
-                maxAttempts: 14,
-                delayMilliseconds: 180
-            )
+        _ = await focusCandidate(
+            candidate,
+            maxAttempts: 14,
+            delayMilliseconds: 180
+        )
 
         var after =
             NSWorkspace.shared.frontmostApplication?
                 .localizedName
-        var frontmostVerified = activated
+
+        var frontmostVerified =
+            await visuallyForeground(
+                candidate
+            )
+
         var verificationSource =
-            activated ? "NSWorkspace" : "unverified"
+            frontmostVerified
+                ? "ScreenCaptureKit z-order"
+                : "unverified"
+
         var fallbackScreenSummary: String?
+
+        if !frontmostVerified,
+           let running =
+            matchingRunningApplication(
+                named: candidate.name,
+                preferredBundleIdentifier:
+                    candidate.bundleIdentifier
+           ) {
+            for _ in 0..<3 {
+                requestActivation(
+                    running
+                )
+
+                try? await Task.sleep(
+                    for: .milliseconds(220)
+                )
+
+                if await visuallyForeground(
+                    candidate
+                ) {
+                    frontmostVerified = true
+                    verificationSource =
+                        "AX raise + ScreenCaptureKit z-order"
+                    after =
+                        NSWorkspace.shared
+                            .frontmostApplication?
+                            .localizedName
+                    break
+                }
+            }
+        }
 
         if !frontmostVerified {
             let screenReport =
                 try? await screenPerception.observe(
                     goal:
-                        "\(candidate.name) uygulamasının önde olduğunu yalnızca ekran kanıtından doğrula."
+                        "\(candidate.name) uygulamasının görünür biçimde önde olduğunu yalnızca ekran kanıtından doğrula."
                 )
-
-            let afterNormalized =
-                normalize(after ?? "")
-
-            let candidateAliases =
-                Set(
-                    candidate.aliases
-                        .map(normalize)
-                        .filter { !$0.isEmpty }
-                )
-
-            frontmostVerified =
-                screenReport.map {
-                    let reportFrontmost =
-                        normalize(
-                            $0.frontmostApplication ?? ""
-                        )
-
-                    return
-                        candidateAliases.contains(
-                            reportFrontmost
-                        ) ||
-                        (!afterNormalized.isEmpty &&
-                         reportFrontmost ==
-                            afterNormalized)
-                } ?? false
-
-            if frontmostVerified {
-                verificationSource =
-                    "Screen Perception fallback"
-                after =
-                    screenReport?.frontmostApplication ??
-                    after
-            }
 
             fallbackScreenSummary =
                 screenReport?.semanticSummary
@@ -876,6 +881,128 @@ actor AgentDesktopControl {
                 window,
                 kAXRaiseAction as CFString
             )
+        }
+    }
+
+    private func visuallyForeground(
+        _ candidate: ApplicationCandidate
+    ) async -> Bool {
+        do {
+            let content =
+                try await SCShareableContent
+                    .excludingDesktopWindows(
+                        false,
+                        onScreenWindowsOnly: true
+                    )
+
+            let candidateWindows =
+                content.windows.filter { window in
+                    guard
+                        window.isOnScreen,
+                        window.windowLayer == 0,
+                        let app =
+                            window.owningApplication
+                    else {
+                        return false
+                    }
+
+                    if let bundleID =
+                        candidate.bundleIdentifier,
+                       app.bundleIdentifier ==
+                        bundleID {
+                        return true
+                    }
+
+                    let appName =
+                        normalize(
+                            app.applicationName
+                        )
+
+                    return candidate.aliases
+                        .map(normalize)
+                        .contains(appName)
+                }
+
+            guard let target =
+                candidateWindows.max(
+                    by: {
+                        ($0.frame.width *
+                         $0.frame.height) <
+                        ($1.frame.width *
+                         $1.frame.height)
+                    }
+                )
+            else {
+                return false
+            }
+
+            let above =
+                try await SCShareableContent
+                    .excludingDesktopWindows(
+                        false,
+                        onScreenWindowsOnlyAbove:
+                            target
+                    )
+
+            let ownBundleID =
+                Bundle.main.bundleIdentifier
+
+            let blockers =
+                above.windows.filter { window in
+                    guard
+                        window.isOnScreen,
+                        window.windowLayer == 0,
+                        let app =
+                            window.owningApplication
+                    else {
+                        return false
+                    }
+
+                    if let bundleID =
+                        candidate.bundleIdentifier,
+                       app.bundleIdentifier ==
+                        bundleID {
+                        return false
+                    }
+
+                    if app.bundleIdentifier ==
+                        ownBundleID {
+                        return true
+                    }
+
+                    if app.bundleIdentifier ==
+                        "com.apple.dock" {
+                        return false
+                    }
+
+                    let overlap =
+                        target.frame.intersection(
+                            window.frame
+                        )
+
+                    guard !overlap.isNull else {
+                        return false
+                    }
+
+                    let targetArea =
+                        max(
+                            1,
+                            target.frame.width *
+                            target.frame.height
+                        )
+                    let overlapArea =
+                        overlap.width *
+                        overlap.height
+
+                    return
+                        overlapArea /
+                        targetArea >
+                        0.08
+                }
+
+            return blockers.isEmpty
+        } catch {
+            return false
         }
     }
 
