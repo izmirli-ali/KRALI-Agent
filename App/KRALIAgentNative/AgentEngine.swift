@@ -2173,6 +2173,30 @@ final class AgentEngine: ObservableObject {
             }
 
             arenaBusy = false
+
+            let arenaNeedsDevelopment =
+                report.failed > 0 ||
+                report.reviewerFlagged > 0
+
+            let trainingGreen =
+                trainingLabReport?.failed == 0 &&
+                trainingLabReport?.appVersion ==
+                    report.appVersion
+
+            let liveGreen =
+                liveResearchEvalReport?.failed == 0 &&
+                liveResearchEvalReport?.appVersion ==
+                    report.appVersion
+
+            if arenaNeedsDevelopment &&
+               trainingGreen &&
+               liveGreen &&
+               !developerAgentBusy {
+                log(
+                    "Arena açık-dünya problemi buldu; Developer Agent candidate düzeltme için otomatik başlatılıyor"
+                )
+                runDeveloperAgent()
+            }
         }
     }
 
