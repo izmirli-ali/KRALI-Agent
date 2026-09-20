@@ -579,10 +579,145 @@ struct ContentView: View {
 
                 if !engine.capabilityLearningPlans.isEmpty ||
                    !engine.capabilityLearningBacklog.isEmpty ||
+                   !engine.learningQueueJobs.isEmpty ||
                    engine.developerAgentStatus.shouldShowLearningStatus {
                     sectionTitle("Öğrenme")
 
                     VStack(alignment: .leading, spacing: 8) {
+                        let activeQueueJobs =
+                            engine.learningQueueJobs
+                                .filter {
+                                    !$0.state.isTerminal
+                                }
+
+                        if !activeQueueJobs.isEmpty {
+                            HStack(spacing: 6) {
+                                Image(
+                                    systemName:
+                                        "list.number"
+                                )
+                                .font(.caption2)
+                                .foregroundStyle(
+                                    .secondary
+                                )
+
+                                Text(
+                                    "Öğrenme kuyruğu • " +
+                                    String(
+                                        activeQueueJobs
+                                            .count
+                                    ) +
+                                    " iş"
+                                )
+                                .font(
+                                    .caption
+                                        .weight(
+                                            .semibold
+                                        )
+                                )
+
+                                Spacer()
+                            }
+
+                            ForEach(
+                                activeQueueJobs
+                                    .prefix(4)
+                            ) { job in
+                                HStack(
+                                    alignment: .top,
+                                    spacing: 7
+                                ) {
+                                    if job.state ==
+                                        .running {
+                                        ProgressView()
+                                            .controlSize(
+                                                .mini
+                                            )
+                                            .frame(
+                                                width: 14,
+                                                height: 14
+                                            )
+                                    } else {
+                                        Image(
+                                            systemName:
+                                                "clock"
+                                        )
+                                        .font(
+                                            .caption2
+                                        )
+                                        .foregroundStyle(
+                                            .secondary
+                                        )
+                                        .frame(
+                                            width: 14
+                                        )
+                                    }
+
+                                    VStack(
+                                        alignment:
+                                            .leading,
+                                        spacing: 2
+                                    ) {
+                                        Text(
+                                            job.capabilityName +
+                                            " • " +
+                                            job.state.title
+                                        )
+                                        .font(
+                                            .caption
+                                                .weight(
+                                                    .medium
+                                                )
+                                        )
+
+                                        Text(
+                                            "Kanıt: " +
+                                            String(
+                                                job.evidenceCount
+                                            ) +
+                                            " • job " +
+                                            job.shortID
+                                        )
+                                        .font(
+                                            .caption2
+                                                .monospacedDigit()
+                                        )
+                                        .foregroundStyle(
+                                            .secondary
+                                        )
+
+                                        if let status =
+                                            job.lastStatus {
+                                            Text(status)
+                                                .font(
+                                                    .caption2
+                                                )
+                                                .foregroundStyle(
+                                                    .secondary
+                                                )
+                                                .lineLimit(
+                                                    2
+                                                )
+                                        }
+                                    }
+
+                                    Spacer()
+                                }
+                            }
+
+                            if engine
+                                .developerAgentStatus
+                                .shouldShowLearningStatus ||
+                               !engine
+                                .capabilityLearningPlans
+                                .isEmpty ||
+                               !engine
+                                .capabilityLearningBacklog
+                                .isEmpty {
+                                Divider()
+                            }
+                        }
+
                         if engine.developerAgentStatus.shouldShowLearningStatus {
                             HStack(alignment: .top, spacing: 8) {
                                 if engine.developerAgentStatus.isLearningActive {
