@@ -142,6 +142,23 @@ struct AgentCapabilityGapResolver {
         }
 
         if step.capabilityID ==
+            "app.workflow" {
+            let observationStack = [
+                "desktop.app",
+                "perception.screen"
+            ]
+
+            if observationStack.allSatisfy({
+                availableIDs.contains($0)
+            }) {
+                candidates.append(
+                    contentsOf:
+                        observationStack
+                )
+            }
+        }
+
+        if step.capabilityID ==
             "mail.work" {
             let genericUI = [
                 "desktop.app",
