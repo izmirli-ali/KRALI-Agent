@@ -732,6 +732,25 @@ struct ContentView: View {
 
                         HStack {
                             VStack(alignment: .leading, spacing: 2) {
+                                Text("KRALİ Arena")
+                                    .font(.caption.weight(.medium))
+                                Text(engine.arenaStatus)
+                                    .font(.caption2)
+                                    .foregroundStyle(.secondary)
+                                    .lineLimit(2)
+                            }
+
+                            Spacer()
+
+                            Button("Çalıştır") {
+                                engine.runArena()
+                            }
+                            .controlSize(.small)
+                            .disabled(engine.arenaBusy)
+                        }
+
+                        HStack {
+                            VStack(alignment: .leading, spacing: 2) {
                                 Text("Developer Agent")
                                     .font(.caption.weight(.medium))
                                 Text(engine.developerAgentStatus.message)
