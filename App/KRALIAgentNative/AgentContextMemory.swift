@@ -409,6 +409,27 @@ struct AgentContextMemoryStore {
         .map { $0.entry }
     }
 
+    func executionContext(
+        to rawQuery: String,
+        from entries: [AgentContextMemoryEntry],
+        limit: Int = 4
+    ) -> [AgentContextMemoryEntry] {
+        let query = normalize(rawQuery)
+
+        // Prior task/research prose is powerful but can poison a new autonomous
+        // action. Only carry it forward when the user explicitly refers to
+        // previous context. Persistent user rules remain safe defaults.
+        if containsContinuationReference(query) {
+            return Array(entries.prefix(max(0, limit)))
+        }
+
+        return Array(
+            entries
+                .filter { $0.kind == .userRule }
+                .prefix(max(0, limit))
+        )
+    }
+
     private func isExplicitNewTopicIntroduction(
         _ text: String
     ) -> Bool {
@@ -618,6 +639,8 @@ struct AgentContextMemoryStore {
             "onceki", "önceki",
             "bu hesap", "bu marka", "bu sirket", "bu şirket",
             "bu konu", "bu analiz", "bu rapor",
+            "bu firma", "bu uygulama", "bu dosya",
+            "aynı görev", "ayni gorev", "aynı konu", "ayni konu",
             "bunlardan", "bunlari", "bunları",
             "buna gore", "buna göre",
             "devam et", "devam edelim",
