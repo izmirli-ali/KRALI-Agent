@@ -1,31 +1,3 @@
-Preparing worktree (new branch 'krali-dev-agent/20260920-134920')
-branch 'krali-dev-agent/20260920-134920' set up to track 'origin/main'.
-HEAD is now at a47e6e8 Set app marketing version to 0.8.15
-❌ Cline görevi başarısız oldu.
-
-━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
- KRALİ DEVELOPER AGENT
- 20260920-141107
-━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-Cline version: 
-Cline doctor:
-From https://github.com/izmirli-ali/KRALI-Agent
- * branch            main       -> FETCH_HEAD
-Already up to date.
-Preparing worktree (new branch 'krali-dev-agent/20260920-141107')
-branch 'krali-dev-agent/20260920-141107' set up to track 'origin/main'.
-HEAD is now at 84887f3 Set app marketing version to 0.8.17
-❌ Cline görevi başarısız oldu.
-
-━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
- KRALİ DEVELOPER AGENT
- 20260920-141855
-━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-Cline version: 
-Cline doctor:
-From https://github.com/izmirli-ali/KRALI-Agent
- * branch            main       -> FETCH_HEAD
-Already up to date.
 Preparing worktree (new branch 'krali-dev-agent/20260920-141855')
 branch 'krali-dev-agent/20260920-141855' set up to track 'origin/main'.
 HEAD is now at 31dd11f Set app marketing version to 0.8.18
@@ -118,3 +90,31 @@ HEAD is now at 707c592 v0.8.36 current Cline contract and live learning UI
 Developer prompt mode: gap • 2390 bytes
 ⚠️ Cline SIGKILL/137 aldı; ultra-light retry deneniyor.
 ❌ Cline görevi başarısız oldu (exit 137, 0s): process SIGKILL aldı; kaynak baskısı veya işletim sistemi sonlandırması
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+ KRALİ DEVELOPER AGENT
+ 20260920-181644
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+⚠️ Cline health probe başarısız. exit=137 output=
+Cline path: /opt/homebrew/bin/cline
+Machine arch: arm64
+/opt/homebrew/bin/cline: a /usr/bin/env node script text executable, ASCII text
+Cline doctor fix deneniyor...
+Cline CLI yeniden kuruluyor: npm install -g cline@latest
+npm warn EBADENGINE Unsupported engine {
+npm warn EBADENGINE   package: '@sap/xsenv@6.2.2',
+npm warn EBADENGINE   required: { node: '^20.0.0  || ^22.0.0 || ^24.0.0' },
+npm warn EBADENGINE   current: { node: 'v26.9.0', npm: '11.19.1' }
+npm warn EBADENGINE }
+npm warn deprecated node-domexception@1.0.0: Use your platform's native DOMException instead
+
+changed 329 packages in 17s
+
+47 packages are looking for funding
+  run `npm fund` for details
+npm warn install-scripts 2 packages have install scripts not yet covered by allowScripts:
+npm warn install-scripts   cline@3.0.62 (postinstall: node ./postinstall.mjs || true)
+npm warn install-scripts   protobufjs@7.6.6 (postinstall: node scripts/postinstall)
+npm warn install-scripts
+npm warn install-scripts Run `npm install -g --allow-scripts=cline,protobufjs` to allow these scripts once, or `npm config set allow-scripts=cline,protobufjs --location=user` to allow them for all global installs.
+❌ Cline CLI otomatik onarılamadı.
