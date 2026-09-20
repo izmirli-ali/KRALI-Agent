@@ -744,10 +744,12 @@ final class AgentEngine: ObservableObject {
             isCompound:
                 mission.steps.count > 2 ||
                 capabilityIDs
-                    .subtracting([
-                        "core.reasoning",
-                        "context.local"
-                    ])
+                    .subtracting(
+                        Set([
+                            "core.reasoning",
+                            "context.local"
+                        ])
+                    )
                     .count > 1
         )
     }
@@ -950,6 +952,13 @@ final class AgentEngine: ObservableObject {
             }
         }
 
+        if didFileSearch,
+           mission.requiredCapabilityIDs.contains(
+                "files.metadata"
+           ) {
+            executed.insert("files.metadata")
+        }
+
         return SemanticMissionExecutionResult(
             reply: outputs.joined(separator: "\n\n"),
             executedCapabilityIDs: executed
@@ -1047,7 +1056,7 @@ final class AgentEngine: ObservableObject {
             return "Hedefi “\(mission.objective)” olarak çözdüm ve mevcut capability'lerle uygulanabilir adımları yürüttüm."
         }
 
-        return "Hedefi “\(mission.objective)” olarak çözdüm. Mevcut adımları yürüttüm; şu capability'ler henüz bağlı olmadığı için mission tamamlanamadı: " +
+        return "Hedefi “\(mission.objective)” olarak çözdüm. Semantic plan hazır; şu capability'ler henüz bağlı olmadığı için ilgili uygulama adımları bekliyor: " +
             blocked.joined(separator: ", ") + "."
     }
 
