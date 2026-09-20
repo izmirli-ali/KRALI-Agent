@@ -118,7 +118,7 @@ struct AgentCapabilityLearner {
             return "macOS ekran algısı için ScreenCaptureKit, Vision, Accessibility element tree ve görsel doğrulama yaklaşımlarını resmi dokümanlardan karşılaştır."
 
         case "desktop.control":
-            return "macOS uygulama/pencere kontrolü için Accessibility API, Apple Events, Shortcuts ve güvenli input otomasyonu seçeneklerini resmi kaynaklardan karşılaştır."
+            return "macOS derin UI etkileşimi için Accessibility / AXUIElement, güvenli keyboard-mouse input, menü-butonu-alan erişimi ve doğrulama yöntemlerini resmi kaynaklardan karşılaştır; uygulama açma/öne getirme desktop.app tarafından zaten sağlanıyor."
 
         case "photoshop.control":
             return "Adobe Photoshop otomasyonu için güncel UXP API, plugin messaging, document/layer işlemleri ve dış ajan köprüsü seçeneklerini resmi Adobe dokümantasyonundan araştır."
