@@ -941,12 +941,9 @@ actor AgentDesktopControl {
             }
 
             let above =
-                try await SCShareableContent
-                    .excludingDesktopWindows(
-                        false,
-                        onScreenWindowsOnlyAbove:
-                            target
-                    )
+                try await shareableContentAbove(
+                    target
+                )
 
             let ownBundleID =
                 Bundle.main.bundleIdentifier
@@ -1007,6 +1004,47 @@ actor AgentDesktopControl {
             return blockers.isEmpty
         } catch {
             return false
+        }
+    }
+
+    @available(macOS 15.0, *)
+    private func shareableContentAbove(
+        _ window: SCWindow
+    ) async throws -> SCShareableContent {
+        try await withCheckedThrowingContinuation {
+            continuation in
+
+            SCShareableContent
+                .getExcludingDesktopWindows(
+                    false,
+                    onScreenWindowsOnlyAbove:
+                        window
+                ) {
+                    content,
+                    error in
+
+                    if let error {
+                        continuation.resume(
+                            throwing: error
+                        )
+                        return
+                    }
+
+                    guard let content else {
+                        continuation.resume(
+                            throwing:
+                                DesktopControlError
+                                    .launchFailed(
+                                        "ScreenCaptureKit z-order doğrulaması"
+                                    )
+                        )
+                        return
+                    }
+
+                    continuation.resume(
+                        returning: content
+                    )
+                }
         }
     }
 
