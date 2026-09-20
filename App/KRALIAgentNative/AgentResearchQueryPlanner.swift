@@ -162,16 +162,17 @@ struct AgentResearchQueryPlanner {
             )
 
         let patterns = [
-            #"(?i)(?:@)?([A-Z0-9._]{2,})\s+"# +
+            "(?:@)?([A-Za-z0-9._]{2,})\\s+" +
                 escapedPlatform,
             escapedPlatform +
-                #"(?i)\s+(?:hesab(?:ı|i|ının|inin)?\s+|profil(?:i)?\s+)?(?:@)?([A-Z0-9._]{2,})"#
+                "\\s+(?:hesab(?:ı|i|ının|inin)?\\s+|profil(?:i)?\\s+)?(?:@)?([A-Za-z0-9._]{2,})"
         ]
 
         for pattern in patterns {
             guard
                 let regex = try? NSRegularExpression(
-                    pattern: pattern
+                    pattern: pattern,
+                    options: [.caseInsensitive]
                 )
             else {
                 continue
