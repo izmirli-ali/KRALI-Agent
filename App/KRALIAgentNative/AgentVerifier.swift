@@ -17,8 +17,21 @@ struct AgentVerificationSnapshot {
 struct AgentVerifier {
     func verify(
         decision: AgentDecision,
+        currentUserInput: String,
+        goal: AgentGoalProfile,
         snapshot: AgentVerificationSnapshot
     ) -> AgentVerificationResult {
+        if let mismatch = alignmentMismatch(
+            decision: decision,
+            currentUserInput: currentUserInput,
+            goal: goal
+        ) {
+            return attention(
+                mismatch,
+                fallback: "Mevcut kullanıcı girdisinden hedefi yeniden türet; önceki turun goal / plan state'ini bu tura taşıma."
+            )
+        }
+
         switch decision.intent {
         case .fileSearch:
             guard snapshot.hasWorkspace else {
@@ -263,6 +276,69 @@ struct AgentVerifier {
                 fallback: nil
             )
         }
+    }
+
+    private func alignmentMismatch(
+        decision: AgentDecision,
+        currentUserInput: String,
+        goal: AgentGoalProfile
+    ) -> String? {
+        let input = normalize(currentUserInput)
+
+        if decision.intent == .fileSearch ||
+           decision.intent == .compoundFileTask {
+            guard looksLikeFileSearch(input) else {
+                return "Doğrulama durduruldu: seçilen dosya arama hedefi mevcut kullanıcı girdisiyle uyuşmuyor."
+            }
+        }
+
+        if decision.intent == .remember,
+           !goal.outcomes.contains(.remember) {
+            return "Doğrulama durduruldu: çalışma kuralı isteği memory hedefi olarak çözümlenmedi."
+        }
+
+        if goal.outcomes.contains(.remember),
+           decision.intent != .remember {
+            return "Doğrulama durduruldu: memory hedefi farklı bir eski intent ile eşleşti."
+        }
+
+        if decision.intent == .general,
+           goal.outcomes.contains(.locate),
+           !looksLikeFileSearch(input) {
+            return "Doğrulama durduruldu: mevcut cümle dosya araması istemediği halde eski bir locate hedefi taşındı."
+        }
+
+        return nil
+    }
+
+    private func looksLikeFileSearch(_ text: String) -> Bool {
+        let actions = [
+            "bul", "ara", "göster", "goster", "listele", "nerede",
+            "hangileri", "neler", "ne var", "incele", "getir",
+            "çıkar", "cikar", "finder'da", "finderda"
+        ]
+        let targets = [
+            "dosya", "video", "çekim", "cekim", "pdf", "görsel",
+            "gorsel", "resim", "fotoğraf", "fotograf", "proje",
+            "belge", "doküman", "dokuman", "logo", "klasör",
+            "klasor", "ekran görünt", "ekran gorunt", "ekran resmi"
+        ]
+
+        return containsAny(text, actions) &&
+            containsAny(text, targets)
+    }
+
+    private func normalize(_ text: String) -> String {
+        text
+            .lowercased(with: Locale(identifier: "tr_TR"))
+            .trimmingCharacters(in: .whitespacesAndNewlines)
+    }
+
+    private func containsAny(
+        _ text: String,
+        _ values: [String]
+    ) -> Bool {
+        values.contains { text.contains($0) }
     }
 
     private func attention(
