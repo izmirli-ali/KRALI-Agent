@@ -579,7 +579,9 @@ struct ContentView: View {
 
                 if !engine.capabilityLearningPlans.isEmpty ||
                    !engine.capabilityLearningBacklog.isEmpty ||
-                   !engine.learningQueueJobs.isEmpty ||
+                   engine.learningQueueJobs.contains(
+                       where: { !$0.state.isTerminal }
+                   ) ||
                    engine.developerAgentStatus.shouldShowLearningStatus {
                     sectionTitle("Öğrenme")
 
