@@ -92,6 +92,9 @@ CLINE_BIN="$(command -v cline || true)"
 PROVIDER="${KRALI_DEV_PROVIDER:-openai-codex}"
 MODEL="${KRALI_DEV_MODEL:-}"
 CLINE_SETTINGS="${CLINE_PROVIDER_SETTINGS_PATH:-$HOME/.cline/data/settings/providers.json}"
+USE_SDK_FALLBACK=0
+SDK_HOST="$STATUS_DIR/cline-sdk-host"
+NATIVE_CLINE_BINARY=""
 
 cline_probe() {
     CLINE_PROBE_OUTPUT=""
@@ -108,6 +111,76 @@ cline_probe() {
     fi
 
     return 1
+}
+
+find_native_cline_binary() {
+    NPM_ROOT="$("$NPM_BIN" root -g 2>/dev/null || true)"
+    CANDIDATES=(
+        "$NPM_ROOT/@cline/cli-darwin-arm64/bin/cline"
+        "$NPM_ROOT/cline/bin/.cline"
+    )
+
+    for candidate in "${CANDIDATES[@]}"; do
+        if [ -n "$candidate" ] && [ -f "$candidate" ]; then
+            NATIVE_CLINE_BINARY="$candidate"
+            return 0
+        fi
+    done
+
+    return 1
+}
+
+diagnose_native_cline_platform() {
+    if [ "$CLINE_PROBE_EXIT" -ne 137 ]; then
+        return 1
+    fi
+
+    if [ "$(/usr/bin/uname -s 2>/dev/null || true)" != "Darwin" ]; then
+        return 1
+    fi
+
+    if ! find_native_cline_binary; then
+        echo "⚠️ Cline SIGKILL/137 alıyor ancak native binary yolu bulunamadı." | tee -a "$LOG"
+        return 1
+    fi
+
+    echo "Native Cline binary: $NATIVE_CLINE_BINARY" | tee -a "$LOG"
+    /usr/bin/file "$NATIVE_CLINE_BINARY" >>"$LOG" 2>&1 || true
+    /usr/bin/codesign -dv --verbose=4 "$NATIVE_CLINE_BINARY" >>"$LOG" 2>&1 || true
+
+    SPCTL_OUTPUT="$(/usr/sbin/spctl --assess --type execute "$NATIVE_CLINE_BINARY" 2>&1)"
+    SPCTL_EXIT=$?
+    echo "spctl exit=$SPCTL_EXIT • $SPCTL_OUTPUT" | tee -a "$LOG"
+
+    # macOS SIGKILL/137 at process start is a platform-level native binary
+    # failure. A rejected/invalid spctl result makes that diagnosis explicit.
+    if [ "$SPCTL_EXIT" -ne 0 ] ||
+       echo "$SPCTL_OUTPUT" | grep -Eqi 'invalid signature|rejected|not notarized|source=no usable signature'; then
+        return 0
+    fi
+
+    # Even if spctl output changes across macOS versions, immediate 137 on
+    # the native binary is not a task/prompt failure. Prefer the Node SDK
+    # surface instead of reinstalling the same native artifact forever.
+    return 0
+}
+
+prepare_sdk_fallback() {
+    write_status "sdk_fallback_preparing|Cline native CLI platform hatası nedeniyle Node SDK fallback hazırlanıyor"
+
+    mkdir -p "$SDK_HOST"
+    if [ ! -f "$SDK_HOST/package.json" ]; then
+        printf '%s\n' '{"private":true,"type":"module"}' > "$SDK_HOST/package.json"
+    fi
+
+    if [ ! -d "$SDK_HOST/node_modules/@cline/sdk" ]; then
+        echo "Cline SDK kuruluyor: @cline/sdk" | tee -a "$LOG"
+        if ! "$NPM_BIN" --prefix "$SDK_HOST" install @cline/sdk@latest >>"$LOG" 2>&1; then
+            return 1
+        fi
+    fi
+
+    return 0
 }
 
 repair_cline() {
@@ -150,15 +223,23 @@ if ! cline_probe; then
     echo "⚠️ Cline health probe başarısız. exit=$CLINE_PROBE_EXIT output=$CLINE_PROBE_OUTPUT" | tee -a "$LOG"
 
     if ! repair_cline; then
-        write_status "setup_cline_repair|Cline CLI otomatik onarılamadı; kurulum logu incelenmeli"
-        echo "❌ Cline CLI otomatik onarılamadı." | tee -a "$LOG"
-        exit 11
+        if diagnose_native_cline_platform; then
+            USE_SDK_FALLBACK=1
+            write_status "provider_platform_bug|Cline native CLI macOS tarafından SIGKILL ile engellendi; SDK fallback kullanılacak"
+            echo "🧩 Native Cline platform hatası sınıflandırıldı; Node SDK fallback'e geçiliyor." | tee -a "$LOG"
+        else
+            write_status "setup_cline_repair|Cline CLI otomatik onarılamadı; kurulum logu incelenmeli"
+            echo "❌ Cline CLI otomatik onarılamadı." | tee -a "$LOG"
+            exit 11
+        fi
     fi
 fi
 
-echo "Cline version: $CLINE_PROBE_OUTPUT" | tee -a "$LOG"
-echo "Cline doctor:" | tee -a "$LOG"
-"$CLINE_BIN" doctor >>"$LOG" 2>&1 || true
+if [ "$USE_SDK_FALLBACK" -eq 0 ]; then
+    echo "Cline version: $CLINE_PROBE_OUTPUT" | tee -a "$LOG"
+    echo "Cline doctor:" | tee -a "$LOG"
+    "$CLINE_BIN" doctor >>"$LOG" 2>&1 || true
+fi
 
 if [ "$PROVIDER" = "openai-codex" ]; then
     CLINE_AUTH_STATE="$("$NODE_BIN" - "$CLINE_SETTINGS" "$PROVIDER" <<'NODE'
@@ -469,16 +550,36 @@ CLINE_ARGS=(
 CLINE_RUN_LOG="$LOG_DIR/KRALI-Developer-Agent-Cline-$STAMP.log"
 
 CLINE_STARTED_AT="$(date +%s)"
-(
-    cd "$WORKTREE" &&
-    "$CLINE_BIN" "${CLINE_ARGS[@]}" "$(cat "$PROMPT_FILE")"
-) >"$CLINE_RUN_LOG" 2>&1
-CLINE_EXIT=$?
+
+if [ "$USE_SDK_FALLBACK" -eq 1 ]; then
+    if prepare_sdk_fallback; then
+        write_status "sdk_fallback_running|$GAP_LABEL ClineCore SDK üzerinden öğreniliyor|$BRANCH|$WORKTREE"
+        KRALI_CLINE_SDK_HOST="$SDK_HOST" \
+        KRALI_WORKTREE="$WORKTREE" \
+        KRALI_PROMPT_FILE="$PROMPT_FILE" \
+        KRALI_CLINE_SETTINGS="$CLINE_SETTINGS" \
+        KRALI_DEV_MODEL="$MODEL" \
+        "$NODE_BIN" "$ROOT/Scripts/cline-sdk-fallback.mjs" >"$CLINE_RUN_LOG" 2>&1
+        CLINE_EXIT=$?
+    else
+        printf '%s\n' "KRALI SDK fallback kurulamadı." >"$CLINE_RUN_LOG"
+        CLINE_EXIT=20
+    fi
+else
+    (
+        cd "$WORKTREE" &&
+        "$CLINE_BIN" "${CLINE_ARGS[@]}" "$(cat "$PROMPT_FILE")"
+    ) >"$CLINE_RUN_LOG" 2>&1
+    CLINE_EXIT=$?
+fi
+
 CLINE_DURATION="$(( $(date +%s) - CLINE_STARTED_AT ))"
 
 cat "$CLINE_RUN_LOG" >>"$LOG"
 
-if [ "$CLINE_EXIT" -eq 137 ] && [ "$GAP_MODE" = "gap" ]; then
+if [ "$CLINE_EXIT" -eq 137 ] &&
+   [ "$GAP_MODE" = "gap" ] &&
+   [ "$USE_SDK_FALLBACK" -eq 0 ]; then
     echo "⚠️ Cline SIGKILL/137 aldı; ultra-light retry deneniyor." | tee -a "$LOG"
     write_status "retrying|Cline kaynak baskısı nedeniyle daha hafif modda yeniden deneniyor|$BRANCH|$WORKTREE"
 
@@ -508,7 +609,7 @@ if [ "$CLINE_EXIT" -ne 0 ]; then
 
     CLINE_ERROR="$(
         tail -n 80 "$ERROR_SOURCE" 2>/dev/null |
-        grep -Eai 'auth|oauth|error|failed|provider|model|login|sign in|killed|memory|resource|unknown option|invalid option' |
+        grep -Eai 'auth|oauth|error|failed|provider|model|login|sign in|killed|memory|resource|unknown option|invalid option|sdk fallback|exception|signature|gatekeeper|spctl' |
         tail -n 1 |
         tr '\n|' '  ' |
         sed -E 's/[[:space:]]+/ /g; s/^ //; s/ $//' |
