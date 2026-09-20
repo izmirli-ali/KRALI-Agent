@@ -11,6 +11,45 @@ struct DeveloperAgentStatus: Hashable {
         state == "build_failed"
     }
 
+    var isLearningActive: Bool {
+        [
+            "learning",
+            "running",
+            "retrying",
+            "verifying"
+        ].contains(state)
+    }
+
+    var shouldShowLearningStatus: Bool {
+        isLearningActive ||
+        [
+            "ready_for_review",
+            "build_failed",
+            "failed"
+        ].contains(state)
+    }
+
+    var learningStageTitle: String {
+        switch state {
+        case "learning":
+            return "Öğreniyor"
+        case "running":
+            return "Analiz ediyor"
+        case "retrying":
+            return "Daha hafif modda tekrar deniyor"
+        case "verifying":
+            return "Adayı doğruluyor"
+        case "ready_for_review":
+            return "Öğrenme adayı hazır"
+        case "build_failed":
+            return "Aday doğrulanamadı"
+        case "failed":
+            return "Öğrenme durdu"
+        default:
+            return "Öğrenme"
+        }
+    }
+
     var isSetupRequired: Bool {
         [
             "setup_required",
