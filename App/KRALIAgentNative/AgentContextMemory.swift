@@ -66,7 +66,8 @@ struct AgentContextMemoryStore {
         ) ?? []
 
         return decoded.filter {
-            !isLowValueFallback($0.summary)
+            !isLowValueFallback($0.summary) &&
+            !isLegacyMisroutedRuleTask($0)
         }
     }
 
@@ -402,6 +403,38 @@ struct AgentContextMemoryStore {
             Array(contextual)
         )
         .map { $0.entry }
+    }
+
+    private func isLegacyMisroutedRuleTask(
+        _ entry: AgentContextMemoryEntry
+    ) -> Bool {
+        guard entry.kind != .userRule else {
+            return false
+        }
+
+        let input = normalize(entry.userInput ?? "")
+        let summary = normalize(entry.summary)
+
+        let looksLikeWorkflowRule =
+            input.contains("calisma bicimini") ||
+            input.contains("çalışma biçimini") ||
+            input.contains("calisma seklini") ||
+            input.contains("çalışma şeklini")
+
+        let containsScopeBoundary =
+            input.contains("baska markalara") ||
+            input.contains("başka markalara") ||
+            input.contains("otomatik uygulama")
+
+        let looksLikeFileSearchReply =
+            summary.contains("eslesme buldum") ||
+            summary.contains("eşleşme buldum") ||
+            summary.contains("finder'da") ||
+            summary.contains("finderda")
+
+        return looksLikeWorkflowRule &&
+            containsScopeBoundary &&
+            looksLikeFileSearchReply
     }
 
     private func trimmed(
