@@ -887,6 +887,10 @@ actor AgentDesktopControl {
     private func visuallyForeground(
         _ candidate: ApplicationCandidate
     ) async -> Bool {
+        guard #available(macOS 15.0, *) else {
+            return false
+        }
+
         do {
             let content =
                 try await SCShareableContent
