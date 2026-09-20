@@ -1261,7 +1261,24 @@ actor AgentArena {
                 )
 
                 selectedMission = localMission
-                provider = "Apple Foundation Models"
+                provider =
+                    localMission.steps.contains(
+                        where: {
+                            $0.operation ==
+                                "semantic.fallback"
+                        }
+                    )
+                        ? "Local Contract Repair"
+                        : (
+                            localMission.steps.contains(
+                                where: {
+                                    $0.operation ==
+                                        "capability.contract"
+                                }
+                            )
+                                ? "Apple + Contract Repair"
+                                : "Apple Foundation Models"
+                        )
                 diagnostics = localDiagnostics
             }
 
