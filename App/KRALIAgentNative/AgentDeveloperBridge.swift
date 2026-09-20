@@ -80,7 +80,9 @@ struct DeveloperAgentStatus: Hashable {
             "sdk_tool_completed",
             "sdk_session_ended",
             "sdk_session_completed",
-            "provider_platform_bug"
+            "provider_platform_bug",
+            "recovering_candidate",
+            "candidate_recovered"
         ].contains(state)
     }
 
@@ -93,6 +95,9 @@ struct DeveloperAgentStatus: Hashable {
             "sdk_failed",
             "sdk_watchdog_timeout",
             "stale_run",
+            "recovered_candidate_ready",
+            "recovered_candidate_build_failed",
+            "candidate_recovery_failed",
             "failed"
         ].contains(state)
     }
@@ -149,6 +154,16 @@ struct DeveloperAgentStatus: Hashable {
             return "SDK öğrenmesi durdu"
         case "sdk_watchdog_timeout":
             return "SDK oturumu takıldı"
+        case "recovering_candidate":
+            return "Önceki öğrenme adayı kurtarılıyor"
+        case "candidate_recovered":
+            return "Aday GitHub'a yedeklendi"
+        case "recovered_candidate_ready":
+            return "Kurtarılan öğrenme adayı hazır"
+        case "recovered_candidate_build_failed":
+            return "Kurtarılan aday build geçmedi"
+        case "candidate_recovery_failed":
+            return "Aday kurtarma başarısız"
         case "stale_run":
             return "Önceki öğrenme oturumu"
         case "failed":
@@ -535,6 +550,14 @@ struct AgentDeveloperBridge {
             )
     }
 
+    var recoveryScriptURL: URL {
+        fileManager.homeDirectoryForCurrentUser
+            .appendingPathComponent(
+                "Developer/KRALI-Agent/Scripts/recover-developer-candidate.command",
+                isDirectory: false
+            )
+    }
+
     func readStatus() -> DeveloperAgentStatus {
         guard
             let text = try? String(
@@ -669,6 +692,58 @@ struct AgentDeveloperBridge {
             atomically: true,
             encoding: .utf8
         )
+    }
+
+    func recoverPendingCandidate() async -> DeveloperAgentStatus? {
+        let current = readStatus()
+
+        guard
+            current.worktree != nil,
+            current.branch != nil,
+            fileManager.fileExists(
+                atPath: recoveryScriptURL.path
+            )
+        else {
+            return nil
+        }
+
+        let scriptPath =
+            recoveryScriptURL.path
+
+        _ = await Task.detached(
+            priority: .utility
+        ) {
+            let process = Process()
+            let pipe = Pipe()
+
+            process.executableURL = URL(
+                fileURLWithPath: "/bin/zsh"
+            )
+            process.arguments = [
+                scriptPath
+            ]
+            process.standardOutput = pipe
+            process.standardError = pipe
+
+            do {
+                try process.run()
+                process.waitUntilExit()
+                _ = pipe.fileHandleForReading
+                    .readDataToEndOfFile()
+            } catch {
+                return
+            }
+        }
+        .value
+
+        let recovered = readStatus()
+
+        if recovered.state != current.state ||
+           recovered.message != current.message {
+            return recovered
+        }
+
+        return nil
     }
 
     func run() async -> DeveloperAgentStatus {
