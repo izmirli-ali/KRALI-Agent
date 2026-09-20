@@ -159,6 +159,9 @@ actor AgentLocalIntelligence {
                 mission.steps.count <= 10,
                 mission.steps.allSatisfy({
                     knownIDs.contains($0.capabilityID)
+                }),
+                mission.requiredCapabilityIDs.allSatisfy({
+                    knownIDs.contains($0)
                 }) else {
                     return nil
                 }
