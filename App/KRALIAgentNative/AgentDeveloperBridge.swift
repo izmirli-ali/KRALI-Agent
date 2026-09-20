@@ -326,16 +326,20 @@ struct DeveloperAgentStatus: Hashable {
 
         case "sdk_session_starting",
              "sdk_session_running",
+             "local_agent_starting",
+             "local_agent_running",
              "learning",
              "running":
             return "3–7 dk"
 
         case "sdk_tools_running",
-             "sdk_tool_completed":
+             "sdk_tool_completed",
+             "local_agent_tool":
             return "2–6 dk"
 
         case "sdk_session_ended",
              "sdk_session_completed",
+             "local_agent_completed",
              "verifying":
             return "1–3 dk"
 
