@@ -253,3 +253,10 @@ Birincisi, standalone bilgi karşılaştırması için geçmişte aynı soruya a
 Aynı kullanıcı isteği daha sonra daha kaliteli bir `research` kaydıyla yeniden çalıştırılırsa, eski `task` kaydı türü farklı olsa bile duplicate kabul edilip yenisiyle değiştirilir. Böylece eski yanlış cevapların kalıcı bağlamda yan yana birikmesi azaltılır.
 
 Training Lab'e `knowledge-comparison-with-stale-memory` regression senaryosu eklenir; eski eşleşen memory mevcut olsa bile standalone Sony/Fuji karşılaştırmasının Research + Verify rotasına gitmesi zorunlu tutulur.
+
+
+**v0.8.4 transformation fidelity:** 0.8.3 Mentor turu, topical recall ve stale-memory freshness düzeltmelerinin çalıştığını doğruladı: Training Lab 22/22, Live Research Eval 2/2 geçti; Sony/Fuji karşılaştırması yeniden Research → Verify rotasına gitti ve Estafiz'e dönüşte Sony memory'si artık synthesis context'ine taşınmadı. Ancak yeni bir semantik hata ortaya çıktı: “birinci Reels fikrini 30 saniyelik çekim senaryosuna çevir” isteği `ideate` olarak modellenmişti. Apple yerel model bu nedenle tek mevcut fikri dönüştürmek yerine üç yeni fikir üretti.
+
+0.8.4'te `AgentGoalOutcome.transform` ayrı bir hedef türü olur. “senaryoya çevir / çekim planına dönüştür / uyarla” gibi bağlamsal dönüşümler artık `ideate` değildir. Planner, `İstenen formata dönüştür` reasoning adımı üretir ve açıkça kullanıcının referans verdiği öğeyi seçip yeni alternatifler yaratmadan istenen süre/sayı/yapıya dönüştürme sözleşmesi taşır. Local ve Subscription synthesis prompt'ları da “birincisini / ikincisini / sonuncusunu” gibi sıra referanslarını önceki bağlamdan çözmek ve dönüşüm görevlerinde alternatif fikir listesi üretmemek üzere sıkılaştırılır.
+
+Engine, `transform` hedefini gerçek synthesis gerektiren hedef olarak değerlendirir; synthesis başarısızsa hedef tamamlandı sayılmaz. Training Lab'deki `context-memory-transform` senaryosu artık `transform` outcome'unu ve `İstenen formata dönüştür` plan adımını zorunlu kılar.
