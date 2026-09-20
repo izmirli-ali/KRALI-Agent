@@ -157,11 +157,11 @@ actor AgentSubscriptionIntelligence {
         process.arguments = [
             "--json",
             "--plan",
-            "--auto-approve", "false",
+            "--auto-approve", "true",
             "--provider", "openai-codex",
             "--thinking", "medium",
-            "--retries", "2",
-            "--timeout", "300",
+            "--retries", "1",
+            "--timeout", "90",
             "--cwd", workspace.path,
             "--system", systemPrompt,
             prompt
