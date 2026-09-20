@@ -500,9 +500,9 @@ struct AgentContextMemoryStore {
         let hasInlineSource =
             value.contains("“") ||
             value.contains("”") ||
-            value.contains(""") ||
+            value.contains("\"") ||
             value.contains(": “") ||
-            value.contains(": "")
+            value.contains(": \"")
 
         return asksRewrite && hasInlineSource
     }
