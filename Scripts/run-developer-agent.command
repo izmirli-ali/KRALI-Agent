@@ -114,9 +114,43 @@ NODE
 )"
 
     if [ "$CLINE_AUTH_STATE" != "ready" ]; then
-        write_status "setup_cline_auth|ChatGPT Subscription için Cline OAuth doğrulaması gerekli|cline auth openai-codex"
-        echo "❌ Cline openai-codex OAuth hazır değil." | tee -a "$LOG"
-        echo "Terminal: cline auth openai-codex" | tee -a "$LOG"
+        AUTH_SCRIPT="$STATUS_DIR/cline-auth.command"
+
+        cat > "$AUTH_SCRIPT" <<EOF
+#!/bin/zsh
+export PATH="/opt/homebrew/bin:/usr/local/bin:$HOME/.npm-global/bin:/usr/bin:/bin:/usr/sbin:/sbin:\$PATH"
+
+echo ""
+echo "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
+echo " KRALİ • CLINE GİRİŞİ"
+echo "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
+echo ""
+echo "ChatGPT Subscription bağlantısı açılıyor..."
+echo "Tarayıcıda hesabınla giriş yap; tamamlanınca KRALİ geliştirmeye otomatik devam edecek."
+echo ""
+
+if "$CLINE_BIN" auth openai-codex; then
+    printf '%s\n' "auth_ready|Cline OAuth tamamlandı; Developer Agent yeniden başlatılıyor" > "$STATUS"
+    echo ""
+    echo "✅ Giriş tamamlandı. KRALİ Developer Agent yeniden başlatılıyor..."
+    /usr/bin/nohup /bin/zsh "$ROOT/Scripts/run-developer-agent.command" >>"$LOG" 2>&1 &
+else
+    printf '%s\n' "setup_cline_auth|Cline OAuth tamamlanamadı; tekrar giriş gerekiyor" > "$STATUS"
+    echo ""
+    echo "❌ Cline girişi tamamlanamadı."
+fi
+EOF
+
+        /bin/chmod +x "$AUTH_SCRIPT" 2>/dev/null || true
+        write_status "waiting_cline_auth|ChatGPT giriş ekranı otomatik açılıyor; girişten sonra Developer Agent devam edecek"
+
+        if /usr/bin/open -a Terminal "$AUTH_SCRIPT" >>"$LOG" 2>&1; then
+            echo "🔐 Cline OAuth Terminal penceresi otomatik açıldı." | tee -a "$LOG"
+        else
+            write_status "setup_cline_auth|Cline OAuth penceresi otomatik açılamadı|cline auth openai-codex"
+            echo "❌ Cline OAuth Terminal penceresi açılamadı." | tee -a "$LOG"
+        fi
+
         exit 11
     fi
 fi
