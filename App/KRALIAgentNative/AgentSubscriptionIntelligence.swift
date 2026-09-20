@@ -94,7 +94,6 @@ actor AgentSubscriptionIntelligence {
 
         let process = Process()
         let outputPipe = Pipe()
-        let errorPipe = Pipe()
 
         process.executableURL = URL(
             fileURLWithPath: clinePath
@@ -111,7 +110,7 @@ actor AgentSubscriptionIntelligence {
             prompt
         ]
         process.standardOutput = outputPipe
-        process.standardError = errorPipe
+        process.standardError = outputPipe
 
         var environment = ProcessInfo.processInfo.environment
         environment["PATH"] =
