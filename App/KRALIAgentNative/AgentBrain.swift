@@ -78,6 +78,8 @@ struct AgentDecision {
 }
 
 struct AgentBrain {
+    private let languageResolver =
+        AgentNaturalLanguageResolver()
     private let calendar = Calendar.autoupdatingCurrent
 
     func analyze(
@@ -327,6 +329,16 @@ struct AgentBrain {
                 proactiveSuggestion: nil,
                 usePreviousResults: false,
                 resultSelection: nil
+            )
+        }
+
+        if languageResolver.isSimpleOpenCommand(rawText) {
+            return decision(
+                intent: .general,
+                route: ["Core", "Intent", "Planner", "Desktop"],
+                goal: "İstenen uygulamayı aç veya öne getir",
+                plan: "Uygulama adını çöz, uygulamayı aç veya öne getir ve sonucu doğrula",
+                alternatives: []
             )
         }
 
