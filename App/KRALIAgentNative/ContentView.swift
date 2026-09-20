@@ -12,7 +12,11 @@ struct ContentView: View {
     var body: some View {
         HStack(spacing: 0) {
             ConversationSidebarView()
-                .frame(width: 238)
+                .frame(
+                    minWidth: 200,
+                    idealWidth: 228,
+                    maxWidth: 238
+                )
 
             Divider()
 
@@ -21,15 +25,15 @@ struct ContentView: View {
                 Divider()
                 chatPane
             }
-            .frame(minWidth: 620)
+            .frame(minWidth: 480)
 
             if inspectorVisible {
                 Divider()
 
                 sidePane
                     .frame(
-                        minWidth: 320,
-                        idealWidth: 360,
+                        minWidth: 280,
+                        idealWidth: 340,
                         maxWidth: 390
                     )
                     .transition(
