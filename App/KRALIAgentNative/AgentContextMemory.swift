@@ -190,7 +190,8 @@ struct AgentContextMemoryStore {
                 $0.kind == entry.kind &&
                 normalize($0.userInput ?? "") ==
                     normalize(entry.userInput ?? "") &&
-                !$0.userInput.map { $0.isEmpty }!
+                entry.userInput?.isEmpty == false &&
+                $0.userInput?.isEmpty == false
             }
         ) {
             updated.remove(at: duplicateIndex)
