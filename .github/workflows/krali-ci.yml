@@ -1,0 +1,38 @@
+name: KRALI CI
+
+on:
+  pull_request:
+  push:
+    branches:
+      - "krali-*"
+
+jobs:
+  validate:
+    runs-on: macos-15
+    timeout-minutes: 20
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Validate shell scripts
+        shell: bash
+        run: |
+          set -euo pipefail
+          for script in Scripts/*.command; do
+            echo "Checking $script"
+            /bin/zsh -n "$script"
+          done
+
+      - name: Compile KRALI without code signing
+        shell: bash
+        run: |
+          set -euo pipefail
+          xcodebuild \
+            -project App/KRALIAgentNative.xcodeproj \
+            -scheme KRALIAgentNative \
+            -configuration Debug \
+            -derivedDataPath .ci-build \
+            CODE_SIGNING_ALLOWED=NO \
+            CODE_SIGNING_REQUIRED=NO \
+            build
