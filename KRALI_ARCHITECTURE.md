@@ -226,3 +226,10 @@ Legacy `UserDefaults` çalışma kuralları ilk açılışta yapılandırılmı�
 Training Lab'e `context-memory-followup` regression senaryosu eklenir. Sosyal profil kelimeleri içeren yaratıcı follow-up'lar (`bu hesap için ... Reels fikri çıkar`) artık sırf “hesap/reels” geçti diye otomatik web araştırmasına zorlanmaz; ilgili önceki bağlam varsa context continuation olarak ele alınır.
 
 Aynı sürümde sağ sidebar 0.7.x geliştirme döneminden kalan debug kalabalığından temizlenir. Varsayılan görünüm yalnızca **Durum**, **Bağlam**, gerektiğinde **Kaynaklar**, **Öğrenme**, **Onay/sonuçlar** bölümlerini gösterir. Training Lab, Live Research Eval ve Developer Agent tek bir kapalı **Geliştirici araçları** disclosure alanına taşınır. Ayrı Active Route, raw activity feed, duplicate Mentor bridge, eski Local File Agent liste dökümleri, tam evidence dump ve release-note kartı varsayılan UI'dan kaldırılır. Mentor düğmesi üst çubukta tek yerde kalır.
+
+
+**v0.8.1 memory relevance + intent cleanup:** İlk gerçek 0.8.0 Mentor turu, görev hafızasının doğru Estafiz araştırmasını geri çağırdığını ve follow-up isteğinde web araştırmasını gereksiz yere tekrarlamadığını doğruladı. Ancak iki kalite açığı görüldü: `fikir çıkar` ifadesi Goal Interpreter tarafından `ideate` olarak sınıflandırılmıyordu ve ilgisiz varsayılan userRule kayıtları her recall'a düşük puanla sızabiliyordu.
+
+0.8.1'de Türkçe ideation kalıpları `fikir çıkar / fikri çıkar / fikirleri çıkar` biçimleriyle genişletilir. Structured memory relevance skorunda userRule artık salt türü nedeniyle taban puan almaz; yalnızca mevcut sorguyla gerçek token örtüşmesi varsa ek puan kazanır. Böylece görev bağlamı ile ilgisiz kalıcı kurallar synthesis prompt'una taşınmaz.
+
+Live Research Eval teknik probe'u da genel Türkçe sorgu yerine Apple Developer / Vision / AVFoundation odaklı resmi dokümantasyon sorgusuna geçirilir. Amaç değerlendirmeyi kolaylaştırmak değil, sağlayıcıların resmi teknik kaynakları bulma olasılığını yükseltip gerçek research pipeline regresyonunu daha kararlı ölçmektir.
