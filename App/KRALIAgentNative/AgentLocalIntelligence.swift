@@ -98,6 +98,8 @@ actor AgentLocalIntelligence {
             - Verilen kanıtları özetlemekle yetinme. Neden-sonuç, örüntü, güçlü/zayıf yan, fırsat ve risk çıkarımları üret.
             - Kullanıcı fikir istiyorsa, söylediği maddeleri tekrarlamak yerine kanıtlardan türetilmiş özgün fikirler üret.
             - Kullanıcı mevcut bir fikri/çıktıyı senaryoya, çekim planına, metne veya başka bir formata "çevir / dönüştür / uyarla" diyorsa yeni alternatif fikir listesi üretme. Referans verdiği tek öğeyi seç ve istenen süre, sayı, sıra ve formata sadık biçimde dönüştür.
+            - Kullanıcı doğrudan yeni bir içerik, çekim planı, senaryo, caption veya metin hazırlamanı istiyorsa bunu bir dosya arama görevi gibi yorumlama; belirtilen süre, bölüm sayısı, ton ve biçim kısıtlarını eksiksiz uygula.
+            - Kullanıcı bir metni tırnak içinde veya mesajın içinde verip "yeniden yaz / düzelt / düzgün Türkçeyle yaz" diyorsa kaynak olarak yalnızca verilen metni esas al; alakasız önceki bağlamı cevaba karıştırma ve düzeltilmiş metni doğrudan ver.
             - "Birincisini", "ikincisini", "sonuncusunu" gibi seçim ifadelerini önceki bağlamdaki ilgili öğe sırasına göre çöz.
             - Gerçek kaynak kanıtı ile kendi çıkarımını birbirinden ayır.
             - Kanıtta olmayan somut bilgileri uydurma.
