@@ -63,8 +63,15 @@ struct AgentFileQuery: Hashable, Sendable {
         !extensions.isEmpty
     }
 
+    var hasRetrievalSignal: Bool {
+        hasSearchAction ||
+        outputProjection != .defaultSummary ||
+        sortMode == .newestFirst ||
+        resultLimit != nil
+    }
+
     var isFileSearchRequest: Bool {
-        hasSearchAction &&
+        hasRetrievalSignal &&
         (
             scopeIsExplicit ||
             mentionsFileEntity ||
@@ -370,15 +377,31 @@ struct AgentFileQueryParser {
     ) -> AgentFileOutputProjection {
         let namesOnlyMarkers = [
             "sadece isim",
+            "sadece ismini",
+            "sadece isimlerini",
+            "sadece adini",
+            "sadece adlarini",
             "yalniz isim",
+            "yalnizca ismini",
+            "yalnizca isimlerini",
+            "yalnizca adini",
+            "yalnizca adlarini",
+            "yalniz ismini",
+            "yalniz isimlerini",
+            "yalniz adini",
+            "yalniz adlarini",
             "isimlerini listele",
             "ismini listele",
             "isimlerini goster",
             "ismini goster",
+            "isimlerini soyle",
+            "ismini soyle",
             "adlarini listele",
             "adini listele",
             "adlarini goster",
-            "adini goster"
+            "adini goster",
+            "adlarini soyle",
+            "adini soyle"
         ]
 
         return namesOnlyMarkers.contains(
