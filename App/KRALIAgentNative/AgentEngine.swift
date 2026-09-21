@@ -30,6 +30,7 @@ final class AgentEngine: ObservableObject {
     @Published var indexedFiles: [FileRecord] = []
     @Published var indexedFolders: [FolderRecord] = []
     @Published var pendingFileAction: PendingFileAction?
+    @Published var pendingTaskApproval: PendingTaskApproval?
     @Published var lastUndoAction: UndoFileAction?
     @Published var fileSearchResults: [FileRecord] = []
     @Published var folderSearchResults: [FolderRecord] = []
@@ -132,6 +133,10 @@ final class AgentEngine: ObservableObject {
     private var lastDecision: AgentDecision?
     private var activeLearningJobID: UUID?
     private var currentOutcomeFailureIsTransient = false
+    private var currentTaskInput = ""
+    private var approvedRuntimeStepIndexes = Set<Int>()
+    private var runtimeStepEvidence: [Int: String] = [:]
+    private var runtimeExecutedCapabilityIDs = Set<String>()
 
     init() {
         inspectorStateForwarder =
@@ -532,6 +537,7 @@ final class AgentEngine: ObservableObject {
         }
 
         resetTransientTaskStateForNewInput()
+        currentTaskInput = text
 
         let recalledContextMemories =
             contextMemoryStore.relevant(
@@ -3570,6 +3576,11 @@ final class AgentEngine: ObservableObject {
         currentSemanticPlannerProvider = nil
         currentTaskGraph = nil
         currentRuntimeTask = nil
+        pendingTaskApproval = nil
+        approvedRuntimeStepIndexes = []
+        runtimeStepEvidence = [:]
+        runtimeExecutedCapabilityIDs = []
+        currentTaskInput = ""
         taskGraphStatus = "Yeni görev için görev grafiği bekleniyor."
         currentProblemResolution = nil
         currentOutcomeResolution = nil
