@@ -1706,6 +1706,8 @@ final class AgentEngine: ObservableObject {
         if finalVerification.state == .attention &&
            currentCapabilityGaps.isEmpty &&
            !currentOutcomeFailureIsTransient &&
+           currentRuntimeTask?.state !=
+                .waitingForApproval &&
            inspectorState.debugIncident == nil &&
            lastFileSearchOutcome == nil {
             registerDebugIncident(
@@ -2329,24 +2331,12 @@ final class AgentEngine: ObservableObject {
                 )
 
             case "files.search":
-                let scopedSearchInput =
-                    [
-                        step.title,
-                        step.purpose,
-                        dependencyEvidence
-                    ]
-                    .filter {
-                        !$0.trimmingCharacters(
-                            in:
-                                .whitespacesAndNewlines
-                        ).isEmpty
-                    }
-                    .joined(separator: "\n")
-
                 let searchInput =
-                    scopedSearchInput.isEmpty
-                        ? userInput
-                        : scopedSearchInput
+                    semanticFileSearchInput(
+                        step: step,
+                        userInput:
+                            userInput
+                    )
 
                 let searchDecision =
                     semanticFileSearchDecision(
@@ -3108,6 +3098,111 @@ final class AgentEngine: ObservableObject {
         }
     }
 
+    private func semanticFileSearchInput(
+        step: AgentSemanticMissionStep,
+        userInput: String
+    ) -> String {
+        var parts: [String] = [
+            step.title,
+            step.operation
+        ]
+
+        let normalized =
+            normalizeSemanticText(
+                userInput
+            )
+
+        let portableConstraints = [
+            "masaustu", "desktop",
+            "indirilenler", "downloads",
+            "belgeler", "documents",
+            "bugun", "bugunku",
+            "dun", "dunku",
+            "en yeni", "en son",
+            "latest", "recent"
+        ]
+
+        for constraint in portableConstraints
+            where normalized.contains(
+                normalizeSemanticText(
+                    constraint
+                )
+            ) {
+            parts.append(
+                constraint
+            )
+        }
+
+        return parts
+            .filter {
+                !$0.trimmingCharacters(
+                    in:
+                        .whitespacesAndNewlines
+                ).isEmpty
+            }
+            .joined(separator: " ")
+    }
+
+    private func semanticRelativeDateRange(
+        from normalizedCorpus: String
+    ) -> DateInterval? {
+        let calendar = Calendar.current
+        let now = Date()
+        let today =
+            calendar.startOfDay(
+                for: now
+            )
+
+        if containsSemanticAny(
+            normalizedCorpus,
+            [
+                "bugun",
+                "bugunku"
+            ]
+        ) {
+            guard let tomorrow =
+                calendar.date(
+                    byAdding: .day,
+                    value: 1,
+                    to: today
+                )
+            else {
+                return nil
+            }
+
+            return DateInterval(
+                start: today,
+                end: tomorrow
+            )
+        }
+
+        if containsSemanticAny(
+            normalizedCorpus,
+            [
+                "dun",
+                "dunku"
+            ]
+        ) {
+            guard
+                let yesterday =
+                    calendar.date(
+                        byAdding: .day,
+                        value: -1,
+                        to: today
+                    )
+            else {
+                return nil
+            }
+
+            return DateInterval(
+                start: yesterday,
+                end: today
+            )
+        }
+
+        return nil
+    }
+
     private func semanticFileSearchDecision(
         mission: AgentSemanticMission,
         userInput: String
@@ -3164,14 +3259,21 @@ final class AgentEngine: ObservableObject {
             corpus,
             [
                 "son cekim", "en yeni", "en son", "latest",
-                "recent", "dunku", "bugunku", "yeni cekim"
+                "recent", "dunku", "bugunku", "yeni cekim",
+                "bugun", "dun"
             ]
         )
+
+        let relativeDateRange =
+            semanticRelativeDateRange(
+                from: corpus
+            )
 
         return AgentDecision(
             intent: .fileSearch,
             target: target,
-            dateRange: nil,
+            dateRange:
+                relativeDateRange,
             dateField: .either,
             sortMode: newest ? .newestFirst : .relevance,
             route: ["Core", "Goal", "Context", "Files"],
