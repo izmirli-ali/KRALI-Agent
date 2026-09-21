@@ -1,23 +1,3 @@
-KRALI_LOCAL_STAGE local_agent_running • Uygulama içi iş akışı (app.workflow) yerel model çalışıyor • adım 6/10
-KRALI_LOCAL_STAGE local_agent_tool • Uygulama içi iş akışı (app.workflow) araç çalışıyor: apply_patch
-KRALI_LOCAL_STAGE local_agent_running • Uygulama içi iş akışı (app.workflow) yerel model çalışıyor • adım 7/10
-KRALI_LOCAL_STAGE local_agent_request_retry • Uygulama içi iş akışı (app.workflow) model isteği zaman aşımına uğradı; mevcut context korunarak retry 1/2
-Uygulama içi iş akışı (app.workflow) native local agent toplam zaman sınırına ulaştı.
-KRALI_LOCAL_STAGE local_agent_starting • Uygulama içi iş akışı (app.workflow) native Ollama agent başlatılıyor: devstral:24b
-KRALI_LOCAL_STAGE local_agent_running • Uygulama içi iş akışı (app.workflow) yerel model çalışıyor • adım 1/10
-KRALI_LOCAL_STAGE local_agent_tool • Uygulama içi iş akışı (app.workflow) araç çalışıyor: search_codebase
-KRALI_LOCAL_STAGE local_agent_running • Uygulama içi iş akışı (app.workflow) yerel model çalışıyor • adım 2/10
-KRALI_LOCAL_STAGE local_agent_tool • Uygulama içi iş akışı (app.workflow) araç çalışıyor: read_file
-KRALI_LOCAL_STAGE local_agent_running • Uygulama içi iş akışı (app.workflow) yerel model çalışıyor • adım 3/10
-KRALI_LOCAL_STAGE local_agent_tool • Uygulama içi iş akışı (app.workflow) araç çalışıyor: read_file
-KRALI_LOCAL_STAGE local_agent_running • Uygulama içi iş akışı (app.workflow) yerel model çalışıyor • adım 4/10
-KRALI_LOCAL_STAGE local_agent_tool • Uygulama içi iş akışı (app.workflow) araç çalışıyor: read_file
-KRALI_LOCAL_STAGE local_agent_implementation_phase • Uygulama içi iş akışı (app.workflow) inspection bütçesi tamamlandı • implementation zorunlu • 4/4
-KRALI_LOCAL_STAGE local_agent_running • Uygulama içi iş akışı (app.workflow) yerel model çalışıyor • adım 5/10
-KRALI_LOCAL_STAGE local_agent_tool • Uygulama içi iş akışı (app.workflow) araç çalışıyor: read_file
-KRALI_LOCAL_STAGE local_agent_implementation_required • Uygulama içi iş akışı (app.workflow) inspection aracı reddedildi • implementation fazı aktif • read_file
-KRALI_LOCAL_STAGE local_agent_running • Uygulama içi iş akışı (app.workflow) yerel model çalışıyor • adım 6/10
-KRALI_LOCAL_STAGE local_agent_tool • Uygulama içi iş akışı (app.workflow) araç çalışıyor: apply_patch
 KRALI_LOCAL_STAGE local_agent_running • Uygulama içi iş akışı (app.workflow) yerel model çalışıyor • adım 7/10
 KRALI_LOCAL_STAGE local_agent_request_retry • Uygulama içi iş akışı (app.workflow) model isteği zaman aşımına uğradı; mevcut context korunarak retry 1/2
 Uygulama içi iş akışı (app.workflow) native local agent toplam zaman sınırına ulaştı.
@@ -118,3 +98,23 @@ KRALI_LOCAL_STAGE local_agent_request_retry • Uygulama kontrolü (desktop.app)
 Uygulama kontrolü (desktop.app) native local agent toplam zaman sınırına ulaştı.
 Deleted branch krali-dev-agent/20260921-234950 (was 87468c8).
 ❌ Native yerel Developer Agent durdu: Uygulama kontrolü (desktop.app) native local agent toplam zaman sınırına ulaştı.
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+ KRALİ DEVELOPER AGENT
+ 20260921-235811
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+⚠️ Global Node.js v26 Cline bağımlılıklarıyla uyumlu değil; izole Node 22 runtime hazırlanıyor.
+✅ Developer Agent runtime: v22.23.2
+⚡ Tool-capable model cache kullanılıyor: devstral:24b • yaş=3831s
+Yerel model seçimi: devstral:24b • RAM≈24GB
+✅ Yerel Developer AI hazır + tool-call doğrulandı: devstral:24b
+From https://github.com/izmirli-ali/KRALI-Agent
+ * branch            main       -> FETCH_HEAD
+Already up to date.
+Learning Queue job brief bulundu; mutable Mentor latest yerine immutable job kullanılacak.
+Preparing worktree (new branch 'krali-dev-agent/20260921-235811')
+branch 'krali-dev-agent/20260921-235811' set up to track 'origin/main'.
+HEAD is now at f1cc7bc Sync KRALI mentor diagnostics
+Developer prompt mode: gap • 4262 bytes
+KRALI_LOCAL_STAGE local_agent_starting • Uygulama kontrolü (desktop.app) native Ollama agent başlatılıyor: devstral:24b
+KRALI_LOCAL_STAGE local_agent_running • Uygulama kontrolü (desktop.app) yerel model çalışıyor • adım 1/10
