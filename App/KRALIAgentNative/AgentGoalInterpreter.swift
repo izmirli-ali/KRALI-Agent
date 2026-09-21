@@ -383,12 +383,34 @@ struct AgentGoalInterpreter {
             outcomes.subtracting([.converse, .explain, .ideate, .compose, .transform]).count > 1 ||
             decision.intent == .compoundFileTask
 
+        let foundationalCapabilityIDs =
+            Set([
+                "core.reasoning",
+                "context.local"
+            ])
+
+        let toolCapabilityIDs =
+            capabilityIDs.subtracting(
+                foundationalCapabilityIDs
+            )
+
+        let preservedUserGoal =
+            rawText.trimmingCharacters(
+                in: .whitespacesAndNewlines
+            )
+
+        let goalSummary =
+            toolCapabilityIDs.isEmpty &&
+            !preservedUserGoal.isEmpty
+                ? preservedUserGoal
+                : summary(
+                    for: decision.target,
+                    outcomes: outcomes,
+                    fallback: decision.goal
+                )
+
         return AgentGoalProfile(
-            summary: summary(
-                for: decision.target,
-                outcomes: outcomes,
-                fallback: decision.goal
-            ),
+            summary: goalSummary,
             outcomes: outcomes,
             requiredCapabilityIDs: capabilityIDs,
             isCompound: isCompound
