@@ -1,5 +1,3 @@
- * branch            main       -> FETCH_HEAD
-Already up to date.
 Learning Queue job brief bulundu; mutable Mentor latest yerine immutable job kullanılacak.
 Preparing worktree (new branch 'krali-dev-agent/20260922-004509')
 branch 'krali-dev-agent/20260922-004509' set up to track 'origin/main'.
@@ -118,3 +116,5 @@ KRALI local tool probe: native tool_call görülmedi • text={"name": "krali_to
 KRALI_LOCAL_STAGE local_agent_resumed • Uygulama kontrolü (desktop.app) process-level checkpoint yüklendi • evidence=10 • recordedPhase=implementation • effectivePhase=implementation • candidateMatch=false
 KRALI_LOCAL_STAGE local_agent_starting • Uygulama kontrolü (desktop.app) native Ollama agent başlatılıyor: devstral:24b • checkpoint resume
 KRALI_LOCAL_STAGE local_agent_running • Uygulama kontrolü (desktop.app) yerel model çalışıyor • adım 1/10
+KRALI_LOCAL_STAGE local_agent_request_retry • Uygulama kontrolü (desktop.app) model isteği zaman aşımına uğradı; mevcut context korunarak retry 1/2
+KRALI_LOCAL_STAGE local_agent_running • Uygulama kontrolü (desktop.app) yerel model çalışıyor • adım 2/10
