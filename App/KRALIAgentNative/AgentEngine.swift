@@ -136,6 +136,8 @@ final class AgentEngine: ObservableObject {
     private let conversationStore = ConversationStore()
     private let workspaceIndexer = AgentWorkspaceIndexer()
     private let diagnosticsLoader = AgentDiagnosticsLoader()
+    private let workspaceIndexFreshness: TimeInterval = 45
+    private var workspaceIndexUpdatedAt: Date?
     private var lastDecision: AgentDecision?
     private var activeLearningJobID: UUID?
 
@@ -4408,6 +4410,7 @@ final class AgentEngine: ObservableObject {
         pendingFileAction = nil
         lastUndoAction = nil
         workspaceIndexReady = false
+        workspaceIndexUpdatedAt = nil
         indexSelectedFolder()
 
         log("Çalışma klasörü seçildi: \(url.lastPathComponent)")
@@ -4428,6 +4431,7 @@ final class AgentEngine: ObservableObject {
         indexedFiles = snapshot.files
         indexedFolders = snapshot.folders
         workspaceIndexReady = true
+        workspaceIndexUpdatedAt = Date()
 
         if snapshot.reachedSafetyLimit {
             log(
@@ -4452,7 +4456,11 @@ final class AgentEngine: ObservableObject {
             return
         }
 
-        guard !workspaceIndexReady else {
+        if workspaceIndexReady,
+           let workspaceIndexUpdatedAt,
+           Date().timeIntervalSince(
+                workspaceIndexUpdatedAt
+           ) < workspaceIndexFreshness {
             return
         }
 
@@ -4501,6 +4509,7 @@ final class AgentEngine: ObservableObject {
             isDirectory: true
         )
         workspaceIndexReady = false
+        workspaceIndexUpdatedAt = nil
         indexedFiles = []
         indexedFolders = []
         log(
