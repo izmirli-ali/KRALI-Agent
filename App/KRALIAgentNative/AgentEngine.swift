@@ -45,6 +45,8 @@ final class AgentEngine: ObservableObject {
     @Published var currentSemanticPlannerProvider: String?
     @Published var currentTaskGraph: AgentTaskGraph?
     @Published var taskGraphStatus = "Henüz görev grafiği yok."
+    @Published var currentProblemResolution: AgentProblemResolution?
+    @Published var currentReflectionSummary: String?
     @Published var currentCapabilityGaps: [CapabilityGapResolution] = []
     @Published var executionSteps: [AgentExecutionStep] = []
     @Published var verificationState: AgentVerificationState = .idle
@@ -80,6 +82,7 @@ final class AgentEngine: ObservableObject {
     private let planner = AgentPlanner()
     private let taskOrchestrator = AgentTaskOrchestrator()
     private let missionNormalizer = AgentMissionNormalizer()
+    private let problemSolver = AgentProblemSolver()
     private let capabilityGapResolver = AgentCapabilityGapResolver()
     private let verifier = AgentVerifier()
     private let capabilityRegistry = AgentCapabilityRegistry()
@@ -802,6 +805,20 @@ final class AgentEngine: ObservableObject {
             currentTaskGraph =
                 compiledTaskGraph
 
+            let problemResolution =
+                problemSolver.solve(
+                    graph: compiledTaskGraph,
+                    capabilities:
+                        capabilityRegistry.all,
+                    observations:
+                        problemSolverObservations()
+                )
+
+            currentProblemResolution =
+                problemResolution
+            currentReflectionSummary =
+                problemResolution.reflection
+
             currentCapabilityGaps =
                 capabilityGapResolver.resolve(
                     graph:
@@ -867,6 +884,41 @@ final class AgentEngine: ObservableObject {
                 "Semantic capability planı: " +
                 mission.requiredCapabilityIDs.joined(separator: ", ")
             )
+            if let chosen =
+                problemResolution.chosenStrategy {
+                log(
+                    "Problem Solver seçimi: " +
+                    chosen.title +
+                    " • score=" +
+                    String(chosen.score) +
+                    " • capabilities=" +
+                    chosen.capabilityIDs
+                        .joined(separator: ",")
+                )
+            }
+
+            let executableStrategies =
+                problemResolution.strategies
+                    .filter {
+                        $0.executableNow &&
+                        !$0.requiresLearning
+                    }
+
+            if !executableStrategies.isEmpty {
+                log(
+                    "Problem Solver adayları: " +
+                    executableStrategies
+                        .prefix(5)
+                        .map {
+                            $0.title +
+                            "[" +
+                            String($0.score) +
+                            "]"
+                        }
+                        .joined(separator: " | ")
+                )
+            }
+
             log(
                 "Task Graph: " +
                 compiledTaskGraph.steps
@@ -2512,6 +2564,8 @@ final class AgentEngine: ObservableObject {
         currentSemanticPlannerProvider = nil
         currentTaskGraph = nil
         taskGraphStatus = "Yeni görev için görev grafiği bekleniyor."
+        currentProblemResolution = nil
+        currentReflectionSummary = nil
         currentCapabilityGaps = []
         activeRoute = ["Core"]
         selectedCapabilities = []
@@ -2527,6 +2581,49 @@ final class AgentEngine: ObservableObject {
         lastFileSearchOutcome = nil
         webResearchStatus = "Bu tur için araştırma henüz başlamadı."
         intelligenceProviderStatus = "Sentez sağlayıcısı henüz kullanılmadı."
+    }
+
+    private func problemSolverObservations()
+        -> [String] {
+        var observations: [String] = []
+
+        if let root = selectedRootURL {
+            observations.append(
+                "Seçili çalışma alanı: " +
+                root.lastPathComponent
+            )
+        }
+
+        if workspaceIndexReady {
+            observations.append(
+                "Workspace gözlemi: " +
+                String(indexedFiles.count) +
+                " dosya, " +
+                String(indexedFolders.count) +
+                " klasör."
+            )
+        }
+
+        if let fileOutcome =
+            lastFileSearchOutcome {
+            observations.append(
+                "Son dosya araması: " +
+                fileOutcome.status.rawValue +
+                " • " +
+                String(fileOutcome.resultCount) +
+                " sonuç."
+            )
+        }
+
+        if let incident =
+            inspectorState.debugIncident {
+            observations.append(
+                "Son debug gözlemi: " +
+                incident.message
+            )
+        }
+
+        return observations
     }
 
     private func brainContext() -> AgentContextSnapshot {
