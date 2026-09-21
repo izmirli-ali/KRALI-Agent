@@ -1227,38 +1227,39 @@ final class AgentEngine: ObservableObject {
                 resolvedLearningPlans =
                     capabilityLearningPlans
 
-                if let graph =
-                    currentTaskGraph {
-                    let browserGap =
-                        capabilityGapResolver
-                            .resolve(
-                                graph:
-                                    graph,
-                                capabilities:
-                                    capabilityRegistry
-                                        .all
-                            )
-                            .first(
-                                where: {
-                                    $0.capabilityID ==
-                                        "browser.control"
-                                }
-                            )
+                let browserGap =
+                    capabilityGapResolver
+                        .resolveExhaustedOutcomeCapability(
+                            capabilityID:
+                                "browser.control",
+                            objective:
+                                text,
+                            attemptSummaries:
+                                chainResult
+                                    .attempts
+                                    .map {
+                                        $0.strategyID +
+                                        ": " +
+                                        $0.summary
+                                    },
+                            capabilities:
+                                capabilityRegistry
+                                    .all
+                        )
 
-                    if let browserGap,
-                       !currentCapabilityGaps
-                        .contains(
-                            where: {
-                                $0.capabilityID ==
-                                    browserGap
-                                        .capabilityID
-                            }
-                        ) {
-                        currentCapabilityGaps
-                            .append(
+                if let browserGap,
+                   !currentCapabilityGaps
+                    .contains(
+                        where: {
+                            $0.capabilityID ==
                                 browserGap
-                            )
-                    }
+                                    .capabilityID
+                        }
+                    ) {
+                    currentCapabilityGaps
+                        .append(
+                            browserGap
+                        )
                 }
 
                 baseReply =
