@@ -125,6 +125,10 @@ struct AgentNaturalLanguageResolver: Sendable {
     func applicationTargetDisplayPhrase(
         from raw: String
     ) -> String? {
+        guard !requestsBrowserWorkflow(raw) else {
+            return nil
+        }
+
         let clauses = raw
             .split(
                 whereSeparator: {
@@ -245,6 +249,10 @@ struct AgentNaturalLanguageResolver: Sendable {
     func applicationTargetPhrase(
         from raw: String
     ) -> String? {
+        guard !requestsBrowserWorkflow(raw) else {
+            return nil
+        }
+
         let clauses = raw
             .split(
                 whereSeparator: {
@@ -381,18 +389,19 @@ struct AgentNaturalLanguageResolver: Sendable {
         }
     }
 
-    private func containsWebAddress(
-        _ raw: String
-    ) -> Bool {
+    func webURL(
+        from raw: String
+    ) -> URL? {
         let pattern =
             #"(?i)\b(?:https?://)?(?:www\.)?[a-z0-9][a-z0-9-]*(?:\.[a-z0-9-]+)+(?:/[^\s]*)?"#
 
-        guard let regex =
-            try? NSRegularExpression(
-                pattern: pattern
-            )
+        guard
+            let regex =
+                try? NSRegularExpression(
+                    pattern: pattern
+                )
         else {
-            return false
+            return nil
         }
 
         let range = NSRange(
@@ -400,10 +409,67 @@ struct AgentNaturalLanguageResolver: Sendable {
             in: raw
         )
 
-        return regex.firstMatch(
-            in: raw,
-            range: range
-        ) != nil
+        guard
+            let match =
+                regex.firstMatch(
+                    in: raw,
+                    range: range
+                ),
+            let matchRange =
+                Range(
+                    match.range,
+                    in: raw
+                )
+        else {
+            return nil
+        }
+
+        var candidate =
+            String(raw[matchRange])
+                .trimmingCharacters(
+                    in:
+                        CharacterSet(
+                            charactersIn:
+                                ".,;:!?)]}\"'"
+                        )
+                )
+
+        guard !candidate.isEmpty else {
+            return nil
+        }
+
+        if !candidate
+            .lowercased()
+            .hasPrefix("http://") &&
+           !candidate
+            .lowercased()
+            .hasPrefix("https://") {
+            candidate =
+                "https://" +
+                candidate
+        }
+
+        guard
+            let url = URL(
+                string: candidate
+            ),
+            let scheme =
+                url.scheme?
+                    .lowercased(),
+            scheme == "http" ||
+            scheme == "https",
+            url.host != nil
+        else {
+            return nil
+        }
+
+        return url
+    }
+
+    private func containsWebAddress(
+        _ raw: String
+    ) -> Bool {
+        webURL(from: raw) != nil
     }
 
     func targetTokens(
