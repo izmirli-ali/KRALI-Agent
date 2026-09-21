@@ -41,6 +41,13 @@ struct AgentResearchQueryPlanner {
             return socialPlan
         }
 
+        if let directWebPlan =
+            directWebPlan(
+                original: query
+            ) {
+            return directWebPlan
+        }
+
         let entity = extractEntity(
             from: query,
             normalized: normalized
@@ -66,6 +73,181 @@ struct AgentResearchQueryPlanner {
             original: query,
             normalized: normalized
         )
+    }
+
+    private func directWebPlan(
+        original: String
+    ) -> ResearchQueryPlan? {
+        guard let url =
+            extractWebURL(
+                from: original
+            ),
+            let host =
+                url.host?
+                    .lowercased()
+                    .trimmingCharacters(
+                        in:
+                            CharacterSet(
+                                charactersIn: "."
+                            )
+                    ),
+            !host.isEmpty
+        else {
+            return nil
+        }
+
+        let hostWithoutWWW =
+            host.hasPrefix("www.")
+                ? String(
+                    host.dropFirst(4)
+                )
+                : host
+
+        let firstLabel =
+            hostWithoutWWW
+                .split(separator: ".")
+                .first
+                .map(String.init) ??
+            hostWithoutWWW
+
+        var aliases = [
+            hostWithoutWWW,
+            firstLabel
+        ]
+        .filter {
+            $0.count >= 2
+        }
+
+        var seen = Set<String>()
+        aliases = aliases.filter {
+            seen.insert(
+                normalize($0)
+            ).inserted
+        }
+
+        guard !aliases.isEmpty else {
+            return nil
+        }
+
+        let direct =
+            ResearchDirectCandidate(
+                title:
+                    hostWithoutWWW +
+                    " — doğrudan kaynak adayı",
+                url: url,
+                domain:
+                    hostWithoutWWW
+            )
+
+        return ResearchQueryPlan(
+            original: original,
+            variants: [
+                original,
+                "site:" +
+                    hostWithoutWWW +
+                    " " +
+                    firstLabel
+            ],
+            conceptGroups: [
+                aliases
+            ],
+            mandatoryConceptGroups: [
+                aliases
+            ],
+            preferredDomains: [
+                hostWithoutWWW
+            ],
+            entityTerms:
+                aliases,
+            facets: [
+                ResearchFacet(
+                    id: "direct",
+                    title: "Doğrudan kaynak",
+                    query:
+                        url.absoluteString
+                )
+            ],
+            directCandidates: [
+                direct
+            ]
+        )
+    }
+
+    private func extractWebURL(
+        from raw: String
+    ) -> URL? {
+        let pattern =
+            #"(?i)\b(?:https?://)?(?:www\.)?[a-z0-9][a-z0-9-]*(?:\.[a-z0-9-]+)+(?:/[^\s]*)?"#
+
+        guard
+            let regex =
+                try? NSRegularExpression(
+                    pattern: pattern
+                )
+        else {
+            return nil
+        }
+
+        let range = NSRange(
+            raw.startIndex..<raw.endIndex,
+            in: raw
+        )
+
+        guard
+            let match =
+                regex.firstMatch(
+                    in: raw,
+                    range: range
+                ),
+            let matchRange =
+                Range(
+                    match.range,
+                    in: raw
+                )
+        else {
+            return nil
+        }
+
+        var value =
+            String(raw[matchRange])
+                .trimmingCharacters(
+                    in:
+                        CharacterSet(
+                            charactersIn:
+                                ".,;:!?)]}\"'"
+                        )
+                )
+
+        guard !value.isEmpty else {
+            return nil
+        }
+
+        if !value
+            .lowercased()
+            .hasPrefix("http://") &&
+           !value
+            .lowercased()
+            .hasPrefix("https://") {
+            value =
+                "https://" +
+                value
+        }
+
+        guard
+            let url = URL(
+                string: value
+            ),
+            let scheme =
+                url.scheme?
+                    .lowercased(),
+            scheme == "http" ||
+            scheme == "https",
+            url.host != nil
+        else {
+            return nil
+        }
+
+        return url
     }
 
     private func socialProfilePlan(
