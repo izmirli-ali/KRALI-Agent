@@ -670,6 +670,9 @@ let implementationPhaseAnnounced = false;
 let consecutiveRequestTimeouts = 0;
 let checkpointEvidence = [];
 let resumedFromCheckpoint = false;
+let implementationSearchCompleted = false;
+let implementationReadCompleted = false;
+let implementationTargetPaths = [];
 
 const inspectionToolNames = new Set([
   "list_files",
@@ -733,13 +736,12 @@ function toolsForCurrentPhase() {
         return true;
       }
 
-      // Implementation may use one final targeted source validation while
-      // budget remains, but broad repo discovery is intentionally hidden.
-      if (inspectionToolCalls < maxInspectionTools) {
-        return (
-          name === "search_codebase" ||
-          name === "read_file"
-        );
+      if (!implementationSearchCompleted) {
+        return name === "search_codebase";
+      }
+
+      if (!implementationReadCompleted) {
+        return name === "read_file";
       }
 
       return false;
@@ -754,7 +756,7 @@ function persistCheckpoint(reason = "progress") {
 
   const status = candidateStatus();
   const payload = {
-    version: 2,
+    version: 3,
     gapLabel,
     reason,
     model,
@@ -766,6 +768,9 @@ function persistCheckpoint(reason = "progress") {
     buildCheckPassed,
     candidateDirty: Boolean(status?.ok && status?.dirty),
     candidateIdentity: candidateIdentity(),
+    implementationSearchCompleted,
+    implementationReadCompleted,
+    implementationTargetPaths: implementationTargetPaths.slice(0, 8),
     evidence: checkpointEvidence.slice(-12),
     savedAt: new Date().toISOString(),
   };
@@ -793,7 +798,7 @@ function loadCheckpoint() {
 
     if (
       !payload ||
-      ![1, 2].includes(Number(payload.version || 0))
+      ![1, 2, 3].includes(Number(payload.version || 0))
     ) {
       return null;
     }
@@ -829,6 +834,26 @@ function resumeCheckpointContext() {
   if (evidence.length === 0) return;
 
   checkpointEvidence = evidence;
+
+  if (
+    Number(checkpoint.version || 0) >= 3 &&
+    (
+      checkpoint.phase === "implementation" ||
+      checkpoint.phase === "verification"
+    )
+  ) {
+    implementationSearchCompleted =
+      checkpoint.implementationSearchCompleted === true;
+    implementationReadCompleted =
+      checkpoint.implementationReadCompleted === true;
+    implementationTargetPaths =
+      Array.isArray(checkpoint.implementationTargetPaths)
+        ? checkpoint.implementationTargetPaths
+            .map((value) => String(value || ""))
+            .filter(Boolean)
+            .slice(0, 8)
+        : [];
+  }
 
   const currentStatus = candidateStatus();
   const currentIdentity = candidateIdentity();
@@ -897,10 +922,26 @@ function resumeCheckpointContext() {
       "Effective resume phase: " + resumedPhase,
       "Checkpoint evidence:",
       truncate(JSON.stringify(evidence), 18000),
+      resumedPhase === "implementation"
+        ? (
+            "Implementation navigation state: searchCompleted=" +
+            String(implementationSearchCompleted) +
+            ", readCompleted=" +
+            String(implementationReadCompleted) +
+            ", targetPaths=" +
+            JSON.stringify(implementationTargetPaths)
+          )
+        : "",
       resumedPhase === "verification"
         ? "Aynı candidate diff kimliği doğrulandı. Verification adımlarından devam et."
         : resumedPhase === "implementation"
-          ? "Teşhis kanıtı taşındı fakat candidate yürütme durumu taşınmadı. Bir son source kontrolünden sonra minimum generic patch üret."
+          ? (
+              implementationReadCompleted
+                ? "Teşhis ve hedef kaynak doğrulaması taşındı fakat candidate yürütme durumu taşınmadı. Artık inspection yapma; minimum generic patch üret."
+                : implementationSearchCompleted
+                  ? "Hedef kaynak önceki tool kanıtıyla bulundu. Yalnız bu hedef kaynağı read_file ile doğrula; ardından minimum generic patch üret."
+                  : "Teşhis kanıtı taşındı fakat candidate yürütme durumu taşınmadı. Bir hedefli search_codebase ile kaynak noktasını bul; sonra yalnız o kaynağı doğrulayıp patch üret."
+            )
           : "Kaldığın teşhis noktasından devam et; gereksiz repo taraması yapma.",
       "Önceki checkpoint bir öneri değil kanıt özetidir; source ile çelişirse source gerçeğini esas al."
     ].join("\n"),
@@ -999,6 +1040,60 @@ function recordToolEvidence(name, result, args = {}) {
     const weight = inspectionWeight(name);
     inspectionToolCalls += weight;
     recordCheckpointEvidence(name, args, result);
+
+    if (
+      developmentPhase() === "implementation" &&
+      name === "search_codebase"
+    ) {
+      const matches = Array.isArray(result.matches)
+        ? result.matches
+        : [];
+
+      if (matches.length > 0) {
+        implementationSearchCompleted = true;
+        implementationReadCompleted = false;
+        implementationTargetPaths = [
+          ...new Set(
+            matches
+              .map((line) =>
+                String(line || "").split(":")[0]
+              )
+              .filter(Boolean)
+          ),
+        ].slice(0, 8);
+
+        stage(
+          "local_agent_target_found",
+          gapLabel +
+            " hedef kaynak bulundu • paths=" +
+            implementationTargetPaths.length
+        );
+      }
+    }
+
+    if (
+      developmentPhase() === "implementation" &&
+      name === "read_file"
+    ) {
+      const readPath = String(
+        result.path || args.path || ""
+      );
+
+      if (
+        implementationSearchCompleted &&
+        (
+          implementationTargetPaths.length === 0 ||
+          implementationTargetPaths.includes(readPath)
+        )
+      ) {
+        implementationReadCompleted = true;
+        stage(
+          "local_agent_target_verified",
+          gapLabel +
+            " hedef kaynak bölgesi doğrulandı • mutation zorunlu"
+        );
+      }
+    }
 
     if (
       requireChange &&
@@ -1329,9 +1424,11 @@ for (let iteration = 1; iteration <= maxIterations; iteration++) {
             "Aynı problemi sıfırdan inceleme; kaldığın development phase'den devam et.",
             developmentPhase() === "implementation"
               ? (
-                  inspectionToolCalls < maxInspectionTools
-                    ? "Genel repo keşfi kapalı. Gerekliyse yalnız hedefli search_codebase/read_file ile son kanıtı doğrula; ardından minimum generic source değişikliğini uygula."
-                    : "Hedefli inspection bütçesi tamamlandı; şimdi minimum generic source değişikliğini uygula."
+                  implementationReadCompleted
+                    ? "Inspection tamamlandı; şimdi minimum generic source değişikliğini uygula."
+                    : implementationSearchCompleted
+                      ? "İkinci arama yapma. Bulunan hedef kaynağı read_file ile doğrula; ardından minimum generic source değişikliğini uygula."
+                      : "Genel repo keşfi kapalı. Bir hedefli search_codebase ile kaynak noktasını bul; ardından yalnız o kaynağı doğrulayıp patch üret."
                 )
               : "Gerekli minimum sonraki tool adımını seç."
           ].join("\n"),
@@ -1511,6 +1608,31 @@ for (let iteration = 1; iteration <= maxIterations; iteration++) {
     let result;
 
     if (
+      requireChange &&
+      !sawMutatingTool &&
+      developmentPhase() === "implementation" &&
+      (
+        (implementationSearchCompleted && name === "search_codebase") ||
+        (implementationReadCompleted && inspectionToolNames.has(name)) ||
+        name === "list_files"
+      )
+    ) {
+      stage(
+        "local_agent_implementation_required",
+        gapLabel +
+          " tekrar/genel inspection reddedildi • implementation fazı aktif • " +
+          name
+      );
+      result = {
+        ok: false,
+        error:
+          implementationReadCompleted
+            ? "Target source is already verified. Apply the minimum generic source mutation now."
+            : implementationSearchCompleted
+              ? "Target search is already complete. Read the identified target source once, then mutate."
+              : "Broad discovery is disabled during implementation. Use targeted search_codebase.",
+      };
+    } else if (
       requireChange &&
       !sawMutatingTool &&
       inspectionToolNames.has(name) &&
