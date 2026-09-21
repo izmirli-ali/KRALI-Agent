@@ -1183,6 +1183,10 @@ if [ "$CLINE_EXIT" -ne 0 ]; then
                 echo "❌ Candidate recovery başarısız oldu." | tee -a "$LOG"
                 exit 24
                 ;;
+            candidate_repair_failed)
+                echo "❌ Candidate compiler-guided repair tamamlanamadı; branch korundu." | tee -a "$LOG"
+                exit 25
+                ;;
         esac
     else
         git -C "$ROOT" worktree remove "$WORKTREE" --force >>"$LOG" 2>&1 || true
