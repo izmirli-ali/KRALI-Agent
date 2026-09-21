@@ -235,6 +235,8 @@ struct AgentVerifier {
 
                 if let mismatch =
                     fileSearchConstraintMismatch(
+                        decision:
+                            decision,
                         currentUserInput:
                             currentUserInput,
                         outcome:
@@ -553,6 +555,7 @@ struct AgentVerifier {
     }
 
     private func fileSearchConstraintMismatch(
+        decision: AgentDecision,
         currentUserInput: String,
         outcome: AgentFileSearchOutcome
     ) -> String? {
@@ -560,6 +563,38 @@ struct AgentVerifier {
             normalize(
                 currentUserInput
             )
+
+        let requestedTarget =
+            fileQueryParser
+                .resolveTargetEntity(
+                    currentUserInput
+                )
+
+        if requestedTarget != .any &&
+           decision.target !=
+            requestedTarget {
+            return "Doğrulama durduruldu: kullanıcı " +
+                targetDescription(
+                    requestedTarget
+                ) +
+                " istedi ancak karar motoru " +
+                targetDescription(
+                    decision.target
+                ) +
+                " hedefini seçti."
+        }
+
+        if let mismatch =
+            fileResultTypeMismatch(
+                target:
+                    requestedTarget == .any
+                    ? decision.target
+                    : requestedTarget,
+                files:
+                    outcome.files
+            ) {
+            return mismatch
+        }
 
         if containsWordOrPhrase(
             input,
@@ -613,6 +648,18 @@ struct AgentVerifier {
            outcome.query.scope !=
             .desktop {
             return "Doğrulama durduruldu: kullanıcı Masaüstü kapsamını istedi ancak arama farklı kapsamda çalıştı."
+        }
+
+        if containsWordOrPhrase(
+            input,
+            [
+                "belgeler",
+                "documents"
+            ]
+        ),
+           outcome.query.scope !=
+            .documents {
+            return "Doğrulama durduruldu: kullanıcı Belgeler kapsamını istedi ancak arama farklı kapsamda çalıştı."
         }
 
         let calendar =
@@ -673,6 +720,95 @@ struct AgentVerifier {
         return nil
     }
 
+    private func fileResultTypeMismatch(
+        target: AgentTargetKind,
+        files: [FileRecord]
+    ) -> String? {
+        guard !files.isEmpty else {
+            return nil
+        }
+
+        let imageExtensions = Set([
+            "png", "jpg", "jpeg", "heic",
+            "tif", "tiff", "webp", "gif",
+            "bmp", "svg"
+        ])
+        let videoExtensions = Set([
+            "mov", "mp4", "m4v", "avi",
+            "mkv", "webm", "mts", "m2ts"
+        ])
+        let projectExtensions = Set([
+            "prproj", "aep", "psd", "psb",
+            "ai", "indd", "fcpxml"
+        ])
+        let documentExtensions = Set([
+            "pdf", "doc", "docx", "txt",
+            "rtf", "md", "pages", "odt",
+            "xls", "xlsx", "csv", "numbers",
+            "ppt", "pptx", "key"
+        ])
+
+        let invalid = files.contains { file in
+            let ext =
+                file.fileExtension
+                    .lowercased()
+
+            switch target {
+            case .screenshot:
+                return !file.isScreenshot
+            case .pdf:
+                return ext != "pdf"
+            case .video:
+                return !videoExtensions
+                    .contains(ext)
+            case .image:
+                return !imageExtensions
+                    .contains(ext)
+            case .project:
+                return !projectExtensions
+                    .contains(ext)
+            case .document:
+                return !documentExtensions
+                    .contains(ext)
+            case .folder:
+                return true
+            case .any:
+                return false
+            }
+        }
+
+        guard invalid else {
+            return nil
+        }
+
+        return "Doğrulama durduruldu: sonuç kümesinde istenen " +
+            targetDescription(target) +
+            " türüyle uyuşmayan öğe bulundu."
+    }
+
+    private func targetDescription(
+        _ target: AgentTargetKind
+    ) -> String {
+        switch target {
+        case .screenshot:
+            return "ekran görüntüsü"
+        case .pdf:
+            return "PDF dosyası"
+        case .video:
+            return "video dosyası"
+        case .image:
+            return "görsel dosyası"
+        case .project:
+            return "proje dosyası"
+        case .document:
+            return "belge"
+        case .folder:
+            return "klasör"
+        case .any:
+            return "dosya/öğe"
+        }
+    }
+
     private func alignmentMismatch(
         decision: AgentDecision,
         currentUserInput: String,
@@ -685,6 +821,26 @@ struct AgentVerifier {
            decision.intent == .compoundFileTask {
             guard looksLikeFileSearch(input) else {
                 return "Doğrulama durduruldu: seçilen dosya arama hedefi mevcut kullanıcı girdisiyle uyuşmuyor."
+            }
+
+            let requestedTarget =
+                fileQueryParser
+                    .resolveTargetEntity(
+                        currentUserInput
+                    )
+
+            if requestedTarget != .any &&
+               decision.target !=
+                    requestedTarget {
+                return "Doğrulama durduruldu: entity/scope ayrımı bozuldu; kullanıcı " +
+                    targetDescription(
+                        requestedTarget
+                    ) +
+                    " istedi ancak karar " +
+                    targetDescription(
+                        decision.target
+                    ) +
+                    " hedefini taşıyor."
             }
         }
 
