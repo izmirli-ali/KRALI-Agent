@@ -33,6 +33,8 @@ struct MentorTraceTaskGraphStep: Codable {
     let risk: String
     let available: Bool
     let requiresApproval: Bool
+    let approvalReason: String?
+    let resourceIDs: [String]
 }
 
 
@@ -78,6 +80,7 @@ struct MentorTrace: Codable {
     let semanticMission: AgentSemanticMission?
     let semanticPlannerProvider: String?
     let taskGraph: [MentorTraceTaskGraphStep]
+    let runtimeTask: AgentRuntimeTask?
     let problemResolution: AgentProblemResolution?
     let outcomeResolution: AgentOutcomeResolution?
     let outcomeAttempts: [AgentOutcomeStrategyAttempt]
@@ -124,6 +127,7 @@ struct MentorTraceStore {
         semanticMission: AgentSemanticMission?,
         semanticPlannerProvider: String?,
         taskGraph: AgentTaskGraph?,
+        runtimeTask: AgentRuntimeTask?,
         problemResolution: AgentProblemResolution?,
         outcomeResolution: AgentOutcomeResolution?,
         outcomeAttempts: [AgentOutcomeStrategyAttempt],
@@ -189,9 +193,20 @@ struct MentorTraceStore {
                         available:
                             $0.isAvailable,
                         requiresApproval:
-                            $0.requiresApproval
+                            $0.requiresApproval,
+                        approvalReason:
+                            $0.approvalReason,
+                        resourceIDs:
+                            AgentTaskRuntimePlanner()
+                                .requiredResources(
+                                    for: $0
+                                )
+                                .map(\.rawValue)
+                                .sorted()
                     )
                 } ?? [],
+            runtimeTask:
+                runtimeTask,
             problemResolution:
                 problemResolution,
             outcomeResolution:
