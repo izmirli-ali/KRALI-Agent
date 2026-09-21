@@ -1169,7 +1169,6 @@ final class AgentEngine: ObservableObject {
         }
 
         var baseReply = ""
-        var outcomeHandledMission = false
         var outcomeOwnedMission = false
 
         if let outcomeResolution =
@@ -1195,14 +1194,72 @@ final class AgentEngine: ObservableObject {
                         .executedCapabilityIDs
                 )
 
+            for capabilityID in
+                chainResult
+                    .executedCapabilityIDs {
+                if !selectedCapabilities.contains(
+                    where: {
+                        $0.id ==
+                            capabilityID
+                    }
+                ),
+                   let capability =
+                    capabilityRegistry
+                        .all
+                        .first(
+                            where: {
+                                $0.id ==
+                                    capabilityID
+                            }
+                        ) {
+                    selectedCapabilities
+                        .append(
+                            capability
+                        )
+                }
+            }
+
             if chainResult.succeeded {
                 baseReply =
                     chainResult.reply
-                outcomeHandledMission = true
             } else {
                 queueInteractiveAccessCapability()
                 resolvedLearningPlans =
                     capabilityLearningPlans
+
+                if let graph =
+                    currentTaskGraph {
+                    let browserGap =
+                        capabilityGapResolver
+                            .resolve(
+                                graph:
+                                    graph,
+                                capabilities:
+                                    capabilityRegistry
+                                        .all
+                            )
+                            .first(
+                                where: {
+                                    $0.capabilityID ==
+                                        "browser.control"
+                                }
+                            )
+
+                    if let browserGap,
+                       !currentCapabilityGaps
+                        .contains(
+                            where: {
+                                $0.capabilityID ==
+                                    browserGap
+                                        .capabilityID
+                            }
+                        ) {
+                        currentCapabilityGaps
+                            .append(
+                                browserGap
+                            )
+                    }
+                }
 
                 baseReply =
                     chainResult.reply
@@ -3941,27 +3998,41 @@ final class AgentEngine: ObservableObject {
                     normalizeSemanticText(
                         observed
                     )
-                let host =
-                    normalizeSemanticText(
-                        url.host ?? ""
+                let rawHost =
+                    (url.host ?? "")
+                        .lowercased()
+                let hostWithoutWWW =
+                    rawHost.hasPrefix(
+                        "www."
                     )
-                    .replacingOccurrences(
-                        of: "www ",
-                        with: ""
+                    ? String(
+                        rawHost
+                            .dropFirst(4)
+                    )
+                    : rawHost
+                let normalizedHost =
+                    normalizeSemanticText(
+                        hostWithoutWWW
                     )
                 let firstHostLabel =
-                    host
+                    hostWithoutWWW
                         .split(
-                            separator: " "
+                            separator: "."
                         )
                         .first
-                        .map(String.init) ??
-                    host
+                        .map {
+                            normalizeSemanticText(
+                                String($0)
+                            )
+                        } ??
+                    normalizedHost
 
                 let targetObserved =
-                    (!host.isEmpty &&
+                    (!normalizedHost.isEmpty &&
                      normalizedEvidence
-                        .contains(host)) ||
+                        .contains(
+                            normalizedHost
+                        )) ||
                     (
                         firstHostLabel.count >= 4 &&
                         normalizedEvidence
