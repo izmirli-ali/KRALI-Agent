@@ -156,10 +156,14 @@ struct DeveloperAgentStatus: Hashable {
             return "Yerel model araç kullanımı doğrulanıyor"
         case "local_model_fallback":
             return "Alternatif yerel model deneniyor"
+        case "local_model_specialized":
+            return "Göreve uygun yerel model seçildi"
         case "local_ai_ready":
             return "Ücretsiz yerel AI hazır"
         case "local_agent_starting":
             return "Native yerel agent başlatılıyor"
+        case "local_agent_resumed":
+            return "Checkpoint'ten devam ediyor"
         case "local_agent_running":
             return "Native yerel agent çalışıyor"
         case "local_agent_tool":
