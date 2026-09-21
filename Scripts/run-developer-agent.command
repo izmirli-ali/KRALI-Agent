@@ -791,7 +791,7 @@ const prompt = [
   learningPathRule,
   "- KRALI_ARCHITECTURE.md içindeki Senaryo bağımsızlığı ilkesini değişmez sözleşme kabul et.",
   "- Tek kullanıcı örneğini geçirmek için uygulama/site adına özel branch veya hard-code ekleme; önce semantic parametreleme + mevcut generic primitive bileşimini dene.",
-  "- Training/Gym diagnostic içindeki [intent], [scope], [entity], [rank], [output], [safety], [capability] etiketlerini failure class olarak kullan; düzeltmeyi ilgili semantic katmanda yap.",
+  "- Training/Gym diagnostic içindeki [intent], [scope], [entity], [rank], [output], [safety], [capability], [verification] etiketlerini failure class olarak kullan; düzeltmeyi ilgili semantic katmanda yap.",
   "- Metamorphic/Gym ailesinden bir varyasyon fail ise yalnız o promptu geçirmek yeterli değildir; aynı semantic contract ailesini geçirecek generic düzeltme üret.",
   "- Önce rg/grep ile bu capability\'nin registry, resolver, executor ve verifier bağlantılarını bul.",
   "- Tek uygulama/marka adına özel hard-code yazma; generic provider/strategy tasarla.",
@@ -819,6 +819,7 @@ cat > "$PROMPT_FILE" <<'EOF'
 Sen KRALİ projesinin Developer Agent'ısın.
 
 Önce KRALI_ARCHITECTURE.md, VERSION ve güncel Mentor diagnostic'lerini incele.
+Mentor/gym-latest.json varsa önce failureSummary ve learningCandidates alanlarını oku; tek promptu değil scenario family invariant'ını düzelt.
 Ama yalnız başarısız/attention alanlarla ilgili minimum dosyaları aç; büyük JSON'ları gereksiz yere tekrar tekrar okuma.
 
 Kurallar:
@@ -829,13 +830,13 @@ Kurallar:
 5. Kanıtı olmayan büyük refactor yapma.
 6. Tek marka/uygulama/prompt örneğine hard-code yazma; önce semantic parametreleme ve mevcut generic primitive bileşimini kullan.
 7. Senaryo için yeni kod yazmadan önce KRALI_ARCHITECTURE.md içindeki Senaryo bağımsızlığı ilkesini uygula.
-8. Training/Gym diagnostic içindeki [intent], [scope], [entity], [rank], [output], [safety], [capability] etiketini failure class olarak ele al; prompta özel değil semantic katmana düzeltme yap.
+8. Training/Gym diagnostic içindeki [intent], [scope], [entity], [rank], [output], [safety], [capability], [verification] etiketini failure class olarak ele al; prompta özel değil semantic katmana düzeltme yap.
 9. Metamorphic/Gym ailesindeki tek varyasyonu geçirip diğerlerini bozma; aynı semantic contract ailesinin tamamını koru.
 10. Gerçek capability yoksa yapılmış gibi gösterme.
 11. İş sonunda /bin/zsh Scripts/build-check.command çalıştır.
 
 Öncelik:
-capability gap → Arena failure → Live Eval failure → güncel Mentor failure → Training regression.
+capability gap → Semantic Gym family failure → Arena failure → Live Eval failure → güncel Mentor failure → Training regression.
 EOF
 fi
 
