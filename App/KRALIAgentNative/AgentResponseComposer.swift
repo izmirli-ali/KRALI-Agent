@@ -10,7 +10,6 @@ struct AgentResponseComposer {
         capabilityGaps: [CapabilityGapResolution],
         fallbackPlan: String?
     ) -> String {
-        let unavailable = capabilities.filter { !$0.isAvailable }
         let gapNames =
             capabilityGaps
                 .map(\.capabilityName)
