@@ -1,5 +1,6 @@
 import Foundation
 import AppKit
+import Combine
 
 @MainActor
 final class AgentEngine: ObservableObject {
@@ -34,7 +35,6 @@ final class AgentEngine: ObservableObject {
     @Published var folderSearchResults: [FolderRecord] = []
     @Published var fileSearchTitle = ""
     @Published var workspaceIndexReady = false
-    @Published var diagnosticsLoaded = false
 
     @Published var currentGoal = "Hazır"
     @Published var currentPlan = "Yeni görevi bekliyor"
@@ -55,33 +55,6 @@ final class AgentEngine: ObservableObject {
     @Published var webResearchResults: [WebResearchResult] = []
     @Published var webResearchEvidence: [WebSourceEvidence] = []
     @Published var webResearchStatus = "Henüz web araştırması yapılmadı."
-    @Published var mentorTraceStatus = "Henüz mentor kaydı yok."
-    @Published var mentorTraceReady = false
-    @Published var mentorSyncBusy = false
-    @Published var trainingLabReport: TrainingLabReport?
-    @Published var trainingLabStatus = "Henüz Training Lab çalıştırılmadı."
-    @Published var trainingLabBusy = false
-    @Published var liveResearchEvalReport: LiveResearchEvalReport?
-    @Published var liveResearchEvalStatus = "Henüz gerçek internet kalite testi yapılmadı."
-    @Published var liveResearchEvalBusy = false
-    @Published var arenaReport: AgentArenaReport?
-    @Published var arenaStatus = "Henüz KRALİ Arena çalıştırılmadı."
-    @Published var arenaBusy = false
-    @Published var screenPerceptionReport: ScreenPerceptionReport?
-    @Published var screenPerceptionStatus = "Henüz Screen Perception Probe çalıştırılmadı."
-    @Published var screenPerceptionBusy = false
-    @Published var desktopControlReport: DesktopControlProbeReport?
-    @Published var desktopControlStatus = "Desktop Control Probe henüz çalıştırılmadı."
-    @Published var desktopControlBusy = false
-    @Published var developerAgentStatus = DeveloperAgentStatus(
-        state: "idle",
-        message: "Developer Agent henüz çalıştırılmadı.",
-        branch: nil,
-        worktree: nil
-    )
-    @Published var developerAgentBusy = false
-    @Published var learningQueueJobs: [AgentLearningJob] = []
-    @Published var debugIncident: AgentDebugIncident?
     @Published var localIntelligenceState: LocalIntelligenceState = .checking
     @Published var intelligenceProviderStatus = "Sentez sağlayıcısı henüz kullanılmadı."
 
@@ -96,6 +69,7 @@ final class AgentEngine: ObservableObject {
     @Published var busy = false
 
     let speech = SpeechController()
+    let inspectorState = AgentInspectorState()
 
     private let memoryKey = "krali.native.memories.v1"
     private let selectedRootKey = "krali.native.selectedRootPath.v1"
@@ -138,10 +112,17 @@ final class AgentEngine: ObservableObject {
     private let diagnosticsLoader = AgentDiagnosticsLoader()
     private let workspaceIndexFreshness: TimeInterval = 45
     private var workspaceIndexUpdatedAt: Date?
+    private var inspectorStateForwarder: AnyCancellable?
     private var lastDecision: AgentDecision?
     private var activeLearningJobID: UUID?
 
     init() {
+        inspectorStateForwarder =
+            inspectorState.objectWillChange
+                .sink { [weak self] _ in
+                    self?.objectWillChange.send()
+                }
+
         if UserDefaults.standard.object(
             forKey: "krali.native.voiceOutputEnabled.v1"
         ) != nil {
@@ -184,14 +165,14 @@ final class AgentEngine: ObservableObject {
             : "\(contextMemoryEntries.count) bağlam kaydı hazır."
 
         capabilityLearningBacklog = learningStore.load()
-        mentorTraceReady =
+        inspectorState.mentorTraceReady =
             fileManager.fileExists(
                 atPath: mentorTraceStore.latestURL.path
             ) ||
             diagnosticsLoader.hasStoredDiagnostics()
 
-        if mentorTraceReady {
-            mentorTraceStatus =
+        if inspectorState.mentorTraceReady {
+            inspectorState.mentorTraceStatus =
                 "Mentor / diagnostic kaydı hazır."
         }
 
@@ -201,31 +182,31 @@ final class AgentEngine: ObservableObject {
                     "CFBundleShortVersionString"
             ) as? String ?? "unknown"
 
-        developerAgentStatus =
+        inspectorState.developerAgentStatus =
             developerBridge
                 .readStatus()
                 .freshForApp(
                     launchAppVersion
                 )
 
-        if developerAgentStatus.state ==
+        if inspectorState.developerAgentStatus.state ==
             "stale_run" {
             developerBridge.writeStatus(
-                developerAgentStatus
+                inspectorState.developerAgentStatus
             )
         }
 
-        learningQueueJobs =
+        inspectorState.learningQueueJobs =
             learningQueueStore
                 .recoverInterruptedJobs(
                     learningQueueStore.load(),
                     activeRunIsFresh:
-                        developerAgentStatus
+                        inspectorState.developerAgentStatus
                             .isLearningActive
                 )
 
         if let running =
-            learningQueueJobs.first(
+            inspectorState.learningQueueJobs.first(
                 where: {
                     $0.state == .running
                 }
@@ -234,7 +215,7 @@ final class AgentEngine: ObservableObject {
                 running.id
         }
 
-        if developerAgentStatus.state == "no_change" {
+        if inspectorState.developerAgentStatus.state == "no_change" {
             loadDiagnosticsIfNeeded()
         }
 
@@ -256,7 +237,7 @@ final class AgentEngine: ObservableObject {
             if let recovered =
                 await self.developerBridge
                     .recoverPendingCandidate() {
-                self.developerAgentStatus =
+                self.inspectorState.developerAgentStatus =
                     recovered
 
                 self.log(
@@ -272,61 +253,61 @@ final class AgentEngine: ObservableObject {
     // MARK: - Lazy Diagnostics
 
     func loadDiagnosticsIfNeeded() {
-        guard !diagnosticsLoaded else {
+        guard !inspectorState.diagnosticsLoaded else {
             return
         }
 
         let snapshot = diagnosticsLoader.load()
 
-        trainingLabReport =
+        inspectorState.trainingLabReport =
             snapshot.trainingLabReport
-        liveResearchEvalReport =
+        inspectorState.liveResearchEvalReport =
             snapshot.liveResearchEvalReport
-        arenaReport =
+        inspectorState.arenaReport =
             snapshot.arenaReport
-        screenPerceptionReport =
+        inspectorState.screenPerceptionReport =
             snapshot.screenPerceptionReport
-        desktopControlReport =
+        inspectorState.desktopControlReport =
             snapshot.desktopControlReport
 
-        if let report = trainingLabReport {
-            trainingLabStatus =
+        if let report = inspectorState.trainingLabReport {
+            inspectorState.trainingLabStatus =
                 "Son test: \(report.passed)/\(report.total) geçti • " +
                 "Core \(report.corePassed)/\(report.coreTotal) • " +
                 "North Star \(report.northStarPassed)/\(report.northStarTotal)"
-            mentorTraceReady = true
+            inspectorState.mentorTraceReady = true
         }
 
-        if let report = liveResearchEvalReport {
-            liveResearchEvalStatus =
+        if let report = inspectorState.liveResearchEvalReport {
+            inspectorState.liveResearchEvalStatus =
                 "Son gerçek test: \(report.passed)/\(report.total) geçti"
-            mentorTraceReady = true
+            inspectorState.mentorTraceReady = true
         }
 
-        if let report = arenaReport {
-            arenaStatus =
+        if let report = inspectorState.arenaReport {
+            inspectorState.arenaStatus =
                 "Son Arena: \(report.passed)/\(report.total) geçti • " +
                 "\(report.failed) başarısız • " +
                 "Reviewer \(report.reviewerFlagged) işaret"
-            mentorTraceReady = true
+            inspectorState.mentorTraceReady = true
         }
 
-        if let report = screenPerceptionReport {
-            screenPerceptionStatus =
+        if let report = inspectorState.screenPerceptionReport {
+            inspectorState.screenPerceptionStatus =
                 "Son Screen Probe: " +
                 String(report.recognizedText.count) +
                 " metin satırı • " +
                 String(report.visibleWindows.count) +
                 " pencere"
-            mentorTraceReady = true
+            inspectorState.mentorTraceReady = true
         } else if let status =
             snapshot.screenPerceptionStatus,
                   !status.isEmpty {
-            screenPerceptionStatus = status
+            inspectorState.screenPerceptionStatus = status
         }
 
-        if let report = desktopControlReport {
-            desktopControlStatus =
+        if let report = inspectorState.desktopControlReport {
+            inspectorState.desktopControlStatus =
                 "Son Desktop Probe: " +
                 (report.launchOrActivateSucceeded
                     ? "uygulama açıldı/öne geldi"
@@ -335,20 +316,20 @@ final class AgentEngine: ObservableObject {
                 (report.accessibilityTrusted
                     ? "izinli"
                     : "izin bekliyor")
-            mentorTraceReady = true
+            inspectorState.mentorTraceReady = true
         } else if let status =
             snapshot.desktopControlStatus,
                   !status.isEmpty {
-            desktopControlStatus = status
+            inspectorState.desktopControlStatus = status
         }
 
-        diagnosticsLoaded = true
+        inspectorState.diagnosticsLoaded = true
         validateNoChangeDiagnostics()
         log("Diagnostics isteğe bağlı yüklendi")
     }
 
     private func validateNoChangeDiagnostics() {
-        guard developerAgentStatus.state == "no_change" else {
+        guard inspectorState.developerAgentStatus.state == "no_change" else {
             return
         }
 
@@ -359,11 +340,11 @@ final class AgentEngine: ObservableObject {
             ) as? String ?? "unknown"
 
         let current =
-            trainingLabReport?.appVersion ==
+            inspectorState.trainingLabReport?.appVersion ==
                 launchAppVersion &&
-            liveResearchEvalReport?.appVersion ==
+            inspectorState.liveResearchEvalReport?.appVersion ==
                 launchAppVersion &&
-            arenaReport?.appVersion ==
+            inspectorState.arenaReport?.appVersion ==
                 launchAppVersion
 
         guard !current else {
@@ -379,7 +360,7 @@ final class AgentEngine: ObservableObject {
                 worktree: nil
             )
 
-        developerAgentStatus = staleStatus
+        inspectorState.developerAgentStatus = staleStatus
         developerBridge.writeStatus(
             staleStatus
         )
@@ -1235,7 +1216,7 @@ final class AgentEngine: ObservableObject {
 
         if finalVerification.state == .attention &&
            currentCapabilityGaps.isEmpty &&
-           debugIncident == nil {
+           inspectorState.debugIncident == nil {
             registerDebugIncident(
                 source: "verifier",
                 message: finalVerification.summary,
@@ -1323,17 +1304,17 @@ final class AgentEngine: ObservableObject {
         }
 
         if !currentCapabilityGaps.isEmpty {
-            learningQueueJobs =
+            inspectorState.learningQueueJobs =
                 learningQueueStore.enqueue(
                     gaps:
                         currentCapabilityGaps,
                     sourceGoal: text,
                     into:
-                        learningQueueJobs
+                        inspectorState.learningQueueJobs
                 )
 
             let queuedCount =
-                learningQueueJobs.filter {
+                inspectorState.learningQueueJobs.filter {
                     $0.state == .queued
                 }.count
 
@@ -1987,7 +1968,7 @@ final class AgentEngine: ObservableObject {
                         result
                             .frontmostVerified
 
-                    desktopControlStatus =
+                    inspectorState.desktopControlStatus =
                         result
                             .resolvedApplicationName +
                         (
@@ -2068,7 +2049,7 @@ final class AgentEngine: ObservableObject {
                         )
                     }
                 } catch {
-                    desktopControlStatus =
+                    inspectorState.desktopControlStatus =
                         "Uygulama kontrolü başarısız: " +
                         error.localizedDescription
                     desktopControlStore
@@ -2078,12 +2059,12 @@ final class AgentEngine: ObservableObject {
                         )
                     registerDebugIncident(
                         source: "desktop.app",
-                        message: desktopControlStatus,
+                        message: inspectorState.desktopControlStatus,
                         evidence: error.localizedDescription,
                         progress: .investigating
                     )
                     log(
-                        desktopControlStatus
+                        inspectorState.desktopControlStatus
                     )
                 }
 
@@ -2117,7 +2098,7 @@ final class AgentEngine: ObservableObject {
                                     )
                             )
 
-                    screenPerceptionReport =
+                    inspectorState.screenPerceptionReport =
                         report
                     try? screenPerceptionStore
                         .save(report)
@@ -2138,7 +2119,7 @@ final class AgentEngine: ObservableObject {
                             " pencere|runtime"
                         )
 
-                    screenPerceptionStatus =
+                    inspectorState.screenPerceptionStatus =
                         String(
                             report
                                 .recognizedText
@@ -2177,11 +2158,11 @@ final class AgentEngine: ObservableObject {
                                 .localizedDescription +
                             "|runtime"
                         )
-                    screenPerceptionStatus =
+                    inspectorState.screenPerceptionStatus =
                         "Screen Perception başarısız: " +
                         error.localizedDescription
                     log(
-                        screenPerceptionStatus
+                        inspectorState.screenPerceptionStatus
                     )
                 }
 
@@ -2528,7 +2509,7 @@ final class AgentEngine: ObservableObject {
         verificationSummary = "Yeni görev için doğrulama bekleniyor."
         fallbackPlan = nil
         recoverySummary = nil
-        debugIncident = nil
+        inspectorState.debugIncident = nil
         webResearchResults = []
         webResearchEvidence = []
         webResearchStatus = "Bu tur için araştırma henüz başlamadı."
@@ -3198,41 +3179,41 @@ final class AgentEngine: ObservableObject {
                 activities: activities
             )
 
-            mentorTraceReady = true
-            mentorTraceStatus = "Mentor kaydı hazır • GitHub'a gönderilebilir"
+            inspectorState.mentorTraceReady = true
+            inspectorState.mentorTraceStatus = "Mentor kaydı hazır • GitHub'a gönderilebilir"
             log("Mentor trace yerel olarak kaydedildi")
         } catch {
-            mentorTraceReady = false
-            mentorTraceStatus =
+            inspectorState.mentorTraceReady = false
+            inspectorState.mentorTraceStatus =
                 "Mentor kaydı oluşturulamadı: " +
                 error.localizedDescription
-            log(mentorTraceStatus)
+            log(inspectorState.mentorTraceStatus)
         }
     }
 
     func runTrainingLab() {
-        guard !trainingLabBusy else { return }
+        guard !inspectorState.trainingLabBusy else { return }
 
-        trainingLabBusy = true
-        trainingLabStatus = "KRALİ kendi temel yeterlilik testlerini çalıştırıyor…"
+        inspectorState.trainingLabBusy = true
+        inspectorState.trainingLabStatus = "KRALİ kendi temel yeterlilik testlerini çalıştırıyor…"
         log("Training Lab başladı")
 
         Task {
             await Task.yield()
 
             let report = trainingLab.run()
-            trainingLabReport = report
+            inspectorState.trainingLabReport = report
 
             do {
                 try trainingLabStore.save(report)
 
-                trainingLabStatus =
+                inspectorState.trainingLabStatus =
                     "\(report.passed)/\(report.total) test geçti • " +
                     "Core \(report.corePassed)/\(report.coreTotal) • " +
                     "North Star \(report.northStarPassed)/\(report.northStarTotal)"
 
-                mentorTraceReady = true
-                mentorTraceStatus =
+                inspectorState.mentorTraceReady = true
+                inspectorState.mentorTraceStatus =
                     "Training Lab raporu hazır • Mentora gönderilebilir"
 
                 log(
@@ -3259,37 +3240,37 @@ final class AgentEngine: ObservableObject {
                     )
                 }
             } catch {
-                trainingLabStatus =
+                inspectorState.trainingLabStatus =
                     "Training Lab tamamlandı fakat rapor kaydedilemedi: " +
                     error.localizedDescription
 
                 log("Training Lab raporu kaydedilemedi")
             }
 
-            trainingLabBusy = false
+            inspectorState.trainingLabBusy = false
         }
     }
 
     func runLiveResearchEval() {
-        guard !liveResearchEvalBusy else { return }
+        guard !inspectorState.liveResearchEvalBusy else { return }
 
-        liveResearchEvalBusy = true
-        liveResearchEvalStatus =
+        inspectorState.liveResearchEvalBusy = true
+        inspectorState.liveResearchEvalStatus =
             "Gerçek internet araştırma kalitesi test ediliyor…"
         log("Live Research Eval başladı")
 
         Task {
             let report = await liveResearchEval.run()
-            liveResearchEvalReport = report
+            inspectorState.liveResearchEvalReport = report
 
             do {
                 try liveResearchEvalStore.save(report)
 
-                liveResearchEvalStatus =
+                inspectorState.liveResearchEvalStatus =
                     "\(report.passed)/\(report.total) gerçek araştırma testi geçti"
 
-                mentorTraceReady = true
-                mentorTraceStatus =
+                inspectorState.mentorTraceReady = true
+                inspectorState.mentorTraceStatus =
                     "Live Research Eval raporu hazır • Mentora gönderilebilir"
 
                 log(
@@ -3299,36 +3280,36 @@ final class AgentEngine: ObservableObject {
                     String(report.total)
                 )
             } catch {
-                liveResearchEvalStatus =
+                inspectorState.liveResearchEvalStatus =
                     "Live Research Eval tamamlandı fakat rapor kaydedilemedi: " +
                     error.localizedDescription
 
                 log("Live Research Eval raporu kaydedilemedi")
             }
 
-            liveResearchEvalBusy = false
+            inspectorState.liveResearchEvalBusy = false
         }
     }
 
     func runArena() {
-        guard !arenaBusy else { return }
+        guard !inspectorState.arenaBusy else { return }
 
-        arenaBusy = true
-        arenaStatus =
+        inspectorState.arenaBusy = true
+        inspectorState.arenaStatus =
             "KRALİ açık-dünya görevlerini planner + reviewer ile test ediyor…"
         log("KRALİ Arena başladı")
 
         Task {
             let monitor = Task { @MainActor [weak self] in
                 while !Task.isCancelled {
-                    guard let self, self.arenaBusy else {
+                    guard let self, self.inspectorState.arenaBusy else {
                         break
                     }
 
                     if let progress =
                         self.arenaStore.readProgress(),
                        !progress.isEmpty {
-                        self.arenaStatus = progress
+                        self.inspectorState.arenaStatus = progress
                     }
 
                     try? await Task.sleep(
@@ -3340,18 +3321,18 @@ final class AgentEngine: ObservableObject {
             let report = await arena.run()
             monitor.cancel()
 
-            arenaReport = report
+            inspectorState.arenaReport = report
 
             do {
                 try arenaStore.save(report)
 
-                arenaStatus =
+                inspectorState.arenaStatus =
                     "\(report.passed)/\(report.total) geçti • " +
                     "\(report.failed) başarısız • " +
                     "Reviewer \(report.reviewerFlagged) işaret"
 
-                mentorTraceReady = true
-                mentorTraceStatus =
+                inspectorState.mentorTraceReady = true
+                inspectorState.mentorTraceStatus =
                     "Arena raporu hazır • Mentora gönderilebilir"
 
                 log(
@@ -3411,13 +3392,13 @@ final class AgentEngine: ObservableObject {
                     )
                 }
             } catch {
-                arenaStatus =
+                inspectorState.arenaStatus =
                     "Arena tamamlandı fakat rapor kaydedilemedi: " +
                     error.localizedDescription
                 log("Arena raporu kaydedilemedi")
             }
 
-            arenaBusy = false
+            inspectorState.arenaBusy = false
 
             let arenaNeedsDevelopment =
                 report.failed > 0 ||
@@ -3435,20 +3416,20 @@ final class AgentEngine: ObservableObject {
 
             let trainingGreen =
                 arenaCurrent &&
-                trainingLabReport?.failed == 0 &&
-                trainingLabReport?.appVersion ==
+                inspectorState.trainingLabReport?.failed == 0 &&
+                inspectorState.trainingLabReport?.appVersion ==
                     currentAppVersion
 
             let liveGreen =
                 arenaCurrent &&
-                liveResearchEvalReport?.failed == 0 &&
-                liveResearchEvalReport?.appVersion ==
+                inspectorState.liveResearchEvalReport?.failed == 0 &&
+                inspectorState.liveResearchEvalReport?.appVersion ==
                     currentAppVersion
 
             if arenaNeedsDevelopment &&
                trainingGreen &&
                liveGreen &&
-               !developerAgentBusy {
+               !inspectorState.developerAgentBusy {
                 log(
                     "Arena açık-dünya problemi buldu; Developer Agent candidate düzeltme için otomatik başlatılıyor"
                 )
@@ -3465,14 +3446,14 @@ final class AgentEngine: ObservableObject {
                             " • Arena: " +
                             report.appVersion +
                             " • Training: " +
-                            (trainingLabReport?.appVersion ?? "yok") +
+                            (inspectorState.trainingLabReport?.appVersion ?? "yok") +
                             " • Live: " +
-                            (liveResearchEvalReport?.appVersion ?? "yok"),
+                            (inspectorState.liveResearchEvalReport?.appVersion ?? "yok"),
                         branch: nil,
                         worktree: nil
                     )
 
-                developerAgentStatus = staleStatus
+                inspectorState.developerAgentStatus = staleStatus
                 developerBridge.writeStatus(
                     staleStatus
                 )
@@ -3480,7 +3461,7 @@ final class AgentEngine: ObservableObject {
                     "Developer Agent no_change kapısı reddedildi: diagnostic sürümleri güncel değil"
                 )
             } else if !arenaNeedsDevelopment &&
-                      !developerAgentBusy {
+                      !inspectorState.developerAgentBusy {
                 let greenStatus =
                     DeveloperAgentStatus(
                         state: "no_change",
@@ -3490,7 +3471,7 @@ final class AgentEngine: ObservableObject {
                         worktree: nil
                     )
 
-                developerAgentStatus = greenStatus
+                inspectorState.developerAgentStatus = greenStatus
                 developerBridge.writeStatus(
                     greenStatus
                 )
@@ -3499,10 +3480,10 @@ final class AgentEngine: ObservableObject {
     }
 
     func runScreenPerceptionProbe() {
-        guard !screenPerceptionBusy else { return }
+        guard !inspectorState.screenPerceptionBusy else { return }
 
-        screenPerceptionBusy = true
-        screenPerceptionStatus =
+        inspectorState.screenPerceptionBusy = true
+        inspectorState.screenPerceptionStatus =
             "Ekran yakalanıyor ve yerel olarak analiz ediliyor…"
         screenPerceptionStore.saveStatus(
             "running|Ekran yakalanıyor ve yerel olarak analiz ediliyor…"
@@ -3517,10 +3498,10 @@ final class AgentEngine: ObservableObject {
                             "Aktif ekrandaki uygulama durumunu, görünen ana içeriği ve güvenilir doğrulama sinyallerini açıkla."
                     )
 
-                screenPerceptionReport = report
+                inspectorState.screenPerceptionReport = report
                 try screenPerceptionStore.save(report)
 
-                screenPerceptionStatus =
+                inspectorState.screenPerceptionStatus =
                     String(report.recognizedText.count) +
                     " metin satırı • " +
                     String(report.visibleWindows.count) +
@@ -3534,8 +3515,8 @@ final class AgentEngine: ObservableObject {
                     " pencere"
                 )
 
-                mentorTraceReady = true
-                mentorTraceStatus =
+                inspectorState.mentorTraceReady = true
+                inspectorState.mentorTraceStatus =
                     "Screen Perception raporu hazır • Mentora gönderilebilir"
 
                 log(
@@ -3548,7 +3529,7 @@ final class AgentEngine: ObservableObject {
                     " metin satırı"
                 )
             } catch {
-                screenPerceptionStatus =
+                inspectorState.screenPerceptionStatus =
                     "Screen Perception başarısız: " +
                     error.localizedDescription
 
@@ -3557,29 +3538,29 @@ final class AgentEngine: ObservableObject {
                     error.localizedDescription
                 )
 
-                mentorTraceReady = true
-                mentorTraceStatus =
+                inspectorState.mentorTraceReady = true
+                inspectorState.mentorTraceStatus =
                     "Screen Perception hata raporu hazır • Mentora gönderilebilir"
 
                 registerDebugIncident(
                     source: "perception.screen",
-                    message: screenPerceptionStatus,
+                    message: inspectorState.screenPerceptionStatus,
                     evidence: error.localizedDescription,
                     progress: .investigating
                 )
 
-                log(screenPerceptionStatus)
+                log(inspectorState.screenPerceptionStatus)
             }
 
-            screenPerceptionBusy = false
+            inspectorState.screenPerceptionBusy = false
         }
     }
 
     func runDesktopControlProbe() {
-        guard !desktopControlBusy else { return }
+        guard !inspectorState.desktopControlBusy else { return }
 
-        desktopControlBusy = true
-        desktopControlStatus =
+        inspectorState.desktopControlBusy = true
+        inspectorState.desktopControlStatus =
             "Accessibility kontrol ediliyor; Notlar güvenli test için açılıp doğrulanıyor…"
         desktopControlStore.saveStatus(
             "running|Accessibility kontrolü ve uygulama açma testi çalışıyor."
@@ -3596,10 +3577,10 @@ final class AgentEngine: ObservableObject {
                                 "com.apple.Notes"
                         )
 
-                desktopControlReport = report
+                inspectorState.desktopControlReport = report
                 try desktopControlStore.save(report)
 
-                desktopControlStatus =
+                inspectorState.desktopControlStatus =
                     (report.launchOrActivateSucceeded
                         ? "Notlar açıldı/öne geldi"
                         : "Notlar doğrulanamadı") +
@@ -3622,16 +3603,16 @@ final class AgentEngine: ObservableObject {
                     String(report.screenVerifiedFrontmost)
                 )
 
-                mentorTraceReady = true
-                mentorTraceStatus =
+                inspectorState.mentorTraceReady = true
+                inspectorState.mentorTraceStatus =
                     "Desktop Control probe raporu hazır • Mentora gönderilebilir"
 
                 log(
                     "Desktop Control Probe tamamlandı: " +
-                    desktopControlStatus
+                    inspectorState.desktopControlStatus
                 )
             } catch {
-                desktopControlStatus =
+                inspectorState.desktopControlStatus =
                     "Desktop Control başarısız: " +
                     error.localizedDescription
 
@@ -3640,32 +3621,32 @@ final class AgentEngine: ObservableObject {
                     error.localizedDescription
                 )
 
-                mentorTraceReady = true
-                mentorTraceStatus =
+                inspectorState.mentorTraceReady = true
+                inspectorState.mentorTraceStatus =
                     "Desktop Control hata raporu hazır • Mentora gönderilebilir"
 
                 registerDebugIncident(
                     source: "desktop.app",
-                    message: desktopControlStatus,
+                    message: inspectorState.desktopControlStatus,
                     evidence: error.localizedDescription,
                     progress: .investigating
                 )
 
-                log(desktopControlStatus)
+                log(inspectorState.desktopControlStatus)
             }
 
-            desktopControlBusy = false
+            inspectorState.desktopControlBusy = false
         }
     }
 
     private func startNextLearningJobIfNeeded() {
-        guard !developerAgentBusy else {
+        guard !inspectorState.developerAgentBusy else {
             return
         }
 
         guard let next =
             learningQueueStore.nextQueued(
-                from: learningQueueJobs
+                from: inspectorState.learningQueueJobs
             )
         else {
             return
@@ -3678,20 +3659,20 @@ final class AgentEngine: ObservableObject {
                 )
         else {
             if let index =
-                learningQueueJobs.firstIndex(
+                inspectorState.learningQueueJobs.firstIndex(
                     where: {
                         $0.id == next.id
                     }
                 ) {
-                learningQueueJobs[index]
+                inspectorState.learningQueueJobs[index]
                     .state = .failed
-                learningQueueJobs[index]
+                inspectorState.learningQueueJobs[index]
                     .updatedAt = Date()
-                learningQueueJobs[index]
+                inspectorState.learningQueueJobs[index]
                     .lastStatus =
                         "Immutable öğrenme brief'i oluşturulamadı."
                 learningQueueStore.save(
-                    learningQueueJobs
+                    inspectorState.learningQueueJobs
                 )
             }
 
@@ -3703,20 +3684,20 @@ final class AgentEngine: ObservableObject {
         }
 
         if let index =
-            learningQueueJobs.firstIndex(
+            inspectorState.learningQueueJobs.firstIndex(
                 where: {
                     $0.id == next.id
                 }
             ) {
-            learningQueueJobs[index]
+            inspectorState.learningQueueJobs[index]
                 .state = .running
-            learningQueueJobs[index]
+            inspectorState.learningQueueJobs[index]
                 .updatedAt = Date()
-            learningQueueJobs[index]
+            inspectorState.learningQueueJobs[index]
                 .lastStatus =
                     "Developer Agent worker'a verildi."
             learningQueueStore.save(
-                learningQueueJobs
+                inspectorState.learningQueueJobs
             )
         }
 
@@ -3740,7 +3721,7 @@ final class AgentEngine: ObservableObject {
         learningJob: AgentLearningJob? = nil,
         learningJobBriefURL: URL? = nil
     ) {
-        guard !developerAgentBusy else {
+        guard !inspectorState.developerAgentBusy else {
             if let learningJob {
                 log(
                     "Developer Agent meşgul; job sırada kalıyor • " +
@@ -3750,7 +3731,7 @@ final class AgentEngine: ObservableObject {
             return
         }
 
-        developerAgentBusy = true
+        inspectorState.developerAgentBusy = true
 
         let initialMessage: String
         if let learningJob {
@@ -3763,7 +3744,7 @@ final class AgentEngine: ObservableObject {
                 "Developer Agent diagnostic'leri inceliyor…"
         }
 
-        developerAgentStatus =
+        inspectorState.developerAgentStatus =
             DeveloperAgentStatus(
                 state: "running",
                 message:
@@ -3773,7 +3754,7 @@ final class AgentEngine: ObservableObject {
             )
 
         developerBridge.writeStatus(
-            developerAgentStatus
+            inspectorState.developerAgentStatus
         )
 
         log(
@@ -3789,7 +3770,7 @@ final class AgentEngine: ObservableObject {
                 while !Task.isCancelled {
                     guard
                         let self,
-                        self.developerAgentBusy
+                        self.inspectorState.developerAgentBusy
                     else {
                         break
                     }
@@ -3799,7 +3780,7 @@ final class AgentEngine: ObservableObject {
                             .readStatus()
 
                     if liveStatus.state != "idle" {
-                        self.developerAgentStatus =
+                        self.inspectorState.developerAgentStatus =
                             liveStatus
 
                         self.updateRunningLearningJob(
@@ -3845,9 +3826,9 @@ final class AgentEngine: ObservableObject {
 
             monitor.cancel()
 
-            developerAgentStatus =
+            inspectorState.developerAgentStatus =
                 status
-            developerAgentBusy =
+            inspectorState.developerAgentBusy =
                 false
 
             finishActiveLearningJob(
@@ -3956,7 +3937,7 @@ final class AgentEngine: ObservableObject {
         guard
             let activeLearningJobID,
             let index =
-                learningQueueJobs
+                inspectorState.learningQueueJobs
                     .firstIndex(
                         where: {
                             $0.id ==
@@ -3967,17 +3948,17 @@ final class AgentEngine: ObservableObject {
             return
         }
 
-        learningQueueJobs[index]
+        inspectorState.learningQueueJobs[index]
             .updatedAt = Date()
-        learningQueueJobs[index]
+        inspectorState.learningQueueJobs[index]
             .branch = status.branch
-        learningQueueJobs[index]
+        inspectorState.learningQueueJobs[index]
             .worktree = status.worktree
-        learningQueueJobs[index]
+        inspectorState.learningQueueJobs[index]
             .lastStatus = status.message
 
         learningQueueStore.save(
-            learningQueueJobs
+            inspectorState.learningQueueJobs
         )
     }
 
@@ -3987,7 +3968,7 @@ final class AgentEngine: ObservableObject {
         guard
             let activeLearningJobID,
             let index =
-                learningQueueJobs
+                inspectorState.learningQueueJobs
                     .firstIndex(
                         where: {
                             $0.id ==
@@ -4015,24 +3996,24 @@ final class AgentEngine: ObservableObject {
             state = .failed
         }
 
-        learningQueueJobs[index]
+        inspectorState.learningQueueJobs[index]
             .state = state
-        learningQueueJobs[index]
+        inspectorState.learningQueueJobs[index]
             .updatedAt = Date()
-        learningQueueJobs[index]
+        inspectorState.learningQueueJobs[index]
             .branch = status.branch
-        learningQueueJobs[index]
+        inspectorState.learningQueueJobs[index]
             .worktree = status.worktree
-        learningQueueJobs[index]
+        inspectorState.learningQueueJobs[index]
             .lastStatus = status.message
 
         learningQueueStore.save(
-            learningQueueJobs
+            inspectorState.learningQueueJobs
         )
 
         log(
             "Learning Queue job tamamlandı • " +
-            learningQueueJobs[index]
+            inspectorState.learningQueueJobs[index]
                 .capabilityID +
             " • " +
             state.title
@@ -4057,7 +4038,7 @@ final class AgentEngine: ObservableObject {
             progress: progress
         )
 
-        debugIncident = incident
+        inspectorState.debugIncident = incident
 
         log(
             "Debug/Recovery: " +
@@ -4072,11 +4053,11 @@ final class AgentEngine: ObservableObject {
     private func resolveDebugIncident(
         summary: String
     ) {
-        guard let incident = debugIncident else {
+        guard let incident = inspectorState.debugIncident else {
             return
         }
 
-        debugIncident = debugRecoveryCenter.recovered(
+        inspectorState.debugIncident = debugRecoveryCenter.recovered(
             from: incident,
             summary: summary
         )
@@ -4088,7 +4069,7 @@ final class AgentEngine: ObservableObject {
     }
 
     func syncMentorTrace() {
-        guard !mentorSyncBusy else { return }
+        guard !inspectorState.mentorSyncBusy else { return }
 
         let hasTrace = fileManager.fileExists(
             atPath: mentorTraceStore.latestURL.path
@@ -4101,8 +4082,8 @@ final class AgentEngine: ObservableObject {
         )
 
         guard hasTrace || hasTrainingReport || hasLiveEvalReport else {
-            mentorTraceReady = false
-            mentorTraceStatus =
+            inspectorState.mentorTraceReady = false
+            inspectorState.mentorTraceStatus =
                 "Önce bir KRALİ görevi, Training Lab veya Live Research Eval çalıştır."
             return
         }
@@ -4114,13 +4095,13 @@ final class AgentEngine: ObservableObject {
             .path
 
         guard fileManager.fileExists(atPath: scriptPath) else {
-            mentorTraceStatus =
+            inspectorState.mentorTraceStatus =
                 "Mentor sync scripti bulunamadı. Önce uygulamayı güncelle."
             return
         }
 
-        mentorSyncBusy = true
-        mentorTraceStatus = "Mentor kaydı private GitHub'a aktarılıyor…"
+        inspectorState.mentorSyncBusy = true
+        inspectorState.mentorTraceStatus = "Mentor kaydı private GitHub'a aktarılıyor…"
 
         Task {
             let result = await Task.detached(
@@ -4161,10 +4142,10 @@ final class AgentEngine: ObservableObject {
             }
             .value
 
-            mentorSyncBusy = false
+            inspectorState.mentorSyncBusy = false
 
             if result.0 == 0 {
-                mentorTraceStatus =
+                inspectorState.mentorTraceStatus =
                     "Mentor kaydı GitHub'a aktarıldı • bana “mentor kaydına bak” diyebilirsin."
                 log("Mentor trace GitHub'a senkronlandı")
             } else {
@@ -4173,7 +4154,7 @@ final class AgentEngine: ObservableObject {
                     .suffix(3)
                     .joined(separator: " ")
 
-                mentorTraceStatus =
+                inspectorState.mentorTraceStatus =
                     "Mentor sync başarısız: " +
                     (compact.isEmpty
                         ? "çıkış kodu \(result.0)"
