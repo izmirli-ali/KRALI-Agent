@@ -81,6 +81,8 @@ struct DeveloperAgentStatus: Hashable {
             "local_agent_resumed",
             "local_agent_running",
             "local_agent_tool",
+            "local_agent_structured_tool",
+            "local_agent_structured_mutation",
             "local_agent_target_found",
             "local_agent_target_verified",
             "local_agent_completed",
@@ -172,6 +174,10 @@ struct DeveloperAgentStatus: Hashable {
             return "Native yerel agent çalışıyor"
         case "local_agent_tool":
             return "Yerel agent araç kullanıyor"
+        case "local_agent_structured_tool":
+            return "Controller araç devamı uyguluyor"
+        case "local_agent_structured_mutation":
+            return "Controller kaynak kod değişikliği uyguluyor"
         case "local_agent_completed":
             return "Yerel agent turu tamamlandı"
         case "setup_local_ai":
