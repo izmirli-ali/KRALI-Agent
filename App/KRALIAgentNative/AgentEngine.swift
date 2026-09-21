@@ -1165,7 +1165,7 @@ final class AgentEngine: ObservableObject {
             }
         }
 
-        var baseReply: String
+        var baseReply = ""
         var outcomeHandledMission = false
 
         if let outcomeResolution =
