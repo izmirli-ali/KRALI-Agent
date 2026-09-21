@@ -67,6 +67,8 @@ struct AgentTrainingLab {
         AgentMissionNormalizer()
     private let capabilityGapResolver =
         AgentCapabilityGapResolver()
+    private let problemSolver =
+        AgentProblemSolver()
     private let fileQueryParser =
         AgentFileQueryParser()
 
@@ -241,6 +243,12 @@ struct AgentTrainingLab {
         results.append(
             fileQueryInflectedBrainIntentResult()
         )
+        results.append(
+            problemSolverUsesExistingStrategyBeforeLearningResult()
+        )
+        results.append(
+            problemSolverReflectionChoosesAnotherSafeStrategyResult()
+        )
 
         let core = results.filter { $0.tier == .core }
         let northStar = results.filter { $0.tier == .northStar }
@@ -258,6 +266,220 @@ struct AgentTrainingLab {
             northStarPassed: northStar.filter(\.passed).count,
             northStarTotal: northStar.count,
             results: results
+        )
+    }
+
+    private func problemSolverUsesExistingStrategyBeforeLearningResult()
+        -> TrainingScenarioResult {
+        let step = AgentTaskGraphStep(
+            index: 0,
+            title: "Public web sayfasını oku",
+            capabilityID: "browser.control",
+            operation: "public site page read inspect",
+            role: .retrieve,
+            dependsOn: [],
+            risk: .external,
+            isAvailable: false,
+            requiresApproval: false
+        )
+
+        let graph = AgentTaskGraph(
+            objective:
+                "Public bir web sayfasındaki bilgiyi oku",
+            steps: [step]
+        )
+
+        let resolution =
+            problemSolver.solve(
+                graph: graph,
+                capabilities:
+                    capabilityRegistry.all,
+                observations: []
+            )
+
+        var diagnostics: [String] = []
+
+        if resolution.chosenStrategy?
+            .requiresLearning == true {
+            diagnostics.append(
+                "Mevcut güvenli alternatifler varken Problem Solver Learning stratejisini seçti."
+            )
+        }
+
+        let executableAlternatives =
+            resolution.strategies.filter {
+                $0.executableNow &&
+                !$0.requiresLearning
+            }
+
+        if executableAlternatives.isEmpty {
+            diagnostics.append(
+                "Blocked browser step için mevcut capability'lerden hiçbir çözüm stratejisi üretilmedi."
+            )
+        }
+
+        if !resolution.strategies.contains(
+            where: {
+                $0.kind ==
+                    .publicResearch ||
+                $0.kind ==
+                    .screenObservation ||
+                $0.kind ==
+                    .genericAppWorkflow
+            }
+        ) {
+            diagnostics.append(
+                "Public/read-only problem için generic çözüm alternatifleri eksik."
+            )
+        }
+
+        return TrainingScenarioResult(
+            scenarioID:
+                "problem-solver-before-learning",
+            title:
+                "Problem Solver Learning'den önce mevcut stratejileri denemeli",
+            tier: .core,
+            prompt:
+                "Public web sayfasındaki bilgiyi oku",
+            passed: diagnostics.isEmpty,
+            goal:
+                "Mevcut güvenli capability kombinasyonunu öğrenmeden önce seç",
+            route: [
+                "Core",
+                "Problem Solver",
+                "Strategy"
+            ],
+            selectedCapabilities:
+                executableAlternatives
+                    .flatMap(
+                        \.capabilityIDs
+                    )
+                    .uniquedForTraining(),
+            unavailableCapabilities: [
+                "browser.control"
+            ],
+            diagnostics: diagnostics
+        )
+    }
+
+    private func problemSolverReflectionChoosesAnotherSafeStrategyResult()
+        -> TrainingScenarioResult {
+        let step = AgentTaskGraphStep(
+            index: 0,
+            title: "Uygulamadaki görünür bilgiyi oku",
+            capabilityID: "browser.control",
+            operation:
+                "observe active application visible state",
+            role: .retrieve,
+            dependsOn: [],
+            risk: .external,
+            isAvailable: false,
+            requiresApproval: false
+        )
+
+        let initial =
+            problemSolver.strategiesForStep(
+                step,
+                capabilities:
+                    capabilityRegistry.all,
+                dependencyEvidence: ""
+            )
+
+        guard let first =
+            initial.first(
+                where: {
+                    $0.executableNow &&
+                    !$0.requiresLearning
+                }
+            )
+        else {
+            return TrainingScenarioResult(
+                scenarioID:
+                    "problem-solver-reflection",
+                title:
+                    "Problem Solver başarısız stratejiden sonra yeniden planlamalı",
+                tier: .core,
+                prompt:
+                    "Uygulamadaki görünür bilgiyi oku",
+                passed: false,
+                goal:
+                    "İkinci güvenli stratejiyi seç",
+                route: [
+                    "Core",
+                    "Problem Solver",
+                    "Reflection"
+                ],
+                selectedCapabilities: [],
+                unavailableCapabilities: [
+                    "browser.control"
+                ],
+                diagnostics: [
+                    "İlk güvenli strateji üretilemedi."
+                ]
+            )
+        }
+
+        let reflected =
+            problemSolver.reflection(
+                step: step,
+                attemptedStrategyIDs: [
+                    first.id
+                ],
+                dependencyEvidence: "",
+                capabilities:
+                    capabilityRegistry.all
+            )
+
+        var diagnostics: [String] = []
+
+        if reflected.chosenStrategyID ==
+            first.id {
+            diagnostics.append(
+                "Reflection başarısız ilk stratejiyi tekrar seçti."
+            )
+        }
+
+        if reflected.chosenStrategy?
+            .requiresLearning == true,
+           initial.filter({
+                $0.executableNow &&
+                !$0.requiresLearning &&
+                $0.id != first.id
+           }).isEmpty == false {
+            diagnostics.append(
+                "Denenmemiş güvenli strateji varken Learning'e geçildi."
+            )
+        }
+
+        if reflected.reflection == nil {
+            diagnostics.append(
+                "Reflection gerekçesi üretilmedi."
+            )
+        }
+
+        return TrainingScenarioResult(
+            scenarioID:
+                "problem-solver-reflection",
+            title:
+                "Problem Solver başarısız stratejiden sonra yeniden planlamalı",
+            tier: .core,
+            prompt:
+                "Uygulamadaki görünür bilgiyi oku",
+            passed: diagnostics.isEmpty,
+            goal:
+                "Başarısız ilk stratejiden sonra denenmemiş güvenli çözümü seç",
+            route: [
+                "Core",
+                "Problem Solver",
+                "Reflection"
+            ],
+            selectedCapabilities:
+                reflected.chosenStrategy?
+                    .capabilityIDs ?? [],
+            unavailableCapabilities: [
+                "browser.control"
+            ],
+            diagnostics: diagnostics
         )
     }
 
@@ -3988,5 +4210,15 @@ struct AgentArenaStore {
             AgentArenaReport.self,
             from: data
         )
+    }
+}
+
+
+private extension Array where Element == String {
+    func uniquedForTraining() -> [String] {
+        var seen = Set<String>()
+        return filter {
+            seen.insert($0).inserted
+        }
     }
 }
