@@ -177,7 +177,15 @@ final class AgentEngine: ObservableObject {
             ? "Henüz görev bağlamı yok."
             : "\(contextMemoryEntries.count) bağlam kaydı hazır."
 
-        capabilityLearningBacklog = learningStore.load()
+        capabilityLearningBacklog =
+            learningStore.merge(
+                existing:
+                    learningStore.load(),
+                plans: [],
+                capabilities:
+                    capabilityRegistry.all
+            )
+
         inspectorState.mentorTraceReady =
             fileManager.fileExists(
                 atPath: mentorTraceStore.latestURL.path
