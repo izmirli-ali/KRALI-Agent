@@ -189,13 +189,17 @@ final class AgentFileSearchCoordinator {
         if decision.sortMode == .newestFirst {
             results.sort {
                 let left =
-                    $0.modificationDate ??
-                    $0.creationDate ??
-                    .distantPast
+                    rankingDate(
+                        for: $0,
+                        field:
+                            query.dateField
+                    )
                 let right =
-                    $1.modificationDate ??
-                    $1.creationDate ??
-                    .distantPast
+                    rankingDate(
+                        for: $1,
+                        field:
+                            query.dateField
+                    )
                 return left > right
             }
         }
@@ -371,6 +375,26 @@ final class AgentFileSearchCoordinator {
         )
 
         return snapshot
+    }
+
+    private func rankingDate(
+        for file: FileRecord,
+        field: AgentDateField
+    ) -> Date {
+        switch field {
+        case .created:
+            return file.creationDate ??
+                file.modificationDate ??
+                .distantPast
+        case .modified:
+            return file.modificationDate ??
+                file.creationDate ??
+                .distantPast
+        case .either:
+            return file.modificationDate ??
+                file.creationDate ??
+                .distantPast
+        }
     }
 
     private func filterByLegacyTarget(
