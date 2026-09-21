@@ -3164,7 +3164,7 @@ final class AgentEngine: ObservableObject {
             inspectorState.debugIncident {
             observations.append(
                 "Son debug gözlemi: " +
-                incident.message
+                incident.summary
             )
         }
 
