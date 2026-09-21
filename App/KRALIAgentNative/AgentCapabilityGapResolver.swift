@@ -146,7 +146,12 @@ struct AgentCapabilityGapResolver {
             "observation interrupted",
             "focus changed",
             "foreground changed",
-            "kullanici veya baska bir uygulama odagi degistirmis olabilir"
+            "kullanici veya baska bir uygulama odagi degistirmis olabilir",
+            "observation hazir degil",
+            "ocr kaniti uretmedi",
+            "observation belirsiz",
+            "tam hedef domain dogrulanamadi",
+            "gecici algi/yuklenme belirsizligi"
         ]
 
         return transientMarkers.contains {
