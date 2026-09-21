@@ -5,6 +5,7 @@ ROOT="$HOME/Developer/KRALI-Agent"
 PROJECT="$ROOT/App/KRALIAgentNative.xcodeproj"
 SCHEME="KRALIAgentNative"
 BUILD_DIR="$ROOT/.build"
+BUILD_LOG="$HOME/Library/Logs/KRALI-Agent-Build.log"
 APP_VERSION="$(/bin/cat "$ROOT/VERSION" 2>/dev/null | /usr/bin/tr -d '[:space:]')"
 if [ -z "$APP_VERSION" ]; then
     echo "❌ VERSION dosyası okunamadı."
@@ -67,17 +68,29 @@ make_icon 1024 "icon_512x512@2x.png"
 echo "2/6  Yeni sürüm derleniyor..."
 rm -rf "$BUILD_DIR"
 
-if ! xcodebuild \
+mkdir -p "$HOME/Library/Logs"
+: > "$BUILD_LOG"
+
+xcodebuild \
     -project "$PROJECT" \
     -scheme "$SCHEME" \
     -configuration Debug \
     -derivedDataPath "$BUILD_DIR" \
     -allowProvisioningUpdates \
     MARKETING_VERSION="$APP_VERSION" \
-    build
-then
+    build 2>&1 | /usr/bin/tee "$BUILD_LOG"
+
+BUILD_EXIT="${pipestatus[1]}"
+
+if [ "$BUILD_EXIT" -ne 0 ]; then
     echo ""
     echo "❌ Otomatik build başarısız."
+    echo ""
+    echo "Compiler hata özeti:"
+    /usr/bin/grep -n -E "error:|fatal error:|SwiftCompile.*failed" "$BUILD_LOG" | /usr/bin/tail -n 40 || true
+    echo ""
+    echo "Tam build logu:"
+    echo "$BUILD_LOG"
     exit 2
 fi
 
