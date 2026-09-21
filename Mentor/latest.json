@@ -1,63 +1,63 @@
 {
   "activityTail" : [
     {
-      "date" : "2026-09-21T10:15:39Z",
+      "date" : "2026-09-21T11:41:26Z",
       "text" : "Debug/Recovery: Bilinmeyen hata • Hata ayıklanıyor • verifier"
     },
     {
-      "date" : "2026-09-21T10:15:39Z",
+      "date" : "2026-09-21T11:41:26Z",
       "text" : "0 klasör eşleşmesi bulundu"
     },
     {
-      "date" : "2026-09-21T10:15:39Z",
+      "date" : "2026-09-21T11:41:26Z",
       "text" : "Yerel klasör araması: klasörleri bul"
     },
     {
-      "date" : "2026-09-21T10:15:39Z",
+      "date" : "2026-09-21T11:41:26Z",
       "text" : "4 ekran görüntüsü adayı bulundu"
     },
     {
-      "date" : "2026-09-21T10:15:39Z",
-      "text" : "1734 dosya ve 56 klasör indekslendi"
+      "date" : "2026-09-21T11:41:26Z",
+      "text" : "1739 dosya ve 56 klasör indekslendi"
     },
     {
-      "date" : "2026-09-21T10:15:39Z",
+      "date" : "2026-09-21T11:41:26Z",
       "text" : "Seçilen kabiliyetler: Akıl yürütme, Bağlam, Dosya metadata, Dosya arama"
     },
     {
-      "date" : "2026-09-21T10:15:39Z",
+      "date" : "2026-09-21T11:41:26Z",
       "text" : "Otomatik rota: Core → Goal → Context → Plan → Files → Verify → Response"
     },
     {
-      "date" : "2026-09-21T10:15:39Z",
+      "date" : "2026-09-21T11:41:26Z",
       "text" : "Seçilen plan: Seçili çalışma alanını salt-okunur tara, filtreleri uygula ve en uygun sonuçları göster"
     },
     {
-      "date" : "2026-09-21T10:15:39Z",
+      "date" : "2026-09-21T11:41:26Z",
       "text" : "KRALİ Core hedef sözleşmesi: klasörleri bul"
     },
     {
-      "date" : "2026-09-21T10:15:39Z",
+      "date" : "2026-09-21T11:41:26Z",
       "text" : "Bağlam firewall: önceki görev bağlamları bu tura taşınmadı"
     },
     {
-      "date" : "2026-09-21T10:15:30Z",
+      "date" : "2026-09-21T11:41:21Z",
       "text" : "Apple yerel zeka hazır"
     },
     {
-      "date" : "2026-09-21T10:15:30Z",
+      "date" : "2026-09-21T11:41:21Z",
       "text" : "Çalışma klasörü yolu geri yüklendi; indeks gerektiğinde oluşturulacak: Desktop"
     },
     {
-      "date" : "2026-09-21T10:15:30Z",
+      "date" : "2026-09-21T11:41:21Z",
       "text" : "Ağır geliştirici testleri normal açılışta otomatik çalıştırılmıyor"
     },
     {
-      "date" : "2026-09-21T10:15:30Z",
+      "date" : "2026-09-21T11:41:21Z",
       "text" : "Dinamik hedef ve kabiliyet yönlendirme aktif"
     },
     {
-      "date" : "2026-09-21T10:15:30Z",
+      "date" : "2026-09-21T11:41:21Z",
       "text" : "KRALİ Core hazır"
     }
   ],
@@ -94,7 +94,7 @@
   "contextMemory" : [
 
   ],
-  "createdAt" : "2026-09-21T10:15:39Z",
+  "createdAt" : "2026-09-21T11:41:26Z",
   "executionSteps" : [
     {
       "capabilityID" : "core.reasoning",
@@ -143,7 +143,7 @@
   "taskGraph" : [
 
   ],
-  "traceID" : "933221EC-FD50-4636-93F7-7FB637434E33",
+  "traceID" : "14F21D65-74AF-4630-8985-7D52C1DF6F34",
   "userInput" : "masaüstündeki klasörleri bul",
   "verificationState" : "attention",
   "verificationSummary" : "Arama teknik olarak tamamlandı ancak 0 sonuç döndü."
