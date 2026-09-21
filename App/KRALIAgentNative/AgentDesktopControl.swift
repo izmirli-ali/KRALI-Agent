@@ -157,13 +157,14 @@ actor AgentDesktopControl {
                 ? "NSWorkspace frontmost"
                 : "unverified"
 
-        if !frontmostVerified,
-           await visuallyForeground(
+        if !frontmostVerified {
+            if await visuallyForeground(
                 candidate
-           ) {
-            frontmostVerified = true
-            verificationSource =
-                "ScreenCaptureKit z-order"
+            ) {
+                frontmostVerified = true
+                verificationSource =
+                    "ScreenCaptureKit z-order"
+            }
         }
 
         var fallbackScreenSummary: String?
