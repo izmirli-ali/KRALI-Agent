@@ -789,6 +789,8 @@ const prompt = [
   "",
   "Kurallar:",
   learningPathRule,
+  "- KRALI_ARCHITECTURE.md içindeki Senaryo bağımsızlığı ilkesini değişmez sözleşme kabul et.",
+  "- Tek kullanıcı örneğini geçirmek için uygulama/site adına özel branch veya hard-code ekleme; önce semantic parametreleme + mevcut generic primitive bileşimini dene.",
   "- Önce rg/grep ile bu capability\'nin registry, resolver, executor ve verifier bağlantılarını bul.",
   "- Tek uygulama/marka adına özel hard-code yazma; generic provider/strategy tasarla.",
   "- Ücretli API veya yeni abonelik bağımlılığı ekleme.",
@@ -823,9 +825,10 @@ Kurallar:
 3. VERSION, updater, signing kimliği ve bundle/team ayarlarını değiştirme.
 4. Mentor JSON dosyalarını değiştirme.
 5. Kanıtı olmayan büyük refactor yapma.
-6. Tek marka/uygulama/prompt örneğine hard-code yazma.
-7. Gerçek capability yoksa yapılmış gibi gösterme.
-8. İş sonunda /bin/zsh Scripts/build-check.command çalıştır.
+6. Tek marka/uygulama/prompt örneğine hard-code yazma; önce semantic parametreleme ve mevcut generic primitive bileşimini kullan.
+7. Senaryo için yeni kod yazmadan önce KRALI_ARCHITECTURE.md içindeki Senaryo bağımsızlığı ilkesini uygula.
+8. Gerçek capability yoksa yapılmış gibi gösterme.
+9. İş sonunda /bin/zsh Scripts/build-check.command çalıştır.
 
 Öncelik:
 capability gap → Arena failure → Live Eval failure → güncel Mentor failure → Training regression.
