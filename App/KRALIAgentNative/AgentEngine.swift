@@ -1901,6 +1901,58 @@ final class AgentEngine: ObservableObject {
             }
         )
 
+        let foundationalCapabilityIDs =
+            Set([
+                "core.reasoning",
+                "context.local"
+            ])
+
+        let deterministicToolCapabilityIDs =
+            fallbackGoal
+                .requiredCapabilityIDs
+                .subtracting(
+                    foundationalCapabilityIDs
+                )
+
+        let semanticToolCapabilityIDs =
+            ids.subtracting(
+                foundationalCapabilityIDs
+            )
+
+        // A reasoning-only user request must stay reasoning-only.
+        // The semantic model may enrich the reasoning shape, but it must not
+        // invent file, screen, app, web, edit or other tool execution when
+        // the deterministic intent layer did not establish any tool need.
+        if deterministicToolCapabilityIDs.isEmpty,
+           !semanticToolCapabilityIDs.isEmpty {
+            return false
+        }
+
+        let toolGroundedOutcomes =
+            Set<AgentGoalOutcome>([
+                .locate,
+                .assessContent,
+                .research,
+                .edit,
+                .organize,
+                .open,
+                .remember,
+                .communicate
+            ])
+
+        let introducedToolOutcomes =
+            outcomes
+                .intersection(
+                    toolGroundedOutcomes
+                )
+                .subtracting(
+                    fallbackGoal.outcomes
+                )
+
+        guard introducedToolOutcomes.isEmpty else {
+            return false
+        }
+
         if fallbackGoal.outcomes.contains(.edit) {
             guard outcomes.contains(.edit) else {
                 return false
