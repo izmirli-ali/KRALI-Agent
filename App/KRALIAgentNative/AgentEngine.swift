@@ -3835,9 +3835,41 @@ final class AgentEngine: ObservableObject {
         var attempts: [AgentOutcomeStrategyAttempt] = []
         var outputs: [String] = []
         var executed = Set<String>()
+        var verifiedNavigationOutput: String?
 
         for requirement in
             resolution.contract.requirements {
+            if requirement.kind ==
+                .retrievePublicInformation,
+               let verifiedNavigationOutput,
+               !verifiedNavigationOutput
+                    .trimmingCharacters(
+                        in:
+                            .whitespacesAndNewlines
+                    )
+                    .isEmpty {
+                attempts.append(
+                    AgentOutcomeStrategyAttempt(
+                        id: UUID()
+                            .uuidString,
+                        strategyID:
+                            requirement.id +
+                            ":reuse-navigation-evidence",
+                        requirementID:
+                            requirement.id,
+                        state:
+                            .succeeded,
+                        summary:
+                            "Aynı görev içindeki doğrulanmış web-navigation ekran kanıtı yeniden kullanıldı; ikinci URL açılışı veya bağımsız ekran gözlemi yapılmadı.",
+                        executedCapabilityIDs: []
+                    )
+                )
+
+                log(
+                    "Outcome Strategy başarılı: doğrulanmış navigation kanıtı yeniden kullanıldı"
+                )
+                continue
+            }
             let strategies =
                 resolution
                     .orderedExecutableStrategies(
@@ -3892,15 +3924,23 @@ final class AgentEngine: ObservableObject {
                             .executedCapabilityIDs
                     )
 
-                    if !result.reply
-                        .trimmingCharacters(
-                            in:
-                                .whitespacesAndNewlines
-                        )
-                        .isEmpty {
+                    let trimmedReply =
+                        result.reply
+                            .trimmingCharacters(
+                                in:
+                                    .whitespacesAndNewlines
+                            )
+
+                    if !trimmedReply.isEmpty {
                         outputs.append(
-                            result.reply
+                            trimmedReply
                         )
+
+                        if requirement.kind ==
+                            .navigateWebResource {
+                            verifiedNavigationOutput =
+                                trimmedReply
+                        }
                     }
 
                     log(
@@ -4031,7 +4071,6 @@ final class AgentEngine: ObservableObject {
                 }
 
                 let observed = [
-                    result.screenSummary,
                     result.recognizedText
                         .joined(
                             separator: "\n"
@@ -4063,39 +4102,19 @@ final class AgentEngine: ObservableObject {
                     normalizeSemanticText(
                         hostWithoutWWW
                     )
-                let firstHostLabel =
-                    hostWithoutWWW
-                        .split(
-                            separator: "."
-                        )
-                        .first
-                        .map {
-                            normalizeSemanticText(
-                                String($0)
-                            )
-                        } ??
-                    normalizedHost
-
                 let targetObserved =
-                    (!normalizedHost.isEmpty &&
-                     normalizedEvidence
+                    !normalizedHost.isEmpty &&
+                    normalizedEvidence
                         .contains(
                             normalizedHost
-                        )) ||
-                    (
-                        firstHostLabel.count >= 4 &&
-                        normalizedEvidence
-                            .contains(
-                                firstHostLabel
-                            )
-                    )
+                        )
 
                 guard targetObserved else {
                     return OutcomeStrategyExecutionResult(
                         succeeded: false,
                         reply: "",
                         summary:
-                            "URL macOS ile açıldı ancak ekran kanıtı hedef domain/sayfayı doğrulamadı.",
+                            "URL macOS ile açıldı ancak ham ekran/OCR kanıtında tam hedef domain doğrulanamadı; yalnız marka adı veya görev metni başarı kanıtı sayılmadı.",
                         executedCapabilityIDs:
                             Set([
                                 "system.open.url"
