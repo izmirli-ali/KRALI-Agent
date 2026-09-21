@@ -436,14 +436,12 @@ struct AgentOutcomePlanner {
 
         var suppressed = Set<String>()
 
-        if Set(
-            contract.requirements
-                .filter {
-                    !$0.requiresMutation
-                }
-                .map(\.id)
-        )
-        .isSubset(of: covered) {
+        if !contract.requiresMutation,
+           Set(
+                contract.requirements
+                    .map(\.id)
+           )
+           .isSubset(of: covered) {
             suppressed.formUnion(
                 contract
                     .instrumentalCapabilityIDs
