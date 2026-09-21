@@ -14,9 +14,13 @@ struct AgentVerificationSnapshot {
     let webResearchEvidenceCount: Int
     let webResearchUniqueDomainCount: Int
     let webResearchCanonicalEvidenceCount: Int
+    let fileSearchOutcome: AgentFileSearchOutcome?
 }
 
 struct AgentVerifier {
+    private let fileQueryParser =
+        AgentFileQueryParser()
+
     func verify(
         decision: AgentDecision,
         currentUserInput: String,
@@ -33,6 +37,18 @@ struct AgentVerifier {
             return attention(
                 mismatch,
                 fallback: "Mevcut kullanıcı girdisinden hedefi yeniden türet; önceki turun goal / plan state'ini bu tura taşıma."
+            )
+        }
+
+        if let fileOutcome =
+            snapshot.fileSearchOutcome,
+           fileOutcome.status.isExpectedBoundary {
+            return attention(
+                fileOutcome.message,
+                fallback:
+                    fileOutcome.status == .unsupportedScope
+                    ? "Arama kapsamını Masaüstü, İndirilenler, Belgeler veya seçili çalışma alanına daralt."
+                    : "Erişilebilir bir klasör kapsamı seç ve aynı aramayı yeniden çalıştır."
             )
         }
 
@@ -122,6 +138,47 @@ struct AgentVerifier {
 
         switch decision.intent {
         case .fileSearch:
+            if let outcome =
+                snapshot.fileSearchOutcome {
+                switch outcome.status {
+                case .matched:
+                    return AgentVerificationResult(
+                        state: .passed,
+                        summary:
+                            "Arama doğrulandı: " +
+                            String(outcome.resultCount) +
+                            " eşleşme • kapsam=" +
+                            (outcome.rootName ?? outcome.query.scope.title) +
+                            (
+                                outcome.query.extensions.isEmpty
+                                ? ""
+                                : " • uzantı=" +
+                                    outcome.query.extensions
+                                        .sorted()
+                                        .joined(separator: ",")
+                            ),
+                        fallback: nil
+                    )
+
+                case .noResults:
+                    return attention(
+                        "Arama doğru kapsam ve filtrelerle tamamlandı ancak sonuç üretmedi: " +
+                        outcome.title,
+                        fallback:
+                            "Dosya adı, uzantı veya tarih filtresini gevşetip aynı kapsamda yeniden ara."
+                    )
+
+                case .workspaceMissing,
+                     .unsupportedScope,
+                     .inaccessibleScope:
+                    return attention(
+                        outcome.message,
+                        fallback:
+                            "Erişilebilir ve daha dar bir dosya kapsamı seç."
+                    )
+                }
+            }
+
             guard snapshot.hasWorkspace else {
                 return attention(
                     "Arama çalıştırılamadı çünkü aktif çalışma alanı yok.",
@@ -407,6 +464,13 @@ struct AgentVerifier {
     }
 
     private func looksLikeFileSearch(_ text: String) -> Bool {
+        let structured =
+            fileQueryParser.parse(text)
+
+        if structured.isFileSearchRequest {
+            return true
+        }
+
         let actions = [
             "bul", "ara", "göster", "goster", "listele", "nerede",
             "hangileri", "neler", "ne var", "incele", "getir",

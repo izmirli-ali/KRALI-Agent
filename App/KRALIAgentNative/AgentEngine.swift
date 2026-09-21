@@ -35,6 +35,8 @@ final class AgentEngine: ObservableObject {
     @Published var folderSearchResults: [FolderRecord] = []
     @Published var fileSearchTitle = ""
     @Published var workspaceIndexReady = false
+    private(set) var lastFileSearchOutcome:
+        AgentFileSearchOutcome?
 
     @Published var currentGoal = "Hazır"
     @Published var currentPlan = "Yeni görevi bekliyor"
@@ -110,6 +112,8 @@ final class AgentEngine: ObservableObject {
     private let conversationStore = ConversationStore()
     private let workspaceIndexer = AgentWorkspaceIndexer()
     private let fileQueryParser = AgentFileQueryParser()
+    private let fileSearchCoordinator =
+        AgentFileSearchCoordinator()
     private let diagnosticsLoader = AgentDiagnosticsLoader()
     private let workspaceIndexFreshness: TimeInterval = 45
     private var workspaceIndexUpdatedAt: Date?
@@ -1217,7 +1221,8 @@ final class AgentEngine: ObservableObject {
 
         if finalVerification.state == .attention &&
            currentCapabilityGaps.isEmpty &&
-           inspectorState.debugIncident == nil {
+           inspectorState.debugIncident == nil &&
+           lastFileSearchOutcome == nil {
             registerDebugIncident(
                 source: "verifier",
                 message: finalVerification.summary,
@@ -1822,7 +1827,13 @@ final class AgentEngine: ObservableObject {
                 stepEvidence[stepIndex] =
                     searchReply
 
-                if selectedRootURL != nil {
+                if lastFileSearchOutcome?
+                    .rootPath != nil ||
+                   (
+                    searchDecision.target ==
+                        .folder &&
+                    selectedRootURL != nil
+                   ) {
                     executed.insert(
                         "files.search"
                     )
@@ -2513,6 +2524,7 @@ final class AgentEngine: ObservableObject {
         inspectorState.debugIncident = nil
         webResearchResults = []
         webResearchEvidence = []
+        lastFileSearchOutcome = nil
         webResearchStatus = "Bu tur için araştırma henüz başlamadı."
         intelligenceProviderStatus = "Sentez sağlayıcısı henüz kullanılmadı."
     }
@@ -2524,7 +2536,9 @@ final class AgentEngine: ObservableObject {
             }
 
         return AgentContextSnapshot(
-            hasWorkspace: selectedRootURL != nil,
+            hasWorkspace:
+                selectedRootURL != nil ||
+                lastFileSearchOutcome?.rootPath != nil,
             workspaceName: selectedRootURL?.lastPathComponent,
             fileCount: indexedFiles.count,
             imageCount: imageCount,
@@ -2557,6 +2571,11 @@ final class AgentEngine: ObservableObject {
     ) -> RecoveryAttempt? {
         guard decision.intent == .fileSearch ||
               decision.intent == .compoundFileTask else {
+            return nil
+        }
+
+        if lastFileSearchOutcome?
+            .status.isExpectedBoundary == true {
             return nil
         }
 
@@ -2779,7 +2798,9 @@ final class AgentEngine: ObservableObject {
         executedCapabilityIDs: Set<String> = []
     ) -> AgentVerificationSnapshot {
         AgentVerificationSnapshot(
-            hasWorkspace: selectedRootURL != nil,
+            hasWorkspace:
+                selectedRootURL != nil ||
+                lastFileSearchOutcome?.rootPath != nil,
             fileResultCount: fileSearchResults.count,
             folderResultCount: folderSearchResults.count,
             hasPendingAction: pendingFileAction != nil,
@@ -2819,7 +2840,9 @@ final class AgentEngine: ObservableObject {
             webResearchCanonicalEvidenceCount:
                 webResearchEvidence.filter {
                     !$0.source.evidenceEligible
-                }.count
+                }.count,
+            fileSearchOutcome:
+                lastFileSearchOutcome
         )
     }
 
@@ -4513,6 +4536,12 @@ final class AgentEngine: ObservableObject {
     }
 
     private func isFileSearchIntent(_ text: String) -> Bool {
+        if fileQueryParser
+            .parse(text)
+            .isFileSearchRequest {
+            return true
+        }
+
         let actionWords = [
             "bul", "ara", "göster", "listele",
             "nerede", "hangileri", "hangi dosya"
@@ -4821,145 +4850,84 @@ final class AgentEngine: ObservableObject {
         for rawText: String,
         decision: AgentDecision
     ) -> String {
-        guard let root = selectedRootURL else {
-            fileSearchResults = []
-            fileSearchTitle = ""
-            return "Önce bir çalışma klasörü seç. Aramayı seçtiğin klasör ve alt klasörlerinde yapacağım."
-        }
-
         let parsedQuery =
             fileQueryParser.parse(rawText)
 
-        if let scopeIssue =
-            fileSearchScopeIssue(
-                parsedQuery.scope,
-                root: root
-            ) {
-            fileSearchResults = []
-            folderSearchResults = []
-            fileSearchTitle =
-                parsedQuery.scope.title
-            log(
-                "Dosya arama kapsamı çalışma alanıyla uyuşmuyor: " +
-                parsedQuery.scope.title +
-                " ≠ " +
-                root.lastPathComponent
+        let outcome =
+            fileSearchCoordinator.search(
+                query: parsedQuery,
+                decision: decision,
+                selectedWorkspace:
+                    selectedRootURL,
+                previousResults:
+                    decision.usePreviousResults
+                    ? fileSearchResults
+                    : []
             )
-            return scopeIssue
-        }
 
-        ensureWorkspaceIndexed()
-
-        let imageExtensions = Set(["png", "jpg", "jpeg", "heic", "tif", "tiff", "webp", "gif"])
-        let videoExtensions = Set(["mov", "mp4", "m4v", "avi", "mkv", "webm", "mts", "m2ts"])
-        let projectExtensions = Set(["prproj", "aep", "psd", "ai", "indd", "fcpxml"])
-        let documentExtensions = Set(["pdf", "doc", "docx", "txt", "rtf", "md", "pages", "numbers", "key"])
-
-        var title = decision.goal
-        var results: [FileRecord]
-        let sourceFiles = decision.usePreviousResults
-            ? fileSearchResults
-            : indexedFiles
-
-        switch decision.target {
-        case .screenshot:
-            results = sourceFiles.filter(\.isScreenshot)
-        case .pdf:
-            results = sourceFiles.filter { $0.fileExtension == "pdf" }
-        case .video:
-            results = sourceFiles.filter { videoExtensions.contains($0.fileExtension) }
-        case .image:
-            results = sourceFiles.filter { imageExtensions.contains($0.fileExtension) }
-        case .project:
-            results = sourceFiles.filter { projectExtensions.contains($0.fileExtension) }
-        case .document:
-            results = sourceFiles.filter { documentExtensions.contains($0.fileExtension) }
-        case .folder:
-            results = []
-        case .any:
-            let query =
-                parsedQuery.filenameQuery
-            title = query.isEmpty
-                ? decision.goal
-                : "“\(query)” araması"
-
-            if query.isEmpty {
-                results = sourceFiles
-            } else {
-                let tokens = query.split(separator: " ").map(String.init)
-                results = sourceFiles.filter { file in
-                    let name = normalize(file.name)
-                    let path = normalize(file.relativePath)
-                    return tokens.allSatisfy { name.contains($0) || path.contains($0) }
-                }
-            }
-        }
-
-        if let range = decision.dateRange {
-            results = results.filter { file in
-                switch decision.dateField {
-                case .created:
-                    guard let date = file.creationDate else { return false }
-                    return range.contains(date)
-                case .modified:
-                    guard let date = file.modificationDate else { return false }
-                    return range.contains(date)
-                case .either:
-                    let createdMatch = file.creationDate.map(range.contains) ?? false
-                    let modifiedMatch = file.modificationDate.map(range.contains) ?? false
-                    return createdMatch || modifiedMatch
-                }
-            }
-        }
-
-        if decision.sortMode == .newestFirst {
-            results.sort {
-                let left = $0.creationDate ?? $0.modificationDate ?? .distantPast
-                let right = $1.creationDate ?? $1.modificationDate ?? .distantPast
-                return left > right
-            }
-        }
-
-        fileSearchResults = results
+        lastFileSearchOutcome = outcome
+        fileSearchResults = outcome.files
         folderSearchResults = []
-        fileSearchTitle = title
+        fileSearchTitle = outcome.title
 
         log(
             "Yerel dosya araması: " +
-            title +
+            outcome.title +
             " • scope=" +
-            parsedQuery.scope.title +
+            outcome.query.scope.title +
+            " • extensions=" +
+            (
+                outcome.query.extensions.isEmpty
+                    ? "∅"
+                    : outcome.query.extensions
+                        .sorted()
+                        .joined(separator: ",")
+            ) +
             " • filenameQuery=" +
             (
-                parsedQuery.filenameQuery.isEmpty
+                outcome.query.filenameQuery.isEmpty
                     ? "∅"
-                    : parsedQuery.filenameQuery
-            )
+                    : outcome.query.filenameQuery
+            ) +
+            " • status=" +
+            outcome.status.rawValue
         )
+
+        if let rootName = outcome.rootName {
+            log(
+                "Dosya arama kökü: " +
+                rootName
+            )
+        }
+
+        if outcome.reachedSafetyLimit {
+            log(
+                "Dosya arama indeksi güvenlik sınırına ulaştı"
+            )
+        }
+
+        log(
+            String(outcome.resultCount) +
+            " eşleşme bulundu"
+        )
+
         if decision.usePreviousResults {
-            log("Bağlam filtresi önceki sonuç kümesine uygulandı")
-        }
-        log("\(results.count) eşleşme bulundu")
-
-        let computerScopeNote =
-            parsedQuery.scope == .wholeComputer
-            ? "Not: Bu sürüm henüz tüm Mac’i değil, seçili “\(root.lastPathComponent)” klasörü ve alt klasörlerini tarıyor. "
-            : ""
-
-        let contextScopeNote = decision.usePreviousResults
-            ? "Önceki sonuçların içinde filtreledim. "
-            : ""
-
-        let scopeNote = computerScopeNote + contextScopeNote
-
-        guard !results.isEmpty else {
-            return scopeNote + "\(title) için eşleşme bulamadım."
+            log(
+                "Bağlam filtresi önceki sonuç kümesine uygulandı"
+            )
         }
 
-        let preview = results.prefix(5).map(\.name).joined(separator: ", ")
-        let extra = results.count > 5 ? " ve \(results.count - 5) dosya daha" : ""
+        switch outcome.status {
+        case .matched:
+            return outcome.message +
+                " Sağdaki sonuçlardan istediğini Finder'da gösterebilirsin."
 
-        return scopeNote + "\(results.count) eşleşme buldum: \(preview)\(extra). Sağdaki sonuçlardan istediğini Finder'da gösterebilirsin."
+        case .noResults,
+             .workspaceMissing,
+             .unsupportedScope,
+             .inaccessibleScope:
+            return outcome.message
+        }
     }
 
     private func turkishDayMonth(from text: String) -> (day: Int, month: Int, monthName: String)? {
@@ -5023,69 +4991,6 @@ final class AgentEngine: ObservableObject {
                 $0.count >= 2 &&
                 !stopWords.contains($0)
             }
-    }
-
-    private func fileSearchScopeIssue(
-        _ scope: AgentFileSearchScope,
-        root: URL
-    ) -> String? {
-        guard
-            let expectedURL =
-                fileSearchScopeURL(scope)
-        else {
-            return nil
-        }
-
-        let requested =
-            expectedURL.standardizedFileURL
-        let selected =
-            root.standardizedFileURL
-
-        guard requested != selected else {
-            return nil
-        }
-
-        return (
-            "“" +
-            scope.title +
-            "” kapsamını istedin ancak seçili çalışma alanı “" +
-            root.lastPathComponent +
-            "”. Yanlış klasörde arama yapmadım. " +
-            scope.title +
-            " klasörünü çalışma alanı olarak seçip tekrar deneyebilirsin."
-        )
-    }
-
-    private func fileSearchScopeURL(
-        _ scope: AgentFileSearchScope
-    ) -> URL? {
-        let home =
-            fileManager
-                .homeDirectoryForCurrentUser
-
-        switch scope {
-        case .selectedWorkspace,
-             .wholeComputer:
-            return nil
-
-        case .desktop:
-            return home.appendingPathComponent(
-                "Desktop",
-                isDirectory: true
-            )
-
-        case .downloads:
-            return home.appendingPathComponent(
-                "Downloads",
-                isDirectory: true
-            )
-
-        case .documents:
-            return home.appendingPathComponent(
-                "Documents",
-                isDirectory: true
-            )
-        }
     }
 
     // MARK: - Real File Actions
@@ -5195,6 +5100,9 @@ final class AgentEngine: ObservableObject {
         }
 
         workspaceIndexReady = false
+        fileSearchCoordinator.invalidate(
+            root: selectedRootURL
+        )
         indexSelectedFolder()
 
         log("\(moves.count) dosya gerçekten taşındı")
@@ -5250,6 +5158,9 @@ final class AgentEngine: ObservableObject {
 
         lastUndoAction = nil
         workspaceIndexReady = false
+        fileSearchCoordinator.invalidate(
+            root: selectedRootURL
+        )
         indexSelectedFolder()
 
         log("\(restored) dosya işlemi geri alındı")

@@ -235,6 +235,12 @@ struct AgentTrainingLab {
         results.append(
             fileQuerySubstringSafetyResult()
         )
+        results.append(
+            fileQueryArchiveExtensionResult()
+        )
+        results.append(
+            fileQueryInflectedBrainIntentResult()
+        )
 
         let core = results.filter { $0.tier == .core }
         let northStar = results.filter { $0.tier == .northStar }
@@ -388,6 +394,122 @@ struct AgentTrainingLab {
                 "Files",
                 "Query Parser"
             ],
+            selectedCapabilities: [
+                "files.search"
+            ],
+            unavailableCapabilities: [],
+            diagnostics: diagnostics
+        )
+    }
+
+    private func fileQueryArchiveExtensionResult()
+        -> TrainingScenarioResult {
+        let prompt =
+            "indirilenlerdeki zip dosyalarını bul"
+        let query =
+            fileQueryParser.parse(prompt)
+
+        var diagnostics: [String] = []
+
+        if query.scope != .downloads ||
+           !query.scopeIsExplicit {
+            diagnostics.append(
+                "İndirilenler explicit scope olarak çözümlenmedi."
+            )
+        }
+
+        if query.extensions != Set(["zip"]) {
+            diagnostics.append(
+                "ZIP uzantısı structured type filter olarak çözümlenmedi: " +
+                query.extensions.sorted()
+                    .joined(separator: ",")
+            )
+        }
+
+        if !query.filenameQuery.isEmpty {
+            diagnostics.append(
+                "ZIP/type/scope kelimeleri filename query'ye sızdı: " +
+                query.filenameQuery
+            )
+        }
+
+        if !query.isFileSearchRequest {
+            diagnostics.append(
+                "Structured query file-search isteği olarak işaretlenmedi."
+            )
+        }
+
+        return TrainingScenarioResult(
+            scenarioID:
+                "file-query-archive-extension",
+            title:
+                "Arşiv uzantısını structured filtreye ayırma",
+            tier: .core,
+            prompt: prompt,
+            passed: diagnostics.isEmpty,
+            goal:
+                "Scope=Downloads, extensions=zip, filenameQuery=boş",
+            route: [
+                "Core",
+                "Files",
+                "Query Parser"
+            ],
+            selectedCapabilities: [
+                "files.search",
+                "files.metadata"
+            ],
+            unavailableCapabilities: [],
+            diagnostics: diagnostics
+        )
+    }
+
+    private func fileQueryInflectedBrainIntentResult()
+        -> TrainingScenarioResult {
+        let prompt =
+            "indirilenlerdeki zipleri bul"
+
+        let decision = brain.analyze(
+            prompt,
+            context: context(
+                hasWorkspace: true
+            )
+        )
+
+        let query =
+            fileQueryParser.parse(prompt)
+
+        var diagnostics: [String] = []
+
+        if decision.intent != .fileSearch {
+            diagnostics.append(
+                "Brain çekimli ZIP sorgusunu fileSearch intent olarak seçmedi."
+            )
+        }
+
+        if query.extensions != Set(["zip"]) {
+            diagnostics.append(
+                "Çekimli ZIP tokenı uzantı filtresine dönüşmedi."
+            )
+        }
+
+        if !query.filenameQuery.isEmpty {
+            diagnostics.append(
+                "Çekimli ZIP sorgusunda filename query boş kalmadı: " +
+                query.filenameQuery
+            )
+        }
+
+        return TrainingScenarioResult(
+            scenarioID:
+                "file-query-inflected-brain-intent",
+            title:
+                "Çekimli uzantı sorgusunu fileSearch intent'e yönlendirme",
+            tier: .core,
+            prompt: prompt,
+            passed: diagnostics.isEmpty,
+            goal:
+                "Brain + parser aynı structured file intent'i paylaşmalı",
+            route: decision.route,
             selectedCapabilities: [
                 "files.search"
             ],
@@ -2501,7 +2623,8 @@ struct AgentTrainingLab {
                 webResearchResultCount: 0,
                 webResearchEvidenceCount: 0,
                 webResearchUniqueDomainCount: 0,
-                webResearchCanonicalEvidenceCount: 0
+                webResearchCanonicalEvidenceCount: 0,
+                fileSearchOutcome: nil
             )
         )
 
@@ -2595,7 +2718,8 @@ struct AgentTrainingLab {
                 webResearchResultCount: 0,
                 webResearchEvidenceCount: 0,
                 webResearchUniqueDomainCount: 0,
-                webResearchCanonicalEvidenceCount: 0
+                webResearchCanonicalEvidenceCount: 0,
+                fileSearchOutcome: nil
             )
         )
 

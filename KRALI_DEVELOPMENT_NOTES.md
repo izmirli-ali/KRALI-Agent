@@ -98,3 +98,16 @@ KRALİ büyüdükçe tek dosya / tek store / her veriyi sürekli bellekte tutan 
 - Scope mismatches no longer silently search the wrong selected workspace.
 - Inflected Turkish file/type words are removed at token level without corrupting action words such as `bul`.
 - Added Training Lab regression coverage for Desktop scope, Downloads+PDF scope, and the historical `bu` / `bul` substring bug.
+
+
+## v0.8.61 — File Intelligence foundation
+
+- File tasks now share one structured intent model across Brain, Engine and Verifier.
+- Added `AgentFileTypeRegistry` for explicit extensions, common archive/audio/spreadsheet/font families and Turkish inflected extension tokens.
+- Added `AgentFileSearchCoordinator` with root-aware 45-second read-only index caching.
+- Desktop, Downloads and Documents can be searched directly as explicit read-only scopes without changing the selected write workspace.
+- File search returns typed `AgentFileSearchOutcome` instead of relying only on response strings.
+- Verifier consumes typed file-search outcomes and no longer depends only on brittle exact-word checks such as `dosya` vs `dosyalarını`.
+- Filename terms, scope, extensions, dates and legacy category filters are applied as separate dimensions.
+- Whole-Mac search remains an explicit safe boundary until a scalable index exists.
+- Write/move behavior remains limited to the selected workspace and existing confirmation rules.

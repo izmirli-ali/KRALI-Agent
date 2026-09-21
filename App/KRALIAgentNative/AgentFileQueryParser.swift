@@ -25,72 +25,137 @@ enum AgentFileSearchScope: String, Hashable, Sendable {
 
 struct AgentFileQuery: Hashable, Sendable {
     let scope: AgentFileSearchScope
+    let scopeIsExplicit: Bool
     let filenameQuery: String
+    let extensions: Set<String>
+    let hasSearchAction: Bool
+    let mentionsFileEntity: Bool
+    let extensionDisplayLabel: String?
+
+    var hasTypeFilter: Bool {
+        !extensions.isEmpty
+    }
+
+    var isFileSearchRequest: Bool {
+        hasSearchAction &&
+        (
+            scopeIsExplicit ||
+            mentionsFileEntity ||
+            hasTypeFilter
+        )
+    }
 }
 
 struct AgentFileQueryParser {
+    private let typeRegistry =
+        AgentFileTypeRegistry()
+
     func parse(
         _ rawText: String
     ) -> AgentFileQuery {
         let normalized = normalize(rawText)
         let tokens = tokenize(normalized)
-        let scope = resolveScope(
-            tokens: tokens,
-            normalized: normalized
-        )
 
-        let filtered = tokens.filter {
-            !shouldIgnoreToken($0)
+        let scopeResolution =
+            resolveScope(
+                tokens: tokens,
+                normalized: normalized
+            )
+
+        let extensions =
+            typeRegistry.requestedExtensions(
+                rawText: rawText,
+                tokens: tokens
+            )
+
+        let hasSearchAction =
+            tokens.contains {
+                searchActionTokens.contains($0)
+            }
+
+        let mentionsFileEntity =
+            tokens.contains {
+                isFileEntityToken($0)
+            }
+
+        let filtered = tokens.filter { token in
+            !shouldIgnoreToken(
+                token,
+                requestedExtensions: extensions
+            )
         }
 
         return AgentFileQuery(
-            scope: scope,
+            scope: scopeResolution.scope,
+            scopeIsExplicit:
+                scopeResolution.explicit,
             filenameQuery:
-                filtered.joined(separator: " ")
+                filtered.joined(separator: " "),
+            extensions: extensions,
+            hasSearchAction: hasSearchAction,
+            mentionsFileEntity:
+                mentionsFileEntity,
+            extensionDisplayLabel:
+                typeRegistry.displayLabel(
+                    for: extensions
+                )
         )
     }
 
     private func resolveScope(
         tokens: [String],
         normalized: String
-    ) -> AgentFileSearchScope {
+    ) -> (
+        scope: AgentFileSearchScope,
+        explicit: Bool
+    ) {
         let tokenSet = Set(tokens)
 
-        if tokenSet.contains("masaustu") ||
-           tokenSet.contains("masaustunde") ||
-           tokenSet.contains("masaustundeki") ||
+        if tokenSet.contains(where: {
+            $0.hasPrefix("masaustu")
+        }) ||
            tokenSet.contains("desktop") {
-            return .desktop
+            return (.desktop, true)
         }
 
-        if tokenSet.contains("indirilenler") ||
-           tokenSet.contains("indirilenlerde") ||
-           tokenSet.contains("indirilenlerdeki") ||
+        if tokenSet.contains(where: {
+            $0.hasPrefix("indirilenler")
+        }) ||
            tokenSet.contains("downloads") {
-            return .downloads
+            return (.downloads, true)
         }
 
-        if tokenSet.contains("belgeler") ||
-           tokenSet.contains("belgelerde") ||
-           tokenSet.contains("belgelerdeki") ||
+        if tokenSet.contains(where: {
+            $0.hasPrefix("belgeler")
+        }) ||
            tokenSet.contains("documents") {
-            return .documents
+            return (.documents, true)
         }
 
         if normalized.contains("tum bilgisayar") ||
            normalized.contains("tum mac") ||
            tokenSet.contains("macimde") ||
            tokenSet.contains("bilgisayarimda") {
-            return .wholeComputer
+            return (.wholeComputer, true)
         }
 
-        return .selectedWorkspace
+        return (.selectedWorkspace, false)
     }
 
     private func tokenize(
         _ text: String
     ) -> [String] {
-        text.split {
+        let apostropheJoined = text
+            .replacingOccurrences(
+                of: "'",
+                with: ""
+            )
+            .replacingOccurrences(
+                of: "’",
+                with: ""
+            )
+
+        return apostropheJoined.split {
             $0.isWhitespace ||
             $0.isPunctuation ||
             $0.isSymbol
@@ -115,36 +180,76 @@ struct AgentFileQueryParser {
                 )
             )
             .lowercased()
+            .replacingOccurrences(
+                of: "ı",
+                with: "i"
+            )
     }
 
     private func shouldIgnoreToken(
-        _ token: String
+        _ token: String,
+        requestedExtensions: Set<String>
     ) -> Bool {
         if ignoredTokens.contains(token) {
             return true
         }
 
-        let semanticPrefixes = [
-            "dosya",
-            "klasor",
-            "masaustu",
-            "indirilenler",
-            "belgeler",
-            "pdf",
-            "video",
-            "gorsel",
-            "resim",
-            "fotograf",
-            "proje",
-            "dokuman",
-            "belge",
-            "screenshot"
-        ]
-
-        return semanticPrefixes.contains {
-            token.hasPrefix($0)
+        if requestedExtensions.contains(token) ||
+           typeRegistry.isKnownExtension(token) {
+            return true
         }
+
+        if semanticPrefixes.contains(
+            where: {
+                token.hasPrefix($0)
+            }
+        ) {
+            return true
+        }
+
+        return false
     }
+
+    private func isFileEntityToken(
+        _ token: String
+    ) -> Bool {
+        semanticPrefixes.contains {
+            token.hasPrefix($0)
+        } ||
+        typeRegistry.isKnownExtension(token)
+    }
+
+    private let searchActionTokens: Set<String> = [
+        "bul", "ara", "goster",
+        "listele", "getir", "cikar",
+        "incele", "nerede", "hangileri",
+        "neler", "bak"
+    ]
+
+    private let semanticPrefixes = [
+        "dosya",
+        "klasor",
+        "masaustu",
+        "indirilenler",
+        "belgeler",
+        "pdf",
+        "video",
+        "gorsel",
+        "resim",
+        "fotograf",
+        "proje",
+        "dokuman",
+        "belge",
+        "screenshot",
+        "arsiv",
+        "archive",
+        "ses",
+        "audio",
+        "excel",
+        "tablo",
+        "font",
+        "yazitipi"
+    ]
 
     private let ignoredTokens: Set<String> = [
         // Conversation / filler
@@ -155,36 +260,21 @@ struct AgentFileQueryParser {
         // Actions
         "bul", "ara", "goster",
         "listele", "ac", "nerede",
+        "getir", "cikar", "incele",
 
-        // Generic file/folder nouns
-        "dosya", "dosyayi",
-        "dosyalar", "dosyalari",
-        "klasor", "klasoru",
-        "klasordeki", "klasorde",
-
-        // Workspace/scope words
+        // Workspace/scope
         "secili", "calisma",
         "alan", "alani", "alaninda",
         "icindeki", "icinde",
-        "masaustu", "masaustunde",
-        "masaustundeki", "desktop",
-        "indirilenler", "indirilenlerde",
-        "indirilenlerdeki", "downloads",
-        "belgeler", "belgelerde",
-        "belgelerdeki", "documents",
-        "bilgisayarimda", "macimde",
-        "tum", "bilgisayar", "mac",
+        "desktop", "downloads",
+        "documents", "bilgisayarimda",
+        "macimde", "tum",
+        "bilgisayar", "mac",
 
-        // Type words handled by AgentTargetKind
-        "pdf", "video", "videolar",
-        "gorsel", "gorseller",
-        "resim", "resimler",
-        "fotograf", "fotograflar",
-        "proje", "projeler",
-        "dokuman", "dokumanlar",
-        "belge", "belgeler",
+        // Type helpers
         "ekran", "goruntusu",
-        "screenshot",
+        "uzantili", "uzantisinda",
+        "extension",
 
         // Date/sort words handled elsewhere
         "tarihli", "olusturulan",
