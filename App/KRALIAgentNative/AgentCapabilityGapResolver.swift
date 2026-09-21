@@ -18,6 +18,8 @@ struct CapabilityGapResolution: Codable, Hashable, Sendable {
 }
 
 struct AgentCapabilityGapResolver {
+    private let problemSolver =
+        AgentProblemSolver()
     func resolve(
         graph: AgentTaskGraph,
         capabilities: [AgentCapability]
@@ -28,13 +30,6 @@ struct AgentCapabilityGapResolver {
                     capabilities.map {
                         ($0.id, $0)
                     }
-            )
-
-        let availableIDs =
-            Set(
-                capabilities
-                    .filter(\.isAvailable)
-                    .map(\.id)
             )
 
         var seen = Set<String>()
@@ -63,21 +58,24 @@ struct AgentCapabilityGapResolver {
             }
 
             let strategyCandidates =
-                candidateStrategies(
-                    for: step,
-                    availableIDs:
-                        availableIDs
-                )
+                problemSolver
+                    .candidateCapabilityIDs(
+                        for: step,
+                        availableCapabilities:
+                            capabilities
+                    )
 
-            let kind: CapabilityGapKind
+            // Initial planning should prefer an executable generic strategy
+            // before declaring a learning gap. Runtime failure resolution
+            // can still escalate later if those strategies fail.
             if !strategyCandidates.isEmpty {
-                kind = .strategy
-            } else if capability.risk ==
-                .external {
-                kind = .integration
-            } else {
-                kind = .code
+                continue
             }
+
+            let kind: CapabilityGapKind =
+                capability.risk == .external
+                ? .integration
+                : .code
 
             let reason =
                 "Task Graph step '\(step.title)' için " +
@@ -197,11 +195,12 @@ struct AgentCapabilityGapResolver {
             )
 
             let strategyCandidates =
-                candidateStrategies(
-                    for: step,
-                    availableIDs:
-                        availableIDs
-                )
+                problemSolver
+                    .candidateCapabilityIDs(
+                        for: step,
+                        availableCapabilities:
+                            capabilities
+                    )
 
             let reason =
                 "Provider available olmasına rağmen runtime step tamamlanamadı veya postcondition doğrulanamadı: " +
@@ -241,7 +240,9 @@ struct AgentCapabilityGapResolver {
                 Sorun:
                 \(reason)
 
-                Tasarım kuralları:
+                Çözüm kuralları:
+                - Önce problemi, gözlemleri ve başarısız postcondition'ı tanımla; doğrudan kod satırı aramaya başlama.
+                - En az iki makul çözüm stratejisini değerlendir; mevcut capability kombinasyonu problemi çözebiliyorsa yeni provider yazma.
                 - Capability zaten available ise önce mevcut provider'ı ve postcondition verifier'ı debug et.
                 - Uygulama/marka adına hard-code yazma; hatayı genel resolver/provider/strategy seviyesinde çöz.
                 - Başarı gerçek observation/verification ile kanıtlanmadan PASS üretme.
@@ -272,86 +273,6 @@ struct AgentCapabilityGapResolver {
         }
 
         return results
-    }
-
-    private func candidateStrategies(
-        for step: AgentTaskGraphStep,
-        availableIDs: Set<String>
-    ) -> [String] {
-        var candidates: [String] = []
-
-        if step.capabilityID ==
-            "browser.control" {
-            if availableIDs.contains(
-                "research.web"
-            ) &&
-               step.role ==
-                .retrieve {
-                candidates.append(
-                    "research.web"
-                )
-            }
-        }
-
-        if step.capabilityID ==
-            "app.workflow" {
-            let observationStack = [
-                "desktop.app",
-                "perception.screen"
-            ]
-
-            if observationStack.allSatisfy({
-                availableIDs.contains($0)
-            }) {
-                candidates.append(
-                    contentsOf:
-                        observationStack
-                )
-            }
-        }
-
-        if step.capabilityID ==
-            "mail.work" {
-            let genericUI = [
-                "desktop.app",
-                "desktop.control",
-                "perception.screen"
-            ]
-
-            if genericUI.allSatisfy({
-                availableIDs.contains($0)
-            }) {
-                candidates.append(
-                    contentsOf:
-                        genericUI
-                )
-            }
-        }
-
-        if step.capabilityID ==
-            "photoshop.control" ||
-           step.capabilityID ==
-            "premiere.control" {
-            let genericUI = [
-                "desktop.app",
-                "desktop.control",
-                "perception.screen"
-            ]
-
-            if genericUI.allSatisfy({
-                availableIDs.contains($0)
-            }) {
-                candidates.append(
-                    contentsOf:
-                        genericUI
-                )
-            }
-        }
-
-        return Array(
-            Set(candidates)
-        )
-        .sorted()
     }
 
     private func researchGoal(
@@ -415,7 +336,10 @@ struct AgentCapabilityGapResolver {
         Mevcut strategy adayları:
         \(strategies)
 
-        Tasarım kuralları:
+        Çözüm kuralları:
+        - Önce problemi ve kabul kriterini tanımla; kod değişikliği yalnız seçilen çözüm stratejisi gerçekten gerektiriyorsa yapılmalı.
+        - Mevcut capability'leri bileştirerek çözüm üretilebiliyorsa yeni provider yazma.
+        - En az iki çözüm alternatifi değerlendir ve neden seçildiğini kaydet.
         - Uygulama/marka adına hard-code yazma; mümkün olduğunca generic capability veya strategy geliştir.
         - Mevcut provider başka bir işi yapılmış gibi göstermesin.
         - Dış dünyaya commit eden eylemlerde kullanıcı onay kapısı korunmalı.

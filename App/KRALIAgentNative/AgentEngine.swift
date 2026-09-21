@@ -45,6 +45,8 @@ final class AgentEngine: ObservableObject {
     @Published var currentSemanticPlannerProvider: String?
     @Published var currentTaskGraph: AgentTaskGraph?
     @Published var taskGraphStatus = "Henüz görev grafiği yok."
+    @Published var currentProblemResolution: AgentProblemResolution?
+    @Published var currentReflectionSummary: String?
     @Published var currentCapabilityGaps: [CapabilityGapResolution] = []
     @Published var executionSteps: [AgentExecutionStep] = []
     @Published var verificationState: AgentVerificationState = .idle
@@ -80,6 +82,7 @@ final class AgentEngine: ObservableObject {
     private let planner = AgentPlanner()
     private let taskOrchestrator = AgentTaskOrchestrator()
     private let missionNormalizer = AgentMissionNormalizer()
+    private let problemSolver = AgentProblemSolver()
     private let capabilityGapResolver = AgentCapabilityGapResolver()
     private let verifier = AgentVerifier()
     private let capabilityRegistry = AgentCapabilityRegistry()
@@ -564,24 +567,115 @@ final class AgentEngine: ObservableObject {
                 where: { $0.id == "research.web" }
             )?.isAvailable == true
 
-        let learningPlans = capabilityLearner.makePlans(
-            for: capabilities,
-            webResearchAvailable: webResearchAvailable
-        )
-        capabilityLearningPlans = learningPlans
-        capabilityLearningBacklog = learningStore.merge(
-            existing: capabilityLearningBacklog,
-            plans: learningPlans,
-            capabilities: capabilities
+        var learningPlans =
+            capabilityLearner.makePlans(
+                for: capabilities,
+                webResearchAvailable:
+                    webResearchAvailable
+            )
+
+        var executionPlan = planner.makePlan(
+            decision: decision,
+            context: brainContext(),
+            capabilities: capabilities,
+            learningPlans: [],
+            goal: goalProfile
         )
 
-        let executionPlan = planner.makePlan(
+        var deterministicGraph =
+            deterministicProblemGraph(
+                goal: goalProfile,
+                plan: executionPlan
+            )
+
+        let problemSolvableBlockedIDs =
+            Set(
+                deterministicGraph.steps
+                    .filter {
+                        !$0.isAvailable
+                    }
+                    .filter { step in
+                        !problemSolver
+                            .candidateCapabilityIDs(
+                                for: step,
+                                availableCapabilities:
+                                    capabilityRegistry.all
+                            )
+                            .isEmpty
+                    }
+                    .map(\.capabilityID)
+            )
+
+        if !problemSolvableBlockedIDs
+            .isEmpty {
+            learningPlans =
+                learningPlans.filter {
+                    !problemSolvableBlockedIDs
+                        .contains(
+                            $0.capabilityID
+                        )
+                }
+
+            log(
+                "Problem Solver Learning'i erteledi: mevcut strateji bulunan capability=" +
+                problemSolvableBlockedIDs
+                    .sorted()
+                    .joined(separator: ", ")
+            )
+        }
+
+        capabilityLearningPlans =
+            learningPlans
+
+        capabilityLearningBacklog =
+            learningStore.merge(
+                existing:
+                    capabilityLearningBacklog,
+                plans: learningPlans,
+                capabilities: capabilities
+            )
+
+        executionPlan = planner.makePlan(
             decision: decision,
             context: brainContext(),
             capabilities: capabilities,
             learningPlans: learningPlans,
             goal: goalProfile
         )
+
+        deterministicGraph =
+            deterministicProblemGraph(
+                goal: goalProfile,
+                plan: executionPlan
+            )
+
+        currentTaskGraph =
+            deterministicGraph
+
+        let deterministicResolution =
+            problemSolver.solve(
+                graph: deterministicGraph,
+                capabilities:
+                    capabilityRegistry.all,
+                observations:
+                    problemSolverObservations()
+            )
+
+        currentProblemResolution =
+            deterministicResolution
+        currentReflectionSummary =
+            deterministicResolution.reflection
+
+        if let chosen =
+            deterministicResolution
+                .chosenStrategy {
+            log(
+                "Problem Solver başlangıç stratejisi: " +
+                chosen.title +
+                " • " +
+                chosen.rationale
+            )
+        }
 
         activeRoute = routeBuilder.build(
             goal: goalProfile,
@@ -782,15 +876,6 @@ final class AgentEngine: ObservableObject {
                 from: mission,
                 fallback: capabilities
             )
-            resolvedLearningPlans = capabilityLearner.makePlans(
-                for: resolvedCapabilities,
-                webResearchAvailable: webResearchAvailable
-            )
-            resolvedExecutionPlan = semanticExecutionPlan(
-                mission,
-                capabilities: resolvedCapabilities,
-                goal: resolvedGoal
-            )
 
             let compiledTaskGraph =
                 taskOrchestrator.compile(
@@ -801,6 +886,68 @@ final class AgentEngine: ObservableObject {
 
             currentTaskGraph =
                 compiledTaskGraph
+
+            let problemResolution =
+                problemSolver.solve(
+                    graph: compiledTaskGraph,
+                    capabilities:
+                        capabilityRegistry.all,
+                    observations:
+                        problemSolverObservations()
+                )
+
+            currentProblemResolution =
+                problemResolution
+            currentReflectionSummary =
+                problemResolution.reflection
+
+            let problemSolvableBlockedIDs =
+                Set(
+                    compiledTaskGraph.steps
+                        .filter {
+                            !$0.isAvailable
+                        }
+                        .filter { step in
+                            !problemSolver
+                                .candidateCapabilityIDs(
+                                    for: step,
+                                    availableCapabilities:
+                                        capabilityRegistry.all
+                                )
+                                .isEmpty
+                        }
+                        .map(\.capabilityID)
+                )
+
+            resolvedLearningPlans =
+                capabilityLearner.makePlans(
+                    for: resolvedCapabilities,
+                    webResearchAvailable:
+                        webResearchAvailable
+                )
+                .filter {
+                    !problemSolvableBlockedIDs
+                        .contains(
+                            $0.capabilityID
+                        )
+                }
+
+            if !problemSolvableBlockedIDs
+                .isEmpty {
+                log(
+                    "Problem Solver semantic Learning'i erteledi: " +
+                    problemSolvableBlockedIDs
+                        .sorted()
+                        .joined(separator: ", ")
+                )
+            }
+
+            resolvedExecutionPlan = semanticExecutionPlan(
+                mission,
+                capabilities:
+                    resolvedCapabilities,
+                goal: resolvedGoal
+            )
 
             currentCapabilityGaps =
                 capabilityGapResolver.resolve(
@@ -867,6 +1014,41 @@ final class AgentEngine: ObservableObject {
                 "Semantic capability planı: " +
                 mission.requiredCapabilityIDs.joined(separator: ", ")
             )
+            if let chosen =
+                problemResolution.chosenStrategy {
+                log(
+                    "Problem Solver seçimi: " +
+                    chosen.title +
+                    " • score=" +
+                    String(chosen.score) +
+                    " • capabilities=" +
+                    chosen.capabilityIDs
+                        .joined(separator: ",")
+                )
+            }
+
+            let executableStrategies =
+                problemResolution.strategies
+                    .filter {
+                        $0.executableNow &&
+                        !$0.requiresLearning
+                    }
+
+            if !executableStrategies.isEmpty {
+                log(
+                    "Problem Solver adayları: " +
+                    executableStrategies
+                        .prefix(5)
+                        .map {
+                            $0.title +
+                            "[" +
+                            String($0.score) +
+                            "]"
+                        }
+                        .joined(separator: " | ")
+                )
+            }
+
             log(
                 "Task Graph: " +
                 compiledTaskGraph.steps
@@ -1621,15 +1803,45 @@ final class AgentEngine: ObservableObject {
                         evidence: stepEvidence
                     )
 
-            guard let capability =
+            let primaryCapabilityAvailable =
                 selectedCapabilities.first(
                     where: {
                         $0.id ==
                             step.capabilityID
                     }
-                ),
-                capability.isAvailable
-            else {
+                )?.isAvailable == true
+
+            if !primaryCapabilityAvailable {
+                if let fallback =
+                    await executeProblemSolverFallback(
+                        graphStep: graphStep,
+                        missionStep: step,
+                        mission: mission,
+                        dependencyEvidence:
+                            dependencyEvidence,
+                        userInput: userInput,
+                        attemptedStrategyIDs: []
+                    ) {
+                    stepEvidence[stepIndex] =
+                        fallback.evidence
+                    outputs.append(
+                        fallback.output
+                    )
+                    executed.formUnion(
+                        fallback.executedCapabilityIDs
+                    )
+                    completedStepIndexes.insert(
+                        stepIndex
+                    )
+                    currentReflectionSummary =
+                        fallback.reflection
+
+                    log(
+                        "Problem Solver fallback tamamlandı: " +
+                        fallback.strategyTitle
+                    )
+                }
+
                 continue
             }
 
@@ -2221,10 +2433,44 @@ final class AgentEngine: ObservableObject {
                 }
 
             default:
-                // Provider henüz bağlı değilse step task graph içinde
-                // blocked kalır. Başka capability o işi yapılmış gibi
-                // taklit etmez.
                 break
+            }
+
+            if !completedStepIndexes.contains(
+                stepIndex
+            ),
+               !graphStep.requiresApproval,
+               let fallback =
+                await executeProblemSolverFallback(
+                    graphStep: graphStep,
+                    missionStep: step,
+                    mission: mission,
+                    dependencyEvidence:
+                        dependencyEvidence,
+                    userInput: userInput,
+                    attemptedStrategyIDs: [
+                        "primary:" +
+                        step.capabilityID
+                    ]
+                ) {
+                stepEvidence[stepIndex] =
+                    fallback.evidence
+                outputs.append(
+                    fallback.output
+                )
+                executed.formUnion(
+                    fallback.executedCapabilityIDs
+                )
+                completedStepIndexes.insert(
+                    stepIndex
+                )
+                currentReflectionSummary =
+                    fallback.reflection
+
+                log(
+                    "Problem Solver reflection recovery tamamlandı: " +
+                    fallback.strategyTitle
+                )
             }
         }
 
@@ -2248,6 +2494,275 @@ final class AgentEngine: ObservableObject {
             completedStepIndexes:
                 completedStepIndexes
         )
+    }
+
+    private struct ProblemSolverFallbackResult {
+        let strategyTitle: String
+        let evidence: String
+        let output: String
+        let executedCapabilityIDs: Set<String>
+        let reflection: String
+    }
+
+    private func executeProblemSolverFallback(
+        graphStep: AgentTaskGraphStep,
+        missionStep: AgentSemanticMissionStep,
+        mission: AgentSemanticMission,
+        dependencyEvidence: String,
+        userInput: String,
+        attemptedStrategyIDs: [String]
+    ) async -> ProblemSolverFallbackResult? {
+        let resolution =
+            problemSolver.reflection(
+                step: graphStep,
+                attemptedStrategyIDs:
+                    attemptedStrategyIDs,
+                dependencyEvidence:
+                    dependencyEvidence,
+                capabilities:
+                    capabilityRegistry.all
+            )
+
+        currentProblemResolution =
+            resolution
+        currentReflectionSummary =
+            resolution.reflection
+
+        guard
+            let strategy =
+                resolution.chosenStrategy,
+            strategy.executableNow,
+            !strategy.requiresLearning,
+            strategy.kind != .primary
+        else {
+            return nil
+        }
+
+        log(
+            "Problem Solver reflection: " +
+            (resolution.reflection ??
+                "Alternatif strateji seçildi")
+        )
+        log(
+            "Problem Solver stratejisi: " +
+            strategy.title +
+            " • " +
+            strategy.rationale
+        )
+
+        switch strategy.kind {
+        case .reuseEvidence:
+            let evidence =
+                dependencyEvidence
+                    .trimmingCharacters(
+                        in:
+                            .whitespacesAndNewlines
+                    )
+
+            guard !evidence.isEmpty else {
+                return nil
+            }
+
+            return ProblemSolverFallbackResult(
+                strategyTitle:
+                    strategy.title,
+                evidence: evidence,
+                output:
+                    "Mevcut doğrulanmış kanıtı yeniden kullanarak adımı tamamladım.",
+                executedCapabilityIDs:
+                    Set(strategy.capabilityIDs),
+                reflection:
+                    resolution.reflection ??
+                    strategy.rationale
+            )
+
+        case .screenObservation:
+            do {
+                let report =
+                    try await screenPerception
+                        .observe(
+                            goal:
+                                [
+                                    mission.objective,
+                                    missionStep.title,
+                                    missionStep.purpose,
+                                    dependencyEvidence
+                                ]
+                                .filter {
+                                    !$0
+                                        .trimmingCharacters(
+                                            in:
+                                                .whitespacesAndNewlines
+                                        )
+                                        .isEmpty
+                                }
+                                .joined(
+                                    separator: "\n"
+                                )
+                        )
+
+                let evidence =
+                    report.semanticSummary
+
+                return ProblemSolverFallbackResult(
+                    strategyTitle:
+                        strategy.title,
+                    evidence: evidence,
+                    output:
+                        "Alternatif ekran gözlemi:\n" +
+                        evidence,
+                    executedCapabilityIDs:
+                        Set(strategy.capabilityIDs),
+                    reflection:
+                        resolution.reflection ??
+                        strategy.rationale
+                )
+            } catch {
+                log(
+                    "Problem Solver screen fallback başarısız: " +
+                    error.localizedDescription
+                )
+                return nil
+            }
+
+        case .genericAppWorkflow:
+            do {
+                let result =
+                    try await appWorkflowStrategy
+                        .execute(
+                            objective:
+                                mission.objective,
+                            stepTitle:
+                                missionStep.title,
+                            stepPurpose:
+                                missionStep.purpose,
+                            dependencyEvidence:
+                                dependencyEvidence
+                        )
+
+                let evidence = [
+                    "Öndeki uygulama: " +
+                        result.frontmostApplication,
+                    result.observationEvidence,
+                    result.workflowOutput,
+                    "Dış değişiklik uygulandı: hayır"
+                ]
+                .joined(separator: "\n\n")
+
+                return ProblemSolverFallbackResult(
+                    strategyTitle:
+                        strategy.title,
+                    evidence: evidence,
+                    output:
+                        result.workflowOutput,
+                    executedCapabilityIDs:
+                        Set(strategy.capabilityIDs),
+                    reflection:
+                        resolution.reflection ??
+                        strategy.rationale
+                )
+            } catch {
+                log(
+                    "Problem Solver app workflow fallback başarısız: " +
+                    error.localizedDescription
+                )
+                return nil
+            }
+
+        case .publicResearch:
+            let composedQuery = [
+                mission.objective,
+                missionStep.title,
+                missionStep.purpose,
+                dependencyEvidence,
+                userInput
+            ]
+            .filter {
+                !$0
+                    .trimmingCharacters(
+                        in:
+                            .whitespacesAndNewlines
+                    )
+                    .isEmpty
+            }
+            .joined(separator: "\n")
+
+            let reply =
+                await performWebResearch(
+                    query:
+                        webResearchQuery(
+                            from:
+                                String(
+                                    composedQuery
+                                        .prefix(4_000)
+                                )
+                        )
+                )
+
+            guard
+                !webResearchResults.isEmpty ||
+                !webResearchEvidence.isEmpty
+            else {
+                return nil
+            }
+
+            return ProblemSolverFallbackResult(
+                strategyTitle:
+                    strategy.title,
+                evidence: reply,
+                output: reply,
+                executedCapabilityIDs:
+                    Set(strategy.capabilityIDs),
+                reflection:
+                    resolution.reflection ??
+                    strategy.rationale
+            )
+
+        case .reasoningTransform:
+            guard
+                !dependencyEvidence
+                    .trimmingCharacters(
+                        in:
+                            .whitespacesAndNewlines
+                    )
+                    .isEmpty
+            else {
+                return nil
+            }
+
+            if let reasoning =
+                await localIntelligence
+                    .executeReasoningStep(
+                        goal:
+                            mission.objective,
+                        title:
+                            missionStep.title,
+                        purpose:
+                            missionStep.purpose,
+                        operation:
+                            missionStep.operation,
+                        dependencyEvidence:
+                            dependencyEvidence
+                    ) {
+                return ProblemSolverFallbackResult(
+                    strategyTitle:
+                        strategy.title,
+                    evidence: reasoning,
+                    output: reasoning,
+                    executedCapabilityIDs:
+                        Set(strategy.capabilityIDs),
+                    reflection:
+                        resolution.reflection ??
+                        strategy.rationale
+                )
+            }
+
+            return nil
+
+        case .primary,
+             .learning:
+            return nil
+        }
     }
 
     private func semanticFileSearchDecision(
@@ -2371,14 +2886,17 @@ final class AgentEngine: ObservableObject {
                     continue
                 }
 
-                if !isStepCapabilityAvailable(
+                if completedMissionStepIndexes.contains(
+                    semanticStepIndex
+                ) {
+                    executionSteps[index].state = .completed
+                } else if !isStepCapabilityAvailable(
                     executionSteps[index]
                 ) {
                     executionSteps[index].state = .blocked
-                } else if completedMissionStepIndexes.contains(
-                    semanticStepIndex
-                ) &&
-                executedCapabilityIDs.contains(capabilityID) {
+                } else if executedCapabilityIDs.contains(
+                    capabilityID
+                ) {
                     executionSteps[index].state = .completed
                 } else {
                     executionSteps[index].state = .partial
@@ -2507,11 +3025,92 @@ final class AgentEngine: ObservableObject {
         }
     }
 
+    private func deterministicProblemGraph(
+        goal: AgentGoalProfile,
+        plan: AgentExecutionPlan
+    ) -> AgentTaskGraph {
+        let steps =
+            plan.steps.enumerated().map {
+                index, step in
+
+                let capabilityID =
+                    step.capabilityID ??
+                    "core.reasoning"
+
+                let capability =
+                    capabilityRegistry.all
+                        .first {
+                            $0.id ==
+                                capabilityID
+                        }
+
+                let role: AgentTaskStepRole
+
+                switch step.kind {
+                case .reasoning:
+                    role = .reason
+
+                case .verification:
+                    role = .verify
+
+                case .response:
+                    role = .reason
+
+                case .action:
+                    switch capability?.risk {
+                    case .readOnly:
+                        role = .retrieve
+                    case .reversibleWrite:
+                        role = .persist
+                    case .external:
+                        role = .act
+                    case .reasoning, .none:
+                        role = .act
+                    }
+                }
+
+                return AgentTaskGraphStep(
+                    index: index,
+                    title: step.title,
+                    capabilityID:
+                        capabilityID,
+                    operation: step.detail,
+                    role: role,
+                    dependsOn:
+                        index > 0
+                        ? [index - 1]
+                        : [],
+                    risk:
+                        capability?.risk ??
+                        .reasoning,
+                    isAvailable:
+                        capability?
+                            .isAvailable ??
+                        (
+                            capabilityID ==
+                            "core.reasoning"
+                        ),
+                    requiresApproval:
+                        capability?.risk ==
+                            .external ||
+                        capability?.risk ==
+                            .reversibleWrite
+                )
+            }
+
+        return AgentTaskGraph(
+            objective: goal.summary,
+            steps: steps
+        )
+    }
+
     private func resetTransientTaskStateForNewInput() {
         currentSemanticMission = nil
         currentSemanticPlannerProvider = nil
         currentTaskGraph = nil
         taskGraphStatus = "Yeni görev için görev grafiği bekleniyor."
+        currentProblemResolution = nil
+        currentReflectionSummary = nil
         currentCapabilityGaps = []
         activeRoute = ["Core"]
         selectedCapabilities = []
@@ -2527,6 +3126,49 @@ final class AgentEngine: ObservableObject {
         lastFileSearchOutcome = nil
         webResearchStatus = "Bu tur için araştırma henüz başlamadı."
         intelligenceProviderStatus = "Sentez sağlayıcısı henüz kullanılmadı."
+    }
+
+    private func problemSolverObservations()
+        -> [String] {
+        var observations: [String] = []
+
+        if let root = selectedRootURL {
+            observations.append(
+                "Seçili çalışma alanı: " +
+                root.lastPathComponent
+            )
+        }
+
+        if workspaceIndexReady {
+            observations.append(
+                "Workspace gözlemi: " +
+                String(indexedFiles.count) +
+                " dosya, " +
+                String(indexedFolders.count) +
+                " klasör."
+            )
+        }
+
+        if let fileOutcome =
+            lastFileSearchOutcome {
+            observations.append(
+                "Son dosya araması: " +
+                fileOutcome.status.rawValue +
+                " • " +
+                String(fileOutcome.resultCount) +
+                " sonuç."
+            )
+        }
+
+        if let incident =
+            inspectorState.debugIncident {
+            observations.append(
+                "Son debug gözlemi: " +
+                incident.message
+            )
+        }
+
+        return observations
     }
 
     private func brainContext() -> AgentContextSnapshot {
@@ -2577,6 +3219,109 @@ final class AgentEngine: ObservableObject {
         if lastFileSearchOutcome?
             .status.isExpectedBoundary == true {
             return nil
+        }
+
+        if decision.target == .folder,
+           folderSearchResults.isEmpty {
+            ensureWorkspaceIndexed()
+
+            if !indexedFolders.isEmpty {
+                var recoveredFolders =
+                    indexedFolders
+
+                if decision.sortMode ==
+                    .newestFirst {
+                    recoveredFolders.sort {
+                        let left =
+                            $0.modificationDate ??
+                            $0.creationDate ??
+                            .distantPast
+                        let right =
+                            $1.modificationDate ??
+                            $1.creationDate ??
+                            .distantPast
+                        return left > right
+                    }
+                }
+
+                folderSearchResults =
+                    recoveredFolders
+                fileSearchResults = []
+                fileSearchTitle =
+                    "Klasörler • mevcut indeks kanıtı"
+
+                let preview =
+                    recoveredFolders
+                        .prefix(5)
+                        .map(\.name)
+                        .joined(separator: ", ")
+
+                let reply =
+                    String(
+                        recoveredFolders.count
+                    ) +
+                    " klasör gözlemledim. İlk klasör arama stratejisi sonuç üretmediği için mevcut doğrulanmış workspace indeksini yeniden kullandım: " +
+                    preview +
+                    (
+                        recoveredFolders.count > 5
+                        ? " ve " +
+                            String(
+                                recoveredFolders.count - 5
+                            ) +
+                            " klasör daha."
+                        : "."
+                    )
+
+                let verification =
+                    verifier.verify(
+                        decision: decision,
+                        currentUserInput: text,
+                        goal: goal,
+                        snapshot:
+                            verificationSnapshot()
+                    )
+
+                let reflection =
+                    "Çelişki algılandı: workspace indeksi " +
+                    String(
+                        indexedFolders.count
+                    ) +
+                    " klasör gözlemledi fakat birincil arama 0 sonuç verdi. Yeni capability öğrenmek yerine doğrulanmış indeks kanıtı yeniden kullanıldı."
+
+                currentReflectionSummary =
+                    reflection
+
+                if let current =
+                    currentProblemResolution {
+                    currentProblemResolution =
+                        AgentProblemResolution(
+                            frame:
+                                current.frame,
+                            strategies:
+                                current.strategies,
+                            chosenStrategyID:
+                                current.chosenStrategyID,
+                            reflection:
+                                reflection
+                        )
+                }
+
+                recoverySummary =
+                    reflection
+
+                log(
+                    "Problem Solver contradiction recovery: " +
+                    reflection
+                )
+
+                return RecoveryAttempt(
+                    reply: reply,
+                    verification:
+                        verification,
+                    summary:
+                        reflection
+                )
+            }
         }
 
         let hasRelaxableConstraint =
@@ -3188,6 +3933,10 @@ final class AgentEngine: ObservableObject {
                     currentSemanticPlannerProvider,
                 taskGraph:
                     currentTaskGraph,
+                problemResolution:
+                    currentProblemResolution,
+                reflectionSummary:
+                    currentReflectionSummary,
                 capabilityGaps:
                     currentCapabilityGaps,
                 capabilities: capabilities,

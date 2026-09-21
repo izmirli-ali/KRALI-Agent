@@ -111,3 +111,22 @@ KRALİ büyüdükçe tek dosya / tek store / her veriyi sürekli bellekte tutan 
 - Filename terms, scope, extensions, dates and legacy category filters are applied as separate dimensions.
 - Whole-Mac search remains an explicit safe boundary until a scalable index exists.
 - Write/move behavior remains limited to the selected workspace and existing confirmation rules.
+
+
+## v0.8.62 — Problem Solver Core
+
+- Added `AgentProblemSolver` as a solution-oriented layer between task understanding and Learning.
+- KRALİ now frames the objective, observations, constraints and blocked capabilities before escalating.
+- Multiple strategy candidates can be generated from existing capabilities instead of assuming one provider = one task.
+- Safe generic alternatives include evidence reuse, screen observation, generic app workflow, public web research and reasoning transforms.
+- Blocked capabilities with an executable generic strategy no longer create an immediate initial Learning gap.
+- Runtime failures can trigger reflection and an untried safe strategy before capability learning.
+- Deterministic tasks also receive a Problem Solver frame; this is not limited to semantic missions.
+- Contradictions such as "workspace observed folders but primary folder search returned zero" can recover from already-verified evidence instead of declaring a new capability gap.
+- Learning plans are filtered after Problem Solver checks whether the current capability set can already solve the problem.
+- Mentor traces now store problem resolution, candidate strategies, chosen strategy and reflection summary.
+- Developer briefs explicitly require problem definition, multiple candidate solutions and generic capability-level fixes before source-code mutation.
+- Training Lab now covers solution-before-learning and reflection-to-next-strategy behavior.
+
+Target flow:
+`Goal → Problem Frame → Observe → Strategy Candidates → Choose → Execute → Verify → Reflect → Retry Safe Strategy → Learning Gateway (only if genuinely needed)`
