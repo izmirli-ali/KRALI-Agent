@@ -283,26 +283,11 @@ struct AgentTaskOrchestrator {
         let purposeCorpus =
             normalize(purpose)
 
-        let explicitNonCommitTerms = [
-            "gondermeden",
-            "gonderme",
-            "commit etmeden",
-            "onay almadan",
-            "degisiklik yapma",
-            "yalniz hazirla",
-            "sadece hazirla",
-            "henuz dis dunyaya",
-            "salt okunur",
-            "read only"
-        ]
-
-        if explicitNonCommitTerms.contains(
-            where: {
-                purposeCorpus.contains($0)
-            }
-        ) {
-            return nil
-        }
+        // Safety invariant:
+        // If the step itself is mutating, approval is never waived by
+        // explanatory text such as "read-only" or "without approval".
+        // Negative user constraints must remove the mutating step earlier
+        // in mission normalization; this layer is the final safety gate.
 
         let harmlessOpenTerms = [
             "open app",
@@ -401,7 +386,32 @@ struct AgentTaskOrchestrator {
         }
 
         if capabilityID.hasPrefix("files.") {
+            if actionTokens.contains("delete") ||
+               actionTokens.contains("sil") {
+                return "Dosya silme işlemi geri dönüşü zor veya imkânsız olabilir."
+            }
+
+            if actionTokens.contains("move") ||
+               actionTokens.contains("tasi") ||
+               actionTokens.contains("rename") {
+                return "Dosyanın konumu veya kimliği değiştirilecek."
+            }
+
+            if actionTokens.contains("overwrite") ||
+               actionCorpus.contains("uzerine yaz") {
+                return "Mevcut dosyanın üzerine yazılacak."
+            }
+
             return "Dosya sistemi üzerinde değişiklik yapılacak."
+        }
+
+        if actionTokens.contains("send") ||
+           actionTokens.contains("gonder") ||
+           actionTokens.contains("publish") ||
+           actionTokens.contains("yayinla") ||
+           actionTokens.contains("post") ||
+           actionTokens.contains("paylas") {
+            return "Dış dünyaya geri alınması zor bir gönderim/yayın işlemi yapılacak."
         }
 
         return "Dış uygulama veya kullanıcı verisi üzerinde kalıcı değişiklik yapılacak."
