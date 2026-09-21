@@ -140,6 +140,9 @@ struct ContentView: View {
             )
 
             Button {
+                if !inspectorVisible {
+                    engine.loadDiagnosticsIfNeeded()
+                }
                 inspectorVisible.toggle()
             } label: {
                 Image(
@@ -523,7 +526,9 @@ struct ContentView: View {
                         Divider()
 
                         Label(
-                            "\(root.lastPathComponent) • \(engine.indexedFiles.count) dosya",
+                            engine.workspaceIndexReady
+                                ? "\(root.lastPathComponent) • \(engine.indexedFiles.count) dosya"
+                                : "\(root.lastPathComponent) • indeks gerektiğinde hazırlanacak",
                             systemImage: "folder"
                         )
                         .font(.caption2)
