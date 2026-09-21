@@ -3901,6 +3901,22 @@ final class AgentEngine: ObservableObject {
         let reply: String
         let summary: String
         let executedCapabilityIDs: Set<String>
+        let observation: AgentOutcomeObservationMetadata?
+
+        init(
+            succeeded: Bool,
+            reply: String,
+            summary: String,
+            executedCapabilityIDs: Set<String>,
+            observation: AgentOutcomeObservationMetadata? = nil
+        ) {
+            self.succeeded = succeeded
+            self.reply = reply
+            self.summary = summary
+            self.executedCapabilityIDs =
+                executedCapabilityIDs
+            self.observation = observation
+        }
     }
 
     private func executeOutcomeStrategyChain(
@@ -3989,7 +4005,9 @@ final class AgentEngine: ObservableObject {
                         executedCapabilityIDs:
                             result
                                 .executedCapabilityIDs
-                                .sorted()
+                                .sorted(),
+                        observation:
+                            result.observation
                     )
                 )
 
@@ -4129,6 +4147,24 @@ final class AgentEngine: ObservableObject {
                         .openWebURL(
                             url
                         )
+
+                let observation =
+                    AgentOutcomeObservationMetadata(
+                        captureScope:
+                            result.captureScope,
+                        applicationBundleIdentifier:
+                            result
+                                .capturedApplicationBundleIdentifier,
+                        windowTitle:
+                            result
+                                .capturedWindowTitle,
+                        recognizedTextLineCount:
+                            result
+                                .recognizedText
+                                .count,
+                        frontmostApplication:
+                            result.frontmostAfter
+                    )
 
                 guard
                     result.handlerVerifiedFrontmost &&
