@@ -326,7 +326,13 @@ struct AgentBrain {
                     dateDescription: dateResolution.description,
                     newestFirst: sort == .newestFirst
                 ),
-                selectedPlan: "Seçili çalışma alanını salt-okunur tara, filtreleri uygula ve en uygun sonuçları göster",
+                selectedPlan:
+                    fileQuery.scopeIsExplicit
+                    ? (
+                        fileQuery.scope.title +
+                        " kapsamını salt-okunur tara, filtreleri uygula ve yalnız eşleşen sonuçları göster"
+                    )
+                    : "Seçili çalışma alanını salt-okunur tara, filtreleri uygula ve en uygun sonuçları göster",
                 alternatives: [
                     "Dosya adına göre daralt",
                     "Tarihe göre daralt",
@@ -662,28 +668,159 @@ struct AgentBrain {
     }
 
     private func resolveTarget(_ text: String) -> AgentTargetKind {
-        if containsAny(text, ["ekran görünt", "ekran gorunt", "ekran resmi", "screenshot"]) {
+        let fileQuery =
+            fileQueryParser.parse(text)
+
+        // Scope nouns such as "İndirilenler klasöründe" describe WHERE
+        // to search, not WHAT to search for. Resolve concrete entities
+        // before considering folder as the requested target.
+        if containsAny(
+            text,
+            [
+                "ekran görünt",
+                "ekran gorunt",
+                "ekran resmi",
+                "screenshot"
+            ]
+        ) {
             return .screenshot
         }
-        if containsAny(text, ["klasör", "klasor"]) {
-            return .folder
-        }
+
         if text.contains("pdf") {
             return .pdf
         }
-        if containsAny(text, ["video", "videolar", "çekim", "cekim", "klip"]) {
+
+        if containsAny(
+            text,
+            [
+                "video",
+                "videolar",
+                "çekim",
+                "cekim",
+                "klip"
+            ]
+        ) {
             return .video
         }
-        if containsAny(text, ["görsel", "gorsel", "resim", "fotoğraf", "fotograf"]) {
+
+        if containsAny(
+            text,
+            [
+                "görsel",
+                "gorsel",
+                "resim",
+                "fotoğraf",
+                "fotograf"
+            ]
+        ) {
             return .image
         }
-        if containsAny(text, ["proje", "project"]) {
+
+        if containsAny(
+            text,
+            [
+                "proje",
+                "project"
+            ]
+        ) {
             return .project
         }
-        if containsAny(text, ["belge", "doküman", "dokuman"]) {
+
+        if containsAny(
+            text,
+            [
+                "belge",
+                "doküman",
+                "dokuman"
+            ]
+        ) {
             return .document
         }
+
+        if requestsFolderEntity(
+            text,
+            fileQuery: fileQuery
+        ) {
+            return .folder
+        }
+
         return .any
+    }
+
+    private func requestsFolderEntity(
+        _ text: String,
+        fileQuery: AgentFileQuery
+    ) -> Bool {
+        let normalized =
+            text
+                .folding(
+                    options: [
+                        .diacriticInsensitive,
+                        .caseInsensitive
+                    ],
+                    locale:
+                        Locale(
+                            identifier:
+                                "tr_TR"
+                        )
+                )
+                .lowercased()
+                .replacingOccurrences(
+                    of: "ı",
+                    with: "i"
+                )
+
+        let genericFileEntity =
+            containsAny(
+                normalized,
+                [
+                    "dosya",
+                    "file"
+                ]
+            )
+
+        // "Downloads folder", "Desktop folder", etc. are explicit scope
+        // descriptions. If the user is asking for files inside that scope,
+        // the word "folder" must not change the target entity.
+        if fileQuery.scopeIsExplicit &&
+           genericFileEntity {
+            return false
+        }
+
+        let folderTargetPhrases = [
+            "klasorleri bul",
+            "klasor bul",
+            "klasorunu bul",
+            "klasoru bul",
+            "klasorleri listele",
+            "klasorleri goster",
+            "hangi klasor",
+            "hangi klasorler",
+            "klasorler neler",
+            "folder bul",
+            "folders",
+            "list folders"
+        ]
+
+        if folderTargetPhrases.contains(
+            where: {
+                normalized.contains($0)
+            }
+        ) {
+            return true
+        }
+
+        // A bare folder reference can still be a real target when no
+        // explicit search scope or file entity is present.
+        return !fileQuery.scopeIsExplicit &&
+            !genericFileEntity &&
+            containsAny(
+                normalized,
+                [
+                    "klasor",
+                    "folder"
+                ]
+            )
     }
 
     private func resolveDateField(_ text: String) -> AgentDateField {
