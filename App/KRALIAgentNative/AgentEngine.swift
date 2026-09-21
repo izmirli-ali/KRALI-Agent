@@ -3607,41 +3607,13 @@ final class AgentEngine: ObservableObject {
                     )
             )
 
-        let dateField: AgentDateField
-        let normalized =
-            normalizeSemanticText(
-                userInput
-            )
-
-        if containsSemanticAny(
-            normalized,
-            [
-                "degistirilen",
-                "değiştirilen",
-                "modified"
-            ]
-        ) {
-            dateField = .modified
-        } else if containsSemanticAny(
-            normalized,
-            [
-                "olusturulan",
-                "oluşturulan",
-                "created"
-            ]
-        ) {
-            dateField = .created
-        } else {
-            dateField = .either
-        }
-
         return AgentDecision(
             intent: .fileSearch,
             target: target,
             dateRange:
                 relativeDateRange,
             dateField:
-                dateField,
+                query.dateField,
             sortMode:
                 query.sortMode,
             route: [
