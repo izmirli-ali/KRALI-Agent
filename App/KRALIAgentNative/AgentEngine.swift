@@ -1226,9 +1226,21 @@ final class AgentEngine: ObservableObject {
                 baseReply =
                     chainResult.reply
             } else {
-                queueInteractiveAccessCapability()
-                resolvedLearningPlans =
-                    capabilityLearningPlans
+                let attemptSummaries =
+                    chainResult
+                        .attempts
+                        .map {
+                            $0.strategyID +
+                            ": " +
+                            $0.summary
+                        }
+
+                let transientFailure =
+                    capabilityGapResolver
+                        .isTransientOutcomeFailure(
+                            attemptSummaries:
+                                attemptSummaries
+                        )
 
                 let browserGap =
                     capabilityGapResolver
@@ -1238,49 +1250,92 @@ final class AgentEngine: ObservableObject {
                             objective:
                                 text,
                             attemptSummaries:
-                                chainResult
-                                    .attempts
-                                    .map {
-                                        $0.strategyID +
-                                        ": " +
-                                        $0.summary
-                                    },
+                                attemptSummaries,
                             capabilities:
                                 capabilityRegistry
                                     .all
                         )
 
-                if let browserGap,
-                   !currentCapabilityGaps
-                    .contains(
-                        where: {
+                if transientFailure {
+                    capabilityLearningPlans
+                        .removeAll {
                             $0.capabilityID ==
-                                browserGap
-                                    .capabilityID
+                                "browser.control"
                         }
-                    ) {
+                    resolvedLearningPlans =
+                        capabilityLearningPlans
+
                     currentCapabilityGaps
-                        .append(
-                            browserGap
+                        .removeAll {
+                            $0.capabilityID ==
+                                "browser.control"
+                        }
+
+                    capabilityLearningBacklog =
+                        learningStore.update(
+                            existing:
+                                capabilityLearningBacklog,
+                            capabilityID:
+                                "browser.control",
+                            progress:
+                                .interrupted,
+                            nextStep:
+                                "Gözlem sırasında foreground değişti. Bu geçici kullanıcı/uygulama müdahalesidir; yeni capability öğrenmesi başlatılmadı."
                         )
+
+                    baseReply =
+                        chainResult.reply
+                            .trimmingCharacters(
+                                in:
+                                    .whitespacesAndNewlines
+                            )
+                            .isEmpty
+                        ? "Web hedefini açmayı denedim ancak gözlem sırasında foreground değiştiği için sonucu doğrulayamadım. Bu geçici bir gözlem kesintisi; yeni bir capability öğrenmesi başlatılmadı."
+                        : chainResult.reply
+
+                    currentReflectionSummary =
+                        "Outcome gözlemi kullanıcı/uygulama foreground değişimiyle kesildi; transient failure capability gap olarak sınıflandırılmadı."
+
+                    log(
+                        "Outcome gözlemi kesildi; Learning Gateway açılmadı"
+                    )
+                } else {
+                    queueInteractiveAccessCapability()
+                    resolvedLearningPlans =
+                        capabilityLearningPlans
+
+                    if let browserGap,
+                       !currentCapabilityGaps
+                        .contains(
+                            where: {
+                                $0.capabilityID ==
+                                    browserGap
+                                        .capabilityID
+                            }
+                        ) {
+                        currentCapabilityGaps
+                            .append(
+                                browserGap
+                            )
+                    }
+
+                    baseReply =
+                        chainResult.reply
+                            .trimmingCharacters(
+                                in:
+                                    .whitespacesAndNewlines
+                            )
+                            .isEmpty
+                        ? "Mevcut outcome stratejilerini denedim ancak başarı kriterini doğrulayamadım. Gerçek capability eksikliği Learning Gateway'e aktarıldı."
+                        : chainResult.reply
+
+                    currentReflectionSummary =
+                        "Outcome Strategy Chain mevcut güvenli stratejileri tüketti; gerçek capability eksikliği kaldığı için Learning Gateway açıldı."
+
+                    log(
+                        "Outcome Strategy Chain tükendi; Learning Gateway açıldı"
+                    )
                 }
-
-                baseReply =
-                    chainResult.reply
-                        .trimmingCharacters(
-                            in:
-                                .whitespacesAndNewlines
-                        )
-                        .isEmpty
-                    ? "Mevcut outcome stratejilerini denedim ancak başarı kriterini doğrulayamadım. Eksik etkileşim capability'si Learning Gateway'e aktarıldı."
-                    : chainResult.reply
-
-                currentReflectionSummary =
-                    "Outcome Strategy Chain mevcut güvenli stratejileri tüketti; başarı kriteri doğrulanamadığı için Learning Gateway açıldı."
-
-                log(
-                    "Outcome Strategy Chain tükendi; Learning Gateway açıldı"
-                )
             }
         }
 
