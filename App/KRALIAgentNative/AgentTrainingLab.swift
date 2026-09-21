@@ -246,6 +246,9 @@ struct AgentTrainingLab {
             fileQueryInflectedBrainIntentResult()
         )
         results.append(
+            fileSemanticMetamorphicFamilyResult()
+        )
+        results.append(
             problemSolverUsesExistingStrategyBeforeLearningResult()
         )
         results.append(
@@ -1258,6 +1261,216 @@ struct AgentTrainingLab {
             selectedCapabilities: [
                 "files.search"
             ],
+            unavailableCapabilities: [],
+            diagnostics: diagnostics
+        )
+    }
+
+    private func fileSemanticMetamorphicFamilyResult()
+        -> TrainingScenarioResult {
+        let cases: [(
+            id: String,
+            prompt: String,
+            scope: AgentFileSearchScope,
+            target: AgentTargetKind,
+            sortMode: AgentSortMode,
+            dateField: AgentDateField,
+            resultLimit: Int?,
+            output: AgentFileOutputProjection,
+            extensions: Set<String>,
+            prohibitions: Set<AgentFileQueryProhibition>
+        )] = [
+            (
+                id: "desktop-image-modified",
+                prompt:
+                    "Masaüstündeki en son değiştirilen görsel dosyasının sadece adını söyle. Dosyayı açma veya değiştirme.",
+                scope: .desktop,
+                target: .image,
+                sortMode: .newestFirst,
+                dateField: .modified,
+                resultLimit: 1,
+                output: .namesOnly,
+                extensions: [],
+                prohibitions: [.open, .modify]
+            ),
+            (
+                id: "downloads-pdf-created",
+                prompt:
+                    "İndirilenler klasöründeki son indirilen PDF dosyasının yalnızca adını ver. Dosyayı açma.",
+                scope: .downloads,
+                target: .pdf,
+                sortMode: .newestFirst,
+                dateField: .created,
+                resultLimit: 1,
+                output: .namesOnly,
+                extensions: ["pdf"],
+                prohibitions: [.open]
+            ),
+            (
+                id: "documents-document-modified",
+                prompt:
+                    "Belgeler klasöründeki bugün değiştirilen belgelerin isimlerini listele; hiçbirini değiştirme.",
+                scope: .documents,
+                target: .document,
+                sortMode: .relevance,
+                dateField: .modified,
+                resultLimit: nil,
+                output: .namesOnly,
+                extensions: [],
+                prohibitions: [.modify]
+            ),
+            (
+                id: "desktop-video-modified",
+                prompt:
+                    "Masaüstündeki son değiştirilen videonun adını göster, dosyayı açma.",
+                scope: .desktop,
+                target: .video,
+                sortMode: .newestFirst,
+                dateField: .modified,
+                resultLimit: 1,
+                output: .namesOnly,
+                extensions: [],
+                prohibitions: [.open]
+            ),
+            (
+                id: "downloads-archive-created",
+                prompt:
+                    "İndirilenler'deki son indirilen ZIP dosyasının sadece ismini söyle; taşıma veya silme.",
+                scope: .downloads,
+                target: .any,
+                sortMode: .newestFirst,
+                dateField: .created,
+                resultLimit: 1,
+                output: .namesOnly,
+                extensions: ["zip"],
+                prohibitions: [.move, .delete]
+            )
+        ]
+
+        var diagnostics: [String] = []
+        var selectedCapabilityIDs = Set<String>()
+
+        for test in cases {
+            let query =
+                fileQueryParser.parse(
+                    test.prompt
+                )
+
+            let decision =
+                brain.analyze(
+                    test.prompt,
+                    context:
+                        context(
+                            hasWorkspace: true
+                        )
+                )
+
+            let goal =
+                goalInterpreter.interpret(
+                    test.prompt,
+                    decision: decision,
+                    context:
+                        context(
+                            hasWorkspace: true
+                        )
+                )
+
+            let actualTarget =
+                fileQueryParser
+                    .resolveTargetEntity(
+                        test.prompt
+                    )
+
+            if decision.intent != .fileSearch {
+                diagnostics.append(
+                    "[intent][\(test.id)] fileSearch seçilmedi."
+                )
+            }
+
+            if !query.isFileSearchRequest {
+                diagnostics.append(
+                    "[intent][\(test.id)] structured query retrieval contract üretmedi."
+                )
+            }
+
+            if query.scope != test.scope ||
+               !query.scopeIsExplicit {
+                diagnostics.append(
+                    "[scope][\(test.id)] beklenen explicit scope korunmadı."
+                )
+            }
+
+            if actualTarget != test.target {
+                diagnostics.append(
+                    "[entity][\(test.id)] hedef entity yanlış çözüldü."
+                )
+            }
+
+            if query.sortMode != test.sortMode ||
+               query.dateField != test.dateField ||
+               query.resultLimit != test.resultLimit {
+                diagnostics.append(
+                    "[rank][\(test.id)] ordering/date/limit semantic contract uyuşmuyor."
+                )
+            }
+
+            if query.outputProjection != test.output {
+                diagnostics.append(
+                    "[output][\(test.id)] output projection korunmadı."
+                )
+            }
+
+            if query.extensions != test.extensions {
+                diagnostics.append(
+                    "[entity][\(test.id)] extension/type filtresi uyuşmuyor."
+                )
+            }
+
+            if !test.prohibitions
+                .isSubset(
+                    of:
+                        query.prohibitions
+                ) {
+                diagnostics.append(
+                    "[safety][\(test.id)] kullanıcı prohibitions eksik çözüldü."
+                )
+            }
+
+            if !goal.requiredCapabilityIDs
+                .contains(
+                    "files.search"
+                ) {
+                diagnostics.append(
+                    "[capability][\(test.id)] files.search capability contract'a taşınmadı."
+                )
+            }
+
+            selectedCapabilityIDs.formUnion(
+                goal.requiredCapabilityIDs
+            )
+        }
+
+        return TrainingScenarioResult(
+            scenarioID:
+                "file-semantic-metamorphic-family",
+            title:
+                "Aynı dosya hedefini farklı cümlelerle otomatik sınama",
+            tier: .core,
+            prompt:
+                "5 semantic varyasyon: scope/entity/rank/output/safety",
+            passed: diagnostics.isEmpty,
+            goal:
+                "Tek senaryoya hard-code yazmadan aynı semantic contract'ı farklı ifadelerde koru",
+            route: [
+                "Core",
+                "Gym",
+                "Semantic Contract",
+                "Files",
+                "Verify"
+            ],
+            selectedCapabilities:
+                selectedCapabilityIDs
+                    .sorted(),
             unavailableCapabilities: [],
             diagnostics: diagnostics
         )
