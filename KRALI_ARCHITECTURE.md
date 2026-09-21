@@ -95,8 +95,8 @@ Input
 ## Değişmez güvenlik ilkeleri
 
 - Kullanıcı tarafından seçilmemiş alanda yazma işlemi yapma.
-- Silme gibi geri döndürmesi zor işlemleri varsayılan olarak yapma.
-- Dosya taşıma / değiştirme öncesinde planı göster ve gereken durumda onay al.
+- Silme, taşıma, yeniden adlandırma, üzerine yazma, dışarı gönderme/yayınlama ve proje/belge üzerinde kalıcı mutasyon gibi geri dönüşü zor işlemler **açık kullanıcı onayı olmadan executor'a geçemez**.
+- Onay gereken adımda görevi `waitingForApproval` durumunda durdur; kullanıcı onay verirse aynı taskID ve tamamlanmış step/evidence ile kaldığı yerden devam et.
 - Çakışan dosya adlarında üzerine yazma.
 - Gerçek işlemden sonra sonucu doğrula.
 - Bağlantısı olmayan bir aracı varmış gibi gösterme.
