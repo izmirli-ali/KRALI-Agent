@@ -1,55 +1,67 @@
 {
   "activityTail" : [
     {
-      "date" : "2026-09-21T09:48:11Z",
-      "text" : "Debug/Recovery: Dış durum • Hata ayıklanıyor • verifier"
+      "date" : "2026-09-21T10:15:39Z",
+      "text" : "Debug/Recovery: Bilinmeyen hata • Hata ayıklanıyor • verifier"
     },
     {
-      "date" : "2026-09-21T09:48:11Z",
-      "text" : "Dosya arama kapsamı çalışma alanıyla uyuşmuyor: İndirilenler ≠ Desktop"
+      "date" : "2026-09-21T10:15:39Z",
+      "text" : "0 klasör eşleşmesi bulundu"
     },
     {
-      "date" : "2026-09-21T09:48:11Z",
+      "date" : "2026-09-21T10:15:39Z",
+      "text" : "Yerel klasör araması: klasörleri bul"
+    },
+    {
+      "date" : "2026-09-21T10:15:39Z",
+      "text" : "4 ekran görüntüsü adayı bulundu"
+    },
+    {
+      "date" : "2026-09-21T10:15:39Z",
+      "text" : "1734 dosya ve 56 klasör indekslendi"
+    },
+    {
+      "date" : "2026-09-21T10:15:39Z",
       "text" : "Seçilen kabiliyetler: Akıl yürütme, Bağlam, Dosya metadata, Dosya arama"
     },
     {
-      "date" : "2026-09-21T09:48:11Z",
+      "date" : "2026-09-21T10:15:39Z",
       "text" : "Otomatik rota: Core → Goal → Context → Plan → Files → Verify → Response"
     },
     {
-      "date" : "2026-09-21T09:48:11Z",
+      "date" : "2026-09-21T10:15:39Z",
       "text" : "Seçilen plan: Seçili çalışma alanını salt-okunur tara, filtreleri uygula ve en uygun sonuçları göster"
     },
     {
-      "date" : "2026-09-21T09:48:11Z",
-      "text" : "KRALİ Core hedef sözleşmesi: hedef öğeleri bul"
+      "date" : "2026-09-21T10:15:39Z",
+      "text" : "KRALİ Core hedef sözleşmesi: klasörleri bul"
     },
     {
-      "date" : "2026-09-21T09:48:11Z",
+      "date" : "2026-09-21T10:15:39Z",
       "text" : "Bağlam firewall: önceki görev bağlamları bu tura taşınmadı"
     },
     {
-      "date" : "2026-09-21T08:09:49Z",
+      "date" : "2026-09-21T10:15:30Z",
       "text" : "Apple yerel zeka hazır"
     },
     {
-      "date" : "2026-09-21T08:09:49Z",
+      "date" : "2026-09-21T10:15:30Z",
       "text" : "Çalışma klasörü yolu geri yüklendi; indeks gerektiğinde oluşturulacak: Desktop"
     },
     {
-      "date" : "2026-09-21T08:09:49Z",
+      "date" : "2026-09-21T10:15:30Z",
       "text" : "Ağır geliştirici testleri normal açılışta otomatik çalıştırılmıyor"
     },
     {
-      "date" : "2026-09-21T08:09:49Z",
+      "date" : "2026-09-21T10:15:30Z",
       "text" : "Dinamik hedef ve kabiliyet yönlendirme aktif"
     },
     {
-      "date" : "2026-09-21T08:09:49Z",
+      "date" : "2026-09-21T10:15:30Z",
       "text" : "KRALİ Core hazır"
     }
   ],
-  "appVersion" : "0.8.60",
+  "appVersion" : "0.8.61",
   "capabilities" : [
     {
       "available" : true,
@@ -82,11 +94,11 @@
   "contextMemory" : [
 
   ],
-  "createdAt" : "2026-09-21T09:48:11Z",
+  "createdAt" : "2026-09-21T10:15:39Z",
   "executionSteps" : [
     {
       "capabilityID" : "core.reasoning",
-      "detail" : "Hedef sözleşmesi: hedef öğeleri bul. Kısıtları ve mevcut bağlamı anlamlandır.",
+      "detail" : "Hedef sözleşmesi: klasörleri bul. Kısıtları ve mevcut bağlamı anlamlandır.",
       "kind" : "reasoning",
       "state" : "completed",
       "title" : "Hedefi çöz"
@@ -105,9 +117,9 @@
       "title" : "Doğrula"
     }
   ],
-  "fallbackPlan" : "Mevcut kullanıcı girdisinden hedefi yeniden türet; önceki turun goal / plan state'ini bu tura taşıma.",
-  "finalResponse" : "“İndirilenler” kapsamını istedin ancak seçili çalışma alanı “Desktop”. Yanlış klasörde arama yapmadım. İndirilenler klasörünü çalışma alanı olarak seçip tekrar deneyebilirsin.\n\nDoğrulama: Doğrulama durduruldu: seçilen dosya arama hedefi mevcut kullanıcı girdisiyle uyuşmuyor.\nAlternatif plan: Mevcut kullanıcı girdisinden hedefi yeniden türet; önceki turun goal / plan state'ini bu tura taşıma.",
-  "goal" : "hedef öğeleri bul",
+  "fallbackPlan" : "Tarih veya önceki-sonuç filtresini kaldırıp aynı hedefi daha geniş kapsamda bir kez daha ara.",
+  "finalResponse" : "“Desktop” içinde klasörleri bul için eşleşme bulamadım.\n\nDoğrulama: Arama teknik olarak tamamlandı ancak 0 sonuç döndü.\nAlternatif plan: Tarih veya önceki-sonuç filtresini kaldırıp aynı hedefi daha geniş kapsamda bir kez daha ara.",
+  "goal" : "klasörleri bul",
   "inputSource" : "text",
   "learningPlans" : [
 
@@ -131,8 +143,8 @@
   "taskGraph" : [
 
   ],
-  "traceID" : "B7544DD2-2B4A-41D1-B512-1F43201CA571",
-  "userInput" : "indirilenlerdeki zip dosyalarını bul",
+  "traceID" : "933221EC-FD50-4636-93F7-7FB637434E33",
+  "userInput" : "masaüstündeki klasörleri bul",
   "verificationState" : "attention",
-  "verificationSummary" : "Doğrulama durduruldu: seçilen dosya arama hedefi mevcut kullanıcı girdisiyle uyuşmuyor."
+  "verificationSummary" : "Arama teknik olarak tamamlandı ancak 0 sonuç döndü."
 }
