@@ -5,6 +5,7 @@ enum AgentOutcomeRequirementKind:
     Codable,
     Hashable,
     Sendable {
+    case navigateWebResource
     case retrievePublicInformation
     case observeApplicationState
     case locateLocalResource
@@ -182,6 +183,62 @@ struct AgentOutcomePlanner {
                     "tarayici"
                 ]
             )
+
+        let navigationLike =
+            webLike &&
+            containsAny(
+                text,
+                [
+                    "siteye gir",
+                    "sitesine gir",
+                    "sayfaya gir",
+                    "sayfasina gir",
+                    "sayfasına gir",
+                    "siteyi ac",
+                    "siteyi aç",
+                    "sayfayi ac",
+                    "sayfayı aç",
+                    "url yi ac",
+                    "url'yi ac",
+                    "url'yi aç",
+                    "adresine git",
+                    "adrese git",
+                    "go to ",
+                    "open http",
+                    "open www."
+                ]
+            )
+
+        if navigationLike {
+            requirements.append(
+                AgentOutcomeRequirement(
+                    id:
+                        "web-navigation",
+                    kind:
+                        .navigateWebResource,
+                    title:
+                        "İstenen web hedefini aç ve doğrula",
+                    successCriterion:
+                        "Kullanıcının belirttiği HTTP/HTTPS hedefi gerçekten açılmış ve görünür ekran kanıtıyla doğrulanmış olmalı.",
+                    preferredCapabilityIDs: [
+                        "system.open.url",
+                        "perception.screen"
+                    ],
+                    acceptableCapabilityIDs: [
+                        "system.open.url",
+                        "perception.screen",
+                        "browser.control"
+                    ],
+                    requiresMutation: false
+                )
+            )
+
+            instrumental.formUnion([
+                "browser.control",
+                "desktop.app",
+                "app.workflow"
+            ])
+        }
 
         if researchLike && webLike {
             requirements.append(
@@ -521,6 +578,11 @@ struct AgentOutcomePlanner {
             requirement
                 .preferredCapabilityIDs {
             if requirement.kind ==
+                .navigateWebResource {
+                continue
+            }
+
+            if requirement.kind ==
                 .retrievePublicInformation &&
                capabilityID ==
                 "research.web" {
@@ -562,6 +624,41 @@ struct AgentOutcomePlanner {
                             false,
                         rationale:
                             "Bu capability başarı kriterini doğrudan karşılayabiliyor."
+                    )
+                )
+            }
+        }
+
+        if requirement.kind ==
+            .navigateWebResource {
+            if availableCapabilityIDs
+                .contains(
+                    "system.open.url"
+                ) &&
+               availableCapabilityIDs
+                .contains(
+                    "perception.screen"
+                ) {
+                results.append(
+                    AgentOutcomeStrategy(
+                        id:
+                            requirement.id +
+                            ":open-url-observe",
+                        requirementID:
+                            requirement.id,
+                        kind:
+                            .openURLAndObserve,
+                        title:
+                            "Web hedefini aç ve görünür olarak doğrula",
+                        capabilityIDs: [
+                            "system.open.url",
+                            "perception.screen"
+                        ],
+                        score: 120,
+                        executableNow: true,
+                        requiresLearning: false,
+                        rationale:
+                            "Kullanıcı açıkça bir web hedefini açmayı istedi; navigation outcome araştırmadan önce gerçek URL açılışı ve ekran doğrulaması gerektirir."
                     )
                 )
             }
