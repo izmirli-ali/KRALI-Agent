@@ -134,11 +134,13 @@ struct AgentFileQueryParser {
                 sortMode,
             dateField:
                 resolveDateField(
-                    normalized: normalized
+                    normalized: normalized,
+                    tokens: tokens
                 ),
             resultLimit:
                 resolveResultLimit(
                     normalized: normalized,
+                    tokens: tokens,
                     sortMode: sortMode
                 ),
             outputProjection:
@@ -304,26 +306,19 @@ struct AgentFileQueryParser {
     }
 
     private func resolveDateField(
-        normalized: String
+        normalized: String,
+        tokens: [String]
     ) -> AgentDateField {
-        if containsAny(
-            normalized,
-            [
-                "degistirilen",
-                "modified"
-            ]
-        ) {
+        let tokenSet = Set(tokens)
+
+        if tokenSet.contains("degistirilen") ||
+           tokenSet.contains("modified") {
             return .modified
         }
 
-        if containsAny(
-            normalized,
-            [
-                "indirilen",
-                "olusturulan",
-                "created"
-            ]
-        ) {
+        if tokenSet.contains("indirilen") ||
+           tokenSet.contains("olusturulan") ||
+           tokenSet.contains("created") {
             return .created
         }
 
@@ -332,6 +327,7 @@ struct AgentFileQueryParser {
 
     private func resolveResultLimit(
         normalized: String,
+        tokens: [String],
         sortMode: AgentSortMode
     ) -> Int? {
         guard sortMode == .newestFirst
@@ -339,23 +335,32 @@ struct AgentFileQueryParser {
             return nil
         }
 
-        let singleResultMarkers = [
-            "en yeni dosya",
-            "en son dosya",
-            "son indirilen",
-            "son eklenen",
-            "son olusturulan",
-            "son degistirilen",
-            "son cekilen",
-            "latest file",
-            "most recent file"
-        ]
+        if containsAny(
+            normalized,
+            [
+                "en yeni dosya",
+                "en son dosya",
+                "latest file",
+                "most recent file"
+            ]
+        ) {
+            return 1
+        }
 
-        return singleResultMarkers.contains(
-            where: {
-                normalized.contains($0)
-            }
-        )
+        let singularRankTokens = Set([
+            "indirilen",
+            "eklenen",
+            "olusturulan",
+            "degistirilen",
+            "cekilen"
+        ])
+        let tokenSet = Set(tokens)
+
+        return !tokenSet
+            .intersection(
+                singularRankTokens
+            )
+            .isEmpty
         ? 1
         : nil
     }
