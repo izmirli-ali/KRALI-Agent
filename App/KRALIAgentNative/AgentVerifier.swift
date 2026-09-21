@@ -26,6 +26,7 @@ struct AgentVerifier {
         currentUserInput: String,
         goal: AgentGoalProfile,
         semanticMission: AgentSemanticMission? = nil,
+        outcomeResolution: AgentOutcomeResolution? = nil,
         snapshot: AgentVerificationSnapshot
     ) -> AgentVerificationResult {
         if let mismatch = alignmentMismatch(
@@ -38,6 +39,80 @@ struct AgentVerifier {
                 mismatch,
                 fallback: "Mevcut kullanıcı girdisinden hedefi yeniden türet; önceki turun goal / plan state'ini bu tura taşıma."
             )
+        }
+
+        if let outcomeResolution,
+           outcomeResolution.isFullyCovered,
+           !outcomeResolution
+                .contract
+                .requiresMutation {
+            let chosen =
+                outcomeResolution
+                    .chosenStrategies
+
+            let publicInformationCovered =
+                outcomeResolution
+                    .contract
+                    .requirements
+                    .contains(
+                        where: {
+                            $0.kind ==
+                                .retrievePublicInformation
+                        }
+                    )
+
+            if publicInformationCovered,
+               chosen.contains(
+                    where: {
+                        $0.kind ==
+                            .publicResearch &&
+                        $0.executableNow
+                    }
+               ) {
+                guard
+                    snapshot
+                        .webResearchEvidenceCount >
+                        0 ||
+                    snapshot
+                        .webResearchResultCount >
+                        0
+                else {
+                    return attention(
+                        "Outcome stratejisi public web araştırmasını seçti ancak gerçek kaynak kanıtı üretmedi.",
+                        fallback:
+                            "Aynı başarı kriteri için başka güvenli outcome stratejisini dene; kanıt üretmeden başarılı sayma."
+                    )
+                }
+
+                return AgentVerificationResult(
+                    state: .passed,
+                    summary:
+                        "Outcome doğrulandı: kullanıcı tarafından istenen public bilgi gerçek web kanıtıyla elde edildi; araç/provider adımlarının kendisi başarı kriteri olarak zorunlu tutulmadı.",
+                    fallback: nil
+                )
+            }
+
+            let localResourceCovered =
+                outcomeResolution
+                    .contract
+                    .requirements
+                    .contains(
+                        where: {
+                            $0.kind ==
+                                .locateLocalResource
+                        }
+                    )
+
+            if localResourceCovered,
+               snapshot.fileResultCount > 0 ||
+               snapshot.folderResultCount > 0 {
+                return AgentVerificationResult(
+                    state: .passed,
+                    summary:
+                        "Outcome doğrulandı: hedef yerel kaynak gerçek sonuç kümesiyle bulundu.",
+                    fallback: nil
+                )
+            }
         }
 
         if let fileOutcome =
