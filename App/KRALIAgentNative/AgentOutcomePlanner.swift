@@ -87,6 +87,17 @@ enum AgentOutcomeAttemptState:
     case skipped
 }
 
+struct AgentOutcomeObservationMetadata:
+    Codable,
+    Hashable,
+    Sendable {
+    let captureScope: String
+    let applicationBundleIdentifier: String?
+    let windowTitle: String?
+    let recognizedTextLineCount: Int
+    let frontmostApplication: String?
+}
+
 struct AgentOutcomeStrategyAttempt:
     Identifiable,
     Codable,
@@ -98,6 +109,7 @@ struct AgentOutcomeStrategyAttempt:
     let state: AgentOutcomeAttemptState
     let summary: String
     let executedCapabilityIDs: [String]
+    var observation: AgentOutcomeObservationMetadata? = nil
 }
 
 struct AgentOutcomeResolution:
