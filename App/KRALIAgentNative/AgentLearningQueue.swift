@@ -351,11 +351,11 @@ struct AgentLearningQueueStore {
             if recovered[index].state ==
                 .running {
                 recovered[index].state =
-                    .queued
+                    .failed
                 recovered[index].updatedAt =
                     Date()
                 recovered[index].lastStatus =
-                    "Önceki worker kesildi; iş tekrar sıraya alındı."
+                    "Önceki app sürümündeki worker kesildi. Planner/provider değişmiş olabileceği için otomatik yeniden başlatılmadı; aynı gap yeni runtime'da tekrar doğrulanırsa yeni öğrenme işi oluşturulacak."
             }
         }
 
