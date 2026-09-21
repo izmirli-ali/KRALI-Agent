@@ -1197,7 +1197,7 @@ async function requestStructuredToolDecision(
               "Arguments must satisfy that tool's schema.",
               "Respect the supplied development phase and available tool contracts.",
               "During inspection, select the minimum real inspection tool needed.",
-              "During implementation, inspection is closed: choose a minimal mutation tool now.",
+              "During implementation, obey the supplied tool contracts exactly. If only mutation tools are supplied, choose a minimal mutation tool now; do not answer with prose.",
               "During verification, prefer git_diff and build_check; mutate again only if evidence shows a fix is needed.",
               "Never request a tool that is absent from the supplied tool contracts.",
             ].join("\n"),
@@ -1217,6 +1217,10 @@ async function requestStructuredToolDecision(
                 sawGitDiff,
                 buildCheckPassed,
                 structuredActions,
+                implementationSearchCompleted,
+                implementationReadCompleted,
+                implementationTargetPaths,
+                checkpointEvidence: checkpointEvidence.slice(-6),
               },
               tools: toolContracts,
               recentContext,
@@ -1288,6 +1292,92 @@ async function requestStructuredToolDecision(
     args,
     reason: truncate(decision?.reason || "", 500),
   };
+}
+
+async function runStructuredContinuation(
+  assistantText,
+  blockers,
+  trigger = "completion"
+) {
+  const decision = await requestStructuredToolDecision(
+    assistantText,
+    blockers
+  );
+
+  if (!decision) {
+    return false;
+  }
+
+  sawToolCall = true;
+
+  const phase = developmentPhase();
+  const isMutation =
+    mutationToolNames.has(decision.name);
+
+  stage(
+    isMutation
+      ? "local_agent_structured_mutation"
+      : "local_agent_structured_tool",
+    gapLabel +
+      " yapılandırılmış devam aracı çalışıyor: " +
+      decision.name +
+      " • trigger=" +
+      trigger +
+      " • phase=" +
+      phase
+  );
+
+  let result;
+
+  try {
+    result = executeTool(
+      decision.name,
+      decision.args
+    );
+  } catch (error) {
+    result = {
+      ok: false,
+      error:
+        error instanceof Error
+          ? error.message
+          : String(error),
+    };
+  }
+
+  recordToolEvidence(
+    decision.name,
+    result,
+    decision.args
+  );
+
+  messages.push({
+    role: "user",
+    content: [
+      "KRALI Tool Continuation Controller gerçek aracı çalıştırdı.",
+      "Tool: " + decision.name,
+      decision.reason
+        ? "Reason: " + decision.reason
+        : "",
+      "Result: " +
+        truncate(
+          JSON.stringify(result),
+          12000
+        ),
+      "Bu gerçek tool sonucuna göre devam et.",
+      "Bir sonraki eylem gerekiyorsa native tool call kullan; düz metinle gelecek eylemi tarif etme.",
+    ]
+      .filter(Boolean)
+      .join("\n"),
+  });
+
+  if (!result?.ok) {
+    requestMoreWork([
+      "yapılandırılmış tool başarısız: " +
+        decision.name,
+    ]);
+  }
+
+  return true;
 }
 
 function requestMoreWork(reasons) {
@@ -1472,14 +1562,6 @@ for (let iteration = 1; iteration <= maxIterations; iteration++) {
     : [];
 
   if (calls.length === 0) {
-    if (!sawToolCall) {
-      fail(
-        "Yerel model gerçek tool çağrısı üretmedi.",
-        25,
-        "local_agent_tool_protocol_failed"
-      );
-    }
-
     messages.push(message);
 
     if (message.content) {
@@ -1510,63 +1592,57 @@ for (let iteration = 1; iteration <= maxIterations; iteration++) {
     }
 
     if (blockers.length > 0) {
-      const decision = await requestStructuredToolDecision(
-        message.content,
-        blockers
-      );
+      const phase = developmentPhase();
+      const trigger =
+        !sawToolCall
+          ? "native_tool_missing"
+          : "completion_blocked";
 
-      if (decision) {
-        stage(
-          "local_agent_structured_tool",
-          gapLabel +
-            " yapılandırılmış devam aracı çalışıyor: " +
-            decision.name
-        );
-
-        let result;
-
-        try {
-          result = executeTool(decision.name, decision.args);
-        } catch (error) {
-          result = {
-            ok: false,
-            error:
-              error instanceof Error
-                ? error.message
-                : String(error),
-          };
-        }
-
-        recordToolEvidence(decision.name, result, decision.args);
-
-        messages.push({
-          role: "user",
-          content: [
-            "KRALI Tool Continuation Controller gerçek aracı çalıştırdı.",
-            "Tool: " + decision.name,
-            decision.reason
-              ? "Reason: " + decision.reason
-              : "",
-            "Result: " + truncate(JSON.stringify(result), 12000),
-            "Şimdi bu gerçek tool sonucuna göre devam et.",
-            "Bir sonraki eylem gerekiyorsa onu native tool call ile çağır; düz metinle gelecek eylemi tarif etme.",
-          ]
-            .filter(Boolean)
-            .join("\n"),
-        });
-
-        if (!result?.ok) {
-          requestMoreWork([
-            "yapılandırılmış tool başarısız: " +
-              decision.name,
-          ]);
-        }
-
+      if (
+        await runStructuredContinuation(
+          message.content,
+          blockers,
+          trigger
+        )
+      ) {
         continue;
+      }
+
+      if (
+        !sawToolCall &&
+        (
+          phase === "implementation" ||
+          phase === "verification"
+        )
+      ) {
+        persistCheckpoint(
+          "structured_continuation_unavailable"
+        );
+        fail(
+          "Yerel model native tool çağrısı üretmedi ve yapılandırılmış devam controller'ı güvenli tool kararı üretemedi.",
+          25,
+          "local_agent_tool_protocol_failed"
+        );
+      }
+
+      if (!sawToolCall) {
+        fail(
+          "Yerel model gerçek tool çağrısı üretmedi.",
+          25,
+          "local_agent_tool_protocol_failed"
+        );
       }
 
       requestMoreWork(blockers);
       continue;
+    }
+
+    if (!sawToolCall) {
+      fail(
+        "Yerel model gerçek veya yapılandırılmış tool çağrısı üretmeden tamamlanamaz.",
+        25,
+        "local_agent_tool_protocol_failed"
+      );
     }
 
     stage(
