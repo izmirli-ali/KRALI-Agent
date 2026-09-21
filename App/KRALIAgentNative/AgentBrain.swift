@@ -307,8 +307,6 @@ struct AgentBrain {
             let fileQuery =
                 fileQueryParser.parse(text)
             let dateResolution = resolveDate(text, now: now)
-            let fileQuery =
-                fileQueryParser.parse(text)
             let sort =
                 fileQuery.sortMode
 
