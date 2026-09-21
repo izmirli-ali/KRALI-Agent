@@ -17,6 +17,7 @@ struct ScreenPerceptionReport: Codable, Hashable, Sendable {
     let captureScope: String?
     let capturedApplicationBundleIdentifier: String?
     let capturedWindowTitle: String?
+    let capturedWindowID: UInt32?
 }
 
 enum ScreenPerceptionError: LocalizedError {
@@ -41,7 +42,8 @@ actor AgentScreenPerception {
 
     func observe(
         goal: String,
-        targetBundleIdentifier: String? = nil
+        targetBundleIdentifier: String? = nil,
+        targetWindowID: UInt32? = nil
     ) async throws -> ScreenPerceptionReport {
         let content = try await SCShareableContent
             .excludingDesktopWindows(
@@ -66,7 +68,10 @@ actor AgentScreenPerception {
                         let application =
                             window.owningApplication,
                         application.bundleIdentifier ==
-                            targetBundleIdentifier
+                            targetBundleIdentifier,
+                        targetWindowID == nil ||
+                            window.windowID ==
+                                targetWindowID
                     else {
                         return false
                     }
@@ -294,7 +299,10 @@ actor AgentScreenPerception {
                     .bundleIdentifier,
             capturedWindowTitle:
                 targetWindow?
-                    .title
+                    .title,
+            capturedWindowID:
+                targetWindow?
+                    .windowID
         )
     }
 
