@@ -822,14 +822,22 @@ struct AgentBrain {
                 " dosyalarını"
         } else {
             switch target {
-        case .video: targetText = "videoları"
-        case .image: targetText = "görselleri"
-        case .document: targetText = "belgeleri"
-        case .project: targetText = "proje dosyalarını"
-        case .screenshot: targetText = "ekran görüntülerini"
-        case .pdf: targetText = "PDF dosyalarını"
-            case .folder: targetText = "klasörleri"
-            case .any: targetText = "dosyaları"
+            case .video:
+                targetText = "videoları"
+            case .image:
+                targetText = "görselleri"
+            case .document:
+                targetText = "belgeleri"
+            case .project:
+                targetText = "proje dosyalarını"
+            case .screenshot:
+                targetText = "ekran görüntülerini"
+            case .pdf:
+                targetText = "PDF dosyalarını"
+            case .folder:
+                targetText = "klasörleri"
+            case .any:
+                targetText = "dosyaları"
             }
         }
 
