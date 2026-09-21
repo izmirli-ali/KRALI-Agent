@@ -120,12 +120,55 @@ struct AgentCapabilityGapResolver {
         return results
     }
 
+    func isTransientOutcomeFailure(
+        attemptSummaries: [String]
+    ) -> Bool {
+        let corpus = attemptSummaries
+            .joined(separator: " ")
+            .folding(
+                options: [
+                    .diacriticInsensitive,
+                    .caseInsensitive
+                ],
+                locale:
+                    Locale(identifier: "tr_TR")
+            )
+            .lowercased()
+            .replacingOccurrences(
+                of: "ı",
+                with: "i"
+            )
+
+        let transientMarkers = [
+            "frontmost kalmadi",
+            "odagi degistirmis olabilir",
+            "observation boyunca frontmost kalmadi",
+            "observation interrupted",
+            "focus changed",
+            "foreground changed",
+            "kullanici veya baska bir uygulama odagi degistirmis olabilir"
+        ]
+
+        return transientMarkers.contains {
+            corpus.contains($0)
+        }
+    }
+
     func resolveExhaustedOutcomeCapability(
         capabilityID: String,
         objective: String,
         attemptSummaries: [String],
         capabilities: [AgentCapability]
     ) -> CapabilityGapResolution? {
+        guard
+            !isTransientOutcomeFailure(
+                attemptSummaries:
+                    attemptSummaries
+            )
+        else {
+            return nil
+        }
+
         guard
             let capability =
                 capabilities.first(
