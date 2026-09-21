@@ -4014,6 +4014,22 @@ final class AgentEngine: ObservableObject {
                             url
                         )
 
+                guard
+                    result.handlerVerifiedFrontmost &&
+                    result.observationStable
+                else {
+                    return OutcomeStrategyExecutionResult(
+                        succeeded: false,
+                        reply: "",
+                        summary:
+                            "URL açıldı ancak varsayılan URL işleyicisi ekran gözlemi boyunca frontmost kalmadı. Kullanıcı veya başka bir uygulama odağı değiştirmiş olabilir; bu gözlem başarı kanıtı olarak kullanılamaz.",
+                        executedCapabilityIDs:
+                            Set([
+                                "system.open.url"
+                            ])
+                    )
+                }
+
                 let observed = [
                     result.screenSummary,
                     result.recognizedText
@@ -4152,7 +4168,7 @@ final class AgentEngine: ObservableObject {
                     succeeded: true,
                     reply: output,
                     summary:
-                        "URL generic macOS provider ile açıldı, hedef ekran kanıtıyla doğrulandı ve istenen bilgi çıkarıldı.",
+                        "URL generic macOS provider ile açıldı; varsayılan URL işleyicisi observation boyunca frontmost ve stabil kaldı, hedef ekran kanıtıyla doğrulandı ve istenen bilgi çıkarıldı.",
                     executedCapabilityIDs:
                         Set(
                             strategy
