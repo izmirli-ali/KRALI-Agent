@@ -109,6 +109,7 @@ final class AgentEngine: ObservableObject {
     private let contextMemoryStore = AgentContextMemoryStore()
     private let conversationStore = ConversationStore()
     private let workspaceIndexer = AgentWorkspaceIndexer()
+    private let fileQueryParser = AgentFileQueryParser()
     private let diagnosticsLoader = AgentDiagnosticsLoader()
     private let workspaceIndexFreshness: TimeInterval = 45
     private var workspaceIndexUpdatedAt: Date?
@@ -4826,9 +4827,29 @@ final class AgentEngine: ObservableObject {
             return "Önce bir çalışma klasörü seç. Aramayı seçtiğin klasör ve alt klasörlerinde yapacağım."
         }
 
+        let parsedQuery =
+            fileQueryParser.parse(rawText)
+
+        if let scopeIssue =
+            fileSearchScopeIssue(
+                parsedQuery.scope,
+                root: root
+            ) {
+            fileSearchResults = []
+            folderSearchResults = []
+            fileSearchTitle =
+                parsedQuery.scope.title
+            log(
+                "Dosya arama kapsamı çalışma alanıyla uyuşmuyor: " +
+                parsedQuery.scope.title +
+                " ≠ " +
+                root.lastPathComponent
+            )
+            return scopeIssue
+        }
+
         ensureWorkspaceIndexed()
 
-        let text = normalize(rawText)
         let imageExtensions = Set(["png", "jpg", "jpeg", "heic", "tif", "tiff", "webp", "gif"])
         let videoExtensions = Set(["mov", "mp4", "m4v", "avi", "mkv", "webm", "mts", "m2ts"])
         let projectExtensions = Set(["prproj", "aep", "psd", "ai", "indd", "fcpxml"])
@@ -4856,8 +4877,11 @@ final class AgentEngine: ObservableObject {
         case .folder:
             results = []
         case .any:
-            let query = fileNameQuery(from: text)
-            title = query.isEmpty ? decision.goal : "“\(query)” araması"
+            let query =
+                parsedQuery.filenameQuery
+            title = query.isEmpty
+                ? decision.goal
+                : "“\(query)” araması"
 
             if query.isEmpty {
                 results = sourceFiles
@@ -4900,18 +4924,25 @@ final class AgentEngine: ObservableObject {
         folderSearchResults = []
         fileSearchTitle = title
 
-        log("Yerel dosya araması: \(title)")
+        log(
+            "Yerel dosya araması: " +
+            title +
+            " • scope=" +
+            parsedQuery.scope.title +
+            " • filenameQuery=" +
+            (
+                parsedQuery.filenameQuery.isEmpty
+                    ? "∅"
+                    : parsedQuery.filenameQuery
+            )
+        )
         if decision.usePreviousResults {
             log("Bağlam filtresi önceki sonuç kümesine uygulandı")
         }
         log("\(results.count) eşleşme bulundu")
 
-        let askedForWholeComputer = containsAny(
-            text,
-            ["bilgisayarımda", "bilgisayarimda", "mac'imde", "macimde", "tüm bilgisayar", "tum bilgisayar"]
-        )
-
-        let computerScopeNote = askedForWholeComputer
+        let computerScopeNote =
+            parsedQuery.scope == .wholeComputer
             ? "Not: Bu sürüm henüz tüm Mac’i değil, seçili “\(root.lastPathComponent)” klasörü ve alt klasörlerini tarıyor. "
             : ""
 
@@ -4994,29 +5025,67 @@ final class AgentEngine: ObservableObject {
             }
     }
 
-    private func fileNameQuery(from text: String) -> String {
-        var cleaned = text
-
-        let stopPhrases = [
-            "bana", "şu", "bu", "bir", "vardı", "vardi", "onu",
-            "dosyayı", "dosyalari", "dosyaları", "dosya",
-            "bul", "ara", "göster", "goster", "listele", "nerede",
-            "klasördeki", "klasordeki", "klasörde", "klasorde",
-            "seçili", "secili", "çalışma", "calisma",
-            "içindeki", "icindeki", "olan", "tarihli",
-            "bilgisayarımda", "bilgisayarimda",
-            "son eklenen", "en yeni", "en son",
-            "var mı", "varmi", "lütfen", "lutfen"
-        ]
-
-        for phrase in stopPhrases {
-            cleaned = cleaned.replacingOccurrences(of: phrase, with: " ")
+    private func fileSearchScopeIssue(
+        _ scope: AgentFileSearchScope,
+        root: URL
+    ) -> String? {
+        guard
+            let expectedURL =
+                fileSearchScopeURL(scope)
+        else {
+            return nil
         }
 
-        return cleaned
-            .split(whereSeparator: { $0.isWhitespace })
-            .joined(separator: " ")
-            .trimmingCharacters(in: .whitespacesAndNewlines)
+        let requested =
+            expectedURL.standardizedFileURL
+        let selected =
+            root.standardizedFileURL
+
+        guard requested != selected else {
+            return nil
+        }
+
+        return (
+            "“" +
+            scope.title +
+            "” kapsamını istedin ancak seçili çalışma alanı “" +
+            root.lastPathComponent +
+            "”. Yanlış klasörde arama yapmadım. " +
+            scope.title +
+            " klasörünü çalışma alanı olarak seçip tekrar deneyebilirsin."
+        )
+    }
+
+    private func fileSearchScopeURL(
+        _ scope: AgentFileSearchScope
+    ) -> URL? {
+        let home =
+            fileManager
+                .homeDirectoryForCurrentUser
+
+        switch scope {
+        case .selectedWorkspace,
+             .wholeComputer:
+            return nil
+
+        case .desktop:
+            return home.appendingPathComponent(
+                "Desktop",
+                isDirectory: true
+            )
+
+        case .downloads:
+            return home.appendingPathComponent(
+                "Downloads",
+                isDirectory: true
+            )
+
+        case .documents:
+            return home.appendingPathComponent(
+                "Documents",
+                isDirectory: true
+            )
+        }
     }
 
     // MARK: - Real File Actions

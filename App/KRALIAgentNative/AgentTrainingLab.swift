@@ -67,6 +67,8 @@ struct AgentTrainingLab {
         AgentMissionNormalizer()
     private let capabilityGapResolver =
         AgentCapabilityGapResolver()
+    private let fileQueryParser =
+        AgentFileQueryParser()
 
     func run() -> TrainingLabReport {
         let scenarios = makeScenarios()
@@ -224,6 +226,15 @@ struct AgentTrainingLab {
         results.append(
             capabilityGapClassificationResult()
         )
+        results.append(
+            fileQueryDesktopScopeResult()
+        )
+        results.append(
+            fileQueryDownloadsPDFResult()
+        )
+        results.append(
+            fileQuerySubstringSafetyResult()
+        )
 
         let core = results.filter { $0.tier == .core }
         let northStar = results.filter { $0.tier == .northStar }
@@ -241,6 +252,147 @@ struct AgentTrainingLab {
             northStarPassed: northStar.filter(\.passed).count,
             northStarTotal: northStar.count,
             results: results
+        )
+    }
+
+    private func fileQueryDesktopScopeResult()
+        -> TrainingScenarioResult {
+        let prompt =
+            "masaüstündeki dosyaları bul"
+        let query =
+            fileQueryParser.parse(prompt)
+
+        var diagnostics: [String] = []
+
+        if query.scope != .desktop {
+            diagnostics.append(
+                "Masaüstü kapsamı desktop olarak ayrıştırılmadı."
+            )
+        }
+
+        if !query.filenameQuery.isEmpty {
+            diagnostics.append(
+                "Scope/komut kelimeleri filename query'ye sızdı: " +
+                query.filenameQuery
+            )
+        }
+
+        return TrainingScenarioResult(
+            scenarioID:
+                "file-query-desktop-scope",
+            title:
+                "Dosya sorgusunda Masaüstü kapsamını ayırma",
+            tier: .core,
+            prompt: prompt,
+            passed: diagnostics.isEmpty,
+            goal:
+                "Scope=Desktop, filenameQuery=boş",
+            route: [
+                "Core",
+                "Files",
+                "Query Parser"
+            ],
+            selectedCapabilities: [
+                "files.search"
+            ],
+            unavailableCapabilities: [],
+            diagnostics: diagnostics
+        )
+    }
+
+    private func fileQueryDownloadsPDFResult()
+        -> TrainingScenarioResult {
+        let prompt =
+            "indirilenlerdeki PDF'leri bul"
+        let query =
+            fileQueryParser.parse(prompt)
+
+        var diagnostics: [String] = []
+
+        if query.scope != .downloads {
+            diagnostics.append(
+                "İndirilenler kapsamı downloads olarak ayrıştırılmadı."
+            )
+        }
+
+        if !query.filenameQuery.isEmpty {
+            diagnostics.append(
+                "Dosya türü/scope kelimeleri filename query'ye sızdı: " +
+                query.filenameQuery
+            )
+        }
+
+        return TrainingScenarioResult(
+            scenarioID:
+                "file-query-downloads-pdf",
+            title:
+                "Dosya türünü filename sorgusundan ayırma",
+            tier: .core,
+            prompt: prompt,
+            passed: diagnostics.isEmpty,
+            goal:
+                "Scope=Downloads, PDF target ayrı, filenameQuery=boş",
+            route: [
+                "Core",
+                "Files",
+                "Query Parser"
+            ],
+            selectedCapabilities: [
+                "files.search",
+                "files.metadata"
+            ],
+            unavailableCapabilities: [],
+            diagnostics: diagnostics
+        )
+    }
+
+    private func fileQuerySubstringSafetyResult()
+        -> TrainingScenarioResult {
+        let prompt =
+            "bu sunum dosyasını bul"
+        let query =
+            fileQueryParser.parse(prompt)
+
+        var diagnostics: [String] = []
+
+        if query.filenameQuery != "sunum" {
+            diagnostics.append(
+                "Token-temelli temizlik beklenen 'sunum' sorgusunu üretmedi: " +
+                query.filenameQuery
+            )
+        }
+
+        let actionProbe =
+            fileQueryParser.parse(
+                "bu dosyayı bul"
+            )
+
+        if actionProbe.filenameQuery.contains("l") {
+            diagnostics.append(
+                "'bu' tokenı 'bul' fiilinin içinden substring olarak silindi."
+            )
+        }
+
+        return TrainingScenarioResult(
+            scenarioID:
+                "file-query-substring-safety",
+            title:
+                "Dosya sorgusunda substring silme regresyonu",
+            tier: .core,
+            prompt: prompt,
+            passed: diagnostics.isEmpty,
+            goal:
+                "Tam token temizliği; filenameQuery=sunum",
+            route: [
+                "Core",
+                "Files",
+                "Query Parser"
+            ],
+            selectedCapabilities: [
+                "files.search"
+            ],
+            unavailableCapabilities: [],
+            diagnostics: diagnostics
         )
     }
 
