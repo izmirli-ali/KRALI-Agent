@@ -1336,6 +1336,8 @@ final class AgentEngine: ObservableObject {
                 semanticMission: semanticMission,
                 outcomeResolution:
                     currentOutcomeResolution,
+                outcomeAttempts:
+                    currentOutcomeAttempts,
                 snapshot: verificationSnapshot(
                     executedCapabilityIDs:
                         executedSemanticCapabilities
