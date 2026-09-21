@@ -1,6 +1,7 @@
 import fs from "node:fs";
 import path from "node:path";
 import { spawnSync } from "node:child_process";
+import crypto from "node:crypto";
 
 const worktree = process.env.KRALI_WORKTREE || "";
 const promptFile = process.env.KRALI_PROMPT_FILE || "";
@@ -694,7 +695,7 @@ function persistCheckpoint(reason = "progress") {
 
   const status = candidateStatus();
   const payload = {
-    version: 1,
+    version: 2,
     gapLabel,
     reason,
     model,
@@ -705,6 +706,7 @@ function persistCheckpoint(reason = "progress") {
     sawGitDiff,
     buildCheckPassed,
     candidateDirty: Boolean(status?.ok && status?.dirty),
+    candidateIdentity: candidateIdentity(),
     evidence: checkpointEvidence.slice(-12),
     savedAt: new Date().toISOString(),
   };
@@ -730,7 +732,10 @@ function loadCheckpoint() {
       fs.readFileSync(checkpointFile, "utf8")
     );
 
-    if (!payload || payload.version !== 1) {
+    if (
+      !payload ||
+      ![1, 2].includes(Number(payload.version || 0))
+    ) {
       return null;
     }
 
@@ -765,19 +770,59 @@ function resumeCheckpointContext() {
   if (evidence.length === 0) return;
 
   checkpointEvidence = evidence;
-  inspectionToolCalls = Math.min(
-    Number(checkpoint.inspectionToolCalls || evidence.length),
-    maxInspectionTools
+
+  const currentStatus = candidateStatus();
+  const currentIdentity = candidateIdentity();
+  const checkpointIdentity =
+    typeof checkpoint.candidateIdentity === "string"
+      ? checkpoint.candidateIdentity
+      : null;
+
+  const canResumeVerification =
+    checkpoint.phase === "verification" &&
+    checkpoint.candidateDirty === true &&
+    currentStatus?.ok === true &&
+    currentStatus.dirty === true &&
+    Boolean(checkpointIdentity) &&
+    Boolean(currentIdentity) &&
+    checkpointIdentity === currentIdentity;
+
+  let resumedPhase = String(
+    checkpoint.phase || "inspection"
   );
 
-  if (checkpoint.phase === "implementation") {
-    // Resume close to implementation, but keep one final bounded source
-    // check available so a stale/wrong checkpoint cannot force a blind patch.
+  if (canResumeVerification) {
+    sawMutatingTool = true;
+    sawGitDiff = checkpoint.sawGitDiff === true;
+    buildCheckPassed =
+      checkpoint.buildCheckPassed === true;
+    inspectionToolCalls = maxInspectionTools;
+    implementationPhaseAnnounced = true;
+    resumedPhase = "verification";
+  } else if (
+    checkpoint.phase === "implementation" ||
+    checkpoint.phase === "verification"
+  ) {
+    // Diagnostic evidence is portable. Candidate execution state is not.
+    // A clean/new worktree cannot inherit verification from an older patch.
+    sawMutatingTool = false;
+    sawGitDiff = false;
+    buildCheckPassed = false;
     inspectionToolCalls = Math.max(
       0,
       maxInspectionTools - 1
     );
     implementationPhaseAnnounced = true;
+    resumedPhase = "implementation";
+  } else {
+    inspectionToolCalls = Math.min(
+      Number(
+        checkpoint.inspectionToolCalls ||
+          evidence.length
+      ),
+      Math.max(0, maxInspectionTools - 1)
+    );
+    resumedPhase = "inspection";
   }
 
   resumedFromCheckpoint = true;
@@ -788,12 +833,16 @@ function resumeCheckpointContext() {
       "KRALI process-level developer checkpoint bulundu.",
       "Önceki oturum watchdog/timeout nedeniyle kapanmış olabilir.",
       "Aynı incelemeleri sıfırdan tekrar etme; aşağıdaki gerçek tool kanıtlarını başlangıç bağlamı olarak kullan.",
-      "Checkpoint phase: " + String(checkpoint.phase || "inspection"),
+      "Checkpoint recorded phase: " +
+        String(checkpoint.phase || "inspection"),
+      "Effective resume phase: " + resumedPhase,
       "Checkpoint evidence:",
       truncate(JSON.stringify(evidence), 18000),
-      checkpoint.phase === "implementation"
-        ? "Inspection bütçesi önceki oturumda tamamlandı. Şimdi kanıta dayalı minimum generic patch üret; yalnız kanıt yetersizse tek ek inspection yap."
-        : "Kaldığın teşhis noktasından devam et; gereksiz repo taraması yapma.",
+      resumedPhase === "verification"
+        ? "Aynı candidate diff kimliği doğrulandı. Verification adımlarından devam et."
+        : resumedPhase === "implementation"
+          ? "Teşhis kanıtı taşındı fakat candidate yürütme durumu taşınmadı. Bir son source kontrolünden sonra minimum generic patch üret."
+          : "Kaldığın teşhis noktasından devam et; gereksiz repo taraması yapma.",
       "Önceki checkpoint bir öneri değil kanıt özetidir; source ile çelişirse source gerçeğini esas al."
     ].join("\n"),
   });
@@ -803,8 +852,12 @@ function resumeCheckpointContext() {
     gapLabel +
       " process-level checkpoint yüklendi • evidence=" +
       evidence.length +
-      " • phase=" +
-      String(checkpoint.phase || "inspection")
+      " • recordedPhase=" +
+      String(checkpoint.phase || "inspection") +
+      " • effectivePhase=" +
+      resumedPhase +
+      " • candidateMatch=" +
+      String(Boolean(canResumeVerification))
   );
 }
 
@@ -854,6 +907,31 @@ function candidateStatus() {
     dirty: lines.length > 0,
     output: lines.join("\n"),
   };
+}
+
+function candidateIdentity() {
+  const status = candidateStatus();
+  if (!status?.ok || !status.dirty) {
+    return null;
+  }
+
+  const diff = runGit([
+    "diff",
+    "--binary",
+    "--no-ext-diff",
+  ]);
+
+  if (
+    diff.status !== 0 ||
+    !diff.stdout.trim()
+  ) {
+    return null;
+  }
+
+  return crypto
+    .createHash("sha256")
+    .update(diff.stdout)
+    .digest("hex");
 }
 
 
