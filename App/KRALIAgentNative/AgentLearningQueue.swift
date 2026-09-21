@@ -140,6 +140,12 @@ struct AgentLearningQueueStore {
         var jobs = existing
 
         for gap in gaps {
+            guard !isTransientReason(
+                gap.reason
+            ) else {
+                continue
+            }
+
             let fingerprint =
                 self.fingerprint(
                     for: gap
@@ -309,19 +315,52 @@ struct AgentLearningQueueStore {
 
         var recovered = jobs
 
-        for index in recovered.indices
-            where recovered[index].state ==
+        for index in recovered.indices {
+            if isTransientReason(
+                recovered[index].reason
+            ) {
+                recovered[index].state =
+                    .failed
+                recovered[index].updatedAt =
+                    Date()
+                recovered[index].lastStatus =
+                    "Geçici kullanıcı/foreground müdahalesi capability eksikliği değildir; öğrenme işi kapatıldı."
+                continue
+            }
+
+            if recovered[index].state ==
                 .running {
-            recovered[index].state =
-                .queued
-            recovered[index].updatedAt =
-                Date()
-            recovered[index].lastStatus =
-                "Önceki worker kesildi; iş tekrar sıraya alındı."
+                recovered[index].state =
+                    .queued
+                recovered[index].updatedAt =
+                    Date()
+                recovered[index].lastStatus =
+                    "Önceki worker kesildi; iş tekrar sıraya alındı."
+            }
         }
 
         save(recovered)
         return recovered
+    }
+
+    private func isTransientReason(
+        _ reason: String
+    ) -> Bool {
+        let normalized =
+            normalize(reason)
+
+        let markers = [
+            "frontmost kalmadi",
+            "odagi degistirmis olabilir",
+            "observation boyunca frontmost kalmadi",
+            "observation interrupted",
+            "focus changed",
+            "foreground changed"
+        ]
+
+        return markers.contains {
+            normalized.contains($0)
+        }
     }
 
     private func fingerprint(
