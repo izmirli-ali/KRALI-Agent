@@ -44,6 +44,7 @@ final class AgentEngine: ObservableObject {
     @Published var currentSemanticMission: AgentSemanticMission?
     @Published var currentSemanticPlannerProvider: String?
     @Published var currentTaskGraph: AgentTaskGraph?
+    @Published var currentRuntimeTask: AgentRuntimeTask?
     @Published var taskGraphStatus = "Henüz görev grafiği yok."
     @Published var currentProblemResolution: AgentProblemResolution?
     @Published var currentOutcomeResolution: AgentOutcomeResolution?
@@ -83,6 +84,8 @@ final class AgentEngine: ObservableObject {
     private let brain = AgentBrain()
     private let planner = AgentPlanner()
     private let taskOrchestrator = AgentTaskOrchestrator()
+    private let taskRuntimePlanner =
+        AgentTaskRuntimePlanner()
     private let missionNormalizer = AgentMissionNormalizer()
     private let problemSolver = AgentProblemSolver()
     private let outcomePlanner = AgentOutcomePlanner()
@@ -690,6 +693,11 @@ final class AgentEngine: ObservableObject {
 
         currentTaskGraph =
             deterministicGraph
+        currentRuntimeTask =
+            taskRuntimePlanner.makeTask(
+                graph:
+                    deterministicGraph
+            )
 
         let deterministicResolution =
             problemSolver.solve(
@@ -925,6 +933,11 @@ final class AgentEngine: ObservableObject {
 
             currentTaskGraph =
                 compiledTaskGraph
+            currentRuntimeTask =
+                taskRuntimePlanner.makeTask(
+                    graph:
+                        compiledTaskGraph
+                )
 
             let problemResolution =
                 problemSolver.solve(
@@ -1477,6 +1490,12 @@ final class AgentEngine: ObservableObject {
 
         let verification: AgentVerificationResult
         if resolvedExecutionPlan.requiresVerification {
+            if currentRuntimeTask?.state !=
+                .waitingForApproval {
+                currentRuntimeTask?.state =
+                    .verifying
+            }
+
             setVerificationStep(.running)
             verificationState = .checking
             verificationSummary = "Sonuç kontrol ediliyor…"
@@ -1695,6 +1714,20 @@ final class AgentEngine: ObservableObject {
                 evidence: finalVerification.fallback,
                 progress: .investigating
             )
+        }
+
+        if currentRuntimeTask?.state !=
+            .waitingForApproval {
+            switch finalVerification.state {
+            case .passed, .skipped:
+                currentRuntimeTask?.state =
+                    .completed
+            case .partial, .attention:
+                currentRuntimeTask?.state =
+                    .failed
+            case .idle, .checking:
+                break
+            }
         }
 
         let replyWithSuggestion = appendSuggestion(
@@ -2054,6 +2087,12 @@ final class AgentEngine: ObservableObject {
                     capabilityRegistry.all
             )
 
+        if currentRuntimeTask?.objective ==
+            mission.objective {
+            currentRuntimeTask?.state =
+                .running
+        }
+
         var outputs: [String] = []
         var stepEvidence: [Int: String] = [:]
         var executed = Set<String>()
@@ -2131,9 +2170,24 @@ final class AgentEngine: ObservableObject {
             }
 
             if graphStep.requiresApproval {
+                let reason =
+                    graphStep.approvalReason ??
+                    "Bu adım dış uygulama veya kullanıcı verisi üzerinde değişiklik yapacak."
+
                 let approvalMessage =
                     "Kullanıcı onayı bekleniyor: " +
-                    step.title
+                    step.title +
+                    "\nNeden: " +
+                    reason
+
+                currentRuntimeTask?.state =
+                    .waitingForApproval
+                currentRuntimeTask?
+                    .waitingResourceIDs =
+                    taskRuntimePlanner
+                        .requiredResources(
+                            for: graphStep
+                        )
 
                 stepEvidence[stepIndex] =
                     approvalMessage
@@ -2146,7 +2200,7 @@ final class AgentEngine: ObservableObject {
                     " • " +
                     step.capabilityID +
                     " • " +
-                    step.operation
+                    reason
                 )
                 continue
             }
@@ -2769,6 +2823,10 @@ final class AgentEngine: ObservableObject {
             )
         }
 
+        currentRuntimeTask?
+            .completedStepIndexes =
+            completedStepIndexes
+
         return SemanticMissionExecutionResult(
             reply:
                 outputs.joined(
@@ -3360,6 +3418,17 @@ final class AgentEngine: ObservableObject {
                     }
                 }
 
+                let approvalReason =
+                    taskOrchestrator
+                        .approvalReason(
+                            title:
+                                step.title,
+                            operation:
+                                step.detail,
+                            capability:
+                                capability
+                        )
+
                 return AgentTaskGraphStep(
                     index: index,
                     title: step.title,
@@ -3382,10 +3451,9 @@ final class AgentEngine: ObservableObject {
                             "core.reasoning"
                         ),
                     requiresApproval:
-                        capability?.risk ==
-                            .external ||
-                        capability?.risk ==
-                            .reversibleWrite
+                        approvalReason != nil,
+                    approvalReason:
+                        approvalReason
                 )
             }
 
@@ -3399,6 +3467,7 @@ final class AgentEngine: ObservableObject {
         currentSemanticMission = nil
         currentSemanticPlannerProvider = nil
         currentTaskGraph = nil
+        currentRuntimeTask = nil
         taskGraphStatus = "Yeni görev için görev grafiği bekleniyor."
         currentProblemResolution = nil
         currentOutcomeResolution = nil
@@ -4793,6 +4862,8 @@ final class AgentEngine: ObservableObject {
                     currentSemanticPlannerProvider,
                 taskGraph:
                     currentTaskGraph,
+                runtimeTask:
+                    currentRuntimeTask,
                 problemResolution:
                     currentProblemResolution,
                 outcomeResolution:
