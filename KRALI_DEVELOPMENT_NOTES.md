@@ -153,3 +153,11 @@ Target flow:
 
 Target flow:
 `Goal → Outcome Contract → Success Criteria → Candidate Strategies → Capability Composition → Execute → Verify Outcome → Reflect → Learning only if uncovered`
+
+
+## v0.8.65 — Outcome Planner Build Hotfix
+
+- Fixed Swift parser ambiguity in `AgentOutcomePlanner.resolve`.
+- Replaced the multiline optional binding ending in `.first {` with an explicit intermediate optional and `if let selected`.
+- No behavioral rollback: v0.8.64 outcome-oriented planning, Learning gate and Developer Agent timeout-resume changes remain intact.
+- Build 115.
