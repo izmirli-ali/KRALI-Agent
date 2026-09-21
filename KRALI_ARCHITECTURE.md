@@ -588,3 +588,18 @@ Hedef döngü:
 - Gym'in amacı kullanıcıdan gelen manuel test sayısını azaltmak, KRALİ'nin bilinmeyen ama yapısal olarak benzer görevlerde genelleme kabiliyetini ölçmektir.
 
 Özet ilke: **Örneği ezberleme; invariants'ı öğren, varyasyonlarla kanıtla.**
+
+
+### Lightweight Semantic Gym
+
+Her yeni uygulama sürümünde tam regression paketini otomatik çalıştırmak yerine hızlı ve deterministik bir Semantic Gym bir kez çalışır. Bu katman production aksiyonu yürütmez; semantic contract'ı sınar.
+
+Çıktı `Mentor/gym-latest.json` dosyasına yazılır ve şunları taşır:
+
+- scenario family ve varyasyon sonuçları,
+- `intent / scope / entity / rank / output / safety / capability / verification` failure class özeti,
+- başarısız varyasyonları aynı invariant altında birleştiren learning candidate'lar,
+- learning candidate için `sourceMutationAllowed=false` güvenlik sınırı,
+- yalnız mevcut primitive'ler yetersizse Capability Gap incelemesine yükseltme sinyali.
+
+Bu katman **öğrenme teşhisi üretir; production source'u kendi kendine değiştirmez.** Developer Agent ancak Mentor/Gym kanıtını aldıktan sonra izole candidate ortamında generic düzeltme üretebilir ve build/regression kapılarından geçmek zorundadır.
