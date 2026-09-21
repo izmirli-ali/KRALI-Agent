@@ -7,6 +7,27 @@ enum CapabilityGapKind: String, Codable, Hashable, Sendable {
     case integration
 }
 
+enum CapabilityLearningPath:
+    String,
+    Codable,
+    Hashable,
+    Sendable {
+    case strategyRecipe
+    case primitivePatch
+    case integration
+
+    var title: String {
+        switch self {
+        case .strategyRecipe:
+            return "Hızlı strateji öğrenimi"
+        case .primitivePatch:
+            return "Dar primitive patch"
+        case .integration:
+            return "Tam entegrasyon"
+        }
+    }
+}
+
 struct CapabilityGapResolution: Codable, Hashable, Sendable {
     let capabilityID: String
     let capabilityName: String
@@ -15,6 +36,7 @@ struct CapabilityGapResolution: Codable, Hashable, Sendable {
     let candidateCapabilityIDs: [String]
     let researchGoal: String
     let developerBrief: String
+    var learningPath: CapabilityLearningPath? = nil
 }
 
 struct AgentCapabilityGapResolver {
@@ -112,7 +134,17 @@ struct AgentCapabilityGapResolver {
                     researchGoal:
                         researchGoal,
                     developerBrief:
-                        developerBrief
+                        developerBrief,
+                    learningPath:
+                        learningPath(
+                            for: step,
+                            capability:
+                                capability,
+                            kind:
+                                kind,
+                            strategyCandidates:
+                                strategyCandidates
+                        )
                 )
             )
         }
@@ -253,7 +285,17 @@ struct AgentCapabilityGapResolver {
             researchGoal:
                 researchGoal,
             developerBrief:
-                developerBrief
+                developerBrief,
+            learningPath:
+                learningPath(
+                    capabilityID:
+                        capability.id,
+                    kind:
+                        kind,
+                    operation:
+                        objective,
+                    strategyCandidates: []
+                )
         )
     }
 
@@ -404,12 +446,94 @@ struct AgentCapabilityGapResolver {
                     researchGoal:
                         researchGoal,
                     developerBrief:
-                        developerBrief
+                        developerBrief,
+                    learningPath:
+                        strategyCandidates
+                            .isEmpty
+                        ? .primitivePatch
+                        : .strategyRecipe
                 )
             )
         }
 
         return results
+    }
+
+    private func learningPath(
+        for step: AgentTaskGraphStep,
+        capability: AgentCapability,
+        kind: CapabilityGapKind,
+        strategyCandidates: [String]
+    ) -> CapabilityLearningPath {
+        learningPath(
+            capabilityID:
+                capability.id,
+            kind:
+                kind,
+            operation:
+                [
+                    step.title,
+                    step.operation
+                ]
+                .joined(separator: " "),
+            strategyCandidates:
+                strategyCandidates
+        )
+    }
+
+    private func learningPath(
+        capabilityID: String,
+        kind: CapabilityGapKind,
+        operation: String,
+        strategyCandidates: [String]
+    ) -> CapabilityLearningPath {
+        if !strategyCandidates.isEmpty ||
+           kind == .strategy {
+            return .strategyRecipe
+        }
+
+        let corpus = operation
+            .folding(
+                options: [
+                    .diacriticInsensitive,
+                    .caseInsensitive
+                ],
+                locale:
+                    Locale(identifier: "tr_TR")
+            )
+            .lowercased()
+            .replacingOccurrences(
+                of: "ı",
+                with: "i"
+            )
+
+        let primitiveTerms = [
+            "click", "tikla",
+            "scroll", "kaydir",
+            "type", "yaz",
+            "select", "sec",
+            "read", "oku",
+            "import", "ice aktar",
+            "add", "ekle",
+            "create sequence",
+            "sequence olustur",
+            "play", "oynat",
+            "open menu", "menu ac",
+            "button", "buton",
+            "field", "alan"
+        ]
+
+        if capabilityID ==
+            "desktop.control" ||
+           primitiveTerms.contains(
+            where: {
+                corpus.contains($0)
+            }
+           ) {
+            return .primitivePatch
+        }
+
+        return .integration
     }
 
     private func researchGoal(
