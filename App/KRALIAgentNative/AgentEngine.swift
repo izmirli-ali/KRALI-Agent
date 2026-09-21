@@ -103,6 +103,8 @@ final class AgentEngine: ObservableObject {
     private let mentorTraceStore = MentorTraceStore()
     private let trainingLab = AgentTrainingLab()
     private let trainingLabStore = TrainingLabStore()
+    private let semanticGym = AgentSemanticGym()
+    private let semanticGymStore = SemanticGymStore()
     private let liveResearchEval = AgentLiveResearchEval()
     private let liveResearchEvalStore = LiveResearchEvalStore()
     private let arena = AgentArena()
@@ -212,6 +214,10 @@ final class AgentEngine: ObservableObject {
                     "CFBundleShortVersionString"
             ) as? String ?? "unknown"
 
+        let semanticGymIsCurrent =
+            semanticGymStore.load()?.appVersion ==
+                launchAppVersion
+
         inspectorState.developerAgentStatus =
             developerBridge
                 .readStatus()
@@ -302,6 +308,15 @@ final class AgentEngine: ObservableObject {
             }
 
             self.startNextLearningJobIfNeeded()
+        }
+
+        if !semanticGymIsCurrent {
+            Task { @MainActor [weak self] in
+                try? await Task.sleep(
+                    for: .milliseconds(850)
+                )
+                self?.runSemanticGym()
+            }
         }
     }
 
@@ -6308,6 +6323,53 @@ final class AgentEngine: ObservableObject {
         )
     }
 
+    func runSemanticGym() {
+        let report =
+            semanticGym.run()
+
+        do {
+            try semanticGymStore.save(
+                report
+            )
+
+            inspectorState.mentorTraceReady = true
+
+            log(
+                "Semantic Gym tamamlandı: " +
+                String(report.passed) +
+                "/" +
+                String(report.total) +
+                " • family=" +
+                report.families.joined(
+                    separator: ","
+                )
+            )
+
+            if report.failed > 0 {
+                let failures =
+                    report.failureSummary
+                        .map {
+                            $0.failureClass.rawValue +
+                            "=" +
+                            String($0.count)
+                        }
+                        .joined(
+                            separator: " • "
+                        )
+
+                log(
+                    "Semantic Gym öğrenme adayı: " +
+                    failures
+                )
+            }
+        } catch {
+            log(
+                "Semantic Gym raporu kaydedilemedi: " +
+                error.localizedDescription
+            )
+        }
+    }
+
     func syncMentorTrace() {
         guard !inspectorState.mentorSyncBusy else { return }
 
@@ -6317,14 +6379,21 @@ final class AgentEngine: ObservableObject {
         let hasTrainingReport = fileManager.fileExists(
             atPath: trainingLabStore.outputURL.path
         )
+        let hasSemanticGymReport = fileManager.fileExists(
+            atPath: semanticGymStore.outputURL.path
+        )
         let hasLiveEvalReport = fileManager.fileExists(
             atPath: liveResearchEvalStore.outputURL.path
         )
 
-        guard hasTrace || hasTrainingReport || hasLiveEvalReport else {
+        guard hasTrace ||
+              hasTrainingReport ||
+              hasSemanticGymReport ||
+              hasLiveEvalReport
+        else {
             inspectorState.mentorTraceReady = false
             inspectorState.mentorTraceStatus =
-                "Önce bir KRALİ görevi, Training Lab veya Live Research Eval çalıştır."
+                "Önce bir KRALİ görevi, Semantic Gym, Training Lab veya Live Research Eval çalıştır."
             return
         }
 
