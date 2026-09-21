@@ -1,23 +1,3 @@
-KRALI_LOCAL_STAGE local_agent_running • Premiere kontrolü (premiere.control) yerel model çalışıyor • adım 1/16
-KRALI_LOCAL_STAGE local_agent_tool • Premiere kontrolü (premiere.control) araç çalışıyor: search_codebase
-KRALI_LOCAL_STAGE local_agent_running • Premiere kontrolü (premiere.control) yerel model çalışıyor • adım 2/16
-[{"name": "read_file", "arguments": {"file_path": "App/KRALIAgentNative/AgentCapabilities.swift"}}]
-KRALI_LOCAL_STAGE local_agent_completion_rejected • Premiere kontrolü (premiere.control) tamamlanma reddedildi • aktif capability gap için gerçek candidate değişikliği yok • deneme=1/3
-KRALI_LOCAL_STAGE local_agent_running • Premiere kontrolü (premiere.control) yerel model çalışıyor • adım 3/16
-[{"name": "read_file", "arguments": {"file_path": "App/KRALIAgentNative/AgentCapabilities.swift"}}]
-KRALI_LOCAL_STAGE local_agent_structured_tool • Premiere kontrolü (premiere.control) yapılandırılmış devam aracı çalışıyor: read_file
-KRALI_LOCAL_STAGE local_agent_running • Premiere kontrolü (premiere.control) yerel model çalışıyor • adım 4/16
-KRALI_LOCAL_STAGE local_agent_request_retry • Premiere kontrolü (premiere.control) model isteği zaman aşımına uğradı; mevcut context korunarak retry 1/2
-Premiere kontrolü (premiere.control) native local agent toplam zaman sınırına ulaştı.
-Deleted branch krali-dev-agent/20260921-212726 (was ba7ad1d).
-❌ Native yerel Developer Agent durdu: Premiere kontrolü (premiere.control) native local agent toplam zaman sınırına ulaştı.
-
-━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
- KRALİ DEVELOPER AGENT
- 20260921-214738
-━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-⚠️ Global Node.js v26 Cline bağımlılıklarıyla uyumlu değil; izole Node 22 runtime hazırlanıyor.
-✅ Developer Agent runtime: v22.23.2
 ⚡ Tool-capable model cache kullanılıyor: devstral:24b • yaş=4890s
 Yerel model seçimi: devstral:24b • RAM≈24GB
 ✅ Yerel Developer AI hazır + tool-call doğrulandı: devstral:24b
@@ -118,3 +98,23 @@ KRALI_LOCAL_STAGE local_agent_request_retry • Uygulama kontrolü (desktop.app)
 Uygulama kontrolü (desktop.app) native local agent toplam zaman sınırına ulaştı.
 Deleted branch krali-dev-agent/20260921-225400 (was 96633d7).
 ❌ Native yerel Developer Agent durdu: Uygulama kontrolü (desktop.app) native local agent toplam zaman sınırına ulaştı.
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+ KRALİ DEVELOPER AGENT
+ 20260921-234950
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+⚠️ Global Node.js v26 Cline bağımlılıklarıyla uyumlu değil; izole Node 22 runtime hazırlanıyor.
+✅ Developer Agent runtime: v22.23.2
+⚡ Tool-capable model cache kullanılıyor: devstral:24b • yaş=3330s
+Yerel model seçimi: devstral:24b • RAM≈24GB
+✅ Yerel Developer AI hazır + tool-call doğrulandı: devstral:24b
+From https://github.com/izmirli-ali/KRALI-Agent
+ * branch            main       -> FETCH_HEAD
+Already up to date.
+Learning Queue job brief bulundu; mutable Mentor latest yerine immutable job kullanılacak.
+Preparing worktree (new branch 'krali-dev-agent/20260921-234950')
+branch 'krali-dev-agent/20260921-234950' set up to track 'origin/main'.
+HEAD is now at 87468c8 Sync KRALI mentor diagnostics
+Developer prompt mode: gap • 4262 bytes
+KRALI_LOCAL_STAGE local_agent_starting • Uygulama kontrolü (desktop.app) native Ollama agent başlatılıyor: devstral:24b
+KRALI_LOCAL_STAGE local_agent_running • Uygulama kontrolü (desktop.app) yerel model çalışıyor • adım 1/10

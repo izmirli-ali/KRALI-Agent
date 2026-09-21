@@ -1,1 +1,1 @@
-runtime|app=Safari|activate=false|frontmost=false|source=unverified
+runtime_failed|Uygulama bulunamadı: notlar
