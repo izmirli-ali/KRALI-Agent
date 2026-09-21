@@ -241,6 +241,11 @@ final class AgentFileSearchCoordinator {
                 reachedSafetyLimit,
             title: title,
             message:
+                "“" +
+                root.lastPathComponent +
+                "” içinde " +
+                title +
+                " için " +
                 String(results.count) +
                 " eşleşme buldum: " +
                 preview +
