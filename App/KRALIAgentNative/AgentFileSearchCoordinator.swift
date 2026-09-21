@@ -101,9 +101,20 @@ final class AgentFileSearchCoordinator {
             sourceFiles = previousResults
             reachedSafetyLimit = false
         } else {
-            let snapshot = cachedIndex(
-                for: root
-            )
+            let freshnessSensitive =
+                query.sortMode ==
+                    .newestFirst ||
+                decision.dateRange != nil
+
+            let snapshot =
+                freshnessSensitive
+                ? refreshedIndex(
+                    for: root
+                )
+                : cachedIndex(
+                    for: root
+                )
+
             sourceFiles = snapshot.files
             reachedSafetyLimit =
                 snapshot.reachedSafetyLimit
@@ -315,6 +326,26 @@ final class AgentFileSearchCoordinator {
         case .wholeComputer:
             return nil
         }
+    }
+
+    private func refreshedIndex(
+        for root: URL
+    ) -> AgentWorkspaceIndexSnapshot {
+        let key =
+            root.standardizedFileURL.path
+
+        let snapshot =
+            indexer.index(
+                root: root
+            )
+
+        cache[key] =
+            CachedIndex(
+                createdAt: Date(),
+                snapshot: snapshot
+            )
+
+        return snapshot
     }
 
     private func cachedIndex(
