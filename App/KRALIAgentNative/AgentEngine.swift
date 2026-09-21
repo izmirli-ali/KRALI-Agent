@@ -2886,14 +2886,17 @@ final class AgentEngine: ObservableObject {
                     continue
                 }
 
-                if !isStepCapabilityAvailable(
+                if completedMissionStepIndexes.contains(
+                    semanticStepIndex
+                ) {
+                    executionSteps[index].state = .completed
+                } else if !isStepCapabilityAvailable(
                     executionSteps[index]
                 ) {
                     executionSteps[index].state = .blocked
-                } else if completedMissionStepIndexes.contains(
-                    semanticStepIndex
-                ) &&
-                executedCapabilityIDs.contains(capabilityID) {
+                } else if executedCapabilityIDs.contains(
+                    capabilityID
+                ) {
                     executionSteps[index].state = .completed
                 } else {
                     executionSteps[index].state = .partial
