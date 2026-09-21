@@ -266,6 +266,9 @@ struct AgentTrainingLab {
         results.append(
             webTargetDoesNotBecomeApplicationNameResult()
         )
+        results.append(
+            exhaustedOutcomeOpensRealCapabilityGapResult()
+        )
 
         let core = results.filter { $0.tier == .core }
         let northStar = results.filter { $0.tier == .northStar }
@@ -283,6 +286,71 @@ struct AgentTrainingLab {
             northStarPassed: northStar.filter(\.passed).count,
             northStarTotal: northStar.count,
             results: results
+        )
+    }
+
+    private func exhaustedOutcomeOpensRealCapabilityGapResult()
+        -> TrainingScenarioResult {
+        let gap =
+            capabilityGapResolver
+                .resolveExhaustedOutcomeCapability(
+                    capabilityID:
+                        "browser.control",
+                    objective:
+                        "example.com ana başlığını öğren",
+                    attemptSummaries: [
+                        "research.web: kanıt yok",
+                        "system.open.url + perception.screen: ekran doğrulanamadı"
+                    ],
+                    capabilities:
+                        capabilityRegistry.all
+                )
+
+        var diagnostics: [String] = []
+
+        if gap == nil {
+            diagnostics.append(
+                "Outcome stratejileri tükendiği halde browser.control gerçek capability gap olarak açılmadı."
+            )
+        }
+
+        if gap?.kind !=
+            .integration {
+            diagnostics.append(
+                "browser.control exhausted gap integration olarak sınıflandırılmadı."
+            )
+        }
+
+        if !(gap?
+            .candidateCapabilityIDs
+            .isEmpty ?? false) {
+            diagnostics.append(
+                "Tükenmiş stratejiler tekrar candidate olarak gap'e taşındı."
+            )
+        }
+
+        return TrainingScenarioResult(
+            scenarioID:
+                "outcome-exhaustion-opens-capability-gap",
+            title:
+                "Outcome stratejileri tükenince gerçek capability gap açılmalı",
+            tier: .core,
+            prompt:
+                "example.com sitesine gir ve sayfadaki ana başlığı bana söyle",
+            passed: diagnostics.isEmpty,
+            goal:
+                "Mevcut güvenli yollar runtime'da başarısızsa ancak o zaman browser.control Learning Gateway'e geç",
+            route: [
+                "Core",
+                "Outcome",
+                "Strategy Chain",
+                "Learning Gate"
+            ],
+            selectedCapabilities: [],
+            unavailableCapabilities: [
+                "browser.control"
+            ],
+            diagnostics: diagnostics
         )
     }
 
