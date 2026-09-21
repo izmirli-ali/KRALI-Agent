@@ -416,26 +416,15 @@ struct AgentContextMemoryStore {
     ) -> [AgentContextMemoryEntry] {
         let query = normalize(rawQuery)
 
-        // Autonomous execution must not inherit unrelated persistent rules.
-        // Reuse the same relevance scorer that powers conversational memory,
-        // then narrow the result according to whether the user explicitly
-        // continues a prior task.
-        let relevantEntries =
-            relevant(
-                to: rawQuery,
-                from: entries,
-                limit: limit
-            )
-
+        // Prior task/research prose is powerful but can poison a new autonomous
+        // action. Only carry it forward when the user explicitly refers to
+        // previous context. Persistent user rules remain safe defaults.
         if containsContinuationReference(query) {
-            return Array(
-                relevantEntries
-                    .prefix(max(0, limit))
-            )
+            return Array(entries.prefix(max(0, limit)))
         }
 
         return Array(
-            relevantEntries
+            entries
                 .filter { $0.kind == .userRule }
                 .prefix(max(0, limit))
         )
