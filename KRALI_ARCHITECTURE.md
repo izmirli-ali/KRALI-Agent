@@ -567,3 +567,24 @@ Developer Agent script'i artık Mentor `capabilityGaps` alanını diagnostic kar
 Training Lab regression'ları current-goal mission normalization, cross-provider dataflow, text-write availability, capability-gap classification, external commit approval ve compound-command fast-path ayrımını kapsayacak şekilde güncellendi. `files.write.text` artık available olduğundan eski “blocked text writer” beklentisi kaldırıldı.
 
 v0.8.32 sonrası sıradaki mimari adım, bu gap resolver'ı **Strategy Memory + sınırlı automatic replan loop** ile birleştirmektir. Bir provider başarısız olduğunda mevcut evidence ve failure reason kullanılarak en fazla sınırlı sayıda alternatif graph üretilmeli; aynı başarısız strategy tekrar denenmemeli. Candidate self-development ise yalnız gap classification + developer brief + build/test/Mentor gate hattından geçmelidir.
+
+
+## KRALİ Gym / Eval Loop — semantic öğrenme döngüsü
+
+KRALİ'nin gelişimi tek bir kullanıcı cümlesini tekrar tekrar deneyip o cümleye özel yama ekleme modeline dayanmaz. Aynı başarı kriterini taşıyan farklı ifade ve ortam varyasyonları bir **scenario family** olarak birlikte sınanır.
+
+Hedef döngü:
+
+`Scenario Family → Variant Runs → Failure Classification → Strategy/Capability Diagnosis → Generic Repair Candidate → Family Regression → Global Regression`
+
+- Test cümleleri somut olabilir; production davranışı prompt, uygulama veya marka adına özel olamaz.
+- Failure sınıfları en az `intent / scope / entity / rank / output / safety / capability / verification` seviyesinde ayrıştırılır.
+- Bir varyasyon başarısız olduğunda düzeltme önce ilgili semantic abstraction, strategy veya reusable primitive katmanında aranır.
+- Mevcut primitive'lerin farklı bileşimi yeterliyse yeni provider/kod yazılmaz; strategy/recipe öğrenilir.
+- Gerçekten eksik atomik davranış varsa Capability Gap + Learning Gateway açılır.
+- Learning otomatik diagnostic, strategy ve candidate üretebilir; production source mutation / merge kontrolsüz yapılmaz. Candidate izole geliştirme ve build/test/Mentor gate'lerinden geçer.
+- Bir düzeltme yalnız tek örneği geçiriyorsa yeterli değildir. Aynı semantic contract ailesinin tamamı ve mevcut regression seti korunmalıdır.
+- Mentor yalnız son cevabı değil semantic contract'ın hangi katmanda bozulduğunu da raporlamalıdır.
+- Gym'in amacı kullanıcıdan gelen manuel test sayısını azaltmak, KRALİ'nin bilinmeyen ama yapısal olarak benzer görevlerde genelleme kabiliyetini ölçmektir.
+
+Özet ilke: **Örneği ezberleme; invariants'ı öğren, varyasyonlarla kanıtla.**
