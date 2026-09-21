@@ -876,15 +876,6 @@ final class AgentEngine: ObservableObject {
                 from: mission,
                 fallback: capabilities
             )
-            resolvedLearningPlans = capabilityLearner.makePlans(
-                for: resolvedCapabilities,
-                webResearchAvailable: webResearchAvailable
-            )
-            resolvedExecutionPlan = semanticExecutionPlan(
-                mission,
-                capabilities: resolvedCapabilities,
-                goal: resolvedGoal
-            )
 
             let compiledTaskGraph =
                 taskOrchestrator.compile(
@@ -909,6 +900,54 @@ final class AgentEngine: ObservableObject {
                 problemResolution
             currentReflectionSummary =
                 problemResolution.reflection
+
+            let problemSolvableBlockedIDs =
+                Set(
+                    compiledTaskGraph.steps
+                        .filter {
+                            !$0.isAvailable
+                        }
+                        .filter { step in
+                            !problemSolver
+                                .candidateCapabilityIDs(
+                                    for: step,
+                                    availableCapabilities:
+                                        capabilityRegistry.all
+                                )
+                                .isEmpty
+                        }
+                        .map(\.capabilityID)
+                )
+
+            resolvedLearningPlans =
+                capabilityLearner.makePlans(
+                    for: resolvedCapabilities,
+                    webResearchAvailable:
+                        webResearchAvailable
+                )
+                .filter {
+                    !problemSolvableBlockedIDs
+                        .contains(
+                            $0.capabilityID
+                        )
+                }
+
+            if !problemSolvableBlockedIDs
+                .isEmpty {
+                log(
+                    "Problem Solver semantic Learning'i erteledi: " +
+                    problemSolvableBlockedIDs
+                        .sorted()
+                        .joined(separator: ", ")
+                )
+            }
+
+            resolvedExecutionPlan = semanticExecutionPlan(
+                mission,
+                capabilities:
+                    resolvedCapabilities,
+                goal: resolvedGoal
+            )
 
             currentCapabilityGaps =
                 capabilityGapResolver.resolve(
