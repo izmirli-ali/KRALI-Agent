@@ -371,19 +371,18 @@ struct AgentNaturalLanguageResolver: Sendable {
         let wordSet = Set(tokens(raw))
 
         let explicitCapabilityTerms =
-            !wordSet.intersection(
-                Set([
-                    "kabiliyet", "kabiliyetler", "kabiliyetlerin",
-                    "yetenek", "yetenekler", "yeteneklerin",
-                    "capability", "capabilities"
-                ])
-            ).isEmpty
+            wordSet.contains {
+                $0.hasPrefix("kabiliyet") ||
+                $0.hasPrefix("yetenek") ||
+                $0.hasPrefix("capabilit")
+            }
 
         let abilityPhrases = [
             "ne yapabiliyorsun",
             "neler yapabiliyorsun",
             "ne yapabilirsin",
             "neler yapabilirsin",
+            "yapabildigin",
             "hangi isleri yap",
             "hangi görevleri yap",
             "hangi gorevleri yap",
