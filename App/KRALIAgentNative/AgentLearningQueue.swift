@@ -355,7 +355,12 @@ struct AgentLearningQueueStore {
             "observation boyunca frontmost kalmadi",
             "observation interrupted",
             "focus changed",
-            "foreground changed"
+            "foreground changed",
+            "observation hazir degil",
+            "ocr kaniti uretmedi",
+            "observation belirsiz",
+            "tam hedef domain dogrulanamadi",
+            "gecici algi/yuklenme belirsizligi"
         ]
 
         return markers.contains {
