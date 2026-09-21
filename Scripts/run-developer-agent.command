@@ -883,6 +883,80 @@ try {
 NODE
 )"
 
+GAP_KEY="$("$NODE_BIN" - "$GAP_SOURCE" <<'NODE'
+const fs = require("fs");
+const crypto = require("crypto");
+
+try {
+  const payload = JSON.parse(fs.readFileSync(process.argv[2], "utf8"));
+  const gap =
+    payload && payload.gap
+      ? payload.gap
+      : (
+          Array.isArray(payload && payload.capabilityGaps)
+            ? payload.capabilityGaps[0]
+            : null
+        );
+
+  if (!gap) {
+    process.stdout.write("full");
+    process.exit(0);
+  }
+
+  const capabilityID = String(gap.capabilityID || "unknown");
+  const signature = [
+    capabilityID,
+    String(gap.kind || ""),
+    String(gap.learningPath || ""),
+    String(gap.reason || ""),
+    String(gap.researchGoal || "")
+  ].join("\n");
+
+  const digest = crypto
+    .createHash("sha256")
+    .update(signature)
+    .digest("hex")
+    .slice(0, 12);
+
+  const safeID = capabilityID
+    .replace(/[^a-zA-Z0-9._-]+/g, "_")
+    .slice(0, 80);
+
+  process.stdout.write(safeID + "-" + digest);
+} catch {
+  process.stdout.write("unknown");
+}
+NODE
+)"
+
+CHECKPOINT_DIR="$STATUS_DIR/checkpoints"
+mkdir -p "$CHECKPOINT_DIR"
+CHECKPOINT_FILE="$CHECKPOINT_DIR/$GAP_KEY.json"
+
+if [ "$PROVIDER" = "ollama" ] &&
+   [ "$LOCAL_AGENT_ENGINE" = "native-ollama" ] &&
+   [ "$LEARNING_PATH" = "primitivePatch" ]; then
+    PATCH_MODEL="qwen2.5-coder:14b-instruct"
+
+    if [ "$MODEL" != "$PATCH_MODEL" ] &&
+       "$OLLAMA_BIN" show "$PATCH_MODEL" >/dev/null 2>&1; then
+        echo "🧠 Primitive patch için daha hafif model deneniyor: $PATCH_MODEL" | tee -a "$LOG"
+
+        if probe_ollama_model "$PATCH_MODEL"; then
+            MODEL="$PATCH_MODEL"
+            MODEL_PROBE_CACHED=0
+            write_status "local_model_specialized|$GAP_LABEL için primitive patch modeli seçildi: $MODEL|$BRANCH|$WORKTREE"
+            echo "✅ Primitive patch modeli: $MODEL" | tee -a "$LOG"
+        else
+            echo "⚠️ $PATCH_MODEL tool-call probe geçmedi; mevcut model korunuyor: $MODEL" | tee -a "$LOG"
+        fi
+    fi
+fi
+
+if [ -f "$CHECKPOINT_FILE" ]; then
+    echo "♻️ Developer checkpoint bulundu; aynı gap teşhisi kaldığı yerden devam edecek: $GAP_KEY" | tee -a "$LOG"
+fi
+
 if [ "$GAP_MODE" = "gap" ] && [ -n "$GAP_LABEL" ]; then
     write_status "learning|$GAP_LABEL için provider/strategy öğreniliyor|$BRANCH|$WORKTREE"
 else
@@ -924,6 +998,7 @@ if [ "$PROVIDER" = "ollama" ] &&
     KRALI_GAP_LABEL="$GAP_LABEL" \
     KRALI_APP_VERSION="$(/bin/cat "$ROOT/VERSION" 2>/dev/null | /usr/bin/tr -d '[:space:]')" \
     KRALI_RUN_ID="$STAMP" \
+    KRALI_CHECKPOINT_FILE="$CHECKPOINT_FILE" \
     KRALI_REQUIRE_CHANGE="$([ "$GAP_MODE" = "gap" ] && echo 1 || echo 0)" \
     KRALI_LOCAL_AGENT_MAX_COMPLETION_REJECTIONS="$([ "$LEARNING_PATH" = "primitivePatch" ] && echo 2 || echo 3)" \
     KRALI_LOCAL_AGENT_MAX_STRUCTURED_ACTIONS="$([ "$LEARNING_PATH" = "primitivePatch" ] && echo 6 || echo 8)" \
@@ -1168,6 +1243,7 @@ if ! git push -u origin "$BRANCH" >>"$LOG" 2>&1; then
     exit 23
 fi
 
+rm -f "$CHECKPOINT_FILE"
 write_status "ready_for_review|$GAP_LABEL öğrenme adayı hazır; build geçti ve incelemeye hazır|$BRANCH|$WORKTREE"
 echo "✅ Developer Agent adayı hazır: $BRANCH" | tee -a "$LOG"
 echo "ℹ️ Main branch değiştirilmedi." | tee -a "$LOG"
