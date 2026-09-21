@@ -2889,6 +2889,288 @@ final class AgentEngine: ObservableObject {
         )
     }
 
+    func approvePendingTaskApproval() {
+        guard
+            !busy,
+            let approval =
+                pendingTaskApproval,
+            let mission =
+                currentSemanticMission,
+            let decision =
+                lastDecision,
+            approval.taskID ==
+                currentRuntimeTask?.id
+        else {
+            return
+        }
+
+        appendConversationMessage(
+            ChatMessage(
+                role: .user,
+                text:
+                    "Onaylıyorum: " +
+                    approval.title
+            )
+        )
+
+        approvedRuntimeStepIndexes
+            .insert(
+                approval.stepIndex
+            )
+
+        pendingTaskApproval = nil
+        currentRuntimeTask?.state =
+            .running
+        currentRuntimeTask?
+            .waitingResourceIDs = []
+
+        verificationState =
+            .checking
+        verificationSummary =
+            "Onaylanan adımdan devam ediliyor…"
+        busy = true
+
+        Task {
+            await resumeApprovedSemanticTask(
+                mission: mission,
+                decision: decision
+            )
+        }
+    }
+
+    func cancelPendingTaskApproval() {
+        guard let approval =
+            pendingTaskApproval
+        else {
+            return
+        }
+
+        appendConversationMessage(
+            ChatMessage(
+                role: .user,
+                text:
+                    "İptal: " +
+                    approval.title
+            )
+        )
+
+        pendingTaskApproval = nil
+        currentRuntimeTask?.state =
+            .cancelled
+        currentRuntimeTask?
+            .waitingResourceIDs = []
+        verificationState =
+            .partial
+        verificationSummary =
+            "Kullanıcı onay vermedi; mutasyon uygulanmadı."
+
+        postAssistantMessage(
+            "İşlemi iptal ettim. Onay gerektiren adım uygulanmadı."
+        )
+
+        log(
+            "Task approval kullanıcı tarafından iptal edildi • step=" +
+            String(
+                approval.stepIndex
+            )
+        )
+    }
+
+    private func resumeApprovedSemanticTask(
+        mission: AgentSemanticMission,
+        decision: AgentDecision
+    ) async {
+        let result =
+            await executeAvailableSemanticMission(
+                mission,
+                userInput:
+                    currentTaskInput
+            )
+
+        completeSemanticActionSteps(
+            executedCapabilityIDs:
+                result.executedCapabilityIDs,
+            completedMissionStepIndexes:
+                result.completedStepIndexes
+        )
+
+        if let graph =
+            currentTaskGraph,
+           currentRuntimeTask?.state !=
+                .waitingForApproval {
+            let runtimeGaps =
+                capabilityGapResolver
+                    .resolveRuntimeFailures(
+                        graph: graph,
+                        completedStepIndexes:
+                            result
+                                .completedStepIndexes,
+                        capabilities:
+                            capabilityRegistry.all
+                    )
+
+            for gap in runtimeGaps
+                where !currentCapabilityGaps
+                    .contains(
+                        where: {
+                            $0.capabilityID ==
+                                gap.capabilityID
+                        }
+                    ) {
+                currentCapabilityGaps
+                    .append(gap)
+            }
+        }
+
+        let fallbackGoal =
+            goalInterpreter.interpret(
+                currentTaskInput,
+                decision: decision,
+                context: brainContext()
+            )
+
+        let goal =
+            semanticGoalProfile(
+                from: mission,
+                fallback:
+                    fallbackGoal
+            )
+
+        var verification =
+            verifier.verify(
+                decision: decision,
+                currentUserInput:
+                    currentTaskInput,
+                goal: goal,
+                semanticMission:
+                    mission,
+                outcomeResolution:
+                    currentOutcomeResolution,
+                outcomeAttempts:
+                    currentOutcomeAttempts,
+                snapshot:
+                    verificationSnapshot(
+                        executedCapabilityIDs:
+                            result
+                                .executedCapabilityIDs
+                    )
+            )
+
+        if let pending =
+            pendingTaskApproval {
+            verification =
+                AgentVerificationResult(
+                    state: .partial,
+                    summary:
+                        "Görev güvenli biçimde duraklatıldı. Sıradaki mutasyon kullanıcı onayı bekliyor: " +
+                        pending.title,
+                    fallback: nil
+                )
+        }
+
+        verificationState =
+            verification.state
+        verificationSummary =
+            verification.summary
+
+        if pendingTaskApproval == nil {
+            switch verification.state {
+            case .passed, .skipped:
+                currentRuntimeTask?.state =
+                    .completed
+            case .partial, .attention:
+                if currentRuntimeTask?.state !=
+                    .cancelled {
+                    currentRuntimeTask?.state =
+                        .failed
+                }
+            case .idle, .checking:
+                break
+            }
+        }
+
+        let baseReply =
+            result.reply
+                .trimmingCharacters(
+                    in:
+                        .whitespacesAndNewlines
+                )
+                .isEmpty
+            ? (
+                pendingTaskApproval == nil
+                ? "Onaylanan adımdan devam ettim."
+                : "Görev bir sonraki onay kapısında durdu."
+            )
+            : result.reply
+
+        let reply =
+            responseComposer.compose(
+                baseReply: baseReply,
+                verification:
+                    verification,
+                goal: goal,
+                capabilities:
+                    selectedCapabilities,
+                learningPlans:
+                    capabilityLearningPlans,
+                capabilityGaps:
+                    currentCapabilityGaps,
+                fallbackPlan: nil
+            )
+
+        recordMentorTrace(
+            input:
+                currentTaskInput,
+            source: .text,
+            goal:
+                goal.summary,
+            plan:
+                mission.steps
+                    .map(\.title)
+                    .joined(
+                        separator: " → "
+                    ),
+            route:
+                activeRoute,
+            capabilities:
+                selectedCapabilities,
+            learningPlans:
+                capabilityLearningPlans,
+            verification:
+                verification,
+            intelligenceProvider:
+                nil,
+            finalResponse:
+                reply
+        )
+
+        appendConversationMessage(
+            ChatMessage(
+                role: .assistant,
+                text: reply
+            )
+        )
+
+        busy = false
+
+        if pendingTaskApproval == nil,
+           !currentCapabilityGaps
+                .isEmpty {
+            inspectorState.learningQueueJobs =
+                learningQueueStore.enqueue(
+                    gaps:
+                        currentCapabilityGaps,
+                    sourceGoal:
+                        currentTaskInput,
+                    into:
+                        inspectorState
+                            .learningQueueJobs
+                )
+
+            startNextLearningJobIfNeeded()
+        }
+    }
+
     private struct ProblemSolverFallbackResult {
         let strategyTitle: String
         let evidence: String
