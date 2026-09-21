@@ -177,6 +177,47 @@ struct AgentTaskOrchestrator {
             return .communicate
         }
 
+        let commitTerms = [
+            "send", "gonder",
+            "submit", "publish", "yayinla",
+            "paylas", "delete", "sil",
+            "save", "kaydet",
+            "create", "olustur",
+            "change", "degistir",
+            "apply", "uygula",
+            "confirm", "onayla",
+            "move", "tasi",
+            "edit", "duzenle"
+        ]
+
+        if commitTerms.contains(
+            where: {
+                corpus.contains($0)
+            }
+        ) {
+            return .act
+        }
+
+        let observationTerms = [
+            "observe", "gozlem",
+            "read", "oku",
+            "inspect", "incele",
+            "list", "listele",
+            "get", "al",
+            "find", "bul",
+            "current", "mevcut",
+            "active", "aktif",
+            "status", "durum"
+        ]
+
+        if observationTerms.contains(
+            where: {
+                corpus.contains($0)
+            }
+        ) {
+            return .retrieve
+        }
+
         if step.capabilityID ==
             "app.workflow" {
             return .act
