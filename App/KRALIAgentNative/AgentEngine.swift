@@ -128,6 +128,7 @@ final class AgentEngine: ObservableObject {
     private var inspectorStateForwarder: AnyCancellable?
     private var lastDecision: AgentDecision?
     private var activeLearningJobID: UUID?
+    private var currentOutcomeFailureIsTransient = false
 
     init() {
         inspectorStateForwarder =
@@ -1265,6 +1266,8 @@ final class AgentEngine: ObservableObject {
                         )
 
                 if transientFailure {
+                    currentOutcomeFailureIsTransient = true
+
                     capabilityLearningPlans
                         .removeAll {
                             $0.capabilityID ==
@@ -1473,7 +1476,13 @@ final class AgentEngine: ObservableObject {
 
             if verification.state == .attention {
                 setVerificationStep(.attention)
-                fallbackPlan = verification.fallback ?? resolvedExecutionPlan.fallback
+                fallbackPlan =
+                    currentOutcomeFailureIsTransient
+                    ? nil
+                    : (
+                        verification.fallback ??
+                        resolvedExecutionPlan.fallback
+                    )
             } else if verification.state == .partial {
                 setVerificationStep(.partial)
                 fallbackPlan = nil
@@ -1652,6 +1661,7 @@ final class AgentEngine: ObservableObject {
 
         if finalVerification.state == .attention &&
            currentCapabilityGaps.isEmpty &&
+           !currentOutcomeFailureIsTransient &&
            inspectorState.debugIncident == nil &&
            lastFileSearchOutcome == nil {
             registerDebugIncident(
@@ -1673,6 +1683,7 @@ final class AgentEngine: ObservableObject {
             goal: resolvedGoal,
             capabilities: selectedCapabilities,
             learningPlans: capabilityLearningPlans,
+            capabilityGaps: currentCapabilityGaps,
             fallbackPlan: fallbackPlan
         )
 
@@ -3369,6 +3380,7 @@ final class AgentEngine: ObservableObject {
         currentOutcomeAttempts = []
         currentReflectionSummary = nil
         currentCapabilityGaps = []
+        currentOutcomeFailureIsTransient = false
         activeRoute = ["Core"]
         selectedCapabilities = []
         capabilityLearningPlans = []
