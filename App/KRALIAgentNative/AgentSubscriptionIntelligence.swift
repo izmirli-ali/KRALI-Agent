@@ -13,6 +13,8 @@ struct SubscriptionMissionResult: Sendable {
 actor AgentSubscriptionIntelligence {
     private let fileManager = FileManager.default
     private var failureReason: String?
+    private var localPlannerFailureReason: String?
+    private var ollamaServeProcess: Process?
 
     func lastFailureReason() -> String? {
         failureReason
@@ -25,6 +27,7 @@ actor AgentSubscriptionIntelligence {
         hasWorkspace: Bool
     ) async -> SubscriptionMissionResult? {
         failureReason = nil
+        localPlannerFailureReason = nil
 
         if let localMission =
             await planMissionWithLocalOllama(
@@ -38,7 +41,11 @@ actor AgentSubscriptionIntelligence {
         }
 
         guard let clinePath = clineExecutablePath() else {
-            failureReason = "Semantic planner fallback için Cline CLI bulunamadı."
+            failureReason =
+                (localPlannerFailureReason.map {
+                    "Local planner: " + $0 + " • "
+                } ?? "") +
+                "Semantic planner fallback için Cline CLI bulunamadı."
             return nil
         }
 
@@ -269,6 +276,9 @@ actor AgentSubscriptionIntelligence {
                 rawOutput.suffix(1200)
             )
             failureReason =
+                (localPlannerFailureReason.map {
+                    "Local planner: " + $0 + " • "
+                } ?? "") +
                 "Semantic planner Cline başarısız • " +
                 clineTerminationReason +
                 "=" +
@@ -524,12 +534,41 @@ actor AgentSubscriptionIntelligence {
         capabilities: [AgentCapability],
         hasWorkspace: Bool
     ) async -> SubscriptionMissionResult? {
+        appendPlannerDiagnostic(
+            "local.stage=ollama_check"
+        )
+
+        guard
+            await ensureOllamaServiceReady()
+        else {
+            localPlannerFailureReason =
+                "Ollama servisi hazır değil"
+            appendPlannerDiagnostic(
+                "local.failure=service_unavailable"
+            )
+            return nil
+        }
+
+        appendPlannerDiagnostic(
+            "local.stage=service_ready"
+        )
+
         guard
             let model =
                 await availableLocalPlannerModel()
         else {
+            localPlannerFailureReason =
+                "Kurulu uygun Ollama modeli bulunamadı"
+            appendPlannerDiagnostic(
+                "local.failure=model_missing"
+            )
             return nil
         }
+
+        appendPlannerDiagnostic(
+            "local.stage=model_found model=" +
+            model
+        )
 
         let capabilityCatalog =
             capabilities.map {
@@ -602,6 +641,8 @@ actor AgentSubscriptionIntelligence {
                     "http://127.0.0.1:11434/api/chat"
             )
         else {
+            localPlannerFailureReason =
+                "Ollama chat URL oluşturulamadı"
             return nil
         }
 
@@ -639,10 +680,21 @@ actor AgentSubscriptionIntelligence {
                     withJSONObject: payload
                 )
         else {
+            localPlannerFailureReason =
+                "Ollama request JSON oluşturulamadı"
+            appendPlannerDiagnostic(
+                "local.failure=request_encoding"
+            )
             return nil
         }
 
         request.httpBody = body
+        appendPlannerDiagnostic(
+            "local.stage=request_started model=" +
+            model
+        )
+
+        let startedAt = Date()
 
         do {
             let (data, response) =
@@ -650,11 +702,54 @@ actor AgentSubscriptionIntelligence {
                     for: request
                 )
 
+            let duration =
+                Date().timeIntervalSince(startedAt)
+
             guard
                 let http =
                     response as?
-                        HTTPURLResponse,
-                http.statusCode == 200,
+                        HTTPURLResponse
+            else {
+                localPlannerFailureReason =
+                    "Ollama HTTP yanıtı çözülemedi"
+                appendPlannerDiagnostic(
+                    "local.failure=response_type duration=" +
+                    String(
+                        format: "%.2f",
+                        duration
+                    ) +
+                    "s"
+                )
+                return nil
+            }
+
+            guard http.statusCode == 200 else {
+                localPlannerFailureReason =
+                    "Ollama HTTP " +
+                    String(http.statusCode)
+                appendPlannerDiagnostic(
+                    "local.failure=http_status status=" +
+                    String(http.statusCode) +
+                    " duration=" +
+                    String(
+                        format: "%.2f",
+                        duration
+                    ) +
+                    "s"
+                )
+                return nil
+            }
+
+            appendPlannerDiagnostic(
+                "local.stage=response_received duration=" +
+                String(
+                    format: "%.2f",
+                    duration
+                ) +
+                "s"
+            )
+
+            guard
                 let object =
                     try JSONSerialization
                         .jsonObject(
@@ -665,7 +760,17 @@ actor AgentSubscriptionIntelligence {
                         as? [String: Any],
                 let content =
                     message["content"]
-                        as? String,
+                        as? String
+            else {
+                localPlannerFailureReason =
+                    "Ollama yanıt gövdesi çözülemedi"
+                appendPlannerDiagnostic(
+                    "local.failure=response_decode"
+                )
+                return nil
+            }
+
+            guard
                 let json =
                     extractJSONObject(
                         from: content
@@ -676,20 +781,62 @@ actor AgentSubscriptionIntelligence {
                     try? JSONDecoder().decode(
                         AgentSemanticMission.self,
                         from: missionData
-                    ),
+                    )
+            else {
+                localPlannerFailureReason =
+                    "Ollama geçerli mission JSON üretmedi"
+                let preview =
+                    String(
+                        content
+                            .replacingOccurrences(
+                                of: "\n",
+                                with: " "
+                            )
+                            .prefix(500)
+                    )
+                appendPlannerDiagnostic(
+                    "local.failure=json_invalid preview=" +
+                    preview
+                )
+                return nil
+            }
+
+            guard
                 validateMission(
                     mission,
                     knownCapabilityIDs:
                         Set(
                             capabilities.map(\.id)
                         )
-                ),
-                missionCoverageIsValid(
-                    mission
                 )
             else {
+                localPlannerFailureReason =
+                    "Ollama mission schema validation reddedildi"
+                appendPlannerDiagnostic(
+                    "local.failure=schema_validation objective=" +
+                    mission.objective
+                )
                 return nil
             }
+
+            guard missionCoverageIsValid(mission)
+            else {
+                localPlannerFailureReason =
+                    "Ollama mission capability coverage reddedildi"
+                appendPlannerDiagnostic(
+                    "local.failure=coverage_validation outcomes=" +
+                    mission.outcomes.joined(
+                        separator: ","
+                    )
+                )
+                return nil
+            }
+
+            localPlannerFailureReason = nil
+            appendPlannerDiagnostic(
+                "local.stage=json_validated provider=Local Ollama/" +
+                model
+            )
 
             return SubscriptionMissionResult(
                 mission: mission,
@@ -698,7 +845,133 @@ actor AgentSubscriptionIntelligence {
                     model
             )
         } catch {
+            localPlannerFailureReason =
+                "Ollama request hatası: " +
+                error.localizedDescription
+            appendPlannerDiagnostic(
+                "local.failure=request_exception error=" +
+                error.localizedDescription
+            )
             return nil
+        }
+    }
+
+    private func ensureOllamaServiceReady()
+        async -> Bool {
+        if await ollamaServiceResponds() {
+            return true
+        }
+
+        appendPlannerDiagnostic(
+            "local.stage=service_start_requested"
+        )
+
+        guard
+            ollamaServeProcess == nil ||
+            ollamaServeProcess?.isRunning == false,
+            let executable =
+                ollamaExecutablePath()
+        else {
+            appendPlannerDiagnostic(
+                "local.failure=ollama_binary_missing_or_running"
+            )
+            return false
+        }
+
+        let logURL =
+            fileManager.homeDirectoryForCurrentUser
+                .appendingPathComponent(
+                    "Library/Logs/KRALI-Ollama.log",
+                    isDirectory: false
+                )
+
+        fileManager.createFile(
+            atPath: logURL.path,
+            contents: nil
+        )
+
+        guard
+            let logHandle = try?
+                FileHandle(
+                    forWritingTo: logURL
+                )
+        else {
+            appendPlannerDiagnostic(
+                "local.failure=ollama_log_open"
+            )
+            return false
+        }
+
+        let process = Process()
+        process.executableURL =
+            URL(fileURLWithPath: executable)
+        process.arguments = ["serve"]
+        process.standardOutput = logHandle
+        process.standardError = logHandle
+
+        do {
+            try process.run()
+            ollamaServeProcess = process
+        } catch {
+            try? logHandle.close()
+            appendPlannerDiagnostic(
+                "local.failure=ollama_start error=" +
+                error.localizedDescription
+            )
+            return false
+        }
+
+        for attempt in 1...12 {
+            try? await Task.sleep(
+                nanoseconds: 500_000_000
+            )
+
+            if await ollamaServiceResponds() {
+                appendPlannerDiagnostic(
+                    "local.stage=service_started attempt=" +
+                    String(attempt)
+                )
+                return true
+            }
+        }
+
+        appendPlannerDiagnostic(
+            "local.failure=service_start_timeout"
+        )
+        return false
+    }
+
+    private func ollamaServiceResponds()
+        async -> Bool {
+        guard
+            let url = URL(
+                string:
+                    "http://127.0.0.1:11434/api/tags"
+            )
+        else {
+            return false
+        }
+
+        var request = URLRequest(url: url)
+        request.timeoutInterval = 1.5
+
+        do {
+            let (_, response) =
+                try await URLSession.shared.data(
+                    for: request
+                )
+
+            guard
+                let http =
+                    response as?
+                        HTTPURLResponse
+            else {
+                return false
+            }
+
+            return http.statusCode == 200
+        } catch {
+            return false
         }
     }
 
@@ -745,6 +1018,12 @@ actor AgentSubscriptionIntelligence {
                 }
             )
 
+            appendPlannerDiagnostic(
+                "local.models=" +
+                names.sorted()
+                    .joined(separator: ",")
+            )
+
             let preferred = [
                 "devstral:24b",
                 "qwen3:8b",
@@ -757,8 +1036,74 @@ actor AgentSubscriptionIntelligence {
                 names.contains($0)
             }
         } catch {
+            appendPlannerDiagnostic(
+                "local.failure=model_list error=" +
+                error.localizedDescription
+            )
             return nil
         }
+    }
+
+    private func ollamaExecutablePath()
+        -> String? {
+        let candidates = [
+            "/opt/homebrew/bin/ollama",
+            "/usr/local/bin/ollama"
+        ]
+
+        return candidates.first {
+            fileManager.isExecutableFile(
+                atPath: $0
+            )
+        }
+    }
+
+    private func appendPlannerDiagnostic(
+        _ line: String
+    ) {
+        let diagnosticURL =
+            fileManager.homeDirectoryForCurrentUser
+                .appendingPathComponent(
+                    "Library/Logs/KRALI-Semantic-Planner.log",
+                    isDirectory: false
+                )
+
+        let entry =
+            "\n[\(ISO8601DateFormatter().string(from: Date()))] " +
+            line +
+            "\n"
+
+        guard
+            let data = entry.data(
+                using: .utf8
+            )
+        else {
+            return
+        }
+
+        if !fileManager.fileExists(
+            atPath: diagnosticURL.path
+        ) {
+            fileManager.createFile(
+                atPath: diagnosticURL.path,
+                contents: data
+            )
+            return
+        }
+
+        guard
+            let handle = try?
+                FileHandle(
+                    forWritingTo:
+                        diagnosticURL
+                )
+        else {
+            return
+        }
+
+        try? handle.seekToEnd()
+        try? handle.write(contentsOf: data)
+        try? handle.close()
     }
 
     private func validateMission(
