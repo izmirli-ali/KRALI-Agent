@@ -205,6 +205,16 @@ struct ContentView: View {
                             .id(approval.id)
                         }
 
+                        if !engine.isViewingArchivedConversation,
+                           engine.pendingTaskApproval == nil,
+                           let fileAction =
+                            engine.pendingFileAction {
+                            fileActionApprovalCard(
+                                fileAction
+                            )
+                            .id(fileAction.id)
+                        }
+
                         if engine.busy &&
                            !engine.isViewingArchivedConversation {
                             thinkingRow
@@ -417,6 +427,111 @@ struct ContentView: View {
                 }
             }
         }
+    }
+
+    private func fileActionApprovalCard(
+        _ action: PendingFileAction
+    ) -> some View {
+        HStack(
+            alignment: .top,
+            spacing: 11
+        ) {
+            ZStack {
+                Circle()
+                    .fill(
+                        Color.orange.opacity(
+                            0.14
+                        )
+                    )
+                    .frame(
+                        width: 30,
+                        height: 30
+                    )
+
+                Image(
+                    systemName:
+                        "folder.badge.gearshape"
+                )
+                .font(.caption)
+                .foregroundStyle(
+                    Color.orange
+                )
+            }
+
+            VStack(
+                alignment: .leading,
+                spacing: 9
+            ) {
+                Text("Dosya işlemi onayı")
+                    .font(
+                        .system(
+                            size: 14,
+                            weight: .semibold
+                        )
+                    )
+
+                Text(action.title)
+                    .font(.callout.weight(.medium))
+
+                Text(action.detail)
+                    .font(.caption)
+                    .foregroundStyle(.secondary)
+
+                Text(
+                    "Dosyalarda henüz değişiklik yapılmadı."
+                )
+                .font(.caption2)
+                .foregroundStyle(.secondary)
+
+                HStack(spacing: 8) {
+                    Button("Onaylıyorum") {
+                        let reply =
+                            engine
+                                .approvePendingFileAction()
+                        engine
+                            .postAssistantMessage(
+                                reply
+                            )
+                    }
+                    .buttonStyle(
+                        .borderedProminent
+                    )
+                    .controlSize(.small)
+
+                    Button(
+                        "İptal",
+                        role: .cancel
+                    ) {
+                        engine
+                            .cancelPendingFileAction()
+                    }
+                    .buttonStyle(.bordered)
+                    .controlSize(.small)
+                }
+            }
+
+            Spacer(minLength: 20)
+        }
+        .padding(13)
+        .background(
+            Color.orange.opacity(0.07)
+        )
+        .overlay(
+            RoundedRectangle(
+                cornerRadius: 14,
+                style: .continuous
+            )
+            .stroke(
+                Color.orange.opacity(0.28),
+                lineWidth: 1
+            )
+        )
+        .clipShape(
+            RoundedRectangle(
+                cornerRadius: 14,
+                style: .continuous
+            )
+        )
     }
 
     private func taskApprovalCard(
