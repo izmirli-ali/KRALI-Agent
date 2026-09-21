@@ -215,14 +215,6 @@ struct AgentVerifier {
                     )
                 }
 
-                guard snapshot.fileResultCount > 0 ||
-                      snapshot.folderResultCount > 0 else {
-                    return attention(
-                        "Semantic mission içindeki dosya bulma adımı sonuç üretmedi.",
-                        fallback: "Dosya kapsamını veya hedef türünü yeniden planla ve güvenli biçimde tekrar ara."
-                    )
-                }
-
                 guard let outcome =
                     snapshot.fileSearchOutcome
                 else {
@@ -246,6 +238,44 @@ struct AgentVerifier {
                         mismatch,
                         fallback:
                             "Aynı dosya aramasını kullanıcıdaki kapsam, tür ve tarih kısıtlarını eksiksiz koruyarak yeniden çalıştır."
+                    )
+                }
+
+                if outcome.status == .noResults {
+                    if outcome.reachedSafetyLimit {
+                        return attention(
+                            "Semantic mission dosya aramasını çalıştırdı ancak indeks güvenlik sınırına ulaştığı için 0 sonucu kesin yokluk olarak doğrulanamadı.",
+                            fallback:
+                                "Aynı kapsam, hedef türü ve kullanıcı kısıtlarını koruyarak daha kapsamlı indeks/tarama ile yeniden doğrula."
+                        )
+                    }
+
+                    let concreteResourceOutcomes =
+                        Set([
+                            "assessContent",
+                            "edit",
+                            "organize",
+                            "open",
+                            "transform"
+                        ])
+
+                    if !Set(mission.outcomes)
+                        .intersection(
+                            concreteResourceOutcomes
+                        )
+                        .isEmpty {
+                        return attention(
+                            "Arama doğru biçimde tamamlandı ancak sonraki işlem için gerekli hedef kaynak belirtilen kapsamda bulunamadı.",
+                            fallback:
+                                "Kullanıcının dosya türü ve kapsam kısıtlarını değiştirmeden görevi tamamlanmış sayma; yalnız kullanıcı yeni bir kapsam veya hedef verirse yeniden planla."
+                        )
+                    }
+                } else if snapshot.fileResultCount == 0 &&
+                          snapshot.folderResultCount == 0 {
+                    return attention(
+                        "Semantic mission içindeki dosya bulma adımı doğrulanabilir sonuç üretmedi.",
+                        fallback:
+                            "Aynı kapsam, hedef türü ve kullanıcı kısıtlarını koruyarak gerçek File Search kanıtını yeniden üret."
                     )
                 }
             }
@@ -308,11 +338,21 @@ struct AgentVerifier {
                     )
 
                 case .noResults:
-                    return attention(
-                        "Arama doğru kapsam ve filtrelerle tamamlandı ancak sonuç üretmedi: " +
-                        outcome.title,
-                        fallback:
-                            "Dosya adı, uzantı veya tarih filtresini gevşetip aynı kapsamda yeniden ara."
+                    if outcome.reachedSafetyLimit {
+                        return attention(
+                            "Arama doğru kapsam ve filtrelerle çalıştı ancak indeks güvenlik sınırına ulaştığı için 0 sonucu kesin yokluk olarak doğrulayamıyorum: " +
+                            outcome.title,
+                            fallback:
+                                "Aynı kapsam, dosya türü ve kullanıcı kısıtlarını koruyarak daha kapsamlı indeks/tarama ile yeniden doğrula."
+                        )
+                    }
+
+                    return AgentVerificationResult(
+                        state: .passed,
+                        summary:
+                            "Arama doğrulandı: doğru kapsam ve filtrelerle 0 eşleşme bulundu; belirtilen kapsamda hedef mevcut değil: " +
+                            outcome.title,
+                        fallback: nil
                     )
 
                 case .workspaceMissing,
@@ -338,9 +378,11 @@ struct AgentVerifier {
                 : snapshot.fileResultCount
 
             guard count > 0 else {
-                return attention(
-                    "Arama teknik olarak tamamlandı ancak 0 sonuç döndü.",
-                    fallback: "Tarih veya önceki-sonuç filtresini kaldırıp aynı hedefi daha geniş kapsamda bir kez daha ara."
+                return AgentVerificationResult(
+                    state: .passed,
+                    summary:
+                        "Arama teknik olarak tamamlandı ve 0 sonuç doğrulandı; belirtilen kapsamda hedef bulunamadı.",
+                    fallback: nil
                 )
             }
 
