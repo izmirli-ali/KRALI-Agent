@@ -1222,8 +1222,7 @@ final class AgentEngine: ObservableObject {
         if finalVerification.state == .attention &&
            currentCapabilityGaps.isEmpty &&
            inspectorState.debugIncident == nil &&
-           lastFileSearchOutcome?
-                .status.isExpectedBoundary != true {
+           lastFileSearchOutcome == nil {
             registerDebugIncident(
                 source: "verifier",
                 message: finalVerification.summary,
@@ -2537,7 +2536,9 @@ final class AgentEngine: ObservableObject {
             }
 
         return AgentContextSnapshot(
-            hasWorkspace: selectedRootURL != nil,
+            hasWorkspace:
+                selectedRootURL != nil ||
+                lastFileSearchOutcome?.rootPath != nil,
             workspaceName: selectedRootURL?.lastPathComponent,
             fileCount: indexedFiles.count,
             imageCount: imageCount,
@@ -4852,7 +4853,6 @@ final class AgentEngine: ObservableObject {
 
         let outcome =
             fileSearchCoordinator.search(
-                rawText: rawText,
                 query: parsedQuery,
                 decision: decision,
                 selectedWorkspace:
