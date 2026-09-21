@@ -364,52 +364,6 @@ struct AgentNaturalLanguageResolver: Sendable {
         )
     }
 
-    func requestsCapabilitySummary(
-        _ raw: String
-    ) -> Bool {
-        let value = normalized(raw)
-        let wordSet = Set(tokens(raw))
-
-        let explicitCapabilityTerms =
-            wordSet.contains {
-                $0.hasPrefix("kabiliyet") ||
-                $0.hasPrefix("yetenek") ||
-                $0.hasPrefix("capabilit")
-            }
-
-        let abilityPhrases = [
-            "ne yapabiliyorsun",
-            "neler yapabiliyorsun",
-            "ne yapabilirsin",
-            "neler yapabilirsin",
-            "yapabildigin",
-            "hangi isleri yap",
-            "hangi görevleri yap",
-            "hangi gorevleri yap",
-            "what can you do"
-        ]
-
-        return explicitCapabilityTerms ||
-            abilityPhrases.contains {
-                value.contains($0)
-            }
-    }
-
-    func requestedItemLimit(
-        from raw: String,
-        defaultValue: Int = 6,
-        maximum: Int = 12
-    ) -> Int {
-        for token in tokens(raw) {
-            if let value = Int(token),
-               value > 0 {
-                return min(value, maximum)
-            }
-        }
-
-        return min(defaultValue, maximum)
-    }
-
     func requestsBrowserWorkflow(
         _ raw: String
     ) -> Bool {
