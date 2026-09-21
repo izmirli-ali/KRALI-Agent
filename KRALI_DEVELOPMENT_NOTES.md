@@ -47,12 +47,12 @@ KRALİ büyüdükçe tek dosya / tek store / her veriyi sürekli bellekte tutan 
 - Sağ taraftaki teknik paneller varsayılan olarak gizli/secondary inspector olsun.
 - Mentor / developer / diagnostics normal chat yüzeyini kalabalıklaştırmasın.
 
-### Phase 3 — Engine Modularization
+### Phase 3 — Engine Modularization — in progress
 - `AgentEngine` yalnız orchestration/coordinator rolüne indirgensin.
 - Conversation, memory, capability, execution, diagnostics ve developer-agent state'leri ayrı modüllere taşınsın.
 - Feature modülleri bağımsız test edilebilir hale gelsin.
 
-### Phase 4 — Storage & Performance
+### Phase 4 — Storage & Performance — in progress
 - Büyük veri setleri için lazy load / paged access.
 - Gerekirse JSON store'lardan indeksli yerel store'a geçiş.
 - File indexing açılış yolundan çıkarılsın.
@@ -69,3 +69,13 @@ KRALİ büyüdükçe tek dosya / tek store / her veriyi sürekli bellekte tutan 
 - KRALİ belirli capability'leri candidate branch'te kendi geliştirir.
 - Build + regression + runtime probe + Mentor kanıtı üretir.
 - İnsan yalnız diff/test/Mentor sonucunu inceler.
+
+
+## v0.8.58 progress
+
+- Workspace indexing moved into `AgentWorkspaceIndexer`.
+- Restored workspace path no longer triggers a 5000-item scan at app launch.
+- Workspace index is cached and reused until a real file mutation invalidates it.
+- Diagnostic report loading moved into `AgentDiagnosticsLoader`.
+- Training / Arena / Screen / Desktop diagnostic JSON files are loaded only when Inspector is opened, except when a prior `no_change` decision requires immediate validation.
+- Legacy in-engine screenshot filename detection was removed after the indexer became the sole owner.
