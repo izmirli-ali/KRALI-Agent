@@ -23,6 +23,7 @@ struct AgentTaskGraphStep: Identifiable, Hashable {
     let risk: AgentCapabilityRisk
     let isAvailable: Bool
     let requiresApproval: Bool
+    var approvalReason: String? = nil
 }
 
 struct AgentTaskGraph: Hashable {
@@ -66,6 +67,13 @@ struct AgentTaskOrchestrator {
                 let capability =
                     registry[step.capabilityID]
 
+                let approvalReason =
+                    approvalReason(
+                        step: step,
+                        capability:
+                            capability
+                    )
+
                 return AgentTaskGraphStep(
                     index: index,
                     title: step.title,
@@ -87,11 +95,9 @@ struct AgentTaskOrchestrator {
                             .isAvailable ??
                         false,
                     requiresApproval:
-                        requiresApproval(
-                            step: step,
-                            capability:
-                                capability
-                        )
+                        approvalReason != nil,
+                    approvalReason:
+                        approvalReason
                 )
             }
 
@@ -239,29 +245,43 @@ struct AgentTaskOrchestrator {
         return .act
     }
 
-    private func requiresApproval(
+    func approvalReason(
         step: AgentSemanticMissionStep,
         capability: AgentCapability?
-    ) -> Bool {
+    ) -> String? {
+        approvalReason(
+            title: step.title,
+            operation: step.operation,
+            purpose: step.purpose,
+            capability: capability
+        )
+    }
+
+    func approvalReason(
+        title: String,
+        operation: String,
+        purpose: String = "",
+        capability: AgentCapability?
+    ) -> String? {
         guard
             capability?.risk ==
                 .external ||
             capability?.risk ==
                 .reversibleWrite
         else {
-            return false
+            return nil
         }
 
         let actionCorpus = normalize(
             [
-                step.operation,
-                step.title
+                title,
+                operation
             ]
             .joined(separator: " ")
         )
 
         let purposeCorpus =
-            normalize(step.purpose)
+            normalize(purpose)
 
         let explicitNonCommitTerms = [
             "gondermeden",
@@ -271,7 +291,9 @@ struct AgentTaskOrchestrator {
             "degisiklik yapma",
             "yalniz hazirla",
             "sadece hazirla",
-            "henuz dis dunyaya"
+            "henuz dis dunyaya",
+            "salt okunur",
+            "read only"
         ]
 
         if explicitNonCommitTerms.contains(
@@ -279,34 +301,81 @@ struct AgentTaskOrchestrator {
                 purposeCorpus.contains($0)
             }
         ) {
-            return false
+            return nil
         }
 
-        let commitTerms = Set([
+        let harmlessOpenTerms = [
+            "open app",
+            "uygulamayi ac",
+            "uygulamasini ac",
+            "uygulamayi one getir",
+            "focus app",
+            "open url",
+            "siteyi ac",
+            "sayfayi ac",
+            "go to"
+        ]
+
+        let mutationTerms = [
             "send", "gonder",
-            "submit", "publish", "yayinla",
-            "post", "paylas",
-            "delete", "sil",
-            "purchase", "satinal",
-            "confirm", "onayla",
-            "commit"
-        ])
+            "submit", "publish",
+            "yayinla", "post",
+            "paylas", "delete",
+            "sil", "purchase",
+            "satinal", "confirm",
+            "onayla", "save",
+            "kaydet", "create",
+            "olustur", "import",
+            "ice aktar", "ekle",
+            "add", "insert",
+            "yerlestir", "move",
+            "tasi", "rename",
+            "yeniden adlandir",
+            "edit", "duzenle",
+            "change", "degistir",
+            "apply", "uygula",
+            "export", "disa aktar",
+            "overwrite", "uzerine yaz"
+        ]
 
-        let actionTokens =
-            approvalTokens(
-                actionCorpus
-            )
-        let purposeTokens =
-            approvalTokens(
-                purposeCorpus
-            )
+        let hasMutation =
+            mutationTerms.contains {
+                actionCorpus.contains($0)
+            }
 
-        return !actionTokens
-            .intersection(commitTerms)
-            .isEmpty ||
-        !purposeTokens
-            .intersection(commitTerms)
-            .isEmpty
+        if !hasMutation &&
+           harmlessOpenTerms.contains(
+            where: {
+                actionCorpus.contains($0)
+            }
+           ) {
+            return nil
+        }
+
+        guard hasMutation else {
+            return nil
+        }
+
+        let capabilityID =
+            capability?.id ?? ""
+
+        if capabilityID == "premiere.control" {
+            return "Premiere projesi/sequence üzerinde kalıcı değişiklik yapılacak."
+        }
+
+        if capabilityID == "photoshop.control" {
+            return "Photoshop belgesi üzerinde kalıcı değişiklik yapılacak."
+        }
+
+        if capabilityID == "mail.work" {
+            return "Mail kutusunda veya dış iletişimde değişiklik yapılacak."
+        }
+
+        if capabilityID.hasPrefix("files.") {
+            return "Dosya sistemi üzerinde değişiklik yapılacak."
+        }
+
+        return "Dış uygulama veya kullanıcı verisi üzerinde kalıcı değişiklik yapılacak."
     }
 
     private func approvalTokens(
