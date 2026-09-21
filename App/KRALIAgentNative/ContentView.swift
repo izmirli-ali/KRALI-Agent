@@ -196,6 +196,15 @@ struct ContentView: View {
                                 .id(message.id)
                         }
 
+                        if !engine.isViewingArchivedConversation,
+                           let approval =
+                            engine.pendingTaskApproval {
+                            taskApprovalCard(
+                                approval
+                            )
+                            .id(approval.id)
+                        }
+
                         if engine.busy &&
                            !engine.isViewingArchivedConversation {
                             thinkingRow
@@ -274,7 +283,9 @@ struct ContentView: View {
                 VoiceComposerView(
                     speech: engine.speech,
                     prompt: $prompt,
-                    isLocked: engine.busy,
+                    isLocked:
+                        engine.busy ||
+                        engine.pendingTaskApproval != nil,
                     onSend: { text, source in
                         engine.send(
                             text,
@@ -406,6 +417,106 @@ struct ContentView: View {
                 }
             }
         }
+    }
+
+    private func taskApprovalCard(
+        _ approval: PendingTaskApproval
+    ) -> some View {
+        HStack(
+            alignment: .top,
+            spacing: 11
+        ) {
+            ZStack {
+                Circle()
+                    .fill(
+                        Color.orange.opacity(
+                            0.14
+                        )
+                    )
+                    .frame(
+                        width: 30,
+                        height: 30
+                    )
+
+                Image(
+                    systemName:
+                        "exclamationmark.shield.fill"
+                )
+                .font(.caption)
+                .foregroundStyle(
+                    Color.orange
+                )
+            }
+
+            VStack(
+                alignment: .leading,
+                spacing: 9
+            ) {
+                Text("Onayın gerekiyor")
+                    .font(
+                        .system(
+                            size: 14,
+                            weight: .semibold
+                        )
+                    )
+
+                Text(approval.title)
+                    .font(.callout.weight(.medium))
+
+                Text(approval.reason)
+                    .font(.caption)
+                    .foregroundStyle(.secondary)
+
+                Text(
+                    "İşlem henüz uygulanmadı. Onay verirsen KRALİ aynı görevde kaldığı adımdan devam edecek."
+                )
+                .font(.caption2)
+                .foregroundStyle(.secondary)
+
+                HStack(spacing: 8) {
+                    Button("Onaylıyorum") {
+                        engine
+                            .approvePendingTaskApproval()
+                    }
+                    .buttonStyle(
+                        .borderedProminent
+                    )
+                    .controlSize(.small)
+
+                    Button(
+                        "İptal",
+                        role: .cancel
+                    ) {
+                        engine
+                            .cancelPendingTaskApproval()
+                    }
+                    .buttonStyle(.bordered)
+                    .controlSize(.small)
+                }
+            }
+
+            Spacer(minLength: 20)
+        }
+        .padding(13)
+        .background(
+            Color.orange.opacity(0.07)
+        )
+        .overlay(
+            RoundedRectangle(
+                cornerRadius: 14,
+                style: .continuous
+            )
+            .stroke(
+                Color.orange.opacity(0.28),
+                lineWidth: 1
+            )
+        )
+        .clipShape(
+            RoundedRectangle(
+                cornerRadius: 14,
+                style: .continuous
+            )
+        )
     }
 
     private var quickActions: some View {
