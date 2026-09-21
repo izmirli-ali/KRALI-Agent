@@ -403,7 +403,7 @@ struct AgentOutcomePlanner {
                     candidates
             )
 
-            if let selected =
+            let selected =
                 candidates
                     .filter {
                         $0.executableNow &&
@@ -415,7 +415,9 @@ struct AgentOutcomePlanner {
                                 $1.score
                         }
                     )
-                    .first {
+                    .first
+
+            if let selected {
                 chosen.append(
                     selected.id
                 )
