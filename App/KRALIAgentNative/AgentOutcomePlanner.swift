@@ -96,6 +96,8 @@ struct AgentOutcomeObservationMetadata:
     let windowTitle: String?
     let recognizedTextLineCount: Int
     let frontmostApplication: String?
+    var windowID: UInt32? = nil
+    var observationAttemptCount: Int? = nil
 }
 
 struct AgentOutcomeStrategyAttempt:
