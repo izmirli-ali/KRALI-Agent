@@ -690,6 +690,57 @@ function developmentPhase() {
   return "inspection";
 }
 
+function inspectionWeight(name) {
+  if (name === "list_files") {
+    return 0;
+  }
+
+  if (
+    name === "search_codebase" ||
+    name === "read_file"
+  ) {
+    return 1;
+  }
+
+  return 0;
+}
+
+function toolsForCurrentPhase() {
+  const phase = developmentPhase();
+
+  return tools.filter((tool) => {
+    const name = tool.function.name;
+
+    if (phase === "verification") {
+      return (
+        mutationToolNames.has(name) ||
+        name === "git_diff" ||
+        name === "build_check" ||
+        name === "git_status"
+      );
+    }
+
+    if (phase === "implementation") {
+      if (mutationToolNames.has(name)) {
+        return true;
+      }
+
+      // Implementation may use one final targeted source validation while
+      // budget remains, but broad repo discovery is intentionally hidden.
+      if (inspectionToolCalls < maxInspectionTools) {
+        return (
+          name === "search_codebase" ||
+          name === "read_file"
+        );
+      }
+
+      return false;
+    }
+
+    return true;
+  });
+}
+
 function persistCheckpoint(reason = "progress") {
   if (!checkpointFile) return;
 
@@ -937,7 +988,8 @@ function candidateIdentity() {
 
 function recordToolEvidence(name, result, args = {}) {
   if (result?.ok && inspectionToolNames.has(name)) {
-    inspectionToolCalls += 1;
+    const weight = inspectionWeight(name);
+    inspectionToolCalls += weight;
     recordCheckpointEvidence(name, args, result);
 
     if (
@@ -950,7 +1002,7 @@ function recordToolEvidence(name, result, args = {}) {
       stage(
         "local_agent_implementation_phase",
         gapLabel +
-          " inspection bütçesi tamamlandı • implementation zorunlu • " +
+          " hedefli inspection kanıtı tamamlandı • implementation zorunlu • " +
           inspectionToolCalls +
           "/" +
           maxInspectionTools
@@ -988,25 +1040,7 @@ async function requestStructuredToolDecision(
 
   const phase = developmentPhase();
 
-  const toolContracts = tools
-    .filter((tool) => {
-      const name = tool.function.name;
-
-      if (phase === "implementation") {
-        return mutationToolNames.has(name);
-      }
-
-      if (phase === "verification") {
-        return (
-          mutationToolNames.has(name) ||
-          name === "git_diff" ||
-          name === "build_check" ||
-          name === "git_status"
-        );
-      }
-
-      return true;
-    })
+  const toolContracts = toolsForCurrentPhase()
     .map((tool) => ({
       name: tool.function.name,
       description: tool.function.description,
@@ -1249,7 +1283,7 @@ for (let iteration = 1; iteration <= maxIterations; iteration++) {
         model,
         stream: false,
         messages,
-        tools,
+        tools: toolsForCurrentPhase(),
         options: {
           temperature: 0.1,
         },
@@ -1286,7 +1320,11 @@ for (let iteration = 1; iteration <= maxIterations; iteration++) {
             "Mevcut tool sonuçlarını ve konuşma context'ini koru.",
             "Aynı problemi sıfırdan inceleme; kaldığın development phase'den devam et.",
             developmentPhase() === "implementation"
-              ? "Inspection kapalı; şimdi minimum generic source değişikliğini uygula."
+              ? (
+                  inspectionToolCalls < maxInspectionTools
+                    ? "Genel repo keşfi kapalı. Gerekliyse yalnız hedefli search_codebase/read_file ile son kanıtı doğrula; ardından minimum generic source değişikliğini uygula."
+                    : "Hedefli inspection bütçesi tamamlandı; şimdi minimum generic source değişikliğini uygula."
+                )
               : "Gerekli minimum sonraki tool adımını seç."
           ].join("\n"),
         });
@@ -1479,7 +1517,7 @@ for (let iteration = 1; iteration <= maxIterations; iteration++) {
       result = {
         ok: false,
         error:
-          "Inspection budget exhausted. Implementation phase is active; use replace_text, write_file, or apply_patch.",
+          "Targeted inspection budget exhausted. Implementation phase is active; use replace_text, write_file, or apply_patch.",
       };
     } else {
       try {
