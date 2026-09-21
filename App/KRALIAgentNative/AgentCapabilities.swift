@@ -261,9 +261,11 @@ struct AgentCapabilityRegistry {
             .requestsBrowserWorkflow(
                 rawText
             ) {
-            ids.append(
-                "browser.control"
-            )
+            ids += [
+                "browser.control",
+                "system.open.url",
+                "perception.screen"
+            ]
         }
 
         var seen = Set<String>()
