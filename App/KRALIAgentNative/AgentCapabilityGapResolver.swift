@@ -168,16 +168,16 @@ struct AgentCapabilityGapResolver {
             KRALİ Exhausted Outcome Capability Developer Brief
 
             Kullanıcı hedefi:
-            (objective)
+            \(objective)
 
             Eksik capability:
-            (capability.id) — (capability.name)
+            \(capability.id) — \(capability.name)
 
             Denenen güvenli stratejiler:
-            (attemptEvidence)
+            \(attemptEvidence)
 
             Sorun:
-            (reason)
+            \(reason)
 
             Çözüm kuralları:
             - Aynı başarısız stratejileri tekrar etme; runtime kanıtı bunların yetersiz olduğunu gösteriyor.
