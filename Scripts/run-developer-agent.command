@@ -747,6 +747,18 @@ const sourceGoals =
 const evidenceCount =
   Number(payload && payload.evidenceCount || sourceGoals.length || 1);
 
+const learningPath =
+  String(gap.learningPath || "integration");
+
+const learningPathRule =
+  learningPath === "primitivePatch"
+    ? "- Bu iş DAR PRIMITIVE PATCH'tir: yalnız eksik atomik davranışı ekle; yeni tam uygulama entegrasyonu veya geniş refactor yapma."
+    : (
+        learningPath === "strategyRecipe"
+          ? "- Bu iş STRATEGY RECIPE'tir: önce mevcut capability'leri yeniden kullan; kaynak kod değişikliği gerçekten gerekmiyorsa yeni provider yazma."
+          : "- Bu iş TAM ENTEGRASYON olabilir: yine de önce daha küçük generic primitive ile çözülüp çözülemeyeceğini kontrol et."
+      );
+
 const prompt = [
   "Sen KRALİ projesinin Developer Agent\'ısın.",
   "",
@@ -757,6 +769,8 @@ const prompt = [
   String(gap.capabilityID || "unknown") + " — " + String(gap.capabilityName || "unknown"),
   "",
   "Gap türü:", String(gap.kind || "unknown"),
+  "",
+  "Learning yolu:", learningPath,
   "",
   "Neden:", String(gap.reason || ""),
   "",
@@ -774,6 +788,7 @@ const prompt = [
   "Developer Brief:", String(gap.developerBrief || ""),
   "",
   "Kurallar:",
+  learningPathRule,
   "- Önce rg/grep ile bu capability\'nin registry, resolver, executor ve verifier bağlantılarını bul.",
   "- Tek uygulama/marka adına özel hard-code yazma; generic provider/strategy tasarla.",
   "- Ücretli API veya yeni abonelik bağımlılığı ekleme.",
@@ -842,6 +857,25 @@ try {
 NODE
 )"
 
+LEARNING_PATH="$("$NODE_BIN" - "$GAP_SOURCE" <<'NODE'
+const fs = require("fs");
+try {
+  const payload = JSON.parse(fs.readFileSync(process.argv[2], "utf8"));
+  const gap =
+    payload && payload.gap
+      ? payload.gap
+      : (
+          Array.isArray(payload && payload.capabilityGaps)
+            ? payload.capabilityGaps[0]
+            : null
+        );
+  process.stdout.write(String(gap && gap.learningPath || "integration"));
+} catch {
+  process.stdout.write("integration");
+}
+NODE
+)"
+
 if [ "$GAP_MODE" = "gap" ] && [ -n "$GAP_LABEL" ]; then
     write_status "learning|$GAP_LABEL için provider/strategy öğreniliyor|$BRANCH|$WORKTREE"
 else
@@ -884,13 +918,13 @@ if [ "$PROVIDER" = "ollama" ] &&
     KRALI_APP_VERSION="$(/bin/cat "$ROOT/VERSION" 2>/dev/null | /usr/bin/tr -d '[:space:]')" \
     KRALI_RUN_ID="$STAMP" \
     KRALI_REQUIRE_CHANGE="$([ "$GAP_MODE" = "gap" ] && echo 1 || echo 0)" \
-    KRALI_LOCAL_AGENT_MAX_COMPLETION_REJECTIONS="3" \
-    KRALI_LOCAL_AGENT_MAX_STRUCTURED_ACTIONS="8" \
-    KRALI_LOCAL_AGENT_MAX_INSPECTIONS="6" \
-    KRALI_LOCAL_AGENT_MAX_ITERATIONS="16" \
-    KRALI_LOCAL_AGENT_TIMEOUT_MS="300000" \
-    KRALI_LOCAL_AGENT_REQUEST_TIMEOUT_MS="60000" \
-    KRALI_LOCAL_AGENT_STRUCTURED_TIMEOUT_MS="45000" \
+    KRALI_LOCAL_AGENT_MAX_COMPLETION_REJECTIONS="$([ "$LEARNING_PATH" = "primitivePatch" ] && echo 2 || echo 3)" \
+    KRALI_LOCAL_AGENT_MAX_STRUCTURED_ACTIONS="$([ "$LEARNING_PATH" = "primitivePatch" ] && echo 6 || echo 8)" \
+    KRALI_LOCAL_AGENT_MAX_INSPECTIONS="$([ "$LEARNING_PATH" = "primitivePatch" ] && echo 4 || echo 6)" \
+    KRALI_LOCAL_AGENT_MAX_ITERATIONS="$([ "$LEARNING_PATH" = "primitivePatch" ] && echo 10 || echo 16)" \
+    KRALI_LOCAL_AGENT_TIMEOUT_MS="$([ "$LEARNING_PATH" = "primitivePatch" ] && echo 180000 || echo 300000)" \
+    KRALI_LOCAL_AGENT_REQUEST_TIMEOUT_MS="$([ "$LEARNING_PATH" = "primitivePatch" ] && echo 45000 || echo 60000)" \
+    KRALI_LOCAL_AGENT_STRUCTURED_TIMEOUT_MS="$([ "$LEARNING_PATH" = "primitivePatch" ] && echo 35000 || echo 45000)" \
     "$NODE_BIN" "$ROOT/Scripts/ollama-developer-agent.mjs" \
         > >(tee "$CLINE_RUN_LOG" >>"$LOG") \
         2> >(tee -a "$CLINE_RUN_LOG" >>"$LOG" >&2)
