@@ -1,23 +1,3 @@
-KRALI_LOCAL_STAGE local_agent_running • Uygulama kontrolü (desktop.app) yerel model çalışıyor • adım 1/16
-Ollama native agent model isteği zaman aşımına uğradı.
-KRALI_LOCAL_STAGE local_agent_starting • Uygulama kontrolü (desktop.app) native Ollama agent başlatılıyor: devstral:24b
-KRALI_LOCAL_STAGE local_agent_running • Uygulama kontrolü (desktop.app) yerel model çalışıyor • adım 1/16
-Ollama native agent model isteği zaman aşımına uğradı.
-Deleted branch krali-dev-agent/20260921-151102 (was 0eb569f).
-❌ Native yerel Developer Agent durdu: Ollama native agent model isteği zaman aşımına uğradı.
-
-━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
- KRALİ DEVELOPER AGENT
- 20260921-202545
-━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-⚠️ Global Node.js v26 Cline bağımlılıklarıyla uyumlu değil; izole Node 22 runtime hazırlanıyor.
-✅ Developer Agent runtime: v22.23.2
-Yerel model seçimi: devstral:24b • RAM≈24GB
-Yerel tool-call probe: devstral:24b
-tool_call_ok|devstral:24b
-✅ Yerel Developer AI hazır + tool-call doğrulandı: devstral:24b
-From https://github.com/izmirli-ali/KRALI-Agent
- * branch            main       -> FETCH_HEAD
 Already up to date.
 Learning Queue job brief bulundu; mutable Mentor latest yerine immutable job kullanılacak.
 Preparing worktree (new branch 'krali-dev-agent/20260921-202545')
@@ -118,3 +98,23 @@ KRALI_LOCAL_STAGE local_agent_completion_rejected • Tarayıcı kontrolü (brow
 Tarayıcı kontrolü (browser.control) native local agent toplam zaman sınırına ulaştı.
 Deleted branch krali-dev-agent/20260921-205819 (was cea3386).
 ❌ Native yerel Developer Agent durdu: Tarayıcı kontrolü (browser.control) native local agent toplam zaman sınırına ulaştı.
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+ KRALİ DEVELOPER AGENT
+ 20260921-212222
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+⚠️ Global Node.js v26 Cline bağımlılıklarıyla uyumlu değil; izole Node 22 runtime hazırlanıyor.
+✅ Developer Agent runtime: v22.23.2
+⚡ Tool-capable model cache kullanılıyor: devstral:24b • yaş=3376s
+Yerel model seçimi: devstral:24b • RAM≈24GB
+✅ Yerel Developer AI hazır + tool-call doğrulandı: devstral:24b
+From https://github.com/izmirli-ali/KRALI-Agent
+ * branch            main       -> FETCH_HEAD
+Already up to date.
+Learning Queue job brief bulundu; mutable Mentor latest yerine immutable job kullanılacak.
+Preparing worktree (new branch 'krali-dev-agent/20260921-212222')
+branch 'krali-dev-agent/20260921-212222' set up to track 'origin/main'.
+HEAD is now at cbf06e8 v0.8.72: bump build to 122
+Developer prompt mode: gap • 3490 bytes
+KRALI_LOCAL_STAGE local_agent_starting • Görsel / video algısı (perception.media) native Ollama agent başlatılıyor: devstral:24b
+KRALI_LOCAL_STAGE local_agent_running • Görsel / video algısı (perception.media) yerel model çalışıyor • adım 1/16

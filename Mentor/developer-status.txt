@@ -1,1 +1,1 @@
-stale_run|Önceki Developer Agent oturumu aktif değil veya bu sürüme ait değil.|krali-dev-agent/20260921-205819|/Users/medusa/Developer/KRALI-Agent-Dev-20260921-205819|@meta|app=0.8.71|at=1790014093|run=20260921-205819
+local_agent_running|Görsel / video algısı (perception.media) yerel model çalışıyor • adım 1/16|krali-dev-agent/20260921-212222|/Users/medusa/Developer/KRALI-Agent-Dev-20260921-212222|@meta|app=0.8.72|at=1790014946|run=20260921-212222
