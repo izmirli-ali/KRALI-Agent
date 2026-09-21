@@ -1539,6 +1539,10 @@ final class AgentEngine: ObservableObject {
                 fallbackPlan = nil
             } else {
                 setVerificationStep(.completed)
+                // A passed/skipped verification has no recovery action.
+                // Do not leak the execution plan's generic fallback into a
+                // successfully verified negative observation.
+                fallbackPlan = nil
             }
         } else {
             setVerificationStep(.skipped)
