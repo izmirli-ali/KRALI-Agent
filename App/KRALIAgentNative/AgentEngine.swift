@@ -2102,12 +2102,26 @@ final class AgentEngine: ObservableObject {
         }
 
         var outputs: [String] = []
-        var stepEvidence: [Int: String] = [:]
-        var executed = Set<String>()
-        var completedStepIndexes = Set<Int>()
-        var didFileSearch = false
+        var stepEvidence =
+            runtimeStepEvidence
+        var executed =
+            runtimeExecutedCapabilityIDs
+        var completedStepIndexes =
+            currentRuntimeTask?
+                .completedStepIndexes ??
+            []
+        var didFileSearch =
+            lastFileSearchOutcome != nil &&
+            executed.contains(
+                "files.search"
+            )
 
         for (stepIndex, step) in mission.steps.enumerated() {
+            if completedStepIndexes.contains(
+                stepIndex
+            ) {
+                continue
+            }
             let dependenciesSatisfied =
                 step.dependsOn.allSatisfy {
                     completedStepIndexes.contains($0)
@@ -2177,16 +2191,38 @@ final class AgentEngine: ObservableObject {
                 continue
             }
 
-            if graphStep.requiresApproval {
+            if graphStep.requiresApproval &&
+               !approvedRuntimeStepIndexes
+                    .contains(
+                        stepIndex
+                    ) {
                 let reason =
                     graphStep.approvalReason ??
                     "Bu adım dış uygulama veya kullanıcı verisi üzerinde değişiklik yapacak."
 
                 let approvalMessage =
-                    "Kullanıcı onayı bekleniyor: " +
+                    "Onay bekleniyor: " +
                     step.title +
                     "\nNeden: " +
                     reason
+
+                if let taskID =
+                    currentRuntimeTask?.id {
+                    pendingTaskApproval =
+                        PendingTaskApproval(
+                            taskID: taskID,
+                            stepIndex:
+                                stepIndex,
+                            title:
+                                step.title,
+                            reason:
+                                reason,
+                            capabilityID:
+                                step.capabilityID,
+                            operation:
+                                step.operation
+                        )
+                }
 
                 currentRuntimeTask?.state =
                     .waitingForApproval
@@ -2197,8 +2233,14 @@ final class AgentEngine: ObservableObject {
                             for: graphStep
                         )
 
-                stepEvidence[stepIndex] =
-                    approvalMessage
+                runtimeStepEvidence =
+                    stepEvidence
+                runtimeExecutedCapabilityIDs =
+                    executed
+                currentRuntimeTask?
+                    .completedStepIndexes =
+                    completedStepIndexes
+
                 outputs.append(
                     approvalMessage
                 )
@@ -2210,7 +2252,7 @@ final class AgentEngine: ObservableObject {
                     " • " +
                     reason
                 )
-                continue
+                break
             }
 
             switch step.capabilityID {
@@ -2807,6 +2849,14 @@ final class AgentEngine: ObservableObject {
                     fallback.strategyTitle
                 )
             }
+
+            runtimeStepEvidence =
+                stepEvidence
+            runtimeExecutedCapabilityIDs =
+                executed
+            currentRuntimeTask?
+                .completedStepIndexes =
+                completedStepIndexes
         }
 
         if didFileSearch,
@@ -2819,6 +2869,10 @@ final class AgentEngine: ObservableObject {
             )
         }
 
+        runtimeStepEvidence =
+            stepEvidence
+        runtimeExecutedCapabilityIDs =
+            executed
         currentRuntimeTask?
             .completedStepIndexes =
             completedStepIndexes
