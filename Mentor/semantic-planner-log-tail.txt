@@ -88,3 +88,9 @@ KRALİ Semantic Planner Fallback
 status=9
 input=OpenAI hakkında internette araştırma yap ve son gelişmeleri kısaca anlat
 output:
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+KRALİ Semantic Planner Fallback
+status=9
+input=Masaüstündeki en son değiştirilen görsel dosyasının sadece adını söyle. Dosyayı açma veya değiştirme
+output:
