@@ -130,3 +130,26 @@ KRALİ büyüdükçe tek dosya / tek store / her veriyi sürekli bellekte tutan 
 
 Target flow:
 `Goal → Problem Frame → Observe → Strategy Candidates → Choose → Execute → Verify → Reflect → Retry Safe Strategy → Learning Gateway (only if genuinely needed)`
+
+
+## v0.8.64 — Outcome-Oriented Problem Solving
+
+- Added `AgentOutcomePlanner`.
+- KRALİ now separates user outcome/success criteria from instrumental provider steps.
+- Public read-only information tasks can be satisfied by `research.web` even when `browser.control` is unavailable.
+- Browser/app capabilities used only as tools can be suppressed from Learning when another verified strategy already satisfies the user outcome.
+- Real mutation/edit tasks are not allowed to hide behind read-only substitutions; missing edit capability still escalates to Learning.
+- Semantic capability gaps and runtime gaps are filtered by outcome coverage.
+- Outcome strategies execute before semantic provider steps when they fully cover a non-mutating goal.
+- Verifier can PASS on real outcome evidence instead of requiring every originally planned provider step to run.
+- Instrumental semantic steps substituted by a better outcome strategy are marked `skipped`, not failed.
+- Mentor traces now include `outcomeResolution`: requirements, success criteria, chosen strategies, coverage and suppressed Learning capabilities.
+- Training Lab adds regressions for:
+  - public information via research.web before browser Learning
+  - mutation tasks still requiring a real mutation capability
+- Developer Agent request timeout is now adaptive by development phase.
+- A single Ollama request timeout no longer kills the run immediately; KRALİ preserves the current message/tool context and retries in-place.
+- Default local-agent watchdog increased from 5 to 7 minutes while inspection budget and forced implementation gates remain bounded.
+
+Target flow:
+`Goal → Outcome Contract → Success Criteria → Candidate Strategies → Capability Composition → Execute → Verify Outcome → Reflect → Learning only if uncovered`
