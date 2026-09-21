@@ -495,6 +495,7 @@ struct AgentProblemSolver {
         for step: AgentTaskGraphStep
     ) -> Bool {
         guard
+            step.capabilityID != "perception.screen",
             step.risk == .readOnly ||
             step.risk == .external
         else {
@@ -514,7 +515,10 @@ struct AgentProblemSolver {
     private func canUseGenericAppWorkflow(
         for step: AgentTaskGraphStep
     ) -> Bool {
-        guard isApplicationLike(step) else {
+        guard
+            isApplicationLike(step),
+            step.capabilityID != "app.workflow"
+        else {
             return false
         }
 
@@ -534,7 +538,10 @@ struct AgentProblemSolver {
     private func canUsePublicResearch(
         for step: AgentTaskGraphStep
     ) -> Bool {
-        guard step.role == .retrieve else {
+        guard
+            step.role == .retrieve,
+            step.capabilityID != "research.web"
+        else {
             return false
         }
 
@@ -576,6 +583,12 @@ struct AgentProblemSolver {
     private func canUseReasoningTransform(
         for step: AgentTaskGraphStep
     ) -> Bool {
+        guard
+            step.capabilityID != "core.reasoning"
+        else {
+            return false
+        }
+
         switch step.role {
         case .reason,
              .transform:
