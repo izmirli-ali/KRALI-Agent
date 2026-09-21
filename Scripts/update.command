@@ -52,6 +52,26 @@ else
     echo "ℹ️ Henüz GitHub remote bağlı değil."
 fi
 
-/bin/zsh "$ROOT/Scripts/build-install.command" || fail $? "Build / kurulum tamamlanamadı."
+/bin/zsh "$ROOT/Scripts/build-install.command"
+BUILD_STATUS="$?"
+
+if [ "$BUILD_STATUS" -ne 0 ]; then
+    BUILD_LOG="$HOME/Library/Logs/KRALI-Agent-Build.log"
+    BUILD_SUMMARY=""
+
+    if [ -f "$BUILD_LOG" ]; then
+        BUILD_SUMMARY="$(
+            /usr/bin/grep -E "error:|fatal error:|SwiftCompile.*failed" "$BUILD_LOG" |
+            /usr/bin/tail -n 1 |
+            /usr/bin/sed 's/^[[:space:]]*//'
+        )"
+    fi
+
+    if [ -n "$BUILD_SUMMARY" ]; then
+        fail "$BUILD_STATUS" "Build başarısız: $BUILD_SUMMARY"
+    fi
+
+    fail "$BUILD_STATUS" "Build / kurulum tamamlanamadı."
+fi
 
 rm -f "$FAILURE_MARKER"
