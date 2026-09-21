@@ -14,11 +14,15 @@ struct ScreenPerceptionReport: Codable, Hashable, Sendable {
     let visibleWindows: [String]
     let recognizedText: [String]
     let semanticSummary: String
+    let captureScope: String?
+    let capturedApplicationBundleIdentifier: String?
+    let capturedWindowTitle: String?
 }
 
 enum ScreenPerceptionError: LocalizedError {
     case noDisplay
     case captureUnavailable
+    case targetWindowUnavailable(String)
 
     var errorDescription: String? {
         switch self {
@@ -26,6 +30,8 @@ enum ScreenPerceptionError: LocalizedError {
             return "Yakalanabilir ekran bulunamadı."
         case .captureUnavailable:
             return "Ekran görüntüsü alınamadı. macOS Ekran Kaydı iznini kontrol et."
+        case .targetWindowUnavailable(let bundleIdentifier):
+            return "Hedef uygulamaya ait görünür pencere bulunamadı: \(bundleIdentifier)"
         }
     }
 }
@@ -34,7 +40,8 @@ actor AgentScreenPerception {
     private let localIntelligence = AgentLocalIntelligence()
 
     func observe(
-        goal: String
+        goal: String,
+        targetBundleIdentifier: String? = nil
     ) async throws -> ScreenPerceptionReport {
         let content = try await SCShareableContent
             .excludingDesktopWindows(
@@ -48,23 +55,82 @@ actor AgentScreenPerception {
             throw ScreenPerceptionError.noDisplay
         }
 
-        let excludedApplications =
-            content.applications.filter {
-                $0.bundleIdentifier ==
-                    Bundle.main.bundleIdentifier
+        let targetWindow: SCWindow?
+        if let targetBundleIdentifier {
+            targetWindow =
+                content.windows.first {
+                    window in
+
+                    guard
+                        window.isOnScreen,
+                        let application =
+                            window.owningApplication,
+                        application.bundleIdentifier ==
+                            targetBundleIdentifier
+                    else {
+                        return false
+                    }
+
+                    return window.frame.width >= 180 &&
+                        window.frame.height >= 120
+                }
+
+            guard targetWindow != nil else {
+                throw ScreenPerceptionError
+                    .targetWindowUnavailable(
+                        targetBundleIdentifier
+                    )
             }
+        } else {
+            targetWindow = nil
+        }
 
-        let filter = SCContentFilter(
-            display: display,
-            excludingApplications: excludedApplications,
-            exceptingWindows: []
-        )
+        let filter: SCContentFilter
+        let sourceWidth: Int
+        let sourceHeight: Int
 
-        let configuration = SCStreamConfiguration()
+        if let targetWindow {
+            filter = SCContentFilter(
+                desktopIndependentWindow:
+                    targetWindow
+            )
+
+            sourceWidth = max(
+                Int(targetWindow.frame.width),
+                1
+            )
+            sourceHeight = max(
+                Int(targetWindow.frame.height),
+                1
+            )
+        } else {
+            let excludedApplications =
+                content.applications.filter {
+                    $0.bundleIdentifier ==
+                        Bundle.main.bundleIdentifier
+                }
+
+            filter = SCContentFilter(
+                display: display,
+                excludingApplications:
+                    excludedApplications,
+                exceptingWindows: []
+            )
+
+            sourceWidth = max(
+                display.width,
+                1
+            )
+            sourceHeight = max(
+                display.height,
+                1
+            )
+        }
+
+        let configuration =
+            SCStreamConfiguration()
 
         let maxWidth = 1600
-        let sourceWidth = max(display.width, 1)
-        let sourceHeight = max(display.height, 1)
         let scale = min(
             1.0,
             Double(maxWidth) /
@@ -98,44 +164,89 @@ actor AgentScreenPerception {
                     in: .whitespacesAndNewlines
                 )
 
-        let visibleApplications =
-            Array(
-                Set(
-                    content.applications.compactMap {
-                        let name = $0.applicationName
-                            .trimmingCharacters(
-                                in: .whitespacesAndNewlines
-                            )
+        let visibleApplications: [String]
+        let visibleWindows: [String]
 
-                        return name.isEmpty ? nil : name
-                    }
-                )
-            )
-            .sorted()
+        if let targetWindow {
+            let appName =
+                targetWindow
+                    .owningApplication?
+                    .applicationName
+                    .trimmingCharacters(
+                        in: .whitespacesAndNewlines
+                    ) ?? ""
 
-        let visibleWindows = content.windows
-            .compactMap { window -> String? in
-                guard
-                    window.isOnScreen,
-                    let title = window.title?
-                        .trimmingCharacters(
-                            in: .whitespacesAndNewlines
-                        ),
-                    !title.isEmpty
-                else {
-                    return nil
-                }
+            visibleApplications =
+                appName.isEmpty
+                ? []
+                : [appName]
 
-                let appName =
-                    window.owningApplication?
-                        .applicationName ??
-                    "Bilinmeyen uygulama"
+            let title =
+                targetWindow.title?
+                    .trimmingCharacters(
+                        in: .whitespacesAndNewlines
+                    ) ?? ""
 
-                return appName +
+            visibleWindows =
+                title.isEmpty
+                ? []
+                : [
+                    (appName.isEmpty
+                        ? "Hedef uygulama"
+                        : appName) +
                     " — " +
                     title
-            }
-            .prefix(40)
+                ]
+        } else {
+            visibleApplications =
+                Array(
+                    Set(
+                        content.applications.compactMap {
+                            let name = $0.applicationName
+                                .trimmingCharacters(
+                                    in: .whitespacesAndNewlines
+                                )
+
+                            return name.isEmpty
+                                ? nil
+                                : name
+                        }
+                    )
+                )
+                .sorted()
+
+            visibleWindows =
+                Array(
+                    content.windows
+                        .compactMap {
+                            window -> String? in
+
+                            guard
+                                window.isOnScreen,
+                                let title =
+                                    window.title?
+                                        .trimmingCharacters(
+                                            in:
+                                                .whitespacesAndNewlines
+                                        ),
+                                !title.isEmpty
+                            else {
+                                return nil
+                            }
+
+                            let appName =
+                                window
+                                    .owningApplication?
+                                    .applicationName ??
+                                "Bilinmeyen uygulama"
+
+                            return appName +
+                                " — " +
+                                title
+                        }
+                        .prefix(40)
+                )
+        }
 
         let semanticSummary =
             await localIntelligence
@@ -146,7 +257,7 @@ actor AgentScreenPerception {
                     visibleApplications:
                         visibleApplications,
                     visibleWindows:
-                        Array(visibleWindows),
+                        visibleWindows,
                     recognizedText:
                         recognizedText
                 ) ??
@@ -154,7 +265,7 @@ actor AgentScreenPerception {
                 visibleApplications:
                     visibleApplications,
                 visibleWindows:
-                    Array(visibleWindows),
+                    visibleWindows,
                 recognizedText:
                     recognizedText
             )
@@ -170,9 +281,20 @@ actor AgentScreenPerception {
             visibleApplications:
                 visibleApplications,
             visibleWindows:
-                Array(visibleWindows),
+                visibleWindows,
             recognizedText: recognizedText,
-            semanticSummary: semanticSummary
+            semanticSummary: semanticSummary,
+            captureScope:
+                targetWindow == nil
+                ? "display"
+                : "window",
+            capturedApplicationBundleIdentifier:
+                targetWindow?
+                    .owningApplication?
+                    .bundleIdentifier,
+            capturedWindowTitle:
+                targetWindow?
+                    .title
         )
     }
 
