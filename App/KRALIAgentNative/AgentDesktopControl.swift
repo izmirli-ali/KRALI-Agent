@@ -27,6 +27,9 @@ struct DesktopWebActionResult: Hashable, Sendable {
     let screenSummary: String
     let recognizedText: [String]
     let visibleWindows: [String]
+    let captureScope: String
+    let capturedApplicationBundleIdentifier: String?
+    let capturedWindowTitle: String?
 }
 
 struct DesktopControlProbeReport: Codable, Hashable, Sendable {
@@ -347,7 +350,15 @@ actor AgentDesktopControl {
             recognizedText:
                 report.recognizedText,
             visibleWindows:
-                report.visibleWindows
+                report.visibleWindows,
+            captureScope:
+                report.captureScope ??
+                "unknown",
+            capturedApplicationBundleIdentifier:
+                report
+                    .capturedApplicationBundleIdentifier,
+            capturedWindowTitle:
+                report.capturedWindowTitle
         )
     }
 
