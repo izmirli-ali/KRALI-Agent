@@ -810,13 +810,8 @@ final class AgentEngine: ObservableObject {
         var semanticMission: AgentSemanticMission?
         var executedSemanticCapabilities = Set<String>()
         var completedSemanticStepIndexes = Set<Int>()
-        let capabilityIntrospectionRequested =
-            languageResolver.requestsCapabilitySummary(
-                text
-            )
 
-        if !capabilityIntrospectionRequested &&
-           shouldUseSemanticMission(
+        if shouldUseSemanticMission(
             decision: decision,
             goal: resolvedGoal
         ) {
@@ -1230,13 +1225,7 @@ final class AgentEngine: ObservableObject {
         var baseReply = ""
         var outcomeOwnedMission = false
 
-        if capabilityIntrospectionRequested {
-            baseReply =
-                capabilitySummaryReply(
-                    for: text
-                )
-            outcomeOwnedMission = true
-        } else if let outcomeResolution =
+        if let outcomeResolution =
             currentOutcomeResolution,
            outcomeResolution.isFullyCovered,
            !outcomeResolution
@@ -1614,8 +1603,7 @@ final class AgentEngine: ObservableObject {
         var intelligenceProvider: String?
         var synthesisApplied = false
 
-        if !capabilityIntrospectionRequested &&
-           pendingTaskApproval == nil &&
+        if pendingTaskApproval == nil &&
            shouldUseIntelligence(
             goal: resolvedGoal,
             verification: finalVerification
@@ -1881,93 +1869,6 @@ final class AgentEngine: ObservableObject {
         let completedStepIndexes: Set<Int>
     }
 
-    private func capabilitySummaryReply(
-        for userInput: String
-    ) -> String {
-        let requestedLimit =
-            languageResolver.requestedItemLimit(
-                from: userInput,
-                defaultValue: 6,
-                maximum: 12
-            )
-
-        let foundationalIDs =
-            Set([
-                "core.reasoning",
-                "context.local"
-            ])
-
-        let available =
-            capabilityRegistry.all
-                .filter {
-                    $0.isAvailable &&
-                    !foundationalIDs.contains(
-                        $0.id
-                    )
-                }
-
-        var seenDomains = Set<String>()
-        var diversified: [AgentCapability] = []
-
-        for capability in available {
-            let domain =
-                capability.id
-                    .split(separator: ".")
-                    .first
-                    .map(String.init) ??
-                capability.id
-
-            if seenDomains.insert(domain).inserted {
-                diversified.append(capability)
-            }
-        }
-
-        if diversified.count < requestedLimit {
-            let selectedIDs =
-                Set(
-                    diversified.map(\.id)
-                )
-
-            diversified.append(
-                contentsOf:
-                    available.filter {
-                        !selectedIDs.contains(
-                            $0.id
-                        )
-                    }
-            )
-        }
-
-        let selected =
-            Array(
-                diversified.prefix(
-                    requestedLimit
-                )
-            )
-
-        guard !selected.isEmpty else {
-            return "Capability registry içinde şu anda kullanılabilir olarak işaretlenmiş bir dış görev kabiliyeti yok."
-        }
-
-        let lines =
-            selected.enumerated().map {
-                index,
-                capability in
-
-                String(index + 1) +
-                ". " +
-                capability.name +
-                " — " +
-                capability.summary
-            }
-
-        return
-            "Capability registry içinde şu anda kullanılabilir olarak işaretlenen " +
-            String(selected.count) +
-            " farklı görev türü:\n\n" +
-            lines.joined(separator: "\n")
-    }
-
     private func shouldUseSemanticMission(
         decision: AgentDecision,
         goal: AgentGoalProfile
@@ -2000,49 +1901,8 @@ final class AgentEngine: ObservableObject {
             }
         )
 
-        let externallyActionableOutcomes =
-            Set<AgentGoalOutcome>([
-                .open,
-                .edit,
-                .organize,
-                .communicate
-            ])
-
-        let introducedExternalOutcomes =
-            outcomes
-                .intersection(
-                    externallyActionableOutcomes
-                )
-                .subtracting(
-                    fallbackGoal.outcomes
-                )
-
-        guard introducedExternalOutcomes.isEmpty else {
-            return false
-        }
-
         if fallbackGoal.outcomes.contains(.edit) {
             guard outcomes.contains(.edit) else {
-                return false
-            }
-        }
-
-        if outcomes.contains(.open) {
-            let openProviders =
-                Set([
-                    "desktop.app",
-                    "files.reveal",
-                    "system.open.url",
-                    "browser.control",
-                    "app.workflow"
-                ])
-
-            guard !ids
-                .intersection(
-                    openProviders
-                )
-                .isEmpty
-            else {
                 return false
             }
         }
