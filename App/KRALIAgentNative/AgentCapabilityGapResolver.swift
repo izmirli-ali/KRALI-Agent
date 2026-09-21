@@ -60,6 +60,11 @@ struct AgentCapabilityGapResolver {
         for step in graph.steps
             where !step.isAvailable {
             guard
+                !step.operation
+                    .contains(
+                        "capability.contract"
+                    ),
+                step.dependsOn.isEmpty,
                 !seen.contains(
                     step.capabilityID
                 )
@@ -312,19 +317,11 @@ struct AgentCapabilityGapResolver {
                     }
             )
 
-        let availableIDs =
-            Set(
-                capabilities
-                    .filter(\.isAvailable)
-                    .map(\.id)
-            )
-
         var seen = Set<String>()
         var results: [CapabilityGapResolution] = []
 
         for step in graph.steps {
             guard
-                step.isAvailable,
                 !completedStepIndexes.contains(
                     step.index
                 ),
@@ -366,6 +363,83 @@ struct AgentCapabilityGapResolver {
                         step.capabilityID
                     ]
             else {
+                continue
+            }
+
+            if !step.isAvailable {
+                guard
+                    !step.operation
+                        .contains(
+                            "capability.contract"
+                        )
+                else {
+                    continue
+                }
+
+                seen.insert(
+                    step.capabilityID
+                )
+
+                let strategyCandidates =
+                    problemSolver
+                        .candidateCapabilityIDs(
+                            for: step,
+                            availableCapabilities:
+                                capabilities
+                        )
+
+                if !strategyCandidates.isEmpty {
+                    continue
+                }
+
+                let kind: CapabilityGapKind =
+                    capability.risk == .external
+                    ? .integration
+                    : .code
+
+                let reason =
+                    "Erişilebilir runtime step için gerçek provider eksik: " +
+                    step.capabilityID +
+                    " • " +
+                    step.operation
+
+                results.append(
+                    CapabilityGapResolution(
+                        capabilityID:
+                            capability.id,
+                        capabilityName:
+                            capability.name,
+                        kind:
+                            kind,
+                        reason:
+                            reason,
+                        candidateCapabilityIDs: [],
+                        researchGoal:
+                            researchGoal(
+                                for: capability,
+                                step: step,
+                                kind: kind
+                            ),
+                        developerBrief:
+                            buildDeveloperBrief(
+                                graph: graph,
+                                step: step,
+                                capability:
+                                    capability,
+                                kind: kind,
+                                strategyCandidates: []
+                            ),
+                        learningPath:
+                            learningPath(
+                                for: step,
+                                capability:
+                                    capability,
+                                kind: kind,
+                                strategyCandidates: []
+                            )
+                    )
+                )
+
                 continue
             }
 
