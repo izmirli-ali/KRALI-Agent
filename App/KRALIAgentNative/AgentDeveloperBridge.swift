@@ -81,6 +81,8 @@ struct DeveloperAgentStatus: Hashable {
             "local_agent_resumed",
             "local_agent_running",
             "local_agent_tool",
+            "local_agent_target_found",
+            "local_agent_target_verified",
             "local_agent_completed",
             "sdk_fallback_preparing",
             "sdk_fallback_running",
