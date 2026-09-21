@@ -2,22 +2,6 @@
   "activityTail" : [
     {
       "date" : "2026-09-21T17:58:19Z",
-      "text" : "Learning Queue worker başlatılıyor • browser.control • job=582D51EE"
-    },
-    {
-      "date" : "2026-09-21T17:58:19Z",
-      "text" : "Capability gap Learning Queue'ya alındı • sırada=1"
-    },
-    {
-      "date" : "2026-09-21T17:58:19Z",
-      "text" : "Görev tamamlandı • 21.31 sn"
-    },
-    {
-      "date" : "2026-09-21T17:58:19Z",
-      "text" : "Mentor trace yerel olarak kaydedildi"
-    },
-    {
-      "date" : "2026-09-21T17:58:19Z",
       "text" : "Outcome Strategy Chain tükendi; Learning Gateway açıldı"
     },
     {
@@ -149,12 +133,22 @@
     }
   ],
   "capabilityGaps" : [
+    {
+      "candidateCapabilityIDs" : [
 
+      ],
+      "capabilityID" : "browser.control",
+      "capabilityName" : "Tarayıcı kontrolü",
+      "developerBrief" : "KRALİ Exhausted Outcome Capability Developer Brief\n\nKullanıcı hedefi:\nopenai.com sitesine gir ve sayfada ne olduğunu kısaca anlat\n\nEksik capability:\nbrowser.control — Tarayıcı kontrolü\n\nDenenen güvenli stratejiler:\nweb-navigation:open-url-observe: URL macOS ile açıldı ancak ham ekran/OCR kanıtında tam hedef domain doğrulanamadı; yalnız marka adı veya görev metni başarı kanıtı sayılmadı.\n\nSorun:\nOutcome başarı kriteri mevcut güvenli stratejilerle runtime'da doğrulanamadı; strategy zinciri tüketildi ve artık gerçek capability eksikliği kaldı: browser.control • web-navigation:open-url-observe: URL macOS ile açıldı ancak ham ekran/OCR kanıtında tam hedef domain doğrulanamadı; yalnız marka adı veya görev metni başarı kanıtı sayılmadı.\n\nÇözüm kuralları:\n- Aynı başarısız stratejileri tekrar etme; runtime kanıtı bunların yetersiz olduğunu gösteriyor.\n- Önce outcome başarı kriterini ve neden mevcut strategy chain'in yetmediğini açıkça tanımla.\n- Uygulama/marka adına özel hard-code yazma.\n- Mümkün olan en genel primitive/provider çözümünü geliştir.\n- Candidate branch/worktree kullan.\n- Gerçek source değişikliği, git diff, build ve runtime/postcondition kanıtı olmadan tamamlandı sayma.\n- Başarılı provider oluşunca yarım kalan kullanıcı görevine kaldığı outcome adımından devam edebilmelidir.\n\nKabul kriteri:\nAynı sınıftaki yeni hedeflerde de capability generic biçimde çalışmalı ve kullanıcı outcome'u gerçek observation ile doğrulanmalıdır.",
+      "kind" : "integration",
+      "reason" : "Outcome başarı kriteri mevcut güvenli stratejilerle runtime'da doğrulanamadı; strategy zinciri tüketildi ve artık gerçek capability eksikliği kaldı: browser.control • web-navigation:open-url-observe: URL macOS ile açıldı ancak ham ekran/OCR kanıtında tam hedef domain doğrulanamadı; yalnız marka adı veya görev metni başarı kanıtı sayılmadı.",
+      "researchGoal" : "Kullanıcı outcome'unu mevcut provider kombinasyonlarıyla çözemediğimiz kanıtlandı. Tarayıcı kontrolü capability'sini uygulama adına özel hard-code olmadan generic provider/strategy olarak araştır, geliştir ve aynı başarı kriterini gerçek observation ile doğrula."
+    }
   ],
   "contextMemory" : [
 
   ],
-  "createdAt" : "2026-09-21T17:58:48Z",
+  "createdAt" : "2026-09-21T17:58:19Z",
   "executionSteps" : [
     {
       "capabilityID" : "core.reasoning",
@@ -198,29 +192,36 @@
       "title" : "Sonucu kullanıcıya aktar"
     }
   ],
-  "finalResponse" : "Web hedefini açmayı denedim ancak gözlem sırasında foreground değiştiği için sonucu doğrulayamadım. Bu geçici bir gözlem kesintisi; yeni bir capability öğrenmesi başlatılmadı.\n\nDoğrulama: Outcome Strategy Chain mevcut güvenli stratejileri denedi ancak hiçbir strateji başarı kriterini doğrulamadı.",
+  "fallbackPlan" : "Gerçek capability eksikliği kaldıysa Learning Gateway üzerinden öğren; başarısız stratejiyi aynı şekilde tekrar etme.",
+  "finalResponse" : "Görev tamamlanamadı. Eksik kabiliyet: Tarayıcı kontrolü.\n\nDoğrulama: Outcome Strategy Chain mevcut güvenli stratejileri denedi ancak hiçbir strateji başarı kriterini doğrulamadı.\nAlternatif plan: Gerçek capability eksikliği kaldıysa Learning Gateway üzerinden öğren; başarısız stratejiyi aynı şekilde tekrar etme.\nYetkinlik kazanma planı: Resmi API/entegrasyonu araştır → gereken hesap/izinleri çıkar → bağlantıyı sandbox/test ortamında doğrula → kullanıcı onayından sonra etkinleştir.",
   "goal" : "openai.com sitesine gir ve sayfada ne olduğunu kısaca anlat",
   "inputSource" : "text",
   "learningPlans" : [
-
+    {
+      "capabilityID" : "browser.control",
+      "capabilityName" : "Tarayıcı kontrolü",
+      "nextStep" : "Resmi API/entegrasyonu araştır → gereken hesap/izinleri çıkar → bağlantıyı sandbox/test ortamında doğrula → kullanıcı onayından sonra etkinleştir.",
+      "researchGoal" : "macOS tarayıcı otomasyonu için güvenli browser bridge, Accessibility ve desteklenen otomasyon API'lerini resmi kaynaklardan karşılaştır.",
+      "state" : "integrationRequired"
+    }
   ],
   "outcomeAttempts" : [
     {
       "executedCapabilityIDs" : [
         "system.open.url"
       ],
-      "id" : "9CCEC751-2C97-495E-BECF-8DA192920236",
+      "id" : "9EF141C0-F926-4A5E-970A-7BF873705B5C",
       "observation" : {
         "applicationBundleIdentifier" : "com.apple.Safari",
         "captureScope" : "window",
-        "frontmostApplication" : "KRALİ",
+        "frontmostApplication" : "Safari",
         "recognizedTextLineCount" : 0,
-        "windowTitle" : "Adsız"
+        "windowTitle" : "OpenAI | Araştırma ve Devreye Alım"
       },
       "requirementID" : "web-navigation",
       "state" : "failed",
       "strategyID" : "web-navigation:open-url-observe",
-      "summary" : "URL açıldı ancak varsayılan URL işleyicisi ekran gözlemi boyunca frontmost kalmadı. Kullanıcı veya başka bir uygulama odağı değiştirmiş olabilir; bu gözlem başarı kanıtı olarak kullanılamaz."
+      "summary" : "URL macOS ile açıldı ancak ham ekran/OCR kanıtında tam hedef domain doğrulanamadı; yalnız marka adı veya görev metni başarı kanıtı sayılmadı."
     }
   ],
   "outcomeResolution" : {
@@ -229,9 +230,9 @@
     ],
     "contract" : {
       "instrumentalCapabilityIDs" : [
-        "app.workflow",
+        "desktop.app",
         "browser.control",
-        "desktop.app"
+        "app.workflow"
       ],
       "objective" : "openai.com sitesine gir ve sayfada ne olduğunu kısaca anlat",
       "requirements" : [
@@ -383,7 +384,7 @@
       }
     ]
   },
-  "reflectionSummary" : "Outcome gözlemi kullanıcı/uygulama foreground değişimiyle kesildi; transient failure capability gap olarak sınıflandırılmadı.",
+  "reflectionSummary" : "Outcome Strategy Chain mevcut güvenli stratejileri tüketti; gerçek capability eksikliği kaldığı için Learning Gateway açıldı.",
   "researchEvidence" : [
 
   ],
@@ -397,6 +398,7 @@
     "Plan",
     "Browser",
     "Desktop",
+    "Learn",
     "Verify",
     "Response"
   ],
@@ -508,7 +510,7 @@
       "title" : "Uygulama kontrolü"
     }
   ],
-  "traceID" : "F8E4A037-DB64-4642-95E1-6104B35709D8",
+  "traceID" : "98CED3D4-9E15-41FE-BA71-CA3A5A5F4187",
   "userInput" : "openai.com sitesine gir ve sayfada ne olduğunu kısaca anlat",
   "verificationState" : "attention",
   "verificationSummary" : "Outcome Strategy Chain mevcut güvenli stratejileri denedi ancak hiçbir strateji başarı kriterini doğrulamadı."
