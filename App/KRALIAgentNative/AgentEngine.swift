@@ -7152,6 +7152,36 @@ final class AgentEngine: ObservableObject {
                     ? "∅"
                     : outcome.query.filenameQuery
             ) +
+            " • sort=" +
+            String(
+                describing:
+                    outcome.query.sortMode
+            ) +
+            " • limit=" +
+            (
+                outcome.query.resultLimit
+                    .map(String.init) ??
+                "∅"
+            ) +
+            " • output=" +
+            outcome.query
+                .outputProjection
+                .rawValue +
+            " • prohibitions=" +
+            (
+                outcome.query
+                    .prohibitions
+                    .map(\.rawValue)
+                    .sorted()
+                    .joined(separator: ",")
+                    .isEmpty
+                ? "∅"
+                : outcome.query
+                    .prohibitions
+                    .map(\.rawValue)
+                    .sorted()
+                    .joined(separator: ",")
+            ) +
             " • status=" +
             outcome.status.rawValue
         )
@@ -7182,6 +7212,24 @@ final class AgentEngine: ObservableObject {
 
         switch outcome.status {
         case .matched:
+            if outcome.query
+                .outputProjection ==
+                .namesOnly {
+                return outcome.files
+                    .map {
+                        "• " + $0.name
+                    }
+                    .joined(
+                        separator: "\n"
+                    )
+            }
+
+            if outcome.query
+                .prohibitions
+                .contains(.open) {
+                return outcome.message
+            }
+
             return outcome.message +
                 " Sağdaki sonuçlardan istediğini Finder'da gösterebilirsin."
 
