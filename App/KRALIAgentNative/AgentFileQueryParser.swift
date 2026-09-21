@@ -222,7 +222,8 @@ struct AgentFileQueryParser {
     private let searchActionTokens: Set<String> = [
         "bul", "ara", "goster",
         "listele", "getir", "cikar",
-        "incele"
+        "incele", "nerede", "hangileri",
+        "neler", "bak"
     ]
 
     private let semanticPrefixes = [
@@ -240,7 +241,14 @@ struct AgentFileQueryParser {
         "dokuman",
         "belge",
         "screenshot",
-        "arsiv"
+        "arsiv",
+        "archive",
+        "ses",
+        "audio",
+        "excel",
+        "tablo",
+        "font",
+        "yazitipi"
     ]
 
     private let ignoredTokens: Set<String> = [
