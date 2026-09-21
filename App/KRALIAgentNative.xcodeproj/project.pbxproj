@@ -46,6 +46,7 @@
 		A10000000000000000000037 /* ConversationSidebarView.swift in Sources */ = {isa = PBXBuildFile; fileRef = B10000000000000000000037 /* ConversationSidebarView.swift */; };
 		A10000000000000000000038 /* AgentWorkspaceIndexer.swift in Sources */ = {isa = PBXBuildFile; fileRef = B10000000000000000000038 /* AgentWorkspaceIndexer.swift */; };
 		A10000000000000000000039 /* AgentDiagnosticsLoader.swift in Sources */ = {isa = PBXBuildFile; fileRef = B10000000000000000000039 /* AgentDiagnosticsLoader.swift */; };
+		A10000000000000000000040 /* AgentInspectorState.swift in Sources */ = {isa = PBXBuildFile; fileRef = B10000000000000000000040 /* AgentInspectorState.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
@@ -89,6 +90,7 @@
 		B10000000000000000000037 /* ConversationSidebarView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ConversationSidebarView.swift; sourceTree = "<group>"; };
 		B10000000000000000000038 /* AgentWorkspaceIndexer.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AgentWorkspaceIndexer.swift; sourceTree = "<group>"; };
 		B10000000000000000000039 /* AgentDiagnosticsLoader.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AgentDiagnosticsLoader.swift; sourceTree = "<group>"; };
+		B10000000000000000000040 /* AgentInspectorState.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AgentInspectorState.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -152,6 +154,7 @@
 				B10000000000000000000037 /* ConversationSidebarView.swift */,
 				B10000000000000000000038 /* AgentWorkspaceIndexer.swift */,
 				B10000000000000000000039 /* AgentDiagnosticsLoader.swift */,
+				B10000000000000000000040 /* AgentInspectorState.swift */,
 			);
 			path = KRALIAgentNative;
 			sourceTree = "<group>";
@@ -272,6 +275,7 @@
 				A10000000000000000000037 /* ConversationSidebarView.swift in Sources */,
 				A10000000000000000000038 /* AgentWorkspaceIndexer.swift in Sources */,
 				A10000000000000000000039 /* AgentDiagnosticsLoader.swift in Sources */,
+				A10000000000000000000040 /* AgentInspectorState.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -309,7 +313,7 @@
 				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
 				CODE_SIGN_STYLE = Automatic;
 				COMBINE_HIDPI_IMAGES = YES;
-				CURRENT_PROJECT_VERSION = 108;
+				CURRENT_PROJECT_VERSION = 109;
 				DEVELOPMENT_TEAM = 65244UMFCK;
 				ENABLE_HARDENED_RUNTIME = NO;
 				ENABLE_PREVIEWS = YES;
@@ -325,7 +329,7 @@
 					"@executable_path/../Frameworks",
 				);
 				MACOSX_DEPLOYMENT_TARGET = 14.0;
-				MARKETING_VERSION = 0.8.58;
+				MARKETING_VERSION = 0.8.59;
 				PRODUCT_BUNDLE_IDENTIFIER = com.aliihsancanuysal.kraliagent;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				SDKROOT = macosx;
@@ -341,7 +345,7 @@
 				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
 				CODE_SIGN_STYLE = Automatic;
 				COMBINE_HIDPI_IMAGES = YES;
-				CURRENT_PROJECT_VERSION = 108;
+				CURRENT_PROJECT_VERSION = 109;
 				DEVELOPMENT_TEAM = 65244UMFCK;
 				ENABLE_HARDENED_RUNTIME = NO;
 				GENERATE_INFOPLIST_FILE = YES;
@@ -356,7 +360,7 @@
 					"@executable_path/../Frameworks",
 				);
 				MACOSX_DEPLOYMENT_TARGET = 14.0;
-				MARKETING_VERSION = 0.8.58;
+				MARKETING_VERSION = 0.8.59;
 				PRODUCT_BUNDLE_IDENTIFIER = com.aliihsancanuysal.kraliagent;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				SDKROOT = macosx;
