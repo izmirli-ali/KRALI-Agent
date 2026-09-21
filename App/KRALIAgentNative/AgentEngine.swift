@@ -3300,7 +3300,7 @@ final class AgentEngine: ObservableObject {
                             strategies:
                                 current.strategies,
                             chosenStrategyID:
-                                "reuse-evidence:contradiction",
+                                current.chosenStrategyID,
                             reflection:
                                 reflection
                         )
