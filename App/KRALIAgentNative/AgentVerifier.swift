@@ -271,6 +271,22 @@ struct AgentVerifier {
         case .fileSearch:
             if let outcome =
                 snapshot.fileSearchOutcome {
+                if let mismatch =
+                    fileSearchConstraintMismatch(
+                        decision:
+                            decision,
+                        currentUserInput:
+                            currentUserInput,
+                        outcome:
+                            outcome
+                    ) {
+                    return attention(
+                        mismatch,
+                        fallback:
+                            "Aynı dosya aramasını entity, kapsam, tür ve tarih sözleşmesini koruyarak yeniden çalıştır."
+                    )
+                }
+
                 switch outcome.status {
                 case .matched:
                     return AgentVerificationResult(
