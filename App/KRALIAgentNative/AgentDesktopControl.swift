@@ -18,7 +18,12 @@ struct DesktopAppActionResult: Codable, Hashable, Sendable {
 struct DesktopWebActionResult: Hashable, Sendable {
     let requestedURL: String
     let openSucceeded: Bool
+    let expectedHandlerApplicationURL: String?
+    let expectedHandlerBundleIdentifier: String?
     let frontmostAfter: String?
+    let frontmostBundleIdentifier: String?
+    let handlerVerifiedFrontmost: Bool
+    let observationStable: Bool
     let screenSummary: String
     let recognizedText: [String]
     let visibleWindows: [String]
@@ -218,6 +223,19 @@ actor AgentDesktopControl {
                 )
         }
 
+        let expectedHandlerURL =
+            NSWorkspace.shared
+                .urlForApplication(
+                    toOpen: url
+                )
+
+        let expectedHandlerBundleIdentifier =
+            expectedHandlerURL
+                .flatMap {
+                    Bundle(url: $0)?
+                        .bundleIdentifier
+                }
+
         let opened =
             NSWorkspace.shared.open(
                 url
@@ -234,6 +252,20 @@ actor AgentDesktopControl {
             for: .milliseconds(900)
         )
 
+        let frontmostBeforeObservation =
+            NSWorkspace.shared
+                .frontmostApplication
+
+        let handlerVerifiedBefore =
+            webHandlerMatches(
+                expectedApplicationURL:
+                    expectedHandlerURL,
+                expectedBundleIdentifier:
+                    expectedHandlerBundleIdentifier,
+                runningApplication:
+                    frontmostBeforeObservation
+            )
+
         let report =
             try await screenPerception.observe(
                 goal:
@@ -241,13 +273,63 @@ actor AgentDesktopControl {
                     url.absoluteString
             )
 
+        let frontmostAfterObservation =
+            NSWorkspace.shared
+                .frontmostApplication
+
+        let handlerVerifiedAfter =
+            webHandlerMatches(
+                expectedApplicationURL:
+                    expectedHandlerURL,
+                expectedBundleIdentifier:
+                    expectedHandlerBundleIdentifier,
+                runningApplication:
+                    frontmostAfterObservation
+            )
+
+        let sameFrontmostProcess =
+            frontmostBeforeObservation?
+                .processIdentifier ==
+            frontmostAfterObservation?
+                .processIdentifier
+
+        let reportMatchesFrontmost =
+            normalize(
+                report.frontmostApplication ??
+                ""
+            ) ==
+            normalize(
+                frontmostBeforeObservation?
+                    .localizedName ??
+                ""
+            )
+
+        let observationStable =
+            sameFrontmostProcess &&
+            reportMatchesFrontmost
+
         return DesktopWebActionResult(
             requestedURL:
                 url.absoluteString,
             openSucceeded:
                 true,
+            expectedHandlerApplicationURL:
+                expectedHandlerURL?.path,
+            expectedHandlerBundleIdentifier:
+                expectedHandlerBundleIdentifier,
             frontmostAfter:
+                frontmostAfterObservation?
+                    .localizedName ??
                 report.frontmostApplication,
+            frontmostBundleIdentifier:
+                frontmostAfterObservation?
+                    .bundleIdentifier,
+            handlerVerifiedFrontmost:
+                handlerVerifiedBefore &&
+                handlerVerifiedAfter &&
+                observationStable,
+            observationStable:
+                observationStable,
             screenSummary:
                 report.semanticSummary,
             recognizedText:
@@ -255,6 +337,39 @@ actor AgentDesktopControl {
             visibleWindows:
                 report.visibleWindows
         )
+    }
+
+    private func webHandlerMatches(
+        expectedApplicationURL: URL?,
+        expectedBundleIdentifier: String?,
+        runningApplication: NSRunningApplication?
+    ) -> Bool {
+        guard
+            let runningApplication
+        else {
+            return false
+        }
+
+        if let expectedBundleIdentifier,
+           !expectedBundleIdentifier.isEmpty {
+            return runningApplication
+                .bundleIdentifier ==
+                expectedBundleIdentifier
+        }
+
+        guard
+            let expectedApplicationURL,
+            let runningURL =
+                runningApplication
+                    .bundleURL
+        else {
+            return false
+        }
+
+        return runningURL
+            .standardizedFileURL ==
+            expectedApplicationURL
+                .standardizedFileURL
     }
 
     func probeOpenApplication(
