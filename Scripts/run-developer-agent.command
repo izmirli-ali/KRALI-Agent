@@ -1159,6 +1159,10 @@ if [ "$CLINE_EXIT" -ne 0 ]; then
         echo "🧩 Developer Agent hata verdi ancak candidate değişiklik üretti; recovery başlatılıyor." | tee -a "$LOG"
         write_status "recovering_candidate|Developer Agent oturumu tamamlanmadı ancak üretilen candidate değişiklikler korunuyor|$BRANCH|$WORKTREE"
 
+        KRALI_NODE_BIN="$NODE_BIN" \
+        KRALI_RECOVERY_MODEL="$MODEL" \
+        KRALI_OLLAMA_BASE_URL="$OLLAMA_BASE_URL" \
+        KRALI_CANDIDATE_REPAIR_ATTEMPTS="2" \
         /bin/zsh "$ROOT/Scripts/recover-developer-candidate.command" >>"$LOG" 2>&1 || true
 
         RECOVERY_STATE="$(
