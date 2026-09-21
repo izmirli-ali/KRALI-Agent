@@ -380,7 +380,7 @@ struct AgentBrain {
             intent: .general,
             route: ["Core", "Intent", "Context", "Planner"],
             goal: "Kullanıcının hedefini anlamlandır ve uygulanabilir bir sonraki adımı seç",
-            plan: "Bağlamı incele; doğrudan araç eşleşmesi yoksa güvenli alternatifler üret",
+            plan: "Kullanıcının mevcut isteğini doğrudan çöz; yalnız gerçekten gerekliyse bağlam veya araç kullan, gerekmiyorsa reasoning ile yanıtla.",
             alternatives: context.hasWorkspace
                 ? ["Çalışma alanını incele", "Dosya araması yap", "Yeni bir çalışma kuralı öğren"]
                 : ["Çalışma alanı seç", "Hedefi biraz daha somutlaştır"]
