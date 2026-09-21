@@ -3604,79 +3604,77 @@ final class AgentEngine: ObservableObject {
         mission: AgentSemanticMission,
         userInput: String
     ) -> AgentDecision {
-        let corpus = normalizeSemanticText(
-            (
-                [userInput, mission.objective] +
-                mission.steps.flatMap {
-                    [$0.title, $0.purpose, $0.operation]
-                }
+        let query =
+            fileQueryParser.parse(
+                userInput
             )
-            .joined(separator: " ")
-        )
 
-        let target: AgentTargetKind
-        if containsSemanticAny(
-            corpus,
-            [
-                "video", "cekim", "kurgu", "reels",
-                "premiere", "klip"
-            ]
-        ) {
-            target = .video
-        } else if containsSemanticAny(
-            corpus,
-            [
-                "gorsel", "fotograf", "resim", "logo",
-                "tasarim", "photoshop"
-            ]
-        ) {
-            target = .image
-        } else if corpus.contains("pdf") {
-            target = .pdf
-        } else if containsSemanticAny(
-            corpus,
-            ["proje", "project"]
-        ) {
-            target = .project
-        } else if containsSemanticAny(
-            corpus,
-            ["belge", "dokuman", "document"]
-        ) {
-            target = .document
-        } else if containsSemanticAny(
-            corpus,
-            ["klasor", "folder"]
-        ) {
-            target = .folder
-        } else {
-            target = .any
-        }
-
-        let newest = containsSemanticAny(
-            corpus,
-            [
-                "son cekim", "en yeni", "en son", "latest",
-                "recent", "dunku", "bugunku", "yeni cekim",
-                "bugun", "dun"
-            ]
-        )
+        let target =
+            fileQueryParser
+                .resolveTargetEntity(
+                    userInput
+                )
 
         let relativeDateRange =
             semanticRelativeDateRange(
-                from: corpus
+                from:
+                    normalizeSemanticText(
+                        userInput
+                    )
             )
+
+        let dateField: AgentDateField
+        let normalized =
+            normalizeSemanticText(
+                userInput
+            )
+
+        if containsSemanticAny(
+            normalized,
+            [
+                "degistirilen",
+                "değiştirilen",
+                "modified"
+            ]
+        ) {
+            dateField = .modified
+        } else if containsSemanticAny(
+            normalized,
+            [
+                "olusturulan",
+                "oluşturulan",
+                "created"
+            ]
+        ) {
+            dateField = .created
+        } else {
+            dateField = .either
+        }
 
         return AgentDecision(
             intent: .fileSearch,
             target: target,
             dateRange:
                 relativeDateRange,
-            dateField: .either,
-            sortMode: newest ? .newestFirst : .relevance,
-            route: ["Core", "Goal", "Context", "Files"],
-            goal: mission.objective,
+            dateField:
+                dateField,
+            sortMode:
+                query.sortMode,
+            route: [
+                "Core",
+                "Goal",
+                "Context",
+                "Files"
+            ],
+            goal:
+                mission.objective,
             selectedPlan:
-                "Semantic mission için gerekli yerel dosya kapsamını salt-okunur tara.",
+                query.scopeIsExplicit
+                ? (
+                    query.scope.title +
+                    " kapsamını salt-okunur tara; entity, rank, output ve güvenlik kısıtlarını koru."
+                )
+                : "Seçili çalışma alanında entity, rank, output ve güvenlik kısıtlarını koruyarak salt-okunur ara.",
             alternatives: [],
             proactiveSuggestion: nil,
             usePreviousResults: false,
