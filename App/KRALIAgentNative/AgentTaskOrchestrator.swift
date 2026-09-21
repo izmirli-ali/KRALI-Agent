@@ -316,7 +316,19 @@ struct AgentTaskOrchestrator {
             "go to"
         ]
 
-        let mutationTerms = [
+        let operationCorpus =
+            normalize(operation)
+
+        if operationCorpus.contains(
+            "capability.contract"
+        ) ||
+           operationCorpus.contains(
+            "semantic.fallback"
+        ) {
+            return nil
+        }
+
+        let mutationTokens = Set([
             "send", "gonder",
             "submit", "publish",
             "yayinla", "post",
@@ -326,22 +338,39 @@ struct AgentTaskOrchestrator {
             "onayla", "save",
             "kaydet", "create",
             "olustur", "import",
-            "ice aktar", "ekle",
-            "add", "insert",
-            "yerlestir", "move",
-            "tasi", "rename",
+            "ekle", "add",
+            "insert", "yerlestir",
+            "move", "tasi",
+            "rename", "edit",
+            "duzenle", "change",
+            "degistir", "apply",
+            "uygula", "export",
+            "overwrite"
+        ])
+
+        let mutationPhrases = [
+            "ice aktar",
             "yeniden adlandir",
-            "edit", "duzenle",
-            "change", "degistir",
-            "apply", "uygula",
-            "export", "disa aktar",
-            "overwrite", "uzerine yaz"
+            "disa aktar",
+            "uzerine yaz"
         ]
 
+        let actionTokens =
+            approvalTokens(
+                actionCorpus
+            )
+
         let hasMutation =
-            mutationTerms.contains {
-                actionCorpus.contains($0)
-            }
+            !actionTokens
+                .intersection(
+                    mutationTokens
+                )
+                .isEmpty ||
+            mutationPhrases.contains(
+                where: {
+                    actionCorpus.contains($0)
+                }
+            )
 
         if !hasMutation &&
            harmlessOpenTerms.contains(
