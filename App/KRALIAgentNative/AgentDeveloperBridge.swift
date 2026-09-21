@@ -97,7 +97,8 @@ struct DeveloperAgentStatus: Hashable {
             "sdk_session_completed",
             "provider_platform_bug",
             "recovering_candidate",
-            "candidate_recovered"
+            "candidate_recovered",
+            "candidate_repair_running"
         ].contains(state)
     }
 
@@ -126,6 +127,7 @@ struct DeveloperAgentStatus: Hashable {
             "recovered_candidate_ready",
             "recovered_candidate_build_failed",
             "candidate_recovery_failed",
+            "candidate_repair_failed",
             "failed"
         ].contains(state)
     }
@@ -234,6 +236,10 @@ struct DeveloperAgentStatus: Hashable {
             return "Önceki öğrenme adayı kurtarılıyor"
         case "candidate_recovered":
             return "Aday GitHub'a yedeklendi"
+        case "candidate_repair_running":
+            return "Aday compiler hatasıyla onarılıyor"
+        case "candidate_repair_failed":
+            return "Aday onarımı durdu"
         case "recovered_candidate_ready":
             return "Kurtarılan öğrenme adayı hazır"
         case "recovered_candidate_build_failed":
