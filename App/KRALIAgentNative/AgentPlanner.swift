@@ -49,7 +49,7 @@ struct AgentPlanner {
                     "Kapsamı tara",
                     decision.usePreviousResults
                         ? "Önceki sonuç kümesinde istenen filtreyi uygula."
-                        : "Seçili çalışma alanını salt-okunur tara.",
+                        : decision.selectedPlan,
                     capability: "files.search"
                 )
             )
