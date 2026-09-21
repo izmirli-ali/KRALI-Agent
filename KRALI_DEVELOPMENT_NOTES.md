@@ -88,3 +88,13 @@ KRALİ büyüdükçe tek dosya / tek store / her veriyi sürekli bellekte tutan 
 - Primary Learning card now shows only active queue jobs, the current task's learning plans, and current/reviewable Developer Agent status.
 - Stale Developer Agent sessions and old capability backlog entries no longer dominate the normal Inspector surface.
 - Historical learning data is preserved in storage; this change only reduces default UI noise.
+
+
+## v0.8.60 progress
+
+- Replaced substring-based filename query cleanup with token-based `AgentFileQueryParser`.
+- File search now separates location/scope words from actual filename terms.
+- Desktop / Downloads / Documents / whole-computer intent is parsed independently from filename query.
+- Scope mismatches no longer silently search the wrong selected workspace.
+- Inflected Turkish file/type words are removed at token level without corrupting action words such as `bul`.
+- Added Training Lab regression coverage for Desktop scope, Downloads+PDF scope, and the historical `bu` / `bul` substring bug.
