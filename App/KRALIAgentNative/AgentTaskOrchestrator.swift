@@ -356,3 +356,245 @@ struct AgentTaskOrchestrator {
             )
     }
 }
+
+
+enum AgentRuntimeTaskState:
+    String,
+    Codable,
+    Hashable,
+    Sendable {
+    case queued
+    case planning
+    case ready
+    case running
+    case waitingForResource
+    case waitingForApproval
+    case verifying
+    case completed
+    case failed
+    case paused
+    case cancelled
+}
+
+enum AgentRuntimeResource:
+    String,
+    Codable,
+    Hashable,
+    Sendable,
+    CaseIterable {
+    case foreground
+    case userInteraction
+    case screenObservation
+    case filesystemWrite
+    case network
+}
+
+struct AgentRuntimeTask:
+    Identifiable,
+    Codable,
+    Hashable,
+    Sendable {
+    let id: String
+    let objective: String
+    let priority: Int
+    let createdAt: Date
+    var state: AgentRuntimeTaskState
+    var completedStepIndexes: Set<Int>
+    var runningStepIndexes: Set<Int>
+    var waitingResourceIDs: Set<AgentRuntimeResource>
+
+    init(
+        id: String = UUID().uuidString,
+        objective: String,
+        priority: Int = 0,
+        createdAt: Date = Date(),
+        state: AgentRuntimeTaskState = .queued,
+        completedStepIndexes: Set<Int> = [],
+        runningStepIndexes: Set<Int> = [],
+        waitingResourceIDs: Set<AgentRuntimeResource> = []
+    ) {
+        self.id = id
+        self.objective = objective
+        self.priority = priority
+        self.createdAt = createdAt
+        self.state = state
+        self.completedStepIndexes = completedStepIndexes
+        self.runningStepIndexes = runningStepIndexes
+        self.waitingResourceIDs = waitingResourceIDs
+    }
+}
+
+struct AgentRuntimeResourceLease:
+    Codable,
+    Hashable,
+    Sendable {
+    let resource: AgentRuntimeResource
+    let taskID: String
+}
+
+enum AgentRuntimeResourceDecision:
+    Hashable,
+    Sendable {
+    case acquired([AgentRuntimeResourceLease])
+    case waiting(Set<AgentRuntimeResource>)
+}
+
+struct AgentRuntimeResourceScheduler:
+    Sendable {
+    private(set) var owners:
+        [AgentRuntimeResource: String] = [:]
+
+    mutating func acquire(
+        _ resources: Set<AgentRuntimeResource>,
+        for taskID: String
+    ) -> AgentRuntimeResourceDecision {
+        let blocked =
+            Set(
+                resources.filter { resource in
+                    guard let owner = owners[resource] else {
+                        return false
+                    }
+
+                    return owner != taskID
+                }
+            )
+
+        guard blocked.isEmpty else {
+            return .waiting(blocked)
+        }
+
+        let leases =
+            resources
+                .sorted {
+                    $0.rawValue < $1.rawValue
+                }
+                .map { resource in
+                    owners[resource] = taskID
+
+                    return AgentRuntimeResourceLease(
+                        resource: resource,
+                        taskID: taskID
+                    )
+                }
+
+        return .acquired(leases)
+    }
+
+    mutating func release(
+        taskID: String
+    ) {
+        owners =
+            owners.filter {
+                $0.value != taskID
+            }
+    }
+
+    mutating func release(
+        _ resources: Set<AgentRuntimeResource>,
+        taskID: String
+    ) {
+        for resource in resources
+            where owners[resource] == taskID {
+            owners.removeValue(
+                forKey: resource
+            )
+        }
+    }
+
+    func owner(
+        of resource: AgentRuntimeResource
+    ) -> String? {
+        owners[resource]
+    }
+}
+
+struct AgentTaskRuntimePlanner {
+    func makeTask(
+        graph: AgentTaskGraph,
+        priority: Int = 0
+    ) -> AgentRuntimeTask {
+        AgentRuntimeTask(
+            objective: graph.objective,
+            priority: priority,
+            state: .ready
+        )
+    }
+
+    func readyStepIndexes(
+        graph: AgentTaskGraph,
+        completedStepIndexes:
+            Set<Int>,
+        runningStepIndexes:
+            Set<Int> = []
+    ) -> [Int] {
+        graph.steps
+            .filter { step in
+                !completedStepIndexes
+                    .contains(step.index) &&
+                !runningStepIndexes
+                    .contains(step.index) &&
+                Set(step.dependsOn)
+                    .isSubset(
+                        of:
+                            completedStepIndexes
+                    )
+            }
+            .map(\.index)
+            .sorted()
+    }
+
+    func requiredResources(
+        for step: AgentTaskGraphStep
+    ) -> Set<AgentRuntimeResource> {
+        var resources =
+            Set<AgentRuntimeResource>()
+
+        if step.capabilityID ==
+            "desktop.app" ||
+           step.capabilityID ==
+            "app.workflow" ||
+           step.capabilityID ==
+            "system.open.url" {
+            resources.insert(
+                .foreground
+            )
+        }
+
+        if step.capabilityID ==
+            "perception.screen" {
+            resources.insert(
+                .screenObservation
+            )
+        }
+
+        if step.capabilityID ==
+            "research.web" {
+            resources.insert(
+                .network
+            )
+        }
+
+        if step.capabilityID ==
+            "files.write.text" ||
+           step.capabilityID ==
+            "files.move.reversible" {
+            resources.insert(
+                .filesystemWrite
+            )
+        }
+
+        if step.role == .act &&
+           (
+                step.capabilityID ==
+                    "desktop.app" ||
+                step.capabilityID ==
+                    "app.workflow"
+           ) {
+            resources.insert(
+                .userInteraction
+            )
+        }
+
+        return resources
+    }
+}
