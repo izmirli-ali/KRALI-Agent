@@ -269,8 +269,12 @@ actor AgentDesktopControl {
         let report =
             try await screenPerception.observe(
                 goal:
-                    "Şu web adresinin varsayılan tarayıcıda açıldığını ve görünür sayfa içeriğini salt-okunur doğrula: " +
-                    url.absoluteString
+                    "Şu web adresinin varsayılan tarayıcıda açıldığını ve yalnız hedef tarayıcı penceresindeki görünür sayfa içeriğini salt-okunur doğrula: " +
+                    url.absoluteString,
+                targetBundleIdentifier:
+                    expectedHandlerBundleIdentifier ??
+                    frontmostBeforeObservation?
+                        .bundleIdentifier
             )
 
         let frontmostAfterObservation =
@@ -304,9 +308,17 @@ actor AgentDesktopControl {
                 ""
             )
 
+        let capturedExpectedWindow =
+            expectedHandlerBundleIdentifier == nil ||
+            report
+                .capturedApplicationBundleIdentifier ==
+                expectedHandlerBundleIdentifier
+
         let observationStable =
             sameFrontmostProcess &&
-            reportMatchesFrontmost
+            reportMatchesFrontmost &&
+            capturedExpectedWindow &&
+            report.captureScope == "window"
 
         return DesktopWebActionResult(
             requestedURL:
