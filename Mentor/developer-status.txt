@@ -1,1 +1,1 @@
-stale_run|Önceki Developer Agent oturumu aktif değil veya bu sürüme ait değil.|krali-dev-agent/20260921-225400|/Users/medusa/Developer/KRALI-Agent-Dev-20260921-225400|@meta|app=0.8.84|at=1790021783|run=20260921-225400
+stale_run|Önceki Developer Agent oturumu aktif değil veya bu sürüme ait değil.|krali-dev-agent/20260921-225400|/Users/medusa/Developer/KRALI-Agent-Dev-20260921-225400|@meta|app=0.8.85|at=1790022056|run=20260921-225400

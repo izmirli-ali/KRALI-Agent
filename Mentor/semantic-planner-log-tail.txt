@@ -106,3 +106,9 @@ KRALİ Semantic Planner Fallback
 status=9
 input=Bir video kurgu iş akışında ilk kontrol etmem gereken 3 teknik unsuru kısaca söyle.
 output:
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+KRALİ Semantic Planner Fallback
+status=9
+input=Bir video kurgu iş akışında ilk kontrol etmem gereken 3 teknik unsuru kısaca söyle.
+output:
