@@ -4827,7 +4827,6 @@ final class AgentEngine: ObservableObject {
             return "Önce bir çalışma klasörü seç. Aramayı seçtiğin klasör ve alt klasörlerinde yapacağım."
         }
 
-        let text = normalize(rawText)
         let parsedQuery =
             fileQueryParser.parse(rawText)
 
