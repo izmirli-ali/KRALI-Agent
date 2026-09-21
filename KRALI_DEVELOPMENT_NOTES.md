@@ -79,3 +79,12 @@ KRALİ büyüdükçe tek dosya / tek store / her veriyi sürekli bellekte tutan 
 - Diagnostic report loading moved into `AgentDiagnosticsLoader`.
 - Training / Arena / Screen / Desktop diagnostic JSON files are loaded only when Inspector is opened, except when a prior `no_change` decision requires immediate validation.
 - Legacy in-engine screenshot filename detection was removed after the indexer became the sole owner.
+
+
+## v0.8.59 progress
+
+- Diagnostic / Developer Agent / learning queue presentation state moved out of `AgentEngine` into `AgentInspectorState`.
+- Inspector state changes are forwarded to the existing UI observation path without changing task execution behavior.
+- Primary Learning card now shows only active queue jobs, the current task's learning plans, and current/reviewable Developer Agent status.
+- Stale Developer Agent sessions and old capability backlog entries no longer dominate the normal Inspector surface.
+- Historical learning data is preserved in storage; this change only reduces default UI noise.
