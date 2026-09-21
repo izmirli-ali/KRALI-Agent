@@ -1,1 +1,1 @@
-local_agent_running|Görsel / video algısı (perception.media) yerel model çalışıyor • adım 1/16|krali-dev-agent/20260921-212222|/Users/medusa/Developer/KRALI-Agent-Dev-20260921-212222|@meta|app=0.8.72|at=1790014946|run=20260921-212222
+local_agent_running|Uygulama içi iş akışı (app.workflow) yerel model çalışıyor • adım 1/10|krali-dev-agent/20260921-214738|/Users/medusa/Developer/KRALI-Agent-Dev-20260921-214738|@meta|app=0.8.73|at=1790016461|run=20260921-214738

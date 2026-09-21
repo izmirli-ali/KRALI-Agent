@@ -1,107 +1,3 @@
-Already up to date.
-Learning Queue job brief bulundu; mutable Mentor latest yerine immutable job kullanılacak.
-Preparing worktree (new branch 'krali-dev-agent/20260921-202545')
-branch 'krali-dev-agent/20260921-202545' set up to track 'origin/main'.
-HEAD is now at d4cc4a8 v0.8.68: bump version
-Developer prompt mode: gap • 3961 bytes
-KRALI_LOCAL_STAGE local_agent_starting • Tarayıcı kontrolü (browser.control) native Ollama agent başlatılıyor: devstral:24b
-KRALI_LOCAL_STAGE local_agent_running • Tarayıcı kontrolü (browser.control) yerel model çalışıyor • adım 1/16
-KRALI_LOCAL_STAGE local_agent_tool • Tarayıcı kontrolü (browser.control) araç çalışıyor: search_codebase
-KRALI_LOCAL_STAGE local_agent_running • Tarayıcı kontrolü (browser.control) yerel model çalışıyor • adım 2/16
-KRALI_LOCAL_STAGE local_agent_tool • Tarayıcı kontrolü (browser.control) araç çalışıyor: read_file
-KRALI_LOCAL_STAGE local_agent_running • Tarayıcı kontrolü (browser.control) yerel model çalışıyor • adım 3/16
-KRALI_LOCAL_STAGE local_agent_request_retry • Tarayıcı kontrolü (browser.control) model isteği zaman aşımına uğradı; mevcut context korunarak retry 1/2
-KRALI_LOCAL_STAGE local_agent_running • Tarayıcı kontrolü (browser.control) yerel model çalışıyor • adım 4/16
-KRALI_LOCAL_STAGE local_agent_tool • Tarayıcı kontrolü (browser.control) araç çalışıyor: list_files
-KRALI_LOCAL_STAGE local_agent_running • Tarayıcı kontrolü (browser.control) yerel model çalışıyor • adım 5/16
-KRALI_LOCAL_STAGE local_agent_tool • Tarayıcı kontrolü (browser.control) araç çalışıyor: search_codebase
-KRALI_LOCAL_STAGE local_agent_running • Tarayıcı kontrolü (browser.control) yerel model çalışıyor • adım 6/16
-KRALI_LOCAL_STAGE local_agent_tool • Tarayıcı kontrolü (browser.control) araç çalışıyor: read_file
-KRALI_LOCAL_STAGE local_agent_running • Tarayıcı kontrolü (browser.control) yerel model çalışıyor • adım 7/16
-KRALI_LOCAL_STAGE local_agent_request_retry • Tarayıcı kontrolü (browser.control) model isteği zaman aşımına uğradı; mevcut context korunarak retry 1/2
-Tarayıcı kontrolü (browser.control) native local agent toplam zaman sınırına ulaştı.
-KRALI_LOCAL_STAGE local_agent_starting • Tarayıcı kontrolü (browser.control) native Ollama agent başlatılıyor: devstral:24b
-KRALI_LOCAL_STAGE local_agent_running • Tarayıcı kontrolü (browser.control) yerel model çalışıyor • adım 1/16
-KRALI_LOCAL_STAGE local_agent_tool • Tarayıcı kontrolü (browser.control) araç çalışıyor: search_codebase
-KRALI_LOCAL_STAGE local_agent_running • Tarayıcı kontrolü (browser.control) yerel model çalışıyor • adım 2/16
-KRALI_LOCAL_STAGE local_agent_tool • Tarayıcı kontrolü (browser.control) araç çalışıyor: read_file
-KRALI_LOCAL_STAGE local_agent_running • Tarayıcı kontrolü (browser.control) yerel model çalışıyor • adım 3/16
-KRALI_LOCAL_STAGE local_agent_request_retry • Tarayıcı kontrolü (browser.control) model isteği zaman aşımına uğradı; mevcut context korunarak retry 1/2
-KRALI_LOCAL_STAGE local_agent_running • Tarayıcı kontrolü (browser.control) yerel model çalışıyor • adım 4/16
-KRALI_LOCAL_STAGE local_agent_tool • Tarayıcı kontrolü (browser.control) araç çalışıyor: list_files
-KRALI_LOCAL_STAGE local_agent_running • Tarayıcı kontrolü (browser.control) yerel model çalışıyor • adım 5/16
-KRALI_LOCAL_STAGE local_agent_tool • Tarayıcı kontrolü (browser.control) araç çalışıyor: search_codebase
-KRALI_LOCAL_STAGE local_agent_running • Tarayıcı kontrolü (browser.control) yerel model çalışıyor • adım 6/16
-KRALI_LOCAL_STAGE local_agent_tool • Tarayıcı kontrolü (browser.control) araç çalışıyor: read_file
-KRALI_LOCAL_STAGE local_agent_running • Tarayıcı kontrolü (browser.control) yerel model çalışıyor • adım 7/16
-KRALI_LOCAL_STAGE local_agent_request_retry • Tarayıcı kontrolü (browser.control) model isteği zaman aşımına uğradı; mevcut context korunarak retry 1/2
-Tarayıcı kontrolü (browser.control) native local agent toplam zaman sınırına ulaştı.
-Deleted branch krali-dev-agent/20260921-202545 (was d4cc4a8).
-❌ Native yerel Developer Agent durdu: Tarayıcı kontrolü (browser.control) native local agent toplam zaman sınırına ulaştı.
-
-━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
- KRALİ DEVELOPER AGENT
- 20260921-205819
-━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-⚠️ Global Node.js v26 Cline bağımlılıklarıyla uyumlu değil; izole Node 22 runtime hazırlanıyor.
-✅ Developer Agent runtime: v22.23.2
-⚡ Tool-capable model cache kullanılıyor: devstral:24b • yaş=1931s
-Yerel model seçimi: devstral:24b • RAM≈24GB
-✅ Yerel Developer AI hazır + tool-call doğrulandı: devstral:24b
-From https://github.com/izmirli-ali/KRALI-Agent
- * branch            main       -> FETCH_HEAD
-Already up to date.
-Learning Queue job brief bulundu; mutable Mentor latest yerine immutable job kullanılacak.
-Preparing worktree (new branch 'krali-dev-agent/20260921-205819')
-branch 'krali-dev-agent/20260921-205819' set up to track 'origin/main'.
-HEAD is now at cea3386 v0.8.70: bump build to 120
-Developer prompt mode: gap • 3799 bytes
-KRALI_LOCAL_STAGE local_agent_starting • Tarayıcı kontrolü (browser.control) native Ollama agent başlatılıyor: devstral:24b
-KRALI_LOCAL_STAGE local_agent_running • Tarayıcı kontrolü (browser.control) yerel model çalışıyor • adım 1/16
-KRALI_LOCAL_STAGE local_agent_tool • Tarayıcı kontrolü (browser.control) araç çalışıyor: search_codebase
-KRALI_LOCAL_STAGE local_agent_running • Tarayıcı kontrolü (browser.control) yerel model çalışıyor • adım 2/16
-KRALI_LOCAL_STAGE local_agent_tool • Tarayıcı kontrolü (browser.control) araç çalışıyor: search_codebase
-KRALI_LOCAL_STAGE local_agent_running • Tarayıcı kontrolü (browser.control) yerel model çalışıyor • adım 3/16
-KRALI_LOCAL_STAGE local_agent_tool • Tarayıcı kontrolü (browser.control) araç çalışıyor: list_files
-KRALI_LOCAL_STAGE local_agent_running • Tarayıcı kontrolü (browser.control) yerel model çalışıyor • adım 4/16
-KRALI_LOCAL_STAGE local_agent_tool • Tarayıcı kontrolü (browser.control) araç çalışıyor: list_files
-KRALI_LOCAL_STAGE local_agent_running • Tarayıcı kontrolü (browser.control) yerel model çalışıyor • adım 5/16
-KRALI_LOCAL_STAGE local_agent_tool • Tarayıcı kontrolü (browser.control) araç çalışıyor: list_files
-KRALI_LOCAL_STAGE local_agent_running • Tarayıcı kontrolü (browser.control) yerel model çalışıyor • adım 6/16
-KRALI_LOCAL_STAGE local_agent_tool • Tarayıcı kontrolü (browser.control) araç çalışıyor: list_files
-KRALI_LOCAL_STAGE local_agent_running • Tarayıcı kontrolü (browser.control) yerel model çalışıyor • adım 7/16
-The specified directories (Training, Live, Arena) containing JSON files do not exist in the current worktree. I will now search for any files containing "browser.control" or "web-navigation" in the entire codebase to locate relevant code.
-KRALI_LOCAL_STAGE local_agent_completion_rejected • Tarayıcı kontrolü (browser.control) tamamlanma reddedildi • aktif capability gap için gerçek candidate değişikliği yok • deneme=1/3
-KRALI_LOCAL_STAGE local_agent_running • Tarayıcı kontrolü (browser.control) yerel model çalışıyor • adım 8/16
-I understand. Let me continue the investigation by searching for any files containing "browser" or "navigation" in the entire codebase to locate relevant code for the browser control capability.
-KRALI_LOCAL_STAGE local_agent_completion_rejected • Tarayıcı kontrolü (browser.control) tamamlanma reddedildi • aktif capability gap için gerçek candidate değişikliği yok • deneme=2/3
-Tarayıcı kontrolü (browser.control) native local agent toplam zaman sınırına ulaştı.
-KRALI_LOCAL_STAGE local_agent_starting • Tarayıcı kontrolü (browser.control) native Ollama agent başlatılıyor: devstral:24b
-KRALI_LOCAL_STAGE local_agent_running • Tarayıcı kontrolü (browser.control) yerel model çalışıyor • adım 1/16
-KRALI_LOCAL_STAGE local_agent_tool • Tarayıcı kontrolü (browser.control) araç çalışıyor: search_codebase
-KRALI_LOCAL_STAGE local_agent_running • Tarayıcı kontrolü (browser.control) yerel model çalışıyor • adım 2/16
-KRALI_LOCAL_STAGE local_agent_tool • Tarayıcı kontrolü (browser.control) araç çalışıyor: search_codebase
-KRALI_LOCAL_STAGE local_agent_running • Tarayıcı kontrolü (browser.control) yerel model çalışıyor • adım 3/16
-KRALI_LOCAL_STAGE local_agent_tool • Tarayıcı kontrolü (browser.control) araç çalışıyor: list_files
-KRALI_LOCAL_STAGE local_agent_running • Tarayıcı kontrolü (browser.control) yerel model çalışıyor • adım 4/16
-KRALI_LOCAL_STAGE local_agent_tool • Tarayıcı kontrolü (browser.control) araç çalışıyor: list_files
-KRALI_LOCAL_STAGE local_agent_running • Tarayıcı kontrolü (browser.control) yerel model çalışıyor • adım 5/16
-KRALI_LOCAL_STAGE local_agent_tool • Tarayıcı kontrolü (browser.control) araç çalışıyor: list_files
-KRALI_LOCAL_STAGE local_agent_running • Tarayıcı kontrolü (browser.control) yerel model çalışıyor • adım 6/16
-KRALI_LOCAL_STAGE local_agent_tool • Tarayıcı kontrolü (browser.control) araç çalışıyor: list_files
-KRALI_LOCAL_STAGE local_agent_running • Tarayıcı kontrolü (browser.control) yerel model çalışıyor • adım 7/16
-The specified directories (Training, Live, Arena) containing JSON files do not exist in the current worktree. I will now search for any files containing "browser.control" or "web-navigation" in the entire codebase to locate relevant code.
-KRALI_LOCAL_STAGE local_agent_completion_rejected • Tarayıcı kontrolü (browser.control) tamamlanma reddedildi • aktif capability gap için gerçek candidate değişikliği yok • deneme=1/3
-KRALI_LOCAL_STAGE local_agent_running • Tarayıcı kontrolü (browser.control) yerel model çalışıyor • adım 8/16
-I understand. Let me continue the investigation by searching for any files containing "browser" or "navigation" in the entire codebase to locate relevant code for the browser control capability.
-KRALI_LOCAL_STAGE local_agent_completion_rejected • Tarayıcı kontrolü (browser.control) tamamlanma reddedildi • aktif capability gap için gerçek candidate değişikliği yok • deneme=2/3
-Tarayıcı kontrolü (browser.control) native local agent toplam zaman sınırına ulaştı.
-Deleted branch krali-dev-agent/20260921-205819 (was cea3386).
-❌ Native yerel Developer Agent durdu: Tarayıcı kontrolü (browser.control) native local agent toplam zaman sınırına ulaştı.
-
-━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
- KRALİ DEVELOPER AGENT
- 20260921-212222
 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 ⚠️ Global Node.js v26 Cline bağımlılıklarıyla uyumlu değil; izole Node 22 runtime hazırlanıyor.
 ✅ Developer Agent runtime: v22.23.2
@@ -118,3 +14,107 @@ HEAD is now at cbf06e8 v0.8.72: bump build to 122
 Developer prompt mode: gap • 3490 bytes
 KRALI_LOCAL_STAGE local_agent_starting • Görsel / video algısı (perception.media) native Ollama agent başlatılıyor: devstral:24b
 KRALI_LOCAL_STAGE local_agent_running • Görsel / video algısı (perception.media) yerel model çalışıyor • adım 1/16
+KRALI_LOCAL_STAGE local_agent_tool • Görsel / video algısı (perception.media) araç çalışıyor: search_codebase
+KRALI_LOCAL_STAGE local_agent_running • Görsel / video algısı (perception.media) yerel model çalışıyor • adım 2/16
+KRALI_LOCAL_STAGE local_agent_tool • Görsel / video algısı (perception.media) araç çalışıyor: read_file
+KRALI_LOCAL_STAGE local_agent_running • Görsel / video algısı (perception.media) yerel model çalışıyor • adım 3/16
+KRALI_LOCAL_STAGE local_agent_request_retry • Görsel / video algısı (perception.media) model isteği zaman aşımına uğradı; mevcut context korunarak retry 1/2
+KRALI_LOCAL_STAGE local_agent_running • Görsel / video algısı (perception.media) yerel model çalışıyor • adım 4/16
+KRALI_LOCAL_STAGE local_agent_tool • Görsel / video algısı (perception.media) araç çalışıyor: git_status
+KRALI_LOCAL_STAGE local_agent_running • Görsel / video algısı (perception.media) yerel model çalışıyor • adım 5/16
+KRALI_LOCAL_STAGE local_agent_tool • Görsel / video algısı (perception.media) araç çalışıyor: list_files
+KRALI_LOCAL_STAGE local_agent_running • Görsel / video algısı (perception.media) yerel model çalışıyor • adım 6/16
+I see this is a Swift-based codebase for a native KRALI agent. Let me search for code related to timeouts or request handling. I'll look for relevant terms.
+KRALI_LOCAL_STAGE local_agent_completion_rejected • Görsel / video algısı (perception.media) tamamlanma reddedildi • aktif capability gap için gerçek candidate değişikliği yok • deneme=1/3
+KRALI_LOCAL_STAGE local_agent_running • Görsel / video algısı (perception.media) yerel model çalışıyor • adım 7/16
+KRALI_LOCAL_STAGE local_agent_request_retry • Görsel / video algısı (perception.media) model isteği zaman aşımına uğradı; mevcut context korunarak retry 1/2
+Görsel / video algısı (perception.media) native local agent toplam zaman sınırına ulaştı.
+KRALI_LOCAL_STAGE local_agent_starting • Görsel / video algısı (perception.media) native Ollama agent başlatılıyor: devstral:24b
+KRALI_LOCAL_STAGE local_agent_running • Görsel / video algısı (perception.media) yerel model çalışıyor • adım 1/16
+KRALI_LOCAL_STAGE local_agent_tool • Görsel / video algısı (perception.media) araç çalışıyor: search_codebase
+KRALI_LOCAL_STAGE local_agent_running • Görsel / video algısı (perception.media) yerel model çalışıyor • adım 2/16
+KRALI_LOCAL_STAGE local_agent_tool • Görsel / video algısı (perception.media) araç çalışıyor: read_file
+KRALI_LOCAL_STAGE local_agent_running • Görsel / video algısı (perception.media) yerel model çalışıyor • adım 3/16
+KRALI_LOCAL_STAGE local_agent_request_retry • Görsel / video algısı (perception.media) model isteği zaman aşımına uğradı; mevcut context korunarak retry 1/2
+KRALI_LOCAL_STAGE local_agent_running • Görsel / video algısı (perception.media) yerel model çalışıyor • adım 4/16
+KRALI_LOCAL_STAGE local_agent_tool • Görsel / video algısı (perception.media) araç çalışıyor: git_status
+KRALI_LOCAL_STAGE local_agent_running • Görsel / video algısı (perception.media) yerel model çalışıyor • adım 5/16
+KRALI_LOCAL_STAGE local_agent_tool • Görsel / video algısı (perception.media) araç çalışıyor: list_files
+KRALI_LOCAL_STAGE local_agent_running • Görsel / video algısı (perception.media) yerel model çalışıyor • adım 6/16
+I see this is a Swift-based codebase for a native KRALI agent. Let me search for code related to timeouts or request handling. I'll look for relevant terms.
+KRALI_LOCAL_STAGE local_agent_completion_rejected • Görsel / video algısı (perception.media) tamamlanma reddedildi • aktif capability gap için gerçek candidate değişikliği yok • deneme=1/3
+KRALI_LOCAL_STAGE local_agent_running • Görsel / video algısı (perception.media) yerel model çalışıyor • adım 7/16
+KRALI_LOCAL_STAGE local_agent_request_retry • Görsel / video algısı (perception.media) model isteği zaman aşımına uğradı; mevcut context korunarak retry 1/2
+Görsel / video algısı (perception.media) native local agent toplam zaman sınırına ulaştı.
+Deleted branch krali-dev-agent/20260921-212222 (was cbf06e8).
+❌ Native yerel Developer Agent durdu: Görsel / video algısı (perception.media) native local agent toplam zaman sınırına ulaştı.
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+ KRALİ DEVELOPER AGENT
+ 20260921-212726
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+⚠️ Global Node.js v26 Cline bağımlılıklarıyla uyumlu değil; izole Node 22 runtime hazırlanıyor.
+✅ Developer Agent runtime: v22.23.2
+⚡ Tool-capable model cache kullanılıyor: devstral:24b • yaş=3679s
+Yerel model seçimi: devstral:24b • RAM≈24GB
+✅ Yerel Developer AI hazır + tool-call doğrulandı: devstral:24b
+From https://github.com/izmirli-ali/KRALI-Agent
+ * branch            main       -> FETCH_HEAD
+   7dd5e30..ba7ad1d  main       -> origin/main
+Updating 7dd5e30..ba7ad1d
+Fast-forward
+ .../AgentCapabilityGapResolver.swift               | 90 ++++++++++++++++++++--
+ App/KRALIAgentNative/AgentGoalInterpreter.swift    | 35 ++++++++-
+ App/KRALIAgentNative/AgentTaskOrchestrator.swift   | 55 +++++++++----
+ 3 files changed, 155 insertions(+), 25 deletions(-)
+Learning Queue job brief bulundu; mutable Mentor latest yerine immutable job kullanılacak.
+Preparing worktree (new branch 'krali-dev-agent/20260921-212726')
+branch 'krali-dev-agent/20260921-212726' set up to track 'origin/main'.
+HEAD is now at ba7ad1d v0.8.73: preserve generic in-app interaction goals
+Developer prompt mode: gap • 3487 bytes
+KRALI_LOCAL_STAGE local_agent_starting • Premiere kontrolü (premiere.control) native Ollama agent başlatılıyor: devstral:24b
+KRALI_LOCAL_STAGE local_agent_running • Premiere kontrolü (premiere.control) yerel model çalışıyor • adım 1/16
+KRALI_LOCAL_STAGE local_agent_tool • Premiere kontrolü (premiere.control) araç çalışıyor: search_codebase
+KRALI_LOCAL_STAGE local_agent_running • Premiere kontrolü (premiere.control) yerel model çalışıyor • adım 2/16
+[{"name": "read_file", "arguments": {"file_path": "App/KRALIAgentNative/AgentCapabilities.swift"}}]
+KRALI_LOCAL_STAGE local_agent_completion_rejected • Premiere kontrolü (premiere.control) tamamlanma reddedildi • aktif capability gap için gerçek candidate değişikliği yok • deneme=1/3
+KRALI_LOCAL_STAGE local_agent_running • Premiere kontrolü (premiere.control) yerel model çalışıyor • adım 3/16
+[{"name": "read_file", "arguments": {"file_path": "App/KRALIAgentNative/AgentCapabilities.swift"}}]
+KRALI_LOCAL_STAGE local_agent_structured_tool • Premiere kontrolü (premiere.control) yapılandırılmış devam aracı çalışıyor: read_file
+KRALI_LOCAL_STAGE local_agent_running • Premiere kontrolü (premiere.control) yerel model çalışıyor • adım 4/16
+KRALI_LOCAL_STAGE local_agent_request_retry • Premiere kontrolü (premiere.control) model isteği zaman aşımına uğradı; mevcut context korunarak retry 1/2
+Premiere kontrolü (premiere.control) native local agent toplam zaman sınırına ulaştı.
+KRALI_LOCAL_STAGE local_agent_starting • Premiere kontrolü (premiere.control) native Ollama agent başlatılıyor: devstral:24b
+KRALI_LOCAL_STAGE local_agent_running • Premiere kontrolü (premiere.control) yerel model çalışıyor • adım 1/16
+KRALI_LOCAL_STAGE local_agent_tool • Premiere kontrolü (premiere.control) araç çalışıyor: search_codebase
+KRALI_LOCAL_STAGE local_agent_running • Premiere kontrolü (premiere.control) yerel model çalışıyor • adım 2/16
+[{"name": "read_file", "arguments": {"file_path": "App/KRALIAgentNative/AgentCapabilities.swift"}}]
+KRALI_LOCAL_STAGE local_agent_completion_rejected • Premiere kontrolü (premiere.control) tamamlanma reddedildi • aktif capability gap için gerçek candidate değişikliği yok • deneme=1/3
+KRALI_LOCAL_STAGE local_agent_running • Premiere kontrolü (premiere.control) yerel model çalışıyor • adım 3/16
+[{"name": "read_file", "arguments": {"file_path": "App/KRALIAgentNative/AgentCapabilities.swift"}}]
+KRALI_LOCAL_STAGE local_agent_structured_tool • Premiere kontrolü (premiere.control) yapılandırılmış devam aracı çalışıyor: read_file
+KRALI_LOCAL_STAGE local_agent_running • Premiere kontrolü (premiere.control) yerel model çalışıyor • adım 4/16
+KRALI_LOCAL_STAGE local_agent_request_retry • Premiere kontrolü (premiere.control) model isteği zaman aşımına uğradı; mevcut context korunarak retry 1/2
+Premiere kontrolü (premiere.control) native local agent toplam zaman sınırına ulaştı.
+Deleted branch krali-dev-agent/20260921-212726 (was ba7ad1d).
+❌ Native yerel Developer Agent durdu: Premiere kontrolü (premiere.control) native local agent toplam zaman sınırına ulaştı.
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+ KRALİ DEVELOPER AGENT
+ 20260921-214738
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+⚠️ Global Node.js v26 Cline bağımlılıklarıyla uyumlu değil; izole Node 22 runtime hazırlanıyor.
+✅ Developer Agent runtime: v22.23.2
+⚡ Tool-capable model cache kullanılıyor: devstral:24b • yaş=4890s
+Yerel model seçimi: devstral:24b • RAM≈24GB
+✅ Yerel Developer AI hazır + tool-call doğrulandı: devstral:24b
+From https://github.com/izmirli-ali/KRALI-Agent
+ * branch            main       -> FETCH_HEAD
+Already up to date.
+Learning Queue job brief bulundu; mutable Mentor latest yerine immutable job kullanılacak.
+Preparing worktree (new branch 'krali-dev-agent/20260921-214738')
+branch 'krali-dev-agent/20260921-214738' set up to track 'origin/main'.
+HEAD is now at 359b47e v0.8.73: bump build to 123
+Developer prompt mode: gap • 3807 bytes
+KRALI_LOCAL_STAGE local_agent_starting • Uygulama içi iş akışı (app.workflow) native Ollama agent başlatılıyor: devstral:24b
+KRALI_LOCAL_STAGE local_agent_running • Uygulama içi iş akışı (app.workflow) yerel model çalışıyor • adım 1/10

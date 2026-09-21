@@ -1,1 +1,1 @@
-runtime|app=Adobe Premiere Pro 2026|activate=true|frontmost=true|source=ScreenCaptureKit z-order
+runtime|app=Finder|activate=true|frontmost=true|source=activation recovery + AX raise + ScreenCaptureKit z-order
