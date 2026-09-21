@@ -4827,8 +4827,6 @@ final class AgentEngine: ObservableObject {
             return "Önce bir çalışma klasörü seç. Aramayı seçtiğin klasör ve alt klasörlerinde yapacağım."
         }
 
-        ensureWorkspaceIndexed()
-
         let text = normalize(rawText)
         let parsedQuery =
             fileQueryParser.parse(rawText)
@@ -4850,6 +4848,8 @@ final class AgentEngine: ObservableObject {
             )
             return scopeIssue
         }
+
+        ensureWorkspaceIndexed()
 
         let imageExtensions = Set(["png", "jpg", "jpeg", "heic", "tif", "tiff", "webp", "gif"])
         let videoExtensions = Set(["mov", "mp4", "m4v", "avi", "mkv", "webm", "mts", "m2ts"])
