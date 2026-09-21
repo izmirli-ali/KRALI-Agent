@@ -6833,9 +6833,23 @@ final class AgentEngine: ObservableObject {
         for rawText: String,
         decision: AgentDecision
     ) -> String {
-        guard selectedRootURL != nil else {
+        let parsedQuery =
+            fileQueryParser.parse(
+                rawText
+            )
+
+        if !parsedQuery.scopeIsExplicit,
+           selectedRootURL == nil {
             fileSearchResults = []
-            return "Bu çok adımlı görev için önce bir çalışma klasörü seçmeliyim."
+            return "Bu çok adımlı görevde konum belirtilmediği için önce bir varsayılan çalışma klasörü seçmeliyim."
+        }
+
+        if parsedQuery.scopeIsExplicit {
+            log(
+                "Compound File Task explicit scope kullanıyor • " +
+                parsedQuery.scope.title +
+                " • selectedWorkspace override edilmedi"
+            )
         }
 
         let searchDecision = AgentDecision(
