@@ -1673,15 +1673,45 @@ final class AgentEngine: ObservableObject {
                         evidence: stepEvidence
                     )
 
-            guard let capability =
+            let primaryCapabilityAvailable =
                 selectedCapabilities.first(
                     where: {
                         $0.id ==
                             step.capabilityID
                     }
-                ),
-                capability.isAvailable
-            else {
+                )?.isAvailable == true
+
+            if !primaryCapabilityAvailable {
+                if let fallback =
+                    await executeProblemSolverFallback(
+                        graphStep: graphStep,
+                        missionStep: step,
+                        mission: mission,
+                        dependencyEvidence:
+                            dependencyEvidence,
+                        userInput: userInput,
+                        attemptedStrategyIDs: []
+                    ) {
+                    stepEvidence[stepIndex] =
+                        fallback.evidence
+                    outputs.append(
+                        fallback.output
+                    )
+                    executed.formUnion(
+                        fallback.executedCapabilityIDs
+                    )
+                    completedStepIndexes.insert(
+                        stepIndex
+                    )
+                    currentReflectionSummary =
+                        fallback.reflection
+
+                    log(
+                        "Problem Solver fallback tamamlandı: " +
+                        fallback.strategyTitle
+                    )
+                }
+
                 continue
             }
 
@@ -2273,10 +2303,44 @@ final class AgentEngine: ObservableObject {
                 }
 
             default:
-                // Provider henüz bağlı değilse step task graph içinde
-                // blocked kalır. Başka capability o işi yapılmış gibi
-                // taklit etmez.
                 break
+            }
+
+            if !completedStepIndexes.contains(
+                stepIndex
+            ),
+               !graphStep.requiresApproval,
+               let fallback =
+                await executeProblemSolverFallback(
+                    graphStep: graphStep,
+                    missionStep: step,
+                    mission: mission,
+                    dependencyEvidence:
+                        dependencyEvidence,
+                    userInput: userInput,
+                    attemptedStrategyIDs: [
+                        "primary:" +
+                        step.capabilityID
+                    ]
+                ) {
+                stepEvidence[stepIndex] =
+                    fallback.evidence
+                outputs.append(
+                    fallback.output
+                )
+                executed.formUnion(
+                    fallback.executedCapabilityIDs
+                )
+                completedStepIndexes.insert(
+                    stepIndex
+                )
+                currentReflectionSummary =
+                    fallback.reflection
+
+                log(
+                    "Problem Solver reflection recovery tamamlandı: " +
+                    fallback.strategyTitle
+                )
             }
         }
 
@@ -2300,6 +2364,275 @@ final class AgentEngine: ObservableObject {
             completedStepIndexes:
                 completedStepIndexes
         )
+    }
+
+    private struct ProblemSolverFallbackResult {
+        let strategyTitle: String
+        let evidence: String
+        let output: String
+        let executedCapabilityIDs: Set<String>
+        let reflection: String
+    }
+
+    private func executeProblemSolverFallback(
+        graphStep: AgentTaskGraphStep,
+        missionStep: AgentSemanticMissionStep,
+        mission: AgentSemanticMission,
+        dependencyEvidence: String,
+        userInput: String,
+        attemptedStrategyIDs: [String]
+    ) async -> ProblemSolverFallbackResult? {
+        let resolution =
+            problemSolver.reflection(
+                step: graphStep,
+                attemptedStrategyIDs:
+                    attemptedStrategyIDs,
+                dependencyEvidence:
+                    dependencyEvidence,
+                capabilities:
+                    capabilityRegistry.all
+            )
+
+        currentProblemResolution =
+            resolution
+        currentReflectionSummary =
+            resolution.reflection
+
+        guard
+            let strategy =
+                resolution.chosenStrategy,
+            strategy.executableNow,
+            !strategy.requiresLearning,
+            strategy.kind != .primary
+        else {
+            return nil
+        }
+
+        log(
+            "Problem Solver reflection: " +
+            (resolution.reflection ??
+                "Alternatif strateji seçildi")
+        )
+        log(
+            "Problem Solver stratejisi: " +
+            strategy.title +
+            " • " +
+            strategy.rationale
+        )
+
+        switch strategy.kind {
+        case .reuseEvidence:
+            let evidence =
+                dependencyEvidence
+                    .trimmingCharacters(
+                        in:
+                            .whitespacesAndNewlines
+                    )
+
+            guard !evidence.isEmpty else {
+                return nil
+            }
+
+            return ProblemSolverFallbackResult(
+                strategyTitle:
+                    strategy.title,
+                evidence: evidence,
+                output:
+                    "Mevcut doğrulanmış kanıtı yeniden kullanarak adımı tamamladım.",
+                executedCapabilityIDs:
+                    Set(strategy.capabilityIDs),
+                reflection:
+                    resolution.reflection ??
+                    strategy.rationale
+            )
+
+        case .screenObservation:
+            do {
+                let report =
+                    try await screenPerception
+                        .observe(
+                            goal:
+                                [
+                                    mission.objective,
+                                    missionStep.title,
+                                    missionStep.purpose,
+                                    dependencyEvidence
+                                ]
+                                .filter {
+                                    !$0
+                                        .trimmingCharacters(
+                                            in:
+                                                .whitespacesAndNewlines
+                                        )
+                                        .isEmpty
+                                }
+                                .joined(
+                                    separator: "\n"
+                                )
+                        )
+
+                let evidence =
+                    report.semanticSummary
+
+                return ProblemSolverFallbackResult(
+                    strategyTitle:
+                        strategy.title,
+                    evidence: evidence,
+                    output:
+                        "Alternatif ekran gözlemi:\n" +
+                        evidence,
+                    executedCapabilityIDs:
+                        Set(strategy.capabilityIDs),
+                    reflection:
+                        resolution.reflection ??
+                        strategy.rationale
+                )
+            } catch {
+                log(
+                    "Problem Solver screen fallback başarısız: " +
+                    error.localizedDescription
+                )
+                return nil
+            }
+
+        case .genericAppWorkflow:
+            do {
+                let result =
+                    try await appWorkflowStrategy
+                        .execute(
+                            objective:
+                                mission.objective,
+                            stepTitle:
+                                missionStep.title,
+                            stepPurpose:
+                                missionStep.purpose,
+                            dependencyEvidence:
+                                dependencyEvidence
+                        )
+
+                let evidence = [
+                    "Öndeki uygulama: " +
+                        result.frontmostApplication,
+                    result.observationEvidence,
+                    result.workflowOutput,
+                    "Dış değişiklik uygulandı: hayır"
+                ]
+                .joined(separator: "\n\n")
+
+                return ProblemSolverFallbackResult(
+                    strategyTitle:
+                        strategy.title,
+                    evidence: evidence,
+                    output:
+                        result.workflowOutput,
+                    executedCapabilityIDs:
+                        Set(strategy.capabilityIDs),
+                    reflection:
+                        resolution.reflection ??
+                        strategy.rationale
+                )
+            } catch {
+                log(
+                    "Problem Solver app workflow fallback başarısız: " +
+                    error.localizedDescription
+                )
+                return nil
+            }
+
+        case .publicResearch:
+            let composedQuery = [
+                mission.objective,
+                missionStep.title,
+                missionStep.purpose,
+                dependencyEvidence,
+                userInput
+            ]
+            .filter {
+                !$0
+                    .trimmingCharacters(
+                        in:
+                            .whitespacesAndNewlines
+                    )
+                    .isEmpty
+            }
+            .joined(separator: "\n")
+
+            let reply =
+                await performWebResearch(
+                    query:
+                        webResearchQuery(
+                            from:
+                                String(
+                                    composedQuery
+                                        .prefix(4_000)
+                                )
+                        )
+                )
+
+            guard
+                !webResearchResults.isEmpty ||
+                !webResearchEvidence.isEmpty
+            else {
+                return nil
+            }
+
+            return ProblemSolverFallbackResult(
+                strategyTitle:
+                    strategy.title,
+                evidence: reply,
+                output: reply,
+                executedCapabilityIDs:
+                    Set(strategy.capabilityIDs),
+                reflection:
+                    resolution.reflection ??
+                    strategy.rationale
+            )
+
+        case .reasoningTransform:
+            guard
+                !dependencyEvidence
+                    .trimmingCharacters(
+                        in:
+                            .whitespacesAndNewlines
+                    )
+                    .isEmpty
+            else {
+                return nil
+            }
+
+            if let reasoning =
+                await localIntelligence
+                    .executeReasoningStep(
+                        goal:
+                            mission.objective,
+                        title:
+                            missionStep.title,
+                        purpose:
+                            missionStep.purpose,
+                        operation:
+                            missionStep.operation,
+                        dependencyEvidence:
+                            dependencyEvidence
+                    ) {
+                return ProblemSolverFallbackResult(
+                    strategyTitle:
+                        strategy.title,
+                    evidence: reasoning,
+                    output: reasoning,
+                    executedCapabilityIDs:
+                        Set(strategy.capabilityIDs),
+                    reflection:
+                        resolution.reflection ??
+                        strategy.rationale
+                )
+            }
+
+            return nil
+
+        case .primary,
+             .learning:
+            return nil
+        }
     }
 
     private func semanticFileSearchDecision(
