@@ -13,6 +13,8 @@ const branchName = process.env.KRALI_BRANCH || "";
 const gapLabel = process.env.KRALI_GAP_LABEL || "Capability";
 const appVersion = process.env.KRALI_APP_VERSION || "unknown";
 const runID = process.env.KRALI_RUN_ID || "";
+const checkpointFile =
+  process.env.KRALI_CHECKPOINT_FILE || "";
 const requireChange =
   (process.env.KRALI_REQUIRE_CHANGE || "0") === "1";
 const maxCompletionRejections = Number(
@@ -665,6 +667,8 @@ let structuredActions = 0;
 let inspectionToolCalls = 0;
 let implementationPhaseAnnounced = false;
 let consecutiveRequestTimeouts = 0;
+let checkpointEvidence = [];
+let resumedFromCheckpoint = false;
 
 const inspectionToolNames = new Set([
   "list_files",
@@ -683,6 +687,120 @@ function developmentPhase() {
     return "implementation";
   }
   return "inspection";
+}
+
+function persistCheckpoint(reason = "progress") {
+  if (!checkpointFile) return;
+
+  const status = candidateStatus();
+  const payload = {
+    version: 1,
+    gapLabel,
+    reason,
+    model,
+    phase: developmentPhase(),
+    inspectionToolCalls,
+    implementationPhaseAnnounced,
+    sawMutatingTool,
+    sawGitDiff,
+    buildCheckPassed,
+    candidateDirty: Boolean(status?.ok && status?.dirty),
+    evidence: checkpointEvidence.slice(-12),
+    savedAt: new Date().toISOString(),
+  };
+
+  try {
+    fs.mkdirSync(path.dirname(checkpointFile), {
+      recursive: true,
+    });
+    fs.writeFileSync(
+      checkpointFile,
+      JSON.stringify(payload, null, 2),
+      "utf8"
+    );
+  } catch {}
+}
+
+function loadCheckpoint() {
+  if (!checkpointFile) return null;
+
+  try {
+    if (!fs.existsSync(checkpointFile)) return null;
+    const payload = JSON.parse(
+      fs.readFileSync(checkpointFile, "utf8")
+    );
+
+    if (!payload || payload.version !== 1) {
+      return null;
+    }
+
+    return payload;
+  } catch {
+    return null;
+  }
+}
+
+function recordCheckpointEvidence(name, args, result) {
+  if (!inspectionToolNames.has(name) || !result?.ok) {
+    return;
+  }
+
+  checkpointEvidence.push({
+    tool: name,
+    args: truncate(JSON.stringify(args || {}), 1600),
+    result: truncate(JSON.stringify(result), 5000),
+  });
+
+  checkpointEvidence = checkpointEvidence.slice(-12);
+}
+
+function resumeCheckpointContext() {
+  const checkpoint = loadCheckpoint();
+  if (!checkpoint) return;
+
+  const evidence = Array.isArray(checkpoint.evidence)
+    ? checkpoint.evidence.slice(-10)
+    : [];
+
+  if (evidence.length === 0) return;
+
+  checkpointEvidence = evidence;
+  inspectionToolCalls = Math.min(
+    Number(checkpoint.inspectionToolCalls || evidence.length),
+    maxInspectionTools
+  );
+
+  if (checkpoint.phase === "implementation") {
+    inspectionToolCalls = maxInspectionTools;
+    implementationPhaseAnnounced = true;
+  }
+
+  resumedFromCheckpoint = true;
+
+  messages.push({
+    role: "user",
+    content: [
+      "KRALI process-level developer checkpoint bulundu.",
+      "Önceki oturum watchdog/timeout nedeniyle kapanmış olabilir.",
+      "Aynı incelemeleri sıfırdan tekrar etme; aşağıdaki gerçek tool kanıtlarını başlangıç bağlamı olarak kullan.",
+      "Checkpoint phase: " + String(checkpoint.phase || "inspection"),
+      "Checkpoint evidence:",
+      truncate(JSON.stringify(evidence), 18000),
+      checkpoint.phase === "implementation"
+        ? "Inspection bütçesi önceki oturumda tamamlandı. Şimdi kanıta dayalı minimum generic patch üret; yalnız kanıt yetersizse tek ek inspection yap."
+        : "Kaldığın teşhis noktasından devam et; gereksiz repo taraması yapma.",
+      "Önceki checkpoint bir öneri değil kanıt özetidir; source ile çelişirse source gerçeğini esas al."
+    ].join("\n"),
+  });
+
+  stage(
+    "local_agent_resumed",
+    gapLabel +
+      " process-level checkpoint yüklendi • evidence=" +
+      evidence.length +
+      " • phase=" +
+      String(checkpoint.phase || "inspection")
+  );
 }
 
 function effectiveRequestTimeoutMs() {
@@ -734,9 +852,10 @@ function candidateStatus() {
 }
 
 
-function recordToolEvidence(name, result) {
+function recordToolEvidence(name, result, args = {}) {
   if (result?.ok && inspectionToolNames.has(name)) {
     inspectionToolCalls += 1;
+    recordCheckpointEvidence(name, args, result);
 
     if (
       requireChange &&
@@ -770,6 +889,10 @@ function recordToolEvidence(name, result) {
   if (name === "build_check") {
     buildCheckPassed = result?.ok === true;
   }
+
+  persistCheckpoint(
+    result?.ok ? "tool_completed:" + name : "tool_failed:" + name
+  );
 }
 
 async function requestStructuredToolDecision(
@@ -986,15 +1109,21 @@ function requestMoreWork(reasons) {
   });
 }
 
+resumeCheckpointContext();
+
 stage(
   "local_agent_starting",
-  gapLabel + " native Ollama agent başlatılıyor: " + model
+  gapLabel +
+    " native Ollama agent başlatılıyor: " +
+    model +
+    (resumedFromCheckpoint ? " • checkpoint resume" : "")
 );
 
 for (let iteration = 1; iteration <= maxIterations; iteration++) {
   const elapsed = Date.now() - startedAt;
 
   if (elapsed >= hardTimeoutMs) {
+    persistCheckpoint("watchdog_timeout");
     fail(
       gapLabel + " native local agent toplam zaman sınırına ulaştı.",
       124,
@@ -1065,6 +1194,8 @@ for (let iteration = 1; iteration <= maxIterations; iteration++) {
             maxRequestTimeoutRetries
         );
 
+        persistCheckpoint("request_timeout_retry");
+
         messages.push({
           role: "user",
           content: [
@@ -1080,6 +1211,7 @@ for (let iteration = 1; iteration <= maxIterations; iteration++) {
         continue;
       }
 
+      persistCheckpoint("request_timeout_limit");
       fail(
         "Ollama native agent model isteği art arda zaman aşımına uğradı.",
         124,
@@ -1179,7 +1311,7 @@ for (let iteration = 1; iteration <= maxIterations; iteration++) {
           };
         }
 
-        recordToolEvidence(decision.name, result);
+        recordToolEvidence(decision.name, result, decision.args);
 
         messages.push({
           role: "user",
@@ -1217,6 +1349,13 @@ for (let iteration = 1; iteration <= maxIterations; iteration++) {
         ? gapLabel + " candidate diff + build doğrulamasıyla tamamlandı"
         : gapLabel + " native local agent tamamlandı"
     );
+
+    if (checkpointFile) {
+      try {
+        fs.rmSync(checkpointFile, { force: true });
+      } catch {}
+    }
+
     process.exit(0);
   }
 
@@ -1273,7 +1412,7 @@ for (let iteration = 1; iteration <= maxIterations; iteration++) {
       }
     }
 
-    recordToolEvidence(name, result);
+    recordToolEvidence(name, result, args);
 
     messages.push({
       role: "tool",
@@ -1283,6 +1422,8 @@ for (let iteration = 1; iteration <= maxIterations; iteration++) {
     });
   }
 }
+
+persistCheckpoint("iteration_limit");
 
 fail(
   gapLabel +
