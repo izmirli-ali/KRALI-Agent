@@ -862,14 +862,10 @@ struct ContentView: View {
                                 }
                             }
 
-                            if engine
-                                .developerAgentStatus
-                                .shouldShowLearningStatus ||
+                            if engine.inspectorState
+                                .shouldShowPrimaryDeveloperStatus ||
                                !engine
                                 .capabilityLearningPlans
-                                .isEmpty ||
-                               !engine
-                                .capabilityLearningBacklog
                                 .isEmpty {
                                 Divider()
                             }
@@ -931,8 +927,7 @@ struct ContentView: View {
                                 Spacer()
                             }
 
-                            if !engine.capabilityLearningPlans.isEmpty ||
-                               !engine.capabilityLearningBacklog.isEmpty {
+                            if !engine.capabilityLearningPlans.isEmpty {
                                 Divider()
                             }
                         }
