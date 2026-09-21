@@ -52,6 +52,7 @@
 		A10000000000000000000043 /* AgentFileSearchCoordinator.swift in Sources */ = {isa = PBXBuildFile; fileRef = B10000000000000000000043 /* AgentFileSearchCoordinator.swift */; };
 		A10000000000000000000044 /* AgentProblemSolver.swift in Sources */ = {isa = PBXBuildFile; fileRef = B10000000000000000000044 /* AgentProblemSolver.swift */; };
 		A10000000000000000000045 /* AgentOutcomePlanner.swift in Sources */ = {isa = PBXBuildFile; fileRef = B10000000000000000000045 /* AgentOutcomePlanner.swift */; };
+		A10000000000000000000046 /* AgentSemanticGym.swift in Sources */ = {isa = PBXBuildFile; fileRef = B10000000000000000000046 /* AgentSemanticGym.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
@@ -101,6 +102,7 @@
 		B10000000000000000000043 /* AgentFileSearchCoordinator.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AgentFileSearchCoordinator.swift; sourceTree = "<group>"; };
 		B10000000000000000000044 /* AgentProblemSolver.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AgentProblemSolver.swift; sourceTree = "<group>"; };
 		B10000000000000000000045 /* AgentOutcomePlanner.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AgentOutcomePlanner.swift; sourceTree = "<group>"; };
+		B10000000000000000000046 /* AgentSemanticGym.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AgentSemanticGym.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -170,6 +172,7 @@
 				B10000000000000000000043 /* AgentFileSearchCoordinator.swift */,
 				B10000000000000000000044 /* AgentProblemSolver.swift */,
 				B10000000000000000000045 /* AgentOutcomePlanner.swift */,
+				B10000000000000000000046 /* AgentSemanticGym.swift */,
 			);
 			path = KRALIAgentNative;
 			sourceTree = "<group>";
@@ -296,6 +299,7 @@
 				A10000000000000000000043 /* AgentFileSearchCoordinator.swift in Sources */,
 				A10000000000000000000044 /* AgentProblemSolver.swift in Sources */,
 				A10000000000000000000045 /* AgentOutcomePlanner.swift in Sources */,
+				A10000000000000000000046 /* AgentSemanticGym.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
