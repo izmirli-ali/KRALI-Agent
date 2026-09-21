@@ -4038,6 +4038,8 @@ final class AgentEngine: ObservableObject {
                     currentTaskGraph,
                 problemResolution:
                     currentProblemResolution,
+                outcomeResolution:
+                    currentOutcomeResolution,
                 reflectionSummary:
                     currentReflectionSummary,
                 capabilityGaps:
