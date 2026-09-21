@@ -4488,6 +4488,8 @@ final class AgentEngine: ObservableObject {
                     currentProblemResolution,
                 outcomeResolution:
                     currentOutcomeResolution,
+                outcomeAttempts:
+                    currentOutcomeAttempts,
                 reflectionSummary:
                     currentReflectionSummary,
                 capabilityGaps:
