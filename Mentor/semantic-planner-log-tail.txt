@@ -1,12 +1,3 @@
-
-━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-KRALİ Semantic Planner Fallback
-status=9
-input=Son çekimlerden hızlı ve enerjik bir kurgu çıkarmamız gerekiyor.
-output:
-
-━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-KRALİ Semantic Planner Fallback
 status=9
 input=Köfteci Tame adında bir markamız var. Marka için sosyal medya tasarımı hazırlayalım.
 output:
@@ -110,5 +101,20 @@ output:
 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 KRALİ Semantic Planner Fallback
 status=9
+input=Bir video kurgu iş akışında ilk kontrol etmem gereken 3 teknik unsuru kısaca söyle.
+output:
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+KRALİ Semantic Planner Fallback
+status=9
+input=ios 26.7 kullanıyorum şuan yeni güncelleme olarak 27.0'a geçiş yapayım mı sence?
+output:
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+KRALİ Semantic Planner Fallback
+status=9
+reason=uncaughtSignal
+duration=0.29s
+executable=/opt/homebrew/bin/cline
 input=Bir video kurgu iş akışında ilk kontrol etmem gereken 3 teknik unsuru kısaca söyle.
 output:
