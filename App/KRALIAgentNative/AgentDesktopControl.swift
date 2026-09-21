@@ -30,6 +30,8 @@ struct DesktopWebActionResult: Hashable, Sendable {
     let captureScope: String
     let capturedApplicationBundleIdentifier: String?
     let capturedWindowTitle: String?
+    let capturedWindowID: UInt32?
+    let observationAttemptCount: Int
 }
 
 struct DesktopControlProbeReport: Codable, Hashable, Sendable {
@@ -269,16 +271,58 @@ actor AgentDesktopControl {
                     frontmostBeforeObservation
             )
 
-        let report =
+        let targetBundleIdentifier =
+            expectedHandlerBundleIdentifier ??
+            frontmostBeforeObservation?
+                .bundleIdentifier
+
+        var report =
             try await screenPerception.observe(
                 goal:
                     "Şu web adresinin varsayılan tarayıcıda açıldığını ve yalnız hedef tarayıcı penceresindeki görünür sayfa içeriğini salt-okunur doğrula: " +
                     url.absoluteString,
                 targetBundleIdentifier:
-                    expectedHandlerBundleIdentifier ??
-                    frontmostBeforeObservation?
-                        .bundleIdentifier
+                    targetBundleIdentifier
             )
+
+        var observationAttemptCount = 1
+        let capturedWindowID =
+            report.capturedWindowID
+
+        while report.recognizedText.isEmpty &&
+              observationAttemptCount < 3 {
+            let currentFrontmost =
+                NSWorkspace.shared
+                    .frontmostApplication
+
+            guard webHandlerMatches(
+                expectedApplicationURL:
+                    expectedHandlerURL,
+                expectedBundleIdentifier:
+                    expectedHandlerBundleIdentifier,
+                runningApplication:
+                    currentFrontmost
+            ) else {
+                break
+            }
+
+            try? await Task.sleep(
+                for: .milliseconds(800)
+            )
+
+            report =
+                try await screenPerception.observe(
+                    goal:
+                        "Aynı web penceresi henüz OCR kanıtı üretmedi. Sayfanın yüklenmesini bekleyip aynı pencereyi yeniden salt-okunur gözlemle: " +
+                        url.absoluteString,
+                    targetBundleIdentifier:
+                        targetBundleIdentifier,
+                    targetWindowID:
+                        capturedWindowID
+                )
+
+            observationAttemptCount += 1
+        }
 
         let frontmostAfterObservation =
             NSWorkspace.shared
@@ -306,7 +350,7 @@ actor AgentDesktopControl {
                 ""
             ) ==
             normalize(
-                frontmostBeforeObservation?
+                frontmostAfterObservation?
                     .localizedName ??
                 ""
             )
@@ -317,10 +361,16 @@ actor AgentDesktopControl {
                 .capturedApplicationBundleIdentifier ==
                 expectedHandlerBundleIdentifier
 
+        let sameCapturedWindow =
+            capturedWindowID == nil ||
+            report.capturedWindowID ==
+                capturedWindowID
+
         let observationStable =
             sameFrontmostProcess &&
             reportMatchesFrontmost &&
             capturedExpectedWindow &&
+            sameCapturedWindow &&
             report.captureScope == "window"
 
         return DesktopWebActionResult(
@@ -358,7 +408,11 @@ actor AgentDesktopControl {
                 report
                     .capturedApplicationBundleIdentifier,
             capturedWindowTitle:
-                report.capturedWindowTitle
+                report.capturedWindowTitle,
+            capturedWindowID:
+                report.capturedWindowID,
+            observationAttemptCount:
+                observationAttemptCount
         )
     }
 
