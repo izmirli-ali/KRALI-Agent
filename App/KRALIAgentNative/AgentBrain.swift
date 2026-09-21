@@ -80,6 +80,8 @@ struct AgentDecision {
 struct AgentBrain {
     private let languageResolver =
         AgentNaturalLanguageResolver()
+    private let fileQueryParser =
+        AgentFileQueryParser()
     private let calendar = Calendar.autoupdatingCurrent
 
     func analyze(
@@ -302,6 +304,8 @@ struct AgentBrain {
 
         if isFileSearchIntent(text) {
             let target = resolveTarget(text)
+            let fileQuery =
+                fileQueryParser.parse(text)
             let dateResolution = resolveDate(text, now: now)
             let sort: AgentSortMode = containsAny(
                 text,
@@ -317,6 +321,8 @@ struct AgentBrain {
                 route: ["Core", "Intent", "Context", "File Search"],
                 goal: fileSearchGoal(
                     target: target,
+                    extensionLabel:
+                        fileQuery.extensionDisplayLabel,
                     dateDescription: dateResolution.description,
                     newestFirst: sort == .newestFirst
                 ),
@@ -528,12 +534,17 @@ struct AgentBrain {
         guard hasContextReference(text) else { return false }
 
         let target = resolveTarget(text)
+        let fileQuery =
+            fileQueryParser.parse(text)
         let filterAction = containsAny(text, [
             "göster", "goster", "listele", "bul", "çıkar", "cikar",
             "hangileri", "neler", "ne var"
         ])
 
-        return target != .any && filterAction
+        return (
+            target != .any ||
+            fileQuery.hasTypeFilter
+        ) && filterAction
     }
 
     private func isExplicitWebResearchIntent(_ text: String) -> Bool {
@@ -554,8 +565,17 @@ struct AgentBrain {
 
     private func isCompoundFileTask(_ text: String) -> Bool {
         let target = resolveTarget(text)
+        let fileQuery =
+            fileQueryParser.parse(text)
 
-        guard target != .any, target != .folder else {
+        guard target != .folder else {
+            return false
+        }
+
+        guard
+            target != .any ||
+            fileQuery.hasTypeFilter
+        else {
             return false
         }
 
@@ -584,9 +604,18 @@ struct AgentBrain {
     }
 
     private func isFileSearchIntent(_ text: String) -> Bool {
+        let structuredQuery =
+            fileQueryParser.parse(text)
+
+        if structuredQuery.isFileSearchRequest {
+            return true
+        }
+
         let explicitLocalScope = containsAny(text, [
             "dosya", "klasör", "klasor", "finder",
             "masaüst", "masaustu", "desktop",
+            "indirilenler", "downloads",
+            "belgeler", "documents",
             "bilgisayarımda", "bilgisayarimda",
             "mac'imde", "macimde",
             "videolarım", "videolarim",
@@ -780,19 +809,28 @@ struct AgentBrain {
 
     private func fileSearchGoal(
         target: AgentTargetKind,
+        extensionLabel: String? = nil,
         dateDescription: String?,
         newestFirst: Bool
     ) -> String {
         let targetText: String
-        switch target {
+
+        if let extensionLabel,
+           !extensionLabel.isEmpty {
+            targetText =
+                extensionLabel +
+                " dosyalarını"
+        } else {
+            switch target {
         case .video: targetText = "videoları"
         case .image: targetText = "görselleri"
         case .document: targetText = "belgeleri"
         case .project: targetText = "proje dosyalarını"
         case .screenshot: targetText = "ekran görüntülerini"
         case .pdf: targetText = "PDF dosyalarını"
-        case .folder: targetText = "klasörleri"
-        case .any: targetText = "dosyaları"
+            case .folder: targetText = "klasörleri"
+            case .any: targetText = "dosyaları"
+            }
         }
 
         var parts = [targetText]
