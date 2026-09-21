@@ -180,7 +180,7 @@ struct AgentBrain {
                 intent: .fileSearch,
                 target: target,
                 dateRange: dateResolution.range,
-                dateField: resolveDateField(text),
+                dateField: fileQuery.dateField,
                 sortMode: sort,
                 route: ["Core", "Context", "Planner", "File Search"],
                 goal: fileSearchGoal(
@@ -290,7 +290,7 @@ struct AgentBrain {
                 intent: .compoundFileTask,
                 target: target,
                 dateRange: dateResolution.range,
-                dateField: resolveDateField(text),
+                dateField: fileQuery.dateField,
                 sortMode: sort,
                 route: ["Core", "Intent", "Context", "Planner", "File Search", "Synthesis"],
                 goal: "Çok adımlı dosya görevini yürüt",
@@ -318,7 +318,7 @@ struct AgentBrain {
                 intent: .fileSearch,
                 target: target,
                 dateRange: dateResolution.range,
-                dateField: resolveDateField(text),
+                dateField: fileQuery.dateField,
                 sortMode: sort,
                 route: ["Core", "Intent", "Context", "File Search"],
                 goal: fileSearchGoal(
