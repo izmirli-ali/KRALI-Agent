@@ -771,7 +771,12 @@ function resumeCheckpointContext() {
   );
 
   if (checkpoint.phase === "implementation") {
-    inspectionToolCalls = maxInspectionTools;
+    // Resume close to implementation, but keep one final bounded source
+    // check available so a stale/wrong checkpoint cannot force a blind patch.
+    inspectionToolCalls = Math.max(
+      0,
+      maxInspectionTools - 1
+    );
     implementationPhaseAnnounced = true;
   }
 
