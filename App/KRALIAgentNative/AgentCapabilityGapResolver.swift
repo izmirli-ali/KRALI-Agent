@@ -65,6 +65,13 @@ struct AgentCapabilityGapResolver {
                             capabilities
                     )
 
+            // Initial planning should prefer an executable generic strategy
+            // before declaring a learning gap. Runtime failure resolution
+            // can still escalate later if those strategies fail.
+            if !strategyCandidates.isEmpty {
+                continue
+            }
+
             let kind: CapabilityGapKind
             if !strategyCandidates.isEmpty {
                 kind = .strategy
