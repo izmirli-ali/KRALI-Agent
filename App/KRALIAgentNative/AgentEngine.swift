@@ -4088,7 +4088,31 @@ final class AgentEngine: ObservableObject {
             return nil
         }
 
-        if decision.target == .folder,
+        let parsedQuery =
+            fileQueryParser.parse(text)
+
+        let explicitScope =
+            parsedQuery.scopeIsExplicit
+
+        if explicitScope {
+            log(
+                "Scope Isolation aktif • explicit=" +
+                parsedQuery.scope.title +
+                " • selectedWorkspace=" +
+                (
+                    selectedRootURL?
+                        .lastPathComponent ??
+                    "∅"
+                )
+            )
+        }
+
+        // Workspace contradiction recovery is only valid when the task
+        // actually targets the user-selected workspace. An explicit scope
+        // such as Downloads/Desktop/Documents must never borrow evidence
+        // from selectedRootURL.
+        if !explicitScope,
+           decision.target == .folder,
            folderSearchResults.isEmpty {
             ensureWorkspaceIndexed()
 
@@ -4127,7 +4151,7 @@ final class AgentEngine: ObservableObject {
                     String(
                         recoveredFolders.count
                     ) +
-                    " klasör gözlemledim. İlk klasör arama stratejisi sonuç üretmediği için mevcut doğrulanmış workspace indeksini yeniden kullandım: " +
+                    " klasör gözlemledim. İlk klasör arama stratejisi sonuç üretmediği için seçili çalışma alanının doğrulanmış indeksini yeniden kullandım: " +
                     preview +
                     (
                         recoveredFolders.count > 5
@@ -4149,11 +4173,11 @@ final class AgentEngine: ObservableObject {
                     )
 
                 let reflection =
-                    "Çelişki algılandı: workspace indeksi " +
+                    "Çelişki algılandı: seçili workspace indeksi " +
                     String(
                         indexedFolders.count
                     ) +
-                    " klasör gözlemledi fakat birincil arama 0 sonuç verdi. Yeni capability öğrenmek yerine doğrulanmış indeks kanıtı yeniden kullanıldı."
+                    " klasör gözlemledi fakat birincil arama 0 sonuç verdi. Explicit scope olmadığı için aynı workspace kanıtı yeniden kullanıldı."
 
                 currentReflectionSummary =
                     reflection
@@ -4195,7 +4219,21 @@ final class AgentEngine: ObservableObject {
             decision.usePreviousResults ||
             decision.dateRange != nil
 
-        guard hasRelaxableConstraint else { return nil }
+        guard hasRelaxableConstraint else {
+            return nil
+        }
+
+        // Folder search still uses the legacy selected-workspace index.
+        // Until it is migrated to the scoped coordinator, never run Plan B
+        // for an explicitly-scoped folder request because that could cross
+        // into selectedRootURL.
+        if explicitScope,
+           decision.target == .folder {
+            log(
+                "Plan B atlandı: explicit folder scope selected workspace'e düşürülemez"
+            )
+            return nil
+        }
 
         let recoveryDecision = AgentDecision(
             intent: decision.intent,
@@ -4204,45 +4242,68 @@ final class AgentEngine: ObservableObject {
             dateField: .either,
             sortMode: decision.sortMode,
             route: decision.route + ["Plan B"],
-            goal: "Daha geniş kapsamda " + decision.goal,
-            selectedPlan: "İlk aramada sonuç çıkmadığı için tarih / önceki-sonuç kısıtını kaldır ve aynı hedefi seçili çalışma alanında salt-okunur yeniden ara.",
-            alternatives: decision.alternatives,
+            goal:
+                explicitScope
+                ? "Aynı explicit kapsamda daha geniş " +
+                    decision.goal
+                : "Seçili çalışma alanında daha geniş " +
+                    decision.goal,
+            selectedPlan:
+                explicitScope
+                ? "İlk aramada sonuç çıkmadığı için tarih / önceki-sonuç kısıtını kaldır; konumu değiştirmeden aynı explicit kapsamda salt-okunur yeniden ara."
+                : "İlk aramada sonuç çıkmadığı için tarih / önceki-sonuç kısıtını kaldır ve aynı seçili çalışma alanında salt-okunur yeniden ara.",
+            alternatives:
+                decision.alternatives,
             proactiveSuggestion: nil,
             usePreviousResults: false,
             resultSelection: nil
         )
 
-        log("Plan B deneniyor: arama kapsamı güvenli biçimde genişletiliyor")
+        log(
+            explicitScope
+            ? "Plan B deneniyor: explicit scope korunarak yalnız relaxable filtreler gevşetiliyor"
+            : "Plan B deneniyor: seçili çalışma alanında relaxable filtreler gevşetiliyor"
+        )
 
         let reply: String
-        if recoveryDecision.intent == .compoundFileTask {
+        if recoveryDecision.intent ==
+            .compoundFileTask {
             reply = executeCompoundFileTask(
                 for: text,
                 decision: recoveryDecision
             )
-        } else if recoveryDecision.target == .folder {
+        } else if recoveryDecision.target ==
+            .folder {
             reply = searchIndexedFolders(
                 for: text,
                 decision: recoveryDecision
             )
         } else {
+            // raw text is intentionally preserved so AgentFileQueryParser
+            // keeps explicit Downloads/Desktop/Documents scope unchanged.
             reply = searchIndexedFiles(
                 for: text,
                 decision: recoveryDecision
             )
         }
 
-        let verification = verifier.verify(
-            decision: recoveryDecision,
-            currentUserInput: text,
-            goal: goal,
-            snapshot: verificationSnapshot()
-        )
+        let verification =
+            verifier.verify(
+                decision: recoveryDecision,
+                currentUserInput: text,
+                goal: goal,
+                snapshot:
+                    verificationSnapshot()
+            )
 
         return RecoveryAttempt(
             reply: reply,
-            verification: verification,
-            summary: "Tarih / önceki sonuç kısıtı kaldırılarak aynı hedef seçili çalışma alanında yeniden arandı."
+            verification:
+                verification,
+            summary:
+                explicitScope
+                ? "Tarih / önceki sonuç kısıtı kaldırıldı; explicit dosya kapsamı değişmeden korundu."
+                : "Tarih / önceki sonuç kısıtı kaldırılarak aynı seçili çalışma alanında yeniden arandı."
         )
     }
 
