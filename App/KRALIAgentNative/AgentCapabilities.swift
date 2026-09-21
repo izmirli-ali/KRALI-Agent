@@ -134,6 +134,14 @@ struct AgentCapabilityRegistry {
             requiresWorkspace: false
         ),
         AgentCapability(
+            id: "system.open.url",
+            name: "URL açma",
+            summary: "HTTP/HTTPS adresini macOS varsayılan işleyicisiyle açar; belirli bir tarayıcı markasına bağlı değildir.",
+            risk: .external,
+            isAvailable: true,
+            requiresWorkspace: false
+        ),
+        AgentCapability(
             id: "app.workflow",
             name: "Uygulama içi iş akışı",
             summary: "Özel provider tanımlı olmayan uygulamalarda desktop.app sonrasında görünür ekranı salt-okunur gözlemler; hedefe uygun veriyi çıkarır ve değişiklik isteyen kısmı yalnız uygulanmamış hazırlık olarak üretir.",
