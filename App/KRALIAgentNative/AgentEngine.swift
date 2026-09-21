@@ -2401,17 +2401,15 @@ final class AgentEngine: ObservableObject {
                 )
 
             case "files.search":
-                let searchInput =
-                    semanticFileSearchInput(
-                        step: step,
-                        userInput:
-                            userInput
-                    )
-
                 let searchDecision =
                     semanticFileSearchDecision(
                         mission: mission,
-                        userInput: searchInput
+                        userInput: userInput
+                    )
+
+                let fileQuery =
+                    fileQueryParser.parse(
+                        userInput
                     )
 
                 var searchReply: String
@@ -2419,34 +2417,20 @@ final class AgentEngine: ObservableObject {
                     .folder {
                     searchReply =
                         searchIndexedFolders(
-                            for: searchInput,
+                            for: userInput,
                             decision:
                                 searchDecision
                         )
                 } else {
                     searchReply =
                         searchIndexedFiles(
-                            for: searchInput,
+                            for: userInput,
                             decision:
                                 searchDecision
                         )
 
-                    let normalizedRequest =
-                        normalizeSemanticText(
-                            userInput
-                        )
-
-                    if containsSemanticAny(
-                        normalizedRequest,
-                        [
-                            "sadece isim",
-                            "yalniz isim",
-                            "yalnız isim",
-                            "isimlerini listele",
-                            "adlarini listele",
-                            "adlarını listele"
-                        ]
-                    ),
+                    if fileQuery.outputProjection ==
+                        .namesOnly,
                        !fileSearchResults
                         .isEmpty {
                         searchReply =
