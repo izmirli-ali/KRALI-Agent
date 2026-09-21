@@ -135,25 +135,36 @@ actor AgentDesktopControl {
             )
         }
 
-        _ = await focusCandidate(
-            candidate,
-            maxAttempts: 14,
-            delayMilliseconds: 180
-        )
+        let focusReached =
+            await focusCandidate(
+                candidate,
+                maxAttempts: 14,
+                delayMilliseconds: 180
+            )
 
         var after =
             NSWorkspace.shared.frontmostApplication?
                 .localizedName
 
         var frontmostVerified =
-            await visuallyForeground(
+            focusReached &&
+            isFrontmost(
                 candidate
             )
 
         var verificationSource =
             frontmostVerified
-                ? "ScreenCaptureKit z-order"
+                ? "NSWorkspace frontmost"
                 : "unverified"
+
+        if !frontmostVerified,
+           await visuallyForeground(
+                candidate
+           ) {
+            frontmostVerified = true
+            verificationSource =
+                "ScreenCaptureKit z-order"
+        }
 
         var fallbackScreenSummary: String?
 
@@ -172,12 +183,14 @@ actor AgentDesktopControl {
 
             if recovered {
                 frontmostVerified = true
-                verificationSource =
-                    "activation recovery + AX raise + ScreenCaptureKit z-order"
                 after =
                     NSWorkspace.shared
                         .frontmostApplication?
                         .localizedName
+                verificationSource =
+                    isFrontmost(candidate)
+                    ? "activation recovery + NSWorkspace frontmost"
+                    : "activation recovery + AX raise + ScreenCaptureKit z-order"
             }
         }
 
@@ -1217,34 +1230,9 @@ actor AgentDesktopControl {
         maxAttempts: Int,
         delayMilliseconds: Int
     ) async -> Bool {
-        let normalizedAliases =
-            Set(
-                candidate.aliases
-                    .map(normalize)
-                    .filter { !$0.isEmpty }
-            )
-
         for _ in 0..<maxAttempts {
-            if let front =
-                NSWorkspace.shared
-                    .frontmostApplication {
-                if let bundleID =
-                    candidate.bundleIdentifier,
-                   front.bundleIdentifier ==
-                    bundleID {
-                    return true
-                }
-
-                let frontName =
-                    normalize(
-                        front.localizedName ?? ""
-                    )
-
-                if normalizedAliases.contains(
-                    frontName
-                ) {
-                    return true
-                }
+            if isFrontmost(candidate) {
+                return true
             }
 
             if let running =
@@ -1266,6 +1254,34 @@ actor AgentDesktopControl {
         }
 
         return false
+    }
+
+    private func isFrontmost(
+        _ candidate: ApplicationCandidate
+    ) -> Bool {
+        guard
+            let front =
+                NSWorkspace.shared
+                    .frontmostApplication
+        else {
+            return false
+        }
+
+        if let bundleID =
+            candidate.bundleIdentifier,
+           front.bundleIdentifier ==
+            bundleID {
+            return true
+        }
+
+        let frontName =
+            normalize(
+                front.localizedName ?? ""
+            )
+
+        return candidate.aliases
+            .map(normalize)
+            .contains(frontName)
     }
 
     private func recoverForeground(
@@ -1294,6 +1310,10 @@ actor AgentDesktopControl {
             try? await Task.sleep(
                 for: .milliseconds(delay)
             )
+
+            if isFrontmost(candidate) {
+                return true
+            }
 
             if await visuallyForeground(
                 candidate
@@ -1704,7 +1724,10 @@ actor AgentDesktopControl {
                 }
 
                 _ = app.activate(
-                    options: [.activateAllWindows]
+                    options: [
+                        .activateAllWindows,
+                        .activateIgnoringOtherApps
+                    ]
                 )
 
                 continuation.resume(
