@@ -15,6 +15,15 @@ struct DesktopAppActionResult: Codable, Hashable, Sendable {
     let screenSummary: String?
 }
 
+struct DesktopWebActionResult: Hashable, Sendable {
+    let requestedURL: String
+    let openSucceeded: Bool
+    let frontmostAfter: String?
+    let screenSummary: String
+    let recognizedText: [String]
+    let visibleWindows: [String]
+}
+
 struct DesktopControlProbeReport: Codable, Hashable, Sendable {
     let createdAt: Date
     let requestedApplication: String
@@ -32,6 +41,8 @@ struct DesktopControlProbeReport: Codable, Hashable, Sendable {
 enum DesktopControlError: LocalizedError {
     case applicationNotFound(String)
     case launchFailed(String)
+    case invalidWebURL(String)
+    case webURLOpenFailed(String)
 
     var errorDescription: String? {
         switch self {
@@ -39,6 +50,10 @@ enum DesktopControlError: LocalizedError {
             return "Uygulama bulunamadı: \(name)"
         case .launchFailed(let name):
             return "Uygulama açılamadı veya öne getirilemedi: \(name)"
+        case .invalidWebURL(let value):
+            return "Geçerli HTTP/HTTPS adresi çözülemedi: \(value)"
+        case .webURLOpenFailed(let value):
+            return "Web adresi macOS varsayılan işleyicisiyle açılamadı: \(value)"
         }
     }
 }
@@ -183,6 +198,62 @@ actor AgentDesktopControl {
                 verificationSource,
             screenSummary:
                 fallbackScreenSummary
+        )
+    }
+
+    func openWebURL(
+        _ url: URL
+    ) async throws -> DesktopWebActionResult {
+        guard
+            let scheme =
+                url.scheme?
+                    .lowercased(),
+            scheme == "http" ||
+            scheme == "https",
+            url.host != nil
+        else {
+            throw DesktopControlError
+                .invalidWebURL(
+                    url.absoluteString
+                )
+        }
+
+        let opened =
+            NSWorkspace.shared.open(
+                url
+            )
+
+        guard opened else {
+            throw DesktopControlError
+                .webURLOpenFailed(
+                    url.absoluteString
+                )
+        }
+
+        try? await Task.sleep(
+            for: .milliseconds(900)
+        )
+
+        let report =
+            try await screenPerception.observe(
+                goal:
+                    "Şu web adresinin varsayılan tarayıcıda açıldığını ve görünür sayfa içeriğini salt-okunur doğrula: " +
+                    url.absoluteString
+            )
+
+        return DesktopWebActionResult(
+            requestedURL:
+                url.absoluteString,
+            openSucceeded:
+                true,
+            frontmostAfter:
+                report.frontmostApplication,
+            screenSummary:
+                report.semanticSummary,
+            recognizedText:
+                report.recognizedText,
+            visibleWindows:
+                report.visibleWindows
         )
     }
 

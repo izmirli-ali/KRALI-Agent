@@ -161,3 +161,27 @@ Target flow:
 - Replaced the multiline optional binding ending in `.first {` with an explicit intermediate optional and `if let selected`.
 - No behavioral rollback: v0.8.64 outcome-oriented planning, Learning gate and Developer Agent timeout-resume changes remain intact.
 - Build 115.
+
+
+## v0.8.66 — Outcome Strategy Chain
+
+- Outcome execution is now a real ordered runtime chain instead of a one-shot preferred strategy.
+- Each outcome strategy attempt is recorded as succeeded/failed/skipped with evidence summary and executed capability IDs.
+- Public web-information flow now prefers:
+  1. `research.web` with direct-source evidence
+  2. `system.open.url + perception.screen`
+  3. Learning Gateway only after safe strategies are exhausted.
+- Added generic `system.open.url` capability using macOS default URL handling; no Safari/Chrome-specific hard-code.
+- Explicit domains/URLs are resolved into direct research candidates before generic search-engine discovery.
+- Domain/site phrases are rejected as application names while explicit application targets such as Safari remain valid.
+- Static web research does not enqueue browser Learning while Outcome Strategy Chain still has an untried safe strategy.
+- If all safe outcome strategies fail at runtime, an exhausted-outcome capability gap is created with attempt evidence; only then can `browser.control` Learning begin.
+- Verifier now uses actual runtime outcome attempts, not merely the originally chosen strategy.
+- Mentor traces now include `outcomeAttempts`, making strategy order and failure/success reasons visible.
+- Added Training Lab regressions for direct domain resolution, strategy-chain ordering, web/app target isolation and exhausted-outcome Learning escalation.
+- VERSION 0.8.66 / build 116.
+
+Target runtime:
+`Outcome → Strategy 1 → evidence? → Strategy 2 → evidence? → ... → Verify → Learning only after exhaustion`
+
+- Outcome Chain execution ownership is gated to supported runtime strategy classes; unrelated reasoning/file tasks remain on their existing execution paths.

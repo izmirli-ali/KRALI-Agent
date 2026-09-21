@@ -80,6 +80,7 @@ struct MentorTrace: Codable {
     let taskGraph: [MentorTraceTaskGraphStep]
     let problemResolution: AgentProblemResolution?
     let outcomeResolution: AgentOutcomeResolution?
+    let outcomeAttempts: [AgentOutcomeStrategyAttempt]
     let reflectionSummary: String?
     let capabilityGaps: [CapabilityGapResolution]
     let capabilities: [MentorTraceCapability]
@@ -125,6 +126,7 @@ struct MentorTraceStore {
         taskGraph: AgentTaskGraph?,
         problemResolution: AgentProblemResolution?,
         outcomeResolution: AgentOutcomeResolution?,
+        outcomeAttempts: [AgentOutcomeStrategyAttempt],
         reflectionSummary: String?,
         capabilityGaps: [CapabilityGapResolution],
         capabilities: [AgentCapability],
@@ -194,6 +196,8 @@ struct MentorTraceStore {
                 problemResolution,
             outcomeResolution:
                 outcomeResolution,
+            outcomeAttempts:
+                outcomeAttempts,
             reflectionSummary:
                 reflectionSummary,
             capabilityGaps:

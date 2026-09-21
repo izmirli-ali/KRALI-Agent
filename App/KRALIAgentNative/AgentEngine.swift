@@ -47,6 +47,7 @@ final class AgentEngine: ObservableObject {
     @Published var taskGraphStatus = "Henüz görev grafiği yok."
     @Published var currentProblemResolution: AgentProblemResolution?
     @Published var currentOutcomeResolution: AgentOutcomeResolution?
+    @Published var currentOutcomeAttempts: [AgentOutcomeStrategyAttempt] = []
     @Published var currentReflectionSummary: String?
     @Published var currentCapabilityGaps: [CapabilityGapResolution] = []
     @Published var executionSteps: [AgentExecutionStep] = []
@@ -117,6 +118,8 @@ final class AgentEngine: ObservableObject {
     private let conversationStore = ConversationStore()
     private let workspaceIndexer = AgentWorkspaceIndexer()
     private let fileQueryParser = AgentFileQueryParser()
+    private let naturalLanguageResolver =
+        AgentNaturalLanguageResolver()
     private let fileSearchCoordinator =
         AgentFileSearchCoordinator()
     private let diagnosticsLoader = AgentDiagnosticsLoader()
@@ -1166,7 +1169,7 @@ final class AgentEngine: ObservableObject {
         }
 
         var baseReply = ""
-        var outcomeHandledMission = false
+        var outcomeOwnedMission = false
 
         if let outcomeResolution =
             currentOutcomeResolution,
@@ -1174,43 +1177,114 @@ final class AgentEngine: ObservableObject {
            !outcomeResolution
                 .contract
                 .requiresMutation,
-           let researchStrategy =
+           outcomeChainCanOwnExecution(
                 outcomeResolution
-                    .chosenStrategies
-                    .first(
-                        where: {
-                            $0.kind ==
-                                .publicResearch &&
-                            $0.executableNow
-                        }
-                    ) {
-            let outcomeReply =
-                await performWebResearch(
-                    query:
-                        webResearchQuery(
-                            from: text
-                        )
+           ) {
+            outcomeOwnedMission = true
+
+            let chainResult =
+                await executeOutcomeStrategyChain(
+                    resolution:
+                        outcomeResolution,
+                    userInput: text
                 )
 
-            if !webResearchResults.isEmpty ||
-               !webResearchEvidence.isEmpty {
-                baseReply = outcomeReply
-                executedSemanticCapabilities
-                    .formUnion(
-                        researchStrategy
-                            .capabilityIDs
-                    )
-                outcomeHandledMission = true
+            currentOutcomeAttempts =
+                chainResult.attempts
+            executedSemanticCapabilities
+                .formUnion(
+                    chainResult
+                        .executedCapabilityIDs
+                )
+
+            for capabilityID in
+                chainResult
+                    .executedCapabilityIDs {
+                if !selectedCapabilities.contains(
+                    where: {
+                        $0.id ==
+                            capabilityID
+                    }
+                ),
+                   let capability =
+                    capabilityRegistry
+                        .all
+                        .first(
+                            where: {
+                                $0.id ==
+                                    capabilityID
+                            }
+                        ) {
+                    selectedCapabilities
+                        .append(
+                            capability
+                        )
+                }
+            }
+
+            if chainResult.succeeded {
+                baseReply =
+                    chainResult.reply
+            } else {
+                queueInteractiveAccessCapability()
+                resolvedLearningPlans =
+                    capabilityLearningPlans
+
+                let browserGap =
+                    capabilityGapResolver
+                        .resolveExhaustedOutcomeCapability(
+                            capabilityID:
+                                "browser.control",
+                            objective:
+                                text,
+                            attemptSummaries:
+                                chainResult
+                                    .attempts
+                                    .map {
+                                        $0.strategyID +
+                                        ": " +
+                                        $0.summary
+                                    },
+                            capabilities:
+                                capabilityRegistry
+                                    .all
+                        )
+
+                if let browserGap,
+                   !currentCapabilityGaps
+                    .contains(
+                        where: {
+                            $0.capabilityID ==
+                                browserGap
+                                    .capabilityID
+                        }
+                    ) {
+                    currentCapabilityGaps
+                        .append(
+                            browserGap
+                        )
+                }
+
+                baseReply =
+                    chainResult.reply
+                        .trimmingCharacters(
+                            in:
+                                .whitespacesAndNewlines
+                        )
+                        .isEmpty
+                    ? "Mevcut outcome stratejilerini denedim ancak başarı kriterini doğrulayamadım. Eksik etkileşim capability'si Learning Gateway'e aktarıldı."
+                    : chainResult.reply
+
+                currentReflectionSummary =
+                    "Outcome Strategy Chain mevcut güvenli stratejileri tüketti; başarı kriteri doğrulanamadığı için Learning Gateway açıldı."
 
                 log(
-                    "Outcome Solver yürüttü: " +
-                    researchStrategy.title +
-                    " • provider adımı yerine başarı kriteri hedeflendi"
+                    "Outcome Strategy Chain tükendi; Learning Gateway açıldı"
                 )
             }
         }
 
-        if !outcomeHandledMission,
+        if !outcomeOwnedMission,
            let mission = semanticMission {
             let result = await executeAvailableSemanticMission(
                 mission,
@@ -1269,7 +1343,7 @@ final class AgentEngine: ObservableObject {
                     )
                 }
             }
-        } else if !outcomeHandledMission,
+        } else if !outcomeOwnedMission,
                   resolvedGoal.outcomes.contains(.research),
                   resolvedCapabilities.contains(where: {
                       $0.id == "research.web" && $0.isAvailable
@@ -1277,7 +1351,7 @@ final class AgentEngine: ObservableObject {
             baseReply = await performWebResearch(
                 query: webResearchQuery(from: text)
             )
-        } else if !outcomeHandledMission {
+        } else if !outcomeOwnedMission {
             baseReply = makeReply(
                 for: text,
                 decision: decision
@@ -1298,7 +1372,7 @@ final class AgentEngine: ObservableObject {
                 completedMissionStepIndexes:
                     completedSemanticStepIndexes,
                 substitutedCapabilityIDs:
-                    outcomeHandledMission
+                    outcomeOwnedMission
                     ? (
                         currentOutcomeResolution?
                             .suppressedLearningCapabilityIDs ??
@@ -1323,6 +1397,8 @@ final class AgentEngine: ObservableObject {
                 semanticMission: semanticMission,
                 outcomeResolution:
                     currentOutcomeResolution,
+                outcomeAttempts:
+                    currentOutcomeAttempts,
                 snapshot: verificationSnapshot(
                     executedCapabilityIDs:
                         executedSemanticCapabilities
@@ -3227,6 +3303,7 @@ final class AgentEngine: ObservableObject {
         taskGraphStatus = "Yeni görev için görev grafiği bekleniyor."
         currentProblemResolution = nil
         currentOutcomeResolution = nil
+        currentOutcomeAttempts = []
         currentReflectionSummary = nil
         currentCapabilityGaps = []
         activeRoute = ["Core"]
@@ -3708,6 +3785,452 @@ final class AgentEngine: ObservableObject {
         )
     }
 
+    private func outcomeChainCanOwnExecution(
+        _ resolution: AgentOutcomeResolution
+    ) -> Bool {
+        let supportedKinds: Set<AgentOutcomeStrategyKind> = [
+            .publicResearch,
+            .openURLAndObserve,
+            .screenObservation
+        ]
+
+        return resolution
+            .contract
+            .requirements
+            .allSatisfy { requirement in
+                resolution
+                    .orderedExecutableStrategies(
+                        for:
+                            requirement.id
+                    )
+                    .contains(
+                        where: {
+                            supportedKinds
+                                .contains(
+                                    $0.kind
+                                )
+                        }
+                    )
+            }
+    }
+
+    private struct OutcomeStrategyChainResult {
+        let succeeded: Bool
+        let reply: String
+        let executedCapabilityIDs: Set<String>
+        let attempts: [AgentOutcomeStrategyAttempt]
+    }
+
+    private struct OutcomeStrategyExecutionResult {
+        let succeeded: Bool
+        let reply: String
+        let summary: String
+        let executedCapabilityIDs: Set<String>
+    }
+
+    private func executeOutcomeStrategyChain(
+        resolution: AgentOutcomeResolution,
+        userInput: String
+    ) async -> OutcomeStrategyChainResult {
+        var attempts: [AgentOutcomeStrategyAttempt] = []
+        var outputs: [String] = []
+        var executed = Set<String>()
+
+        for requirement in
+            resolution.contract.requirements {
+            let strategies =
+                resolution
+                    .orderedExecutableStrategies(
+                        for:
+                            requirement.id
+                    )
+
+            var requirementSucceeded = false
+
+            for strategy in strategies {
+                log(
+                    "Outcome Strategy denenecek: " +
+                    strategy.title +
+                    " • score=" +
+                    String(strategy.score)
+                )
+
+                let result =
+                    await executeOutcomeStrategy(
+                        strategy,
+                        requirement:
+                            requirement,
+                        userInput:
+                            userInput
+                    )
+
+                attempts.append(
+                    AgentOutcomeStrategyAttempt(
+                        id: UUID()
+                            .uuidString,
+                        strategyID:
+                            strategy.id,
+                        requirementID:
+                            requirement.id,
+                        state:
+                            result.succeeded
+                            ? .succeeded
+                            : .failed,
+                        summary:
+                            result.summary,
+                        executedCapabilityIDs:
+                            result
+                                .executedCapabilityIDs
+                                .sorted()
+                    )
+                )
+
+                if result.succeeded {
+                    requirementSucceeded = true
+                    executed.formUnion(
+                        result
+                            .executedCapabilityIDs
+                    )
+
+                    if !result.reply
+                        .trimmingCharacters(
+                            in:
+                                .whitespacesAndNewlines
+                        )
+                        .isEmpty {
+                        outputs.append(
+                            result.reply
+                        )
+                    }
+
+                    log(
+                        "Outcome Strategy başarılı: " +
+                        strategy.title
+                    )
+                    break
+                }
+
+                log(
+                    "Outcome Strategy başarısız: " +
+                    strategy.title +
+                    " • " +
+                    result.summary
+                )
+            }
+
+            if !requirementSucceeded {
+                return OutcomeStrategyChainResult(
+                    succeeded: false,
+                    reply:
+                        outputs.joined(
+                            separator: "\n\n"
+                        ),
+                    executedCapabilityIDs:
+                        executed,
+                    attempts:
+                        attempts
+                )
+            }
+        }
+
+        return OutcomeStrategyChainResult(
+            succeeded: true,
+            reply:
+                outputs.joined(
+                    separator: "\n\n"
+                ),
+            executedCapabilityIDs:
+                executed,
+            attempts:
+                attempts
+        )
+    }
+
+    private func executeOutcomeStrategy(
+        _ strategy: AgentOutcomeStrategy,
+        requirement:
+            AgentOutcomeRequirement,
+        userInput: String
+    ) async -> OutcomeStrategyExecutionResult {
+        switch strategy.kind {
+        case .publicResearch:
+            let reply =
+                await performWebResearch(
+                    query:
+                        webResearchQuery(
+                            from:
+                                userInput
+                        ),
+                    allowInteractiveEscalation:
+                        false
+                )
+
+            let hasEvidence =
+                !webResearchEvidence
+                    .isEmpty
+
+            return OutcomeStrategyExecutionResult(
+                succeeded:
+                    hasEvidence,
+                reply:
+                    hasEvidence
+                    ? reply
+                    : "",
+                summary:
+                    hasEvidence
+                    ? "Gerçek web kaynak kanıtı üretildi."
+                    : "Web araştırması sonuç veya derin okuma üretse bile başarı kriterini destekleyen gerçek kaynak kanıtı oluşmadı.",
+                executedCapabilityIDs:
+                    hasEvidence
+                    ? Set(
+                        strategy
+                            .capabilityIDs
+                    )
+                    : []
+            )
+
+        case .openURLAndObserve:
+            guard
+                let url =
+                    naturalLanguageResolver
+                        .webURL(
+                            from:
+                                userInput
+                        )
+            else {
+                return OutcomeStrategyExecutionResult(
+                    succeeded: false,
+                    reply: "",
+                    summary:
+                        "Kullanıcı girdisinden güvenilir HTTP/HTTPS hedefi çözülemedi.",
+                    executedCapabilityIDs: []
+                )
+            }
+
+            do {
+                let result =
+                    try await desktopControl
+                        .openWebURL(
+                            url
+                        )
+
+                let observed = [
+                    result.screenSummary,
+                    result.recognizedText
+                        .joined(
+                            separator: "\n"
+                        ),
+                    result.visibleWindows
+                        .joined(
+                            separator: "\n"
+                        )
+                ]
+                .joined(separator: "\n")
+
+                let normalizedEvidence =
+                    normalizeSemanticText(
+                        observed
+                    )
+                let rawHost =
+                    (url.host ?? "")
+                        .lowercased()
+                let hostWithoutWWW =
+                    rawHost.hasPrefix(
+                        "www."
+                    )
+                    ? String(
+                        rawHost
+                            .dropFirst(4)
+                    )
+                    : rawHost
+                let normalizedHost =
+                    normalizeSemanticText(
+                        hostWithoutWWW
+                    )
+                let firstHostLabel =
+                    hostWithoutWWW
+                        .split(
+                            separator: "."
+                        )
+                        .first
+                        .map {
+                            normalizeSemanticText(
+                                String($0)
+                            )
+                        } ??
+                    normalizedHost
+
+                let targetObserved =
+                    (!normalizedHost.isEmpty &&
+                     normalizedEvidence
+                        .contains(
+                            normalizedHost
+                        )) ||
+                    (
+                        firstHostLabel.count >= 4 &&
+                        normalizedEvidence
+                            .contains(
+                                firstHostLabel
+                            )
+                    )
+
+                guard targetObserved else {
+                    return OutcomeStrategyExecutionResult(
+                        succeeded: false,
+                        reply: "",
+                        summary:
+                            "URL macOS ile açıldı ancak ekran kanıtı hedef domain/sayfayı doğrulamadı.",
+                        executedCapabilityIDs:
+                            Set([
+                                "system.open.url"
+                            ])
+                    )
+                }
+
+                let evidence = [
+                    "URL: " +
+                        url.absoluteString,
+                    "Öndeki uygulama: " +
+                        (
+                            result.frontmostAfter ??
+                            "Bilinmiyor"
+                        ),
+                    "Ekran özeti: " +
+                        result.screenSummary,
+                    "OCR:\n" +
+                        result.recognizedText
+                            .prefix(80)
+                            .joined(
+                                separator: "\n"
+                            )
+                ]
+                .joined(
+                    separator: "\n\n"
+                )
+
+                let extracted =
+                    await localIntelligence
+                        .executeReasoningStep(
+                            goal:
+                                userInput,
+                            title:
+                                requirement.title,
+                            purpose:
+                                requirement.successCriterion +
+                                " Yalnız verilen ekran kanıtına dayan; kanıtta olmayan bilgiyi uydurma.",
+                            operation:
+                                "outcome.web.open-and-observe",
+                            dependencyEvidence:
+                                evidence
+                        )
+
+                let output =
+                    extracted?
+                        .trimmingCharacters(
+                            in:
+                                .whitespacesAndNewlines
+                        )
+
+                guard
+                    let output,
+                    !output.isEmpty
+                else {
+                    return OutcomeStrategyExecutionResult(
+                        succeeded: false,
+                        reply: "",
+                        summary:
+                            "Hedef sayfa gözlemlendi fakat kullanıcı outcome'u için güvenilir çıktı çıkarılamadı.",
+                        executedCapabilityIDs:
+                            Set(
+                                strategy
+                                    .capabilityIDs
+                            )
+                    )
+                }
+
+                return OutcomeStrategyExecutionResult(
+                    succeeded: true,
+                    reply: output,
+                    summary:
+                        "URL generic macOS provider ile açıldı, hedef ekran kanıtıyla doğrulandı ve istenen bilgi çıkarıldı.",
+                    executedCapabilityIDs:
+                        Set(
+                            strategy
+                                .capabilityIDs
+                        )
+                )
+            } catch {
+                return OutcomeStrategyExecutionResult(
+                    succeeded: false,
+                    reply: "",
+                    summary:
+                        error.localizedDescription,
+                    executedCapabilityIDs: []
+                )
+            }
+
+        case .screenObservation:
+            do {
+                let report =
+                    try await screenPerception
+                        .observe(
+                            goal:
+                                userInput
+                        )
+
+                let summary =
+                    report.semanticSummary
+                        .trimmingCharacters(
+                            in:
+                                .whitespacesAndNewlines
+                        )
+
+                guard !summary.isEmpty else {
+                    return OutcomeStrategyExecutionResult(
+                        succeeded: false,
+                        reply: "",
+                        summary:
+                            "Ekran gözlemi anlamlı kanıt üretmedi.",
+                        executedCapabilityIDs: []
+                    )
+                }
+
+                return OutcomeStrategyExecutionResult(
+                    succeeded: true,
+                    reply: summary,
+                    summary:
+                        "Görünür ekran kanıtı üretildi.",
+                    executedCapabilityIDs:
+                        Set(
+                            strategy
+                                .capabilityIDs
+                        )
+                )
+            } catch {
+                return OutcomeStrategyExecutionResult(
+                    succeeded: false,
+                    reply: "",
+                    summary:
+                        error.localizedDescription,
+                    executedCapabilityIDs: []
+                )
+            }
+
+        case .genericAppWorkflow,
+             .directCapability,
+             .localFiles,
+             .reasoningTransform,
+             .learning:
+            return OutcomeStrategyExecutionResult(
+                succeeded: false,
+                reply: "",
+                summary:
+                    "Bu strategy kind için outcome-level generic executor bu sürümde bağlı değil.",
+                executedCapabilityIDs: []
+            )
+        }
+    }
+
     private func webResearchQuery(
         from rawText: String
     ) -> String {
@@ -3751,7 +4274,8 @@ final class AgentEngine: ObservableObject {
     }
 
     private func performWebResearch(
-        query: String
+        query: String,
+        allowInteractiveEscalation: Bool = true
     ) async -> String {
         webResearchStatus = "Web araştırılıyor…"
         log("Web Research başladı")
@@ -3808,15 +4332,22 @@ final class AgentEngine: ObservableObject {
 
             if evidence.isEmpty,
                let resolved = resolvedTargets.first {
-                queueInteractiveAccessCapability()
+                if allowInteractiveEscalation {
+                    queueInteractiveAccessCapability()
+                }
 
                 var reply =
                     "Hedefin doğrudan adresini çözdüm: " +
                     resolved.url.absoluteString +
                     "\n\nAncak bu kaynak canlı içeriğini statik web isteğine açmadığı için güncel veriyi doğrulayamadım."
 
-                reply +=
-                    "\n\nKRALİ bunu 'hedef yok' diye yorumlamıyor; bir sonraki gerekli yetkinlik olarak güvenli tarayıcı/oturum erişimini öğrenme kuyruğuna aldı."
+                if allowInteractiveEscalation {
+                    reply +=
+                        "\n\nKRALİ bunu 'hedef yok' diye yorumlamıyor; bir sonraki gerekli yetkinlik olarak güvenli tarayıcı/oturum erişimini öğrenme kuyruğuna aldı."
+                } else {
+                    reply +=
+                        "\n\nOutcome Strategy Chain bu yolu başarısız sayıp sıradaki güvenli stratejiyi değerlendirecek."
+                }
 
                 if !lines.isEmpty {
                     reply += "\n\nÇözülen / bulunan kaynaklar:\n" + lines
@@ -3858,14 +4389,21 @@ final class AgentEngine: ObservableObject {
             let browser = capabilityRegistry.all.first(
                 where: { $0.id == "browser.control" }
             ),
-            !selectedCapabilities.contains(
-                where: { $0.id == browser.id }
-            )
+            !browser.isAvailable
         else {
             return
         }
 
-        selectedCapabilities.append(browser)
+        if !selectedCapabilities.contains(
+            where: {
+                $0.id ==
+                    browser.id
+            }
+        ) {
+            selectedCapabilities.append(
+                browser
+            )
+        }
 
         let plans = capabilityLearner.makePlans(
             for: [browser],
@@ -4054,6 +4592,8 @@ final class AgentEngine: ObservableObject {
                     currentProblemResolution,
                 outcomeResolution:
                     currentOutcomeResolution,
+                outcomeAttempts:
+                    currentOutcomeAttempts,
                 reflectionSummary:
                     currentReflectionSummary,
                 capabilityGaps:

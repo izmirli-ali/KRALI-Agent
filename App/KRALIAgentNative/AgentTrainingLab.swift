@@ -257,6 +257,18 @@ struct AgentTrainingLab {
         results.append(
             outcomePlannerMutationStillRequiresRealCapabilityResult()
         )
+        results.append(
+            explicitDomainDirectResearchCandidateResult()
+        )
+        results.append(
+            outcomeStrategyChainOrderingResult()
+        )
+        results.append(
+            webTargetDoesNotBecomeApplicationNameResult()
+        )
+        results.append(
+            exhaustedOutcomeOpensRealCapabilityGapResult()
+        )
 
         let core = results.filter { $0.tier == .core }
         let northStar = results.filter { $0.tier == .northStar }
@@ -274,6 +286,304 @@ struct AgentTrainingLab {
             northStarPassed: northStar.filter(\.passed).count,
             northStarTotal: northStar.count,
             results: results
+        )
+    }
+
+    private func exhaustedOutcomeOpensRealCapabilityGapResult()
+        -> TrainingScenarioResult {
+        let gap =
+            capabilityGapResolver
+                .resolveExhaustedOutcomeCapability(
+                    capabilityID:
+                        "browser.control",
+                    objective:
+                        "example.com ana başlığını öğren",
+                    attemptSummaries: [
+                        "research.web: kanıt yok",
+                        "system.open.url + perception.screen: ekran doğrulanamadı"
+                    ],
+                    capabilities:
+                        capabilityRegistry.all
+                )
+
+        var diagnostics: [String] = []
+
+        if gap == nil {
+            diagnostics.append(
+                "Outcome stratejileri tükendiği halde browser.control gerçek capability gap olarak açılmadı."
+            )
+        }
+
+        if gap?.kind !=
+            .integration {
+            diagnostics.append(
+                "browser.control exhausted gap integration olarak sınıflandırılmadı."
+            )
+        }
+
+        if !(gap?
+            .candidateCapabilityIDs
+            .isEmpty ?? false) {
+            diagnostics.append(
+                "Tükenmiş stratejiler tekrar candidate olarak gap'e taşındı."
+            )
+        }
+
+        return TrainingScenarioResult(
+            scenarioID:
+                "outcome-exhaustion-opens-capability-gap",
+            title:
+                "Outcome stratejileri tükenince gerçek capability gap açılmalı",
+            tier: .core,
+            prompt:
+                "example.com sitesine gir ve sayfadaki ana başlığı bana söyle",
+            passed: diagnostics.isEmpty,
+            goal:
+                "Mevcut güvenli yollar runtime'da başarısızsa ancak o zaman browser.control Learning Gateway'e geç",
+            route: [
+                "Core",
+                "Outcome",
+                "Strategy Chain",
+                "Learning Gate"
+            ],
+            selectedCapabilities: [],
+            unavailableCapabilities: [
+                "browser.control"
+            ],
+            diagnostics: diagnostics
+        )
+    }
+
+    private func explicitDomainDirectResearchCandidateResult()
+        -> TrainingScenarioResult {
+        let prompt =
+            "example.com sitesine gir ve sayfadaki ana başlığı bana söyle"
+
+        let plan =
+            researchQueryPlanner.plan(
+                prompt
+            )
+
+        var diagnostics: [String] = []
+
+        if !plan.directCandidates
+            .contains(
+                where: {
+                    $0.url.host?
+                        .lowercased() ==
+                        "example.com"
+                }
+            ) {
+            diagnostics.append(
+                "Açık domain direct research candidate'a çevrilmedi."
+            )
+        }
+
+        if !plan.preferredDomains
+            .contains(
+                "example.com"
+            ) {
+            diagnostics.append(
+                "Açık domain preferred domain olarak korunmadı."
+            )
+        }
+
+        return TrainingScenarioResult(
+            scenarioID:
+                "explicit-domain-direct-research",
+            title:
+                "Açık domain doğrudan kaynağa çözülmeli",
+            tier: .core,
+            prompt: prompt,
+            passed: diagnostics.isEmpty,
+            goal:
+                "Arama motoruna bağımlı kalmadan explicit URL/domain kaynağını önce doğrudan oku",
+            route: [
+                "Core",
+                "Outcome",
+                "Research"
+            ],
+            selectedCapabilities: [
+                "research.web"
+            ],
+            unavailableCapabilities: [],
+            diagnostics: diagnostics
+        )
+    }
+
+    private func outcomeStrategyChainOrderingResult()
+        -> TrainingScenarioResult {
+        let prompt =
+            "example.com sitesine gir ve sayfadaki ana başlığı bana söyle"
+
+        let goal = AgentGoalProfile(
+            summary:
+                "example.com ana başlığını öğren",
+            outcomes: [
+                .open,
+                .research,
+                .explain
+            ],
+            requiredCapabilityIDs: [
+                "core.reasoning",
+                "context.local",
+                "browser.control",
+                "desktop.app"
+            ],
+            isCompound: true
+        )
+
+        let resolution =
+            outcomePlanner.resolve(
+                contract:
+                    outcomePlanner.makeContract(
+                        userInput:
+                            prompt,
+                        goal:
+                            goal,
+                        mission:
+                            nil
+                    ),
+                capabilities:
+                    capabilityRegistry.all
+            )
+
+        let strategies =
+            resolution
+                .orderedExecutableStrategies(
+                    for:
+                        "public-information"
+                )
+
+        var diagnostics: [String] = []
+
+        if strategies.first?
+            .kind !=
+            .publicResearch {
+            diagnostics.append(
+                "Outcome chain'in ilk stratejisi research.web değil."
+            )
+        }
+
+        if strategies.dropFirst()
+            .first?
+            .kind !=
+            .openURLAndObserve {
+            diagnostics.append(
+                "research.web sonrasında system.open.url + perception.screen fallback'i yok."
+            )
+        }
+
+        if strategies.contains(
+            where: {
+                $0.requiresLearning
+            }
+        ) {
+            diagnostics.append(
+                "Learning stratejisi executable safe strategy zincirine karıştı."
+            )
+        }
+
+        return TrainingScenarioResult(
+            scenarioID:
+                "outcome-strategy-chain-order",
+            title:
+                "Outcome stratejileri güvenli sırayla denenmeli",
+            tier: .core,
+            prompt: prompt,
+            passed: diagnostics.isEmpty,
+            goal:
+                "research.web → system.open.url + perception.screen → gerekirse Learning",
+            route: [
+                "Core",
+                "Outcome",
+                "Strategy Chain"
+            ],
+            selectedCapabilities:
+                strategies
+                    .flatMap(
+                        \.capabilityIDs
+                    )
+                    .uniquedForTraining(),
+            unavailableCapabilities: [
+                "browser.control"
+            ],
+            diagnostics: diagnostics
+        )
+    }
+
+    private func webTargetDoesNotBecomeApplicationNameResult()
+        -> TrainingScenarioResult {
+        let prompt =
+            "example.com sitesine gir ve sayfadaki ana başlığı bana söyle"
+
+        let explicitAppPrompt =
+            "Safari'yi aç ve example.com sitesine gir"
+
+        var diagnostics: [String] = []
+
+        if languageResolver
+            .applicationTargetPhrase(
+                from: prompt
+            ) != nil {
+            diagnostics.append(
+                "Domain/site ifadesi yanlışlıkla uygulama hedefi olarak çözüldü."
+            )
+        }
+
+        if languageResolver
+            .webURL(
+                from: prompt
+            )?
+            .host?
+            .lowercased() !=
+            "example.com" {
+            diagnostics.append(
+                "Web hedefi example.com olarak çözülemedi."
+            )
+        }
+
+        let explicitApp =
+            languageResolver
+                .applicationTargetPhrase(
+                    from:
+                        explicitAppPrompt
+                )
+
+        if explicitApp == nil ||
+           !languageResolver
+            .normalized(
+                explicitApp ?? ""
+            )
+            .contains(
+                "safari"
+            ) {
+            diagnostics.append(
+                "Açık Safari hedefi web workflow filtresi yüzünden kayboldu."
+            )
+        }
+
+        return TrainingScenarioResult(
+            scenarioID:
+                "web-target-not-application-name",
+            title:
+                "Domain hedefi uygulama adı sanılmamalı",
+            tier: .core,
+            prompt: prompt,
+            passed: diagnostics.isEmpty,
+            goal:
+                "Web hedefini URL olarak çöz; yalnız açık app hedefi varsa uygulama resolver'a ver",
+            route: [
+                "Core",
+                "Language",
+                "Outcome"
+            ],
+            selectedCapabilities: [
+                "system.open.url",
+                "perception.screen"
+            ],
+            unavailableCapabilities: [],
+            diagnostics: diagnostics
         )
     }
 

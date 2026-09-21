@@ -52,6 +52,7 @@ enum AgentOutcomeStrategyKind:
     case directCapability
     case publicResearch
     case screenObservation
+    case openURLAndObserve
     case genericAppWorkflow
     case localFiles
     case reasoningTransform
@@ -72,6 +73,30 @@ struct AgentOutcomeStrategy:
     let executableNow: Bool
     let requiresLearning: Bool
     let rationale: String
+}
+
+
+enum AgentOutcomeAttemptState:
+    String,
+    Codable,
+    Hashable,
+    Sendable {
+    case succeeded
+    case failed
+    case skipped
+}
+
+struct AgentOutcomeStrategyAttempt:
+    Identifiable,
+    Codable,
+    Hashable,
+    Sendable {
+    let id: String
+    let strategyID: String
+    let requirementID: String
+    let state: AgentOutcomeAttemptState
+    let summary: String
+    let executedCapabilityIDs: [String]
 }
 
 struct AgentOutcomeResolution:
@@ -99,6 +124,24 @@ struct AgentOutcomeResolution:
         .isSubset(
             of: coveredRequirementIDs
         )
+    }
+
+    func orderedExecutableStrategies(
+        for requirementID: String
+    ) -> [AgentOutcomeStrategy] {
+        strategies
+            .filter {
+                $0.requirementID ==
+                    requirementID &&
+                $0.executableNow &&
+                !$0.requiresLearning
+            }
+            .sorted {
+                if $0.score == $1.score {
+                    return $0.id < $1.id
+                }
+                return $0.score > $1.score
+            }
     }
 }
 
@@ -156,8 +199,9 @@ struct AgentOutcomePlanner {
                     ],
                     acceptableCapabilityIDs: [
                         "research.web",
-                        "browser.control",
-                        "perception.screen"
+                        "system.open.url",
+                        "perception.screen",
+                        "browser.control"
                     ],
                     requiresMutation: false
                 )
@@ -476,6 +520,13 @@ struct AgentOutcomePlanner {
         for capabilityID in
             requirement
                 .preferredCapabilityIDs {
+            if requirement.kind ==
+                .retrievePublicInformation &&
+               capabilityID ==
+                "research.web" {
+                continue
+            }
+
             if availableCapabilityIDs
                 .contains(capabilityID) {
                 results.append(
@@ -547,32 +598,32 @@ struct AgentOutcomePlanner {
 
             if availableCapabilityIDs
                 .contains(
-                    "perception.screen"
+                    "system.open.url"
                 ) &&
                availableCapabilityIDs
                 .contains(
-                    "desktop.app"
+                    "perception.screen"
                 ) {
                 results.append(
                     AgentOutcomeStrategy(
                         id:
                             requirement.id +
-                            ":screen-observation",
+                            ":open-url-observe",
                         requirementID:
                             requirement.id,
                         kind:
-                            .screenObservation,
+                            .openURLAndObserve,
                         title:
-                            "Uygulama + ekran gözlemiyle bilgi edin",
+                            "URL'yi sistemle aç ve ekranı gözlemle",
                         capabilityIDs: [
-                            "desktop.app",
+                            "system.open.url",
                             "perception.screen"
                         ],
-                        score: 70,
+                        score: 80,
                         executableNow: true,
                         requiresLearning: false,
                         rationale:
-                            "Public bilgi başka yolla alınamazsa görünür uygulama durumundan salt-okunur kanıt üretilebilir."
+                            "Statik web okuma kanıt üretmezse belirli bir tarayıcıya bağlanmadan macOS varsayılan URL işleyicisiyle hedef açılıp görünür içerik doğrulanabilir."
                     )
                 )
             }
