@@ -4163,7 +4163,11 @@ final class AgentEngine: ObservableObject {
                                 .recognizedText
                                 .count,
                         frontmostApplication:
-                            result.frontmostAfter
+                            result.frontmostAfter,
+                        windowID:
+                            result.capturedWindowID,
+                        observationAttemptCount:
+                            result.observationAttemptCount
                     )
 
                 guard
@@ -4175,6 +4179,27 @@ final class AgentEngine: ObservableObject {
                         reply: "",
                         summary:
                             "URL açıldı ancak varsayılan URL işleyicisi ekran gözlemi boyunca frontmost kalmadı. Kullanıcı veya başka bir uygulama odağı değiştirmiş olabilir; bu gözlem başarı kanıtı olarak kullanılamaz.",
+                        executedCapabilityIDs:
+                            Set([
+                                "system.open.url"
+                            ]),
+                        observation:
+                            observation
+                    )
+                }
+
+                guard
+                    !result.recognizedText.isEmpty
+                else {
+                    return OutcomeStrategyExecutionResult(
+                        succeeded: false,
+                        reply: "",
+                        summary:
+                            "Observation hazır değil: hedef web penceresi " +
+                            String(
+                                result.observationAttemptCount
+                            ) +
+                            " denemede OCR kanıtı üretmedi. Bu geçici algı/yüklenme belirsizliği capability eksikliği sayılmamalı.",
                         executedCapabilityIDs:
                             Set([
                                 "system.open.url"
@@ -4228,7 +4253,7 @@ final class AgentEngine: ObservableObject {
                         succeeded: false,
                         reply: "",
                         summary:
-                            "URL macOS ile açıldı ancak ham ekran/OCR kanıtında tam hedef domain doğrulanamadı; yalnız marka adı veya görev metni başarı kanıtı sayılmadı.",
+                            "Observation belirsiz: URL açıldı ve hedef pencere yakalandı ancak ham ekran/OCR kanıtında tam hedef domain doğrulanamadı. Bu tek başına browser.control capability eksikliği kanıtı değildir.",
                         executedCapabilityIDs:
                             Set([
                                 "system.open.url"
