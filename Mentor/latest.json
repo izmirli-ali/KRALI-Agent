@@ -1,127 +1,123 @@
 {
   "activityTail" : [
     {
-      "date" : "2026-09-21T12:07:22Z",
-      "text" : "Task Graph: "
+      "date" : "2026-09-21T13:03:45Z",
+      "text" : "Uygulama kontrolü başarısız: Uygulama bulunamadı: com sitesine"
     },
     {
-      "date" : "2026-09-21T12:07:22Z",
-      "text" : "Semantic capability planı: context.local, core.reasoning, research.web"
+      "date" : "2026-09-21T13:03:45Z",
+      "text" : "Debug/Recovery: Bilinmeyen hata • Hata ayıklanıyor • desktop.app"
     },
     {
-      "date" : "2026-09-21T12:07:22Z",
-      "text" : "Semantic planner sağlayıcısı: Deterministic Capability Contract"
+      "date" : "2026-09-21T13:03:43Z",
+      "text" : "Problem Solver fallback tamamlandı: Mevcut kanıtı yeniden kullan"
     },
     {
-      "date" : "2026-09-21T12:07:22Z",
-      "text" : "Semantic Mission: birşey araştırmak istiyorum"
+      "date" : "2026-09-21T13:03:43Z",
+      "text" : "Problem Solver stratejisi: Mevcut kanıtı yeniden kullan • Bağımlılık kanıtı zaten mevcut; salt-okunur reasoning/transform adımında yeniden gözlem gerekmeyebilir."
     },
     {
-      "date" : "2026-09-21T12:07:22Z",
-      "text" : "Semantic planner fallback: goal contract'tan deterministic mission üretildi"
+      "date" : "2026-09-21T13:03:43Z",
+      "text" : "Problem Solver reflection: İlk yaklaşım hedefe ulaşmadı. Kalan güvenli stratejiler değerlendirildi; sıradaki yaklaşım: Mevcut kanıtı yeniden kullan."
     },
     {
-      "date" : "2026-09-21T12:07:15Z",
-      "text" : "Seçilen kabiliyetler: Akıl yürütme, Bağlam, Web araştırma"
+      "date" : "2026-09-21T13:03:43Z",
+      "text" : "Web Research başarısız: Web araştırması yeterince alakalı sonuç üretmedi."
     },
     {
-      "date" : "2026-09-21T12:07:15Z",
-      "text" : "Otomatik rota: Core → Goal → Context → Plan → Research → Verify → Response"
+      "date" : "2026-09-21T13:03:41Z",
+      "text" : "Web Research başladı"
     },
     {
-      "date" : "2026-09-21T12:07:15Z",
-      "text" : "Seçilen plan: Bağlamı incele; doğrudan araç eşleşmesi yoksa güvenli alternatifler üret"
+      "date" : "2026-09-21T13:03:41Z",
+      "text" : "Semantic rota: Core → Goal → Context → Plan → Browser → Desktop → Verify → Response"
     },
     {
-      "date" : "2026-09-21T12:07:15Z",
-      "text" : "KRALİ Core hedef sözleşmesi: güncel kaynaklarla araştır"
+      "date" : "2026-09-21T13:03:41Z",
+      "text" : "Task Graph blocked capability: browser.control"
     },
     {
-      "date" : "2026-09-21T12:07:15Z",
+      "date" : "2026-09-21T13:03:41Z",
+      "text" : "Task Graph: 0:core.reasoning[reason] → 1:context.local[reason] → 2:browser.control[verify] → 3:desktop.app[act]"
+    },
+    {
+      "date" : "2026-09-21T13:03:41Z",
+      "text" : "Problem Solver adayları: Mevcut provider'ı kullan[100] | Mevcut provider'ı kullan[100] | Mevcut provider'ı kullan[100] | Kanıtı reasoning ile dönüştür[75]"
+    },
+    {
+      "date" : "2026-09-21T13:03:41Z",
+      "text" : "Problem Solver seçimi: Mevcut provider'ı kullan • score=100 • capabilities=core.reasoning"
+    },
+    {
+      "date" : "2026-09-21T13:03:41Z",
+      "text" : "Semantic capability planı: browser.control, context.local, core.reasoning, desktop.app"
+    },
+    {
+      "date" : "2026-09-21T13:03:41Z",
+      "text" : "Semantic planner sağlayıcısı: Local Contract Repair"
+    },
+    {
+      "date" : "2026-09-21T13:03:41Z",
+      "text" : "Semantic Mission: example.com sitesine gir ve sayfadaki ana başlığı bana söyle"
+    },
+    {
+      "date" : "2026-09-21T13:03:41Z",
+      "text" : "Problem Solver semantic Learning'i erteledi: app.workflow, browser.control, desktop.app"
+    },
+    {
+      "date" : "2026-09-21T13:03:41Z",
+      "text" : "Outcome Solver: başarı kriterleri mevcut capability'lerle kapsandı • Outcome'u research.web ile çöz"
+    },
+    {
+      "date" : "2026-09-21T13:03:41Z",
+      "text" : "Yetkinlik öğrenme planı: Tarayıcı kontrolü → Entegrasyon gerekli"
+    },
+    {
+      "date" : "2026-09-21T13:03:41Z",
+      "text" : "Seçilen kabiliyetler: Akıl yürütme, Bağlam, Uygulama kontrolü, Tarayıcı kontrolü [bekliyor]"
+    },
+    {
+      "date" : "2026-09-21T13:03:41Z",
+      "text" : "Otomatik rota: Core → Goal → Context → Plan → Desktop → Browser → Learn → Verify → Response"
+    },
+    {
+      "date" : "2026-09-21T13:03:41Z",
+      "text" : "Seçilen plan: Uygulama adını çöz, uygulamayı aç veya öne getir ve sonucu doğrula"
+    },
+    {
+      "date" : "2026-09-21T13:03:41Z",
+      "text" : "KRALİ Core hedef sözleşmesi: istenen uygulamayı aç veya öne getir"
+    },
+    {
+      "date" : "2026-09-21T13:03:41Z",
       "text" : "Problem Solver başlangıç stratejisi: Mevcut provider'ı kullan • Task Graph bu capability'yi doğrudan seçti ve provider available."
     },
     {
-      "date" : "2026-09-21T12:06:55Z",
-      "text" : "Mentor trace GitHub'a senkronlandı"
+      "date" : "2026-09-21T13:03:41Z",
+      "text" : "Bağlam hafızası: Çalışma kuralı"
     },
     {
-      "date" : "2026-09-21T12:06:44Z",
-      "text" : "Görev tamamlandı • 0.14 sn"
-    },
-    {
-      "date" : "2026-09-21T12:06:44Z",
-      "text" : "Mentor trace yerel olarak kaydedildi"
-    },
-    {
-      "date" : "2026-09-21T12:06:44Z",
-      "text" : "Plan B başarılı: Çelişki algılandı: workspace indeksi 56 klasör gözlemledi fakat birincil arama 0 sonuç verdi. Yeni capability öğrenmek yerine doğrulanmış indeks kanıtı yeniden kullanıldı."
-    },
-    {
-      "date" : "2026-09-21T12:06:44Z",
-      "text" : "Problem Solver contradiction recovery: Çelişki algılandı: workspace indeksi 56 klasör gözlemledi fakat birincil arama 0 sonuç verdi. Yeni capability öğrenmek yerine doğrulanmış indeks kanıtı yeniden kullanıldı."
-    },
-    {
-      "date" : "2026-09-21T12:06:44Z",
-      "text" : "0 klasör eşleşmesi bulundu"
-    },
-    {
-      "date" : "2026-09-21T12:06:44Z",
-      "text" : "Yerel klasör araması: klasörleri bul"
-    },
-    {
-      "date" : "2026-09-21T12:06:44Z",
-      "text" : "4 ekran görüntüsü adayı bulundu"
-    },
-    {
-      "date" : "2026-09-21T12:06:44Z",
-      "text" : "1739 dosya ve 56 klasör indekslendi"
-    },
-    {
-      "date" : "2026-09-21T12:06:44Z",
-      "text" : "Seçilen kabiliyetler: Akıl yürütme, Bağlam, Dosya metadata, Dosya arama"
-    },
-    {
-      "date" : "2026-09-21T12:06:44Z",
-      "text" : "Otomatik rota: Core → Goal → Context → Plan → Files → Verify → Response"
-    },
-    {
-      "date" : "2026-09-21T12:06:44Z",
-      "text" : "Seçilen plan: Seçili çalışma alanını salt-okunur tara, filtreleri uygula ve en uygun sonuçları göster"
-    },
-    {
-      "date" : "2026-09-21T12:06:44Z",
-      "text" : "KRALİ Core hedef sözleşmesi: klasörleri bul"
-    },
-    {
-      "date" : "2026-09-21T12:06:44Z",
-      "text" : "Problem Solver başlangıç stratejisi: Mevcut provider'ı kullan • Task Graph bu capability'yi doğrudan seçti ve provider available."
-    },
-    {
-      "date" : "2026-09-21T12:06:44Z",
-      "text" : "Bağlam firewall: önceki görev bağlamları bu tura taşınmadı"
-    },
-    {
-      "date" : "2026-09-21T12:06:34Z",
+      "date" : "2026-09-21T13:03:31Z",
       "text" : "Apple yerel zeka hazır"
     },
     {
-      "date" : "2026-09-21T12:06:34Z",
+      "date" : "2026-09-21T13:03:31Z",
       "text" : "Çalışma klasörü yolu geri yüklendi; indeks gerektiğinde oluşturulacak: Desktop"
     },
     {
-      "date" : "2026-09-21T12:06:34Z",
+      "date" : "2026-09-21T13:03:31Z",
       "text" : "Ağır geliştirici testleri normal açılışta otomatik çalıştırılmıyor"
     },
     {
-      "date" : "2026-09-21T12:06:34Z",
+      "date" : "2026-09-21T13:03:31Z",
       "text" : "Dinamik hedef ve kabiliyet yönlendirme aktif"
     },
     {
-      "date" : "2026-09-21T12:06:34Z",
+      "date" : "2026-09-21T13:03:31Z",
       "text" : "KRALİ Core hazır"
     }
   ],
-  "appVersion" : "0.8.63",
+  "appVersion" : "0.8.65",
   "capabilities" : [
     {
       "available" : true,
@@ -149,28 +145,7 @@
     }
   ],
   "capabilityGaps" : [
-    {
-      "candidateCapabilityIDs" : [
 
-      ],
-      "capabilityID" : "browser.control",
-      "capabilityName" : "Tarayıcı kontrolü",
-      "developerBrief" : "KRALİ Capability Gap Developer Brief\n\nKullanıcı hedefi:\nexample.com sitesine gir ve sayfadaki ana başlığı bana söyle\n\nEksik capability:\nbrowser.control — Tarayıcı kontrolü\n\nGap türü:\nintegration\n\nBlocked step:\n2: Tarayıcı kontrolü\nOperation: capability.contract\nRole: verify\n\nMevcut strategy adayları:\nYok\n\nÇözüm kuralları:\n- Önce problemi ve kabul kriterini tanımla; kod değişikliği yalnız seçilen çözüm stratejisi gerçekten gerektiriyorsa yapılmalı.\n- Mevcut capability'leri bileştirerek çözüm üretilebiliyorsa yeni provider yazma.\n- En az iki çözüm alternatifi değerlendir ve neden seçildiğini kaydet.\n- Uygulama/marka adına hard-code yazma; mümkün olduğunca generic capability veya strategy geliştir.\n- Mevcut provider başka bir işi yapılmış gibi göstermesin.\n- Dış dünyaya commit eden eylemlerde kullanıcı onay kapısı korunmalı.\n- Başarı gerçek observation/verification ile kanıtlanmalı.\n- Ana branch üzerinde doğrudan self-modification yapma; candidate branch/worktree kullan.\n- Build + Training Lab + ilgili runtime probe geçmeden capability available yapılmamalı.\n\nKabul kriteri:\nBlocked step gerçek provider/strategy ile tamamlanmalı, evidence downstream step'e aktarılmalı ve verifier sahte PASS üretmemeli.",
-      "kind" : "integration",
-      "reason" : "Task Graph step 'Tarayıcı kontrolü' için browser.control gerekiyor ancak provider available değil.",
-      "researchGoal" : "Tarayıcı kontrolü için resmi API/entegrasyon veya generic UI bridge seçeneklerini araştır; izin, güvenlik ve doğrulama sınırlarını çıkar."
-    },
-    {
-      "candidateCapabilityIDs" : [
-
-      ],
-      "capabilityID" : "desktop.app",
-      "capabilityName" : "Uygulama kontrolü",
-      "developerBrief" : "KRALİ Runtime Capability Failure Developer Brief\n\nKullanıcı hedefi:\nexample.com sitesine gir ve sayfadaki ana başlığı bana söyle\n\nRuntime'da başarısız capability:\ndesktop.app — Uygulama kontrolü\n\nStep:\n3: Uygulama kontrolü\nOperation: capability.contract\nRole: act\n\nMevcut strategy adayları:\nYok\n\nSorun:\nProvider available olmasına rağmen runtime step tamamlanamadı veya postcondition doğrulanamadı: desktop.app • capability.contract\n\nÇözüm kuralları:\n- Önce problemi, gözlemleri ve başarısız postcondition'ı tanımla; doğrudan kod satırı aramaya başlama.\n- En az iki makul çözüm stratejisini değerlendir; mevcut capability kombinasyonu problemi çözebiliyorsa yeni provider yazma.\n- Capability zaten available ise önce mevcut provider'ı ve postcondition verifier'ı debug et.\n- Uygulama/marka adına hard-code yazma; hatayı genel resolver/provider/strategy seviyesinde çöz.\n- Başarı gerçek observation/verification ile kanıtlanmadan PASS üretme.\n- Dış dünyaya commit eden eylemlerde kullanıcı onayı korunmalı.\n- Candidate branch/worktree kullan; ana branch'i doğrudan değiştirme.\n- Build + regression + mümkünse runtime probe geçmeden düzeltmeyi available/healthy sayma.\n\nKabul kriteri:\nAynı sınıftaki bilinmeyen hedeflerde de provider doğru hedefi çözebilmeli; başarısız runtime step tamamlanmalı ve verifier gerçek evidence ile PASS verebilmeli.",
-      "kind" : "strategy",
-      "reason" : "Provider available olmasına rağmen runtime step tamamlanamadı veya postcondition doğrulanamadı: desktop.app • capability.contract",
-      "researchGoal" : "Mevcut Uygulama kontrolü provider'ının neden runtime'da başarısız olduğunu kanıtla; önce mevcut provider/strategy'yi debug et, gerekirse generic recovery veya yeni provider stratejisi geliştir ve aynı postcondition'ı gerçek observation ile doğrula."
-    }
   ],
   "contextMemory" : [
     {
@@ -180,7 +155,7 @@
       "title" : "Çalışma kuralı"
     }
   ],
-  "createdAt" : "2026-09-21T12:08:43Z",
+  "createdAt" : "2026-09-21T13:03:45Z",
   "executionSteps" : [
     {
       "capabilityID" : "core.reasoning",
@@ -224,19 +199,96 @@
       "title" : "Sonucu kullanıcıya aktar"
     }
   ],
-  "fallbackPlan" : "Tamamlanmayan action step'ini yeniden planla; yürütülmeyen işi başarılı sayma.",
-  "finalResponse" : "Görev tamamlanamadı. Eksik kabiliyet: Tarayıcı kontrolü.\n\nDoğrulama: Semantic mission içindeki zorunlu action step'lerinden bazıları tamamlanmadı: desktop.app\nAlternatif plan: Tamamlanmayan action step'ini yeniden planla; yürütülmeyen işi başarılı sayma.\nYetkinlik kazanma planı: Resmi API/entegrasyonu araştır → gereken hesap/izinleri çıkar → bağlantıyı sandbox/test ortamında doğrula → kullanıcı onayından sonra etkinleştir.",
+  "fallbackPlan" : "Aynı başarı kriteri için başka güvenli outcome stratejisini dene; kanıt üretmeden başarılı sayma.",
+  "finalResponse" : "Görev tamamlanamadı. Eksik kabiliyet: Tarayıcı kontrolü.\n\nDoğrulama: Outcome stratejisi public web araştırmasını seçti ancak gerçek kaynak kanıtı üretmedi.\nAlternatif plan: Aynı başarı kriteri için başka güvenli outcome stratejisini dene; kanıt üretmeden başarılı sayma.",
   "goal" : "example.com sitesine gir ve sayfadaki ana başlığı bana söyle",
   "inputSource" : "text",
   "learningPlans" : [
-    {
-      "capabilityID" : "browser.control",
-      "capabilityName" : "Tarayıcı kontrolü",
-      "nextStep" : "Resmi API/entegrasyonu araştır → gereken hesap/izinleri çıkar → bağlantıyı sandbox/test ortamında doğrula → kullanıcı onayından sonra etkinleştir.",
-      "researchGoal" : "macOS tarayıcı otomasyonu için güvenli browser bridge, Accessibility ve desteklenen otomasyon API'lerini resmi kaynaklardan karşılaştır.",
-      "state" : "integrationRequired"
-    }
+
   ],
+  "outcomeResolution" : {
+    "chosenStrategyIDs" : [
+      "public-information:direct:research.web"
+    ],
+    "contract" : {
+      "instrumentalCapabilityIDs" : [
+        "app.workflow",
+        "browser.control",
+        "desktop.app"
+      ],
+      "objective" : "example.com sitesine gir ve sayfadaki ana başlığı bana söyle",
+      "requirements" : [
+        {
+          "acceptableCapabilityIDs" : [
+            "research.web",
+            "browser.control",
+            "perception.screen"
+          ],
+          "id" : "public-information",
+          "kind" : "retrievePublicInformation",
+          "preferredCapabilityIDs" : [
+            "research.web"
+          ],
+          "requiresMutation" : false,
+          "successCriterion" : "Kullanıcının istediği bilgi gerçek public kaynaktan kanıtla elde edilmiş olmalı.",
+          "title" : "İstenen public bilgiyi elde et"
+        }
+      ],
+      "successCriteria" : [
+        "Kullanıcının istediği bilgi gerçek public kaynaktan kanıtla elde edilmiş olmalı."
+      ]
+    },
+    "coveredRequirementIDs" : [
+      "public-information"
+    ],
+    "strategies" : [
+      {
+        "capabilityIDs" : [
+          "research.web"
+        ],
+        "executableNow" : true,
+        "id" : "public-information:direct:research.web",
+        "kind" : "publicResearch",
+        "rationale" : "Bu capability başarı kriterini doğrudan karşılayabiliyor.",
+        "requirementID" : "public-information",
+        "requiresLearning" : false,
+        "score" : 110,
+        "title" : "Outcome'u research.web ile çöz"
+      },
+      {
+        "capabilityIDs" : [
+          "research.web"
+        ],
+        "executableNow" : true,
+        "id" : "public-information:public-research",
+        "kind" : "publicResearch",
+        "rationale" : "Kullanıcının başarı kriteri bilgi edinmek; tarayıcı UI'sı araçtır, zorunlu outcome değildir.",
+        "requirementID" : "public-information",
+        "requiresLearning" : false,
+        "score" : 110,
+        "title" : "Public kaynaktan bilgi edin"
+      },
+      {
+        "capabilityIDs" : [
+          "desktop.app",
+          "perception.screen"
+        ],
+        "executableNow" : true,
+        "id" : "public-information:screen-observation",
+        "kind" : "screenObservation",
+        "rationale" : "Public bilgi başka yolla alınamazsa görünür uygulama durumundan salt-okunur kanıt üretilebilir.",
+        "requirementID" : "public-information",
+        "requiresLearning" : false,
+        "score" : 70,
+        "title" : "Uygulama + ekran gözlemiyle bilgi edin"
+      }
+    ],
+    "suppressedLearningCapabilityIDs" : [
+      "browser.control",
+      "app.workflow",
+      "desktop.app"
+    ]
+  },
   "plan" : "Hedefi çöz → Bağlam → Tarayıcı kontrolü → Uygulama kontrolü",
   "problemResolution" : {
     "frame" : {
@@ -301,7 +353,6 @@
     "Plan",
     "Browser",
     "Desktop",
-    "Learn",
     "Verify",
     "Response"
   ],
@@ -413,8 +464,8 @@
       "title" : "Uygulama kontrolü"
     }
   ],
-  "traceID" : "85B71BD0-B49A-4CDA-BC57-18FCB5FAEC64",
+  "traceID" : "66D2B379-9005-4A16-8A19-1C0CCD2677D2",
   "userInput" : "example.com sitesine gir ve sayfadaki ana başlığı bana söyle",
   "verificationState" : "attention",
-  "verificationSummary" : "Semantic mission içindeki zorunlu action step'lerinden bazıları tamamlanmadı: desktop.app"
+  "verificationSummary" : "Outcome stratejisi public web araştırmasını seçti ancak gerçek kaynak kanıtı üretmedi."
 }

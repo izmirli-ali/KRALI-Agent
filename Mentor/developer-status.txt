@@ -1,1 +1,1 @@
-local_agent_watchdog_timeout|Ollama native agent model isteği zaman aşımına uğradı.|krali-dev-agent/20260921-151102|/Users/medusa/Developer/KRALI-Agent-Dev-20260921-151102|@meta|app=0.8.63|at=1789992727|run=20260921-151102
+stale_run|Önceki Developer Agent oturumu aktif değil veya bu sürüme ait değil.|krali-dev-agent/20260921-151102|/Users/medusa/Developer/KRALI-Agent-Dev-20260921-151102|@meta|app=0.8.65|at=1789995811|run=20260921-151102
