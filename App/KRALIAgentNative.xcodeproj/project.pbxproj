@@ -44,6 +44,8 @@
 		A10000000000000000000035 /* AgentLearningQueue.swift in Sources */ = {isa = PBXBuildFile; fileRef = B10000000000000000000035 /* AgentLearningQueue.swift */; };
 		A10000000000000000000036 /* ConversationStore.swift in Sources */ = {isa = PBXBuildFile; fileRef = B10000000000000000000036 /* ConversationStore.swift */; };
 		A10000000000000000000037 /* ConversationSidebarView.swift in Sources */ = {isa = PBXBuildFile; fileRef = B10000000000000000000037 /* ConversationSidebarView.swift */; };
+		A10000000000000000000038 /* AgentWorkspaceIndexer.swift in Sources */ = {isa = PBXBuildFile; fileRef = B10000000000000000000038 /* AgentWorkspaceIndexer.swift */; };
+		A10000000000000000000039 /* AgentDiagnosticsLoader.swift in Sources */ = {isa = PBXBuildFile; fileRef = B10000000000000000000039 /* AgentDiagnosticsLoader.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
@@ -85,6 +87,8 @@
 		B10000000000000000000035 /* AgentLearningQueue.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AgentLearningQueue.swift; sourceTree = "<group>"; };
 		B10000000000000000000036 /* ConversationStore.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ConversationStore.swift; sourceTree = "<group>"; };
 		B10000000000000000000037 /* ConversationSidebarView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ConversationSidebarView.swift; sourceTree = "<group>"; };
+		B10000000000000000000038 /* AgentWorkspaceIndexer.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AgentWorkspaceIndexer.swift; sourceTree = "<group>"; };
+		B10000000000000000000039 /* AgentDiagnosticsLoader.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AgentDiagnosticsLoader.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -146,6 +150,8 @@
 				B10000000000000000000035 /* AgentLearningQueue.swift */,
 				B10000000000000000000036 /* ConversationStore.swift */,
 				B10000000000000000000037 /* ConversationSidebarView.swift */,
+				B10000000000000000000038 /* AgentWorkspaceIndexer.swift */,
+				B10000000000000000000039 /* AgentDiagnosticsLoader.swift */,
 			);
 			path = KRALIAgentNative;
 			sourceTree = "<group>";
@@ -264,6 +270,8 @@
 				A10000000000000000000035 /* AgentLearningQueue.swift in Sources */,
 				A10000000000000000000036 /* ConversationStore.swift in Sources */,
 				A10000000000000000000037 /* ConversationSidebarView.swift in Sources */,
+				A10000000000000000000038 /* AgentWorkspaceIndexer.swift in Sources */,
+				A10000000000000000000039 /* AgentDiagnosticsLoader.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -301,7 +309,7 @@
 				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
 				CODE_SIGN_STYLE = Automatic;
 				COMBINE_HIDPI_IMAGES = YES;
-				CURRENT_PROJECT_VERSION = 107;
+				CURRENT_PROJECT_VERSION = 108;
 				DEVELOPMENT_TEAM = 65244UMFCK;
 				ENABLE_HARDENED_RUNTIME = NO;
 				ENABLE_PREVIEWS = YES;
@@ -317,7 +325,7 @@
 					"@executable_path/../Frameworks",
 				);
 				MACOSX_DEPLOYMENT_TARGET = 14.0;
-				MARKETING_VERSION = 0.8.57;
+				MARKETING_VERSION = 0.8.58;
 				PRODUCT_BUNDLE_IDENTIFIER = com.aliihsancanuysal.kraliagent;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				SDKROOT = macosx;
@@ -333,7 +341,7 @@
 				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
 				CODE_SIGN_STYLE = Automatic;
 				COMBINE_HIDPI_IMAGES = YES;
-				CURRENT_PROJECT_VERSION = 107;
+				CURRENT_PROJECT_VERSION = 108;
 				DEVELOPMENT_TEAM = 65244UMFCK;
 				ENABLE_HARDENED_RUNTIME = NO;
 				GENERATE_INFOPLIST_FILE = YES;
@@ -348,7 +356,7 @@
 					"@executable_path/../Frameworks",
 				);
 				MACOSX_DEPLOYMENT_TARGET = 14.0;
-				MARKETING_VERSION = 0.8.57;
+				MARKETING_VERSION = 0.8.58;
 				PRODUCT_BUNDLE_IDENTIFIER = com.aliihsancanuysal.kraliagent;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				SDKROOT = macosx;

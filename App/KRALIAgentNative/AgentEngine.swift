@@ -33,6 +33,8 @@ final class AgentEngine: ObservableObject {
     @Published var fileSearchResults: [FileRecord] = []
     @Published var folderSearchResults: [FolderRecord] = []
     @Published var fileSearchTitle = ""
+    @Published var workspaceIndexReady = false
+    @Published var diagnosticsLoaded = false
 
     @Published var currentGoal = "Hazır"
     @Published var currentPlan = "Yeni görevi bekliyor"
@@ -132,6 +134,10 @@ final class AgentEngine: ObservableObject {
     private let subscriptionIntelligence = AgentSubscriptionIntelligence()
     private let contextMemoryStore = AgentContextMemoryStore()
     private let conversationStore = ConversationStore()
+    private let workspaceIndexer = AgentWorkspaceIndexer()
+    private let diagnosticsLoader = AgentDiagnosticsLoader()
+    private let workspaceIndexFreshness: TimeInterval = 45
+    private var workspaceIndexUpdatedAt: Date?
     private var lastDecision: AgentDecision?
     private var activeLearningJobID: UUID?
 
@@ -178,90 +184,15 @@ final class AgentEngine: ObservableObject {
             : "\(contextMemoryEntries.count) bağlam kaydı hazır."
 
         capabilityLearningBacklog = learningStore.load()
-        mentorTraceReady = fileManager.fileExists(
-            atPath: mentorTraceStore.latestURL.path
-        )
-        if mentorTraceReady {
-            mentorTraceStatus = "Son mentor kaydı hazır."
-        }
-
-        trainingLabReport = trainingLabStore.load()
-        if let report = trainingLabReport {
-            trainingLabStatus =
-                "Son test: \(report.passed)/\(report.total) geçti • " +
-                "Core \(report.corePassed)/\(report.coreTotal) • " +
-                "North Star \(report.northStarPassed)/\(report.northStarTotal)"
-
-            mentorTraceReady = true
-            if !fileManager.fileExists(
+        mentorTraceReady =
+            fileManager.fileExists(
                 atPath: mentorTraceStore.latestURL.path
-            ) {
-                mentorTraceStatus =
-                    "Training Lab raporu hazır • Mentora gönderilebilir"
-            }
-        }
+            ) ||
+            diagnosticsLoader.hasStoredDiagnostics()
 
-        liveResearchEvalReport = liveResearchEvalStore.load()
-        if let report = liveResearchEvalReport {
-            liveResearchEvalStatus =
-                "Son gerçek test: \(report.passed)/\(report.total) geçti"
-
-            mentorTraceReady = true
-        }
-
-        arenaReport = arenaStore.load()
-        if let report = arenaReport {
-            arenaStatus =
-                "Son Arena: \(report.passed)/\(report.total) geçti • " +
-                "\(report.failed) başarısız • " +
-                "Reviewer \(report.reviewerFlagged) işaret"
-            mentorTraceReady = true
-        }
-
-        screenPerceptionReport =
-            screenPerceptionStore.load()
-        if let report = screenPerceptionReport {
-            screenPerceptionStatus =
-                "Son Screen Probe: " +
-                String(report.recognizedText.count) +
-                " metin satırı • " +
-                String(report.visibleWindows.count) +
-                " pencere"
-            mentorTraceReady = true
-        } else if let status =
-            screenPerceptionStore.readStatus(),
-                  !status.isEmpty {
-            screenPerceptionStatus = status
-        } else {
-            screenPerceptionStatus =
-                "Screen Perception Probe henüz çalıştırılmadı."
-            screenPerceptionStore.saveStatus(
-                "not_run|Screen Perception Probe henüz çalıştırılmadı."
-            )
-        }
-
-        desktopControlReport =
-            desktopControlStore.load()
-        if let report = desktopControlReport {
-            desktopControlStatus =
-                "Son Desktop Probe: " +
-                (report.launchOrActivateSucceeded
-                    ? "uygulama açıldı/öne geldi"
-                    : "başarısız") +
-                " • AX " +
-                (report.accessibilityTrusted
-                    ? "izinli"
-                    : "izin bekliyor")
-        } else if let status =
-            desktopControlStore.readStatus(),
-                  !status.isEmpty {
-            desktopControlStatus = status
-        } else {
-            desktopControlStatus =
-                "Desktop Control Probe henüz çalıştırılmadı."
-            desktopControlStore.saveStatus(
-                "not_run|Desktop Control Probe henüz çalıştırılmadı."
-            )
+        if mentorTraceReady {
+            mentorTraceStatus =
+                "Mentor / diagnostic kaydı hazır."
         }
 
         let launchAppVersion =
@@ -303,29 +234,8 @@ final class AgentEngine: ObservableObject {
                 running.id
         }
 
-        let launchDiagnosticsCurrent =
-            trainingLabReport?.appVersion ==
-                launchAppVersion &&
-            liveResearchEvalReport?.appVersion ==
-                launchAppVersion &&
-            arenaReport?.appVersion ==
-                launchAppVersion
-
-        if developerAgentStatus.state == "no_change" &&
-           !launchDiagnosticsCurrent {
-            let staleStatus =
-                DeveloperAgentStatus(
-                    state: "stale_diagnostics",
-                    message:
-                        "Önceki no_change kararı bu sürüm için geçerli değil. Güncel Training, Live ve Arena diagnostic'leri gerekiyor.",
-                    branch: nil,
-                    worktree: nil
-                )
-
-            developerAgentStatus = staleStatus
-            developerBridge.writeStatus(
-                staleStatus
-            )
+        if developerAgentStatus.state == "no_change" {
+            loadDiagnosticsIfNeeded()
         }
 
         log("KRALİ Core hazır")
@@ -357,6 +267,122 @@ final class AgentEngine: ObservableObject {
 
             self.startNextLearningJobIfNeeded()
         }
+    }
+
+    // MARK: - Lazy Diagnostics
+
+    func loadDiagnosticsIfNeeded() {
+        guard !diagnosticsLoaded else {
+            return
+        }
+
+        let snapshot = diagnosticsLoader.load()
+
+        trainingLabReport =
+            snapshot.trainingLabReport
+        liveResearchEvalReport =
+            snapshot.liveResearchEvalReport
+        arenaReport =
+            snapshot.arenaReport
+        screenPerceptionReport =
+            snapshot.screenPerceptionReport
+        desktopControlReport =
+            snapshot.desktopControlReport
+
+        if let report = trainingLabReport {
+            trainingLabStatus =
+                "Son test: \(report.passed)/\(report.total) geçti • " +
+                "Core \(report.corePassed)/\(report.coreTotal) • " +
+                "North Star \(report.northStarPassed)/\(report.northStarTotal)"
+            mentorTraceReady = true
+        }
+
+        if let report = liveResearchEvalReport {
+            liveResearchEvalStatus =
+                "Son gerçek test: \(report.passed)/\(report.total) geçti"
+            mentorTraceReady = true
+        }
+
+        if let report = arenaReport {
+            arenaStatus =
+                "Son Arena: \(report.passed)/\(report.total) geçti • " +
+                "\(report.failed) başarısız • " +
+                "Reviewer \(report.reviewerFlagged) işaret"
+            mentorTraceReady = true
+        }
+
+        if let report = screenPerceptionReport {
+            screenPerceptionStatus =
+                "Son Screen Probe: " +
+                String(report.recognizedText.count) +
+                " metin satırı • " +
+                String(report.visibleWindows.count) +
+                " pencere"
+            mentorTraceReady = true
+        } else if let status =
+            snapshot.screenPerceptionStatus,
+                  !status.isEmpty {
+            screenPerceptionStatus = status
+        }
+
+        if let report = desktopControlReport {
+            desktopControlStatus =
+                "Son Desktop Probe: " +
+                (report.launchOrActivateSucceeded
+                    ? "uygulama açıldı/öne geldi"
+                    : "başarısız") +
+                " • AX " +
+                (report.accessibilityTrusted
+                    ? "izinli"
+                    : "izin bekliyor")
+            mentorTraceReady = true
+        } else if let status =
+            snapshot.desktopControlStatus,
+                  !status.isEmpty {
+            desktopControlStatus = status
+        }
+
+        diagnosticsLoaded = true
+        validateNoChangeDiagnostics()
+        log("Diagnostics isteğe bağlı yüklendi")
+    }
+
+    private func validateNoChangeDiagnostics() {
+        guard developerAgentStatus.state == "no_change" else {
+            return
+        }
+
+        let launchAppVersion =
+            Bundle.main.object(
+                forInfoDictionaryKey:
+                    "CFBundleShortVersionString"
+            ) as? String ?? "unknown"
+
+        let current =
+            trainingLabReport?.appVersion ==
+                launchAppVersion &&
+            liveResearchEvalReport?.appVersion ==
+                launchAppVersion &&
+            arenaReport?.appVersion ==
+                launchAppVersion
+
+        guard !current else {
+            return
+        }
+
+        let staleStatus =
+            DeveloperAgentStatus(
+                state: "stale_diagnostics",
+                message:
+                    "Önceki no_change kararı bu sürüm için geçerli değil. Güncel Training, Live ve Arena diagnostic'leri gerekiyor.",
+                branch: nil,
+                worktree: nil
+            )
+
+        developerAgentStatus = staleStatus
+        developerBridge.writeStatus(
+            staleStatus
+        )
     }
 
     // MARK: - Chat
@@ -4327,7 +4353,7 @@ final class AgentEngine: ObservableObject {
             return "Önce bir çalışma klasörü seçmeliyim. Sonra hiçbir dosyayı değiştirmeden yapıyı inceleyip birkaç alternatif önerebilirim."
         }
 
-        indexSelectedFolder()
+        ensureWorkspaceIndexed()
 
         var observations: [String] = [
             "\(indexedFiles.count) dosya",
@@ -4383,93 +4409,62 @@ final class AgentEngine: ObservableObject {
         UserDefaults.standard.set(url.path, forKey: selectedRootKey)
         pendingFileAction = nil
         lastUndoAction = nil
+        workspaceIndexReady = false
+        workspaceIndexUpdatedAt = nil
         indexSelectedFolder()
 
         log("Çalışma klasörü seçildi: \(url.lastPathComponent)")
     }
 
     func indexSelectedFolder() {
-        guard let root = selectedRootURL else { return }
-
-        let keys: [URLResourceKey] = [
-            .isRegularFileKey,
-            .isDirectoryKey,
-            .creationDateKey,
-            .contentModificationDateKey
-        ]
-
-        guard let enumerator = fileManager.enumerator(
-            at: root,
-            includingPropertiesForKeys: keys,
-            options: [.skipsHiddenFiles, .skipsPackageDescendants]
-        ) else {
+        guard let root = selectedRootURL else {
+            workspaceIndexReady = false
             indexedFiles = []
-            log("Klasör indekslenemedi")
+            indexedFolders = []
             return
         }
 
-        var records: [FileRecord] = []
-        var folders: [FolderRecord] = []
-        let maxItems = 5000
+        let snapshot = workspaceIndexer.index(
+            root: root
+        )
 
-        for case let url as URL in enumerator {
-            if records.count + folders.count >= maxItems {
-                log("İndeks güvenlik sınırına ulaştı: \(maxItems) öğe")
-                break
-            }
+        indexedFiles = snapshot.files
+        indexedFolders = snapshot.folders
+        workspaceIndexReady = true
+        workspaceIndexUpdatedAt = Date()
 
-            do {
-                let values = try url.resourceValues(forKeys: Set(keys))
-                let name = url.lastPathComponent
-                let relativePath = url.path.replacingOccurrences(
-                    of: root.path + "/",
-                    with: ""
-                )
-
-                if values.isDirectory == true {
-                    folders.append(
-                        FolderRecord(
-                            url: url,
-                            name: name,
-                            relativePath: relativePath,
-                            creationDate: values.creationDate,
-                            modificationDate: values.contentModificationDate
-                        )
-                    )
-                    continue
-                }
-
-                guard values.isRegularFile == true else { continue }
-
-                let ext = url.pathExtension.lowercased()
-
-                records.append(
-                    FileRecord(
-                        url: url,
-                        name: name,
-                        relativePath: relativePath,
-                        fileExtension: ext,
-                        isScreenshot: isScreenshotFileName(name, extension: ext),
-                        creationDate: values.creationDate,
-                        modificationDate: values.contentModificationDate
-                    )
-                )
-            } catch {
-                continue
-            }
+        if snapshot.reachedSafetyLimit {
+            log(
+                "İndeks güvenlik sınırına ulaştı: 5000 öğe"
+            )
         }
 
-        indexedFiles = records.sorted {
-            $0.relativePath.localizedStandardCompare($1.relativePath) == .orderedAscending
+        let screenshots =
+            indexedFiles.filter(\.isScreenshot).count
+
+        log(
+            "\(indexedFiles.count) dosya ve " +
+            "\(indexedFolders.count) klasör indekslendi"
+        )
+        log(
+            "\(screenshots) ekran görüntüsü adayı bulundu"
+        )
+    }
+
+    private func ensureWorkspaceIndexed() {
+        guard selectedRootURL != nil else {
+            return
         }
 
-        indexedFolders = folders.sorted {
-            $0.relativePath.localizedStandardCompare($1.relativePath) == .orderedAscending
+        if workspaceIndexReady,
+           let workspaceIndexUpdatedAt,
+           Date().timeIntervalSince(
+                workspaceIndexUpdatedAt
+           ) < workspaceIndexFreshness {
+            return
         }
 
-        let screenshotCount = indexedFiles.filter(\.isScreenshot).count
-        log("\(indexedFiles.count) dosya ve \(indexedFolders.count) klasör indekslendi")
-        log("\(screenshotCount) ekran görüntüsü adayı bulundu")
+        indexSelectedFolder()
     }
 
     var screenshotCount: Int {
@@ -4509,9 +4504,18 @@ final class AgentEngine: ObservableObject {
             return
         }
 
-        selectedRootURL = URL(fileURLWithPath: path, isDirectory: true)
-        indexSelectedFolder()
-        log("Çalışma klasörü geri yüklendi: \(selectedRootURL?.lastPathComponent ?? path)")
+        selectedRootURL = URL(
+            fileURLWithPath: path,
+            isDirectory: true
+        )
+        workspaceIndexReady = false
+        workspaceIndexUpdatedAt = nil
+        indexedFiles = []
+        indexedFolders = []
+        log(
+            "Çalışma klasörü yolu geri yüklendi; indeks gerektiğinde oluşturulacak: " +
+            (selectedRootURL?.lastPathComponent ?? path)
+        )
     }
 
     // MARK: - Local File Search
@@ -4705,7 +4709,7 @@ final class AgentEngine: ObservableObject {
             return "Önce bir çalışma klasörü seç. Klasör aramasını seçili alanın içinde yapacağım."
         }
 
-        indexSelectedFolder()
+        ensureWorkspaceIndexed()
 
         let text =
             normalize(rawText)
@@ -4841,7 +4845,7 @@ final class AgentEngine: ObservableObject {
             return "Önce bir çalışma klasörü seç. Aramayı seçtiğin klasör ve alt klasörlerinde yapacağım."
         }
 
-        indexSelectedFolder()
+        ensureWorkspaceIndexed()
 
         let text = normalize(rawText)
         let imageExtensions = Set(["png", "jpg", "jpeg", "heic", "tif", "tiff", "webp", "gif"])
@@ -5042,7 +5046,7 @@ final class AgentEngine: ObservableObject {
             return "Önce sağdaki “Klasör seç ve indeksle” ile Masaüstü klasörünü seç. Bu sürüm dosyaları yalnızca senin seçtiğin klasör içinde değiştirecek."
         }
 
-        indexSelectedFolder()
+        ensureWorkspaceIndexed()
 
         let screenshots = indexedFiles.filter {
             $0.isScreenshot &&
@@ -5140,6 +5144,7 @@ final class AgentEngine: ObservableObject {
             lastUndoAction = UndoFileAction(moves: moves)
         }
 
+        workspaceIndexReady = false
         indexSelectedFolder()
 
         log("\(moves.count) dosya gerçekten taşındı")
@@ -5194,6 +5199,7 @@ final class AgentEngine: ObservableObject {
         }
 
         lastUndoAction = nil
+        workspaceIndexReady = false
         indexSelectedFolder()
 
         log("\(restored) dosya işlemi geri alındı")
@@ -5229,23 +5235,6 @@ final class AgentEngine: ObservableObject {
 
             counter += 1
         }
-    }
-
-    private func isScreenshotFileName(_ name: String, extension ext: String) -> Bool {
-        let imageExtensions = Set(["png", "jpg", "jpeg", "heic", "tif", "tiff", "webp"])
-        guard imageExtensions.contains(ext) else { return false }
-
-        let n = normalize(name)
-
-        let patterns = [
-            "ekran resmi",
-            "ekran goruntusu",
-            "ekran görüntüsü",
-            "screenshot",
-            "screen shot"
-        ]
-
-        return patterns.contains { n.contains($0) }
     }
 
     // MARK: - Memory
