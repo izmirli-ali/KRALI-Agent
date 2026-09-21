@@ -328,7 +328,12 @@ struct AgentGoalInterpreter {
                     "ayarla", "degistir",
                     "hatirlatma",
                     "etkinlik", "randevu", "mesaj", "sarki",
-                    "bolumune git"
+                    "bolumune git",
+                    "oynat", "play",
+                    "tikla", "click",
+                    "kaydir", "scroll",
+                    "yaz", "type",
+                    "ac ve", "open and"
                 ]
             )
 
@@ -341,9 +346,31 @@ struct AgentGoalInterpreter {
 
         if asksGenericAppWorkflow &&
            !specializedAppDomain {
-            capabilityIDs.insert(
-                "app.workflow"
-            )
+            capabilityIDs.formUnion([
+                "app.workflow",
+                "perception.screen"
+            ])
+
+            let interactionTerms = [
+                "oynat", "play",
+                "tikla", "click",
+                "kaydir", "scroll",
+                "sec", "select",
+                "yaz", "type",
+                "ekle", "add",
+                "ayarla", "degistir"
+            ]
+
+            if interactionTerms.contains(
+                where: {
+                    affirmativeWorkflowText
+                        .contains($0)
+                }
+            ) {
+                capabilityIDs.insert(
+                    "desktop.control"
+                )
+            }
         }
 
         if containsAny(text, ["aç", "ac", "finder'da", "finderda"]) &&
