@@ -1380,7 +1380,9 @@ actor AgentLocalIntelligence {
             Türkçe cevap ver.
 
             Kurallar:
-            - Kullanıcının hedefini doğrudan cevapla; yalnızca plan veya süreç anlatma.
+            - Kullanıcının güncel mesajı nihai hedeftir. Hedef sözleşmesi, önceki bağlam ve executor taslağı yardımcı sinyallerdir; güncel istekle çelişirlerse veya isteği meta-süreç anlatımına çevirirlerse güncel kullanıcı mesajını takip et.
+            - Kullanıcının hedefini doğrudan cevapla; yalnızca plan, capability eşleştirmesi, güvenli alternatif üretimi veya iç sistem süreci anlatma; kullanıcı bunları özellikle sormadıysa cevabı görevin gerçek içeriğinde tut.
+            - Önceki workflow kurallarını yalnızca gerçekten uygulanabilir bir kısıt olarak kullan; bilgi sorusunun konusunu bu kurallarla değiştirme.
             - Verilen kanıtları özetlemekle yetinme. Neden-sonuç, örüntü, güçlü/zayıf yan, fırsat ve risk çıkarımları üret.
             - Kullanıcı fikir istiyorsa, söylediği maddeleri tekrarlamak yerine kanıtlardan türetilmiş özgün fikirler üret.
             - Kullanıcı mevcut bir fikri/çıktıyı senaryoya, çekim planına, metne veya başka bir formata "çevir / dönüştür / uyarla" diyorsa yeni alternatif fikir listesi üretme. Referans verdiği tek öğeyi seç ve istenen süre, sayı, sıra ve formata sadık biçimde dönüştür.
