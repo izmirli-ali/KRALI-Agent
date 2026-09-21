@@ -100,7 +100,7 @@ struct ContentView: View {
             Button {
                 engine.syncMentorTrace()
             } label: {
-                if engine.mentorSyncBusy {
+                if engine.inspectorState.mentorSyncBusy {
                     ProgressView()
                         .controlSize(.small)
                 } else {
@@ -112,8 +112,8 @@ struct ContentView: View {
             .buttonStyle(.bordered)
             .controlSize(.small)
             .disabled(
-                !engine.mentorTraceReady ||
-                engine.mentorSyncBusy
+                !engine.inspectorState.mentorTraceReady ||
+                engine.inspectorState.mentorSyncBusy
             )
             .help("Son görevin Mentor kaydını gönder")
 
@@ -659,7 +659,7 @@ struct ContentView: View {
                     .clipShape(RoundedRectangle(cornerRadius: 11))
                 }
 
-                if let incident = engine.debugIncident {
+                if let incident = engine.inspectorState.debugIncident {
                     sectionTitle("Hata Ayıklama")
 
                     VStack(alignment: .leading, spacing: 8) {
@@ -739,19 +739,13 @@ struct ContentView: View {
                 }
 
                 if !engine.capabilityLearningPlans.isEmpty ||
-                   !engine.capabilityLearningBacklog.isEmpty ||
-                   engine.learningQueueJobs.contains(
-                       where: { !$0.state.isTerminal }
-                   ) ||
-                   engine.developerAgentStatus.shouldShowLearningStatus {
+                   !engine.inspectorState.activeLearningJobs.isEmpty ||
+                   engine.inspectorState.shouldShowPrimaryDeveloperStatus {
                     sectionTitle("Öğrenme")
 
                     VStack(alignment: .leading, spacing: 8) {
                         let activeQueueJobs =
-                            engine.learningQueueJobs
-                                .filter {
-                                    !$0.state.isTerminal
-                                }
+                            engine.inspectorState.activeLearningJobs
 
                         if !activeQueueJobs.isEmpty {
                             HStack(spacing: 6) {
@@ -868,44 +862,40 @@ struct ContentView: View {
                                 }
                             }
 
-                            if engine
-                                .developerAgentStatus
-                                .shouldShowLearningStatus ||
+                            if engine.inspectorState
+                                .shouldShowPrimaryDeveloperStatus ||
                                !engine
                                 .capabilityLearningPlans
-                                .isEmpty ||
-                               !engine
-                                .capabilityLearningBacklog
                                 .isEmpty {
                                 Divider()
                             }
                         }
 
-                        if engine.developerAgentStatus.shouldShowLearningStatus {
+                        if engine.inspectorState.shouldShowPrimaryDeveloperStatus {
                             HStack(alignment: .top, spacing: 8) {
-                                if engine.developerAgentStatus.isLearningActive {
+                                if engine.inspectorState.developerAgentStatus.isLearningActive {
                                     ProgressView()
                                         .controlSize(.small)
                                         .frame(width: 16, height: 16)
                                 } else {
                                     Image(
                                         systemName:
-                                            engine.developerAgentStatus
+                                            engine.inspectorState.developerAgentStatus
                                             .isReadyForReview &&
-                                        engine.developerAgentStatus.state !=
+                                        engine.inspectorState.developerAgentStatus.state !=
                                             "build_failed" &&
-                                        engine.developerAgentStatus.state !=
+                                        engine.inspectorState.developerAgentStatus.state !=
                                             "recovered_candidate_build_failed"
                                                 ? "checkmark.circle.fill"
                                                 : "exclamationmark.triangle.fill"
                                     )
                                     .font(.caption)
                                     .foregroundStyle(
-                                        engine.developerAgentStatus
+                                        engine.inspectorState.developerAgentStatus
                                             .isReadyForReview &&
-                                        engine.developerAgentStatus.state !=
+                                        engine.inspectorState.developerAgentStatus.state !=
                                             "build_failed" &&
-                                        engine.developerAgentStatus.state !=
+                                        engine.inspectorState.developerAgentStatus.state !=
                                             "recovered_candidate_build_failed"
                                             ? Color.green
                                             : Color.orange
@@ -915,18 +905,18 @@ struct ContentView: View {
 
                                 VStack(alignment: .leading, spacing: 2) {
                                     Text(
-                                        engine.developerAgentStatus
+                                        engine.inspectorState.developerAgentStatus
                                             .learningStageTitle
                                     )
                                     .font(.caption.weight(.semibold))
 
-                                    Text(engine.developerAgentStatus.message)
+                                    Text(engine.inspectorState.developerAgentStatus.message)
                                         .font(.caption2)
                                         .foregroundStyle(.secondary)
                                         .lineLimit(3)
 
                                     if let timing =
-                                        engine.developerAgentStatus
+                                        engine.inspectorState.developerAgentStatus
                                             .learningTimingText {
                                         Text(timing)
                                             .font(.caption2.monospacedDigit())
@@ -937,8 +927,7 @@ struct ContentView: View {
                                 Spacer()
                             }
 
-                            if !engine.capabilityLearningPlans.isEmpty ||
-                               !engine.capabilityLearningBacklog.isEmpty {
+                            if !engine.capabilityLearningPlans.isEmpty {
                                 Divider()
                             }
                         }
@@ -965,31 +954,6 @@ struct ContentView: View {
                             }
                         }
 
-                        if engine.capabilityLearningPlans.isEmpty {
-                            ForEach(
-                                engine.capabilityLearningBacklog
-                                    .filter { $0.progress != .enabled }
-                                    .prefix(3)
-                            ) { task in
-                                HStack(alignment: .top, spacing: 7) {
-                                    Image(systemName: task.progress.systemImage)
-                                        .font(.caption)
-                                        .foregroundStyle(.orange)
-
-                                    VStack(alignment: .leading, spacing: 2) {
-                                        Text(task.capabilityName)
-                                            .font(.caption.weight(.medium))
-
-                                        Text(task.nextStep)
-                                            .font(.caption2)
-                                            .foregroundStyle(.secondary)
-                                            .lineLimit(2)
-                                    }
-
-                                    Spacer()
-                                }
-                            }
-                        }
                     }
                     .padding(11)
                     .background(Color(nsColor: .controlBackgroundColor))
@@ -1132,7 +1096,7 @@ struct ContentView: View {
                             VStack(alignment: .leading, spacing: 2) {
                                 Text("Training Lab")
                                     .font(.caption.weight(.medium))
-                                Text(engine.trainingLabStatus)
+                                Text(engine.inspectorState.trainingLabStatus)
                                     .font(.caption2)
                                     .foregroundStyle(.secondary)
                                     .lineLimit(2)
@@ -1144,14 +1108,14 @@ struct ContentView: View {
                                 engine.runTrainingLab()
                             }
                             .controlSize(.small)
-                            .disabled(engine.trainingLabBusy)
+                            .disabled(engine.inspectorState.trainingLabBusy)
                         }
 
                         HStack {
                             VStack(alignment: .leading, spacing: 2) {
                                 Text("Live Research Eval")
                                     .font(.caption.weight(.medium))
-                                Text(engine.liveResearchEvalStatus)
+                                Text(engine.inspectorState.liveResearchEvalStatus)
                                     .font(.caption2)
                                     .foregroundStyle(.secondary)
                                     .lineLimit(2)
@@ -1163,14 +1127,14 @@ struct ContentView: View {
                                 engine.runLiveResearchEval()
                             }
                             .controlSize(.small)
-                            .disabled(engine.liveResearchEvalBusy)
+                            .disabled(engine.inspectorState.liveResearchEvalBusy)
                         }
 
                         HStack {
                             VStack(alignment: .leading, spacing: 2) {
                                 Text("KRALİ Arena")
                                     .font(.caption.weight(.medium))
-                                Text(engine.arenaStatus)
+                                Text(engine.inspectorState.arenaStatus)
                                     .font(.caption2)
                                     .foregroundStyle(.secondary)
                                     .lineLimit(2)
@@ -1182,14 +1146,14 @@ struct ContentView: View {
                                 engine.runArena()
                             }
                             .controlSize(.small)
-                            .disabled(engine.arenaBusy)
+                            .disabled(engine.inspectorState.arenaBusy)
                         }
 
                         HStack {
                             VStack(alignment: .leading, spacing: 2) {
                                 Text("Screen Perception Probe")
                                     .font(.caption.weight(.medium))
-                                Text(engine.screenPerceptionStatus)
+                                Text(engine.inspectorState.screenPerceptionStatus)
                                     .font(.caption2)
                                     .foregroundStyle(.secondary)
                                     .lineLimit(3)
@@ -1201,14 +1165,14 @@ struct ContentView: View {
                                 engine.runScreenPerceptionProbe()
                             }
                             .controlSize(.small)
-                            .disabled(engine.screenPerceptionBusy)
+                            .disabled(engine.inspectorState.screenPerceptionBusy)
                         }
 
                         HStack {
                             VStack(alignment: .leading, spacing: 2) {
                                 Text("Desktop Control Probe")
                                     .font(.caption.weight(.medium))
-                                Text(engine.desktopControlStatus)
+                                Text(engine.inspectorState.desktopControlStatus)
                                     .font(.caption2)
                                     .foregroundStyle(.secondary)
                                     .lineLimit(3)
@@ -1220,14 +1184,14 @@ struct ContentView: View {
                                 engine.runDesktopControlProbe()
                             }
                             .controlSize(.small)
-                            .disabled(engine.desktopControlBusy)
+                            .disabled(engine.inspectorState.desktopControlBusy)
                         }
 
                         HStack {
                             VStack(alignment: .leading, spacing: 2) {
                                 Text("Developer Agent")
                                     .font(.caption.weight(.medium))
-                                Text(engine.developerAgentStatus.message)
+                                Text(engine.inspectorState.developerAgentStatus.message)
                                     .font(.caption2)
                                     .foregroundStyle(.secondary)
                                     .lineLimit(2)
@@ -1239,7 +1203,7 @@ struct ContentView: View {
                                 engine.runDeveloperAgent()
                             }
                             .controlSize(.small)
-                            .disabled(engine.developerAgentBusy)
+                            .disabled(engine.inspectorState.developerAgentBusy)
                         }
 
                         Text(
