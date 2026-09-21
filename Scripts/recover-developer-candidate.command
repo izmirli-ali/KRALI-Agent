@@ -112,6 +112,7 @@ run_candidate_build() {
     BUILD_EXIT=$?
 
     /bin/cat "$BUILD_LOG" >>"$LOG" 2>/dev/null || true
+    rm -rf "$WORKTREE/.build-check"
     return "$BUILD_EXIT"
 }
 
