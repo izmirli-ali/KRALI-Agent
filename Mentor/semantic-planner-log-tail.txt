@@ -70,3 +70,15 @@ KRALİ Semantic Planner Fallback
 status=9
 input=Safari’yi aç. example.com adresine git ve sayfadaki ana başlığı oku, bana söyle. Ardından yeni bir sekmede wikipedia.org adresini açmayı hazırla ama benden onay almadan yeni sekme açma veya başka bir işlem yapma.
 output:
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+KRALİ Semantic Planner Fallback
+status=9
+input=birşey araştırmak istiyorum
+output:
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+KRALİ Semantic Planner Fallback
+status=9
+input=windows keyi ekli mi değil mi nasıl öğrenebiliriz?
+output:
