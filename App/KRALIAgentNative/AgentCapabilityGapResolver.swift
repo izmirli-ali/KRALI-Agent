@@ -120,6 +120,95 @@ struct AgentCapabilityGapResolver {
         return results
     }
 
+    func resolveExhaustedOutcomeCapability(
+        capabilityID: String,
+        objective: String,
+        attemptSummaries: [String],
+        capabilities: [AgentCapability]
+    ) -> CapabilityGapResolution? {
+        guard
+            let capability =
+                capabilities.first(
+                    where: {
+                        $0.id ==
+                            capabilityID
+                    }
+                ),
+            !capability.isAvailable
+        else {
+            return nil
+        }
+
+        let kind: CapabilityGapKind =
+            capability.risk == .external
+            ? .integration
+            : .code
+
+        let attemptEvidence =
+            attemptSummaries.isEmpty
+            ? "Mevcut güvenli strategy zinciri sonuç üretmedi."
+            : attemptSummaries
+                .joined(
+                    separator: " | "
+                )
+
+        let reason =
+            "Outcome başarı kriteri mevcut güvenli stratejilerle runtime'da doğrulanamadı; strategy zinciri tüketildi ve artık gerçek capability eksikliği kaldı: " +
+            capability.id +
+            " • " +
+            attemptEvidence
+
+        let researchGoal =
+            "Kullanıcı outcome'unu mevcut provider kombinasyonlarıyla çözemediğimiz kanıtlandı. " +
+            capability.name +
+            " capability'sini uygulama adına özel hard-code olmadan generic provider/strategy olarak araştır, geliştir ve aynı başarı kriterini gerçek observation ile doğrula."
+
+        let developerBrief =
+            """
+            KRALİ Exhausted Outcome Capability Developer Brief
+
+            Kullanıcı hedefi:
+            (objective)
+
+            Eksik capability:
+            (capability.id) — (capability.name)
+
+            Denenen güvenli stratejiler:
+            (attemptEvidence)
+
+            Sorun:
+            (reason)
+
+            Çözüm kuralları:
+            - Aynı başarısız stratejileri tekrar etme; runtime kanıtı bunların yetersiz olduğunu gösteriyor.
+            - Önce outcome başarı kriterini ve neden mevcut strategy chain'in yetmediğini açıkça tanımla.
+            - Uygulama/marka adına özel hard-code yazma.
+            - Mümkün olan en genel primitive/provider çözümünü geliştir.
+            - Candidate branch/worktree kullan.
+            - Gerçek source değişikliği, git diff, build ve runtime/postcondition kanıtı olmadan tamamlandı sayma.
+            - Başarılı provider oluşunca yarım kalan kullanıcı görevine kaldığı outcome adımından devam edebilmelidir.
+
+            Kabul kriteri:
+            Aynı sınıftaki yeni hedeflerde de capability generic biçimde çalışmalı ve kullanıcı outcome'u gerçek observation ile doğrulanmalıdır.
+            """
+
+        return CapabilityGapResolution(
+            capabilityID:
+                capability.id,
+            capabilityName:
+                capability.name,
+            kind:
+                kind,
+            reason:
+                reason,
+            candidateCapabilityIDs: [],
+            researchGoal:
+                researchGoal,
+            developerBrief:
+                developerBrief
+        )
+    }
+
     func resolveRuntimeFailures(
         graph: AgentTaskGraph,
         completedStepIndexes: Set<Int>,
