@@ -46,6 +46,7 @@ final class AgentEngine: ObservableObject {
     @Published var currentTaskGraph: AgentTaskGraph?
     @Published var taskGraphStatus = "Henüz görev grafiği yok."
     @Published var currentProblemResolution: AgentProblemResolution?
+    @Published var currentOutcomeResolution: AgentOutcomeResolution?
     @Published var currentReflectionSummary: String?
     @Published var currentCapabilityGaps: [CapabilityGapResolution] = []
     @Published var executionSteps: [AgentExecutionStep] = []
@@ -83,6 +84,7 @@ final class AgentEngine: ObservableObject {
     private let taskOrchestrator = AgentTaskOrchestrator()
     private let missionNormalizer = AgentMissionNormalizer()
     private let problemSolver = AgentProblemSolver()
+    private let outcomePlanner = AgentOutcomePlanner()
     private let capabilityGapResolver = AgentCapabilityGapResolver()
     private let verifier = AgentVerifier()
     private let capabilityRegistry = AgentCapabilityRegistry()
@@ -901,6 +903,35 @@ final class AgentEngine: ObservableObject {
             currentReflectionSummary =
                 problemResolution.reflection
 
+            let outcomeContract =
+                outcomePlanner.makeContract(
+                    userInput: text,
+                    goal: resolvedGoal,
+                    mission: mission
+                )
+            let outcomeResolution =
+                outcomePlanner.resolve(
+                    contract: outcomeContract,
+                    capabilities:
+                        capabilityRegistry.all
+                )
+            currentOutcomeResolution =
+                outcomeResolution
+
+            let outcomeSuppressedLearningIDs =
+                outcomeResolution
+                    .suppressedLearningCapabilityIDs
+
+            if outcomeResolution.isFullyCovered {
+                log(
+                    "Outcome Solver: başarı kriterleri mevcut capability'lerle kapsandı • " +
+                    outcomeResolution
+                        .chosenStrategies
+                        .map(\.title)
+                        .joined(separator: " | ")
+                )
+            }
+
             let problemSolvableBlockedIDs =
                 Set(
                     compiledTaskGraph.steps
@@ -929,14 +960,23 @@ final class AgentEngine: ObservableObject {
                     !problemSolvableBlockedIDs
                         .contains(
                             $0.capabilityID
+                        ) &&
+                    !outcomeSuppressedLearningIDs
+                        .contains(
+                            $0.capabilityID
                         )
                 }
 
-            if !problemSolvableBlockedIDs
-                .isEmpty {
+            let deferredLearningIDs =
+                problemSolvableBlockedIDs
+                    .union(
+                        outcomeSuppressedLearningIDs
+                    )
+
+            if !deferredLearningIDs.isEmpty {
                 log(
                     "Problem Solver semantic Learning'i erteledi: " +
-                    problemSolvableBlockedIDs
+                    deferredLearningIDs
                         .sorted()
                         .joined(separator: ", ")
                 )
@@ -956,6 +996,12 @@ final class AgentEngine: ObservableObject {
                     capabilities:
                         capabilityRegistry.all
                 )
+                .filter {
+                    !outcomeSuppressedLearningIDs
+                        .contains(
+                            $0.capabilityID
+                        )
+                }
 
             let blocked =
                 compiledTaskGraph
@@ -1119,9 +1165,53 @@ final class AgentEngine: ObservableObject {
             }
         }
 
-        var baseReply: String
+        var baseReply = ""
+        var outcomeHandledMission = false
 
-        if let mission = semanticMission {
+        if let outcomeResolution =
+            currentOutcomeResolution,
+           outcomeResolution.isFullyCovered,
+           !outcomeResolution
+                .contract
+                .requiresMutation,
+           let researchStrategy =
+                outcomeResolution
+                    .chosenStrategies
+                    .first(
+                        where: {
+                            $0.kind ==
+                                .publicResearch &&
+                            $0.executableNow
+                        }
+                    ) {
+            let outcomeReply =
+                await performWebResearch(
+                    query:
+                        webResearchQuery(
+                            from: text
+                        )
+                )
+
+            if !webResearchResults.isEmpty ||
+               !webResearchEvidence.isEmpty {
+                baseReply = outcomeReply
+                executedSemanticCapabilities
+                    .formUnion(
+                        researchStrategy
+                            .capabilityIDs
+                    )
+                outcomeHandledMission = true
+
+                log(
+                    "Outcome Solver yürüttü: " +
+                    researchStrategy.title +
+                    " • provider adımı yerine başarı kriteri hedeflendi"
+                )
+            }
+        }
+
+        if !outcomeHandledMission,
+           let mission = semanticMission {
             let result = await executeAvailableSemanticMission(
                 mission,
                 userInput: text
@@ -1151,8 +1241,17 @@ final class AgentEngine: ObservableObject {
                                 capabilityRegistry.all
                         )
 
+                let suppressedRuntimeIDs =
+                    currentOutcomeResolution?
+                        .suppressedLearningCapabilityIDs ??
+                    []
+
                 for gap in runtimeGaps
-                    where !currentCapabilityGaps
+                    where !suppressedRuntimeIDs
+                        .contains(
+                            gap.capabilityID
+                        ) &&
+                    !currentCapabilityGaps
                         .contains(
                             where: {
                                 $0.capabilityID ==
@@ -1170,14 +1269,15 @@ final class AgentEngine: ObservableObject {
                     )
                 }
             }
-        } else if resolvedGoal.outcomes.contains(.research),
+        } else if !outcomeHandledMission,
+                  resolvedGoal.outcomes.contains(.research),
                   resolvedCapabilities.contains(where: {
                       $0.id == "research.web" && $0.isAvailable
                   }) {
             baseReply = await performWebResearch(
                 query: webResearchQuery(from: text)
             )
-        } else {
+        } else if !outcomeHandledMission {
             baseReply = makeReply(
                 for: text,
                 decision: decision
@@ -1196,7 +1296,15 @@ final class AgentEngine: ObservableObject {
                 executedCapabilityIDs:
                     executedSemanticCapabilities,
                 completedMissionStepIndexes:
-                    completedSemanticStepIndexes
+                    completedSemanticStepIndexes,
+                substitutedCapabilityIDs:
+                    outcomeHandledMission
+                    ? (
+                        currentOutcomeResolution?
+                            .suppressedLearningCapabilityIDs ??
+                        []
+                    )
+                    : []
             )
         } else {
             completeActionSteps()
@@ -1213,6 +1321,8 @@ final class AgentEngine: ObservableObject {
                 currentUserInput: text,
                 goal: resolvedGoal,
                 semanticMission: semanticMission,
+                outcomeResolution:
+                    currentOutcomeResolution,
                 snapshot: verificationSnapshot(
                     executedCapabilityIDs:
                         executedSemanticCapabilities
@@ -2862,7 +2972,8 @@ final class AgentEngine: ObservableObject {
 
     private func completeSemanticActionSteps(
         executedCapabilityIDs: Set<String>,
-        completedMissionStepIndexes: Set<Int>
+        completedMissionStepIndexes: Set<Int>,
+        substitutedCapabilityIDs: Set<String> = []
     ) {
         var semanticStepIndex = 0
 
@@ -2890,6 +3001,11 @@ final class AgentEngine: ObservableObject {
                     semanticStepIndex
                 ) {
                     executionSteps[index].state = .completed
+                } else if substitutedCapabilityIDs
+                    .contains(
+                        capabilityID
+                    ) {
+                    executionSteps[index].state = .skipped
                 } else if !isStepCapabilityAvailable(
                     executionSteps[index]
                 ) {
@@ -3110,6 +3226,7 @@ final class AgentEngine: ObservableObject {
         currentTaskGraph = nil
         taskGraphStatus = "Yeni görev için görev grafiği bekleniyor."
         currentProblemResolution = nil
+        currentOutcomeResolution = nil
         currentReflectionSummary = nil
         currentCapabilityGaps = []
         activeRoute = ["Core"]
@@ -3935,6 +4052,8 @@ final class AgentEngine: ObservableObject {
                     currentTaskGraph,
                 problemResolution:
                     currentProblemResolution,
+                outcomeResolution:
+                    currentOutcomeResolution,
                 reflectionSummary:
                     currentReflectionSummary,
                 capabilityGaps:

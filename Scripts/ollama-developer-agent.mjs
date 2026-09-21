@@ -28,13 +28,16 @@ const maxIterations = Number(
   process.env.KRALI_LOCAL_AGENT_MAX_ITERATIONS || "16"
 );
 const hardTimeoutMs = Number(
-  process.env.KRALI_LOCAL_AGENT_TIMEOUT_MS || "300000"
+  process.env.KRALI_LOCAL_AGENT_TIMEOUT_MS || "420000"
 );
 const requestTimeoutMs = Number(
-  process.env.KRALI_LOCAL_AGENT_REQUEST_TIMEOUT_MS || "60000"
+  process.env.KRALI_LOCAL_AGENT_REQUEST_TIMEOUT_MS || "90000"
 );
 const structuredRequestTimeoutMs = Number(
-  process.env.KRALI_LOCAL_AGENT_STRUCTURED_TIMEOUT_MS || "45000"
+  process.env.KRALI_LOCAL_AGENT_STRUCTURED_TIMEOUT_MS || "60000"
+);
+const maxRequestTimeoutRetries = Number(
+  process.env.KRALI_LOCAL_AGENT_REQUEST_TIMEOUT_RETRIES || "2"
 );
 const startedAt = Date.now();
 
@@ -661,6 +664,7 @@ let completionRejections = 0;
 let structuredActions = 0;
 let inspectionToolCalls = 0;
 let implementationPhaseAnnounced = false;
+let consecutiveRequestTimeouts = 0;
 
 const inspectionToolNames = new Set([
   "list_files",
@@ -679,6 +683,20 @@ function developmentPhase() {
     return "implementation";
   }
   return "inspection";
+}
+
+function effectiveRequestTimeoutMs() {
+  const phase = developmentPhase();
+
+  if (phase === "implementation") {
+    return Math.max(requestTimeoutMs, 120000);
+  }
+
+  if (phase === "verification") {
+    return Math.max(requestTimeoutMs, 90000);
+  }
+
+  return Math.max(requestTimeoutMs, 105000);
 }
 
 const promptRelative = path
@@ -1002,7 +1020,10 @@ for (let iteration = 1; iteration <= maxIterations; iteration++) {
   const controller = new AbortController();
   const requestTimer = setTimeout(
     () => controller.abort(),
-    Math.min(requestTimeoutMs, remainingMs)
+    Math.min(
+      effectiveRequestTimeoutMs(),
+      remainingMs
+    )
   );
 
   try {
@@ -1029,8 +1050,38 @@ for (let iteration = 1; iteration <= maxIterations; iteration++) {
       error instanceof Error &&
       error.name === "AbortError"
     ) {
+      consecutiveRequestTimeouts += 1;
+
+      if (
+        consecutiveRequestTimeouts <=
+        maxRequestTimeoutRetries
+      ) {
+        stage(
+          "local_agent_request_retry",
+          gapLabel +
+            " model isteği zaman aşımına uğradı; mevcut context korunarak retry " +
+            consecutiveRequestTimeouts +
+            "/" +
+            maxRequestTimeoutRetries
+        );
+
+        messages.push({
+          role: "user",
+          content: [
+            "Önceki model isteği zaman aşımına uğradı.",
+            "Mevcut tool sonuçlarını ve konuşma context'ini koru.",
+            "Aynı problemi sıfırdan inceleme; kaldığın development phase'den devam et.",
+            developmentPhase() === "implementation"
+              ? "Inspection kapalı; şimdi minimum generic source değişikliğini uygula."
+              : "Gerekli minimum sonraki tool adımını seç."
+          ].join("\n"),
+        });
+
+        continue;
+      }
+
       fail(
-        "Ollama native agent model isteği zaman aşımına uğradı.",
+        "Ollama native agent model isteği art arda zaman aşımına uğradı.",
         124,
         "local_agent_watchdog_timeout"
       );
@@ -1043,6 +1094,7 @@ for (let iteration = 1; iteration <= maxIterations; iteration++) {
   }
 
   clearTimeout(requestTimer);
+  consecutiveRequestTimeouts = 0;
 
   if (!response.ok) {
     fail(
