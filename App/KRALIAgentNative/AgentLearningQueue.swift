@@ -334,6 +334,20 @@ struct AgentLearningQueueStore {
                 continue
             }
 
+            if recovered[index]
+                .developerBrief
+                .contains(
+                    "Operation: capability.contract"
+                ) {
+                recovered[index].state =
+                    .failed
+                recovered[index].updatedAt =
+                    Date()
+                recovered[index].lastStatus =
+                    "Synthetic capability.contract gelecekteki gerçek bir runtime step değildir; erken öğrenme işi kapatıldı."
+                continue
+            }
+
             if recovered[index].state ==
                 .running {
                 recovered[index].state =
