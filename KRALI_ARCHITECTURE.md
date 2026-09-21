@@ -36,6 +36,22 @@ Kullanıcı "dünkü çekimleri bul, hangilerinin işe yarayacağını incele, e
 
 Amaç, "hangi modülü çağırayım?" diyen bir sistem değil; **"bu hedefe en iyi nasıl ulaşırım?"** diye çalışan bir sistemdir.
 
+## Senaryo bağımsızlığı — değişmez geliştirme kuralı
+
+KRALİ bir uygulama, site veya tekil kullanıcı cümlesi için özel akış ezberlememelidir. Yeni bir örnek görev gördüğümüzde ilk soru “bu senaryoya hangi if/else kodunu ekleyelim?” değil, “bu görev hangi genel semantic parametrelerden ve hangi yeniden kullanılabilir capability primitive'lerinden oluşuyor?” olmalıdır.
+
+- Kullanıcı talebi önce **goal / scope / entity / constraints / ordering / output / approval / verification** gibi genel semantic alanlara ayrılır.
+- Planner bu alanlardan dinamik Task DAG üretir; YouTube, Finder, Premiere, WhatsApp gibi adlar mümkün olduğunca planlama mantığının değil provider çözümlemesinin girdisidir.
+- Aynı primitive farklı uygulamalarda yeniden kullanılmalıdır: observe, find, click, type, select, read, search, import, persist, verify gibi davranışlar uygulama adına göre çoğaltılmaz.
+- Yeni bir görev mevcut primitive'lerin yeni bir sıralamasıyla çözülebiliyorsa **strategy/recipe** öğrenilir; yeni kod yazılmaz.
+- Gerçekten eksik atomik davranış varsa **primitive patch** öğrenilir.
+- Yalnız provider/API/izin sınırı nedeniyle gerekli olduğunda **tam entegrasyon** geliştirilir.
+- Testler mümkün olduğunca her tur farklı görev sınıfından seçilir. Amaç tek senaryoyu optimize etmek değil, aynı Core reasoning'in farklı ortamlarda çalıştığını kanıtlamaktır.
+- Bir bug düzeltmesi belirli örneği geçirirken aynı sınıftaki bilinmeyen görevleri kötüleştiriyorsa kabul edilmez.
+- Verifier yalnız çıktıyı değil, semantic contract'ın korunup korunmadığını da kontrol eder. Scope, entity, safety constraint veya onay sınırı execution sırasında sessizce değiştirilemez.
+
+Özet ilke: **Senaryoyu kodlama; görevi parametreleştir, capability'leri birleştir, gerçek gap'i öğren.**
+
 ## Tasarım ilkesi
 
 Geliştirme sırası özellik sayısına göre değil, zeka iskeletine göre ilerler:
