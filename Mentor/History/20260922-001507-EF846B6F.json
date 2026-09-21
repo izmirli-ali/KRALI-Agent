@@ -1,127 +1,127 @@
 {
   "activityTail" : [
     {
-      "date" : "2026-09-21T16:53:12Z",
-      "text" : "Outcome Strategy başarılı: URL'yi sistemle aç ve ekranı gözlemle"
+      "date" : "2026-09-21T21:11:17Z",
+      "text" : "Mentor trace GitHub'a senkronlandı"
     },
     {
-      "date" : "2026-09-21T16:52:46Z",
-      "text" : "Outcome Strategy denenecek: URL'yi sistemle aç ve ekranı gözlemle • score=80"
+      "date" : "2026-09-21T21:10:42Z",
+      "text" : "Diagnostics isteğe bağlı yüklendi"
     },
     {
-      "date" : "2026-09-21T16:52:46Z",
-      "text" : "Outcome Strategy başarısız: Public kaynaktan bilgi edin • Web araştırması sonuç veya derin okuma üretse bile başarı kriterini destekleyen gerçek kaynak kanıtı oluşmadı."
+      "date" : "2026-09-21T21:10:40Z",
+      "text" : "Debug/Recovery: Bağımlılık • Recovery uygulanıyor • Developer Agent"
     },
     {
-      "date" : "2026-09-21T16:52:46Z",
-      "text" : "Web Research tamamlandı: 3 kaynak, 0 kaynak okundu"
+      "date" : "2026-09-21T21:10:39Z",
+      "text" : "Developer Agent Learning Queue job'u başlatıldı"
     },
     {
-      "date" : "2026-09-21T16:52:43Z",
-      "text" : "Web Research başladı"
+      "date" : "2026-09-21T21:10:39Z",
+      "text" : "Learning Queue worker başlatılıyor • desktop.app • Dar primitive patch • job=F1EBADDE"
     },
     {
-      "date" : "2026-09-21T16:52:43Z",
-      "text" : "Outcome Strategy denenecek: Public kaynaktan bilgi edin • score=110"
+      "date" : "2026-09-21T21:10:39Z",
+      "text" : "Capability gap Learning Queue'ya alındı • sırada=1"
     },
     {
-      "date" : "2026-09-21T16:52:43Z",
-      "text" : "Outcome Strategy başarılı: Web hedefini aç ve görünür olarak doğrula"
+      "date" : "2026-09-21T21:10:39Z",
+      "text" : "Görev tamamlandı • 1.19 sn"
     },
     {
-      "date" : "2026-09-21T16:52:19Z",
-      "text" : "Outcome Strategy denenecek: Web hedefini aç ve görünür olarak doğrula • score=120"
+      "date" : "2026-09-21T21:10:39Z",
+      "text" : "Mentor trace yerel olarak kaydedildi"
     },
     {
-      "date" : "2026-09-21T16:52:19Z",
-      "text" : "Semantic rota: Core → Goal → Context → Plan → Browser → Desktop → Verify → Response"
+      "date" : "2026-09-21T21:10:39Z",
+      "text" : "Runtime Capability Gap: desktop.app • Provider available olmasına rağmen runtime step tamamlanamadı veya postcondition doğrulanamadı: desktop.app • capability.contract"
     },
     {
-      "date" : "2026-09-21T16:52:19Z",
-      "text" : "Task Graph blocked capability: browser.control"
+      "date" : "2026-09-21T21:10:39Z",
+      "text" : "Uygulama kontrolü başarısız: Uygulama bulunamadı: notlar"
     },
     {
-      "date" : "2026-09-21T16:52:19Z",
-      "text" : "Task Graph: 0:core.reasoning[reason] → 1:context.local[reason] → 2:browser.control[verify] → 3:desktop.app[act]"
+      "date" : "2026-09-21T21:10:39Z",
+      "text" : "Debug/Recovery: Bilinmeyen hata • Hata ayıklanıyor • desktop.app"
     },
     {
-      "date" : "2026-09-21T16:52:19Z",
+      "date" : "2026-09-21T21:10:38Z",
+      "text" : "Semantic rota: Core → Goal → Context → Plan → Desktop → Verify → Response"
+    },
+    {
+      "date" : "2026-09-21T21:10:38Z",
+      "text" : "Task Graph: 0:core.reasoning[reason] → 1:context.local[reason] → 2:desktop.app[act]"
+    },
+    {
+      "date" : "2026-09-21T21:10:38Z",
       "text" : "Problem Solver adayları: Mevcut provider'ı kullan[100] | Mevcut provider'ı kullan[100] | Mevcut provider'ı kullan[100] | Kanıtı reasoning ile dönüştür[75]"
     },
     {
-      "date" : "2026-09-21T16:52:19Z",
+      "date" : "2026-09-21T21:10:38Z",
       "text" : "Problem Solver seçimi: Mevcut provider'ı kullan • score=100 • capabilities=core.reasoning"
     },
     {
-      "date" : "2026-09-21T16:52:19Z",
-      "text" : "Semantic capability planı: browser.control, context.local, core.reasoning, desktop.app"
+      "date" : "2026-09-21T21:10:38Z",
+      "text" : "Semantic capability planı: context.local, core.reasoning, desktop.app"
     },
     {
-      "date" : "2026-09-21T16:52:19Z",
+      "date" : "2026-09-21T21:10:38Z",
       "text" : "Semantic planner sağlayıcısı: Local Contract Repair"
     },
     {
-      "date" : "2026-09-21T16:52:19Z",
-      "text" : "Semantic Mission: openai.com sitesine gir ve sayfada ne olduğunu kısaca anlat"
+      "date" : "2026-09-21T21:10:38Z",
+      "text" : "Semantic Mission: Notlar uygulamasını aç ve gerçekten ön planda olduğunu doğrula. Başka hiçbir işlem yapma"
     },
     {
-      "date" : "2026-09-21T16:52:19Z",
-      "text" : "Problem Solver semantic Learning'i erteledi: app.workflow, browser.control, desktop.app"
+      "date" : "2026-09-21T21:10:38Z",
+      "text" : "Outcome Solver: başarı kriterleri mevcut capability'lerle kapsandı • Outcome'u desktop.app ile çöz"
     },
     {
-      "date" : "2026-09-21T16:52:19Z",
-      "text" : "Outcome Solver: başarı kriterleri mevcut capability'lerle kapsandı • Web hedefini aç ve görünür olarak doğrula | Public kaynaktan bilgi edin"
+      "date" : "2026-09-21T21:10:38Z",
+      "text" : "Seçilen kabiliyetler: Akıl yürütme, Bağlam, Uygulama kontrolü"
     },
     {
-      "date" : "2026-09-21T16:52:19Z",
-      "text" : "Yetkinlik öğrenme planı: Tarayıcı kontrolü → Entegrasyon gerekli"
+      "date" : "2026-09-21T21:10:38Z",
+      "text" : "Otomatik rota: Core → Goal → Context → Plan → Desktop → Response"
     },
     {
-      "date" : "2026-09-21T16:52:19Z",
-      "text" : "Seçilen kabiliyetler: Akıl yürütme, Bağlam, Uygulama kontrolü, Tarayıcı kontrolü [bekliyor], URL açma, Ekran algısı"
-    },
-    {
-      "date" : "2026-09-21T16:52:19Z",
-      "text" : "Otomatik rota: Core → Goal → Context → Plan → Desktop → Browser → Screen → Learn → Verify → Response"
-    },
-    {
-      "date" : "2026-09-21T16:52:19Z",
+      "date" : "2026-09-21T21:10:38Z",
       "text" : "Seçilen plan: Uygulama adını çöz, uygulamayı aç veya öne getir ve sonucu doğrula"
     },
     {
-      "date" : "2026-09-21T16:52:19Z",
+      "date" : "2026-09-21T21:10:38Z",
       "text" : "KRALİ Core hedef sözleşmesi: istenen uygulamayı aç veya öne getir"
     },
     {
-      "date" : "2026-09-21T16:52:19Z",
+      "date" : "2026-09-21T21:10:38Z",
       "text" : "Problem Solver başlangıç stratejisi: Mevcut provider'ı kullan • Task Graph bu capability'yi doğrudan seçti ve provider available."
     },
     {
-      "date" : "2026-09-21T16:52:19Z",
+      "date" : "2026-09-21T21:10:38Z",
       "text" : "Bağlam firewall: önceki görev bağlamları bu tura taşınmadı"
     },
     {
-      "date" : "2026-09-21T16:52:07Z",
+      "date" : "2026-09-21T21:10:34Z",
       "text" : "Apple yerel zeka hazır"
     },
     {
-      "date" : "2026-09-21T16:52:07Z",
+      "date" : "2026-09-21T21:10:34Z",
       "text" : "Çalışma klasörü yolu geri yüklendi; indeks gerektiğinde oluşturulacak: Desktop"
     },
     {
-      "date" : "2026-09-21T16:52:07Z",
+      "date" : "2026-09-21T21:10:34Z",
       "text" : "Ağır geliştirici testleri normal açılışta otomatik çalıştırılmıyor"
     },
     {
-      "date" : "2026-09-21T16:52:07Z",
+      "date" : "2026-09-21T21:10:34Z",
       "text" : "Dinamik hedef ve kabiliyet yönlendirme aktif"
     },
     {
-      "date" : "2026-09-21T16:52:07Z",
+      "date" : "2026-09-21T21:10:34Z",
       "text" : "KRALİ Core hazır"
     }
   ],
-  "appVersion" : "0.8.67",
+  "appVersion" : "0.8.89",
   "capabilities" : [
     {
       "available" : true,
@@ -143,12 +143,23 @@
     }
   ],
   "capabilityGaps" : [
+    {
+      "candidateCapabilityIDs" : [
 
+      ],
+      "capabilityID" : "desktop.app",
+      "capabilityName" : "Uygulama kontrolü",
+      "developerBrief" : "KRALİ Runtime Capability Failure Developer Brief\n\nKullanıcı hedefi:\nNotlar uygulamasını aç ve gerçekten ön planda olduğunu doğrula. Başka hiçbir işlem yapma.\n\nRuntime'da başarısız capability:\ndesktop.app — Uygulama kontrolü\n\nStep:\n2: Uygulama kontrolü\nOperation: capability.contract\nRole: act\n\nMevcut strategy adayları:\nYok\n\nSorun:\nProvider available olmasına rağmen runtime step tamamlanamadı veya postcondition doğrulanamadı: desktop.app • capability.contract\n\nÇözüm kuralları:\n- Önce problemi, gözlemleri ve başarısız postcondition'ı tanımla; doğrudan kod satırı aramaya başlama.\n- En az iki makul çözüm stratejisini değerlendir; mevcut capability kombinasyonu problemi çözebiliyorsa yeni provider yazma.\n- Capability zaten available ise önce mevcut provider'ı ve postcondition verifier'ı debug et.\n- Uygulama/marka adına hard-code yazma; hatayı genel resolver/provider/strategy seviyesinde çöz.\n- Başarı gerçek observation/verification ile kanıtlanmadan PASS üretme.\n- Dış dünyaya commit eden eylemlerde kullanıcı onayı korunmalı.\n- Candidate branch/worktree kullan; ana branch'i doğrudan değiştirme.\n- Build + regression + mümkünse runtime probe geçmeden düzeltmeyi available/healthy sayma.\n\nKabul kriteri:\nAynı sınıftaki bilinmeyen hedeflerde de provider doğru hedefi çözebilmeli; başarısız runtime step tamamlanmalı ve verifier gerçek evidence ile PASS verebilmeli.",
+      "kind" : "strategy",
+      "learningPath" : "primitivePatch",
+      "reason" : "Provider available olmasına rağmen runtime step tamamlanamadı veya postcondition doğrulanamadı: desktop.app • capability.contract",
+      "researchGoal" : "Mevcut Uygulama kontrolü provider'ının neden runtime'da başarısız olduğunu kanıtla; önce mevcut provider/strategy'yi debug et, gerekirse generic recovery veya yeni provider stratejisi geliştir ve aynı postcondition'ı gerçek observation ile doğrula."
+    }
   ],
   "contextMemory" : [
 
   ],
-  "createdAt" : "2026-09-21T16:54:16Z",
+  "createdAt" : "2026-09-21T21:15:07Z",
   "executionSteps" : [
     {
       "capabilityID" : "core.reasoning",
@@ -168,14 +179,14 @@
       "capabilityID" : "desktop.app",
       "detail" : "Mission hedefini uçtan uca tamamlamak için gerekli capability sözleşmesi. Ön koşul adımları: 2. Operation: capability.contract",
       "kind" : "action",
-      "state" : "completed",
+      "state" : "partial",
       "title" : "Uygulama kontrolü"
     },
     {
       "capabilityID" : "core.reasoning",
       "detail" : "Gerçekleşen adımları hedefle, capability durumuyla ve üretilen sonuçla karşılaştır.",
       "kind" : "verification",
-      "state" : "completed",
+      "state" : "attention",
       "title" : "Mission sonucunu doğrula"
     },
     {
@@ -185,9 +196,9 @@
       "title" : "Sonucu kullanıcıya aktar"
     }
   ],
-  "fallbackPlan" : "Eksik capability veya başarısız adımı yeniden planla; tamamlanmayan işi yapılmış gibi gösterme.",
-  "finalResponse" : "Spotify uygulamasını açtım ve görünür biçimde öne geldiğini doğruladım.",
-  "goal" : "Spotify uygulamasını aç",
+  "fallbackPlan" : "Tamamlanmayan action step'ini yeniden planla; yürütülmeyen işi başarılı sayma.",
+  "finalResponse" : "Görev tamamlanamadı. Eksik kabiliyet: Uygulama kontrolü.\n\nDoğrulama: Semantic mission içindeki zorunlu action step'lerinden bazıları tamamlanmadı: desktop.app\nAlternatif plan: Tamamlanmayan action step'ini yeniden planla; yürütülmeyen işi başarılı sayma.",
+  "goal" : "Notlar uygulamasını aç ve gerçekten ön planda olduğunu doğrula. Başka hiçbir işlem yapma.",
   "inputSource" : "text",
   "learningPlans" : [
 
@@ -203,7 +214,7 @@
       "instrumentalCapabilityIDs" : [
 
       ],
-      "objective" : "Spotify uygulamasını aç",
+      "objective" : "Notlar uygulamasını aç ve gerçekten ön planda olduğunu doğrula. Başka hiçbir işlem yapma.",
       "requirements" : [
         {
           "acceptableCapabilityIDs" : [
@@ -265,7 +276,6 @@
   },
   "plan" : "Hedefi çöz → Bağlam → Uygulama kontrolü",
   "problemResolution" : {
-    "chosenStrategyID" : "primary:core.reasoning",
     "frame" : {
       "availableCapabilityIDs" : [
         "app.workflow",
@@ -292,38 +302,14 @@
         "Dış dünyaya commit eden işlem kullanıcı onayı olmadan uygulanmamalı.",
         "Uygulama/marka adına özel hard-code yerine generic capability/strategy tercih edilmeli."
       ],
-      "objective" : "Spotify uygulamasını aç",
+      "objective" : "Uygulama kontrolü",
       "observations" : [
-        "Seçili çalışma alanı: Desktop"
+        "Başarısız step: Uygulama kontrolü",
+        "Bu görev için ek kalıcı bağlam yok."
       ]
     },
+    "reflection" : "Mevcut güvenli stratejiler tükendi; capability learning gerekli.",
     "strategies" : [
-      {
-        "capabilityIDs" : [
-          "core.reasoning"
-        ],
-        "executableNow" : true,
-        "id" : "primary:core.reasoning",
-        "kind" : "primary",
-        "rationale" : "Task Graph bu capability'yi doğrudan seçti ve provider available.",
-        "requiresLearning" : false,
-        "score" : 100,
-        "summary" : "Hedefi çöz adımını core.reasoning ile yürüt.",
-        "title" : "Mevcut provider'ı kullan"
-      },
-      {
-        "capabilityIDs" : [
-          "context.local"
-        ],
-        "executableNow" : true,
-        "id" : "primary:context.local",
-        "kind" : "primary",
-        "rationale" : "Task Graph bu capability'yi doğrudan seçti ve provider available.",
-        "requiresLearning" : false,
-        "score" : 100,
-        "summary" : "Bağlam adımını context.local ile yürüt.",
-        "title" : "Mevcut provider'ı kullan"
-      },
       {
         "capabilityIDs" : [
           "desktop.app"
@@ -336,22 +322,10 @@
         "score" : 100,
         "summary" : "Uygulama kontrolü adımını desktop.app ile yürüt.",
         "title" : "Mevcut provider'ı kullan"
-      },
-      {
-        "capabilityIDs" : [
-          "core.reasoning"
-        ],
-        "executableNow" : true,
-        "id" : "reasoning:1",
-        "kind" : "reasoningTransform",
-        "rationale" : "Adımın amacı dış değişiklik değil; mevcut kanıttan yeni bir bilgi/çıktı üretmek.",
-        "requiresLearning" : false,
-        "score" : 75,
-        "summary" : "Mevcut dependency evidence üzerinde analiz/sentez uygula.",
-        "title" : "Kanıtı reasoning ile dönüştür"
       }
     ]
   },
+  "reflectionSummary" : "Mevcut güvenli stratejiler tükendi; capability learning gerekli.",
   "researchEvidence" : [
 
   ],
@@ -367,9 +341,26 @@
     "Verify",
     "Response"
   ],
+  "runtimeTask" : {
+    "completedStepIndexes" : [
+      0,
+      1
+    ],
+    "createdAt" : "2026-09-21T21:15:06Z",
+    "id" : "6AEB62F9-6037-4EF7-AE0D-E8A108FDB13C",
+    "objective" : "Notlar uygulamasını aç ve gerçekten ön planda olduğunu doğrula. Başka hiçbir işlem yapma.",
+    "priority" : 0,
+    "runningStepIndexes" : [
+
+    ],
+    "state" : "failed",
+    "waitingResourceIDs" : [
+
+    ]
+  },
   "semanticMission" : {
     "confidence" : 0.65,
-    "objective" : "Spotify uygulamasını aç",
+    "objective" : "Notlar uygulamasını aç ve gerçekten ön planda olduğunu doğrula. Başka hiçbir işlem yapma.",
     "outcomes" : [
       "open"
     ],
@@ -420,6 +411,9 @@
       "index" : 0,
       "operation" : "semantic.fallback",
       "requiresApproval" : false,
+      "resourceIDs" : [
+
+      ],
       "risk" : "reasoning",
       "role" : "reason",
       "title" : "Hedefi çöz"
@@ -433,6 +427,9 @@
       "index" : 1,
       "operation" : "capability.contract",
       "requiresApproval" : false,
+      "resourceIDs" : [
+
+      ],
       "risk" : "reasoning",
       "role" : "reason",
       "title" : "Bağlam"
@@ -446,13 +443,17 @@
       "index" : 2,
       "operation" : "capability.contract",
       "requiresApproval" : false,
+      "resourceIDs" : [
+        "foreground",
+        "userInteraction"
+      ],
       "risk" : "external",
       "role" : "act",
       "title" : "Uygulama kontrolü"
     }
   ],
-  "traceID" : "C7CB3801-BCA6-4589-96C7-05CCDAED7A55",
-  "userInput" : "Spotify uygulamasını aç",
-  "verificationState" : "passed",
-  "verificationSummary" : "Semantic mission ile seçilen mevcut capability adımları yürütüldü ve hedefle uyumlu sonuç doğrulandı."
+  "traceID" : "EF846B6F-6A30-497B-A01D-4053C739B385",
+  "userInput" : "Notlar uygulamasını aç ve gerçekten ön planda olduğunu doğrula. Başka hiçbir işlem yapma.",
+  "verificationState" : "attention",
+  "verificationSummary" : "Semantic mission içindeki zorunlu action step'lerinden bazıları tamamlanmadı: desktop.app"
 }
