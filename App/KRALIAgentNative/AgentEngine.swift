@@ -2798,7 +2798,9 @@ final class AgentEngine: ObservableObject {
         executedCapabilityIDs: Set<String> = []
     ) -> AgentVerificationSnapshot {
         AgentVerificationSnapshot(
-            hasWorkspace: selectedRootURL != nil,
+            hasWorkspace:
+                selectedRootURL != nil ||
+                lastFileSearchOutcome?.rootPath != nil,
             fileResultCount: fileSearchResults.count,
             folderResultCount: folderSearchResults.count,
             hasPendingAction: pendingFileAction != nil,
