@@ -567,18 +567,75 @@ final class AgentEngine: ObservableObject {
                 where: { $0.id == "research.web" }
             )?.isAvailable == true
 
-        let learningPlans = capabilityLearner.makePlans(
-            for: capabilities,
-            webResearchAvailable: webResearchAvailable
-        )
-        capabilityLearningPlans = learningPlans
-        capabilityLearningBacklog = learningStore.merge(
-            existing: capabilityLearningBacklog,
-            plans: learningPlans,
-            capabilities: capabilities
+        var learningPlans =
+            capabilityLearner.makePlans(
+                for: capabilities,
+                webResearchAvailable:
+                    webResearchAvailable
+            )
+
+        var executionPlan = planner.makePlan(
+            decision: decision,
+            context: brainContext(),
+            capabilities: capabilities,
+            learningPlans: [],
+            goal: goalProfile
         )
 
-        let executionPlan = planner.makePlan(
+        var deterministicGraph =
+            deterministicProblemGraph(
+                goal: goalProfile,
+                plan: executionPlan
+            )
+
+        let problemSolvableBlockedIDs =
+            Set(
+                deterministicGraph.steps
+                    .filter {
+                        !$0.isAvailable
+                    }
+                    .filter { step in
+                        !problemSolver
+                            .candidateCapabilityIDs(
+                                for: step,
+                                availableCapabilities:
+                                    capabilityRegistry.all
+                            )
+                            .isEmpty
+                    }
+                    .map(\.capabilityID)
+            )
+
+        if !problemSolvableBlockedIDs
+            .isEmpty {
+            learningPlans =
+                learningPlans.filter {
+                    !problemSolvableBlockedIDs
+                        .contains(
+                            $0.capabilityID
+                        )
+                }
+
+            log(
+                "Problem Solver Learning'i erteledi: mevcut strateji bulunan capability=" +
+                problemSolvableBlockedIDs
+                    .sorted()
+                    .joined(separator: ", ")
+            )
+        }
+
+        capabilityLearningPlans =
+            learningPlans
+
+        capabilityLearningBacklog =
+            learningStore.merge(
+                existing:
+                    capabilityLearningBacklog,
+                plans: learningPlans,
+                capabilities: capabilities
+            )
+
+        executionPlan = planner.makePlan(
             decision: decision,
             context: brainContext(),
             capabilities: capabilities,
@@ -586,7 +643,7 @@ final class AgentEngine: ObservableObject {
             goal: goalProfile
         )
 
-        let deterministicGraph =
+        deterministicGraph =
             deterministicProblemGraph(
                 goal: goalProfile,
                 plan: executionPlan
