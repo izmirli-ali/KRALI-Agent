@@ -1296,7 +1296,15 @@ final class AgentEngine: ObservableObject {
                 executedCapabilityIDs:
                     executedSemanticCapabilities,
                 completedMissionStepIndexes:
-                    completedSemanticStepIndexes
+                    completedSemanticStepIndexes,
+                substitutedCapabilityIDs:
+                    outcomeHandledMission
+                    ? (
+                        currentOutcomeResolution?
+                            .suppressedLearningCapabilityIDs ??
+                        []
+                    )
+                    : []
             )
         } else {
             completeActionSteps()
@@ -2964,7 +2972,8 @@ final class AgentEngine: ObservableObject {
 
     private func completeSemanticActionSteps(
         executedCapabilityIDs: Set<String>,
-        completedMissionStepIndexes: Set<Int>
+        completedMissionStepIndexes: Set<Int>,
+        substitutedCapabilityIDs: Set<String> = []
     ) {
         var semanticStepIndex = 0
 
@@ -2992,6 +3001,11 @@ final class AgentEngine: ObservableObject {
                     semanticStepIndex
                 ) {
                     executionSteps[index].state = .completed
+                } else if substitutedCapabilityIDs
+                    .contains(
+                        capabilityID
+                    ) {
+                    executionSteps[index].state = .skipped
                 } else if !isStepCapabilityAvailable(
                     executionSteps[index]
                 ) {
