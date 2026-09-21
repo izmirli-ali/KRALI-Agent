@@ -156,7 +156,7 @@ struct AgentOutcomePlanner {
         var requirements: [AgentOutcomeRequirement] = []
         var instrumental = Set<String>()
 
-        let researchLike =
+        let modelResearchLike =
             goal.outcomes.contains(.research) ||
             goal.outcomes.contains(.explain) ||
             mission?.outcomes.contains(
@@ -207,6 +207,31 @@ struct AgentOutcomePlanner {
                     "open http",
                     "open www."
                 ]
+            )
+
+        let explicitResearchRequest =
+            containsAny(
+                text,
+                [
+                    "araştır",
+                    "arastir",
+                    "research",
+                    "internette ara",
+                    "webden ara",
+                    "web'den ara",
+                    "kaynak bul",
+                    "son gelişme",
+                    "son gelisme",
+                    "güncel bilgi",
+                    "guncel bilgi"
+                ]
+            )
+
+        let researchLike =
+            explicitResearchRequest ||
+            (
+                !navigationLike &&
+                modelResearchLike
             )
 
         if navigationLike {
