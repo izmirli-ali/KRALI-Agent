@@ -7,6 +7,7 @@ enum CapabilityLearningProgress: String, Codable, Hashable {
     case researching
     case proposalReady
     case awaitingApproval
+    case interrupted
     case enabled
 
     var title: String {
@@ -17,6 +18,7 @@ enum CapabilityLearningProgress: String, Codable, Hashable {
         case .researching: return "Araştırılıyor"
         case .proposalReady: return "Çözüm önerisi hazır"
         case .awaitingApproval: return "Onay bekliyor"
+        case .interrupted: return "Geçici müdahale"
         case .enabled: return "Öğrenme tamamlandı"
         }
     }
@@ -29,6 +31,7 @@ enum CapabilityLearningProgress: String, Codable, Hashable {
         case .researching: return "sparkles"
         case .proposalReady: return "doc.badge.gearshape"
         case .awaitingApproval: return "person.crop.circle.badge.checkmark"
+        case .interrupted: return "pause.circle"
         case .enabled: return "checkmark.seal.fill"
         }
     }
