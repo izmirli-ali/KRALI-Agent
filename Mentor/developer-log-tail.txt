@@ -1,7 +1,3 @@
-Uygulama kontrolü (desktop.app) native local agent toplam zaman sınırına ulaştı.
-Deleted branch krali-dev-agent/20260920-234646 (was d11dd94).
-❌ Native yerel Developer Agent durdu: Uygulama kontrolü (desktop.app) native local agent toplam zaman sınırına ulaştı.
-
 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
  KRALİ DEVELOPER AGENT
  20260921-000740
@@ -118,3 +114,7 @@ HEAD is now at d4cc4a8 v0.8.68: bump version
 Developer prompt mode: gap • 3961 bytes
 KRALI_LOCAL_STAGE local_agent_starting • Tarayıcı kontrolü (browser.control) native Ollama agent başlatılıyor: devstral:24b
 KRALI_LOCAL_STAGE local_agent_running • Tarayıcı kontrolü (browser.control) yerel model çalışıyor • adım 1/16
+KRALI_LOCAL_STAGE local_agent_tool • Tarayıcı kontrolü (browser.control) araç çalışıyor: search_codebase
+KRALI_LOCAL_STAGE local_agent_running • Tarayıcı kontrolü (browser.control) yerel model çalışıyor • adım 2/16
+KRALI_LOCAL_STAGE local_agent_tool • Tarayıcı kontrolü (browser.control) araç çalışıyor: read_file
+KRALI_LOCAL_STAGE local_agent_running • Tarayıcı kontrolü (browser.control) yerel model çalışıyor • adım 3/16
