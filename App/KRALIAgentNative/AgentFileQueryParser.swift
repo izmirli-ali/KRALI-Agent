@@ -102,6 +102,132 @@ struct AgentFileQueryParser {
         )
     }
 
+    func resolveTargetEntity(
+        _ rawText: String
+    ) -> AgentTargetKind {
+        let normalized =
+            normalize(rawText)
+        let tokens =
+            tokenize(normalized)
+        let scope =
+            resolveScope(
+                tokens: tokens,
+                normalized: normalized
+            )
+
+        if containsAny(
+            normalized,
+            [
+                "ekran gorunt",
+                "ekran resmi",
+                "screenshot"
+            ]
+        ) {
+            return .screenshot
+        }
+
+        if containsAny(
+            normalized,
+            ["pdf"]
+        ) {
+            return .pdf
+        }
+
+        if containsAny(
+            normalized,
+            [
+                "video",
+                "videolar",
+                "cekim",
+                "klip"
+            ]
+        ) {
+            return .video
+        }
+
+        if containsAny(
+            normalized,
+            [
+                "gorsel",
+                "resim",
+                "fotograf"
+            ]
+        ) {
+            return .image
+        }
+
+        if containsAny(
+            normalized,
+            [
+                "proje",
+                "project"
+            ]
+        ) {
+            return .project
+        }
+
+        if containsAny(
+            normalized,
+            [
+                "belge",
+                "dokuman"
+            ]
+        ) {
+            return .document
+        }
+
+        let folderTargetPhrases = [
+            "klasorleri bul",
+            "klasor bul",
+            "klasorunu bul",
+            "klasoru bul",
+            "klasorleri listele",
+            "klasorleri goster",
+            "hangi klasor",
+            "hangi klasorler",
+            "klasorler neler",
+            "alt klasor",
+            "folder bul",
+            "list folders",
+            "folders"
+        ]
+
+        if containsAny(
+            normalized,
+            folderTargetPhrases
+        ) {
+            return .folder
+        }
+
+        let genericFileEntity =
+            tokens.contains(
+                where: {
+                    $0.hasPrefix("dosya") ||
+                    $0.hasPrefix("file")
+                }
+            )
+
+        // Scope phrases such as "İndirilenler klasöründe" or
+        // "Masaüstü klasöründeki" describe WHERE. If scope is explicit,
+        // a bare "klasör" token cannot become the target entity.
+        if scope.explicit {
+            return .any
+        }
+
+        if !genericFileEntity &&
+           tokens.contains(
+            where: {
+                $0.hasPrefix("klasor") ||
+                $0.hasPrefix("folder")
+            }
+           ) {
+            return .folder
+        }
+
+        return .any
+    }
+
+
     private func resolveScope(
         tokens: [String],
         normalized: String
@@ -163,6 +289,15 @@ struct AgentFileQueryParser {
         .map(String.init)
         .filter {
             !$0.isEmpty
+        }
+    }
+
+    private func containsAny(
+        _ text: String,
+        _ values: [String]
+    ) -> Bool {
+        values.contains {
+            text.contains($0)
         }
     }
 
