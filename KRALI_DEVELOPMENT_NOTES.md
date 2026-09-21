@@ -183,3 +183,5 @@ Target flow:
 
 Target runtime:
 `Outcome → Strategy 1 → evidence? → Strategy 2 → evidence? → ... → Verify → Learning only after exhaustion`
+
+- Outcome Chain execution ownership is gated to supported runtime strategy classes; unrelated reasoning/file tasks remain on their existing execution paths.
