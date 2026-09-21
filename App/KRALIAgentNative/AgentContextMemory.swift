@@ -306,9 +306,17 @@ struct AgentContextMemoryStore {
                inlineSourceRewrite {
                 isRelevant = false
             } else if entry.kind == .userRule {
+                // Persistent rules must not enter execution context because
+                // of one generic verb such as "değiştirme", "açma" or
+                // "söyle". Require stronger lexical evidence unless the
+                // user explicitly continues the previous task.
                 isRelevant =
-                    tokenOverlap > 0 ||
-                    exactMatch
+                    exactMatch ||
+                    tokenOverlap >= 2 ||
+                    (
+                        continuation &&
+                        tokenOverlap > 0
+                    )
             } else if transformation &&
                       referencesIdeas &&
                       hasDirectIdeaSource {
@@ -357,7 +365,7 @@ struct AgentContextMemoryStore {
             score += identityOverlap * 6
 
             if entry.kind == .userRule,
-               tokenOverlap > 0 {
+               tokenOverlap >= 2 {
                 score += 3
             }
 
