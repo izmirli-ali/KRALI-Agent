@@ -50,6 +50,8 @@ struct AgentLearningJob: Identifiable, Codable, Hashable, Sendable {
     var branch: String?
     var worktree: String?
     var lastStatus: String?
+    var learningPath:
+        CapabilityLearningPath? = nil
 
     var shortID: String {
         String(id.uuidString.prefix(8))
@@ -206,7 +208,9 @@ struct AgentLearningQueueStore {
                     branch: nil,
                     worktree: nil,
                     lastStatus:
-                        "Öğrenme kuyruğuna eklendi."
+                        "Öğrenme kuyruğuna eklendi.",
+                    learningPath:
+                        gap.learningPath
                 )
             )
         }
@@ -274,7 +278,9 @@ struct AgentLearningQueueStore {
                             researchGoal:
                                 job.researchGoal,
                             developerBrief:
-                                job.developerBrief
+                                job.developerBrief,
+                            learningPath:
+                                job.learningPath
                         ),
                     sourceGoals:
                         job.sourceGoals,
