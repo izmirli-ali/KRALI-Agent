@@ -194,7 +194,8 @@ struct AgentFileQueryParser {
             return true
         }
 
-        if requestedExtensions.contains(token) {
+        if requestedExtensions.contains(token) ||
+           typeRegistry.isKnownExtension(token) {
             return true
         }
 
