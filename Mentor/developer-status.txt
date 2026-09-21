@@ -1,1 +1,1 @@
-local_agent_running|Tarayıcı kontrolü (browser.control) yerel model çalışıyor • adım 3/16|krali-dev-agent/20260921-150843|/Users/medusa/Developer/KRALI-Agent-Dev-20260921-150843|@meta|app=0.8.63|at=1789992602|run=20260921-150843
+local_agent_watchdog_timeout|Ollama native agent model isteği zaman aşımına uğradı.|krali-dev-agent/20260921-151102|/Users/medusa/Developer/KRALI-Agent-Dev-20260921-151102|@meta|app=0.8.63|at=1789992727|run=20260921-151102
