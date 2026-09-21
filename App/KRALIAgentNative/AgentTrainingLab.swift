@@ -69,6 +69,8 @@ struct AgentTrainingLab {
         AgentCapabilityGapResolver()
     private let problemSolver =
         AgentProblemSolver()
+    private let outcomePlanner =
+        AgentOutcomePlanner()
     private let fileQueryParser =
         AgentFileQueryParser()
 
@@ -249,6 +251,12 @@ struct AgentTrainingLab {
         results.append(
             problemSolverReflectionChoosesAnotherSafeStrategyResult()
         )
+        results.append(
+            outcomePlannerPublicResearchAvoidsBrowserLearningResult()
+        )
+        results.append(
+            outcomePlannerMutationStillRequiresRealCapabilityResult()
+        )
 
         let core = results.filter { $0.tier == .core }
         let northStar = results.filter { $0.tier == .northStar }
@@ -266,6 +274,211 @@ struct AgentTrainingLab {
             northStarPassed: northStar.filter(\.passed).count,
             northStarTotal: northStar.count,
             results: results
+        )
+    }
+
+    private func outcomePlannerPublicResearchAvoidsBrowserLearningResult()
+        -> TrainingScenarioResult {
+        let prompt =
+            "example.com sitesine gir ve sayfadaki ana başlığı bana söyle"
+
+        let goal = AgentGoalProfile(
+            summary:
+                "example.com ana başlığını öğren",
+            outcomes: [
+                .open,
+                .research,
+                .explain
+            ],
+            requiredCapabilityIDs: [
+                "core.reasoning",
+                "context.local",
+                "browser.control",
+                "desktop.app"
+            ],
+            isCompound: true
+        )
+
+        let contract =
+            outcomePlanner.makeContract(
+                userInput: prompt,
+                goal: goal,
+                mission: nil
+            )
+
+        let resolution =
+            outcomePlanner.resolve(
+                contract: contract,
+                capabilities:
+                    capabilityRegistry.all
+            )
+
+        var diagnostics: [String] = []
+
+        if !resolution.isFullyCovered {
+            diagnostics.append(
+                "Public bilgi outcome'u mevcut capability'lerle kapsanamadı."
+            )
+        }
+
+        if !resolution
+            .chosenStrategies
+            .contains(
+                where: {
+                    $0.kind ==
+                        .publicResearch &&
+                    $0.capabilityIDs
+                        .contains(
+                            "research.web"
+                        )
+                }
+            ) {
+            diagnostics.append(
+                "research.web public bilgi için outcome stratejisi olarak seçilmedi."
+            )
+        }
+
+        if !resolution
+            .suppressedLearningCapabilityIDs
+            .contains(
+                "browser.control"
+            ) {
+            diagnostics.append(
+                "browser.control yalnız araç olmasına rağmen Learning gate tarafından bastırılmadı."
+            )
+        }
+
+        return TrainingScenarioResult(
+            scenarioID:
+                "outcome-public-research-before-browser-learning",
+            title:
+                "Public bilgi outcome'u browser Learning'den önce çözülmeli",
+            tier: .core,
+            prompt: prompt,
+            passed: diagnostics.isEmpty,
+            goal:
+                "Başarı kriterini research.web ile karşıla; browser yalnız araçsa Learning açma",
+            route: [
+                "Core",
+                "Outcome",
+                "Strategy",
+                "Research",
+                "Verify"
+            ],
+            selectedCapabilities:
+                resolution
+                    .chosenStrategies
+                    .flatMap(
+                        \.capabilityIDs
+                    )
+                    .uniquedForTraining(),
+            unavailableCapabilities:
+                resolution
+                    .suppressedLearningCapabilityIDs
+                    .sorted(),
+            diagnostics: diagnostics
+        )
+    }
+
+    private func outcomePlannerMutationStillRequiresRealCapabilityResult()
+        -> TrainingScenarioResult {
+        let prompt =
+            "Premiere'de aktif sequence içindeki boşlukları temizle"
+
+        let goal = AgentGoalProfile(
+            summary:
+                "timeline boşluklarını temizle",
+            outcomes: [
+                .edit
+            ],
+            requiredCapabilityIDs: [
+                "core.reasoning",
+                "context.local",
+                "premiere.control"
+            ],
+            isCompound: false
+        )
+
+        let contract =
+            outcomePlanner.makeContract(
+                userInput: prompt,
+                goal: goal,
+                mission: nil
+            )
+
+        let resolution =
+            outcomePlanner.resolve(
+                contract: contract,
+                capabilities:
+                    capabilityRegistry.all
+            )
+
+        var diagnostics: [String] = []
+
+        if !contract.requiresMutation {
+            diagnostics.append(
+                "Gerçek edit görevi mutation outcome olarak sınıflandırılmadı."
+            )
+        }
+
+        if resolution.isFullyCovered {
+            diagnostics.append(
+                "premiere.control available değilken mutation outcome yanlışlıkla fully covered sayıldı."
+            )
+        }
+
+        if !resolution
+            .chosenStrategies
+            .contains(
+                where: {
+                    $0.requiresLearning &&
+                    $0.capabilityIDs
+                        .contains(
+                            "premiere.control"
+                        )
+                }
+            ) {
+            diagnostics.append(
+                "Gerçek mutation capability eksikliği Learning stratejisine yükseltilmedi."
+            )
+        }
+
+        if resolution
+            .suppressedLearningCapabilityIDs
+            .contains(
+                "premiere.control"
+            ) {
+            diagnostics.append(
+                "Mutation capability yanlışlıkla Learning gate tarafından bastırıldı."
+            )
+        }
+
+        return TrainingScenarioResult(
+            scenarioID:
+                "outcome-mutation-requires-real-capability",
+            title:
+                "Gerçek değişiklik outcome'u capability yoksa Learning istemeli",
+            tier: .core,
+            prompt: prompt,
+            passed: diagnostics.isEmpty,
+            goal:
+                "Salt-okunur alternatiflerle gerçek edit capability eksikliğini gizleme",
+            route: [
+                "Core",
+                "Outcome",
+                "Learning Gate"
+            ],
+            selectedCapabilities:
+                resolution
+                    .chosenStrategies
+                    .flatMap(
+                        \.capabilityIDs
+                    )
+                    .uniquedForTraining(),
+            unavailableCapabilities: [
+                "premiere.control"
+            ],
+            diagnostics: diagnostics
         )
     }
 
