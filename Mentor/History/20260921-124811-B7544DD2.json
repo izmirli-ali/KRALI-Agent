@@ -1,0 +1,138 @@
+{
+  "activityTail" : [
+    {
+      "date" : "2026-09-21T09:48:11Z",
+      "text" : "Debug/Recovery: Dış durum • Hata ayıklanıyor • verifier"
+    },
+    {
+      "date" : "2026-09-21T09:48:11Z",
+      "text" : "Dosya arama kapsamı çalışma alanıyla uyuşmuyor: İndirilenler ≠ Desktop"
+    },
+    {
+      "date" : "2026-09-21T09:48:11Z",
+      "text" : "Seçilen kabiliyetler: Akıl yürütme, Bağlam, Dosya metadata, Dosya arama"
+    },
+    {
+      "date" : "2026-09-21T09:48:11Z",
+      "text" : "Otomatik rota: Core → Goal → Context → Plan → Files → Verify → Response"
+    },
+    {
+      "date" : "2026-09-21T09:48:11Z",
+      "text" : "Seçilen plan: Seçili çalışma alanını salt-okunur tara, filtreleri uygula ve en uygun sonuçları göster"
+    },
+    {
+      "date" : "2026-09-21T09:48:11Z",
+      "text" : "KRALİ Core hedef sözleşmesi: hedef öğeleri bul"
+    },
+    {
+      "date" : "2026-09-21T09:48:11Z",
+      "text" : "Bağlam firewall: önceki görev bağlamları bu tura taşınmadı"
+    },
+    {
+      "date" : "2026-09-21T08:09:49Z",
+      "text" : "Apple yerel zeka hazır"
+    },
+    {
+      "date" : "2026-09-21T08:09:49Z",
+      "text" : "Çalışma klasörü yolu geri yüklendi; indeks gerektiğinde oluşturulacak: Desktop"
+    },
+    {
+      "date" : "2026-09-21T08:09:49Z",
+      "text" : "Ağır geliştirici testleri normal açılışta otomatik çalıştırılmıyor"
+    },
+    {
+      "date" : "2026-09-21T08:09:49Z",
+      "text" : "Dinamik hedef ve kabiliyet yönlendirme aktif"
+    },
+    {
+      "date" : "2026-09-21T08:09:49Z",
+      "text" : "KRALİ Core hazır"
+    }
+  ],
+  "appVersion" : "0.8.60",
+  "capabilities" : [
+    {
+      "available" : true,
+      "id" : "core.reasoning",
+      "name" : "Akıl yürütme",
+      "risk" : "reasoning"
+    },
+    {
+      "available" : true,
+      "id" : "context.local",
+      "name" : "Bağlam",
+      "risk" : "reasoning"
+    },
+    {
+      "available" : true,
+      "id" : "files.metadata",
+      "name" : "Dosya metadata",
+      "risk" : "readOnly"
+    },
+    {
+      "available" : true,
+      "id" : "files.search",
+      "name" : "Dosya arama",
+      "risk" : "readOnly"
+    }
+  ],
+  "capabilityGaps" : [
+
+  ],
+  "contextMemory" : [
+
+  ],
+  "createdAt" : "2026-09-21T09:48:11Z",
+  "executionSteps" : [
+    {
+      "capabilityID" : "core.reasoning",
+      "detail" : "Hedef sözleşmesi: hedef öğeleri bul. Kısıtları ve mevcut bağlamı anlamlandır.",
+      "kind" : "reasoning",
+      "state" : "completed",
+      "title" : "Hedefi çöz"
+    },
+    {
+      "capabilityID" : "files.search",
+      "detail" : "Seçili çalışma alanını salt-okunur tara.",
+      "kind" : "action",
+      "state" : "completed",
+      "title" : "Kapsamı tara"
+    },
+    {
+      "detail" : "Sonuç kümesini yeniden okuyup hedefi doğrula.",
+      "kind" : "verification",
+      "state" : "attention",
+      "title" : "Doğrula"
+    }
+  ],
+  "fallbackPlan" : "Mevcut kullanıcı girdisinden hedefi yeniden türet; önceki turun goal / plan state'ini bu tura taşıma.",
+  "finalResponse" : "“İndirilenler” kapsamını istedin ancak seçili çalışma alanı “Desktop”. Yanlış klasörde arama yapmadım. İndirilenler klasörünü çalışma alanı olarak seçip tekrar deneyebilirsin.\n\nDoğrulama: Doğrulama durduruldu: seçilen dosya arama hedefi mevcut kullanıcı girdisiyle uyuşmuyor.\nAlternatif plan: Mevcut kullanıcı girdisinden hedefi yeniden türet; önceki turun goal / plan state'ini bu tura taşıma.",
+  "goal" : "hedef öğeleri bul",
+  "inputSource" : "text",
+  "learningPlans" : [
+
+  ],
+  "plan" : "Seçili çalışma alanını salt-okunur tara, filtreleri uygula ve en uygun sonuçları göster",
+  "researchEvidence" : [
+
+  ],
+  "researchSources" : [
+
+  ],
+  "route" : [
+    "Core",
+    "Goal",
+    "Context",
+    "Plan",
+    "Files",
+    "Verify",
+    "Response"
+  ],
+  "taskGraph" : [
+
+  ],
+  "traceID" : "B7544DD2-2B4A-41D1-B512-1F43201CA571",
+  "userInput" : "indirilenlerdeki zip dosyalarını bul",
+  "verificationState" : "attention",
+  "verificationSummary" : "Doğrulama durduruldu: seçilen dosya arama hedefi mevcut kullanıcı girdisiyle uyuşmuyor."
+}

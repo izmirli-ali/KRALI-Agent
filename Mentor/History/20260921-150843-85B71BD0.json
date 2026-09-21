@@ -1,0 +1,420 @@
+{
+  "activityTail" : [
+    {
+      "date" : "2026-09-21T12:07:22Z",
+      "text" : "Task Graph: "
+    },
+    {
+      "date" : "2026-09-21T12:07:22Z",
+      "text" : "Semantic capability planı: context.local, core.reasoning, research.web"
+    },
+    {
+      "date" : "2026-09-21T12:07:22Z",
+      "text" : "Semantic planner sağlayıcısı: Deterministic Capability Contract"
+    },
+    {
+      "date" : "2026-09-21T12:07:22Z",
+      "text" : "Semantic Mission: birşey araştırmak istiyorum"
+    },
+    {
+      "date" : "2026-09-21T12:07:22Z",
+      "text" : "Semantic planner fallback: goal contract'tan deterministic mission üretildi"
+    },
+    {
+      "date" : "2026-09-21T12:07:15Z",
+      "text" : "Seçilen kabiliyetler: Akıl yürütme, Bağlam, Web araştırma"
+    },
+    {
+      "date" : "2026-09-21T12:07:15Z",
+      "text" : "Otomatik rota: Core → Goal → Context → Plan → Research → Verify → Response"
+    },
+    {
+      "date" : "2026-09-21T12:07:15Z",
+      "text" : "Seçilen plan: Bağlamı incele; doğrudan araç eşleşmesi yoksa güvenli alternatifler üret"
+    },
+    {
+      "date" : "2026-09-21T12:07:15Z",
+      "text" : "KRALİ Core hedef sözleşmesi: güncel kaynaklarla araştır"
+    },
+    {
+      "date" : "2026-09-21T12:07:15Z",
+      "text" : "Problem Solver başlangıç stratejisi: Mevcut provider'ı kullan • Task Graph bu capability'yi doğrudan seçti ve provider available."
+    },
+    {
+      "date" : "2026-09-21T12:06:55Z",
+      "text" : "Mentor trace GitHub'a senkronlandı"
+    },
+    {
+      "date" : "2026-09-21T12:06:44Z",
+      "text" : "Görev tamamlandı • 0.14 sn"
+    },
+    {
+      "date" : "2026-09-21T12:06:44Z",
+      "text" : "Mentor trace yerel olarak kaydedildi"
+    },
+    {
+      "date" : "2026-09-21T12:06:44Z",
+      "text" : "Plan B başarılı: Çelişki algılandı: workspace indeksi 56 klasör gözlemledi fakat birincil arama 0 sonuç verdi. Yeni capability öğrenmek yerine doğrulanmış indeks kanıtı yeniden kullanıldı."
+    },
+    {
+      "date" : "2026-09-21T12:06:44Z",
+      "text" : "Problem Solver contradiction recovery: Çelişki algılandı: workspace indeksi 56 klasör gözlemledi fakat birincil arama 0 sonuç verdi. Yeni capability öğrenmek yerine doğrulanmış indeks kanıtı yeniden kullanıldı."
+    },
+    {
+      "date" : "2026-09-21T12:06:44Z",
+      "text" : "0 klasör eşleşmesi bulundu"
+    },
+    {
+      "date" : "2026-09-21T12:06:44Z",
+      "text" : "Yerel klasör araması: klasörleri bul"
+    },
+    {
+      "date" : "2026-09-21T12:06:44Z",
+      "text" : "4 ekran görüntüsü adayı bulundu"
+    },
+    {
+      "date" : "2026-09-21T12:06:44Z",
+      "text" : "1739 dosya ve 56 klasör indekslendi"
+    },
+    {
+      "date" : "2026-09-21T12:06:44Z",
+      "text" : "Seçilen kabiliyetler: Akıl yürütme, Bağlam, Dosya metadata, Dosya arama"
+    },
+    {
+      "date" : "2026-09-21T12:06:44Z",
+      "text" : "Otomatik rota: Core → Goal → Context → Plan → Files → Verify → Response"
+    },
+    {
+      "date" : "2026-09-21T12:06:44Z",
+      "text" : "Seçilen plan: Seçili çalışma alanını salt-okunur tara, filtreleri uygula ve en uygun sonuçları göster"
+    },
+    {
+      "date" : "2026-09-21T12:06:44Z",
+      "text" : "KRALİ Core hedef sözleşmesi: klasörleri bul"
+    },
+    {
+      "date" : "2026-09-21T12:06:44Z",
+      "text" : "Problem Solver başlangıç stratejisi: Mevcut provider'ı kullan • Task Graph bu capability'yi doğrudan seçti ve provider available."
+    },
+    {
+      "date" : "2026-09-21T12:06:44Z",
+      "text" : "Bağlam firewall: önceki görev bağlamları bu tura taşınmadı"
+    },
+    {
+      "date" : "2026-09-21T12:06:34Z",
+      "text" : "Apple yerel zeka hazır"
+    },
+    {
+      "date" : "2026-09-21T12:06:34Z",
+      "text" : "Çalışma klasörü yolu geri yüklendi; indeks gerektiğinde oluşturulacak: Desktop"
+    },
+    {
+      "date" : "2026-09-21T12:06:34Z",
+      "text" : "Ağır geliştirici testleri normal açılışta otomatik çalıştırılmıyor"
+    },
+    {
+      "date" : "2026-09-21T12:06:34Z",
+      "text" : "Dinamik hedef ve kabiliyet yönlendirme aktif"
+    },
+    {
+      "date" : "2026-09-21T12:06:34Z",
+      "text" : "KRALİ Core hazır"
+    }
+  ],
+  "appVersion" : "0.8.63",
+  "capabilities" : [
+    {
+      "available" : true,
+      "id" : "core.reasoning",
+      "name" : "Akıl yürütme",
+      "risk" : "reasoning"
+    },
+    {
+      "available" : true,
+      "id" : "context.local",
+      "name" : "Bağlam",
+      "risk" : "reasoning"
+    },
+    {
+      "available" : false,
+      "id" : "browser.control",
+      "name" : "Tarayıcı kontrolü",
+      "risk" : "external"
+    },
+    {
+      "available" : true,
+      "id" : "desktop.app",
+      "name" : "Uygulama kontrolü",
+      "risk" : "external"
+    }
+  ],
+  "capabilityGaps" : [
+    {
+      "candidateCapabilityIDs" : [
+
+      ],
+      "capabilityID" : "browser.control",
+      "capabilityName" : "Tarayıcı kontrolü",
+      "developerBrief" : "KRALİ Capability Gap Developer Brief\n\nKullanıcı hedefi:\nexample.com sitesine gir ve sayfadaki ana başlığı bana söyle\n\nEksik capability:\nbrowser.control — Tarayıcı kontrolü\n\nGap türü:\nintegration\n\nBlocked step:\n2: Tarayıcı kontrolü\nOperation: capability.contract\nRole: verify\n\nMevcut strategy adayları:\nYok\n\nÇözüm kuralları:\n- Önce problemi ve kabul kriterini tanımla; kod değişikliği yalnız seçilen çözüm stratejisi gerçekten gerektiriyorsa yapılmalı.\n- Mevcut capability'leri bileştirerek çözüm üretilebiliyorsa yeni provider yazma.\n- En az iki çözüm alternatifi değerlendir ve neden seçildiğini kaydet.\n- Uygulama/marka adına hard-code yazma; mümkün olduğunca generic capability veya strategy geliştir.\n- Mevcut provider başka bir işi yapılmış gibi göstermesin.\n- Dış dünyaya commit eden eylemlerde kullanıcı onay kapısı korunmalı.\n- Başarı gerçek observation/verification ile kanıtlanmalı.\n- Ana branch üzerinde doğrudan self-modification yapma; candidate branch/worktree kullan.\n- Build + Training Lab + ilgili runtime probe geçmeden capability available yapılmamalı.\n\nKabul kriteri:\nBlocked step gerçek provider/strategy ile tamamlanmalı, evidence downstream step'e aktarılmalı ve verifier sahte PASS üretmemeli.",
+      "kind" : "integration",
+      "reason" : "Task Graph step 'Tarayıcı kontrolü' için browser.control gerekiyor ancak provider available değil.",
+      "researchGoal" : "Tarayıcı kontrolü için resmi API/entegrasyon veya generic UI bridge seçeneklerini araştır; izin, güvenlik ve doğrulama sınırlarını çıkar."
+    },
+    {
+      "candidateCapabilityIDs" : [
+
+      ],
+      "capabilityID" : "desktop.app",
+      "capabilityName" : "Uygulama kontrolü",
+      "developerBrief" : "KRALİ Runtime Capability Failure Developer Brief\n\nKullanıcı hedefi:\nexample.com sitesine gir ve sayfadaki ana başlığı bana söyle\n\nRuntime'da başarısız capability:\ndesktop.app — Uygulama kontrolü\n\nStep:\n3: Uygulama kontrolü\nOperation: capability.contract\nRole: act\n\nMevcut strategy adayları:\nYok\n\nSorun:\nProvider available olmasına rağmen runtime step tamamlanamadı veya postcondition doğrulanamadı: desktop.app • capability.contract\n\nÇözüm kuralları:\n- Önce problemi, gözlemleri ve başarısız postcondition'ı tanımla; doğrudan kod satırı aramaya başlama.\n- En az iki makul çözüm stratejisini değerlendir; mevcut capability kombinasyonu problemi çözebiliyorsa yeni provider yazma.\n- Capability zaten available ise önce mevcut provider'ı ve postcondition verifier'ı debug et.\n- Uygulama/marka adına hard-code yazma; hatayı genel resolver/provider/strategy seviyesinde çöz.\n- Başarı gerçek observation/verification ile kanıtlanmadan PASS üretme.\n- Dış dünyaya commit eden eylemlerde kullanıcı onayı korunmalı.\n- Candidate branch/worktree kullan; ana branch'i doğrudan değiştirme.\n- Build + regression + mümkünse runtime probe geçmeden düzeltmeyi available/healthy sayma.\n\nKabul kriteri:\nAynı sınıftaki bilinmeyen hedeflerde de provider doğru hedefi çözebilmeli; başarısız runtime step tamamlanmalı ve verifier gerçek evidence ile PASS verebilmeli.",
+      "kind" : "strategy",
+      "reason" : "Provider available olmasına rağmen runtime step tamamlanamadı veya postcondition doğrulanamadı: desktop.app • capability.contract",
+      "researchGoal" : "Mevcut Uygulama kontrolü provider'ının neden runtime'da başarısız olduğunu kanıtla; önce mevcut provider/strategy'yi debug et, gerekirse generic recovery veya yeni provider stratejisi geliştir ve aynı postcondition'ı gerçek observation ile doğrula."
+    }
+  ],
+  "contextMemory" : [
+    {
+      "createdAt" : "2026-09-20T01:00:28Z",
+      "kind" : "userRule",
+      "summary" : "Ana projeyi doğrudan değiştirme; çalışma kopyasında ilerle.",
+      "title" : "Çalışma kuralı"
+    }
+  ],
+  "createdAt" : "2026-09-21T12:08:43Z",
+  "executionSteps" : [
+    {
+      "capabilityID" : "core.reasoning",
+      "detail" : "Semantic model geçici olarak mission üretemedi; capability contract güncel kullanıcı mesajından güvenli fallback oluşturuyor. Operation: semantic.fallback",
+      "kind" : "reasoning",
+      "state" : "completed",
+      "title" : "Hedefi çöz"
+    },
+    {
+      "capabilityID" : "context.local",
+      "detail" : "Mission hedefini uçtan uca tamamlamak için gerekli capability sözleşmesi. Ön koşul adımları: 1. Operation: capability.contract",
+      "kind" : "reasoning",
+      "state" : "completed",
+      "title" : "Bağlam"
+    },
+    {
+      "capabilityID" : "browser.control",
+      "detail" : "Mission hedefini uçtan uca tamamlamak için gerekli capability sözleşmesi. Ön koşul adımları: 2. Operation: capability.contract",
+      "kind" : "action",
+      "state" : "completed",
+      "title" : "Tarayıcı kontrolü"
+    },
+    {
+      "capabilityID" : "desktop.app",
+      "detail" : "Mission hedefini uçtan uca tamamlamak için gerekli capability sözleşmesi. Ön koşul adımları: 3. Operation: capability.contract",
+      "kind" : "action",
+      "state" : "partial",
+      "title" : "Uygulama kontrolü"
+    },
+    {
+      "capabilityID" : "core.reasoning",
+      "detail" : "Gerçekleşen adımları hedefle, capability durumuyla ve üretilen sonuçla karşılaştır.",
+      "kind" : "verification",
+      "state" : "attention",
+      "title" : "Mission sonucunu doğrula"
+    },
+    {
+      "detail" : "Tamamlanan, bekleyen ve kullanıcı bilgisi gerektiren kısımları birbirinden ayır.",
+      "kind" : "response",
+      "state" : "completed",
+      "title" : "Sonucu kullanıcıya aktar"
+    }
+  ],
+  "fallbackPlan" : "Tamamlanmayan action step'ini yeniden planla; yürütülmeyen işi başarılı sayma.",
+  "finalResponse" : "Görev tamamlanamadı. Eksik kabiliyet: Tarayıcı kontrolü.\n\nDoğrulama: Semantic mission içindeki zorunlu action step'lerinden bazıları tamamlanmadı: desktop.app\nAlternatif plan: Tamamlanmayan action step'ini yeniden planla; yürütülmeyen işi başarılı sayma.\nYetkinlik kazanma planı: Resmi API/entegrasyonu araştır → gereken hesap/izinleri çıkar → bağlantıyı sandbox/test ortamında doğrula → kullanıcı onayından sonra etkinleştir.",
+  "goal" : "example.com sitesine gir ve sayfadaki ana başlığı bana söyle",
+  "inputSource" : "text",
+  "learningPlans" : [
+    {
+      "capabilityID" : "browser.control",
+      "capabilityName" : "Tarayıcı kontrolü",
+      "nextStep" : "Resmi API/entegrasyonu araştır → gereken hesap/izinleri çıkar → bağlantıyı sandbox/test ortamında doğrula → kullanıcı onayından sonra etkinleştir.",
+      "researchGoal" : "macOS tarayıcı otomasyonu için güvenli browser bridge, Accessibility ve desteklenen otomasyon API'lerini resmi kaynaklardan karşılaştır.",
+      "state" : "integrationRequired"
+    }
+  ],
+  "plan" : "Hedefi çöz → Bağlam → Tarayıcı kontrolü → Uygulama kontrolü",
+  "problemResolution" : {
+    "frame" : {
+      "availableCapabilityIDs" : [
+        "app.workflow",
+        "context.local",
+        "core.reasoning",
+        "desktop.app",
+        "files.metadata",
+        "files.move.reversible",
+        "files.reveal",
+        "files.search",
+        "files.write.text",
+        "memory.local",
+        "perception.screen",
+        "research.web",
+        "speech.input",
+        "speech.output"
+      ],
+      "blockedCapabilityIDs" : [
+
+      ],
+      "constraints" : [
+        "Başarı gerçek observation/verification ile kanıtlanmalı.",
+        "Dış dünyaya commit eden işlem kullanıcı onayı olmadan uygulanmamalı.",
+        "Uygulama/marka adına özel hard-code yerine generic capability/strategy tercih edilmeli."
+      ],
+      "objective" : "Uygulama kontrolü",
+      "observations" : [
+        "Başarısız step: Uygulama kontrolü",
+        "Çalışma kuralı: Ana projeyi doğrudan değiştirme; çalışma kopyasında ilerle."
+      ]
+    },
+    "reflection" : "Mevcut güvenli stratejiler tükendi; capability learning gerekli.",
+    "strategies" : [
+      {
+        "capabilityIDs" : [
+          "desktop.app"
+        ],
+        "executableNow" : true,
+        "id" : "primary:desktop.app",
+        "kind" : "primary",
+        "rationale" : "Task Graph bu capability'yi doğrudan seçti ve provider available.",
+        "requiresLearning" : false,
+        "score" : 100,
+        "summary" : "Uygulama kontrolü adımını desktop.app ile yürüt.",
+        "title" : "Mevcut provider'ı kullan"
+      }
+    ]
+  },
+  "reflectionSummary" : "Mevcut güvenli stratejiler tükendi; capability learning gerekli.",
+  "researchEvidence" : [
+
+  ],
+  "researchSources" : [
+
+  ],
+  "route" : [
+    "Core",
+    "Goal",
+    "Context",
+    "Plan",
+    "Browser",
+    "Desktop",
+    "Learn",
+    "Verify",
+    "Response"
+  ],
+  "semanticMission" : {
+    "confidence" : 0.65,
+    "objective" : "example.com sitesine gir ve sayfadaki ana başlığı bana söyle",
+    "outcomes" : [
+      "open",
+      "research"
+    ],
+    "requiredCapabilityIDs" : [
+      "browser.control",
+      "context.local",
+      "core.reasoning",
+      "desktop.app"
+    ],
+    "requiresUserInput" : false,
+    "steps" : [
+      {
+        "capabilityID" : "core.reasoning",
+        "dependsOn" : [
+
+        ],
+        "operation" : "semantic.fallback",
+        "purpose" : "Semantic model geçici olarak mission üretemedi; capability contract güncel kullanıcı mesajından güvenli fallback oluşturuyor.",
+        "title" : "Hedefi çöz"
+      },
+      {
+        "capabilityID" : "context.local",
+        "dependsOn" : [
+          0
+        ],
+        "operation" : "capability.contract",
+        "purpose" : "Mission hedefini uçtan uca tamamlamak için gerekli capability sözleşmesi.",
+        "title" : "Bağlam"
+      },
+      {
+        "capabilityID" : "browser.control",
+        "dependsOn" : [
+          1
+        ],
+        "operation" : "capability.contract",
+        "purpose" : "Mission hedefini uçtan uca tamamlamak için gerekli capability sözleşmesi.",
+        "title" : "Tarayıcı kontrolü"
+      },
+      {
+        "capabilityID" : "desktop.app",
+        "dependsOn" : [
+          2
+        ],
+        "operation" : "capability.contract",
+        "purpose" : "Mission hedefini uçtan uca tamamlamak için gerekli capability sözleşmesi.",
+        "title" : "Uygulama kontrolü"
+      }
+    ]
+  },
+  "semanticPlannerProvider" : "Local Contract Repair",
+  "taskGraph" : [
+    {
+      "available" : true,
+      "capabilityID" : "core.reasoning",
+      "dependsOn" : [
+
+      ],
+      "index" : 0,
+      "operation" : "semantic.fallback",
+      "requiresApproval" : false,
+      "risk" : "reasoning",
+      "role" : "reason",
+      "title" : "Hedefi çöz"
+    },
+    {
+      "available" : true,
+      "capabilityID" : "context.local",
+      "dependsOn" : [
+        0
+      ],
+      "index" : 1,
+      "operation" : "capability.contract",
+      "requiresApproval" : false,
+      "risk" : "reasoning",
+      "role" : "reason",
+      "title" : "Bağlam"
+    },
+    {
+      "available" : false,
+      "capabilityID" : "browser.control",
+      "dependsOn" : [
+        1
+      ],
+      "index" : 2,
+      "operation" : "capability.contract",
+      "requiresApproval" : false,
+      "risk" : "external",
+      "role" : "verify",
+      "title" : "Tarayıcı kontrolü"
+    },
+    {
+      "available" : true,
+      "capabilityID" : "desktop.app",
+      "dependsOn" : [
+        2
+      ],
+      "index" : 3,
+      "operation" : "capability.contract",
+      "requiresApproval" : false,
+      "risk" : "external",
+      "role" : "act",
+      "title" : "Uygulama kontrolü"
+    }
+  ],
+  "traceID" : "85B71BD0-B49A-4CDA-BC57-18FCB5FAEC64",
+  "userInput" : "example.com sitesine gir ve sayfadaki ana başlığı bana söyle",
+  "verificationState" : "attention",
+  "verificationSummary" : "Semantic mission içindeki zorunlu action step'lerinden bazıları tamamlanmadı: desktop.app"
+}

@@ -1,0 +1,178 @@
+{
+  "activityTail" : [
+    {
+      "date" : "2026-09-21T07:12:35Z",
+      "text" : "Debug/Recovery: Dış durum • Hata ayıklanıyor • verifier"
+    },
+    {
+      "date" : "2026-09-21T07:12:35Z",
+      "text" : "0 eşleşme bulundu"
+    },
+    {
+      "date" : "2026-09-21T07:12:35Z",
+      "text" : "Yerel dosya araması: “masaüstündeki l” araması"
+    },
+    {
+      "date" : "2026-09-21T07:12:35Z",
+      "text" : "2 ekran görüntüsü adayı bulundu"
+    },
+    {
+      "date" : "2026-09-21T07:12:35Z",
+      "text" : "1718 dosya ve 56 klasör indekslendi"
+    },
+    {
+      "date" : "2026-09-21T07:12:35Z",
+      "text" : "Seçilen kabiliyetler: Akıl yürütme, Bağlam, Dosya metadata, Dosya arama"
+    },
+    {
+      "date" : "2026-09-21T07:12:35Z",
+      "text" : "Otomatik rota: Core → Goal → Context → Plan → Files → Verify → Response"
+    },
+    {
+      "date" : "2026-09-21T07:12:35Z",
+      "text" : "Seçilen plan: Seçili çalışma alanını salt-okunur tara, filtreleri uygula ve en uygun sonuçları göster"
+    },
+    {
+      "date" : "2026-09-21T07:12:35Z",
+      "text" : "KRALİ Core hedef sözleşmesi: hedef öğeleri bul"
+    },
+    {
+      "date" : "2026-09-21T07:12:35Z",
+      "text" : "Bağlam firewall: önceki görev bağlamları bu tura taşınmadı"
+    },
+    {
+      "date" : "2026-09-21T07:12:17Z",
+      "text" : "Diagnostics isteğe bağlı yüklendi"
+    },
+    {
+      "date" : "2026-09-21T07:12:11Z",
+      "text" : "Görev tamamlandı • 0.06 sn"
+    },
+    {
+      "date" : "2026-09-21T07:12:11Z",
+      "text" : "Mentor trace yerel olarak kaydedildi"
+    },
+    {
+      "date" : "2026-09-21T07:12:11Z",
+      "text" : "Seçilen kabiliyetler: Akıl yürütme, Bağlam"
+    },
+    {
+      "date" : "2026-09-21T07:12:11Z",
+      "text" : "Otomatik rota: Core → Goal → Context → Response"
+    },
+    {
+      "date" : "2026-09-21T07:12:11Z",
+      "text" : "Seçilen plan: Kısa ve bağlama uygun cevap ver"
+    },
+    {
+      "date" : "2026-09-21T07:12:11Z",
+      "text" : "KRALİ Core hedef sözleşmesi: doğal konuşmayı sürdür"
+    },
+    {
+      "date" : "2026-09-21T07:10:39Z",
+      "text" : "Apple yerel zeka hazır"
+    },
+    {
+      "date" : "2026-09-21T07:10:38Z",
+      "text" : "Çalışma klasörü yolu geri yüklendi; indeks gerektiğinde oluşturulacak: Desktop"
+    },
+    {
+      "date" : "2026-09-21T07:10:38Z",
+      "text" : "Ağır geliştirici testleri normal açılışta otomatik çalıştırılmıyor"
+    },
+    {
+      "date" : "2026-09-21T07:10:38Z",
+      "text" : "Dinamik hedef ve kabiliyet yönlendirme aktif"
+    },
+    {
+      "date" : "2026-09-21T07:10:38Z",
+      "text" : "KRALİ Core hazır"
+    }
+  ],
+  "appVersion" : "0.8.59",
+  "capabilities" : [
+    {
+      "available" : true,
+      "id" : "core.reasoning",
+      "name" : "Akıl yürütme",
+      "risk" : "reasoning"
+    },
+    {
+      "available" : true,
+      "id" : "context.local",
+      "name" : "Bağlam",
+      "risk" : "reasoning"
+    },
+    {
+      "available" : true,
+      "id" : "files.metadata",
+      "name" : "Dosya metadata",
+      "risk" : "readOnly"
+    },
+    {
+      "available" : true,
+      "id" : "files.search",
+      "name" : "Dosya arama",
+      "risk" : "readOnly"
+    }
+  ],
+  "capabilityGaps" : [
+
+  ],
+  "contextMemory" : [
+
+  ],
+  "createdAt" : "2026-09-21T07:12:35Z",
+  "executionSteps" : [
+    {
+      "capabilityID" : "core.reasoning",
+      "detail" : "Hedef sözleşmesi: hedef öğeleri bul. Kısıtları ve mevcut bağlamı anlamlandır.",
+      "kind" : "reasoning",
+      "state" : "completed",
+      "title" : "Hedefi çöz"
+    },
+    {
+      "capabilityID" : "files.search",
+      "detail" : "Seçili çalışma alanını salt-okunur tara.",
+      "kind" : "action",
+      "state" : "completed",
+      "title" : "Kapsamı tara"
+    },
+    {
+      "detail" : "Sonuç kümesini yeniden okuyup hedefi doğrula.",
+      "kind" : "verification",
+      "state" : "attention",
+      "title" : "Doğrula"
+    }
+  ],
+  "fallbackPlan" : "Mevcut kullanıcı girdisinden hedefi yeniden türet; önceki turun goal / plan state'ini bu tura taşıma.",
+  "finalResponse" : "“masaüstündeki l” araması için eşleşme bulamadım.\n\nDoğrulama: Doğrulama durduruldu: seçilen dosya arama hedefi mevcut kullanıcı girdisiyle uyuşmuyor.\nAlternatif plan: Mevcut kullanıcı girdisinden hedefi yeniden türet; önceki turun goal / plan state'ini bu tura taşıma.",
+  "goal" : "hedef öğeleri bul",
+  "inputSource" : "text",
+  "learningPlans" : [
+
+  ],
+  "plan" : "Seçili çalışma alanını salt-okunur tara, filtreleri uygula ve en uygun sonuçları göster",
+  "researchEvidence" : [
+
+  ],
+  "researchSources" : [
+
+  ],
+  "route" : [
+    "Core",
+    "Goal",
+    "Context",
+    "Plan",
+    "Files",
+    "Verify",
+    "Response"
+  ],
+  "taskGraph" : [
+
+  ],
+  "traceID" : "0F7221D7-6642-4572-BED0-D33CA0CF74B7",
+  "userInput" : "masaüstündeki dosyaları bul",
+  "verificationState" : "attention",
+  "verificationSummary" : "Doğrulama durduruldu: seçilen dosya arama hedefi mevcut kullanıcı girdisiyle uyuşmuyor."
+}

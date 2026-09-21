@@ -82,3 +82,9 @@ KRALİ Semantic Planner Fallback
 status=9
 input=windows keyi ekli mi değil mi nasıl öğrenebiliriz?
 output:
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+KRALİ Semantic Planner Fallback
+status=9
+input=OpenAI hakkında internette araştırma yap ve son gelişmeleri kısaca anlat
+output:

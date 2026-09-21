@@ -136,9 +136,27 @@
       "risk" : "reasoning"
     },
     {
+      "available" : false,
+      "id" : "browser.control",
+      "name" : "Tarayıcı kontrolü",
+      "risk" : "external"
+    },
+    {
       "available" : true,
       "id" : "desktop.app",
       "name" : "Uygulama kontrolü",
+      "risk" : "external"
+    },
+    {
+      "available" : true,
+      "id" : "perception.screen",
+      "name" : "Ekran algısı",
+      "risk" : "readOnly"
+    },
+    {
+      "available" : true,
+      "id" : "system.open.url",
+      "name" : "URL açma",
       "risk" : "external"
     }
   ],
@@ -148,7 +166,7 @@
   "contextMemory" : [
 
   ],
-  "createdAt" : "2026-09-21T16:54:16Z",
+  "createdAt" : "2026-09-21T16:53:16Z",
   "executionSteps" : [
     {
       "capabilityID" : "core.reasoning",
@@ -165,10 +183,17 @@
       "title" : "Bağlam"
     },
     {
-      "capabilityID" : "desktop.app",
+      "capabilityID" : "browser.control",
       "detail" : "Mission hedefini uçtan uca tamamlamak için gerekli capability sözleşmesi. Ön koşul adımları: 2. Operation: capability.contract",
       "kind" : "action",
-      "state" : "completed",
+      "state" : "skipped",
+      "title" : "Tarayıcı kontrolü"
+    },
+    {
+      "capabilityID" : "desktop.app",
+      "detail" : "Mission hedefini uçtan uca tamamlamak için gerekli capability sözleşmesi. Ön koşul adımları: 3. Operation: capability.contract",
+      "kind" : "action",
+      "state" : "skipped",
       "title" : "Uygulama kontrolü"
     },
     {
@@ -186,84 +211,152 @@
     }
   ],
   "fallbackPlan" : "Eksik capability veya başarısız adımı yeniden planla; tamamlanmayan işi yapılmış gibi gösterme.",
-  "finalResponse" : "Spotify uygulamasını açtım ve görünür biçimde öne geldiğini doğruladım.",
-  "goal" : "Spotify uygulamasını aç",
+  "finalResponse" : "OpenAI.com sayfası, araştırma ve devreye alma, ürünler, kurumsal, geliştiriciler, şirket, Foundation, yardım seçenekleri, quiz, sohbet, arama, API Platformu, hikayeler, pr, oturum aç, ChatGPT deneyin, paylaş, çalışma adımları, mentor, senkronizasyon, trace, install, command, mir, ekle, araştırma, kısaca anlat, mali, web-observe, screen, an, doğrulama, doğrudan v0.8.68'de, ile, gerçek, Ul, ChatGPT, Images 2.5, reklam metni yazımı, KRALI durumu incelemesi, video değiştirme promptu, vO.8.32 test değerlendirme, KRALI projesi değerlendirmesi, KRALI agent geliştirme, Ali İhsancan UYSAL, ChatGPT hata kontrolü, mesaj gönder içeriklerini ve seçeneklerini sunar.",
+  "goal" : "openai.com sitesine gir ve sayfada ne olduğunu kısaca anlat",
   "inputSource" : "text",
+  "intelligenceProvider" : "Apple Foundation Models",
   "learningPlans" : [
 
   ],
   "outcomeAttempts" : [
+    {
+      "executedCapabilityIDs" : [
+        "perception.screen",
+        "system.open.url"
+      ],
+      "id" : "591F43C7-7EB7-4FDA-A816-55174416D6FD",
+      "requirementID" : "web-navigation",
+      "state" : "succeeded",
+      "strategyID" : "web-navigation:open-url-observe",
+      "summary" : "URL generic macOS provider ile açıldı, hedef ekran kanıtıyla doğrulandı ve istenen bilgi çıkarıldı."
+    },
+    {
+      "executedCapabilityIDs" : [
 
+      ],
+      "id" : "A9EE3D42-FFE5-47AA-80E5-DA615FE615B6",
+      "requirementID" : "public-information",
+      "state" : "failed",
+      "strategyID" : "public-information:public-research",
+      "summary" : "Web araştırması sonuç veya derin okuma üretse bile başarı kriterini destekleyen gerçek kaynak kanıtı oluşmadı."
+    },
+    {
+      "executedCapabilityIDs" : [
+        "perception.screen",
+        "system.open.url"
+      ],
+      "id" : "32BBBE3E-421F-4C9C-BBCE-526D25932086",
+      "requirementID" : "public-information",
+      "state" : "succeeded",
+      "strategyID" : "public-information:open-url-observe",
+      "summary" : "URL generic macOS provider ile açıldı, hedef ekran kanıtıyla doğrulandı ve istenen bilgi çıkarıldı."
+    }
   ],
   "outcomeResolution" : {
     "chosenStrategyIDs" : [
-      "open-resource:direct:desktop.app"
+      "web-navigation:open-url-observe",
+      "public-information:public-research"
     ],
     "contract" : {
       "instrumentalCapabilityIDs" : [
-
+        "browser.control",
+        "desktop.app",
+        "app.workflow"
       ],
-      "objective" : "Spotify uygulamasını aç",
+      "objective" : "openai.com sitesine gir ve sayfada ne olduğunu kısaca anlat",
       "requirements" : [
         {
           "acceptableCapabilityIDs" : [
-            "desktop.app",
-            "files.reveal",
-            "browser.control",
-            "app.workflow"
-          ],
-          "id" : "open-resource",
-          "kind" : "openResource",
-          "preferredCapabilityIDs" : [
-            "desktop.app",
-            "files.reveal",
+            "system.open.url",
+            "perception.screen",
             "browser.control"
           ],
+          "id" : "web-navigation",
+          "kind" : "navigateWebResource",
+          "preferredCapabilityIDs" : [
+            "system.open.url",
+            "perception.screen"
+          ],
           "requiresMutation" : false,
-          "successCriterion" : "Hedef kaynak gerçekten açılmış/öne gelmiş olmalı.",
-          "title" : "Hedef kaynağı aç veya öne getir"
+          "successCriterion" : "Kullanıcının belirttiği HTTP/HTTPS hedefi gerçekten açılmış ve görünür ekran kanıtıyla doğrulanmış olmalı.",
+          "title" : "İstenen web hedefini aç ve doğrula"
+        },
+        {
+          "acceptableCapabilityIDs" : [
+            "research.web",
+            "system.open.url",
+            "perception.screen",
+            "browser.control"
+          ],
+          "id" : "public-information",
+          "kind" : "retrievePublicInformation",
+          "preferredCapabilityIDs" : [
+            "research.web"
+          ],
+          "requiresMutation" : false,
+          "successCriterion" : "Kullanıcının istediği bilgi gerçek public kaynaktan kanıtla elde edilmiş olmalı.",
+          "title" : "İstenen public bilgiyi elde et"
         }
       ],
       "successCriteria" : [
-        "Hedef kaynak gerçekten açılmış/öne gelmiş olmalı."
+        "Kullanıcının belirttiği HTTP/HTTPS hedefi gerçekten açılmış ve görünür ekran kanıtıyla doğrulanmış olmalı.",
+        "Kullanıcının istediği bilgi gerçek public kaynaktan kanıtla elde edilmiş olmalı."
       ]
     },
     "coveredRequirementIDs" : [
-      "open-resource"
+      "web-navigation",
+      "public-information"
     ],
     "strategies" : [
       {
         "capabilityIDs" : [
-          "desktop.app"
+          "system.open.url",
+          "perception.screen"
         ],
         "executableNow" : true,
-        "id" : "open-resource:direct:desktop.app",
-        "kind" : "genericAppWorkflow",
-        "rationale" : "Bu capability başarı kriterini doğrudan karşılayabiliyor.",
-        "requirementID" : "open-resource",
+        "id" : "web-navigation:open-url-observe",
+        "kind" : "openURLAndObserve",
+        "rationale" : "Kullanıcı açıkça bir web hedefini açmayı istedi; navigation outcome araştırmadan önce gerçek URL açılışı ve ekran doğrulaması gerektirir.",
+        "requirementID" : "web-navigation",
         "requiresLearning" : false,
-        "score" : 90,
-        "title" : "Outcome'u desktop.app ile çöz"
+        "score" : 120,
+        "title" : "Web hedefini aç ve görünür olarak doğrula"
       },
       {
         "capabilityIDs" : [
-          "files.reveal"
+          "research.web"
         ],
         "executableNow" : true,
-        "id" : "open-resource:direct:files.reveal",
-        "kind" : "localFiles",
-        "rationale" : "Bu capability başarı kriterini doğrudan karşılayabiliyor.",
-        "requirementID" : "open-resource",
+        "id" : "public-information:public-research",
+        "kind" : "publicResearch",
+        "rationale" : "Kullanıcının başarı kriteri bilgi edinmek; tarayıcı UI'sı araçtır, zorunlu outcome değildir.",
+        "requirementID" : "public-information",
         "requiresLearning" : false,
-        "score" : 90,
-        "title" : "Outcome'u files.reveal ile çöz"
+        "score" : 110,
+        "title" : "Public kaynaktan bilgi edin"
+      },
+      {
+        "capabilityIDs" : [
+          "system.open.url",
+          "perception.screen"
+        ],
+        "executableNow" : true,
+        "id" : "public-information:open-url-observe",
+        "kind" : "openURLAndObserve",
+        "rationale" : "Statik web okuma kanıt üretmezse belirli bir tarayıcıya bağlanmadan macOS varsayılan URL işleyicisiyle hedef açılıp görünür içerik doğrulanabilir.",
+        "requirementID" : "public-information",
+        "requiresLearning" : false,
+        "score" : 80,
+        "title" : "URL'yi sistemle aç ve ekranı gözlemle"
       }
     ],
     "suppressedLearningCapabilityIDs" : [
-
+      "app.workflow",
+      "desktop.app",
+      "browser.control"
     ]
   },
-  "plan" : "Hedefi çöz → Bağlam → Uygulama kontrolü",
+  "plan" : "Hedefi çöz → Bağlam → Tarayıcı kontrolü → Uygulama kontrolü",
   "problemResolution" : {
     "chosenStrategyID" : "primary:core.reasoning",
     "frame" : {
@@ -285,14 +378,14 @@
         "system.open.url"
       ],
       "blockedCapabilityIDs" : [
-
+        "browser.control"
       ],
       "constraints" : [
         "Başarı gerçek observation/verification ile kanıtlanmalı.",
         "Dış dünyaya commit eden işlem kullanıcı onayı olmadan uygulanmamalı.",
         "Uygulama/marka adına özel hard-code yerine generic capability/strategy tercih edilmeli."
       ],
-      "objective" : "Spotify uygulamasını aç",
+      "objective" : "openai.com sitesine gir ve sayfada ne olduğunu kısaca anlat",
       "observations" : [
         "Seçili çalışma alanı: Desktop"
       ]
@@ -349,6 +442,19 @@
         "score" : 75,
         "summary" : "Mevcut dependency evidence üzerinde analiz/sentez uygula.",
         "title" : "Kanıtı reasoning ile dönüştür"
+      },
+      {
+        "capabilityIDs" : [
+          "browser.control"
+        ],
+        "executableNow" : false,
+        "id" : "learn:browser.control",
+        "kind" : "learning",
+        "rationale" : "Mevcut capability setinde hedefi güvenilir biçimde tamamlayacak güvenli alternatif bulunamadı.",
+        "requiresLearning" : true,
+        "score" : 10,
+        "summary" : "browser.control için güvenli provider/strategy öğrenme hattını başlat.",
+        "title" : "Capability öğren"
       }
     ]
   },
@@ -356,24 +462,47 @@
 
   ],
   "researchSources" : [
-
+    {
+      "domain" : "openai.com",
+      "sourceType" : "canonical-direct",
+      "title" : "openai.com — doğrudan kaynak adayı",
+      "url" : "https://openai.com"
+    },
+    {
+      "domain" : "platform.openai.com",
+      "snippet" : "Build on the OpenAI API Platform Sign up or login with an OpenAI account to build with the OpenAI API.",
+      "sourceType" : "search-result",
+      "title" : "OpenAI Platform",
+      "url" : "https://platform.openai.com/"
+    },
+    {
+      "domain" : "openai.com",
+      "snippet" : "En son araştırmalar Tümünü görüntüle Bir OpenAI modeli Navier–Stokes problemine çözüm öneriyor Araştırma 8 Eyl 2026 Araştırmaların hızlanması: OpenAI'dan bir bakış Araştırma 6 Eyl 2026",
+      "sourceType" : "search-result",
+      "title" : "OpenAI | Araştırma ve Devreye Alım",
+      "url" : "https://openai.com/tr-TR/"
+    }
   ],
   "route" : [
     "Core",
     "Goal",
     "Context",
     "Plan",
+    "Browser",
     "Desktop",
+    "Intelligence",
     "Verify",
     "Response"
   ],
   "semanticMission" : {
     "confidence" : 0.65,
-    "objective" : "Spotify uygulamasını aç",
+    "objective" : "openai.com sitesine gir ve sayfada ne olduğunu kısaca anlat",
     "outcomes" : [
-      "open"
+      "open",
+      "research"
     ],
     "requiredCapabilityIDs" : [
+      "browser.control",
       "context.local",
       "core.reasoning",
       "desktop.app"
@@ -399,9 +528,18 @@
         "title" : "Bağlam"
       },
       {
-        "capabilityID" : "desktop.app",
+        "capabilityID" : "browser.control",
         "dependsOn" : [
           1
+        ],
+        "operation" : "capability.contract",
+        "purpose" : "Mission hedefini uçtan uca tamamlamak için gerekli capability sözleşmesi.",
+        "title" : "Tarayıcı kontrolü"
+      },
+      {
+        "capabilityID" : "desktop.app",
+        "dependsOn" : [
+          2
         ],
         "operation" : "capability.contract",
         "purpose" : "Mission hedefini uçtan uca tamamlamak için gerekli capability sözleşmesi.",
@@ -438,8 +576,8 @@
       "title" : "Bağlam"
     },
     {
-      "available" : true,
-      "capabilityID" : "desktop.app",
+      "available" : false,
+      "capabilityID" : "browser.control",
       "dependsOn" : [
         1
       ],
@@ -447,12 +585,25 @@
       "operation" : "capability.contract",
       "requiresApproval" : false,
       "risk" : "external",
+      "role" : "verify",
+      "title" : "Tarayıcı kontrolü"
+    },
+    {
+      "available" : true,
+      "capabilityID" : "desktop.app",
+      "dependsOn" : [
+        2
+      ],
+      "index" : 3,
+      "operation" : "capability.contract",
+      "requiresApproval" : false,
+      "risk" : "external",
       "role" : "act",
       "title" : "Uygulama kontrolü"
     }
   ],
-  "traceID" : "C7CB3801-BCA6-4589-96C7-05CCDAED7A55",
-  "userInput" : "Spotify uygulamasını aç",
+  "traceID" : "5E742DAB-328B-4BA6-ADBE-BA032821E4D9",
+  "userInput" : "openai.com sitesine gir ve sayfada ne olduğunu kısaca anlat",
   "verificationState" : "passed",
-  "verificationSummary" : "Semantic mission ile seçilen mevcut capability adımları yürütüldü ve hedefle uyumlu sonuç doğrulandı."
+  "verificationSummary" : "Outcome doğrulandı: başarı kriteri runtime strategy chain içinde gerçek kanıt üreten stratejiyle tamamlandı • web-navigation:open-url-observe, public-information:open-url-observe"
 }

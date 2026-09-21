@@ -1,0 +1,301 @@
+{
+  "activityTail" : [
+    {
+      "date" : "2026-09-20T21:07:40Z",
+      "text" : "Desktop runtime: Safari • foreground=true • source=ScreenCaptureKit z-order"
+    },
+    {
+      "date" : "2026-09-20T21:07:40Z",
+      "text" : "Semantic rota: Core → Goal → Context → Plan → Browser → Desktop → Learn → Verify → Response"
+    },
+    {
+      "date" : "2026-09-20T21:07:40Z",
+      "text" : "Capability Gap: browser.control • integration • strategy=yok"
+    },
+    {
+      "date" : "2026-09-20T21:07:40Z",
+      "text" : "Task Graph blocked capability: browser.control"
+    },
+    {
+      "date" : "2026-09-20T21:07:40Z",
+      "text" : "Task Graph: 0:context.local[reason] → 1:desktop.app[act] → 2:browser.control[act]"
+    },
+    {
+      "date" : "2026-09-20T21:07:40Z",
+      "text" : "Semantic capability planı: browser.control, context.local, core.reasoning, desktop.app"
+    },
+    {
+      "date" : "2026-09-20T21:07:40Z",
+      "text" : "Semantic planner sağlayıcısı: Apple Foundation Models"
+    },
+    {
+      "date" : "2026-09-20T21:07:40Z",
+      "text" : "Semantic Mission: Safari’yi aç. example.com adresine git ve sayfadaki ana başlığı bana söyle. Başka hiçbir işlem yapma."
+    },
+    {
+      "date" : "2026-09-20T21:07:40Z",
+      "text" : "Yetkinlik öğrenme planı: Tarayıcı kontrolü → Entegrasyon gerekli"
+    },
+    {
+      "date" : "2026-09-20T21:07:40Z",
+      "text" : "Seçilen kabiliyetler: Akıl yürütme, Bağlam, Uygulama kontrolü, Tarayıcı kontrolü [bekliyor]"
+    },
+    {
+      "date" : "2026-09-20T21:07:40Z",
+      "text" : "Otomatik rota: Core → Goal → Context → Plan → Desktop → Browser → Learn → Verify → Response"
+    },
+    {
+      "date" : "2026-09-20T21:07:40Z",
+      "text" : "Seçilen plan: Uygulama adını çöz, uygulamayı aç veya öne getir ve sonucu doğrula"
+    },
+    {
+      "date" : "2026-09-20T21:07:40Z",
+      "text" : "KRALİ Core hedef sözleşmesi: istenen uygulamayı aç veya öne getir"
+    },
+    {
+      "date" : "2026-09-20T21:07:40Z",
+      "text" : "Bağlam hafızası: Çalışma kuralı • Çalışma kuralı"
+    },
+    {
+      "date" : "2026-09-20T21:07:16Z",
+      "text" : "Apple yerel zeka hazır"
+    },
+    {
+      "date" : "2026-09-20T21:07:16Z",
+      "text" : "Çalışma klasörü geri yüklendi: Desktop"
+    },
+    {
+      "date" : "2026-09-20T21:07:16Z",
+      "text" : "2 ekran görüntüsü adayı bulundu"
+    },
+    {
+      "date" : "2026-09-20T21:07:16Z",
+      "text" : "1768 dosya ve 68 klasör indekslendi"
+    },
+    {
+      "date" : "2026-09-20T21:07:16Z",
+      "text" : "Ağır geliştirici testleri normal açılışta otomatik çalıştırılmıyor"
+    },
+    {
+      "date" : "2026-09-20T21:07:16Z",
+      "text" : "Dinamik hedef ve kabiliyet yönlendirme aktif"
+    },
+    {
+      "date" : "2026-09-20T21:07:16Z",
+      "text" : "KRALİ Core hazır"
+    }
+  ],
+  "appVersion" : "0.8.55",
+  "capabilities" : [
+    {
+      "available" : true,
+      "id" : "core.reasoning",
+      "name" : "Akıl yürütme",
+      "risk" : "reasoning"
+    },
+    {
+      "available" : true,
+      "id" : "context.local",
+      "name" : "Bağlam",
+      "risk" : "reasoning"
+    },
+    {
+      "available" : false,
+      "id" : "browser.control",
+      "name" : "Tarayıcı kontrolü",
+      "risk" : "external"
+    },
+    {
+      "available" : true,
+      "id" : "desktop.app",
+      "name" : "Uygulama kontrolü",
+      "risk" : "external"
+    }
+  ],
+  "capabilityGaps" : [
+    {
+      "candidateCapabilityIDs" : [
+
+      ],
+      "capabilityID" : "browser.control",
+      "capabilityName" : "Tarayıcı kontrolü",
+      "developerBrief" : "KRALİ Capability Gap Developer Brief\n\nKullanıcı hedefi:\nSafari’yi aç. example.com adresine git ve sayfadaki ana başlığı bana söyle. Başka hiçbir işlem yapma.\n\nEksik capability:\nbrowser.control — Tarayıcı kontrolü\n\nGap türü:\nintegration\n\nBlocked step:\n2: Web hedefini tarayıcıda yürüt\nOperation: browser.navigate.observe\nRole: act\n\nMevcut strategy adayları:\nYok\n\nTasarım kuralları:\n- Uygulama/marka adına hard-code yazma; mümkün olduğunca generic capability veya strategy geliştir.\n- Mevcut provider başka bir işi yapılmış gibi göstermesin.\n- Dış dünyaya commit eden eylemlerde kullanıcı onay kapısı korunmalı.\n- Başarı gerçek observation/verification ile kanıtlanmalı.\n- Ana branch üzerinde doğrudan self-modification yapma; candidate branch/worktree kullan.\n- Build + Training Lab + ilgili runtime probe geçmeden capability available yapılmamalı.\n\nKabul kriteri:\nBlocked step gerçek provider/strategy ile tamamlanmalı, evidence downstream step'e aktarılmalı ve verifier sahte PASS üretmemeli.",
+      "kind" : "integration",
+      "reason" : "Task Graph step 'Web hedefini tarayıcıda yürüt' için browser.control gerekiyor ancak provider available değil.",
+      "researchGoal" : "Tarayıcı kontrolü için resmi API/entegrasyon veya generic UI bridge seçeneklerini araştır; izin, güvenlik ve doğrulama sınırlarını çıkar."
+    }
+  ],
+  "contextMemory" : [
+    {
+      "createdAt" : "2026-09-20T09:47:42Z",
+      "kind" : "userRule",
+      "summary" : "Estafiz'e özel marka detaylarını başka markalara otomatik uygulama",
+      "title" : "Çalışma kuralı"
+    },
+    {
+      "createdAt" : "2026-09-20T01:00:28Z",
+      "kind" : "userRule",
+      "summary" : "Ana projeyi doğrudan değiştirme; çalışma kopyasında ilerle.",
+      "title" : "Çalışma kuralı"
+    }
+  ],
+  "createdAt" : "2026-09-20T21:07:40Z",
+  "executionSteps" : [
+    {
+      "capabilityID" : "context.local",
+      "detail" : "Yalnızca bu kullanıcı hedefiyle ilgili bağlamı hazırla; eski görev hedeflerini yeni göreve taşıma. Operation: context.resolve",
+      "kind" : "reasoning",
+      "state" : "completed",
+      "title" : "Görev bağlamını hazırla"
+    },
+    {
+      "capabilityID" : "desktop.app",
+      "detail" : "Kullanıcının adlandırdığı uygulamayı çöz ve görünür foreground durumuna getir. Ön koşul adımları: 1. Operation: app.open",
+      "kind" : "action",
+      "state" : "completed",
+      "title" : "Kaynak uygulamayı aç veya öne getir"
+    },
+    {
+      "capabilityID" : "browser.control",
+      "detail" : "Kullanıcının verdiği web hedefini gerçek tarayıcı oturumunda aç, gerekli görünür bilgiyi oku ve yeni sekme/form/gönderim gibi dış değişiklikleri kullanıcı onayı olmadan uygulama. Provider yoksa capability gap üret ve öğrenme hattına geçir. Ön koşul adımları: 2. Operation: browser.navigate.observe",
+      "kind" : "action",
+      "state" : "blocked",
+      "title" : "Web hedefini tarayıcıda yürüt"
+    },
+    {
+      "capabilityID" : "core.reasoning",
+      "detail" : "Gerçekleşen adımları hedefle, capability durumuyla ve üretilen sonuçla karşılaştır.",
+      "kind" : "verification",
+      "state" : "attention",
+      "title" : "Mission sonucunu doğrula"
+    },
+    {
+      "detail" : "Tamamlanan, bekleyen ve kullanıcı bilgisi gerektiren kısımları birbirinden ayır.",
+      "kind" : "response",
+      "state" : "completed",
+      "title" : "Sonucu kullanıcıya aktar"
+    }
+  ],
+  "fallbackPlan" : "Tamamlanmayan action step'ini yeniden planla; yürütülmeyen işi başarılı sayma.",
+  "finalResponse" : "Görev tamamlanamadı. Eksik kabiliyet: Tarayıcı kontrolü.\n\nDoğrulama: Semantic mission içindeki zorunlu action step'lerinden bazıları tamamlanmadı: browser.control\nAlternatif plan: Tamamlanmayan action step'ini yeniden planla; yürütülmeyen işi başarılı sayma.\nYetkinlik kazanma planı: Resmi API/entegrasyonu araştır → gereken hesap/izinleri çıkar → bağlantıyı sandbox/test ortamında doğrula → kullanıcı onayından sonra etkinleştir.",
+  "goal" : "Safari’yi aç. example.com adresine git ve sayfadaki ana başlığı bana söyle. Başka hiçbir işlem yapma.",
+  "inputSource" : "text",
+  "learningPlans" : [
+    {
+      "capabilityID" : "browser.control",
+      "capabilityName" : "Tarayıcı kontrolü",
+      "nextStep" : "Resmi API/entegrasyonu araştır → gereken hesap/izinleri çıkar → bağlantıyı sandbox/test ortamında doğrula → kullanıcı onayından sonra etkinleştir.",
+      "researchGoal" : "macOS tarayıcı otomasyonu için güvenli browser bridge, Accessibility ve desteklenen otomasyon API'lerini resmi kaynaklardan karşılaştır.",
+      "state" : "integrationRequired"
+    }
+  ],
+  "plan" : "Görev bağlamını hazırla → Kaynak uygulamayı aç veya öne getir → Web hedefini tarayıcıda yürüt",
+  "researchEvidence" : [
+
+  ],
+  "researchSources" : [
+
+  ],
+  "route" : [
+    "Core",
+    "Goal",
+    "Context",
+    "Plan",
+    "Browser",
+    "Desktop",
+    "Learn",
+    "Verify",
+    "Response"
+  ],
+  "semanticMission" : {
+    "confidence" : 0.88,
+    "objective" : "Safari’yi aç. example.com adresine git ve sayfadaki ana başlığı bana söyle. Başka hiçbir işlem yapma.",
+    "outcomes" : [
+      "explain",
+      "open",
+      "research"
+    ],
+    "requiredCapabilityIDs" : [
+      "browser.control",
+      "context.local",
+      "core.reasoning",
+      "desktop.app"
+    ],
+    "requiresUserInput" : false,
+    "steps" : [
+      {
+        "capabilityID" : "context.local",
+        "dependsOn" : [
+
+        ],
+        "operation" : "context.resolve",
+        "purpose" : "Yalnızca bu kullanıcı hedefiyle ilgili bağlamı hazırla; eski görev hedeflerini yeni göreve taşıma.",
+        "title" : "Görev bağlamını hazırla"
+      },
+      {
+        "capabilityID" : "desktop.app",
+        "dependsOn" : [
+          0
+        ],
+        "operation" : "app.open",
+        "purpose" : "Kullanıcının adlandırdığı uygulamayı çöz ve görünür foreground durumuna getir.",
+        "title" : "Kaynak uygulamayı aç veya öne getir"
+      },
+      {
+        "capabilityID" : "browser.control",
+        "dependsOn" : [
+          1
+        ],
+        "operation" : "browser.navigate.observe",
+        "purpose" : "Kullanıcının verdiği web hedefini gerçek tarayıcı oturumunda aç, gerekli görünür bilgiyi oku ve yeni sekme/form/gönderim gibi dış değişiklikleri kullanıcı onayı olmadan uygulama. Provider yoksa capability gap üret ve öğrenme hattına geçir.",
+        "title" : "Web hedefini tarayıcıda yürüt"
+      }
+    ]
+  },
+  "semanticPlannerProvider" : "Apple Foundation Models",
+  "taskGraph" : [
+    {
+      "available" : true,
+      "capabilityID" : "context.local",
+      "dependsOn" : [
+
+      ],
+      "index" : 0,
+      "operation" : "context.resolve",
+      "requiresApproval" : false,
+      "risk" : "reasoning",
+      "role" : "reason",
+      "title" : "Görev bağlamını hazırla"
+    },
+    {
+      "available" : true,
+      "capabilityID" : "desktop.app",
+      "dependsOn" : [
+        0
+      ],
+      "index" : 1,
+      "operation" : "app.open",
+      "requiresApproval" : false,
+      "risk" : "external",
+      "role" : "act",
+      "title" : "Kaynak uygulamayı aç veya öne getir"
+    },
+    {
+      "available" : false,
+      "capabilityID" : "browser.control",
+      "dependsOn" : [
+        1
+      ],
+      "index" : 2,
+      "operation" : "browser.navigate.observe",
+      "requiresApproval" : false,
+      "risk" : "external",
+      "role" : "act",
+      "title" : "Web hedefini tarayıcıda yürüt"
+    }
+  ],
+  "traceID" : "2DE83F15-39AE-40E5-8953-BFB21C214E5E",
+  "userInput" : "Safari’yi aç. example.com adresine git ve sayfadaki ana başlığı bana söyle. Başka hiçbir işlem yapma.",
+  "verificationState" : "attention",
+  "verificationSummary" : "Semantic mission içindeki zorunlu action step'lerinden bazıları tamamlanmadı: browser.control"
+}

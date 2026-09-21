@@ -1,0 +1,107 @@
+{
+  "activityTail" : [
+    {
+      "date" : "2026-09-21T07:00:00Z",
+      "text" : "Seçilen kabiliyetler: Akıl yürütme, Bağlam"
+    },
+    {
+      "date" : "2026-09-21T07:00:00Z",
+      "text" : "Otomatik rota: Core → Goal → Context → Response"
+    },
+    {
+      "date" : "2026-09-21T07:00:00Z",
+      "text" : "Seçilen plan: Kısa ve bağlama uygun cevap ver"
+    },
+    {
+      "date" : "2026-09-21T07:00:00Z",
+      "text" : "KRALİ Core hedef sözleşmesi: doğal konuşmayı sürdür"
+    },
+    {
+      "date" : "2026-09-21T06:29:57Z",
+      "text" : "Mentor trace GitHub'a senkronlandı"
+    },
+    {
+      "date" : "2026-09-21T06:16:15Z",
+      "text" : "Apple yerel zeka hazır"
+    },
+    {
+      "date" : "2026-09-21T06:16:15Z",
+      "text" : "Çalışma klasörü yolu geri yüklendi; indeks gerektiğinde oluşturulacak: Desktop"
+    },
+    {
+      "date" : "2026-09-21T06:16:15Z",
+      "text" : "Ağır geliştirici testleri normal açılışta otomatik çalıştırılmıyor"
+    },
+    {
+      "date" : "2026-09-21T06:16:15Z",
+      "text" : "Dinamik hedef ve kabiliyet yönlendirme aktif"
+    },
+    {
+      "date" : "2026-09-21T06:16:15Z",
+      "text" : "KRALİ Core hazır"
+    }
+  ],
+  "appVersion" : "0.8.58",
+  "capabilities" : [
+    {
+      "available" : true,
+      "id" : "core.reasoning",
+      "name" : "Akıl yürütme",
+      "risk" : "reasoning"
+    },
+    {
+      "available" : true,
+      "id" : "context.local",
+      "name" : "Bağlam",
+      "risk" : "reasoning"
+    }
+  ],
+  "capabilityGaps" : [
+
+  ],
+  "contextMemory" : [
+
+  ],
+  "createdAt" : "2026-09-21T07:00:00Z",
+  "executionSteps" : [
+    {
+      "capabilityID" : "core.reasoning",
+      "detail" : "Hedef sözleşmesi: doğal konuşmayı sürdür. Kısıtları ve mevcut bağlamı anlamlandır.",
+      "kind" : "reasoning",
+      "state" : "completed",
+      "title" : "Hedefi çöz"
+    },
+    {
+      "detail" : "Konuşma bağlamına uygun, kısa ve doğal yanıt üret.",
+      "kind" : "response",
+      "state" : "completed",
+      "title" : "Yanıt oluştur"
+    }
+  ],
+  "finalResponse" : "Selam. Hazırım; sadece komut beklemek yerine hedefini anlamaya, seçenekleri düşünmeye ve uygun yolu seçmeye çalışacağım.",
+  "goal" : "doğal konuşmayı sürdür",
+  "inputSource" : "text",
+  "learningPlans" : [
+
+  ],
+  "plan" : "Kısa ve bağlama uygun cevap ver",
+  "researchEvidence" : [
+
+  ],
+  "researchSources" : [
+
+  ],
+  "route" : [
+    "Core",
+    "Goal",
+    "Context",
+    "Response"
+  ],
+  "taskGraph" : [
+
+  ],
+  "traceID" : "D29DCE70-FEA4-4FBD-AAC6-72FECEE78716",
+  "userInput" : "Merhaba, hazır mısın?",
+  "verificationState" : "skipped",
+  "verificationSummary" : "Bu turda doğrulanacak gerçek araç işlemi yok."
+}

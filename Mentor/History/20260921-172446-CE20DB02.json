@@ -1,127 +1,127 @@
 {
   "activityTail" : [
     {
-      "date" : "2026-09-21T16:53:12Z",
-      "text" : "Outcome Strategy başarılı: URL'yi sistemle aç ve ekranı gözlemle"
+      "date" : "2026-09-21T14:23:47Z",
+      "text" : "Görev tamamlandı • 12.44 sn"
     },
     {
-      "date" : "2026-09-21T16:52:46Z",
-      "text" : "Outcome Strategy denenecek: URL'yi sistemle aç ve ekranı gözlemle • score=80"
+      "date" : "2026-09-21T14:23:47Z",
+      "text" : "Mentor trace yerel olarak kaydedildi"
     },
     {
-      "date" : "2026-09-21T16:52:46Z",
-      "text" : "Outcome Strategy başarısız: Public kaynaktan bilgi edin • Web araştırması sonuç veya derin okuma üretse bile başarı kriterini destekleyen gerçek kaynak kanıtı oluşmadı."
+      "date" : "2026-09-21T14:23:47Z",
+      "text" : "Yerel zeka sentezi uygulandı"
     },
     {
-      "date" : "2026-09-21T16:52:46Z",
-      "text" : "Web Research tamamlandı: 3 kaynak, 0 kaynak okundu"
+      "date" : "2026-09-21T14:23:42Z",
+      "text" : "Outcome Strategy başarılı: Public kaynaktan bilgi edin"
     },
     {
-      "date" : "2026-09-21T16:52:43Z",
+      "date" : "2026-09-21T14:23:42Z",
+      "text" : "Web Research tamamlandı: 2 kaynak, 2 kaynak okundu"
+    },
+    {
+      "date" : "2026-09-21T14:23:41Z",
+      "text" : "Diagnostics isteğe bağlı yüklendi"
+    },
+    {
+      "date" : "2026-09-21T14:23:35Z",
       "text" : "Web Research başladı"
     },
     {
-      "date" : "2026-09-21T16:52:43Z",
+      "date" : "2026-09-21T14:23:35Z",
       "text" : "Outcome Strategy denenecek: Public kaynaktan bilgi edin • score=110"
     },
     {
-      "date" : "2026-09-21T16:52:43Z",
-      "text" : "Outcome Strategy başarılı: Web hedefini aç ve görünür olarak doğrula"
-    },
-    {
-      "date" : "2026-09-21T16:52:19Z",
-      "text" : "Outcome Strategy denenecek: Web hedefini aç ve görünür olarak doğrula • score=120"
-    },
-    {
-      "date" : "2026-09-21T16:52:19Z",
+      "date" : "2026-09-21T14:23:35Z",
       "text" : "Semantic rota: Core → Goal → Context → Plan → Browser → Desktop → Verify → Response"
     },
     {
-      "date" : "2026-09-21T16:52:19Z",
+      "date" : "2026-09-21T14:23:35Z",
       "text" : "Task Graph blocked capability: browser.control"
     },
     {
-      "date" : "2026-09-21T16:52:19Z",
+      "date" : "2026-09-21T14:23:35Z",
       "text" : "Task Graph: 0:core.reasoning[reason] → 1:context.local[reason] → 2:browser.control[verify] → 3:desktop.app[act]"
     },
     {
-      "date" : "2026-09-21T16:52:19Z",
+      "date" : "2026-09-21T14:23:35Z",
       "text" : "Problem Solver adayları: Mevcut provider'ı kullan[100] | Mevcut provider'ı kullan[100] | Mevcut provider'ı kullan[100] | Kanıtı reasoning ile dönüştür[75]"
     },
     {
-      "date" : "2026-09-21T16:52:19Z",
+      "date" : "2026-09-21T14:23:35Z",
       "text" : "Problem Solver seçimi: Mevcut provider'ı kullan • score=100 • capabilities=core.reasoning"
     },
     {
-      "date" : "2026-09-21T16:52:19Z",
+      "date" : "2026-09-21T14:23:35Z",
       "text" : "Semantic capability planı: browser.control, context.local, core.reasoning, desktop.app"
     },
     {
-      "date" : "2026-09-21T16:52:19Z",
+      "date" : "2026-09-21T14:23:35Z",
       "text" : "Semantic planner sağlayıcısı: Local Contract Repair"
     },
     {
-      "date" : "2026-09-21T16:52:19Z",
-      "text" : "Semantic Mission: openai.com sitesine gir ve sayfada ne olduğunu kısaca anlat"
+      "date" : "2026-09-21T14:23:35Z",
+      "text" : "Semantic Mission: example.com sitesine gir ve sayfadaki ana başlığı bana söyle"
     },
     {
-      "date" : "2026-09-21T16:52:19Z",
+      "date" : "2026-09-21T14:23:35Z",
       "text" : "Problem Solver semantic Learning'i erteledi: app.workflow, browser.control, desktop.app"
     },
     {
-      "date" : "2026-09-21T16:52:19Z",
-      "text" : "Outcome Solver: başarı kriterleri mevcut capability'lerle kapsandı • Web hedefini aç ve görünür olarak doğrula | Public kaynaktan bilgi edin"
+      "date" : "2026-09-21T14:23:35Z",
+      "text" : "Outcome Solver: başarı kriterleri mevcut capability'lerle kapsandı • Public kaynaktan bilgi edin"
     },
     {
-      "date" : "2026-09-21T16:52:19Z",
+      "date" : "2026-09-21T14:23:35Z",
       "text" : "Yetkinlik öğrenme planı: Tarayıcı kontrolü → Entegrasyon gerekli"
     },
     {
-      "date" : "2026-09-21T16:52:19Z",
+      "date" : "2026-09-21T14:23:35Z",
       "text" : "Seçilen kabiliyetler: Akıl yürütme, Bağlam, Uygulama kontrolü, Tarayıcı kontrolü [bekliyor], URL açma, Ekran algısı"
     },
     {
-      "date" : "2026-09-21T16:52:19Z",
+      "date" : "2026-09-21T14:23:35Z",
       "text" : "Otomatik rota: Core → Goal → Context → Plan → Desktop → Browser → Screen → Learn → Verify → Response"
     },
     {
-      "date" : "2026-09-21T16:52:19Z",
+      "date" : "2026-09-21T14:23:35Z",
       "text" : "Seçilen plan: Uygulama adını çöz, uygulamayı aç veya öne getir ve sonucu doğrula"
     },
     {
-      "date" : "2026-09-21T16:52:19Z",
+      "date" : "2026-09-21T14:23:35Z",
       "text" : "KRALİ Core hedef sözleşmesi: istenen uygulamayı aç veya öne getir"
     },
     {
-      "date" : "2026-09-21T16:52:19Z",
+      "date" : "2026-09-21T14:23:35Z",
       "text" : "Problem Solver başlangıç stratejisi: Mevcut provider'ı kullan • Task Graph bu capability'yi doğrudan seçti ve provider available."
     },
     {
-      "date" : "2026-09-21T16:52:19Z",
-      "text" : "Bağlam firewall: önceki görev bağlamları bu tura taşınmadı"
+      "date" : "2026-09-21T14:23:35Z",
+      "text" : "Bağlam hafızası: Çalışma kuralı"
     },
     {
-      "date" : "2026-09-21T16:52:07Z",
+      "date" : "2026-09-21T14:23:02Z",
       "text" : "Apple yerel zeka hazır"
     },
     {
-      "date" : "2026-09-21T16:52:07Z",
+      "date" : "2026-09-21T14:23:01Z",
       "text" : "Çalışma klasörü yolu geri yüklendi; indeks gerektiğinde oluşturulacak: Desktop"
     },
     {
-      "date" : "2026-09-21T16:52:07Z",
+      "date" : "2026-09-21T14:23:01Z",
       "text" : "Ağır geliştirici testleri normal açılışta otomatik çalıştırılmıyor"
     },
     {
-      "date" : "2026-09-21T16:52:07Z",
+      "date" : "2026-09-21T14:23:01Z",
       "text" : "Dinamik hedef ve kabiliyet yönlendirme aktif"
     },
     {
-      "date" : "2026-09-21T16:52:07Z",
+      "date" : "2026-09-21T14:23:01Z",
       "text" : "KRALİ Core hazır"
     }
   ],
-  "appVersion" : "0.8.67",
+  "appVersion" : "0.8.66",
   "capabilities" : [
     {
       "available" : true,
@@ -148,7 +148,7 @@
   "contextMemory" : [
 
   ],
-  "createdAt" : "2026-09-21T16:54:16Z",
+  "createdAt" : "2026-09-21T14:24:46Z",
   "executionSteps" : [
     {
       "capabilityID" : "core.reasoning",
@@ -451,7 +451,7 @@
       "title" : "Uygulama kontrolü"
     }
   ],
-  "traceID" : "C7CB3801-BCA6-4589-96C7-05CCDAED7A55",
+  "traceID" : "CE20DB02-F84D-4085-BD58-DE50CB4AD742",
   "userInput" : "Spotify uygulamasını aç",
   "verificationState" : "passed",
   "verificationSummary" : "Semantic mission ile seçilen mevcut capability adımları yürütüldü ve hedefle uyumlu sonuç doğrulandı."
