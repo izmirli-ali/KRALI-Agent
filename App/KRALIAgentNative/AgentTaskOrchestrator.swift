@@ -280,9 +280,6 @@ struct AgentTaskOrchestrator {
             .joined(separator: " ")
         )
 
-        let purposeCorpus =
-            normalize(purpose)
-
         // Safety invariant:
         // If the step itself is mutating, approval is never waived by
         // explanatory text such as "read-only" or "without approval".
@@ -321,7 +318,8 @@ struct AgentTaskOrchestrator {
             "sil", "purchase",
             "satinal", "confirm",
             "onayla", "save",
-            "kaydet", "create",
+            "kaydet", "write",
+            "yaz", "create",
             "olustur", "import",
             "ekle", "add",
             "insert", "yerlestir",
