@@ -189,6 +189,19 @@ final class AgentFileSearchCoordinator {
             }
         }
 
+        if let resultLimit =
+            query.resultLimit,
+           resultLimit > 0,
+           results.count >
+            resultLimit {
+            results =
+                Array(
+                    results.prefix(
+                        resultLimit
+                    )
+                )
+        }
+
         let title = makeTitle(
             query: query,
             decision: decision
