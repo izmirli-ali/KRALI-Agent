@@ -72,15 +72,10 @@ struct AgentCapabilityGapResolver {
                 continue
             }
 
-            let kind: CapabilityGapKind
-            if !strategyCandidates.isEmpty {
-                kind = .strategy
-            } else if capability.risk ==
-                .external {
-                kind = .integration
-            } else {
-                kind = .code
-            }
+            let kind: CapabilityGapKind =
+                capability.risk == .external
+                ? .integration
+                : .code
 
             let reason =
                 "Task Graph step '\(step.title)' için " +
