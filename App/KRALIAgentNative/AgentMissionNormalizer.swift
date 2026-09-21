@@ -3,6 +3,8 @@ import Foundation
 struct AgentMissionNormalizer {
     private let languageResolver =
         AgentNaturalLanguageResolver()
+    private let fileQueryParser =
+        AgentFileQueryParser()
 
     func normalize(
         _ mission: AgentSemanticMission,
@@ -10,6 +12,10 @@ struct AgentMissionNormalizer {
         capabilities: [AgentCapability]
     ) -> AgentSemanticMission {
         let corpus = normalizeText(userInput)
+        let fileQuery =
+            fileQueryParser.parse(
+                userInput
+            )
         let knownIDs = Set(
             capabilities.map(\.id)
         )
@@ -120,6 +126,8 @@ struct AgentMissionNormalizer {
                 )
 
         let explicitMove =
+            !fileQuery.prohibitions
+                .contains(.move) &&
             containsAny(
                 affirmativeWorkflowCorpus,
                 [
@@ -134,6 +142,8 @@ struct AgentMissionNormalizer {
             )
 
         let explicitReveal =
+            !fileQuery.prohibitions
+                .contains(.open) &&
             containsAny(
                 affirmativeWorkflowCorpus,
                 [
@@ -303,24 +313,9 @@ struct AgentMissionNormalizer {
             )
 
         let forbidsMutation =
-            containsAny(
-                corpus,
-                [
-                    "hicbir dosyayi acma",
-                    "hiçbir dosyayı açma",
-                    "dosya acma",
-                    "dosya açma",
-                    "tasima",
-                    "taşıma",
-                    "degistirme",
-                    "değiştirme",
-                    "silme",
-                    "yeniden adlandirma",
-                    "yeniden adlandırma",
-                    "uzerine yazma",
-                    "üzerine yazma"
-                ]
-            )
+            !fileQuery
+                .prohibitions
+                .isEmpty
 
         let defersMutation =
             forbidsMutation ||
