@@ -2412,7 +2412,7 @@ final class AgentEngine: ObservableObject {
                         userInput: searchInput
                     )
 
-                let searchReply: String
+                var searchReply: String
                 if searchDecision.target ==
                     .folder {
                     searchReply =
@@ -2428,6 +2428,34 @@ final class AgentEngine: ObservableObject {
                             decision:
                                 searchDecision
                         )
+
+                    let normalizedRequest =
+                        normalizeSemanticText(
+                            userInput
+                        )
+
+                    if containsSemanticAny(
+                        normalizedRequest,
+                        [
+                            "sadece isim",
+                            "yalniz isim",
+                            "yalnız isim",
+                            "isimlerini listele",
+                            "adlarini listele",
+                            "adlarını listele"
+                        ]
+                    ),
+                       !fileSearchResults
+                        .isEmpty {
+                        searchReply =
+                            fileSearchResults
+                                .map {
+                                    "• " + $0.name
+                                }
+                                .joined(
+                                    separator: "\n"
+                                )
+                    }
                 }
 
                 outputs.append(
@@ -3481,7 +3509,12 @@ final class AgentEngine: ObservableObject {
             "bugun", "bugunku",
             "dun", "dunku",
             "en yeni", "en son",
-            "latest", "recent"
+            "latest", "recent",
+            "pdf", "video",
+            "gorsel", "fotograf",
+            "resim", "belge",
+            "dokuman", "proje",
+            "ses", "audio"
         ]
 
         for constraint in portableConstraints
