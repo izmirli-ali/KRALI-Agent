@@ -684,9 +684,17 @@ const mutationToolNames = new Set([
 
 function developmentPhase() {
   if (sawMutatingTool) return "verification";
-  if (requireChange && inspectionToolCalls >= maxInspectionTools) {
+
+  if (
+    requireChange &&
+    (
+      implementationPhaseAnnounced ||
+      inspectionToolCalls >= maxInspectionTools
+    )
+  ) {
     return "implementation";
   }
+
   return "inspection";
 }
 
