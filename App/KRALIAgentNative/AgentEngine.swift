@@ -5414,6 +5414,12 @@ final class AgentEngine: ObservableObject {
         log(
             "Learning Queue worker başlatılıyor • " +
             next.capabilityID +
+            " • " +
+            (
+                next.learningPath?
+                    .title ??
+                "Öğrenme"
+            ) +
             " • job=" +
             next.shortID
         )
@@ -5443,9 +5449,16 @@ final class AgentEngine: ObservableObject {
 
         let initialMessage: String
         if let learningJob {
+            let pathTitle =
+                learningJob.learningPath?
+                    .title ??
+                "Öğrenme"
+
             initialMessage =
                 learningJob.capabilityName +
-                " için öğrenme işi başlatılıyor • job=" +
+                " • " +
+                pathTitle +
+                " başlatılıyor • job=" +
                 learningJob.shortID
         } else {
             initialMessage =
