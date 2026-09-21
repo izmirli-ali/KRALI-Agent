@@ -113,9 +113,15 @@ struct AgentMissionNormalizer {
                 ]
             )
 
+        let affirmativeWorkflowCorpus =
+            languageResolver
+                .affirmativeWorkflowText(
+                    userInput
+                )
+
         let explicitMove =
             containsAny(
-                corpus,
+                affirmativeWorkflowCorpus,
                 [
                     "tasi",
                     "taşı",
@@ -129,7 +135,7 @@ struct AgentMissionNormalizer {
 
         let explicitReveal =
             containsAny(
-                corpus,
+                affirmativeWorkflowCorpus,
                 [
                     "finder'da goster",
                     "finderda goster",
@@ -200,15 +206,32 @@ struct AgentMissionNormalizer {
             ) ||
             browserWorkflow
 
-        let affirmativeWorkflowCorpus =
-            languageResolver
-                .affirmativeWorkflowText(
-                    userInput
-                )
+        let localFileSearch =
+            containsAny(
+                affirmativeWorkflowCorpus,
+                [
+                    "bul", "ara", "listele",
+                    "goster", "göster",
+                    "hangi", "hangileri"
+                ]
+            ) &&
+            containsAny(
+                corpus,
+                [
+                    "dosya", "pdf", "video",
+                    "gorsel", "görsel",
+                    "fotograf", "fotoğraf",
+                    "belge", "dokuman", "doküman",
+                    "indirilenler", "downloads",
+                    "masaustu", "masaüstü",
+                    "desktop"
+                ]
+            )
 
         let genericAppWorkflow =
             appOpen &&
             !specializedAppDomain &&
+            !localFileSearch &&
             containsAny(
                 affirmativeWorkflowCorpus,
                 [
@@ -279,7 +302,28 @@ struct AgentMissionNormalizer {
                 ]
             )
 
+        let forbidsMutation =
+            containsAny(
+                corpus,
+                [
+                    "hicbir dosyayi acma",
+                    "hiçbir dosyayı açma",
+                    "dosya acma",
+                    "dosya açma",
+                    "tasima",
+                    "taşıma",
+                    "degistirme",
+                    "değiştirme",
+                    "silme",
+                    "yeniden adlandirma",
+                    "yeniden adlandırma",
+                    "uzerine yazma",
+                    "üzerine yazma"
+                ]
+            )
+
         let defersMutation =
+            forbidsMutation ||
             containsAny(
                 corpus,
                 [
@@ -302,6 +346,7 @@ struct AgentMissionNormalizer {
             mailRead,
             mailDraft,
             mailSend,
+            localFileSearch,
             genericAppWorkflow,
             browserWorkflow
         ]
@@ -379,6 +424,25 @@ struct AgentMissionNormalizer {
             }
 
             outcomes.insert("open")
+        }
+
+        if localFileSearch {
+            append(
+                title: "Yerel dosyaları bul",
+                purpose:
+                    "Kullanıcının belirttiği yer, dosya türü ve tarih kısıtlarını salt-okunur olarak uygula; yalnız eşleşen dosyaları döndür.",
+                capabilityID: "files.search",
+                operation: "files.search",
+                dependsOn:
+                    latestDataStep.map { [$0] } ?? []
+            )
+
+            if !steps.isEmpty {
+                latestDataStep =
+                    steps.count - 1
+            }
+
+            outcomes.insert("locate")
         }
 
         if browserWorkflow {
@@ -720,15 +784,45 @@ struct AgentMissionNormalizer {
         }
 
         if defersMutation {
-            for step in mission.steps
-                where step.operation ==
-                    "capability.contract" {
-                if capabilityByID[
-                    step.capabilityID
-                ]?.risk == .external {
-                    forbidden.insert(
+            for step in mission.steps {
+                let risk =
+                    capabilityByID[
                         step.capabilityID
-                    )
+                    ]?.risk
+
+                if risk == .external ||
+                   risk == .reversibleWrite {
+                    let operation =
+                        normalizeText(
+                            step.operation +
+                            " " +
+                            step.title
+                        )
+
+                    let mutatingTerms = [
+                        "move", "tasi",
+                        "delete", "sil",
+                        "rename", "adlandir",
+                        "write", "yaz",
+                        "save", "kaydet",
+                        "send", "gonder",
+                        "publish", "yayinla",
+                        "import", "ekle",
+                        "create", "olustur",
+                        "edit", "duzenle"
+                    ]
+
+                    if step.operation ==
+                        "capability.contract" ||
+                       mutatingTerms.contains(
+                        where: {
+                            operation.contains($0)
+                        }
+                       ) {
+                        forbidden.insert(
+                            step.capabilityID
+                        )
+                    }
                 }
             }
         }
