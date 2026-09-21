@@ -27,6 +27,7 @@ struct AgentVerifier {
         goal: AgentGoalProfile,
         semanticMission: AgentSemanticMission? = nil,
         outcomeResolution: AgentOutcomeResolution? = nil,
+        outcomeAttempts: [AgentOutcomeStrategyAttempt] = [],
         snapshot: AgentVerificationSnapshot
     ) -> AgentVerificationResult {
         if let mismatch = alignmentMismatch(
@@ -46,6 +47,35 @@ struct AgentVerifier {
            !outcomeResolution
                 .contract
                 .requiresMutation {
+            let succeededAttempts =
+                outcomeAttempts.filter {
+                    $0.state ==
+                        .succeeded
+                }
+
+            if !succeededAttempts.isEmpty {
+                return AgentVerificationResult(
+                    state: .passed,
+                    summary:
+                        "Outcome doğrulandı: başarı kriteri runtime strategy chain içinde gerçek kanıt üreten stratejiyle tamamlandı • " +
+                        succeededAttempts
+                            .map {
+                                $0.strategyID
+                            }
+                            .joined(
+                                separator: ", "
+                            ),
+                    fallback: nil
+                )
+            }
+
+            if !outcomeAttempts.isEmpty {
+                return attention(
+                    "Outcome Strategy Chain mevcut güvenli stratejileri denedi ancak hiçbir strateji başarı kriterini doğrulamadı.",
+                    fallback:
+                        "Gerçek capability eksikliği kaldıysa Learning Gateway üzerinden öğren; başarısız stratejiyi aynı şekilde tekrar etme."
+                )
+            }
             let chosen =
                 outcomeResolution
                     .chosenStrategies
