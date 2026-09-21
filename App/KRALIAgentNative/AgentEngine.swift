@@ -482,6 +482,7 @@ final class AgentEngine: ObservableObject {
         archivedConversationPreview = []
         refreshConversationHistory()
 
+        resetTransientTaskStateForNewInput()
         currentGoal = "Hazır"
         currentPlan = "Yeni görevi bekliyor"
         verificationState = .idle
@@ -1837,7 +1838,8 @@ final class AgentEngine: ObservableObject {
             speech.speak(reply)
         }
 
-        if !currentCapabilityGaps.isEmpty {
+        if pendingTaskApproval == nil &&
+           !currentCapabilityGaps.isEmpty {
             inspectorState.learningQueueJobs =
                 learningQueueStore.enqueue(
                     gaps:
