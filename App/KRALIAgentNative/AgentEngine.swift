@@ -7132,7 +7132,9 @@ final class AgentEngine: ObservableObject {
             " • limit=" +
             (
                 outcome.query.resultLimit
-                    .map(String.init) ??
+                    .map {
+                        String($0)
+                    } ??
                 "∅"
             ) +
             " • output=" +
