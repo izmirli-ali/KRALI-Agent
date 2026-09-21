@@ -4178,7 +4178,9 @@ final class AgentEngine: ObservableObject {
                         executedCapabilityIDs:
                             Set([
                                 "system.open.url"
-                            ])
+                            ]),
+                        observation:
+                            observation
                     )
                 }
 
@@ -4230,7 +4232,9 @@ final class AgentEngine: ObservableObject {
                         executedCapabilityIDs:
                             Set([
                                 "system.open.url"
-                            ])
+                            ]),
+                        observation:
+                            observation
                     )
                 }
 
@@ -4291,7 +4295,9 @@ final class AgentEngine: ObservableObject {
                             Set(
                                 strategy
                                     .capabilityIDs
-                            )
+                            ),
+                        observation:
+                            observation
                     )
                 }
 
@@ -4304,7 +4310,9 @@ final class AgentEngine: ObservableObject {
                         Set(
                             strategy
                                 .capabilityIDs
-                        )
+                        ),
+                    observation:
+                        observation
                 )
             } catch {
                 return OutcomeStrategyExecutionResult(
