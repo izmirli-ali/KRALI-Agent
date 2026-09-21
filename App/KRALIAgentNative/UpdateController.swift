@@ -80,7 +80,13 @@ final class UpdateController: ObservableObject {
                     result.localDiffersFromRemote ||
                     installedVersionDiffers
 
-                if updateAvailable {
+                if let failure = readFailureMarker(),
+                   failure.version == result.remoteVersion {
+                    updateAvailable = true
+                    statusText =
+                        "v\(failure.version) kurulamadı • " +
+                        failure.message
+                } else if updateAvailable {
                     if let remoteVersion, !remoteVersion.isEmpty {
                         statusText = "v\(remoteVersion) hazır"
                     } else {
