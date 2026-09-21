@@ -3841,8 +3841,9 @@ final class AgentEngine: ObservableObject {
             resolution.contract.requirements {
             if requirement.kind ==
                 .retrievePublicInformation,
-               let verifiedNavigationOutput,
-               !verifiedNavigationOutput
+               let navigationOutput =
+                    verifiedNavigationOutput,
+               !navigationOutput
                     .trimmingCharacters(
                         in:
                             .whitespacesAndNewlines
