@@ -222,6 +222,30 @@ struct AgentVerifier {
                         fallback: "Dosya kapsamını veya hedef türünü yeniden planla ve güvenli biçimde tekrar ara."
                     )
                 }
+
+                guard let outcome =
+                    snapshot.fileSearchOutcome
+                else {
+                    return attention(
+                        "Dosya araması için doğrulanabilir query/result kanıtı yok.",
+                        fallback:
+                            "Arama adımını gerçek File Search provider ile yeniden yürüt."
+                    )
+                }
+
+                if let mismatch =
+                    fileSearchConstraintMismatch(
+                        currentUserInput:
+                            currentUserInput,
+                        outcome:
+                            outcome
+                    ) {
+                    return attention(
+                        mismatch,
+                        fallback:
+                            "Aynı dosya aramasını kullanıcıdaki kapsam, tür ve tarih kısıtlarını eksiksiz koruyarak yeniden çalıştır."
+                    )
+                }
             }
 
             if !snapshot.selectedCapabilityIDs.contains("research.web") {
@@ -526,6 +550,127 @@ struct AgentVerifier {
                 fallback: nil
             )
         }
+    }
+
+    private func fileSearchConstraintMismatch(
+        currentUserInput: String,
+        outcome: AgentFileSearchOutcome
+    ) -> String? {
+        let input =
+            normalize(
+                currentUserInput
+            )
+
+        if containsWordOrPhrase(
+            input,
+            [
+                "pdf"
+            ]
+        ) {
+            guard
+                outcome.query.extensions
+                    .contains("pdf") ||
+                outcome.files.allSatisfy({
+                    $0.fileExtension
+                        .lowercased() ==
+                    "pdf"
+                })
+            else {
+                return "Doğrulama durduruldu: kullanıcı PDF istedi ancak sonuç kümesi PDF filtresini kanıtlamıyor."
+            }
+
+            if outcome.files.contains(
+                where: {
+                    $0.fileExtension
+                        .lowercased() !=
+                    "pdf"
+                }
+            ) {
+                return "Doğrulama durduruldu: sonuç kümesinde PDF olmayan dosya bulundu."
+            }
+        }
+
+        if containsWordOrPhrase(
+            input,
+            [
+                "indirilenler",
+                "downloads"
+            ]
+        ),
+           outcome.query.scope !=
+            .downloads {
+            return "Doğrulama durduruldu: kullanıcı İndirilenler kapsamını istedi ancak arama farklı kapsamda çalıştı."
+        }
+
+        if containsWordOrPhrase(
+            input,
+            [
+                "masaüstü",
+                "masaustu",
+                "desktop"
+            ]
+        ),
+           outcome.query.scope !=
+            .desktop {
+            return "Doğrulama durduruldu: kullanıcı Masaüstü kapsamını istedi ancak arama farklı kapsamda çalıştı."
+        }
+
+        let calendar =
+            Calendar.current
+        let today =
+            calendar.startOfDay(
+                for: Date()
+            )
+
+        if containsWordOrPhrase(
+            input,
+            [
+                "bugün",
+                "bugun",
+                "bugünkü",
+                "bugunku"
+            ]
+        ) {
+            guard let tomorrow =
+                calendar.date(
+                    byAdding: .day,
+                    value: 1,
+                    to: today
+                )
+            else {
+                return "Bugün tarih aralığı oluşturulamadı."
+            }
+
+            let range =
+                DateInterval(
+                    start: today,
+                    end: tomorrow
+                )
+
+            if outcome.files.contains(
+                where: { file in
+                    let created =
+                        file.creationDate
+                            .map(
+                                range.contains
+                            ) ??
+                        false
+                    let modified =
+                        file.modificationDate
+                            .map(
+                                range.contains
+                            ) ??
+                        false
+
+                    return !created &&
+                        !modified
+                }
+            ) {
+                return "Doğrulama durduruldu: sonuç kümesinde bugün tarih filtresine uymayan dosya bulundu."
+            }
+        }
+
+        return nil
     }
 
     private func alignmentMismatch(
