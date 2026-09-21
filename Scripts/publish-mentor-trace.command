@@ -5,6 +5,7 @@ ROOT="${KRALI_REPO_ROOT:-$HOME/Developer/KRALI-Agent}"
 TRACE_SOURCE="$HOME/Library/Application Support/KRALI Agent/Mentor/latest.json"
 HISTORY_SOURCE="$HOME/Library/Application Support/KRALI Agent/Mentor/History"
 TRAINING_SOURCE="$HOME/Library/Application Support/KRALI Agent/Mentor/training-latest.json"
+GYM_SOURCE="$HOME/Library/Application Support/KRALI Agent/Mentor/gym-latest.json"
 LIVE_EVAL_SOURCE="$HOME/Library/Application Support/KRALI Agent/Mentor/live-eval-latest.json"
 ARENA_SOURCE="$HOME/Library/Application Support/KRALI Agent/Mentor/arena-latest.json"
 ARENA_PROGRESS_SOURCE="$HOME/Library/Application Support/KRALI Agent/Mentor/arena-progress.txt"
@@ -18,6 +19,7 @@ SEMANTIC_LOG_SOURCE="$HOME/Library/Logs/KRALI-Semantic-Planner.log"
 TRACE_DEST="$ROOT/Mentor/latest.json"
 HISTORY_DEST="$ROOT/Mentor/History"
 TRAINING_DEST="$ROOT/Mentor/training-latest.json"
+GYM_DEST="$ROOT/Mentor/gym-latest.json"
 LIVE_EVAL_DEST="$ROOT/Mentor/live-eval-latest.json"
 ARENA_DEST="$ROOT/Mentor/arena-latest.json"
 ARENA_PROGRESS_DEST="$ROOT/Mentor/arena-progress.txt"
@@ -41,8 +43,8 @@ if [ ! -d "$ROOT/.git" ]; then
     exit 10
 fi
 
-if [ ! -f "$TRACE_SOURCE" ] && [ ! -f "$TRAINING_SOURCE" ] && [ ! -f "$LIVE_EVAL_SOURCE" ] && [ ! -f "$ARENA_SOURCE" ] && [ ! -f "$SCREEN_SOURCE" ] && [ ! -f "$SCREEN_STATUS_SOURCE" ] && [ ! -f "$DESKTOP_SOURCE" ] && [ ! -f "$DESKTOP_STATUS_SOURCE" ]; then
-    echo "❌ Gönderilecek mentor trace, Training Lab, Live Research Eval, Arena veya Screen Perception raporu yok."
+if [ ! -f "$TRACE_SOURCE" ] && [ ! -f "$TRAINING_SOURCE" ] && [ ! -f "$GYM_SOURCE" ] && [ ! -f "$LIVE_EVAL_SOURCE" ] && [ ! -f "$ARENA_SOURCE" ] && [ ! -f "$SCREEN_SOURCE" ] && [ ! -f "$SCREEN_STATUS_SOURCE" ] && [ ! -f "$DESKTOP_SOURCE" ] && [ ! -f "$DESKTOP_STATUS_SOURCE" ]; then
+    echo "❌ Gönderilecek mentor trace, Semantic Gym, Training Lab, Live Research Eval, Arena veya Screen Perception raporu yok."
     exit 11
 fi
 
@@ -80,6 +82,11 @@ fi
 if [ -f "$TRAINING_SOURCE" ]; then
     cp "$TRAINING_SOURCE" "$TRAINING_DEST"
     FILES+=("Mentor/training-latest.json")
+fi
+
+if [ -f "$GYM_SOURCE" ]; then
+    cp "$GYM_SOURCE" "$GYM_DEST"
+    FILES+=("Mentor/gym-latest.json")
 fi
 
 if [ -f "$LIVE_EVAL_SOURCE" ]; then
