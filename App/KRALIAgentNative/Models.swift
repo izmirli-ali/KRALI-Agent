@@ -65,6 +65,34 @@ struct PendingFileAction: Identifiable {
     let destinationFolderURL: URL
 }
 
+struct PendingTaskApproval: Identifiable, Hashable {
+    let id: UUID
+    let taskID: String
+    let stepIndex: Int
+    let title: String
+    let reason: String
+    let capabilityID: String
+    let operation: String
+
+    init(
+        id: UUID = UUID(),
+        taskID: String,
+        stepIndex: Int,
+        title: String,
+        reason: String,
+        capabilityID: String,
+        operation: String
+    ) {
+        self.id = id
+        self.taskID = taskID
+        self.stepIndex = stepIndex
+        self.title = title
+        self.reason = reason
+        self.capabilityID = capabilityID
+        self.operation = operation
+    }
+}
+
 struct FileMoveRecord: Identifiable {
     let id = UUID()
     let originalURL: URL
