@@ -1553,7 +1553,26 @@ final class AgentEngine: ObservableObject {
         var finalBaseReply = baseReply
         var finalVerification = verification
 
-        if verification.state == .attention,
+        if let pending =
+            pendingTaskApproval {
+            finalVerification =
+                AgentVerificationResult(
+                    state: .partial,
+                    summary:
+                        "Görev güvenli biçimde duraklatıldı. Mutasyon uygulanmadı; kullanıcı onayı bekleniyor: " +
+                        pending.title,
+                    fallback: nil
+                )
+            verificationState =
+                .partial
+            verificationSummary =
+                finalVerification.summary
+            fallbackPlan = nil
+            setVerificationStep(.partial)
+        }
+
+        if pendingTaskApproval == nil,
+           verification.state == .attention,
            let recovery = attemptSafeRecovery(
                 for: text,
                 decision: decision,
@@ -1583,7 +1602,8 @@ final class AgentEngine: ObservableObject {
         var intelligenceProvider: String?
         var synthesisApplied = false
 
-        if shouldUseIntelligence(
+        if pendingTaskApproval == nil &&
+           shouldUseIntelligence(
             goal: resolvedGoal,
             verification: finalVerification
         ) {
