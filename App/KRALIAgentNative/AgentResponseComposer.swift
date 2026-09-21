@@ -7,9 +7,14 @@ struct AgentResponseComposer {
         goal: AgentGoalProfile,
         capabilities: [AgentCapability],
         learningPlans: [CapabilityLearningPlan],
+        capabilityGaps: [CapabilityGapResolution],
         fallbackPlan: String?
     ) -> String {
         let unavailable = capabilities.filter { !$0.isAvailable }
+        let gapNames =
+            capabilityGaps
+                .map(\.capabilityName)
+                .filter { !$0.isEmpty }
 
         switch verification.state {
         case .partial:
@@ -22,9 +27,9 @@ struct AgentResponseComposer {
 
             reply += "\n\nKısmi doğrulama: " + verification.summary
 
-            if !unavailable.isEmpty {
+            if !gapNames.isEmpty {
                 reply += "\nEksik kabiliyet: " +
-                    unavailable.map(\.name).joined(separator: ", ") + "."
+                    gapNames.joined(separator: ", ") + "."
             }
 
             if let learning = learningPlans.first {
@@ -36,10 +41,10 @@ struct AgentResponseComposer {
         case .attention:
             var reply: String
 
-            if !unavailable.isEmpty {
+            if !gapNames.isEmpty {
                 reply =
                     "Görev tamamlanamadı. Eksik kabiliyet: " +
-                    unavailable.map(\.name).joined(separator: ", ") +
+                    gapNames.joined(separator: ", ") +
                     "."
             } else {
                 let cleaned =
