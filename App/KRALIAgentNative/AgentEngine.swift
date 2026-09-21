@@ -586,6 +586,40 @@ final class AgentEngine: ObservableObject {
             goal: goalProfile
         )
 
+        let deterministicGraph =
+            deterministicProblemGraph(
+                goal: goalProfile,
+                plan: executionPlan
+            )
+
+        currentTaskGraph =
+            deterministicGraph
+
+        let deterministicResolution =
+            problemSolver.solve(
+                graph: deterministicGraph,
+                capabilities:
+                    capabilityRegistry.all,
+                observations:
+                    problemSolverObservations()
+            )
+
+        currentProblemResolution =
+            deterministicResolution
+        currentReflectionSummary =
+            deterministicResolution.reflection
+
+        if let chosen =
+            deterministicResolution
+                .chosenStrategy {
+            log(
+                "Problem Solver başlangıç stratejisi: " +
+                chosen.title +
+                " • " +
+                chosen.rationale
+            )
+        }
+
         activeRoute = routeBuilder.build(
             goal: goalProfile,
             capabilities: capabilities,
@@ -2892,6 +2926,85 @@ final class AgentEngine: ObservableObject {
         }
     }
 
+    private func deterministicProblemGraph(
+        goal: AgentGoalProfile,
+        plan: AgentExecutionPlan
+    ) -> AgentTaskGraph {
+        let steps =
+            plan.steps.enumerated().map {
+                index, step in
+
+                let capabilityID =
+                    step.capabilityID ??
+                    "core.reasoning"
+
+                let capability =
+                    capabilityRegistry.all
+                        .first {
+                            $0.id ==
+                                capabilityID
+                        }
+
+                let role: AgentTaskStepRole
+
+                switch step.kind {
+                case .reasoning:
+                    role = .reason
+
+                case .verification:
+                    role = .verify
+
+                case .response:
+                    role = .reason
+
+                case .action:
+                    switch capability?.risk {
+                    case .readOnly:
+                        role = .retrieve
+                    case .reversibleWrite:
+                        role = .persist
+                    case .external:
+                        role = .act
+                    case .reasoning, .none:
+                        role = .act
+                    }
+                }
+
+                return AgentTaskGraphStep(
+                    index: index,
+                    title: step.title,
+                    capabilityID:
+                        capabilityID,
+                    operation: step.detail,
+                    role: role,
+                    dependsOn:
+                        index > 0
+                        ? [index - 1]
+                        : [],
+                    risk:
+                        capability?.risk ??
+                        .reasoning,
+                    isAvailable:
+                        capability?
+                            .isAvailable ??
+                        (
+                            capabilityID ==
+                            "core.reasoning"
+                        ),
+                    requiresApproval:
+                        capability?.risk ==
+                            .external ||
+                        capability?.risk ==
+                            .reversibleWrite
+                )
+            }
+
+        return AgentTaskGraph(
+            objective: goal.summary,
+            steps: steps
+        )
+    }
+
     private func resetTransientTaskStateForNewInput() {
         currentSemanticMission = nil
         currentSemanticPlannerProvider = nil
@@ -3007,6 +3120,93 @@ final class AgentEngine: ObservableObject {
         if lastFileSearchOutcome?
             .status.isExpectedBoundary == true {
             return nil
+        }
+
+        if decision.target == .folder,
+           folderSearchResults.isEmpty {
+            ensureWorkspaceIndexed()
+
+            if !indexedFolders.isEmpty {
+                var recoveredFolders =
+                    indexedFolders
+
+                if decision.sortMode ==
+                    .newestFirst {
+                    recoveredFolders.sort {
+                        let left =
+                            $0.modificationDate ??
+                            $0.creationDate ??
+                            .distantPast
+                        let right =
+                            $1.modificationDate ??
+                            $1.creationDate ??
+                            .distantPast
+                        return left > right
+                    }
+                }
+
+                folderSearchResults =
+                    recoveredFolders
+                fileSearchResults = []
+                fileSearchTitle =
+                    "Klasörler • mevcut indeks kanıtı"
+
+                let preview =
+                    recoveredFolders
+                        .prefix(5)
+                        .map(\.name)
+                        .joined(separator: ", ")
+
+                let reply =
+                    String(
+                        recoveredFolders.count
+                    ) +
+                    " klasör gözlemledim. İlk klasör arama stratejisi sonuç üretmediği için mevcut doğrulanmış workspace indeksini yeniden kullandım: " +
+                    preview +
+                    (
+                        recoveredFolders.count > 5
+                        ? " ve " +
+                            String(
+                                recoveredFolders.count - 5
+                            ) +
+                            " klasör daha."
+                        : "."
+                    )
+
+                let verification =
+                    verifier.verify(
+                        decision: decision,
+                        currentUserInput: text,
+                        goal: goal,
+                        snapshot:
+                            verificationSnapshot()
+                    )
+
+                let reflection =
+                    "Çelişki algılandı: workspace indeksi " +
+                    String(
+                        indexedFolders.count
+                    ) +
+                    " klasör gözlemledi fakat birincil arama 0 sonuç verdi. Yeni capability öğrenmek yerine doğrulanmış indeks kanıtı yeniden kullanıldı."
+
+                currentReflectionSummary =
+                    reflection
+                recoverySummary =
+                    reflection
+
+                log(
+                    "Problem Solver contradiction recovery: " +
+                    reflection
+                )
+
+                return RecoveryAttempt(
+                    reply: reply,
+                    verification:
+                        verification,
+                    summary:
+                        reflection
+                )
+            }
         }
 
         let hasRelaxableConstraint =
