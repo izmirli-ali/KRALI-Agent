@@ -227,6 +227,28 @@ final class AgentEngine: ObservableObject {
                             .isLearningActive
                 )
 
+        for job in inspectorState
+            .learningQueueJobs
+            where job.state == .failed &&
+                (
+                    job.lastStatus?
+                        .contains(
+                            "capability eksikliği değildir"
+                        ) == true
+                ) {
+            capabilityLearningBacklog =
+                learningStore.update(
+                    existing:
+                        capabilityLearningBacklog,
+                    capabilityID:
+                        job.capabilityID,
+                    progress:
+                        .interrupted,
+                    nextStep:
+                        "Önceki öğrenme işi observation belirsizliği veya foreground müdahalesinden doğmuştu; gerçek capability eksikliği olmadığı için kapatıldı."
+                )
+        }
+
         if let running =
             inspectorState.learningQueueJobs.first(
                 where: {
@@ -256,7 +278,10 @@ final class AgentEngine: ObservableObject {
         Task { @MainActor [weak self] in
             guard let self else { return }
 
-            if let recovered =
+            if self.inspectorState
+                .developerAgentStatus
+                .isReadyForReview,
+               let recovered =
                 await self.developerBridge
                     .recoverPendingCandidate() {
                 self.inspectorState.developerAgentStatus =
