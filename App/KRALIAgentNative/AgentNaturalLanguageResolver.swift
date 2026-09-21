@@ -125,10 +125,6 @@ struct AgentNaturalLanguageResolver: Sendable {
     func applicationTargetDisplayPhrase(
         from raw: String
     ) -> String? {
-        guard !requestsBrowserWorkflow(raw) else {
-            return nil
-        }
-
         let clauses = raw
             .split(
                 whereSeparator: {
@@ -239,6 +235,13 @@ struct AgentNaturalLanguageResolver: Sendable {
                     )
 
             if !phrase.isEmpty {
+                if isLikelyWebTargetPhrase(
+                    phrase,
+                    raw: raw
+                ) {
+                    continue
+                }
+
                 return phrase
             }
         }
@@ -249,10 +252,6 @@ struct AgentNaturalLanguageResolver: Sendable {
     func applicationTargetPhrase(
         from raw: String
     ) -> String? {
-        guard !requestsBrowserWorkflow(raw) else {
-            return nil
-        }
-
         let clauses = raw
             .split(
                 whereSeparator: {
@@ -318,6 +317,13 @@ struct AgentNaturalLanguageResolver: Sendable {
                     .joined(separator: " ")
 
             if !phrase.isEmpty {
+                if isLikelyWebTargetPhrase(
+                    phrase,
+                    raw: raw
+                ) {
+                    continue
+                }
+
                 return phrase
             }
         }
@@ -387,6 +393,62 @@ struct AgentNaturalLanguageResolver: Sendable {
         return signals.contains {
             value.contains($0)
         }
+    }
+
+    private func isLikelyWebTargetPhrase(
+        _ phrase: String,
+        raw: String
+    ) -> Bool {
+        guard
+            requestsBrowserWorkflow(
+                raw
+            ),
+            let url =
+                webURL(
+                    from: raw
+                )
+        else {
+            return false
+        }
+
+        let normalizedPhrase =
+            normalized(
+                phrase
+            )
+        let host =
+            normalized(
+                url.host ?? ""
+            )
+        let firstHostLabel =
+            host
+                .split(separator: " ")
+                .first
+                .map(String.init) ??
+            host
+
+        let webNouns = [
+            "site",
+            "sitesine",
+            "siteye",
+            "sayfa",
+            "sayfaya",
+            "adres",
+            "adresine",
+            "url"
+        ]
+
+        return
+            (!firstHostLabel.isEmpty &&
+             normalizedPhrase
+                .contains(
+                    firstHostLabel
+                )) ||
+            webNouns.contains(
+                where: {
+                    normalizedPhrase
+                        .contains($0)
+                }
+            )
     }
 
     func webURL(
