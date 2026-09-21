@@ -167,10 +167,10 @@ struct AgentBrain {
                 ? (context.lastTarget ?? .any)
                 : resolvedTarget
             let dateResolution = resolveDate(text, now: now)
-            let sort: AgentSortMode = containsAny(
-                text,
-                ["son eklenen", "en yeni", "en son", "son çekilen", "son cekilen", "latest"]
-            ) ? .newestFirst : .relevance
+            let fileQuery =
+                fileQueryParser.parse(text)
+            let sort =
+                fileQuery.sortMode
 
             return AgentDecision(
                 intent: .fileSearch,
@@ -277,10 +277,10 @@ struct AgentBrain {
         if isCompoundFileTask(text) {
             let target = resolveTarget(text)
             let dateResolution = resolveDate(text, now: now)
-            let sort: AgentSortMode = containsAny(
-                text,
-                ["son eklenen", "en yeni", "en yenilerini", "en son", "son çekilen", "son cekilen", "latest"]
-            ) ? .newestFirst : .relevance
+            let fileQuery =
+                fileQueryParser.parse(text)
+            let sort =
+                fileQuery.sortMode
 
             return AgentDecision(
                 intent: .compoundFileTask,
@@ -307,10 +307,10 @@ struct AgentBrain {
             let fileQuery =
                 fileQueryParser.parse(text)
             let dateResolution = resolveDate(text, now: now)
-            let sort: AgentSortMode = containsAny(
-                text,
-                ["son eklenen", "en yeni", "en son", "son çekilen", "son cekilen", "latest"]
-            ) ? .newestFirst : .relevance
+            let fileQuery =
+                fileQueryParser.parse(text)
+            let sort =
+                fileQuery.sortMode
 
             return AgentDecision(
                 intent: .fileSearch,
