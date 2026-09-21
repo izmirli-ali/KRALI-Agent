@@ -1,26 +1,3 @@
-Learning Queue job brief bulundu; mutable Mentor latest yerine immutable job kullanılacak.
-Preparing worktree (new branch 'krali-dev-agent/20260922-004509')
-branch 'krali-dev-agent/20260922-004509' set up to track 'origin/main'.
-HEAD is now at d818ddf v0.8.92: bump build to 142
-Developer prompt mode: gap • 4262 bytes
-🧠 Primitive patch için daha hafif model deneniyor: qwen2.5-coder:14b-instruct
-Yerel tool-call probe: qwen2.5-coder:14b-instruct
-KRALI local tool probe: native tool_call görülmedi • text={"name": "krali_tool_probe", "arguments": {}}
-⚠️ qwen2.5-coder:14b-instruct tool-call probe geçmedi; mevcut model korunuyor: devstral:24b
-♻️ Developer checkpoint bulundu; aynı gap teşhisi kaldığı yerden devam edecek: desktop.app-02edb76fda4e
-KRALI_LOCAL_STAGE local_agent_resumed • Uygulama kontrolü (desktop.app) process-level checkpoint yüklendi • evidence=7 • recordedPhase=implementation • effectivePhase=implementation • candidateMatch=false
-KRALI_LOCAL_STAGE local_agent_starting • Uygulama kontrolü (desktop.app) native Ollama agent başlatılıyor: devstral:24b • checkpoint resume
-KRALI_LOCAL_STAGE local_agent_running • Uygulama kontrolü (desktop.app) yerel model çalışıyor • adım 1/10
-KRALI_LOCAL_STAGE local_agent_request_retry • Uygulama kontrolü (desktop.app) model isteği zaman aşımına uğradı; mevcut context korunarak retry 1/2
-KRALI_LOCAL_STAGE local_agent_running • Uygulama kontrolü (desktop.app) yerel model çalışıyor • adım 2/10
-KRALI_LOCAL_STAGE local_agent_tool • Uygulama kontrolü (desktop.app) araç çalışıyor: search_codebase
-KRALI_LOCAL_STAGE local_agent_tool • Uygulama kontrolü (desktop.app) araç çalışıyor: search_codebase
-KRALI_LOCAL_STAGE local_agent_implementation_required • Uygulama kontrolü (desktop.app) inspection aracı reddedildi • implementation fazı aktif • search_codebase
-KRALI_LOCAL_STAGE local_agent_running • Uygulama kontrolü (desktop.app) yerel model çalışıyor • adım 3/10
-KRALI_LOCAL_STAGE local_agent_request_retry • Uygulama kontrolü (desktop.app) model isteği zaman aşımına uğradı; mevcut context korunarak retry 1/2
-Uygulama kontrolü (desktop.app) native local agent toplam zaman sınırına ulaştı.
-KRALI_LOCAL_STAGE local_agent_resumed • Uygulama kontrolü (desktop.app) process-level checkpoint yüklendi • evidence=7 • recordedPhase=implementation • effectivePhase=implementation • candidateMatch=false
-KRALI_LOCAL_STAGE local_agent_starting • Uygulama kontrolü (desktop.app) native Ollama agent başlatılıyor: devstral:24b • checkpoint resume
 KRALI_LOCAL_STAGE local_agent_running • Uygulama kontrolü (desktop.app) yerel model çalışıyor • adım 1/10
 KRALI_LOCAL_STAGE local_agent_request_retry • Uygulama kontrolü (desktop.app) model isteği zaman aşımına uğradı; mevcut context korunarak retry 1/2
 KRALI_LOCAL_STAGE local_agent_running • Uygulama kontrolü (desktop.app) yerel model çalışıyor • adım 2/10
@@ -118,3 +95,26 @@ KRALI_LOCAL_STAGE local_agent_starting • Uygulama kontrolü (desktop.app) nati
 KRALI_LOCAL_STAGE local_agent_running • Uygulama kontrolü (desktop.app) yerel model çalışıyor • adım 1/10
 KRALI_LOCAL_STAGE local_agent_request_retry • Uygulama kontrolü (desktop.app) model isteği zaman aşımına uğradı; mevcut context korunarak retry 1/2
 KRALI_LOCAL_STAGE local_agent_running • Uygulama kontrolü (desktop.app) yerel model çalışıyor • adım 2/10
+KRALI_LOCAL_STAGE local_agent_tool • Uygulama kontrolü (desktop.app) araç çalışıyor: read_file
+KRALI_LOCAL_STAGE local_agent_implementation_required • Uygulama kontrolü (desktop.app) tekrar/genel inspection reddedildi • implementation fazı aktif • read_file
+KRALI_LOCAL_STAGE local_agent_running • Uygulama kontrolü (desktop.app) yerel model çalışıyor • adım 3/10
+KRALI_LOCAL_STAGE local_agent_tool • Uygulama kontrolü (desktop.app) araç çalışıyor: read_file
+KRALI_LOCAL_STAGE local_agent_target_verified • Uygulama kontrolü (desktop.app) hedef kaynak bölgesi doğrulandı • mutation zorunlu
+KRALI_LOCAL_STAGE local_agent_running • Uygulama kontrolü (desktop.app) yerel model çalışıyor • adım 4/10
+KRALI_LOCAL_STAGE local_agent_request_retry • Uygulama kontrolü (desktop.app) model isteği zaman aşımına uğradı; mevcut context korunarak retry 1/2
+Uygulama kontrolü (desktop.app) native local agent toplam zaman sınırına ulaştı.
+KRALI_LOCAL_STAGE local_agent_resumed • Uygulama kontrolü (desktop.app) process-level checkpoint yüklendi • evidence=10 • recordedPhase=implementation • effectivePhase=implementation • candidateMatch=false
+KRALI_LOCAL_STAGE local_agent_starting • Uygulama kontrolü (desktop.app) native Ollama agent başlatılıyor: devstral:24b • checkpoint resume
+KRALI_LOCAL_STAGE local_agent_running • Uygulama kontrolü (desktop.app) yerel model çalışıyor • adım 1/10
+KRALI_LOCAL_STAGE local_agent_request_retry • Uygulama kontrolü (desktop.app) model isteği zaman aşımına uğradı; mevcut context korunarak retry 1/2
+KRALI_LOCAL_STAGE local_agent_running • Uygulama kontrolü (desktop.app) yerel model çalışıyor • adım 2/10
+KRALI_LOCAL_STAGE local_agent_tool • Uygulama kontrolü (desktop.app) araç çalışıyor: read_file
+KRALI_LOCAL_STAGE local_agent_implementation_required • Uygulama kontrolü (desktop.app) tekrar/genel inspection reddedildi • implementation fazı aktif • read_file
+KRALI_LOCAL_STAGE local_agent_running • Uygulama kontrolü (desktop.app) yerel model çalışıyor • adım 3/10
+KRALI_LOCAL_STAGE local_agent_tool • Uygulama kontrolü (desktop.app) araç çalışıyor: read_file
+KRALI_LOCAL_STAGE local_agent_target_verified • Uygulama kontrolü (desktop.app) hedef kaynak bölgesi doğrulandı • mutation zorunlu
+KRALI_LOCAL_STAGE local_agent_running • Uygulama kontrolü (desktop.app) yerel model çalışıyor • adım 4/10
+KRALI_LOCAL_STAGE local_agent_request_retry • Uygulama kontrolü (desktop.app) model isteği zaman aşımına uğradı; mevcut context korunarak retry 1/2
+Uygulama kontrolü (desktop.app) native local agent toplam zaman sınırına ulaştı.
+Deleted branch krali-dev-agent/20260922-005920 (was 153a860).
+❌ Native yerel Developer Agent durdu: Uygulama kontrolü (desktop.app) native local agent toplam zaman sınırına ulaştı.
