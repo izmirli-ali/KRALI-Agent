@@ -228,7 +228,67 @@ struct AgentMissionNormalizer {
                     "randevu",
                     "mesaj",
                     "sarki",
-                    "bolumune git"
+                    "bolumune git",
+                    "oynat",
+                    "play",
+                    "tikla",
+                    "click",
+                    "kaydir",
+                    "scroll",
+                    "yaz",
+                    "type"
+                ]
+            )
+
+        let genericAppInteraction =
+            genericAppWorkflow &&
+            containsAny(
+                affirmativeWorkflowCorpus,
+                [
+                    "oynat",
+                    "play",
+                    "tikla",
+                    "click",
+                    "kaydir",
+                    "scroll",
+                    "sec",
+                    "select",
+                    "yaz",
+                    "type",
+                    "ekle",
+                    "add",
+                    "ayarla",
+                    "degistir"
+                ]
+            )
+
+        let explicitContentAssessment =
+            containsAny(
+                corpus,
+                [
+                    "kalite",
+                    "netlik",
+                    "kadraj",
+                    "hareket",
+                    "ses analizi",
+                    "uygun",
+                    "degerlendir",
+                    "değerlendir",
+                    "hangisi daha iyi",
+                    "kurgu potansiyeli"
+                ]
+            )
+
+        let defersMutation =
+            containsAny(
+                corpus,
+                [
+                    "once bana sor",
+                    "önce bana sor",
+                    "teyit etmeden",
+                    "onay almadan",
+                    "ben onaylamadan",
+                    "sormadan yapma"
                 ]
             )
 
@@ -253,7 +313,13 @@ struct AgentMissionNormalizer {
                 mission,
                 corpus: corpus,
                 explicitMove: explicitMove,
-                explicitReveal: explicitReveal
+                explicitReveal: explicitReveal,
+                explicitContentAssessment:
+                    explicitContentAssessment,
+                defersMutation:
+                    defersMutation,
+                capabilities:
+                    capabilities
             )
         }
 
@@ -369,6 +435,27 @@ struct AgentMissionNormalizer {
             }
 
             outcomes.insert("analyze")
+
+            if genericAppInteraction {
+                append(
+                    title: "Uygulama içi görünür kontrolü uygula",
+                    purpose:
+                        "Önceki ekran/gözlem kanıtını kullanarak kullanıcının istediği görünür UI etkileşimini uygula; mümkün olan en küçük generic UI primitive'ini kullan ve sonucu yeniden gözlemle.",
+                    capabilityID:
+                        "desktop.control",
+                    operation:
+                        "ui.interact",
+                    dependsOn:
+                        latestDataStep.map {
+                            [$0]
+                        } ?? []
+                )
+
+                if !steps.isEmpty {
+                    latestDataStep =
+                        steps.count - 1
+                }
+            }
         } else if appContentRead {
             append(
                 title: "Uygulamadaki mevcut içeriği oku",
@@ -599,9 +686,20 @@ struct AgentMissionNormalizer {
         _ mission: AgentSemanticMission,
         corpus: String,
         explicitMove: Bool,
-        explicitReveal: Bool
+        explicitReveal: Bool,
+        explicitContentAssessment: Bool,
+        defersMutation: Bool,
+        capabilities: [AgentCapability]
     ) -> AgentSemanticMission {
         var forbidden = Set<String>()
+
+        let capabilityByID =
+            Dictionary(
+                uniqueKeysWithValues:
+                    capabilities.map {
+                        ($0.id, $0)
+                    }
+            )
 
         if !explicitMove {
             forbidden.insert(
@@ -613,6 +711,26 @@ struct AgentMissionNormalizer {
             forbidden.insert(
                 "files.reveal"
             )
+        }
+
+        if !explicitContentAssessment {
+            forbidden.insert(
+                "perception.media"
+            )
+        }
+
+        if defersMutation {
+            for step in mission.steps
+                where step.operation ==
+                    "capability.contract" {
+                if capabilityByID[
+                    step.capabilityID
+                ]?.risk == .external {
+                    forbidden.insert(
+                        step.capabilityID
+                    )
+                }
+            }
         }
 
         var steps: [AgentSemanticMissionStep] = []
