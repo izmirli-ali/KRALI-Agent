@@ -53,6 +53,36 @@ struct AgentFileTypeRegistry {
             }
         )
 
+        let tokenSet = Set(tokens)
+
+        if tokenSet.contains("arsiv") ||
+           tokenSet.contains("archive") {
+            result.formUnion(
+                archiveExtensions
+            )
+        }
+
+        if tokenSet.contains("ses") ||
+           tokenSet.contains("audio") {
+            result.formUnion(
+                audioExtensions
+            )
+        }
+
+        if tokenSet.contains("excel") ||
+           tokenSet.contains("tablo") {
+            result.formUnion(
+                spreadsheetExtensions
+            )
+        }
+
+        if tokenSet.contains("font") ||
+           tokenSet.contains("yazitipi") {
+            result.formUnion(
+                fontExtensions
+            )
+        }
+
         let normalized = normalize(rawText)
 
         result.formUnion(
@@ -87,6 +117,25 @@ struct AgentFileTypeRegistry {
             for: token
         ) != nil
     }
+
+    private let archiveExtensions: Set<String> = [
+        "zip", "rar", "7z", "tar", "gz",
+        "gzip", "bz2", "xz", "tgz"
+    ]
+
+    private let audioExtensions: Set<String> = [
+        "mp3", "wav", "m4a", "aac",
+        "flac", "ogg", "aiff", "aif"
+    ]
+
+    private let spreadsheetExtensions: Set<String> = [
+        "xls", "xlsx", "csv", "tsv",
+        "numbers", "ods"
+    ]
+
+    private let fontExtensions: Set<String> = [
+        "otf", "ttf", "woff", "woff2"
+    ]
 
     private func canonicalExtension(
         for token: String
@@ -123,6 +172,22 @@ struct AgentFileTypeRegistry {
     ) -> String? {
         guard !extensions.isEmpty else {
             return nil
+        }
+
+        if extensions == archiveExtensions {
+            return "ARŞİV"
+        }
+
+        if extensions == audioExtensions {
+            return "SES"
+        }
+
+        if extensions == spreadsheetExtensions {
+            return "TABLO"
+        }
+
+        if extensions == fontExtensions {
+            return "FONT"
         }
 
         return extensions
