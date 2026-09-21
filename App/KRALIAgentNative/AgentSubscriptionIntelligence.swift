@@ -26,6 +26,17 @@ actor AgentSubscriptionIntelligence {
     ) async -> SubscriptionMissionResult? {
         failureReason = nil
 
+        if let localMission =
+            await planMissionWithLocalOllama(
+                userInput: userInput,
+                contextMemory: contextMemory,
+                capabilities: capabilities,
+                hasWorkspace: hasWorkspace
+            ) {
+            failureReason = nil
+            return localMission
+        }
+
         guard let clinePath = clineExecutablePath() else {
             failureReason = "Semantic planner fallback için Cline CLI bulunamadı."
             return nil
@@ -74,6 +85,7 @@ actor AgentSubscriptionIntelligence {
         - Capability unavailable olsa bile hedef için gerekliyse plana dahil et.
         - Yalnızca hazırlık/analizde durma; gerekiyorsa gerçek uygulama/üretim ve sonuç doğrulamasını da planla.
         - Yerel dosya ve uygulama capability'leriyle çözülebilen görevlerde gereksiz research.web ekleme. Yalnızca dış/güncel/bilinmeyen bilgi gerçekten gerekiyorsa araştırma planla.
+        - Kullanıcı yalnızca bilgi, açıklama, fikir veya genel uzmanlık cevabı istiyorsa ve güncel/dış/özel kaynak gerekmiyorsa core.reasoning + gerektiğinde context.local ile kal; dosya, ekran, uygulama, web veya edit capability'si uydurma.
         - Yeni marka/şirket/işletmeye eski başka bir markanın task/research bağlamını taşıma.
         - Makul ve geri alınabilir varsayımla ilerlenebiliyorsa kullanıcıdan gereksiz bilgi isteme.
 
@@ -176,6 +188,8 @@ actor AgentSubscriptionIntelligence {
             #"{"allow":[],"deny":["*"],"allowRedirects":false}"#
         process.environment = environment
 
+        let clineStartedAt = Date()
+
         do {
             try process.run()
             process.waitUntilExit()
@@ -202,11 +216,29 @@ actor AgentSubscriptionIntelligence {
                     isDirectory: false
                 )
 
+        let clineDurationSeconds =
+            Date().timeIntervalSince(
+                clineStartedAt
+            )
+
+        let clineTerminationReason: String
+        switch process.terminationReason {
+        case .exit:
+            clineTerminationReason = "exit"
+        case .uncaughtSignal:
+            clineTerminationReason = "uncaughtSignal"
+        @unknown default:
+            clineTerminationReason = "unknown"
+        }
+
         if process.terminationStatus != 0 {
             let diagnostic = """
             \n━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
             KRALİ Semantic Planner Fallback
             status=\(process.terminationStatus)
+            reason=\(clineTerminationReason)
+            duration=\(String(format: "%.2f", clineDurationSeconds))s
+            executable=\(clinePath)
             input=\(userInput)
             output:
             \(rawOutput)
@@ -237,8 +269,16 @@ actor AgentSubscriptionIntelligence {
                 rawOutput.suffix(1200)
             )
             failureReason =
-                "Semantic planner fallback hata kodu " +
+                "Semantic planner Cline başarısız • " +
+                clineTerminationReason +
+                "=" +
                 String(process.terminationStatus) +
+                " • süre=" +
+                String(
+                    format: "%.2f",
+                    clineDurationSeconds
+                ) +
+                "sn" +
                 (tail.isEmpty
                     ? " • ayrıntı: ~/Library/Logs/KRALI-Semantic-Planner.log"
                     : ": " + tail)
@@ -476,6 +516,249 @@ actor AgentSubscriptionIntelligence {
             text: text,
             provider: "ChatGPT Subscription / openai-codex"
         )
+    }
+
+    private func planMissionWithLocalOllama(
+        userInput: String,
+        contextMemory: [AgentContextMemoryEntry],
+        capabilities: [AgentCapability],
+        hasWorkspace: Bool
+    ) async -> SubscriptionMissionResult? {
+        guard
+            let model =
+                await availableLocalPlannerModel()
+        else {
+            return nil
+        }
+
+        let capabilityCatalog =
+            capabilities.map {
+                "- \($0.id): \($0.summary) [\($0.isAvailable ? "available" : "unavailable")]"
+            }
+            .joined(separator: "\n")
+
+        let memoryText =
+            contextMemory.prefix(5).map {
+                "[\($0.kind.rawValue)] \($0.title): \($0.summary)"
+            }
+            .joined(separator: "\n")
+
+        let systemPrompt = """
+        Sen KRALİ'nin yerel semantic mission planner katmanısın.
+        Araç çalıştırma. Yalnızca JSON mission üret.
+
+        Kurallar:
+        - Güncel kullanıcı mesajı nihai hedeftir.
+        - Kullanıcı yalnızca bilgi, açıklama, fikir veya genel uzmanlık cevabı istiyorsa ve güncel/dış/özel kaynak gerekmiyorsa yalnız core.reasoning ve gerekirse context.local kullan.
+        - Dosya, ekran, uygulama, web veya edit capability'lerini yalnız başarı için gerçekten zorunluysa seç.
+        - Kullanıcının istemediği dış durum değişikliğini plana ekleme.
+        - Eski bağlamı yalnız güncel hedefle gerçekten ilgiliyse kullan.
+        - Capability unavailable olsa bile gerçek görev için zorunluysa plana dahil edebilirsin.
+        - Gerçek edit/tasarım/kurgu işi sadece core.reasoning ile tamamlanmış sayılmaz.
+        - JSON dışında hiçbir metin üretme.
+        """
+
+        let prompt = """
+        Kullanıcı mesajı:
+        \(userInput)
+
+        Çalışma alanı bağlı mı:
+        \(hasWorkspace ? "evet" : "hayır")
+
+        İlgili hafıza:
+        \(memoryText.isEmpty ? "Yok" : memoryText)
+
+        Capability kataloğu:
+        \(capabilityCatalog)
+
+        Yalnız şu şemada JSON döndür:
+        {
+          "objective": "kullanıcının nihai hedefi",
+          "outcomes": ["explain"],
+          "steps": [
+            {
+              "title": "kısa adım adı",
+              "purpose": "neden gerekli",
+              "capabilityID": "catalogdaki.id",
+              "operation": "kısa işlem etiketi",
+              "dependsOn": []
+            }
+          ],
+          "requiredCapabilityIDs": ["catalogdaki.id"],
+          "requiresUserInput": false,
+          "userInputReason": null,
+          "confidence": 0.0
+        }
+
+        Outcomes yalnızca şunlardan olabilir:
+        converse, locate, shortlist, assessContent, analyze, ideate, compose, transform, explain, organize, open, remember, research, edit, communicate.
+
+        1-10 arası anlamlı step üret. dependsOn 0 tabanlı önceki step indeksleridir.
+        """
+
+        guard
+            let url = URL(
+                string:
+                    "http://127.0.0.1:11434/api/chat"
+            )
+        else {
+            return nil
+        }
+
+        var request = URLRequest(url: url)
+        request.httpMethod = "POST"
+        request.timeoutInterval = 75
+        request.setValue(
+            "application/json",
+            forHTTPHeaderField:
+                "Content-Type"
+        )
+
+        let payload: [String: Any] = [
+            "model": model,
+            "stream": false,
+            "format": "json",
+            "options": [
+                "temperature": 0.1
+            ],
+            "messages": [
+                [
+                    "role": "system",
+                    "content": systemPrompt
+                ],
+                [
+                    "role": "user",
+                    "content": prompt
+                ]
+            ]
+        ]
+
+        guard
+            let body = try?
+                JSONSerialization.data(
+                    withJSONObject: payload
+                )
+        else {
+            return nil
+        }
+
+        request.httpBody = body
+
+        do {
+            let (data, response) =
+                try await URLSession.shared.data(
+                    for: request
+                )
+
+            guard
+                let http =
+                    response as?
+                        HTTPURLResponse,
+                http.statusCode == 200,
+                let object =
+                    try JSONSerialization
+                        .jsonObject(
+                            with: data
+                        ) as? [String: Any],
+                let message =
+                    object["message"]
+                        as? [String: Any],
+                let content =
+                    message["content"]
+                        as? String,
+                let json =
+                    extractJSONObject(
+                        from: content
+                    ),
+                let missionData =
+                    json.data(using: .utf8),
+                let mission =
+                    try? JSONDecoder().decode(
+                        AgentSemanticMission.self,
+                        from: missionData
+                    ),
+                validateMission(
+                    mission,
+                    knownCapabilityIDs:
+                        Set(
+                            capabilities.map(\.id)
+                        )
+                ),
+                missionCoverageIsValid(
+                    mission
+                )
+            else {
+                return nil
+            }
+
+            return SubscriptionMissionResult(
+                mission: mission,
+                provider:
+                    "Local Ollama / " +
+                    model
+            )
+        } catch {
+            return nil
+        }
+    }
+
+    private func availableLocalPlannerModel()
+        async -> String? {
+        guard
+            let url = URL(
+                string:
+                    "http://127.0.0.1:11434/api/tags"
+            )
+        else {
+            return nil
+        }
+
+        var request = URLRequest(url: url)
+        request.timeoutInterval = 2.5
+
+        do {
+            let (data, response) =
+                try await URLSession.shared.data(
+                    for: request
+                )
+
+            guard
+                let http =
+                    response as?
+                        HTTPURLResponse,
+                http.statusCode == 200,
+                let object =
+                    try JSONSerialization
+                        .jsonObject(
+                            with: data
+                        ) as? [String: Any],
+                let models =
+                    object["models"]
+                        as? [[String: Any]]
+            else {
+                return nil
+            }
+
+            let names = Set(
+                models.compactMap {
+                    $0["name"] as? String
+                }
+            )
+
+            let preferred = [
+                "devstral:24b",
+                "qwen3:8b",
+                "qwen2.5-coder:14b-instruct",
+                "qwen2.5-coder:7b-instruct",
+                "qwen3-coder:30b"
+            ]
+
+            return preferred.first {
+                names.contains($0)
+            }
+        } catch {
+            return nil
+        }
     }
 
     private func validateMission(
