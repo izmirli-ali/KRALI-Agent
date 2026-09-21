@@ -1176,7 +1176,10 @@ final class AgentEngine: ObservableObject {
            outcomeResolution.isFullyCovered,
            !outcomeResolution
                 .contract
-                .requiresMutation {
+                .requiresMutation,
+           outcomeChainCanOwnExecution(
+                outcomeResolution
+           ) {
             outcomeOwnedMission = true
 
             let chainResult =
@@ -3780,6 +3783,35 @@ final class AgentEngine: ObservableObject {
             fileSearchOutcome:
                 lastFileSearchOutcome
         )
+    }
+
+    private func outcomeChainCanOwnExecution(
+        _ resolution: AgentOutcomeResolution
+    ) -> Bool {
+        let supportedKinds: Set<AgentOutcomeStrategyKind> = [
+            .publicResearch,
+            .openURLAndObserve,
+            .screenObservation
+        ]
+
+        return resolution
+            .contract
+            .requirements
+            .allSatisfy { requirement in
+                resolution
+                    .orderedExecutableStrategies(
+                        for:
+                            requirement.id
+                    )
+                    .contains(
+                        where: {
+                            supportedKinds
+                                .contains(
+                                    $0.kind
+                                )
+                        }
+                    )
+            }
     }
 
     private struct OutcomeStrategyChainResult {
