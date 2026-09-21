@@ -1,24 +1,3 @@
-KRALI_LOCAL_STAGE local_agent_running • Görsel / video algısı (perception.media) yerel model çalışıyor • adım 3/16
-KRALI_LOCAL_STAGE local_agent_request_retry • Görsel / video algısı (perception.media) model isteği zaman aşımına uğradı; mevcut context korunarak retry 1/2
-KRALI_LOCAL_STAGE local_agent_running • Görsel / video algısı (perception.media) yerel model çalışıyor • adım 4/16
-KRALI_LOCAL_STAGE local_agent_tool • Görsel / video algısı (perception.media) araç çalışıyor: git_status
-KRALI_LOCAL_STAGE local_agent_running • Görsel / video algısı (perception.media) yerel model çalışıyor • adım 5/16
-KRALI_LOCAL_STAGE local_agent_tool • Görsel / video algısı (perception.media) araç çalışıyor: list_files
-KRALI_LOCAL_STAGE local_agent_running • Görsel / video algısı (perception.media) yerel model çalışıyor • adım 6/16
-I see this is a Swift-based codebase for a native KRALI agent. Let me search for code related to timeouts or request handling. I'll look for relevant terms.
-KRALI_LOCAL_STAGE local_agent_completion_rejected • Görsel / video algısı (perception.media) tamamlanma reddedildi • aktif capability gap için gerçek candidate değişikliği yok • deneme=1/3
-KRALI_LOCAL_STAGE local_agent_running • Görsel / video algısı (perception.media) yerel model çalışıyor • adım 7/16
-KRALI_LOCAL_STAGE local_agent_request_retry • Görsel / video algısı (perception.media) model isteği zaman aşımına uğradı; mevcut context korunarak retry 1/2
-Görsel / video algısı (perception.media) native local agent toplam zaman sınırına ulaştı.
-Deleted branch krali-dev-agent/20260921-212222 (was cbf06e8).
-❌ Native yerel Developer Agent durdu: Görsel / video algısı (perception.media) native local agent toplam zaman sınırına ulaştı.
-
-━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
- KRALİ DEVELOPER AGENT
- 20260921-212726
-━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-⚠️ Global Node.js v26 Cline bağımlılıklarıyla uyumlu değil; izole Node 22 runtime hazırlanıyor.
-✅ Developer Agent runtime: v22.23.2
 ⚡ Tool-capable model cache kullanılıyor: devstral:24b • yaş=3679s
 Yerel model seçimi: devstral:24b • RAM≈24GB
 ✅ Yerel Developer AI hazır + tool-call doğrulandı: devstral:24b
@@ -118,3 +97,24 @@ KRALI_LOCAL_STAGE local_agent_request_retry • Uygulama içi iş akışı (app.
 Uygulama içi iş akışı (app.workflow) native local agent toplam zaman sınırına ulaştı.
 Deleted branch krali-dev-agent/20260921-214738 (was 359b47e).
 ❌ Native yerel Developer Agent durdu: Uygulama içi iş akışı (app.workflow) native local agent toplam zaman sınırına ulaştı.
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+ KRALİ DEVELOPER AGENT
+ 20260921-225400
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+⚠️ Global Node.js v26 Cline bağımlılıklarıyla uyumlu değil; izole Node 22 runtime hazırlanıyor.
+✅ Developer Agent runtime: v22.23.2
+Yerel model seçimi: devstral:24b • RAM≈24GB
+Yerel tool-call probe: devstral:24b
+tool_call_ok|devstral:24b
+✅ Yerel Developer AI hazır + tool-call doğrulandı: devstral:24b
+From https://github.com/izmirli-ali/KRALI-Agent
+ * branch            main       -> FETCH_HEAD
+Already up to date.
+Learning Queue job brief bulundu; mutable Mentor latest yerine immutable job kullanılacak.
+Preparing worktree (new branch 'krali-dev-agent/20260921-225400')
+branch 'krali-dev-agent/20260921-225400' set up to track 'origin/main'.
+HEAD is now at 96633d7 Sync KRALI mentor diagnostics
+Developer prompt mode: gap • 4238 bytes
+KRALI_LOCAL_STAGE local_agent_starting • Uygulama kontrolü (desktop.app) native Ollama agent başlatılıyor: devstral:24b
+KRALI_LOCAL_STAGE local_agent_running • Uygulama kontrolü (desktop.app) yerel model çalışıyor • adım 1/10

@@ -94,3 +94,9 @@ KRALİ Semantic Planner Fallback
 status=9
 input=Masaüstündeki en son değiştirilen görsel dosyasının sadece adını söyle. Dosyayı açma veya değiştirme
 output:
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+KRALİ Semantic Planner Fallback
+status=9
+input=Elindeki mevcut kabiliyetleri düşün ve şu anda yapabildiğin 3 farklı görev türünü kısaca söyle.
+output:

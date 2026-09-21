@@ -1,1 +1,1 @@
-runtime|app=Finder|activate=true|frontmost=true|source=activation recovery + AX raise + ScreenCaptureKit z-order
+runtime|app=Safari|activate=false|frontmost=false|source=unverified

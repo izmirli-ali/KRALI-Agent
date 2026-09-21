@@ -134,16 +134,66 @@
       "id" : "context.local",
       "name" : "Bağlam",
       "risk" : "reasoning"
+    },
+    {
+      "available" : true,
+      "id" : "desktop.app",
+      "name" : "Uygulama kontrolü",
+      "risk" : "external"
     }
   ],
   "capabilityGaps" : [
+    {
+      "candidateCapabilityIDs" : [
 
+      ],
+      "capabilityID" : "desktop.app",
+      "capabilityName" : "Uygulama kontrolü",
+      "developerBrief" : "KRALİ Runtime Capability Failure Developer Brief\n\nKullanıcı hedefi:\nSafari'yi aç ve gerçekten ön planda olduğunu doğrula. Başka hiçbir işlem yapma.\n\nRuntime'da başarısız capability:\ndesktop.app — Uygulama kontrolü\n\nStep:\n2: Uygulama kontrolü\nOperation: capability.contract\nRole: act\n\nMevcut strategy adayları:\nYok\n\nSorun:\nProvider available olmasına rağmen runtime step tamamlanamadı veya postcondition doğrulanamadı: desktop.app • capability.contract\n\nÇözüm kuralları:\n- Önce problemi, gözlemleri ve başarısız postcondition'ı tanımla; doğrudan kod satırı aramaya başlama.\n- En az iki makul çözüm stratejisini değerlendir; mevcut capability kombinasyonu problemi çözebiliyorsa yeni provider yazma.\n- Capability zaten available ise önce mevcut provider'ı ve postcondition verifier'ı debug et.\n- Uygulama/marka adına hard-code yazma; hatayı genel resolver/provider/strategy seviyesinde çöz.\n- Başarı gerçek observation/verification ile kanıtlanmadan PASS üretme.\n- Dış dünyaya commit eden eylemlerde kullanıcı onayı korunmalı.\n- Candidate branch/worktree kullan; ana branch'i doğrudan değiştirme.\n- Build + regression + mümkünse runtime probe geçmeden düzeltmeyi available/healthy sayma.\n\nKabul kriteri:\nAynı sınıftaki bilinmeyen hedeflerde de provider doğru hedefi çözebilmeli; başarısız runtime step tamamlanmalı ve verifier gerçek evidence ile PASS verebilmeli.",
+      "kind" : "strategy",
+      "learningPath" : "primitivePatch",
+      "reason" : "Provider available olmasına rağmen runtime step tamamlanamadı veya postcondition doğrulanamadı: desktop.app • capability.contract",
+      "researchGoal" : "Mevcut Uygulama kontrolü provider'ının neden runtime'da başarısız olduğunu kanıtla; önce mevcut provider/strategy'yi debug et, gerekirse generic recovery veya yeni provider stratejisi geliştir ve aynı postcondition'ı gerçek observation ile doğrula."
+    }
   ],
   "contextMemory" : [
-
+    {
+      "createdAt" : "2026-09-20T09:47:42Z",
+      "kind" : "userRule",
+      "summary" : "Estafiz'e özel marka detaylarını başka markalara otomatik uygulama",
+      "title" : "Çalışma kuralı"
+    }
   ],
-  "createdAt" : "2026-09-21T19:54:43Z",
+  "createdAt" : "2026-09-21T19:54:00Z",
   "executionSteps" : [
+    {
+      "capabilityID" : "core.reasoning",
+      "detail" : "Semantic model geçici olarak mission üretemedi; capability contract güncel kullanıcı mesajından güvenli fallback oluşturuyor. Operation: semantic.fallback",
+      "kind" : "reasoning",
+      "state" : "completed",
+      "title" : "Hedefi çöz"
+    },
+    {
+      "capabilityID" : "context.local",
+      "detail" : "Mission hedefini uçtan uca tamamlamak için gerekli capability sözleşmesi. Ön koşul adımları: 1. Operation: capability.contract",
+      "kind" : "reasoning",
+      "state" : "completed",
+      "title" : "Bağlam"
+    },
+    {
+      "capabilityID" : "desktop.app",
+      "detail" : "Mission hedefini uçtan uca tamamlamak için gerekli capability sözleşmesi. Ön koşul adımları: 2. Operation: capability.contract",
+      "kind" : "action",
+      "state" : "partial",
+      "title" : "Uygulama kontrolü"
+    },
+    {
+      "capabilityID" : "core.reasoning",
+      "detail" : "Gerçekleşen adımları hedefle, capability durumuyla ve üretilen sonuçla karşılaştır.",
+      "kind" : "verification",
+      "state" : "attention",
+      "title" : "Mission sonucunu doğrula"
+    },
     {
       "detail" : "Tamamlanan, bekleyen ve kullanıcı bilgisi gerektiren kısımları birbirinden ayır.",
       "kind" : "response",
@@ -151,11 +201,10 @@
       "title" : "Sonucu kullanıcıya aktar"
     }
   ],
-  "fallbackPlan" : "Eksik capability veya başarısız adımı yeniden planla; tamamlanmayan işi yapılmış gibi gösterme.",
-  "finalResponse" : "**1. Metin Üretimi**  \nMevcut bilgiyle doğrudan ilişkilendirilebilecek bir çıktı üretme yeteneği, bu kapsamda değerlendirilir.  \n\n**2. Anlamsal İlişki Kurma**  \nVerilen yapısal kalıpları analiz ederek yeni bir ifade oluşturma kapasitesi, bu görevde kullanılır.  \n\n**3. Soyut Fikir Çıkarma**  \nSomut kanıtlar olmasa da, mevcut bilişsel modelin soyut kavramları sentezleme becerisi bu alana girer.",
-  "goal" : "Elindeki mevcut kabiliyetleri düşün ve şu anda yapabildiğin 3 farklı görev türünü kısaca söyle.",
+  "fallbackPlan" : "Tamamlanmayan action step'ini yeniden planla; yürütülmeyen işi başarılı sayma.",
+  "finalResponse" : "Görev tamamlanamadı. Eksik kabiliyet: Uygulama kontrolü.\n\nDoğrulama: Semantic mission içindeki zorunlu action step'lerinden bazıları tamamlanmadı: desktop.app\nAlternatif plan: Tamamlanmayan action step'ini yeniden planla; yürütülmeyen işi başarılı sayma.",
+  "goal" : "Safari'yi aç ve gerçekten ön planda olduğunu doğrula. Başka hiçbir işlem yapma.",
   "inputSource" : "text",
-  "intelligenceProvider" : "Apple Foundation Models",
   "learningPlans" : [
 
   ],
@@ -170,7 +219,7 @@
       "instrumentalCapabilityIDs" : [
 
       ],
-      "objective" : "Elindeki mevcut kabiliyetleri düşün ve şu anda yapabildiğin 3 farklı görev türünü kısaca söyle.",
+      "objective" : "Safari'yi aç ve gerçekten ön planda olduğunu doğrula. Başka hiçbir işlem yapma.",
       "requirements" : [
         {
           "acceptableCapabilityIDs" : [
@@ -230,7 +279,7 @@
 
     ]
   },
-  "plan" : "",
+  "plan" : "Hedefi çöz → Bağlam → Uygulama kontrolü",
   "problemResolution" : {
     "frame" : {
       "availableCapabilityIDs" : [
@@ -258,15 +307,30 @@
         "Dış dünyaya commit eden işlem kullanıcı onayı olmadan uygulanmamalı.",
         "Uygulama/marka adına özel hard-code yerine generic capability/strategy tercih edilmeli."
       ],
-      "objective" : "Elindeki mevcut kabiliyetleri düşün ve şu anda yapabildiğin 3 farklı görev türünü kısaca söyle.",
+      "objective" : "Uygulama kontrolü",
       "observations" : [
-        "Seçili çalışma alanı: Desktop"
+        "Başarısız step: Uygulama kontrolü",
+        "Çalışma kuralı: Estafiz'e özel marka detaylarını başka markalara otomatik uygulama"
       ]
     },
+    "reflection" : "Mevcut güvenli stratejiler tükendi; capability learning gerekli.",
     "strategies" : [
-
+      {
+        "capabilityIDs" : [
+          "desktop.app"
+        ],
+        "executableNow" : true,
+        "id" : "primary:desktop.app",
+        "kind" : "primary",
+        "rationale" : "Task Graph bu capability'yi doğrudan seçti ve provider available.",
+        "requiresLearning" : false,
+        "score" : 100,
+        "summary" : "Uygulama kontrolü adımını desktop.app ile yürüt.",
+        "title" : "Mevcut provider'ı kullan"
+      }
     ]
   },
+  "reflectionSummary" : "Mevcut güvenli stratejiler tükendi; capability learning gerekli.",
   "researchEvidence" : [
 
   ],
@@ -277,47 +341,124 @@
     "Core",
     "Goal",
     "Context",
-    "Intelligence",
+    "Plan",
+    "Desktop",
+    "Verify",
     "Response"
   ],
   "runtimeTask" : {
     "completedStepIndexes" : [
-
+      0,
+      1
     ],
-    "createdAt" : "2026-09-21T19:54:37Z",
-    "id" : "5E6F0C4B-5B6E-492A-9BC1-E51A1DFBCD0B",
-    "objective" : "Elindeki mevcut kabiliyetleri düşün ve şu anda yapabildiğin 3 farklı görev türünü kısaca söyle.",
+    "createdAt" : "2026-09-21T19:53:07Z",
+    "id" : "69DAED68-59A4-4BDF-BADC-ED1A6E40EAE5",
+    "objective" : "Safari'yi aç ve gerçekten ön planda olduğunu doğrula. Başka hiçbir işlem yapma.",
     "priority" : 0,
     "runningStepIndexes" : [
 
     ],
-    "state" : "completed",
+    "state" : "failed",
     "waitingResourceIDs" : [
 
     ]
   },
   "semanticMission" : {
-    "confidence" : 0.6,
-    "objective" : "Elindeki mevcut kabiliyetleri düşün ve şu anda yapabildiğin 3 farklı görev türünü kısaca söyle.",
+    "confidence" : 0.65,
+    "objective" : "Safari'yi aç ve gerçekten ön planda olduğunu doğrula. Başka hiçbir işlem yapma.",
     "outcomes" : [
-      "explain",
       "open"
     ],
     "requiredCapabilityIDs" : [
       "context.local",
-      "core.reasoning"
+      "core.reasoning",
+      "desktop.app"
     ],
     "requiresUserInput" : false,
     "steps" : [
+      {
+        "capabilityID" : "core.reasoning",
+        "dependsOn" : [
 
+        ],
+        "operation" : "semantic.fallback",
+        "purpose" : "Semantic model geçici olarak mission üretemedi; capability contract güncel kullanıcı mesajından güvenli fallback oluşturuyor.",
+        "title" : "Hedefi çöz"
+      },
+      {
+        "capabilityID" : "context.local",
+        "dependsOn" : [
+          0
+        ],
+        "operation" : "capability.contract",
+        "purpose" : "Mission hedefini uçtan uca tamamlamak için gerekli capability sözleşmesi.",
+        "title" : "Bağlam"
+      },
+      {
+        "capabilityID" : "desktop.app",
+        "dependsOn" : [
+          1
+        ],
+        "operation" : "capability.contract",
+        "purpose" : "Mission hedefini uçtan uca tamamlamak için gerekli capability sözleşmesi.",
+        "title" : "Uygulama kontrolü"
+      }
     ]
   },
-  "semanticPlannerProvider" : "Deterministic Capability Contract",
+  "semanticPlannerProvider" : "Local Contract Repair",
   "taskGraph" : [
+    {
+      "available" : true,
+      "capabilityID" : "core.reasoning",
+      "dependsOn" : [
 
+      ],
+      "index" : 0,
+      "operation" : "semantic.fallback",
+      "requiresApproval" : false,
+      "resourceIDs" : [
+
+      ],
+      "risk" : "reasoning",
+      "role" : "reason",
+      "title" : "Hedefi çöz"
+    },
+    {
+      "available" : true,
+      "capabilityID" : "context.local",
+      "dependsOn" : [
+        0
+      ],
+      "index" : 1,
+      "operation" : "capability.contract",
+      "requiresApproval" : false,
+      "resourceIDs" : [
+
+      ],
+      "risk" : "reasoning",
+      "role" : "reason",
+      "title" : "Bağlam"
+    },
+    {
+      "available" : true,
+      "capabilityID" : "desktop.app",
+      "dependsOn" : [
+        1
+      ],
+      "index" : 2,
+      "operation" : "capability.contract",
+      "requiresApproval" : false,
+      "resourceIDs" : [
+        "foreground",
+        "userInteraction"
+      ],
+      "risk" : "external",
+      "role" : "act",
+      "title" : "Uygulama kontrolü"
+    }
   ],
-  "traceID" : "6FE468C5-8907-45B5-929E-6463458A31AA",
-  "userInput" : "Elindeki mevcut kabiliyetleri düşün ve şu anda yapabildiğin 3 farklı görev türünü kısaca söyle.",
-  "verificationState" : "skipped",
-  "verificationSummary" : "Bu turda doğrulanacak gerçek araç işlemi yok."
+  "traceID" : "A8EB4A43-7755-4C58-852D-4410D2CCC74B",
+  "userInput" : "Safari'yi aç ve gerçekten ön planda olduğunu doğrula. Başka hiçbir işlem yapma.",
+  "verificationState" : "attention",
+  "verificationSummary" : "Semantic mission içindeki zorunlu action step'lerinden bazıları tamamlanmadı: desktop.app"
 }
