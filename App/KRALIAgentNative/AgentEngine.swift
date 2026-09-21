@@ -3191,6 +3191,22 @@ final class AgentEngine: ObservableObject {
 
                 currentReflectionSummary =
                     reflection
+
+                if let current =
+                    currentProblemResolution {
+                    currentProblemResolution =
+                        AgentProblemResolution(
+                            frame:
+                                current.frame,
+                            strategies:
+                                current.strategies,
+                            chosenStrategyID:
+                                "reuse-evidence:contradiction",
+                            reflection:
+                                reflection
+                        )
+                }
+
                 recoverySummary =
                     reflection
 
@@ -3818,6 +3834,10 @@ final class AgentEngine: ObservableObject {
                     currentSemanticPlannerProvider,
                 taskGraph:
                     currentTaskGraph,
+                problemResolution:
+                    currentProblemResolution,
+                reflectionSummary:
+                    currentReflectionSummary,
                 capabilityGaps:
                     currentCapabilityGaps,
                 capabilities: capabilities,
