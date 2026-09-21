@@ -1607,15 +1607,33 @@ for (let iteration = 1; iteration <= maxIterations; iteration++) {
 
     let result;
 
+    const phase = developmentPhase();
+    const requestedPath = String(args.path || "");
+    const implementationInspectionAllowed =
+      phase === "implementation" &&
+      !sawMutatingTool &&
+      (
+        (
+          name === "search_codebase" &&
+          !implementationSearchCompleted
+        ) ||
+        (
+          name === "read_file" &&
+          implementationSearchCompleted &&
+          !implementationReadCompleted &&
+          (
+            implementationTargetPaths.length === 0 ||
+            implementationTargetPaths.includes(requestedPath)
+          )
+        )
+      );
+
     if (
       requireChange &&
       !sawMutatingTool &&
-      developmentPhase() === "implementation" &&
-      (
-        (implementationSearchCompleted && name === "search_codebase") ||
-        (implementationReadCompleted && inspectionToolNames.has(name)) ||
-        name === "list_files"
-      )
+      phase === "implementation" &&
+      inspectionToolNames.has(name) &&
+      !implementationInspectionAllowed
     ) {
       stage(
         "local_agent_implementation_required",
@@ -1629,25 +1647,13 @@ for (let iteration = 1; iteration <= maxIterations; iteration++) {
           implementationReadCompleted
             ? "Target source is already verified. Apply the minimum generic source mutation now."
             : implementationSearchCompleted
-              ? "Target search is already complete. Read the identified target source once, then mutate."
-              : "Broad discovery is disabled during implementation. Use targeted search_codebase.",
-      };
-    } else if (
-      requireChange &&
-      !sawMutatingTool &&
-      inspectionToolNames.has(name) &&
-      inspectionToolCalls >= maxInspectionTools
-    ) {
-      stage(
-        "local_agent_implementation_required",
-        gapLabel +
-          " inspection aracı reddedildi • implementation fazı aktif • " +
-          name
-      );
-      result = {
-        ok: false,
-        error:
-          "Targeted inspection budget exhausted. Implementation phase is active; use replace_text, write_file, or apply_patch.",
+              ? (
+                  implementationTargetPaths.length > 0
+                    ? "Target search is complete. Read one identified target path only: " +
+                      implementationTargetPaths.join(", ")
+                    : "Target search is complete. Read the identified target source once, then mutate."
+                )
+              : "Broad discovery is disabled during implementation. Use one targeted search_codebase.",
       };
     } else {
       try {
