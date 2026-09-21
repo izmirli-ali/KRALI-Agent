@@ -28,12 +28,16 @@ enum AgentTargetKind {
     case folder
 }
 
-enum AgentSortMode {
+enum AgentSortMode:
+    Hashable,
+    Sendable {
     case relevance
     case newestFirst
 }
 
-enum AgentDateField {
+enum AgentDateField:
+    Hashable,
+    Sendable {
     case either
     case created
     case modified
