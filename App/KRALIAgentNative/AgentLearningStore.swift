@@ -17,7 +17,7 @@ enum CapabilityLearningProgress: String, Codable, Hashable {
         case .researching: return "Araştırılıyor"
         case .proposalReady: return "Çözüm önerisi hazır"
         case .awaitingApproval: return "Onay bekliyor"
-        case .enabled: return "Etkin"
+        case .enabled: return "Öğrenme tamamlandı"
         }
     }
 
@@ -45,6 +45,9 @@ struct CapabilityLearningTask: Identifiable, Codable, Hashable {
     let firstSeenAt: Date
     var updatedAt: Date
     var encounterCount: Int
+    var validatedAt: Date? = nil
+    var validatedAppVersion: String? = nil
+    var validationSummary: String? = nil
 }
 
 struct AgentLearningStore {
@@ -83,10 +86,28 @@ struct AgentLearningStore {
 
         let now = Date()
 
+        let appVersion =
+            Bundle.main.object(
+                forInfoDictionaryKey:
+                    "CFBundleShortVersionString"
+            ) as? String ?? "unknown"
+
         for capability in capabilities where capability.isAvailable {
             guard var task = byID[capability.id] else { continue }
             task.progress = .enabled
             task.updatedAt = now
+
+            if task.validatedAt == nil {
+                task.validatedAt = now
+            }
+
+            task.validatedAppVersion =
+                appVersion
+            task.validationSummary =
+                "Provider bu sürümde available; öğrenme sonucu kalıcı capability olarak doğrulandı."
+            task.nextStep =
+                "Öğrenme tamamlandı. Aynı capability için yeniden learning başlatma; yalnız gerçek runtime bozulması varsa repair/revalidation uygula."
+
             byID[capability.id] = task
         }
 
