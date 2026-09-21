@@ -3,6 +3,7 @@ set -u
 
 ROOT="${KRALI_REPO_ROOT:-$HOME/Developer/KRALI-Agent}"
 TRACE_SOURCE="$HOME/Library/Application Support/KRALI Agent/Mentor/latest.json"
+HISTORY_SOURCE="$HOME/Library/Application Support/KRALI Agent/Mentor/History"
 TRAINING_SOURCE="$HOME/Library/Application Support/KRALI Agent/Mentor/training-latest.json"
 LIVE_EVAL_SOURCE="$HOME/Library/Application Support/KRALI Agent/Mentor/live-eval-latest.json"
 ARENA_SOURCE="$HOME/Library/Application Support/KRALI Agent/Mentor/arena-latest.json"
@@ -15,6 +16,7 @@ DEVELOPER_STATUS_SOURCE="$HOME/Library/Application Support/KRALI Agent/Developer
 DEVELOPER_LOG_SOURCE="$HOME/Library/Logs/KRALI-Developer-Agent.log"
 SEMANTIC_LOG_SOURCE="$HOME/Library/Logs/KRALI-Semantic-Planner.log"
 TRACE_DEST="$ROOT/Mentor/latest.json"
+HISTORY_DEST="$ROOT/Mentor/History"
 TRAINING_DEST="$ROOT/Mentor/training-latest.json"
 LIVE_EVAL_DEST="$ROOT/Mentor/live-eval-latest.json"
 ARENA_DEST="$ROOT/Mentor/arena-latest.json"
@@ -62,6 +64,13 @@ echo "2/4  Mentor verisi hazırlanıyor..."
 mkdir -p "$ROOT/Mentor"
 
 FILES=()
+
+if [ -d "$HISTORY_SOURCE" ]; then
+    mkdir -p "$HISTORY_DEST"
+    rm -f "$HISTORY_DEST"/*.json(N)
+    cp "$HISTORY_SOURCE"/*.json(N) "$HISTORY_DEST"/ 2>/dev/null || true
+    FILES+=("Mentor/History")
+fi
 
 if [ -f "$TRACE_SOURCE" ]; then
     cp "$TRACE_SOURCE" "$TRACE_DEST"
