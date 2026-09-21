@@ -25,8 +25,7 @@ enum AgentFileSearchOutcomeStatus:
 }
 
 struct AgentFileSearchOutcome:
-    Hashable,
-    Sendable {
+    Hashable {
     let status: AgentFileSearchOutcomeStatus
     let query: AgentFileQuery
     let rootPath: String?
@@ -51,7 +50,6 @@ final class AgentFileSearchCoordinator {
     private var cache: [String: CachedIndex] = [:]
 
     func search(
-        rawText: String,
         query: AgentFileQuery,
         decision: AgentDecision,
         selectedWorkspace: URL?,
@@ -98,6 +96,7 @@ final class AgentFileSearchCoordinator {
         let reachedSafetyLimit: Bool
 
         if decision.usePreviousResults,
+           !query.scopeIsExplicit,
            !previousResults.isEmpty {
             sourceFiles = previousResults
             reachedSafetyLimit = false
