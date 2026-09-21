@@ -7149,6 +7149,11 @@ final class AgentEngine: ObservableObject {
         log(
             "Yerel dosya araması: " +
             outcome.title +
+            " • target=" +
+            String(
+                describing:
+                    decision.target
+            ) +
             " • scope=" +
             outcome.query.scope.title +
             " • extensions=" +
