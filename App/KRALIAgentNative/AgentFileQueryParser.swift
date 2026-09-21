@@ -40,7 +40,7 @@ struct AgentFileQueryParser {
         )
 
         let filtered = tokens.filter {
-            !ignoredTokens.contains($0)
+            !shouldIgnoreToken($0)
         }
 
         return AgentFileQuery(
@@ -115,6 +115,35 @@ struct AgentFileQueryParser {
                 )
             )
             .lowercased()
+    }
+
+    private func shouldIgnoreToken(
+        _ token: String
+    ) -> Bool {
+        if ignoredTokens.contains(token) {
+            return true
+        }
+
+        let semanticPrefixes = [
+            "dosya",
+            "klasor",
+            "masaustu",
+            "indirilenler",
+            "belgeler",
+            "pdf",
+            "video",
+            "gorsel",
+            "resim",
+            "fotograf",
+            "proje",
+            "dokuman",
+            "belge",
+            "screenshot"
+        ]
+
+        return semanticPrefixes.contains {
+            token.hasPrefix($0)
+        }
     }
 
     private let ignoredTokens: Set<String> = [
