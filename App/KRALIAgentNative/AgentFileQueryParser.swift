@@ -52,6 +52,7 @@ struct AgentFileQuery: Hashable, Sendable {
     let mentionsFileEntity: Bool
     let extensionDisplayLabel: String?
     let sortMode: AgentSortMode
+    let dateField: AgentDateField
     let resultLimit: Int?
     let outputProjection:
         AgentFileOutputProjection
@@ -131,6 +132,10 @@ struct AgentFileQueryParser {
                 ),
             sortMode:
                 sortMode,
+            dateField:
+                resolveDateField(
+                    normalized: normalized
+                ),
             resultLimit:
                 resolveResultLimit(
                     normalized: normalized,
@@ -296,6 +301,33 @@ struct AgentFileQueryParser {
         )
         ? .newestFirst
         : .relevance
+    }
+
+    private func resolveDateField(
+        normalized: String
+    ) -> AgentDateField {
+        if containsAny(
+            normalized,
+            [
+                "degistirilen",
+                "modified"
+            ]
+        ) {
+            return .modified
+        }
+
+        if containsAny(
+            normalized,
+            [
+                "indirilen",
+                "olusturulan",
+                "created"
+            ]
+        ) {
+            return .created
+        }
+
+        return .either
     }
 
     private func resolveResultLimit(
