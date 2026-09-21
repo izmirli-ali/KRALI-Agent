@@ -23,6 +23,26 @@ enum AgentFileSearchScope: String, Hashable, Sendable {
     }
 }
 
+enum AgentFileOutputProjection:
+    String,
+    Hashable,
+    Sendable {
+    case defaultSummary
+    case namesOnly
+}
+
+enum AgentFileQueryProhibition:
+    String,
+    Hashable,
+    Sendable {
+    case open
+    case modify
+    case move
+    case delete
+    case rename
+    case overwrite
+}
+
 struct AgentFileQuery: Hashable, Sendable {
     let scope: AgentFileSearchScope
     let scopeIsExplicit: Bool
@@ -31,6 +51,12 @@ struct AgentFileQuery: Hashable, Sendable {
     let hasSearchAction: Bool
     let mentionsFileEntity: Bool
     let extensionDisplayLabel: String?
+    let sortMode: AgentSortMode
+    let resultLimit: Int?
+    let outputProjection:
+        AgentFileOutputProjection
+    let prohibitions:
+        Set<AgentFileQueryProhibition>
 
     var hasTypeFilter: Bool {
         !extensions.isEmpty
@@ -78,19 +104,23 @@ struct AgentFileQueryParser {
                 isFileEntityToken($0)
             }
 
-        let filtered = tokens.filter { token in
-            !shouldIgnoreToken(
-                token,
-                requestedExtensions: extensions
+        let sortMode =
+            resolveSortMode(
+                normalized: normalized
             )
-        }
 
         return AgentFileQuery(
             scope: scopeResolution.scope,
             scopeIsExplicit:
                 scopeResolution.explicit,
             filenameQuery:
-                filtered.joined(separator: " "),
+                explicitFilenameQuery(
+                    rawText: rawText,
+                    normalized: normalized,
+                    tokens: tokens,
+                    requestedExtensions:
+                        extensions
+                ),
             extensions: extensions,
             hasSearchAction: hasSearchAction,
             mentionsFileEntity:
@@ -98,6 +128,21 @@ struct AgentFileQueryParser {
             extensionDisplayLabel:
                 typeRegistry.displayLabel(
                     for: extensions
+                ),
+            sortMode:
+                sortMode,
+            resultLimit:
+                resolveResultLimit(
+                    normalized: normalized,
+                    sortMode: sortMode
+                ),
+            outputProjection:
+                resolveOutputProjection(
+                    normalized: normalized
+                ),
+            prohibitions:
+                resolveProhibitions(
+                    normalized: normalized
                 )
         )
     }
@@ -227,6 +272,339 @@ struct AgentFileQueryParser {
         return .any
     }
 
+
+    private func resolveSortMode(
+        normalized: String
+    ) -> AgentSortMode {
+        let newestMarkers = [
+            "en yeni",
+            "en son",
+            "son indirilen",
+            "son eklenen",
+            "son olusturulan",
+            "son degistirilen",
+            "son cekilen",
+            "latest",
+            "most recent",
+            "newest"
+        ]
+
+        return newestMarkers.contains(
+            where: {
+                normalized.contains($0)
+            }
+        )
+        ? .newestFirst
+        : .relevance
+    }
+
+    private func resolveResultLimit(
+        normalized: String,
+        sortMode: AgentSortMode
+    ) -> Int? {
+        guard sortMode == .newestFirst
+        else {
+            return nil
+        }
+
+        let singleResultMarkers = [
+            "en yeni dosya",
+            "en son dosya",
+            "son indirilen",
+            "son eklenen",
+            "son olusturulan",
+            "son degistirilen",
+            "son cekilen",
+            "latest file",
+            "most recent file"
+        ]
+
+        return singleResultMarkers.contains(
+            where: {
+                normalized.contains($0)
+            }
+        )
+        ? 1
+        : nil
+    }
+
+    private func resolveOutputProjection(
+        normalized: String
+    ) -> AgentFileOutputProjection {
+        let namesOnlyMarkers = [
+            "sadece isim",
+            "yalniz isim",
+            "isimlerini listele",
+            "ismini listele",
+            "isimlerini goster",
+            "ismini goster",
+            "adlarini listele",
+            "adini listele",
+            "adlarini goster",
+            "adini goster"
+        ]
+
+        return namesOnlyMarkers.contains(
+            where: {
+                normalized.contains($0)
+            }
+        )
+        ? .namesOnly
+        : .defaultSummary
+    }
+
+    private func resolveProhibitions(
+        normalized: String
+    ) -> Set<AgentFileQueryProhibition> {
+        var result =
+            Set<AgentFileQueryProhibition>()
+
+        let mappings: [
+            (
+                AgentFileQueryProhibition,
+                [String]
+            )
+        ] = [
+            (
+                .open,
+                [
+                    "dosyayi acma",
+                    "dosyalari acma",
+                    "hicbir dosyayi acma",
+                    "acma"
+                ]
+            ),
+            (
+                .modify,
+                [
+                    "degistirme",
+                    "degisiklik yapma",
+                    "dokunma"
+                ]
+            ),
+            (
+                .move,
+                [
+                    "tasima",
+                    "yerini degistirme"
+                ]
+            ),
+            (
+                .delete,
+                [
+                    "silme"
+                ]
+            ),
+            (
+                .rename,
+                [
+                    "yeniden adlandirma"
+                ]
+            ),
+            (
+                .overwrite,
+                [
+                    "uzerine yazma"
+                ]
+            )
+        ]
+
+        for (prohibition, markers)
+            in mappings
+            where markers.contains(
+                where: {
+                    normalized.contains($0)
+                }
+            ) {
+            result.insert(prohibition)
+        }
+
+        return result
+    }
+
+    private func explicitFilenameQuery(
+        rawText: String,
+        normalized: String,
+        tokens: [String],
+        requestedExtensions: Set<String>
+    ) -> String {
+        if let quoted =
+            quotedFilenameQuery(
+                rawText: rawText,
+                normalized: normalized
+            ) {
+            return quoted
+        }
+
+        let prefixMarkers = Set([
+            "adinda",
+            "isminde",
+            "adi",
+            "ismi"
+        ])
+        let stopTokens = Set([
+            "olan",
+            "gecen",
+            "geçen",
+            "dosya",
+            "dosyasi",
+            "dosyalari",
+            "file",
+            "files",
+            "pdf",
+            "video",
+            "gorsel",
+            "resim",
+            "fotograf",
+            "belge",
+            "dokuman",
+            "proje",
+            "bul",
+            "ara",
+            "goster",
+            "listele"
+        ])
+
+        if let markerIndex =
+            tokens.firstIndex(
+                where: {
+                    prefixMarkers
+                        .contains($0)
+                }
+            ) {
+            var parts: [String] = []
+
+            for token in tokens
+                .dropFirst(
+                    markerIndex + 1
+                ) {
+                if stopTokens.contains(token) ||
+                   requestedExtensions
+                    .contains(token) ||
+                   typeRegistry
+                    .isKnownExtension(token) {
+                    break
+                }
+
+                parts.append(token)
+            }
+
+            let value =
+                parts.joined(
+                    separator: " "
+                )
+                .trimmingCharacters(
+                    in: .whitespacesAndNewlines
+                )
+
+            if !value.isEmpty {
+                return value
+            }
+        }
+
+        let suffixMarkers = Set([
+            "adli",
+            "isimli"
+        ])
+
+        if let markerIndex =
+            tokens.firstIndex(
+                where: {
+                    suffixMarkers
+                        .contains($0)
+                }
+            ),
+           markerIndex > 0 {
+            let candidate =
+                tokens[
+                    markerIndex - 1
+                ]
+
+            if !shouldIgnoreToken(
+                candidate,
+                requestedExtensions:
+                    requestedExtensions
+            ) {
+                return candidate
+            }
+        }
+
+        return ""
+    }
+
+    private func quotedFilenameQuery(
+        rawText: String,
+        normalized: String
+    ) -> String? {
+        let markers = [
+            "adli",
+            "isimli",
+            "adinda",
+            "isminde",
+            "adi",
+            "ismi"
+        ]
+
+        guard markers.contains(
+            where: {
+                normalized.contains($0)
+            }
+        )
+        else {
+            return nil
+        }
+
+        let quotePairs: [
+            (Character, Character)
+        ] = [
+            ("\"", "\""),
+            ("“", "”"),
+            ("'", "'")
+        ]
+
+        for (open, close) in quotePairs {
+            guard let start =
+                rawText.firstIndex(
+                    of: open
+                )
+            else {
+                continue
+            }
+
+            let afterStart =
+                rawText.index(
+                    after: start
+                )
+
+            guard let end =
+                rawText[
+                    afterStart...
+                ]
+                .firstIndex(
+                    of: close
+                )
+            else {
+                continue
+            }
+
+            let value =
+                String(
+                    rawText[
+                        afterStart..<end
+                    ]
+                )
+                .trimmingCharacters(
+                    in:
+                        .whitespacesAndNewlines
+                )
+
+            if !value.isEmpty {
+                return normalize(value)
+            }
+        }
+
+        return nil
+    }
 
     private func resolveScope(
         tokens: [String],
