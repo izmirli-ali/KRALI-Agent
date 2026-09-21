@@ -46,8 +46,10 @@ struct AgentFileTypeRegistry {
         tokens: [String]
     ) -> Set<String> {
         var result = Set(
-            tokens.filter {
-                knownExtensions.contains($0)
+            tokens.compactMap {
+                canonicalExtension(
+                    for: $0
+                )
             }
         )
 
@@ -81,7 +83,39 @@ struct AgentFileTypeRegistry {
     func isKnownExtension(
         _ token: String
     ) -> Bool {
-        knownExtensions.contains(token)
+        canonicalExtension(
+            for: token
+        ) != nil
+    }
+
+    private func canonicalExtension(
+        for token: String
+    ) -> String? {
+        if knownExtensions.contains(token) {
+            return token
+        }
+
+        let suffixes = Set([
+            "ler", "lar",
+            "leri", "lari",
+            "lerim", "larim",
+            "yi", "i", "u",
+            "de", "da",
+            "den", "dan"
+        ])
+
+        for ext in knownExtensions
+        where token.hasPrefix(ext) {
+            let suffix = String(
+                token.dropFirst(ext.count)
+            )
+
+            if suffixes.contains(suffix) {
+                return ext
+            }
+        }
+
+        return nil
     }
 
     func displayLabel(
