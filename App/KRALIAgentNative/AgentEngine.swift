@@ -5228,23 +5228,6 @@ final class AgentEngine: ObservableObject {
         }
     }
 
-    private func isScreenshotFileName(_ name: String, extension ext: String) -> Bool {
-        let imageExtensions = Set(["png", "jpg", "jpeg", "heic", "tif", "tiff", "webp"])
-        guard imageExtensions.contains(ext) else { return false }
-
-        let n = normalize(name)
-
-        let patterns = [
-            "ekran resmi",
-            "ekran goruntusu",
-            "ekran görüntüsü",
-            "screenshot",
-            "screen shot"
-        ]
-
-        return patterns.contains { n.contains($0) }
-    }
-
     // MARK: - Memory
 
     func addMemory(_ raw: String) {
