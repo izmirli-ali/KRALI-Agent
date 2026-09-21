@@ -682,7 +682,16 @@ struct AgentNaturalLanguageResolver: Sendable {
             "silme",
             "kaydetme",
             "oynatma",
-            "tiklama"
+            "tiklama",
+            "tasima",
+            "tasi ma",
+            "yerini degistirme",
+            "yeniden adlandirma",
+            "acma",
+            "paylasma",
+            "yayinlama",
+            "guncelleme",
+            "uzerine yazma"
         ]
 
         for prohibition in prohibitions {
