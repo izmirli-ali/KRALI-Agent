@@ -57,6 +57,8 @@ struct ApplicationResolutionCandidateTrace:
     let path: String
     let score: Double
     let aliases: [String]
+    let aliasProvenance:
+        [String: [String]]
 }
 
 struct ApplicationResolutionQueryTrace:
@@ -1018,6 +1020,10 @@ actor AgentDesktopControl {
                                             .aliases
                                             .sorted()
                                             .prefix(8)
+                                    ),
+                                aliasProvenance:
+                                    applicationAliasProvenance(
+                                        item.candidate
                                     )
                             )
                         }
@@ -1402,14 +1408,122 @@ actor AgentDesktopControl {
         return merged
     }
 
+    private func applicationAliasProvenance(
+        _ candidate: ApplicationCandidate
+    ) -> [String: [String]] {
+        let url = candidate.url
+        let bundle = Bundle(url: url)
+        let baseName =
+            url.deletingPathExtension()
+                .lastPathComponent
+        let finderDisplayName =
+            fileManager.displayName(
+                atPath: url.path
+            )
+        let localizedResourceName =
+            (
+                try? url.resourceValues(
+                    forKeys: [
+                        .localizedNameKey
+                    ]
+                )
+            )?.localizedName ?? ""
+        let localizedInfoDisplayName =
+            bundle?
+                .localizedInfoDictionary?[
+                    "CFBundleDisplayName"
+                ] as? String ?? ""
+        let localizedInfoBundleName =
+            bundle?
+                .localizedInfoDictionary?[
+                    "CFBundleName"
+                ] as? String ?? ""
+
+        var result: [String: [String]] = [:]
+
+        func store(
+            _ source: String,
+            _ values: [String]
+        ) {
+            let clean =
+                Array(
+                    Set(
+                        values
+                            .map {
+                                $0.trimmingCharacters(
+                                    in: .whitespacesAndNewlines
+                                )
+                            }
+                            .filter {
+                                !$0.isEmpty
+                            }
+                    )
+                )
+                .sorted()
+
+            if !clean.isEmpty {
+                result[source] = clean
+            }
+        }
+
+        store(
+            "path.basename",
+            [baseName]
+        )
+        store(
+            "finder.displayName",
+            [finderDisplayName]
+        )
+        store(
+            "url.localizedName",
+            [localizedResourceName]
+        )
+        store(
+            "bundle.localizedInfoDictionary",
+            [
+                localizedInfoDisplayName,
+                localizedInfoBundleName
+            ]
+        )
+
+        for (
+            source,
+            values
+        ) in localizedBundleAliasProvenance(
+            bundle
+        ) {
+            store(
+                source,
+                values
+            )
+        }
+
+        return result
+    }
+
     private func localizedBundleAliases(
         _ bundle: Bundle?
     ) -> [String] {
+        Array(
+            Set(
+                localizedBundleAliasProvenance(
+                    bundle
+                )
+                .values
+                .flatMap { $0 }
+            )
+        )
+    }
+
+    private func localizedBundleAliasProvenance(
+        _ bundle: Bundle?
+    ) -> [String: [String]] {
         guard let bundle else {
-            return []
+            return [:]
         }
 
-        var aliases: [String] = []
+        var result:
+            [String: [String]] = [:]
         let localizations =
             Array(
                 Set(
@@ -1417,6 +1531,7 @@ actor AgentDesktopControl {
                     bundle.preferredLocalizations
                 )
             )
+            .sorted()
 
         for localization in localizations {
             guard let path =
@@ -1446,22 +1561,37 @@ actor AgentDesktopControl {
                 continue
             }
 
-            if let value =
+            let values = [
                 dictionary[
                     "CFBundleDisplayName"
-                ] as? String {
-                aliases.append(value)
-            }
-
-            if let value =
+                ] as? String ?? "",
                 dictionary[
                     "CFBundleName"
-                ] as? String {
-                aliases.append(value)
+                ] as? String ?? ""
+            ]
+            .map {
+                $0.trimmingCharacters(
+                    in: .whitespacesAndNewlines
+                )
+            }
+            .filter {
+                !$0.isEmpty
+            }
+
+            if !values.isEmpty {
+                result[
+                    "InfoPlist.strings[" +
+                    localization +
+                    "]"
+                ] =
+                    Array(
+                        Set(values)
+                    )
+                    .sorted()
             }
         }
 
-        return aliases
+        return result
     }
 
     private func focusCandidate(
