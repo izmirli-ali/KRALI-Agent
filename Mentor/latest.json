@@ -1,103 +1,95 @@
 {
   "activityTail" : [
     {
-      "date" : "2026-09-22T14:54:25Z",
+      "date" : "2026-09-22T15:41:11Z",
       "text" : "Runtime Capability Gap: desktop.app • Provider available olmasına rağmen runtime step tamamlanamadı veya postcondition doğrulanamadı: desktop.app • capability.contract"
     },
     {
-      "date" : "2026-09-22T14:54:25Z",
+      "date" : "2026-09-22T15:41:11Z",
       "text" : "Uygulama kontrolü başarısız: Uygulama bulunamadı: notlar"
     },
     {
-      "date" : "2026-09-22T14:54:25Z",
+      "date" : "2026-09-22T15:41:11Z",
       "text" : "Debug/Recovery: Bilinmeyen hata • Hata ayıklanıyor • desktop.app"
     },
     {
-      "date" : "2026-09-22T14:54:24Z",
+      "date" : "2026-09-22T15:41:10Z",
       "text" : "Semantic rota: Core → Goal → Context → Plan → Desktop → Verify → Response"
     },
     {
-      "date" : "2026-09-22T14:54:24Z",
+      "date" : "2026-09-22T15:41:10Z",
       "text" : "Task Graph: 0:core.reasoning[reason] → 1:context.local[reason] → 2:desktop.app[act]"
     },
     {
-      "date" : "2026-09-22T14:54:24Z",
+      "date" : "2026-09-22T15:41:10Z",
       "text" : "Problem Solver adayları: Mevcut provider'ı kullan[100] | Mevcut provider'ı kullan[100] | Mevcut provider'ı kullan[100] | Kanıtı reasoning ile dönüştür[75]"
     },
     {
-      "date" : "2026-09-22T14:54:24Z",
+      "date" : "2026-09-22T15:41:10Z",
       "text" : "Problem Solver seçimi: Mevcut provider'ı kullan • score=100 • capabilities=core.reasoning"
     },
     {
-      "date" : "2026-09-22T14:54:24Z",
+      "date" : "2026-09-22T15:41:10Z",
       "text" : "Semantic capability planı: context.local, core.reasoning, desktop.app"
     },
     {
-      "date" : "2026-09-22T14:54:24Z",
+      "date" : "2026-09-22T15:41:10Z",
       "text" : "Semantic planner sağlayıcısı: Local Contract Repair"
     },
     {
-      "date" : "2026-09-22T14:54:24Z",
+      "date" : "2026-09-22T15:41:10Z",
       "text" : "Semantic Mission: Notlar uygulamasını aç ve gerçekten ön planda olduğunu doğrula. Başka hiçbir işlem yapma."
     },
     {
-      "date" : "2026-09-22T14:54:24Z",
+      "date" : "2026-09-22T15:41:10Z",
       "text" : "Outcome Solver: başarı kriterleri mevcut capability'lerle kapsandı • Outcome'u desktop.app ile çöz"
     },
     {
-      "date" : "2026-09-22T14:54:24Z",
+      "date" : "2026-09-22T15:41:10Z",
       "text" : "Seçilen kabiliyetler: Akıl yürütme, Bağlam, Uygulama kontrolü"
     },
     {
-      "date" : "2026-09-22T14:54:24Z",
+      "date" : "2026-09-22T15:41:10Z",
       "text" : "Otomatik rota: Core → Goal → Context → Plan → Desktop → Response"
     },
     {
-      "date" : "2026-09-22T14:54:24Z",
+      "date" : "2026-09-22T15:41:10Z",
       "text" : "Seçilen plan: Uygulama adını çöz, uygulamayı aç veya öne getir ve sonucu doğrula"
     },
     {
-      "date" : "2026-09-22T14:54:24Z",
+      "date" : "2026-09-22T15:41:10Z",
       "text" : "KRALİ Core hedef sözleşmesi: istenen uygulamayı aç veya öne getir"
     },
     {
-      "date" : "2026-09-22T14:54:24Z",
+      "date" : "2026-09-22T15:41:10Z",
       "text" : "Problem Solver başlangıç stratejisi: Mevcut provider'ı kullan • Task Graph bu capability'yi doğrudan seçti ve provider available."
     },
     {
-      "date" : "2026-09-22T14:54:24Z",
+      "date" : "2026-09-22T15:41:10Z",
       "text" : "Bağlam firewall: önceki görev bağlamları bu tura taşınmadı"
     },
     {
-      "date" : "2026-09-22T14:53:56Z",
-      "text" : "Mentor trace GitHub'a senkronlandı"
-    },
-    {
-      "date" : "2026-09-22T14:53:38Z",
-      "text" : "Diagnostics isteğe bağlı yüklendi"
-    },
-    {
-      "date" : "2026-09-22T14:48:22Z",
+      "date" : "2026-09-22T15:40:42Z",
       "text" : "Apple yerel zeka hazır"
     },
     {
-      "date" : "2026-09-22T14:48:22Z",
+      "date" : "2026-09-22T15:40:42Z",
       "text" : "Çalışma klasörü yolu geri yüklendi; indeks gerektiğinde oluşturulacak: Desktop"
     },
     {
-      "date" : "2026-09-22T14:48:22Z",
+      "date" : "2026-09-22T15:40:42Z",
       "text" : "Ağır geliştirici testleri normal açılışta otomatik çalıştırılmıyor"
     },
     {
-      "date" : "2026-09-22T14:48:22Z",
+      "date" : "2026-09-22T15:40:42Z",
       "text" : "Dinamik hedef ve kabiliyet yönlendirme aktif"
     },
     {
-      "date" : "2026-09-22T14:48:22Z",
+      "date" : "2026-09-22T15:40:42Z",
       "text" : "KRALİ Core hazır"
     }
   ],
-  "appVersion" : "0.9.15",
+  "appVersion" : "0.9.16",
   "capabilities" : [
     {
       "available" : true,
@@ -135,7 +127,7 @@
   "contextMemory" : [
 
   ],
-  "createdAt" : "2026-09-22T14:54:25Z",
+  "createdAt" : "2026-09-22T15:41:11Z",
   "executionSteps" : [
     {
       "capabilityID" : "core.reasoning",
@@ -322,8 +314,8 @@
       0,
       1
     ],
-    "createdAt" : "2026-09-22T14:54:24Z",
-    "id" : "CC04DBB7-736A-404A-9825-257DC124D66A",
+    "createdAt" : "2026-09-22T15:41:10Z",
+    "id" : "BB0F4119-F22C-47A2-A498-8ACF91DED07F",
     "objective" : "Notlar uygulamasını aç ve gerçekten ön planda olduğunu doğrula. Başka hiçbir işlem yapma.",
     "priority" : 0,
     "runningStepIndexes" : [
@@ -428,7 +420,7 @@
       "title" : "Uygulama kontrolü"
     }
   ],
-  "traceID" : "6E24018B-8526-40B3-A590-D00D0747BE4A",
+  "traceID" : "8BB51C2C-3FEE-4303-9275-0331DC3B6525",
   "userInput" : "Notlar uygulamasını aç ve gerçekten ön planda olduğunu doğrula. Başka hiçbir işlem yapma.",
   "verificationState" : "attention",
   "verificationSummary" : "Semantic mission içindeki zorunlu action step'lerinden bazıları tamamlanmadı: desktop.app"
