@@ -646,6 +646,8 @@ const systemPrompt = [
   "Do not modify VERSION, Mentor JSON, billing, updater signing, or user credentials.",
   "Prefer a minimal generic fix; never hard-code one app, brand, or exact user prompt.",
   "Inspect relevant code before editing.",
+  "For runtime failures, prefer the defining provider/resolver/error source over orchestration call sites. Search an exact runtime error fragment or the provider/resolver symbol before browsing folders.",
+  "Do not call list_files repeatedly. Once a capability/error clue exists, use search_codebase and then read_file on the defining source.",
   "If you edit code, inspect git_diff and run build_check before finishing.",
   "A capability gap is not resolved by merely explaining or summarizing source code.",
   "If you say you need to inspect, read, search, change, diff, or build something, call the matching tool in the SAME turn instead of describing the next step.",
@@ -707,7 +709,7 @@ function developmentPhase() {
 
 function inspectionWeight(name) {
   if (name === "list_files") {
-    return 0;
+    return 1;
   }
 
   if (
@@ -736,10 +738,6 @@ function toolsForCurrentPhase() {
     }
 
     if (phase === "implementation") {
-      if (mutationToolNames.has(name)) {
-        return true;
-      }
-
       if (!implementationSearchCompleted) {
         return name === "search_codebase";
       }
@@ -748,7 +746,7 @@ function toolsForCurrentPhase() {
         return name === "read_file";
       }
 
-      return false;
+      return mutationToolNames.has(name);
     }
 
     return true;
@@ -858,8 +856,8 @@ function resumeCheckpointContext() {
     sawMutatingTool = false;
     sawGitDiff = false;
     buildCheckPassed = false;
-    inspectionToolCalls = 0;
-    implementationPhaseAnnounced = false;
+    inspectionToolCalls = maxInspectionTools;
+    implementationPhaseAnnounced = true;
 
     stage(
       "local_agent_checkpoint_stale",
