@@ -1159,6 +1159,8 @@ const failedMutationFingerprints = new Set();
 const failedDiffFingerprints = new Set();
 let runtimeBootstrapTarget = null;
 let rootCauseDiagnosis = null;
+let rootCauseNeighborhood = [];
+let rootCausePrimaryID = "";
 
 const inspectionToolNames = new Set([
   "list_files",
@@ -4388,7 +4390,8 @@ function collectDependencyNeighborhood(
 
 async function requestRootCauseDiagnosis(
   primary,
-  neighborhood
+  neighborhood,
+  reconsideration = null
 ) {
   if (
     !architectModel ||
@@ -4451,6 +4454,8 @@ async function requestRootCauseDiagnosis(
       runtimeSourceHints.slice(0, 6),
     primary_symbol:
       primary.id,
+    previous_attempt:
+      reconsideration,
     candidates:
       neighborhood.map(
         (item) => ({
@@ -4525,6 +4530,7 @@ async function requestRootCauseDiagnosis(
                 "Prefer the deepest reusable cause over a caller-level workaround.",
                 "Do not hard-code the concrete app, brand, filename, or exact test phrase.",
                 "Consider at least two plausible strategies before choosing.",
+                "If previous_attempt is supplied, treat its compiler/diff evidence as proof that the prior strategy or implementation may be wrong. Reconsider both target and strategy instead of polishing the same idea.",
                 "Return only JSON matching the schema.",
               ].join("\n"),
             },
@@ -4629,6 +4635,11 @@ async function resolveRuntimeFailureDependency(
       collectDependencyNeighborhood(
         primary
       );
+
+    rootCauseNeighborhood =
+      neighborhood;
+    rootCausePrimaryID =
+      primary.id;
 
     stage(
       "local_agent_dependency_neighborhood_verified",
@@ -4739,6 +4750,170 @@ async function resolveRuntimeFailureDependency(
 
   return false;
 }
+async function reconsiderRootCauseAfterFailedRepairs() {
+  if (
+    rootCauseNeighborhood.length === 0 ||
+    !rootCauseDiagnosis
+  ) {
+    return false;
+  }
+
+  const primary =
+    rootCauseNeighborhood.find(
+      (item) =>
+        item.id ===
+        rootCausePrimaryID
+    ) ||
+    rootCauseNeighborhood[0];
+
+  if (!primary) {
+    return false;
+  }
+
+  const previousTarget =
+    String(
+      rootCauseDiagnosis.target_symbol || ""
+    ) +
+    "@" +
+    String(
+      rootCauseDiagnosis.target_path || ""
+    );
+  const previousStrategy =
+    String(
+      rootCauseDiagnosis.strategy || ""
+    );
+
+  const controllerEvidence =
+    compactControllerEvidence(false);
+
+  const diagnosis =
+    await requestRootCauseDiagnosis(
+      primary,
+      rootCauseNeighborhood,
+      {
+        prior_root_cause:
+          rootCauseDiagnosis,
+        build_failure:
+          controllerEvidence
+            .lastStructuredOutcome,
+        failed_mutation_fingerprints:
+          controllerEvidence
+            .failedMutationFingerprints,
+        failed_diff_fingerprints:
+          controllerEvidence
+            .failedDiffFingerprints,
+      }
+    );
+
+  if (!diagnosis) {
+    return false;
+  }
+
+  const target =
+    diagnosis.target;
+  const nextTarget =
+    target.symbol +
+    "@" +
+    target.path;
+  const nextStrategy =
+    String(
+      diagnosis.strategy || ""
+    );
+
+  if (
+    nextTarget === previousTarget &&
+    nextStrategy === previousStrategy
+  ) {
+    stage(
+      "local_agent_strategy_escalation_inconclusive",
+      gapLabel +
+        " architect aynı başarısız target/stratejiyi tekrar seçti • yeni mutation yapılmayacak"
+    );
+    return false;
+  }
+
+  implementationSearchCompleted =
+    true;
+  implementationReadCompleted =
+    true;
+  implementationTargetPaths = [
+    target.path,
+  ];
+
+  recordCheckpointEvidence(
+    "read_file",
+    target.read_args,
+    target.read_result
+  );
+
+  rootCauseDiagnosis = {
+    root_cause:
+      String(
+        diagnosis.root_cause || ""
+      ),
+    strategy:
+      nextStrategy,
+    confidence:
+      Number(
+        diagnosis.confidence || 0
+      ),
+    target_symbol:
+      target.symbol,
+    target_path:
+      target.path,
+    alternatives_considered:
+      Array.isArray(
+        diagnosis.alternatives_considered
+      )
+        ? diagnosis.alternatives_considered
+        : [],
+  };
+
+  lastFailedReplaceMutation = null;
+  lastAppliedMutationDecision = null;
+  lastMutationSnapshot = null;
+  lastMutationFingerprint = "";
+  lastStructuredOutcome = null;
+  sawMutatingTool = false;
+  sawGitDiff = false;
+  buildCheckPassed = false;
+
+  stage(
+    "local_agent_strategy_escalated",
+    gapLabel +
+      " başarısız repair sonrası architect strateji değiştirdi • target=" +
+      target.symbol +
+      " • path=" +
+      target.path +
+      " • confidence=" +
+      rootCauseDiagnosis.confidence.toFixed(
+        2
+      )
+  );
+
+  messages.push({
+    role: "user",
+    content: [
+      "KRALI Root Cause Architect önceki build/repair başarısızlıklarından sonra stratejiyi yeniden değerlendirdi.",
+      "Yeni target: " +
+        target.symbol +
+        " @ " +
+        target.path,
+      "Yeni root cause: " +
+        rootCauseDiagnosis.root_cause,
+      "Yeni strategy: " +
+        rootCauseDiagnosis.strategy,
+      "Önceki başarısız mutation fingerprint'leri hâlâ yasaktır.",
+    ].join("\n"),
+  });
+
+  persistCheckpoint(
+    "root_cause_strategy_escalated"
+  );
+
+  return true;
+}
+
 async function runRuntimeFailureBootstrapFastPath() {
   if (!bootstrapRuntimeFailureSourceEvidence()) {
     return false;
@@ -4809,7 +4984,7 @@ async function runRuntimeFailureBootstrapFastPath() {
     return false;
   }
 
-  for (let attempt = 1; attempt <= 3; attempt++) {
+  for (let attempt = 1; attempt <= 2; attempt++) {
     const {
       blockers,
     } = currentCandidateBlockers();
@@ -4817,30 +4992,56 @@ async function runRuntimeFailureBootstrapFastPath() {
     const continued =
       await runStructuredContinuation(
         attempt === 1
-          ? "Runtime failure'ın implementation sembolü doğrulandı. Yeni inspection yapmadan minimum generic exact replacement mutation üret."
-          : "Önceki mutation veya build gerçek tool kanıtıyla başarısız oldu. lastStructuredOutcome ve lastVerifiedRead kanıtına göre aynı başarısız değişikliği tekrarlamadan minimum repair mutation üret.",
+          ? "Root Cause Architect gerçek mutation target ve stratejiyi seçti. Exact source üzerinde minimum generic replacement üret."
+          : "İlk mutation build/validation kanıtıyla başarısız oldu. Architect stratejisini koruyarak compiler/diff kanıtına göre yalnız bir kontrollü repair üret.",
         blockers.length > 0
           ? blockers
           : [
-              "doğrulanmış implementation source sonrası minimum mutation gerekli",
+              "architect-selected exact source sonrası minimum mutation gerekli",
             ],
         attempt === 1
           ? "runtime_failure_bootstrap_mutation"
-          : "runtime_failure_bootstrap_repair_" + attempt
+          : "runtime_failure_bootstrap_repair"
       );
 
     if (!continued) {
-      persistCheckpoint(
-        "runtime_failure_bootstrap_controller_unavailable"
-      );
-      return false;
+      break;
     }
 
     if (
       handoffStructuredCandidateIfReady(
         attempt === 1
           ? "runtime_failure_bootstrap"
-          : "runtime_failure_bootstrap_repair_" + attempt
+          : "runtime_failure_bootstrap_repair"
+      )
+    ) {
+      return true;
+    }
+  }
+
+  const escalated =
+    await reconsiderRootCauseAfterFailedRepairs();
+
+  if (escalated) {
+    const {
+      blockers,
+    } = currentCandidateBlockers();
+
+    const continued =
+      await runStructuredContinuation(
+        "Önceki target/strateji başarısız olduğu için Root Cause Architect yeni bir strateji seçti. Yeni exact target üzerinde tek kontrollü mutation üret.",
+        blockers.length > 0
+          ? blockers
+          : [
+              "architect strategy escalation sonrası yeni mutation gerekli",
+            ],
+        "runtime_failure_bootstrap_strategy_escalation"
+      );
+
+    if (
+      continued &&
+      handoffStructuredCandidateIfReady(
+        "runtime_failure_bootstrap_strategy_escalation"
       )
     ) {
       return true;
