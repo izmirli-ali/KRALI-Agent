@@ -1485,6 +1485,26 @@ function summarizeBuildFailure(
   };
 }
 
+function parseCheckpointJSON(
+  value,
+  fallback = null
+) {
+  if (
+    value &&
+    typeof value === "object"
+  ) {
+    return value;
+  }
+
+  try {
+    return JSON.parse(
+      String(value || "")
+    );
+  } catch {
+    return fallback;
+  }
+}
+
 function compactControllerEvidence(
   ultraCompact = false
 ) {
@@ -1506,6 +1526,27 @@ function compactControllerEvidence(
     implementationReadCompleted &&
     !sawMutatingTool;
 
+  const parsedReadArgs =
+    lastRead
+      ? parseCheckpointJSON(
+          lastRead.args,
+          {}
+        )
+      : {};
+
+  const parsedReadResult =
+    lastRead
+      ? parseCheckpointJSON(
+          lastRead.result,
+          {}
+        )
+      : {};
+
+  const verifiedReadContent =
+    String(
+      parsedReadResult?.content || ""
+    );
+
   return {
     implementationSearchCompleted,
     implementationReadCompleted,
@@ -1522,44 +1563,56 @@ function compactControllerEvidence(
     ),
     lastVerifiedRead: lastRead
       ? {
-          args: truncate(
-            lastRead.args || "",
+          path:
+            String(
+              parsedReadResult?.path ||
+              parsedReadArgs?.path ||
+              ""
+            ),
+          start_line:
+            parsedReadResult?.start_line ??
+            parsedReadArgs?.start_line ??
+            null,
+          end_line:
+            parsedReadResult?.end_line ??
+            parsedReadArgs?.end_line ??
+            null,
+          content: truncate(
+            verifiedReadContent,
             ultraCompact
-              ? 300
-              : initialMutation
-                ? 500
-                : 800
-          ),
-          result: truncate(
-            lastRead.result || "",
-            ultraCompact
-              ? 2200
+              ? 1800
               : rollbackRepair
-                ? 6500
+                ? 5200
                 : initialMutation
-                  ? 4200
-                  : 12000
+                  ? 3000
+                  : 9000
           ),
         }
       : null,
     lastStructuredOutcome:
-      lastStructuredOutcome
-        ? {
-            tool: lastStructuredOutcome.tool,
-            args: truncate(
-              JSON.stringify(
-                lastStructuredOutcome.args || {}
+      initialMutation
+        ? null
+        : lastStructuredOutcome
+          ? {
+              tool: lastStructuredOutcome.tool,
+              args: truncate(
+                JSON.stringify(
+                  lastStructuredOutcome.args || {}
+                ),
+                ultraCompact
+                  ? 500
+                  : 1800
               ),
-              1800
-            ),
-            result: truncate(
-              JSON.stringify(
-                lastStructuredOutcome.result || {}
+              result: truncate(
+                JSON.stringify(
+                  lastStructuredOutcome.result || {}
+                ),
+                ultraCompact
+                  ? 1200
+                  : 4000
               ),
-              4000
-            ),
-          }
-        : null,
+            }
+          : null,
   };
 }
 
