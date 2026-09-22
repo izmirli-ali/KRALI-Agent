@@ -208,3 +208,12 @@ Target runtime:
 - `checking` ve root-cause pipeline'ın ara stage'leri aktif Developer Agent durumu olarak tanınıyor.
 - Güncel app sürümünde fresh/active bir Developer Agent run'ı varsa yeni Learning Queue worker veya manuel Developer Agent run'ı başlatılmıyor; yeni job sırada kalıyor.
 - VERSION 0.10.10 / build 183.
+
+
+## v0.10.11 progress
+
+- v0.10.10 updater build failure fixed: `startNextLearningJobIfNeeded()` and `runDeveloperAgent()` referenced init-local `launchAppVersion`, which was out of scope during Swift compilation.
+- Added class-level `currentAppVersionString` computed property and routed both active-run guards through it.
+- Duplicate `AgentDeveloperBridge.estimatedRemainingRange` switch literals cleaned up to remove compiler warnings from repeated local-agent states.
+- No rollback of v0.10.10 immutable Learning evidence binding or per-run Developer Agent isolation.
+- VERSION 0.10.11 / build 184.
