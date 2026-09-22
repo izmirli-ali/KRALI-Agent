@@ -1,1 +1,1 @@
-local_agent_running|Uygulama kontrolü (desktop.app) yerel model çalışıyor • adım 2/10|krali-dev-agent/20260922-214839|/Users/medusa/Developer/KRALI-Agent-Dev-20260922-214839|@meta|app=0.10.3|at=1790103095|run=20260922-214839
+local_agent_running|Candidate build repair yerel model çalışıyor • adım 1/8|krali-dev-agent/20260922-214839|/Users/medusa/Developer/KRALI-Agent-Dev-20260922-214839|@meta|app=0.10.3|at=1790103434|run=20260922-214839-repair-2
