@@ -1038,6 +1038,25 @@ function candidateIdentity() {
     .digest("hex");
 }
 
+function currentCandidateDiff(limit = 12000) {
+  const status = candidateStatus();
+  if (!status?.ok || !status.dirty) {
+    return "";
+  }
+
+  const diff = runGit([
+    "diff",
+    "--no-ext-diff",
+    "--",
+  ]);
+
+  if (diff.status !== 0) {
+    return "";
+  }
+
+  return truncate(diff.stdout, limit);
+}
+
 
 function recordToolEvidence(name, result, args = {}) {
   if (result?.ok && inspectionToolNames.has(name)) {
@@ -1163,6 +1182,7 @@ function compactControllerEvidence() {
     implementationReadCompleted,
     implementationTargetPaths:
       implementationTargetPaths.slice(0, 8),
+    candidateDiff: currentCandidateDiff(12000),
     lastVerifiedRead: lastRead
       ? {
           args: truncate(
@@ -1402,7 +1422,9 @@ async function requestStructuredToolDecision(
               "During implementation, obey the supplied tool contracts exactly. If only mutation tools are supplied, choose a minimal mutation tool now; do not answer with prose.",
               "read_file evidence lines may be prefixed like '  123 | '; those prefixes are display metadata, not source text. Never copy line-number prefixes into old_text, new_text, file content, or patches.",
               "If lastStructuredOutcome contains a failed real tool result, repair that exact failure with the next minimal mutation instead of repeating the same arguments.",
-              "During verification, prefer git_diff and build_check; mutate again only if evidence shows a fix is needed.",
+              "candidateDiff is the current real worktree diff. Use it together with source evidence to repair only the defect introduced by the candidate.",
+              "If lastStructuredOutcome is a failed build_check, compiler output is authoritative: choose a minimum mutation tool to repair the current candidate before running build_check again.",
+              "During verification, prefer git_diff and build_check when no compiler failure is already known; mutate when build evidence shows a fix is needed.",
               "Never request a tool that is absent from the supplied tool contracts.",
             ].join("\n"),
           },
@@ -1721,12 +1743,99 @@ function handoffStructuredCandidateIfReady(
     return false;
   }
 
+  if (!sawGitDiff) {
+    stage(
+      "local_agent_structured_tool",
+      gapLabel +
+        " candidate preflight diff doğrulaması çalışıyor • trigger=" +
+        trigger
+    );
+
+    const diffResult = executeTool(
+      "git_diff",
+      {}
+    );
+
+    recordToolEvidence(
+      "git_diff",
+      diffResult,
+      {}
+    );
+
+    lastStructuredOutcome = {
+      tool: "git_diff",
+      args: {},
+      result: diffResult,
+    };
+
+    if (!diffResult?.ok) {
+      persistCheckpoint(
+        "structured_candidate_diff_failed:" + trigger
+      );
+      return false;
+    }
+  }
+
+  if (!buildCheckPassed) {
+    stage(
+      "local_agent_structured_tool",
+      gapLabel +
+        " candidate preflight build_check çalışıyor • trigger=" +
+        trigger
+    );
+
+    const buildResult = executeTool(
+      "build_check",
+      {}
+    );
+
+    recordToolEvidence(
+      "build_check",
+      buildResult,
+      {}
+    );
+
+    lastStructuredOutcome = {
+      tool: "build_check",
+      args: {},
+      result: buildResult,
+    };
+
+    messages.push({
+      role: "user",
+      content: [
+        "KRALI structured candidate preflight gerçek build_check çalıştırdı.",
+        "Result: " +
+          truncate(
+            JSON.stringify(buildResult),
+            16000
+          ),
+        buildResult?.ok
+          ? "Build PASS. Candidate handoff edilebilir."
+          : "Build FAIL. candidateDiff ve compiler çıktısını birlikte kullan; yeni inspection yapmadan minimum repair mutation uygula. Aynı build_check'i source değiştirmeden tekrar etme.",
+      ].join("\n"),
+    });
+
+    if (!buildResult?.ok) {
+      stage(
+        "local_agent_structured_tool",
+        gapLabel +
+          " candidate preflight build başarısız • sıcak controller ile repair gerekli • trigger=" +
+          trigger
+      );
+      persistCheckpoint(
+        "structured_candidate_preflight_failed:" + trigger
+      );
+      return false;
+    }
+  }
+
   stage(
     "local_agent_candidate_handoff",
     gapLabel +
-      " structured controller gerçek candidate üretti • trigger=" +
+      " structured controller candidate build PASS • trigger=" +
       trigger +
-      " • mevcut recovery/build pipeline'ına devrediliyor"
+      " • recovery pipeline'ına doğrulanmış candidate devrediliyor"
   );
 
   persistCheckpoint(
@@ -1734,7 +1843,7 @@ function handoffStructuredCandidateIfReady(
   );
 
   fail(
-    "Structured controller candidate üretti; build ve recovery pipeline'ına devrediliyor.",
+    "Structured controller candidate üretti ve preflight build geçti; recovery pipeline'ına devrediliyor.",
     28,
     "local_agent_candidate_handoff"
   );
@@ -1769,7 +1878,7 @@ async function runVerifiedResumeFastPath() {
       await runStructuredContinuation(
         attempt === 1
           ? "Doğrulanmış implementation checkpoint'inden devam ediliyor. Hedef kaynak zaten okundu; yeni inspection yapmadan minimum generic mutation uygula."
-          : "Önceki structured mutation gerçek tool sonucunda başarısız oldu. lastStructuredOutcome hata kanıtını kullanarak aynı hedefte minimum düzeltilmiş mutation uygula.",
+          : "Önceki structured candidate preflight/build doğrulamasında başarısız oldu. lastStructuredOutcome compiler kanıtını ve candidateDiff'i kullan; yeni inspection veya tekrar build yapmadan önce mevcut candidate'ı minimum mutation ile düzelt.",
         blockers.length > 0
           ? blockers
           : [
@@ -1777,7 +1886,7 @@ async function runVerifiedResumeFastPath() {
             ],
         attempt === 1
           ? "verified_resume"
-          : "verified_resume_repair"
+          : "verified_resume_build_repair"
       );
 
     if (!continued) {
@@ -1795,7 +1904,7 @@ async function runVerifiedResumeFastPath() {
       handoffStructuredCandidateIfReady(
         attempt === 1
           ? "verified_resume"
-          : "verified_resume_repair"
+          : "verified_resume_build_repair"
       )
     ) {
       return true;
