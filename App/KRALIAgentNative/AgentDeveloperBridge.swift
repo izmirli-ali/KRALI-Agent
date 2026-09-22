@@ -84,6 +84,7 @@ struct DeveloperAgentStatus: Hashable {
             "local_agent_tool",
             "local_agent_structured_tool",
             "local_agent_structured_mutation",
+            "local_agent_structured_failure",
             "local_agent_controller_preparing",
             "local_agent_timeout_controller",
             "local_agent_controller_rejected",
@@ -185,6 +186,8 @@ struct DeveloperAgentStatus: Hashable {
             return "Controller araç devamı uyguluyor"
         case "local_agent_structured_mutation":
             return "Controller kaynak kod değişikliği uyguluyor"
+        case "local_agent_structured_failure":
+            return "Controller mutation hatasını analiz ediyor"
         case "local_agent_controller_preparing":
             return "Controller için model ve kanıt hazırlanıyor"
         case "local_agent_timeout_controller":
