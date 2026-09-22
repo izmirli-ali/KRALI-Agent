@@ -100,6 +100,7 @@ struct DeveloperAgentStatus: Hashable {
             "local_agent_failed_diff_recorded",
             "local_agent_repeated_failed_mutation_rejected",
             "local_agent_repeated_failed_diff_rejected",
+            "local_agent_strategy_escalated",
             "skill_extracting",
             "skill_candidate_ready",
             "local_agent_candidate_handoff",
@@ -136,6 +137,7 @@ struct DeveloperAgentStatus: Hashable {
             "local_ai_upgrade_required",
             "local_tool_probe_failed",
             "local_agent_root_cause_inconclusive",
+            "local_agent_strategy_escalation_inconclusive",
             "local_agent_resumed",
             "local_storage_low",
             "local_agent_failed",
@@ -228,6 +230,10 @@ struct DeveloperAgentStatus: Hashable {
         case "local_agent_repeated_failed_mutation_rejected",
              "local_agent_repeated_failed_diff_rejected":
             return "Tekrarlanan başarısız strateji engellendi"
+        case "local_agent_strategy_escalated":
+            return "Architect yeni stratejiye geçti"
+        case "local_agent_strategy_escalation_inconclusive":
+            return "Alternatif strateji bulunamadı"
         case "skill_extracting":
             return "Genellenebilir skill çıkarılıyor"
         case "skill_candidate_ready":
