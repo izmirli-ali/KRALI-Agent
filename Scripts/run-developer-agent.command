@@ -1365,6 +1365,7 @@ if [ "$PROVIDER" = "ollama" ] &&
     KRALI_RUN_ID="$STAMP" \
     KRALI_CHECKPOINT_FILE="$CHECKPOINT_FILE" \
     KRALI_RUNTIME_SOURCE_HINTS="$RUNTIME_SOURCE_HINTS" \
+    KRALI_REQUIRE_ROOT_CAUSE_GATE="$([ "$GAP_MODE" = "gap" ] && echo 1 || echo 0)" \
     KRALI_REQUIRE_CHANGE="$([ "$GAP_MODE" = "gap" ] && echo 1 || echo 0)" \
     KRALI_LOCAL_AGENT_MAX_COMPLETION_REJECTIONS="$([ "$LEARNING_PATH" = "primitivePatch" ] && echo 2 || echo 3)" \
     KRALI_LOCAL_AGENT_MAX_STRUCTURED_ACTIONS="$([ "$LEARNING_PATH" = "primitivePatch" ] && echo 6 || echo 8)" \
