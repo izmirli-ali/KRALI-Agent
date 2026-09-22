@@ -1560,7 +1560,8 @@ function compactControllerEvidence(
   const initialMutation =
     developmentPhase() === "implementation" &&
     implementationReadCompleted &&
-    !sawMutatingTool;
+    !sawMutatingTool &&
+    !rollbackRepair;
 
   const parsedReadArgs =
     lastRead
@@ -1640,25 +1641,52 @@ function compactControllerEvidence(
       initialMutation
         ? null
         : lastStructuredOutcome
-          ? {
-              tool: lastStructuredOutcome.tool,
-              args: truncate(
-                JSON.stringify(
-                  lastStructuredOutcome.args || {}
+          ? rollbackRepair
+            ? {
+                tool: "build_check",
+                args: {},
+                result: {
+                  ok: false,
+                  compiler_errors:
+                    Array.isArray(
+                      lastStructuredOutcome.result?.compiler_errors
+                    )
+                      ? lastStructuredOutcome.result.compiler_errors.slice(-20)
+                      : [],
+                  output_tail: truncate(
+                    lastStructuredOutcome.result?.output_tail || "",
+                    ultraCompact
+                      ? 1800
+                      : 3200
+                  ),
+                  failed_candidate_diff: truncate(
+                    lastStructuredOutcome.result?.failed_candidate_diff || "",
+                    ultraCompact
+                      ? 2200
+                      : 4200
+                  ),
+                  mutation_rolled_back: true,
+                },
+              }
+            : {
+                tool: lastStructuredOutcome.tool,
+                args: truncate(
+                  JSON.stringify(
+                    lastStructuredOutcome.args || {}
+                  ),
+                  ultraCompact
+                    ? 500
+                    : 1800
                 ),
-                ultraCompact
-                  ? 500
-                  : 1800
-              ),
-              result: truncate(
-                JSON.stringify(
-                  lastStructuredOutcome.result || {}
+                result: truncate(
+                  JSON.stringify(
+                    lastStructuredOutcome.result || {}
+                  ),
+                  ultraCompact
+                    ? 1200
+                    : 4000
                 ),
-                ultraCompact
-                  ? 1200
-                  : 4000
-              ),
-            }
+              }
           : null,
   };
 }
@@ -1811,15 +1839,8 @@ async function requestStructuredToolDecision(
     implementationReadCompleted &&
     !sawMutatingTool;
 
-  if (rollbackRepair) {
-    const patchContract = toolContracts.find(
-      (tool) => tool.name === "apply_patch"
-    );
-
-    if (patchContract) {
-      toolContracts = [patchContract];
-    }
-  } else if (
+  if (
+    rollbackRepair ||
     initialMutation ||
     exactReplaceFailure
   ) {
@@ -1958,7 +1979,7 @@ async function requestStructuredToolDecision(
               "If lastStructuredOutcome contains a failed real tool result, repair that exact failure with the next minimal mutation instead of repeating the same arguments.",
               "If replace_text failed because old_text was not found or was ambiguous, stay with replace_text when that is the supplied tool: choose a longer exact unique block from lastVerifiedRead.content.",
               "candidateDiff is the current real worktree diff. Use it together with source evidence to repair only the defect introduced by the candidate.",
-              "If lastStructuredOutcome is a failed build_check, compiler_errors, output_tail, and failed_candidate_diff are authoritative. If mutation_rolled_back is true, the bad mutation is no longer present: use the single supplied apply_patch tool to generate an alternative minimum patch against lastVerifiedRead; never reapply the failed diff.",
+              "If lastStructuredOutcome is a failed build_check, compiler_errors, output_tail, and failed_candidate_diff are authoritative. If mutation_rolled_back is true, the bad mutation is no longer present. Use the supplied replace_text tool against clean lastVerifiedRead source to produce an alternative unique multi-line repair. Do not reapply the failed diff.",
               "During verification, prefer git_diff and build_check when no compiler failure is already known; mutate when build evidence shows a fix is needed.",
               "Never request a tool that is absent from the supplied tool contracts.",
             ].join("\n"),
@@ -2598,6 +2619,18 @@ function handoffStructuredCandidateIfReady(
         gapLabel +
           " candidate preflight build başarısız • sıcak controller ile repair gerekli • rollback=" +
           String(mutationRolledBack) +
+          " • compilerErrors=" +
+          truncate(
+            JSON.stringify(
+              buildEvidence.compiler_errors || []
+            ),
+            1400
+          ) +
+          " • failedDiff=" +
+          truncate(
+            buildEvidence.failed_candidate_diff || "",
+            1800
+          ) +
           " • trigger=" +
           trigger
       );
