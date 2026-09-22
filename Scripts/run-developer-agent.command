@@ -970,20 +970,26 @@ const immutableSnapshots =
 const hasImmutableEvidence =
   immutableSnapshots.length > 0;
 
+const primarySnapshot =
+  hasImmutableEvidence
+    ? immutableSnapshots[0]
+    : null;
+
 const runtimeEvidence =
   hasImmutableEvidence
-    ? immutableSnapshots
-        .flatMap((snapshot) =>
-          Array.isArray(
-            snapshot &&
-            snapshot.runtimeEvidence
-          )
-            ? snapshot.runtimeEvidence
-            : []
+    ? (
+        Array.isArray(
+          primarySnapshot &&
+          primarySnapshot.runtimeEvidence
         )
-        .map((line) => String(line || ""))
-        .filter(Boolean)
-        .slice(-12)
+          ? primarySnapshot.runtimeEvidence
+              .map((line) =>
+                String(line || "")
+              )
+              .filter(Boolean)
+              .slice(0, 12)
+          : []
+      )
     : (
         currentMentor &&
         Array.isArray(currentMentor.activityTail) &&
@@ -1008,9 +1014,9 @@ let boundResolutionTrace = null;
 
 if (hasImmutableEvidence) {
   for (
-    let index = immutableSnapshots.length - 1;
-    index >= 0;
-    index -= 1
+    let index = 0;
+    index < immutableSnapshots.length;
+    index += 1
   ) {
     const raw = String(
       immutableSnapshots[index] &&
@@ -1359,17 +1365,17 @@ const immutableSnapshots =
         .filter(Boolean)
     : [];
 
-const lines =
+const primarySnapshot =
   immutableSnapshots.length > 0
-    ? immutableSnapshots
-        .flatMap((snapshot) =>
-          Array.isArray(
-            snapshot &&
-            snapshot.runtimeEvidence
-          )
-            ? snapshot.runtimeEvidence
-            : []
-        )
+    ? immutableSnapshots[0]
+    : null;
+
+const lines =
+  primarySnapshot &&
+  Array.isArray(
+    primarySnapshot.runtimeEvidence
+  )
+    ? primarySnapshot.runtimeEvidence
         .map((line) =>
           String(line || "")
         )
