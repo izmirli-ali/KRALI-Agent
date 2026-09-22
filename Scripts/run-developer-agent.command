@@ -809,14 +809,22 @@ if [ -n "$LEARNING_JOB_FILE" ] &&
     GAP_SOURCE="$LEARNING_JOB_FILE"
 fi
 
-GAP_MODE="$("$NODE_BIN" - "$GAP_SOURCE" "$PROMPT_FILE" <<'NODE'
+GAP_MODE="$("$NODE_BIN" - "$GAP_SOURCE" "$PROMPT_FILE" "$LOCAL_MENTOR_DIR/latest.json" <<'NODE'
 const fs = require("fs");
 
 const source = process.argv[2];
 const target = process.argv[3];
+const mentorPath = process.argv[4];
 
 let payload = null;
 try { payload = JSON.parse(fs.readFileSync(source, "utf8")); } catch {}
+
+let currentMentor = null;
+try {
+  currentMentor = JSON.parse(
+    fs.readFileSync(mentorPath, "utf8")
+  );
+} catch {}
 
 const gap =
   payload && payload.gap
@@ -846,6 +854,25 @@ const sourceGoals =
 
 const evidenceCount =
   Number(payload && payload.evidenceCount || sourceGoals.length || 1);
+
+const runtimeEvidence =
+  currentMentor &&
+  Array.isArray(currentMentor.activityTail) &&
+  Array.isArray(currentMentor.capabilityGaps) &&
+  currentMentor.capabilityGaps.some(
+    (item) =>
+      String(item && item.capabilityID || "") ===
+      String(gap.capabilityID || "")
+  )
+    ? currentMentor.activityTail
+        .map((item) => String(item && item.text || ""))
+        .filter((line) =>
+          /başarısız|bulunamadı|runtime capability gap|postcondition|failed|error/i.test(
+            line
+          )
+        )
+        .slice(0, 8)
+    : [];
 
 const learningPath =
   String(gap.learningPath || "integration");
@@ -887,13 +914,19 @@ const prompt = [
   "",
   "Developer Brief:", String(gap.developerBrief || ""),
   "",
+  "Güncel runtime kanıtı:",
+  runtimeEvidence.length > 0
+    ? runtimeEvidence.join("\n")
+    : "Ek runtime hata satırı yok.",
+  "",
   "Kurallar:",
   learningPathRule,
   "- KRALI_ARCHITECTURE.md içindeki Senaryo bağımsızlığı ilkesini değişmez sözleşme kabul et.",
   "- Tek kullanıcı örneğini geçirmek için uygulama/site adına özel branch veya hard-code ekleme; önce semantic parametreleme + mevcut generic primitive bileşimini dene.",
   "- Training/Gym diagnostic içindeki [intent], [scope], [entity], [rank], [output], [safety], [capability] etiketlerini failure class olarak kullan; düzeltmeyi ilgili semantic katmanda yap.",
   "- Metamorphic/Gym ailesinden bir varyasyon fail ise yalnız o promptu geçirmek yeterli değildir; aynı semantic contract ailesini geçirecek generic düzeltme üret.",
-  "- Önce rg/grep ile bu capability\'nin registry, resolver, executor ve verifier bağlantılarını bul.",
+  "- Runtime hata metni varsa önce o hata metninin tanımlandığı source'u rg/grep ile bul; orchestrator çağrı noktası yerine provider/resolver/error tanımını önceliklendir.",
+  "- Capability kimliğini arıyorsan registry, resolver, executor ve verifier bağlantılarını hedefli aramayla bul; klasörleri tekrar tekrar listeleme.",
   "- Tek uygulama/marka adına özel hard-code yazma; generic provider/strategy tasarla.",
   "- Ücretli API veya yeni abonelik bağımlılığı ekleme.",
   "- Dış dünyaya commit eden aksiyonlarda kullanıcı onayı korunmalı.",
