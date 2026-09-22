@@ -181,6 +181,16 @@ Varsayılan provider/model `cline + nvidia/nemotron-3.5-lightning` olarak sabitl
 
 **v0.7.23 Developer Agent fast diagnostic gate + live progress:** Developer Agent artık her tıklamada doğrudan modele gitmez. Yerel `training-latest.json`, `live-eval-latest.json` ve `latest.json` raporları mevcut `VERSION` ile karşılaştırılır. Training Lab ve Live Research Eval güncel sürümde tamamen yeşilse ve güncel mentor trace ek müdahale gerektirmiyorsa Cline çağrısı atlanır; bu hem ChatGPT kullanım limitini hem bekleme süresini korur. Gerçek bir failure varsa Cline çalışır; UI yaklaşık 700 ms aralıkla status dosyasını okuyarak hazırlık, diagnostic kontrol, model çalışması ve build doğrulama aşamalarını canlı gösterir. Cline turu `medium` thinking ve 900 saniye timeout ile sınırlandırılır.
 
+### 0.10.1 — Compact hypothesis verification
+
+0.10.0 mimarisi korunur; yalnız Architect'in ağır kalan diagnosis/mutation hattı daraltılır.
+
+- Root-cause diagnosis en fazla 5 source adayı ve aday başına yaklaşık 2.2K exact source görür.
+- Architect seçtiği target üzerinde doğrudan patch'e geçmez; önce küçük bir read-only hypothesis verifier target'ın gerçekten failing behavior'ı uygulayıp uygulamadığını kontrol eder.
+- Yalnız `direct_cause` olarak doğrulanan target mutation aşamasına geçebilir. Upstream input extraction, downstream effect veya belirsiz target'lar patchlenmez.
+- Root-cause ve exact mutation rolleri ayrı model slotlarıdır: `KRALI_ROOT_CAUSE_MODEL` ve `KRALI_ARCHITECT_MUTATION_MODEL`. Varsayılan olarak ikisi de Architect modelini kullanır. Böylece ileride yalnız yavaş kalan role alternatif model takılabilir.
+- Exact mutation payload ve context budget küçültülür; rollback/fingerprint/build/skill lifecycle sözleşmeleri değişmez.
+
 ### 0.10.0 — Architect-led self-repair + skill lifecycle
 
 Developer/learning hattı artık tek modelin ilk bulduğu sembolü doğrudan patchlediği mikro-fix döngüsü değildir. Runtime failure çözümü şu sözleşmeye geçer:
