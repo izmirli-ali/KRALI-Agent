@@ -1212,6 +1212,45 @@ async function releasePrimaryModelForController() {
   );
 
   try {
+    const psResponse = await fetch(
+      baseUrl + "/api/ps",
+      {
+        method: "GET",
+        signal: controller.signal,
+      }
+    );
+
+    if (psResponse.ok) {
+      const psPayload = await psResponse.json();
+      const loadedModels =
+        Array.isArray(psPayload?.models)
+          ? psPayload.models
+          : [];
+      const primaryLoaded =
+        loadedModels.some((item) => {
+          const loadedName = String(
+            item?.name || item?.model || ""
+          );
+          return (
+            loadedName === model ||
+            loadedName.startsWith(
+              model + ":"
+            )
+          );
+        });
+
+      if (!primaryLoaded) {
+        clearTimeout(timer);
+        stage(
+          "local_agent_controller_preparing",
+          gapLabel +
+            " ana model bellekte değil; sıcak controller korunuyor • controller=" +
+            controllerModel
+        );
+        return true;
+      }
+    }
+
     const response = await fetch(
       baseUrl + "/api/chat",
       {
