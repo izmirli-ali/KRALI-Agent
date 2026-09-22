@@ -44,6 +44,9 @@ const runtimeSourceHints = (() => {
 })();
 const requireChange =
   (process.env.KRALI_REQUIRE_CHANGE || "0") === "1";
+const requireRootCauseGate =
+  (process.env.KRALI_REQUIRE_ROOT_CAUSE_GATE || "0") === "1" &&
+  runtimeSourceHints.length > 0;
 const maxCompletionRejections = Number(
   process.env.KRALI_LOCAL_AGENT_MAX_COMPLETION_REJECTIONS || "3"
 );
@@ -1167,6 +1170,8 @@ let runtimeBootstrapTarget = null;
 let rootCauseDiagnosis = null;
 let rootCauseNeighborhood = [];
 let rootCausePrimaryID = "";
+let rootCauseMutationTargetVerified =
+  !requireRootCauseGate;
 let strategyEscalationCount = 0;
 
 const inspectionToolNames = new Set([
@@ -1235,6 +1240,13 @@ function toolsForCurrentPhase() {
         return name === "read_file";
       }
 
+      if (
+        requireRootCauseGate &&
+        !rootCauseMutationTargetVerified
+      ) {
+        return false;
+      }
+
       return mutationToolNames.has(name);
     }
 
@@ -1254,7 +1266,7 @@ function persistCheckpoint(reason = "progress") {
 
   const status = candidateStatus();
   const payload = {
-    version: 5,
+    version: 6,
     baseHead: currentBaseHead(),
     gapLabel,
     reason,
@@ -1263,6 +1275,7 @@ function persistCheckpoint(reason = "progress") {
     controllerModel,
     rootCauseDiagnosis,
     rootCausePrimaryID,
+    rootCauseMutationTargetVerified,
     rootCauseNeighborhood:
       rootCauseNeighborhood
         .slice(0, 8)
@@ -1317,7 +1330,7 @@ function loadCheckpoint() {
 
     if (
       !payload ||
-      ![1, 2, 3, 4, 5].includes(Number(payload.version || 0))
+      ![1, 2, 3, 4, 5, 6].includes(Number(payload.version || 0))
     ) {
       return null;
     }
@@ -1391,6 +1404,8 @@ function resumeCheckpointContext() {
     implementationSearchCompleted = false;
     implementationReadCompleted = false;
     implementationTargetPaths = [];
+    rootCauseMutationTargetVerified =
+      !requireRootCauseGate;
     sawMutatingTool = false;
     sawGitDiff = false;
     buildCheckPassed = false;
@@ -1505,6 +1520,15 @@ function resumeCheckpointContext() {
         })
         .filter(Boolean)
         .slice(0, 8);
+  }
+
+  if (
+    Number(checkpoint.version || 0) >= 6
+  ) {
+    rootCauseMutationTargetVerified =
+      requireRootCauseGate
+        ? checkpoint.rootCauseMutationTargetVerified === true
+        : true;
   }
 
   if (
@@ -2038,15 +2062,27 @@ function recordToolEvidence(name, result, args = {}) {
           implementationTargetPaths.includes(readPath)
         )
       ) {
-        implementationReadCompleted = true;
-        implementationTargetPaths = [
-          normalizeRepoRelativePath(readPath)
-        ];
-        stage(
-          "local_agent_target_verified",
-          gapLabel +
-            " hedef kaynak bölgesi doğrulandı • mutation zorunlu"
-        );
+        if (
+          requireRootCauseGate &&
+          !rootCauseMutationTargetVerified
+        ) {
+          stage(
+            "local_agent_diagnostic_target_read",
+            gapLabel +
+              " diagnostic source okundu • root-cause verifier PASS olmadan mutation yetkisi verilmeyecek • path=" +
+              normalizeRepoRelativePath(readPath)
+          );
+        } else {
+          implementationReadCompleted = true;
+          implementationTargetPaths = [
+            normalizeRepoRelativePath(readPath)
+          ];
+          stage(
+            "local_agent_target_verified",
+            gapLabel +
+              " mutation target source doğrulandı • mutation izinli"
+          );
+        }
       }
     }
 
@@ -3410,6 +3446,22 @@ async function runStructuredContinuation(
   const phase = developmentPhase();
   const isMutation =
     mutationToolNames.has(decision.name);
+
+  if (
+    isMutation &&
+    requireRootCauseGate &&
+    !rootCauseMutationTargetVerified
+  ) {
+    stage(
+      "local_agent_root_cause_gate_blocked",
+      gapLabel +
+        " mutation reddedildi • diagnostic source mutation target değildir • ranking+verifier PASS gerekli"
+    );
+    persistCheckpoint(
+      "root_cause_gate_blocked_mutation"
+    );
+    return false;
+  }
 
   stage(
     isMutation
@@ -5165,14 +5217,14 @@ async function requestRootCauseRanking(
     runtime_source_hints:
       runtimeSourceHints.slice(0, 4),
     candidates:
-      candidates.map(
+      candidates.slice(0, 8).map(
         (item) => ({
           id: item.id,
           symbol: item.symbol,
           path: item.path,
           source: clipExactSource(
             item.source,
-            1200
+            850
           ),
         })
       ),
@@ -5219,8 +5271,8 @@ async function requestRootCauseRanking(
             keep_alive: "10m",
             options: {
               temperature: 0.05,
-              num_ctx: 8192,
-              num_predict: 520,
+              num_ctx: 6144,
+              num_predict: 420,
             },
             messages: [
               {
@@ -5413,6 +5465,8 @@ async function resolveRuntimeFailureDependency(
       continue;
     }
 
+    rootCauseMutationTargetVerified =
+      true;
     implementationSearchCompleted =
       true;
     implementationReadCompleted =
@@ -5579,6 +5633,22 @@ async function reconsiderRootCauseAfterFailedRepairs() {
 
   const target =
     diagnosis.target;
+
+  const escalatedTargetVerified =
+    await verifyRootCauseTarget(
+      primary,
+      diagnosis
+    );
+
+  if (!escalatedTargetVerified) {
+    stage(
+      "local_agent_strategy_escalation_inconclusive",
+      gapLabel +
+        " yeni architect target verifier tarafından doğrulanmadı • mutation yapılmayacak"
+    );
+    return false;
+  }
+
   const nextTarget =
     target.symbol +
     "@" +
@@ -5600,6 +5670,8 @@ async function reconsiderRootCauseAfterFailedRepairs() {
     return false;
   }
 
+  rootCauseMutationTargetVerified =
+    true;
   implementationSearchCompleted =
     true;
   implementationReadCompleted =
@@ -5746,11 +5818,24 @@ async function runRuntimeFailureBootstrapFastPath() {
 
   if (
     !dependencyResolved ||
-    !implementationReadCompleted
+    !implementationReadCompleted ||
+    (
+      requireRootCauseGate &&
+      !rootCauseMutationTargetVerified
+    )
   ) {
     persistCheckpoint(
       "runtime_failure_dependency_resolution_incomplete"
     );
+
+    if (requireRootCauseGate) {
+      fail(
+        "Root-cause ranking/verifier mutation target doğrulamadı; güvenli olarak candidate mutation başlatılmadı.",
+        29,
+        "local_agent_root_cause_gate_blocked"
+      );
+    }
+
     return false;
   }
 
