@@ -1294,6 +1294,42 @@ function rejectStructuredDecision(reason) {
   return null;
 }
 
+function summarizeBuildFailure(
+  buildResult,
+  failedCandidateDiff,
+  mutationRolledBack
+) {
+  const rawOutput = String(
+    buildResult?.output || ""
+  );
+
+  const compilerLines = rawOutput
+    .split("\n")
+    .filter((line) =>
+      /error:|fatal error:|SwiftCompile.*failed/i.test(
+        line
+      )
+    )
+    .slice(-30);
+
+  return {
+    ok: false,
+    exit_code:
+      buildResult?.exit_code ?? 1,
+    compiler_errors: compilerLines,
+    output_tail: truncate(
+      rawOutput.slice(-7000),
+      7000
+    ),
+    failed_candidate_diff: truncate(
+      failedCandidateDiff || "",
+      7000
+    ),
+    mutation_rolled_back:
+      mutationRolledBack === true,
+  };
+}
+
 function compactControllerEvidence() {
   const lastRead = [...checkpointEvidence]
     .reverse()
@@ -1303,21 +1339,29 @@ function compactControllerEvidence() {
         item.tool === "read_file"
     );
 
+  const rollbackRepair =
+    lastStructuredOutcome?.tool === "build_check" &&
+    lastStructuredOutcome?.result?.ok === false &&
+    lastStructuredOutcome?.result?.mutation_rolled_back === true;
+
   return {
     implementationSearchCompleted,
     implementationReadCompleted,
     implementationTargetPaths:
       implementationTargetPaths.slice(0, 8),
-    candidateDiff: currentCandidateDiff(12000),
+    rollbackRepair,
+    candidateDiff: currentCandidateDiff(
+      rollbackRepair ? 4000 : 12000
+    ),
     lastVerifiedRead: lastRead
       ? {
           args: truncate(
             lastRead.args || "",
-            1200
+            1000
           ),
           result: truncate(
             lastRead.result || "",
-            12000
+            rollbackRepair ? 6500 : 12000
           ),
         }
       : null,
@@ -1478,7 +1522,12 @@ async function requestStructuredToolDecision(
       previousStructuredError.includes("eşleş")
     );
 
-  if (exactReplaceFailure) {
+  const rollbackRepair =
+    lastStructuredOutcome?.tool === "build_check" &&
+    lastStructuredOutcome?.result?.ok === false &&
+    lastStructuredOutcome?.result?.mutation_rolled_back === true;
+
+  if (exactReplaceFailure || rollbackRepair) {
     const patchContract = toolContracts.find(
       (tool) => tool.name === "apply_patch"
     );
@@ -1573,7 +1622,7 @@ async function requestStructuredToolDecision(
               "If lastStructuredOutcome contains a failed real tool result, repair that exact failure with the next minimal mutation instead of repeating the same arguments.",
               "If replace_text failed because old_text was not found or was ambiguous, do not retry replace_text. Use the supplied apply_patch contract and lastVerifiedRead to produce a minimal context-aware patch.",
               "candidateDiff is the current real worktree diff. Use it together with source evidence to repair only the defect introduced by the candidate.",
-              "If lastStructuredOutcome is a failed build_check, compiler output and failed_candidate_diff are authoritative. If mutation_rolled_back is true, the bad mutation is no longer present: generate an alternative minimum mutation against the verified clean source; never reapply the failed diff.",
+              "If lastStructuredOutcome is a failed build_check, compiler_errors, output_tail, and failed_candidate_diff are authoritative. If mutation_rolled_back is true, the bad mutation is no longer present: use the single supplied apply_patch tool to generate an alternative minimum patch against lastVerifiedRead; never reapply the failed diff.",
               "During verification, prefer git_diff and build_check when no compiler failure is already known; mutate when build evidence shows a fix is needed.",
               "Never request a tool that is absent from the supplied tool contracts.",
             ].join("\n"),
@@ -1595,6 +1644,7 @@ async function requestStructuredToolDecision(
               phase,
               recoveryHints: {
                 exactReplaceFailure,
+                rollbackRepair,
                 previousStructuredError: truncate(
                   previousStructuredError,
                   1200
@@ -2028,13 +2078,11 @@ function handoffStructuredCandidateIfReady(
 
     const buildEvidence = buildResult?.ok
       ? buildResult
-      : {
-          ...buildResult,
-          failed_candidate_diff:
-            failedCandidateDiff,
-          mutation_rolled_back:
-            mutationRolledBack,
-        };
+      : summarizeBuildFailure(
+          buildResult,
+          failedCandidateDiff,
+          mutationRolledBack
+        );
 
     lastStructuredOutcome = {
       tool: "build_check",
