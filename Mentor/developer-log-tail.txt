@@ -1,4 +1,3 @@
-KRALI_LOCAL_STAGE local_agent_dependency_neighborhood_verified • Uygulama kontrolü (desktop.app) runtime dependency neighborhood doğrulandı • entry=accessibilityTrusted • candidates=1
 KRALI_LOCAL_STAGE local_agent_root_cause_analyzing • Uygulama kontrolü (desktop.app) dependency neighborhood architect tarafından analiz ediliyor • candidates=1 • rootCauseModel=qwen2.5-coder:14b-instruct
 KRALI_LOCAL_STAGE local_agent_root_cause_inconclusive • Uygulama kontrolü (desktop.app) architect diagnosis tamamlanamadı • This operation was aborted • kör mutation yapılmayacak
 KRALI_LOCAL_STAGE local_agent_dependency_neighborhood_verified • Uygulama kontrolü (desktop.app) runtime dependency neighborhood doğrulandı • entry=AgentNaturalLanguageResolver • candidates=6
@@ -118,3 +117,4 @@ KRALI_LOCAL_STAGE local_agent_controller_rejected • Candidate build repair str
 KRALI_LOCAL_STAGE local_agent_completion_rejected • Candidate build repair tamamlanma reddedildi • aktif capability gap için gerçek candidate değişikliği yok • deneme=1/2
 Candidate build repair native local agent toplam zaman sınırına ulaştı.
 ⚠️ Candidate repair agent turu tamamlanamadı: 2
+⚠️ Candidate GitHub'a korundu ancak build geçmedi.
