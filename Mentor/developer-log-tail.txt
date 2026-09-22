@@ -1,7 +1,3 @@
-Developer prompt mode: gap • 4262 bytes
-🧠 Primitive patch için daha hafif model deneniyor: qwen2.5-coder:14b-instruct
-Yerel tool-call probe: qwen2.5-coder:14b-instruct
-KRALI local tool probe: native tool_call görülmedi • text={"name": "krali_tool_probe", "arguments": {}}
 ⚠️ qwen2.5-coder:14b-instruct tool-call probe geçmedi; mevcut model korunuyor: devstral:24b
 🧭 Structured controller modeli: qwen2.5-coder:14b-instruct • JSON karar modu
 ♻️ Developer checkpoint bulundu; aynı gap teşhisi kaldığı yerden devam edecek: desktop.app-02edb76fda4e
@@ -118,3 +114,7 @@ KRALI_LOCAL_STAGE local_agent_starting • Candidate build repair native Ollama 
 KRALI_LOCAL_STAGE local_agent_running • Candidate build repair yerel model çalışıyor • adım 1/8
 KRALI_LOCAL_STAGE local_agent_tool • Candidate build repair araç çalışıyor: read_file
 KRALI_LOCAL_STAGE local_agent_running • Candidate build repair yerel model çalışıyor • adım 2/8
+KRALI_LOCAL_STAGE local_agent_request_retry • Candidate build repair model isteği zaman aşımına uğradı; mevcut context korunarak retry 1/2
+Candidate build repair native local agent toplam zaman sınırına ulaştı.
+⚠️ Candidate repair agent turu tamamlanamadı: 2
+⚠️ Candidate GitHub'a korundu ancak build geçmedi.

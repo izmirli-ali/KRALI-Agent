@@ -1,1 +1,1 @@
-local_agent_running|Candidate build repair yerel model çalışıyor • adım 2/8|krali-dev-agent/20260922-104946|/Users/medusa/Developer/KRALI-Agent-Dev-20260922-104946|@meta|app=0.8.99|at=1790063759|run=20260922-104946-repair-2
+recovered_candidate_build_failed|Candidate repair sınırı doldu; branch korundu ve main değiştirilmedi|krali-dev-agent/20260922-104946|/Users/medusa/Developer/KRALI-Agent-Dev-20260922-104946|@meta|app=0.8.99|at=1790063880|run=20260922-104946
