@@ -5100,6 +5100,7 @@ async function verifyRootCauseTarget(
                   "Decide whether the proposed target can causally produce the observed runtime failure.",
                   "The final throw or error message may happen downstream.",
                   "Accept target_role=behavioral_cause when the target can return a wrong nil, wrong lookup result, wrong normalization, wrong alias/candidate set, or another incorrect value that directly causes downstream failure.",
+                  "If runtime_diagnostic_trace shows an installed candidate exists but alias/localization evidence is incomplete, treat alias/localization production as a stronger behavioral cause than a downstream LaunchServices nil unless the proposed target itself owns that evidence.",
                   "Use direct_cause only when the target itself implements the failing operation/error.",
                   "Reject only when the target merely forwards an already-correct value or is unrelated.",
                   "When evidence is insufficient, return supported=false and target_role=uncertain.",
@@ -5339,6 +5340,40 @@ function deterministicRootCauseScore(
     score += 4;
   }
 
+  const runtimeTrace =
+    String(
+      mutationProblemContext()
+        .runtime_diagnostic_trace || ""
+    );
+
+  if (
+    runtimeTrace.includes(
+      "candidate_alias_or_localization_gap_possible"
+    )
+  ) {
+    if (
+      /alias|localiz|displayname|bundlename/i.test(
+        symbol
+      )
+    ) {
+      score += 14;
+    } else if (
+      /candidate|installed|merge/i.test(
+        symbol
+      )
+    ) {
+      score += 4;
+    }
+
+    if (
+      /launchservices/i.test(
+        symbol
+      )
+    ) {
+      score -= 5;
+    }
+  }
+
   if (
     /error|description|message|format/i.test(
       symbol
@@ -5566,6 +5601,7 @@ async function requestRootCauseRanking(
                     "The throw site is not necessarily the root cause.",
                     "A function that returns a wrong nil, wrong lookup result, wrong normalization, wrong alias set, or otherwise corrupts the value consumed later can be the behavioral root cause even if another function emits the final error.",
                     "Prefer reusable behavioral causes over error-reporting wrappers.",
+                    "When runtime_diagnostic_trace reports candidate_alias_or_localization_gap_possible, distinguish the downstream LaunchServices miss from the upstream alias/localization evidence producer; prefer the producer when source evidence supports it.",
                     "Do not hard-code the concrete app, filename, brand, or exact user phrase.",
                     compact
                       ? "Keep root_cause and strategy extremely short so the JSON object is complete."
