@@ -296,9 +296,17 @@ use_cached_controller_model() {
 
     if [ -n "$cached_model" ] &&
        "$OLLAMA_BIN" show "$cached_model" >/dev/null 2>&1; then
-        CONTROLLER_MODEL="$cached_model"
-        echo "⚡ Structured controller cache kullanılıyor: $CONTROLLER_MODEL • yaş=${age}s" | tee -a "$LOG"
-        return 0
+        echo "⚡ Structured controller cache adayı yeniden ısıtılıyor: $cached_model • yaş=${age}s" | tee -a "$LOG"
+
+        if probe_controller_model "$cached_model"; then
+            CONTROLLER_MODEL="$cached_model"
+            remember_controller_model "$cached_model"
+            echo "✅ Structured controller cache doğrulandı ve sıcak: $CONTROLLER_MODEL" | tee -a "$LOG"
+            return 0
+        fi
+
+        echo "⚠️ Cached controller probe geçmedi; controller seçimi yeniden yapılacak: $cached_model" | tee -a "$LOG"
+        /bin/rm -f "$CONTROLLER_MODEL_CACHE"
     fi
 
     return 1
