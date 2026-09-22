@@ -675,6 +675,7 @@ let resumedFromCheckpoint = false;
 let implementationSearchCompleted = false;
 let implementationReadCompleted = false;
 let implementationTargetPaths = [];
+let lastStructuredOutcome = null;
 
 const inspectionToolNames = new Set([
   "list_files",
@@ -1174,6 +1175,24 @@ function compactControllerEvidence() {
           ),
         }
       : null,
+    lastStructuredOutcome:
+      lastStructuredOutcome
+        ? {
+            tool: lastStructuredOutcome.tool,
+            args: truncate(
+              JSON.stringify(
+                lastStructuredOutcome.args || {}
+              ),
+              1800
+            ),
+            result: truncate(
+              JSON.stringify(
+                lastStructuredOutcome.result || {}
+              ),
+              4000
+            ),
+          }
+        : null,
   };
 }
 
@@ -1342,6 +1361,8 @@ async function requestStructuredToolDecision(
               "Respect the supplied development phase and available tool contracts.",
               "During inspection, select the minimum real inspection tool needed.",
               "During implementation, obey the supplied tool contracts exactly. If only mutation tools are supplied, choose a minimal mutation tool now; do not answer with prose.",
+              "read_file evidence lines may be prefixed like '  123 | '; those prefixes are display metadata, not source text. Never copy line-number prefixes into old_text, new_text, file content, or patches.",
+              "If lastStructuredOutcome contains a failed real tool result, repair that exact failure with the next minimal mutation instead of repeating the same arguments.",
               "During verification, prefer git_diff and build_check; mutate again only if evidence shows a fix is needed.",
               "Never request a tool that is absent from the supplied tool contracts.",
             ].join("\n"),
@@ -1574,6 +1595,12 @@ async function runStructuredContinuation(
     decision.args
   );
 
+  lastStructuredOutcome = {
+    tool: decision.name,
+    args: decision.args,
+    result,
+  };
+
   messages.push({
     role: "user",
     content: [
@@ -1642,6 +1669,115 @@ function currentCandidateBlockers() {
   return { status, blockers };
 }
 
+function handoffStructuredCandidateIfReady(
+  trigger
+) {
+  const status = candidateStatus();
+
+  if (
+    !sawMutatingTool ||
+    status?.ok !== true ||
+    status.dirty !== true
+  ) {
+    return false;
+  }
+
+  stage(
+    "local_agent_candidate_handoff",
+    gapLabel +
+      " structured controller gerçek candidate üretti • trigger=" +
+      trigger +
+      " • mevcut recovery/build pipeline'ına devrediliyor"
+  );
+
+  persistCheckpoint(
+    "structured_candidate_handoff:" + trigger
+  );
+
+  fail(
+    "Structured controller candidate üretti; build ve recovery pipeline'ına devrediliyor.",
+    28,
+    "local_agent_candidate_handoff"
+  );
+}
+
+async function runVerifiedResumeFastPath() {
+  if (
+    !resumedFromCheckpoint ||
+    developmentPhase() !== "implementation" ||
+    !implementationReadCompleted
+  ) {
+    return false;
+  }
+
+  stage(
+    "local_agent_verified_resume_controller",
+    gapLabel +
+      " doğrulanmış implementation checkpoint'i bulundu • ana model atlanıyor • controller=" +
+      controllerModel
+  );
+
+  persistCheckpoint(
+    "verified_resume_controller"
+  );
+
+  for (let attempt = 1; attempt <= 2; attempt++) {
+    const {
+      blockers,
+    } = currentCandidateBlockers();
+
+    const continued =
+      await runStructuredContinuation(
+        attempt === 1
+          ? "Doğrulanmış implementation checkpoint'inden devam ediliyor. Hedef kaynak zaten okundu; yeni inspection yapmadan minimum generic mutation uygula."
+          : "Önceki structured mutation gerçek tool sonucunda başarısız oldu. lastStructuredOutcome hata kanıtını kullanarak aynı hedefte minimum düzeltilmiş mutation uygula.",
+        blockers.length > 0
+          ? blockers
+          : [
+              "doğrulanmış source evidence sonrası minimum mutation gerekli",
+            ],
+        attempt === 1
+          ? "verified_resume"
+          : "verified_resume_repair"
+      );
+
+    if (!continued) {
+      persistCheckpoint(
+        "verified_resume_controller_unavailable"
+      );
+      fail(
+        "Doğrulanmış implementation checkpoint'inde structured controller güvenli devam kararı üretemedi.",
+        25,
+        "local_agent_tool_protocol_failed"
+      );
+    }
+
+    if (
+      handoffStructuredCandidateIfReady(
+        attempt === 1
+          ? "verified_resume"
+          : "verified_resume_repair"
+      )
+    ) {
+      return true;
+    }
+
+    if (lastStructuredOutcome?.result?.ok === true) {
+      break;
+    }
+  }
+
+  persistCheckpoint(
+    "verified_resume_no_candidate"
+  );
+
+  fail(
+    "Structured controller doğrulanmış implementation checkpoint'inden candidate üretemedi.",
+    25,
+    "local_agent_tool_protocol_failed"
+  );
+}
+
 function requestMoreWork(reasons) {
   completionRejections += 1;
 
@@ -1682,6 +1818,8 @@ function requestMoreWork(reasons) {
 }
 
 resumeCheckpointContext();
+
+await runVerifiedResumeFastPath();
 
 stage(
   "local_agent_starting",
@@ -1785,28 +1923,9 @@ for (let iteration = 1; iteration <= maxIterations; iteration++) {
         ) {
           consecutiveRequestTimeouts = 0;
 
-          const handoffStatus =
-            candidateStatus();
-
-          if (
-            sawMutatingTool &&
-            handoffStatus?.ok === true &&
-            handoffStatus.dirty === true
-          ) {
-            stage(
-              "local_agent_candidate_handoff",
-              gapLabel +
-                " structured controller gerçek candidate üretti • mevcut recovery/build pipeline'ına devrediliyor"
-            );
-            persistCheckpoint(
-              "structured_candidate_handoff"
-            );
-            fail(
-              "Structured controller candidate üretti; build ve recovery pipeline'ına devrediliyor.",
-              28,
-              "local_agent_candidate_handoff"
-            );
-          }
+          handoffStructuredCandidateIfReady(
+            "implementation_timeout"
+          );
 
           continue;
         }
