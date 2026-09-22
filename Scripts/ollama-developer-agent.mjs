@@ -676,6 +676,7 @@ let implementationSearchCompleted = false;
 let implementationReadCompleted = false;
 let implementationTargetPaths = [];
 let lastStructuredOutcome = null;
+let lastMutationSnapshot = null;
 
 const inspectionToolNames = new Set([
   "list_files",
@@ -1057,6 +1058,121 @@ function currentCandidateDiff(limit = 12000) {
   return truncate(diff.stdout, limit);
 }
 
+
+function mutationPathsForTool(name, args = {}) {
+  if (
+    name === "replace_text" ||
+    name === "write_file"
+  ) {
+    const target = String(args.path || "").trim();
+    return target ? [target] : [];
+  }
+
+  if (name === "apply_patch") {
+    const patch = String(args.patch || "");
+    const paths = [];
+
+    for (const line of patch.split("\n")) {
+      if (
+        !line.startsWith("+++ ") &&
+        !line.startsWith("--- ")
+      ) {
+        continue;
+      }
+
+      let value = line.slice(4).trim().split("\t")[0];
+      if (!value || value === "/dev/null") {
+        continue;
+      }
+
+      value = value.replace(/^[ab]\//, "");
+      if (value) {
+        paths.push(value);
+      }
+    }
+
+    return [...new Set(paths)];
+  }
+
+  return [];
+}
+
+function captureMutationSnapshot(name, args = {}) {
+  const files = [];
+
+  for (const target of mutationPathsForTool(name, args)) {
+    try {
+      const { absolute, relative } =
+        safeRelativePath(target);
+      assertMutablePath(relative);
+
+      const exists = fs.existsSync(absolute);
+      const isFile =
+        exists && fs.statSync(absolute).isFile();
+
+      files.push({
+        relative,
+        existed: isFile,
+        content: isFile
+          ? fs.readFileSync(absolute, "utf8")
+          : null,
+      });
+    } catch {
+      return null;
+    }
+  }
+
+  return {
+    tool: name,
+    files,
+    flags: {
+      sawMutatingTool,
+      sawGitDiff,
+      buildCheckPassed,
+    },
+  };
+}
+
+function restoreMutationSnapshot(snapshot) {
+  if (!snapshot || !Array.isArray(snapshot.files)) {
+    return false;
+  }
+
+  try {
+    for (const item of snapshot.files) {
+      const { absolute, relative } =
+        safeRelativePath(item.relative);
+      assertMutablePath(relative);
+
+      if (item.existed) {
+        fs.mkdirSync(path.dirname(absolute), {
+          recursive: true,
+        });
+        fs.writeFileSync(
+          absolute,
+          String(item.content ?? ""),
+          "utf8"
+        );
+      } else if (fs.existsSync(absolute)) {
+        const stat = fs.statSync(absolute);
+        if (stat.isFile()) {
+          fs.unlinkSync(absolute);
+        }
+      }
+    }
+
+    sawMutatingTool =
+      snapshot.flags?.sawMutatingTool === true;
+    sawGitDiff =
+      snapshot.flags?.sawGitDiff === true;
+    buildCheckPassed =
+      snapshot.flags?.buildCheckPassed === true;
+
+    return true;
+  } catch {
+    return false;
+  }
+}
 
 function recordToolEvidence(name, result, args = {}) {
   if (result?.ok && inspectionToolNames.has(name)) {
@@ -1447,7 +1563,7 @@ async function requestStructuredToolDecision(
               "If lastStructuredOutcome contains a failed real tool result, repair that exact failure with the next minimal mutation instead of repeating the same arguments.",
               "If replace_text failed because old_text was not found or was ambiguous, do not retry replace_text. Use the supplied apply_patch contract and lastVerifiedRead to produce a minimal context-aware patch.",
               "candidateDiff is the current real worktree diff. Use it together with source evidence to repair only the defect introduced by the candidate.",
-              "If lastStructuredOutcome is a failed build_check, compiler output is authoritative: choose a minimum mutation tool to repair the current candidate before running build_check again.",
+              "If lastStructuredOutcome is a failed build_check, compiler output and failed_candidate_diff are authoritative. If mutation_rolled_back is true, the bad mutation is no longer present: generate an alternative minimum mutation against the verified clean source; never reapply the failed diff.",
               "During verification, prefer git_diff and build_check when no compiler failure is already known; mutate when build evidence shows a fix is needed.",
               "Never request a tool that is absent from the supplied tool contracts.",
             ].join("\n"),
@@ -1665,6 +1781,12 @@ async function runStructuredContinuation(
   );
 
   let result;
+  const mutationSnapshot = isMutation
+    ? captureMutationSnapshot(
+        decision.name,
+        decision.args
+      )
+    : null;
 
   try {
     result = executeTool(
@@ -1692,6 +1814,10 @@ async function runStructuredContinuation(
     args: decision.args,
     result,
   };
+
+  if (isMutation && result?.ok) {
+    lastMutationSnapshot = mutationSnapshot;
+  }
 
   messages.push({
     role: "user",
@@ -1848,10 +1974,45 @@ function handoffStructuredCandidateIfReady(
       {}
     );
 
+    const failedCandidateDiff =
+      buildResult?.ok
+        ? ""
+        : currentCandidateDiff(12000);
+
+    let mutationRolledBack = false;
+
+    if (!buildResult?.ok && lastMutationSnapshot) {
+      mutationRolledBack =
+        restoreMutationSnapshot(
+          lastMutationSnapshot
+        );
+
+      if (mutationRolledBack) {
+        stage(
+          "local_agent_mutation_rolled_back",
+          gapLabel +
+            " başarısız preflight sonrası son mutation geri alındı • trigger=" +
+            trigger
+        );
+      }
+
+      lastMutationSnapshot = null;
+    }
+
+    const buildEvidence = buildResult?.ok
+      ? buildResult
+      : {
+          ...buildResult,
+          failed_candidate_diff:
+            failedCandidateDiff,
+          mutation_rolled_back:
+            mutationRolledBack,
+        };
+
     lastStructuredOutcome = {
       tool: "build_check",
       args: {},
-      result: buildResult,
+      result: buildEvidence,
     };
 
     messages.push({
@@ -1860,12 +2021,14 @@ function handoffStructuredCandidateIfReady(
         "KRALI structured candidate preflight gerçek build_check çalıştırdı.",
         "Result: " +
           truncate(
-            JSON.stringify(buildResult),
-            16000
+            JSON.stringify(buildEvidence),
+            18000
           ),
         buildResult?.ok
           ? "Build PASS. Candidate handoff edilebilir."
-          : "Build FAIL. candidateDiff ve compiler çıktısını birlikte kullan; yeni inspection yapmadan minimum repair mutation uygula. Aynı build_check'i source değiştirmeden tekrar etme.",
+          : mutationRolledBack
+            ? "Build FAIL. Hatalı son mutation güvenli biçimde geri alındı. failed_candidate_diff ve compiler çıktısını kullanarak temiz kaynak üzerinde alternatif minimum repair mutation üret. Aynı başarısız mutation'ı tekrarlama."
+            : "Build FAIL. candidateDiff ve compiler çıktısını birlikte kullan; yeni inspection yapmadan minimum repair mutation uygula. Aynı build_check'i source değiştirmeden tekrar etme.",
       ].join("\n"),
     });
 
@@ -1873,7 +2036,9 @@ function handoffStructuredCandidateIfReady(
       stage(
         "local_agent_structured_tool",
         gapLabel +
-          " candidate preflight build başarısız • sıcak controller ile repair gerekli • trigger=" +
+          " candidate preflight build başarısız • sıcak controller ile repair gerekli • rollback=" +
+          String(mutationRolledBack) +
+          " • trigger=" +
           trigger
       );
       persistCheckpoint(
