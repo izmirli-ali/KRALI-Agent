@@ -181,6 +181,20 @@ Varsayılan provider/model `cline + nvidia/nemotron-3.5-lightning` olarak sabitl
 
 **v0.7.23 Developer Agent fast diagnostic gate + live progress:** Developer Agent artık her tıklamada doğrudan modele gitmez. Yerel `training-latest.json`, `live-eval-latest.json` ve `latest.json` raporları mevcut `VERSION` ile karşılaştırılır. Training Lab ve Live Research Eval güncel sürümde tamamen yeşilse ve güncel mentor trace ek müdahale gerektirmiyorsa Cline çağrısı atlanır; bu hem ChatGPT kullanım limitini hem bekleme süresini korur. Gerçek bir failure varsa Cline çalışır; UI yaklaşık 700 ms aralıkla status dosyasını okuyarak hazırlık, diagnostic kontrol, model çalışması ve build doğrulama aşamalarını canlı gösterir. Cline turu `medium` thinking ve 900 saniye timeout ile sınırlandırılır.
 
+### 0.10.8 — Deterministic verified mutation anchor + resolver failure classes
+
+0.10.7 runtime evidence loop korunur; exact mutation protokolü ve resolver root-cause yönlendirmesi daha deterministik hale getirilir.
+
+- Ranking + verifier PASS ile seçilen exact source definition artık `verifiedMutationSource` olarak tutulur.
+- İlk mutation'da model `old_text` seçmez. KRALİ verified source gövdesinin worktree'de tam ve benzersiz bulunduğunu doğrular ve bunu deterministic `fixed_old_text` olarak sabitler.
+- Mutation modeli yalnız `new_text` üretir. Böylece yanlış/uydurulmuş/eksik source anchor kaynaklı `occurrences=0` ve `copiedFromVerifiedRead=false` failure class'ı ortadan kaldırılır.
+- Checkpoint aynı verified source proof'unu taşır; stale checkpoint source provenance değiştiğinde proof ve anchor temizlenir.
+- Resolver trace query bazında `failureClass` üretir. Candidate mevcut fakat fuzzy alias skoru confidence altında kaldığında generic `candidate_alias_or_localization_gap_possible` sinyali oluşturulur.
+- Bu sinyal root-cause deterministic pruning'de alias/localization/display-name üreticilerine ek ağırlık verir ve downstream LaunchServices miss'i hafifçe geri iter.
+- Ranker ve verifier runtime trace alias/localization gap gösterdiğinde downstream lookup sonucu ile upstream alias evidence producer'ı ayırmak zorundadır.
+- Hiçbir uygulama adı, bundle id veya test cümlesi hard-code edilmez.
+- Mutation gate, verifier proof, rollback, failed mutation/diff fingerprint, bounded repair, build/regression ve skill lifecycle değişmez.
+
 ### 0.10.7 — Runtime resolver observability + bounded mutation fallback
 
 0.10.6 ranking/verifier gate korunur; kaynak koddan tahmin etmek yerine gerçek resolver çalışmasının kanıtı Developer Agent'a taşınır.
