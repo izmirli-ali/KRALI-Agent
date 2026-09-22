@@ -1152,6 +1152,7 @@ let lastStructuredOutcome = null;
 let lastMutationSnapshot = null;
 let lastMutationFingerprint = "";
 const failedMutationFingerprints = new Set();
+const failedDiffFingerprints = new Set();
 let runtimeBootstrapTarget = null;
 
 const inspectionToolNames = new Set([
@@ -1992,6 +1993,28 @@ function mutationFingerprint(
     .digest("hex");
 }
 
+function diffFingerprint(
+  diffText
+) {
+  const normalized =
+    String(diffText || "")
+      .replace(/\r\n/g, "\n")
+      .replace(
+        /^index\s+[0-9a-f]+\.\.[0-9a-f]+.*$/gm,
+        ""
+      )
+      .trim();
+
+  if (!normalized) {
+    return "";
+  }
+
+  return crypto
+    .createHash("sha256")
+    .update(normalized)
+    .digest("hex");
+}
+
 function summarizeBuildFailure(
   buildResult,
   failedCandidateDiff,
@@ -2141,6 +2164,12 @@ function compactControllerEvidence(
       implementationTargetPaths.slice(0, 8),
     failedMutationFingerprints:
       [...failedMutationFingerprints]
+        .slice(-6)
+        .map((value) =>
+          value.slice(0, 12)
+        ),
+    failedDiffFingerprints:
+      [...failedDiffFingerprints]
         .slice(-6)
         .map((value) =>
           value.slice(0, 12)
@@ -2478,7 +2507,7 @@ async function requestStructuredToolDecision(
           "Do not hard-code the concrete app, brand, filename, or exact user phrase from problem evidence; generalize the fix to the capability class.",
           "Do not include path, tool name, reason, markdown, prose, or code fences.",
           "If build failure evidence exists, repair that failure against the clean verified source and do not repeat the failed diff.",
-          "failedMutationFingerprints identify strategies already proven to fail. Produce a materially different semantic change, not a cosmetically different anchor for the same failed edit.",
+          "failedMutationFingerprints and failedDiffFingerprints identify strategies already proven to fail. Produce a materially different semantic change, not a cosmetically different anchor for the same failed edit.",
         ].join("\n")
       : [
           "You are KRALI Tool Continuation Controller.",
@@ -2551,6 +2580,10 @@ async function requestStructuredToolDecision(
               controllerEvidence.lastVerifiedRead,
             lastStructuredOutcome:
               controllerEvidence.lastStructuredOutcome,
+            failedMutationFingerprints:
+              controllerEvidence.failedMutationFingerprints,
+            failedDiffFingerprints:
+              controllerEvidence.failedDiffFingerprints,
           },
         }
       : null;
@@ -3274,6 +3307,86 @@ function handoffStructuredCandidateIfReady(
       );
       return false;
     }
+
+    const currentDiffFingerprint =
+      diffFingerprint(
+        diffResult.output || ""
+      );
+
+    if (
+      currentDiffFingerprint &&
+      failedDiffFingerprints.has(
+        currentDiffFingerprint
+      )
+    ) {
+      let repeatedDiffRolledBack = false;
+
+      if (lastMutationSnapshot) {
+        repeatedDiffRolledBack =
+          restoreMutationSnapshot(
+            lastMutationSnapshot
+          );
+      }
+
+      if (lastMutationFingerprint) {
+        failedMutationFingerprints.add(
+          lastMutationFingerprint
+        );
+      }
+
+      lastMutationSnapshot = null;
+      lastMutationFingerprint = "";
+      sawMutatingTool = false;
+      sawGitDiff = false;
+      buildCheckPassed = false;
+
+      const repeatReason =
+        "önceden build FAIL alan candidate diff tekrarlandı • fingerprint=" +
+        currentDiffFingerprint.slice(
+          0,
+          12
+        ) +
+        " • rollback=" +
+        String(
+          repeatedDiffRolledBack
+        );
+
+      stage(
+        "local_agent_repeated_failed_diff_rejected",
+        gapLabel +
+          " " +
+          repeatReason +
+          " • trigger=" +
+          trigger
+      );
+
+      lastStructuredOutcome = {
+        tool: "git_diff",
+        args: {},
+        result: {
+          ok: false,
+          repeated_failed_diff: true,
+          diff_fingerprint:
+            currentDiffFingerprint.slice(
+              0,
+              12
+            ),
+          mutation_rolled_back:
+            repeatedDiffRolledBack,
+          failed_candidate_diff:
+            truncate(
+              diffResult.output || "",
+              4200
+            ),
+        },
+      };
+
+      persistCheckpoint(
+        "repeated_failed_diff_rejected:" +
+          trigger
+      );
+      return false;
+    }
   }
 
   if (!buildCheckPassed) {
@@ -3299,6 +3412,31 @@ function handoffStructuredCandidateIfReady(
       buildResult?.ok
         ? ""
         : currentCandidateDiff(12000);
+
+    if (!buildResult?.ok) {
+      const failedDiffFingerprint =
+        diffFingerprint(
+          failedCandidateDiff
+        );
+
+      if (failedDiffFingerprint) {
+        failedDiffFingerprints.add(
+          failedDiffFingerprint
+        );
+
+        stage(
+          "local_agent_failed_diff_recorded",
+          gapLabel +
+            " build FAIL candidate diff fingerprint kaydedildi • fingerprint=" +
+            failedDiffFingerprint.slice(
+              0,
+              12
+            ) +
+            " • trigger=" +
+            trigger
+        );
+      }
+    }
 
     let mutationRolledBack = false;
 
