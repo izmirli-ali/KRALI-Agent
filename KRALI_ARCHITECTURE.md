@@ -181,6 +181,20 @@ Varsayılan provider/model `cline + nvidia/nemotron-3.5-lightning` olarak sabitl
 
 **v0.7.23 Developer Agent fast diagnostic gate + live progress:** Developer Agent artık her tıklamada doğrudan modele gitmez. Yerel `training-latest.json`, `live-eval-latest.json` ve `latest.json` raporları mevcut `VERSION` ile karşılaştırılır. Training Lab ve Live Research Eval güncel sürümde tamamen yeşilse ve güncel mentor trace ek müdahale gerektirmiyorsa Cline çağrısı atlanır; bu hem ChatGPT kullanım limitini hem bekleme süresini korur. Gerçek bir failure varsa Cline çalışır; UI yaklaşık 700 ms aralıkla status dosyasını okuyarak hazırlık, diagnostic kontrol, model çalışması ve build doğrulama aşamalarını canlı gösterir. Cline turu `medium` thinking ve 900 saniye timeout ile sınırlandırılır.
 
+### 0.10.5 — Deterministic root-cause pruning
+
+0.10.4 mutation authority gate korunur; root-cause modeline giden aday sayısı model kullanmadan önce daraltılır.
+
+- Dependency neighborhood'lardan gelen exact source adayları önce deterministik olarak puanlanır.
+- Birden fazla neighborhood'da tekrar görülen adaylar, entry point yerine daha derin dependency olanlar ve lookup/resolve/match/normalize/filter/optional-result gibi genellenebilir davranış sinyalleri taşıyan adaylar daha yüksek puan alır.
+- Error/message/format ağırlıklı wrapper adayları hafifçe geriye düşer.
+- Bu pruning uygulama, marka, dosya adı veya test cümlesine özel hard-code içermez.
+- En fazla 4 aday Qwen root-cause ranking aşamasına gider.
+- Ranking source bütçesi aday başına yaklaşık 700 karakter, context 4096 ve output budget 320 token seviyesine düşürülür.
+- Ranking timeout bütçesi 45 saniyedir.
+- Ranking sonucu yine en fazla iki hypothesis üretir; yalnız verifier PASS sonrası mutation authority açılır.
+- Gate, rollback, fingerprint, bounded repair, build/regression ve skill lifecycle değişmez.
+
 ### 0.10.4 — Verified mutation authority gate
 
 0.10.3 tek-havuz root-cause akışı korunur; diagnostic source ile mutation-authorized source artık ayrı state'lerdir.
