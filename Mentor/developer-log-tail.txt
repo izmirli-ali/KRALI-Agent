@@ -1,120 +1,67 @@
-KRALI_LOCAL_STAGE local_agent_controller_preparing • Uygulama kontrolü (desktop.app) structured controller girdisi hazır • mode=exact_replace • problem=runtime_evidence • chars=10236 • decisionModel=qwen2.5-coder:14b-instruct • role=architect-mutation
-KRALI_LOCAL_STAGE local_agent_controller_rejected • Uygulama kontrolü (desktop.app) structured controller kararı reddedildi • controller isteği başarısız/zaman aşımı • controller=qwen2.5-coder:14b-instruct
-KRALI_LOCAL_STAGE local_agent_root_cause_analyzing • Uygulama kontrolü (desktop.app) dependency neighborhood architect tarafından analiz ediliyor • candidates=5 • rootCauseModel=qwen2.5-coder:14b-instruct
-KRALI_LOCAL_STAGE local_agent_root_cause_inconclusive • Uygulama kontrolü (desktop.app) architect diagnosis tamamlanamadı • This operation was aborted • kör mutation yapılmayacak
-KRALI_LOCAL_STAGE local_agent_starting • Uygulama kontrolü (desktop.app) native Ollama agent başlatılıyor: devstral-small-2:24b
-Uygulama kontrolü (desktop.app) native local agent toplam zaman sınırına ulaştı.
-KRALI_LOCAL_STAGE local_agent_checkpoint_stale • Uygulama kontrolü (desktop.app) checkpoint source provenance eski • recordedHead=1e9398402ae14d18452e25d0c6d703f0b14f18f1 • liveHead=318d0b4adcf777a004512ffac623f5cb7789c4c5 • source hedefleri yeniden doğrulanacak
-KRALI_LOCAL_STAGE local_agent_target_found • Uygulama kontrolü (desktop.app) hedef kaynak bulundu • paths=1 • targets=["App/KRALIAgentNative/AgentDesktopControl.swift"]
-KRALI_LOCAL_STAGE local_agent_diagnostic_source_bootstrap • Uygulama kontrolü (desktop.app) runtime hata metninden source bootstrap bulundu • hint=Uygulama bulunamadı • targets=["App/KRALIAgentNative/AgentDesktopControl.swift"]
-KRALI_LOCAL_STAGE local_agent_diagnostic_target_read • Uygulama kontrolü (desktop.app) diagnostic source okundu • root-cause verifier PASS olmadan mutation yetkisi verilmeyecek • path=App/KRALIAgentNative/AgentDesktopControl.swift
-KRALI_LOCAL_STAGE local_agent_diagnostic_error_window • Uygulama kontrolü (desktop.app) runtime hata noktası çevresi okundu • path=App/KRALIAgentNative/AgentDesktopControl.swift • line=101
-KRALI_LOCAL_STAGE local_agent_dependency_neighborhood_verified • Uygulama kontrolü (desktop.app) runtime dependency neighborhood havuza eklendi • entry=resolveRequestedApplication • candidates=8
-KRALI_LOCAL_STAGE local_agent_dependency_neighborhood_verified • Uygulama kontrolü (desktop.app) runtime dependency neighborhood havuza eklendi • entry=applicationTargetPhrase • candidates=4
-KRALI_LOCAL_STAGE local_agent_root_cause_pool_ready • Uygulama kontrolü (desktop.app) dedupe edilmiş root-cause candidate havuzu hazır • candidates=12
-KRALI_LOCAL_STAGE local_agent_root_cause_pruned • Uygulama kontrolü (desktop.app) deterministic candidate pruning tamamlandı • input=12 • output=4 • top=installedApplicationCandidates:27,nestedApplicationCandidates:25,mergeCandidates:25,bestApplicationCandidate:21
-KRALI_LOCAL_STAGE local_agent_root_cause_ranking • Uygulama kontrolü (desktop.app) deterministic pruning sonrası candidate ranking • candidates=4 • rootCauseModel=qwen2.5-coder:14b-instruct
-KRALI_LOCAL_STAGE local_agent_root_cause_ranked • Uygulama kontrolü (desktop.app) root-cause adayları sıralandı • top=installedApplicationCandidates:0.80,bestApplicationCandidate:0.70
-KRALI_LOCAL_STAGE local_agent_root_cause_verifying • Uygulama kontrolü (desktop.app) seçilen root-cause hypothesis patch öncesi doğrulanıyor • target=installedApplicationCandidates • rootCauseModel=qwen2.5-coder:14b-instruct
-KRALI_LOCAL_STAGE local_agent_root_cause_verified • Uygulama kontrolü (desktop.app) root-cause hypothesis doğrulandı • target=installedApplicationCandidates • reason=The function `installedApplicationCandidates` is responsible for identifying and returning the list of installed applications. If it fails to correctly identify or return the Notes application, it could lead to downstream failures when trying to launch the application. The runtime diagnostic trace shows that the Notes 
-…[truncated]
-KRALI_LOCAL_STAGE local_agent_root_cause_selected • Uygulama kontrolü (desktop.app) ranked+verified mutation target seçildi • target=installedApplicationCandidates • path=App/KRALIAgentNative/AgentDesktopControl.swift • range=1088-1259 • confidence=0.80 • rootCauseModel=qwen2.5-coder:14b-instruct
-KRALI_LOCAL_STAGE local_agent_controller_preparing • Uygulama kontrolü (desktop.app) structured controller girdisi hazır • mode=exact_replace • problem=runtime_evidence • chars=11299 • decisionModel=devstral-small-2:24b • role=architect-mutation
-KRALI_LOCAL_STAGE local_agent_controller_compact_retry • Uygulama kontrolü (desktop.app) ilk mutation karar isteği zaman aşımına uğradı • ultra-kompakt retry • decisionModel=devstral-small-2:24b
-KRALI_LOCAL_STAGE local_agent_controller_preparing • Uygulama kontrolü (desktop.app) structured controller girdisi hazır • mode=exact_replace • problem=runtime_evidence • chars=10236 • decisionModel=devstral-small-2:24b • role=architect-mutation
-KRALI_LOCAL_STAGE local_agent_mutation_model_fallback • Uygulama kontrolü (desktop.app) verified target + runtime trace mevcut; ağır mutation modeli timeout sonrası tek hızlı fallback • devstral-small-2:24b → qwen2.5-coder:14b-instruct
-KRALI_LOCAL_STAGE local_agent_controller_preparing • Uygulama kontrolü (desktop.app) ana model belleği karar modeli için boşaltıldı • devstral-small-2:24b → qwen2.5-coder:14b-instruct
-KRALI_LOCAL_STAGE local_agent_controller_preparing • Uygulama kontrolü (desktop.app) structured controller girdisi hazır • mode=exact_replace • problem=runtime_evidence • chars=10236 • decisionModel=qwen2.5-coder:14b-instruct • role=architect-mutation
-KRALI_LOCAL_STAGE local_agent_controller_rejected • Uygulama kontrolü (desktop.app) structured controller kararı reddedildi • controller isteği başarısız/zaman aşımı • controller=qwen2.5-coder:14b-instruct
-KRALI_LOCAL_STAGE local_agent_root_cause_analyzing • Uygulama kontrolü (desktop.app) dependency neighborhood architect tarafından analiz ediliyor • candidates=5 • rootCauseModel=qwen2.5-coder:14b-instruct
-KRALI_LOCAL_STAGE local_agent_root_cause_inconclusive • Uygulama kontrolü (desktop.app) architect diagnosis tamamlanamadı • This operation was aborted • kör mutation yapılmayacak
-KRALI_LOCAL_STAGE local_agent_starting • Uygulama kontrolü (desktop.app) native Ollama agent başlatılıyor: devstral-small-2:24b
-Uygulama kontrolü (desktop.app) native local agent toplam zaman sınırına ulaştı.
-Deleted branch krali-dev-agent/20260922-225455 (was 318d0b4).
-❌ Native yerel Developer Agent durdu: Uygulama kontrolü (desktop.app) native local agent toplam zaman sınırına ulaştı.
 
 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
  KRALİ DEVELOPER AGENT
- 20260922-231414
+ 20260922-233720
 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 ⚠️ Global Node.js v26 Cline bağımlılıklarıyla uyumlu değil; izole Node 22 runtime hazırlanıyor.
 ✅ Developer Agent runtime: v22.23.2
+⚡ Tool-capable model cache kullanılıyor: devstral-small-2:24b • yaş=1371s
 Yerel architect model seçimi: devstral-small-2:24b • RAM≈24GB
-Yerel tool-call probe: devstral-small-2:24b
-tool_call_ok|devstral-small-2:24b
 ✅ Yerel Developer AI hazır + tool-call doğrulandı: devstral-small-2:24b
 From https://github.com/izmirli-ali/KRALI-Agent
  * branch            main       -> FETCH_HEAD
-From https://github.com/izmirli-ali/KRALI-Agent
- * [new branch]      fix/v0.10.9-repair-loop -> origin/fix/v0.10.9-repair-loop
 Already up to date.
 Learning Queue job brief bulundu; mutable Mentor latest yerine immutable job kullanılacak.
-Preparing worktree (new branch 'krali-dev-agent/20260922-231414')
-branch 'krali-dev-agent/20260922-231414' set up to track 'origin/main'.
-HEAD is now at e5eac7b Sync KRALI mentor diagnostics
-Developer prompt mode: gap • 4657 bytes
-⚡ Structured controller cache adayı yeniden ısıtılıyor: qwen2.5-coder:14b-instruct • yaş=1161s
+Preparing worktree (new branch 'krali-dev-agent/20260922-233720')
+branch 'krali-dev-agent/20260922-233720' set up to track 'origin/main'.
+HEAD is now at f1e0317 v0.10.11: fix updater Swift build regression
+Developer prompt mode: gap • 5617 bytes
+⚡ Structured controller cache adayı yeniden ısıtılıyor: qwen2.5-coder:14b-instruct • yaş=1112s
 🧪 Structured controller JSON probe: qwen2.5-coder:14b-instruct
-controller_probe_ok|qwen2.5-coder:14b-instruct|10707ms
+controller_probe_ok|qwen2.5-coder:14b-instruct|12839ms
 ✅ Structured controller cache doğrulandı ve sıcak: qwen2.5-coder:14b-instruct
 🧭 Structured controller modeli: qwen2.5-coder:14b-instruct • ölçülmüş JSON karar modu
 ♻️ Developer checkpoint bulundu; aynı gap teşhisi kaldığı yerden devam edecek: desktop.app-02edb76fda4e
 🧠 Model rolleri: root-cause=qwen2.5-coder:14b-instruct • mutation=devstral-small-2:24b • controller=qwen2.5-coder:14b-instruct
-KRALI_LOCAL_STAGE local_agent_checkpoint_stale • Uygulama kontrolü (desktop.app) checkpoint source provenance eski • recordedHead=318d0b4adcf777a004512ffac623f5cb7789c4c5 • liveHead=e5eac7b93ac6292bff92cc3441e374fc0f49d475 • source hedefleri yeniden doğrulanacak
+KRALI_LOCAL_STAGE local_agent_checkpoint_stale • Uygulama kontrolü (desktop.app) checkpoint source provenance eski • recordedHead=e5eac7b93ac6292bff92cc3441e374fc0f49d475 • liveHead=f1e0317575b9c0a89a29468bd24b923777557f52 • source hedefleri yeniden doğrulanacak
 KRALI_LOCAL_STAGE local_agent_target_found • Uygulama kontrolü (desktop.app) hedef kaynak bulundu • paths=1 • targets=["App/KRALIAgentNative/AgentDesktopControl.swift"]
 KRALI_LOCAL_STAGE local_agent_diagnostic_source_bootstrap • Uygulama kontrolü (desktop.app) runtime hata metninden source bootstrap bulundu • hint=Uygulama bulunamadı • targets=["App/KRALIAgentNative/AgentDesktopControl.swift"]
 KRALI_LOCAL_STAGE local_agent_diagnostic_target_read • Uygulama kontrolü (desktop.app) diagnostic source okundu • root-cause verifier PASS olmadan mutation yetkisi verilmeyecek • path=App/KRALIAgentNative/AgentDesktopControl.swift
 KRALI_LOCAL_STAGE local_agent_diagnostic_error_window • Uygulama kontrolü (desktop.app) runtime hata noktası çevresi okundu • path=App/KRALIAgentNative/AgentDesktopControl.swift • line=101
-KRALI_LOCAL_STAGE local_agent_dependency_neighborhood_verified • Uygulama kontrolü (desktop.app) runtime dependency neighborhood havuza eklendi • entry=resolveRequestedApplication • candidates=8
-KRALI_LOCAL_STAGE local_agent_dependency_neighborhood_verified • Uygulama kontrolü (desktop.app) runtime dependency neighborhood havuza eklendi • entry=applicationTargetPhrase • candidates=4
+KRALI_LOCAL_STAGE local_agent_dependency_neighborhood_verified • Uygulama kontrolü (desktop.app) runtime dependency neighborhood havuza eklendi • entry=resolveRequestedApplication • candidates=10
+KRALI_LOCAL_STAGE local_agent_dependency_neighborhood_verified • Uygulama kontrolü (desktop.app) runtime dependency neighborhood havuza eklendi • entry=applicationTargetPhrase • candidates=8
 KRALI_LOCAL_STAGE local_agent_root_cause_pool_ready • Uygulama kontrolü (desktop.app) dedupe edilmiş root-cause candidate havuzu hazır • candidates=12
-KRALI_LOCAL_STAGE local_agent_root_cause_pruned • Uygulama kontrolü (desktop.app) deterministic candidate pruning tamamlandı • input=12 • output=4 • top=installedApplicationCandidates:23,launchServicesApplicationCandidate:21,nestedApplicationCandidates:21,mergeCandidates:21
+KRALI_LOCAL_STAGE local_agent_root_cause_pruned • Uygulama kontrolü (desktop.app) deterministic candidate pruning tamamlandı • input=12 • output=4 • top=mergedAliases:37,installedApplicationCandidates:33,nestedApplicationCandidates:31,mergeCandidates:23
 KRALI_LOCAL_STAGE local_agent_root_cause_ranking • Uygulama kontrolü (desktop.app) deterministic pruning sonrası candidate ranking • candidates=4 • rootCauseModel=qwen2.5-coder:14b-instruct
-KRALI_LOCAL_STAGE local_agent_root_cause_ranked • Uygulama kontrolü (desktop.app) root-cause adayları sıralandı • top=installedApplicationCandidates:0.80,launchServicesApplicationCandidate:0.70
-KRALI_LOCAL_STAGE local_agent_root_cause_verifying • Uygulama kontrolü (desktop.app) seçilen root-cause hypothesis patch öncesi doğrulanıyor • target=installedApplicationCandidates • rootCauseModel=qwen2.5-coder:14b-instruct
-KRALI_LOCAL_STAGE local_agent_root_cause_verified • Uygulama kontrolü (desktop.app) root-cause hypothesis doğrulandı • target=installedApplicationCandidates • reason=The function `installedApplicationCandidates` is responsible for identifying and caching application candidates. If it fails to correctly identify or cache the application candidates, it could lead to a failure in finding the application 'notlar'. This function checks specific directories for applications, and if the a
-…[truncated]
-KRALI_LOCAL_STAGE local_agent_root_cause_selected • Uygulama kontrolü (desktop.app) ranked+verified mutation target seçildi • target=installedApplicationCandidates • path=App/KRALIAgentNative/AgentDesktopControl.swift • range=1088-1259 • confidence=0.80 • rootCauseModel=qwen2.5-coder:14b-instruct
-KRALI_LOCAL_STAGE local_agent_controller_preparing • Uygulama kontrolü (desktop.app) structured controller girdisi hazır • mode=exact_replace • problem=runtime_evidence • chars=10274 • decisionModel=devstral-small-2:24b • role=architect-mutation
-KRALI_LOCAL_STAGE local_agent_controller_compact_retry • Uygulama kontrolü (desktop.app) ilk mutation karar isteği zaman aşımına uğradı • ultra-kompakt retry • decisionModel=devstral-small-2:24b
-KRALI_LOCAL_STAGE local_agent_controller_preparing • Uygulama kontrolü (desktop.app) structured controller girdisi hazır • mode=exact_replace • problem=runtime_evidence • chars=9211 • decisionModel=devstral-small-2:24b • role=architect-mutation
-
-━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
- KRALİ DEVELOPER AGENT
- 20260922-231755
-━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-⚠️ Global Node.js v26 Cline bağımlılıklarıyla uyumlu değil; izole Node 22 runtime hazırlanıyor.
-✅ Developer Agent runtime: v22.23.2
-⚡ Tool-capable model cache kullanılıyor: devstral-small-2:24b • yaş=207s
-Yerel architect model seçimi: devstral-small-2:24b • RAM≈24GB
-✅ Yerel Developer AI hazır + tool-call doğrulandı: devstral-small-2:24b
-From https://github.com/izmirli-ali/KRALI-Agent
- * branch            main       -> FETCH_HEAD
-Already up to date.
-Preparing worktree (new branch 'krali-dev-agent/20260922-231755')
-branch 'krali-dev-agent/20260922-231755' set up to track 'origin/main'.
-HEAD is now at 9309cc4 v0.10.9: stop repeated Developer Agent repair loops
-Developer prompt mode: gap • 4675 bytes
-⚡ Structured controller cache adayı yeniden ısıtılıyor: qwen2.5-coder:14b-instruct • yaş=196s
-🧪 Structured controller JSON probe: qwen2.5-coder:14b-instruct
-controller_probe_failed|qwen2.5-coder:14b-instruct|AbortError:This operation was aborted
-⚠️ Cached controller probe geçmedi; controller seçimi yeniden yapılacak: qwen2.5-coder:14b-instruct
-🧪 Structured controller JSON probe: qwen2.5-coder:14b-instruct
-KRALI_LOCAL_STAGE local_agent_mutation_model_fallback • Uygulama kontrolü (desktop.app) verified target + runtime trace mevcut; ağır mutation modeli timeout sonrası tek hızlı fallback • devstral-small-2:24b → qwen2.5-coder:14b-instruct
-KRALI_LOCAL_STAGE local_agent_controller_preparing • Uygulama kontrolü (desktop.app) ana model bellekte değil; karar modeli korunuyor • decisionModel=qwen2.5-coder:14b-instruct
-KRALI_LOCAL_STAGE local_agent_controller_preparing • Uygulama kontrolü (desktop.app) structured controller girdisi hazır • mode=exact_replace • problem=runtime_evidence • chars=9211 • decisionModel=qwen2.5-coder:14b-instruct • role=architect-mutation
-controller_probe_ok|qwen2.5-coder:14b-instruct|21357ms
-✅ Structured controller probe geçti: qwen2.5-coder:14b-instruct
-🧭 Structured controller modeli: qwen2.5-coder:14b-instruct • ölçülmüş JSON karar modu
-♻️ Developer checkpoint bulundu; aynı gap teşhisi kaldığı yerden devam edecek: desktop.app-02edb76fda4e
-🧠 Model rolleri: root-cause=qwen2.5-coder:14b-instruct • mutation=devstral-small-2:24b • controller=qwen2.5-coder:14b-instruct
-KRALI_LOCAL_STAGE local_agent_checkpoint_stale • Uygulama kontrolü (desktop.app) checkpoint source provenance eski • recordedHead=e5eac7b93ac6292bff92cc3441e374fc0f49d475 • liveHead=9309cc46063ab242b1f97e1ea71ff51515c0cc23 • source hedefleri yeniden doğrulanacak
+KRALI_LOCAL_STAGE local_agent_root_cause_ranked • Uygulama kontrolü (desktop.app) root-cause adayları sıralandı • top=mergedAliases:0.80,installedApplicationCandidates:0.70
+KRALI_LOCAL_STAGE local_agent_root_cause_verifying • Uygulama kontrolü (desktop.app) seçilen root-cause hypothesis patch öncesi doğrulanıyor • target=mergedAliases • rootCauseModel=qwen2.5-coder:14b-instruct
+KRALI_LOCAL_STAGE local_agent_root_cause_verified • Uygulama kontrolü (desktop.app) root-cause hypothesis doğrulandı • target=mergedAliases • reason=The mergedAliases function may be returning an incorrect or incomplete set of aliases, leading to a failure in resolving the correct application. This could result in the 'Notlar' query not being correctly mapped to the 'Notes' application, causing the launch failure.
+KRALI_LOCAL_STAGE local_agent_root_cause_selected • Uygulama kontrolü (desktop.app) ranked+verified mutation target seçildi • target=mergedAliases • path=App/KRALIAgentNative/AgentNaturalLanguageResolver.swift • range=707-732 • confidence=0.80 • rootCauseModel=qwen2.5-coder:14b-instruct
+KRALI_LOCAL_STAGE local_agent_controller_preparing • Uygulama kontrolü (desktop.app) structured controller girdisi hazır • mode=exact_replace • problem=runtime_evidence • chars=3217 • decisionModel=devstral-small-2:24b • role=architect-mutation
+KRALI_LOCAL_STAGE local_agent_mutation_model_fallback • Uygulama kontrolü (desktop.app) verified target + runtime trace mevcut; ilk ağır mutation timeout sonrası aynı modeli tekrar etmeden hızlı fallback • devstral-small-2:24b → qwen2.5-coder:14b-instruct
+KRALI_LOCAL_STAGE local_agent_controller_preparing • Uygulama kontrolü (desktop.app) ana model belleği karar modeli için boşaltıldı • devstral-small-2:24b → qwen2.5-coder:14b-instruct
+KRALI_LOCAL_STAGE local_agent_controller_preparing • Uygulama kontrolü (desktop.app) structured controller girdisi hazır • mode=exact_replace • problem=runtime_evidence • chars=3040 • decisionModel=qwen2.5-coder:14b-instruct • role=architect-mutation
+KRALI_LOCAL_STAGE local_agent_controller_rejected • Uygulama kontrolü (desktop.app) structured controller kararı reddedildi • controller isteği başarısız/zaman aşımı • controller=qwen2.5-coder:14b-instruct
+Doğrulanmış root-cause checkpoint'i korundu; mutation controller timeout sonrası aynı diagnosis yeniden başlatılmadı.
+KRALI_LOCAL_STAGE local_agent_checkpoint_stale • Uygulama kontrolü (desktop.app) checkpoint source provenance eski • recordedHead=e5eac7b93ac6292bff92cc3441e374fc0f49d475 • liveHead=f1e0317575b9c0a89a29468bd24b923777557f52 • source hedefleri yeniden doğrulanacak
 KRALI_LOCAL_STAGE local_agent_target_found • Uygulama kontrolü (desktop.app) hedef kaynak bulundu • paths=1 • targets=["App/KRALIAgentNative/AgentDesktopControl.swift"]
 KRALI_LOCAL_STAGE local_agent_diagnostic_source_bootstrap • Uygulama kontrolü (desktop.app) runtime hata metninden source bootstrap bulundu • hint=Uygulama bulunamadı • targets=["App/KRALIAgentNative/AgentDesktopControl.swift"]
 KRALI_LOCAL_STAGE local_agent_diagnostic_target_read • Uygulama kontrolü (desktop.app) diagnostic source okundu • root-cause verifier PASS olmadan mutation yetkisi verilmeyecek • path=App/KRALIAgentNative/AgentDesktopControl.swift
 KRALI_LOCAL_STAGE local_agent_diagnostic_error_window • Uygulama kontrolü (desktop.app) runtime hata noktası çevresi okundu • path=App/KRALIAgentNative/AgentDesktopControl.swift • line=101
-KRALI_LOCAL_STAGE local_agent_dependency_neighborhood_verified • Uygulama kontrolü (desktop.app) runtime dependency neighborhood havuza eklendi • entry=resolveRequestedApplication • candidates=8
-KRALI_LOCAL_STAGE local_agent_dependency_neighborhood_verified • Uygulama kontrolü (desktop.app) runtime dependency neighborhood havuza eklendi • entry=applicationTargetPhrase • candidates=4
+KRALI_LOCAL_STAGE local_agent_dependency_neighborhood_verified • Uygulama kontrolü (desktop.app) runtime dependency neighborhood havuza eklendi • entry=resolveRequestedApplication • candidates=10
+KRALI_LOCAL_STAGE local_agent_dependency_neighborhood_verified • Uygulama kontrolü (desktop.app) runtime dependency neighborhood havuza eklendi • entry=applicationTargetPhrase • candidates=8
 KRALI_LOCAL_STAGE local_agent_root_cause_pool_ready • Uygulama kontrolü (desktop.app) dedupe edilmiş root-cause candidate havuzu hazır • candidates=12
-KRALI_LOCAL_STAGE local_agent_root_cause_pruned • Uygulama kontrolü (desktop.app) deterministic candidate pruning tamamlandı • input=12 • output=4 • top=installedApplicationCandidates:23,launchServicesApplicationCandidate:21,nestedApplicationCandidates:21,mergeCandidates:21
+KRALI_LOCAL_STAGE local_agent_root_cause_pruned • Uygulama kontrolü (desktop.app) deterministic candidate pruning tamamlandı • input=12 • output=4 • top=mergedAliases:37,installedApplicationCandidates:33,nestedApplicationCandidates:31,mergeCandidates:23
 KRALI_LOCAL_STAGE local_agent_root_cause_ranking • Uygulama kontrolü (desktop.app) deterministic pruning sonrası candidate ranking • candidates=4 • rootCauseModel=qwen2.5-coder:14b-instruct
+KRALI_LOCAL_STAGE local_agent_root_cause_ranked • Uygulama kontrolü (desktop.app) root-cause adayları sıralandı • top=mergedAliases:0.80,installedApplicationCandidates:0.70
+KRALI_LOCAL_STAGE local_agent_root_cause_verifying • Uygulama kontrolü (desktop.app) seçilen root-cause hypothesis patch öncesi doğrulanıyor • target=mergedAliases • rootCauseModel=qwen2.5-coder:14b-instruct
+KRALI_LOCAL_STAGE local_agent_root_cause_verified • Uygulama kontrolü (desktop.app) root-cause hypothesis doğrulandı • target=mergedAliases • reason=The mergedAliases function may be returning an incorrect or incomplete set of aliases, leading to a failure in resolving the correct application. This could result in the 'Notlar' query not being correctly mapped to the 'Notes' application, causing the launch failure.
+KRALI_LOCAL_STAGE local_agent_root_cause_selected • Uygulama kontrolü (desktop.app) ranked+verified mutation target seçildi • target=mergedAliases • path=App/KRALIAgentNative/AgentNaturalLanguageResolver.swift • range=707-732 • confidence=0.80 • rootCauseModel=qwen2.5-coder:14b-instruct
+KRALI_LOCAL_STAGE local_agent_controller_preparing • Uygulama kontrolü (desktop.app) structured controller girdisi hazır • mode=exact_replace • problem=runtime_evidence • chars=3217 • decisionModel=devstral-small-2:24b • role=architect-mutation
+KRALI_LOCAL_STAGE local_agent_mutation_model_fallback • Uygulama kontrolü (desktop.app) verified target + runtime trace mevcut; ilk ağır mutation timeout sonrası aynı modeli tekrar etmeden hızlı fallback • devstral-small-2:24b → qwen2.5-coder:14b-instruct
+KRALI_LOCAL_STAGE local_agent_controller_preparing • Uygulama kontrolü (desktop.app) ana model belleği karar modeli için boşaltıldı • devstral-small-2:24b → qwen2.5-coder:14b-instruct
+KRALI_LOCAL_STAGE local_agent_controller_preparing • Uygulama kontrolü (desktop.app) structured controller girdisi hazır • mode=exact_replace • problem=runtime_evidence • chars=3040 • decisionModel=qwen2.5-coder:14b-instruct • role=architect-mutation
+KRALI_LOCAL_STAGE local_agent_controller_rejected • Uygulama kontrolü (desktop.app) structured controller kararı reddedildi • controller isteği başarısız/zaman aşımı • controller=qwen2.5-coder:14b-instruct
+Doğrulanmış root-cause checkpoint'i korundu; mutation controller timeout sonrası aynı diagnosis yeniden başlatılmadı.
+Deleted branch krali-dev-agent/20260922-233720 (was f1e0317).
+❌ Native yerel Developer Agent durdu: Doğrulanmış root-cause checkpoint'i korundu; mutation controller timeout sonrası aynı diagnosis yeniden başlatılmadı.
