@@ -7,7 +7,8 @@ BRANCH="krali-dev-agent/$STAMP"
 WORKTREE_BASE="${KRALI_DEV_WORKTREE_BASE:-$HOME/Developer}"
 WORKTREE="$WORKTREE_BASE/KRALI-Agent-Dev-$STAMP"
 LOG_DIR="$HOME/Library/Logs"
-LOG="$LOG_DIR/KRALI-Developer-Agent.log"
+RUN_LOG_DIR="$LOG_DIR/KRALI-Developer-Agent-Runs"
+LOG="$RUN_LOG_DIR/$STAMP.log"
 STATUS_DIR="$HOME/Library/Application Support/KRALI Agent/Developer"
 STATUS="$STATUS_DIR/latest.txt"
 LOCAL_MENTOR_DIR="$HOME/Library/Application Support/KRALI Agent/Mentor"
@@ -18,7 +19,8 @@ LEARNING_JOB_FILE="${KRALI_LEARNING_JOB_FILE:-}"
 
 export PATH="/opt/homebrew/bin:/usr/local/bin:$HOME/.npm-global/bin:/usr/bin:/bin:/usr/sbin:/sbin:$PATH"
 
-mkdir -p "$LOG_DIR" "$STATUS_DIR" "$SKILL_CANDIDATE_DIR"
+mkdir -p "$LOG_DIR" "$RUN_LOG_DIR" "$STATUS_DIR" "$SKILL_CANDIDATE_DIR"
+printf "%s\n" "$LOG" > "$STATUS_DIR/active-run-log.txt"
 
 write_status() {
     APP_VERSION="$(
@@ -958,86 +960,148 @@ const sourceGoals =
 const evidenceCount =
   Number(payload && payload.evidenceCount || sourceGoals.length || 1);
 
-const runtimeEvidence =
-  currentMentor &&
-  Array.isArray(currentMentor.activityTail) &&
-  Array.isArray(currentMentor.capabilityGaps) &&
-  currentMentor.capabilityGaps.some(
-    (item) =>
-      String(item && item.capabilityID || "") ===
-      String(gap.capabilityID || "")
-  )
-    ? currentMentor.activityTail
-        .map((item) => String(item && item.text || ""))
-        .filter((line) =>
-          /başarısız|bulunamadı|runtime capability gap|postcondition|failed|error/i.test(
-            line
-          )
-        )
-        .slice(0, 8)
+const immutableSnapshots =
+  payload &&
+  Array.isArray(payload.evidenceSnapshots)
+    ? payload.evidenceSnapshots
+        .filter(Boolean)
     : [];
 
-const resolutionTraceMatches =
-  String(gap.capabilityID || "") ===
-    "desktop.app" &&
-  resolutionTrace &&
-  currentMentor &&
-  String(
-    resolutionTrace.requestedText || ""
-  ) ===
-  String(
-    currentMentor.userInput || ""
-  );
+const hasImmutableEvidence =
+  immutableSnapshots.length > 0;
+
+const runtimeEvidence =
+  hasImmutableEvidence
+    ? immutableSnapshots
+        .flatMap((snapshot) =>
+          Array.isArray(
+            snapshot &&
+            snapshot.runtimeEvidence
+          )
+            ? snapshot.runtimeEvidence
+            : []
+        )
+        .map((line) => String(line || ""))
+        .filter(Boolean)
+        .slice(-12)
+    : (
+        currentMentor &&
+        Array.isArray(currentMentor.activityTail) &&
+        Array.isArray(currentMentor.capabilityGaps) &&
+        currentMentor.capabilityGaps.some(
+          (item) =>
+            String(item && item.capabilityID || "") ===
+            String(gap.capabilityID || "")
+        )
+          ? currentMentor.activityTail
+              .map((item) => String(item && item.text || ""))
+              .filter((line) =>
+                /başarısız|bulunamadı|runtime capability gap|postcondition|failed|error/i.test(
+                  line
+                )
+              )
+              .slice(0, 8)
+          : []
+      );
+
+let boundResolutionTrace = null;
+
+if (hasImmutableEvidence) {
+  for (
+    let index = immutableSnapshots.length - 1;
+    index >= 0;
+    index -= 1
+  ) {
+    const raw = String(
+      immutableSnapshots[index] &&
+      immutableSnapshots[index].resolverTraceJSON ||
+      ""
+    ).trim();
+
+    if (!raw) {
+      continue;
+    }
+
+    try {
+      const parsed = JSON.parse(raw);
+
+      if (
+        parsed &&
+        typeof parsed === "object"
+      ) {
+        boundResolutionTrace = parsed;
+        break;
+      }
+    } catch {}
+  }
+} else {
+  const resolutionTraceMatches =
+    String(gap.capabilityID || "") ===
+      "desktop.app" &&
+    resolutionTrace &&
+    currentMentor &&
+    String(
+      resolutionTrace.requestedText || ""
+    ) ===
+    String(
+      currentMentor.userInput || ""
+    );
+
+  if (resolutionTraceMatches) {
+    boundResolutionTrace =
+      resolutionTrace;
+  }
+}
 
 const resolverRuntimeEvidence =
-  resolutionTraceMatches
+  boundResolutionTrace
     ? JSON.stringify({
         requestedText:
           String(
-            resolutionTrace.requestedText || ""
+            boundResolutionTrace.requestedText || ""
           ),
         queries:
           Array.isArray(
-            resolutionTrace.queries
+            boundResolutionTrace.queries
           )
-            ? resolutionTrace.queries
+            ? boundResolutionTrace.queries
                 .slice(0, 4)
             : [],
         candidateCounts: {
           cacheBefore:
-            resolutionTrace
+            boundResolutionTrace
               .cacheCandidateCountBefore ??
             null,
           installed:
             Number(
-              resolutionTrace
+              boundResolutionTrace
                 .installedCandidateCount ||
               0
             ),
           refreshed:
             Number(
-              resolutionTrace
+              boundResolutionTrace
                 .refreshedCandidateCount ||
               0
             ),
           nested:
             Number(
-              resolutionTrace
+              boundResolutionTrace
                 .nestedCandidateCount ||
               0
             ),
           expanded:
             Number(
-              resolutionTrace
+              boundResolutionTrace
                 .expandedCandidateCount ||
               0
             ),
         },
         queryTraces:
           Array.isArray(
-            resolutionTrace.queryTraces
+            boundResolutionTrace.queryTraces
           )
-            ? resolutionTrace.queryTraces
+            ? boundResolutionTrace.queryTraces
                 .slice(0, 4)
                 .map((item) => ({
                   query:
@@ -1288,13 +1352,40 @@ const capabilityID = String(
   gap && gap.capabilityID || ""
 );
 
-const lines =
-  mentor &&
-  Array.isArray(mentor.activityTail)
-    ? mentor.activityTail.map(
-        (item) => String(item && item.text || "")
-      )
+const immutableSnapshots =
+  source &&
+  Array.isArray(source.evidenceSnapshots)
+    ? source.evidenceSnapshots
+        .filter(Boolean)
     : [];
+
+const lines =
+  immutableSnapshots.length > 0
+    ? immutableSnapshots
+        .flatMap((snapshot) =>
+          Array.isArray(
+            snapshot &&
+            snapshot.runtimeEvidence
+          )
+            ? snapshot.runtimeEvidence
+            : []
+        )
+        .map((line) =>
+          String(line || "")
+        )
+    : (
+        mentor &&
+        Array.isArray(mentor.activityTail)
+          ? mentor.activityTail.map(
+              (item) =>
+                String(
+                  item &&
+                  item.text ||
+                  ""
+                )
+            )
+          : []
+      );
 
 const hints = [];
 
