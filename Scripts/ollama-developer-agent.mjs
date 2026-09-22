@@ -2316,11 +2316,13 @@ function compactControllerEvidence(
   };
 }
 
-async function releasePrimaryModelForController() {
+async function prepareDecisionModel(
+  targetModel
+) {
   if (
     !model ||
-    !controllerModel ||
-    model === controllerModel
+    !targetModel ||
+    model === targetModel
   ) {
     return true;
   }
@@ -2364,8 +2366,8 @@ async function releasePrimaryModelForController() {
         stage(
           "local_agent_controller_preparing",
           gapLabel +
-            " ana model bellekte değil; sıcak controller korunuyor • controller=" +
-            controllerModel
+            " ana model bellekte değil; karar modeli korunuyor • decisionModel=" +
+            targetModel
         );
         return true;
       }
@@ -2394,7 +2396,7 @@ async function releasePrimaryModelForController() {
       stage(
         "local_agent_controller_preparing",
         gapLabel +
-          " ana model belleği boşaltılamadı; controller yine denenecek • HTTP " +
+          " ana model belleği boşaltılamadı; karar modeli yine denenecek • HTTP " +
           response.status
       );
       return false;
@@ -2403,10 +2405,10 @@ async function releasePrimaryModelForController() {
     stage(
       "local_agent_controller_preparing",
       gapLabel +
-        " ana model belleği controller için boşaltıldı • " +
+        " ana model belleği karar modeli için boşaltıldı • " +
         model +
         " → " +
-        controllerModel
+        targetModel
     );
     return true;
   } catch {
@@ -2414,7 +2416,7 @@ async function releasePrimaryModelForController() {
     stage(
       "local_agent_controller_preparing",
       gapLabel +
-        " ana model bellek bırakma isteği zaman aşımına uğradı; controller yine denenecek"
+        " ana model bellek bırakma isteği zaman aşımına uğradı; karar modeli yine denenecek"
     );
     return false;
   }
@@ -2495,6 +2497,12 @@ async function requestStructuredToolDecision(
     rollbackRepair &&
     lastFailedReplaceMutation?.old_text &&
     lastFailedReplaceMutation?.path;
+
+  const decisionModel =
+    fixedReplaceMode &&
+    architectModel
+      ? architectModel
+      : controllerModel;
 
   const fixedReplacePath =
     fixedRepairMode
@@ -2578,7 +2586,7 @@ async function requestStructuredToolDecision(
     fixedReplaceMode
       ? fixedRepairMode
         ? [
-            "You are KRALI Exact Repair Controller.",
+            "You are KRALI Exact Repair Architect.",
             "Return JSON matching the supplied schema and nothing else.",
             "The target path, tool, and exact old_text are already fixed by KRALI.",
             "Return only a corrected new_text replacement for fixed_old_text.",
@@ -2590,7 +2598,7 @@ async function requestStructuredToolDecision(
             "Do not include path, tool name, old_text, reason, markdown, prose, or code fences.",
           ].join("\n")
         : [
-            "You are KRALI Exact Mutation Controller.",
+            "You are KRALI Exact Mutation Architect.",
             "Return JSON matching the supplied schema and nothing else.",
             "The target path and tool are already fixed by KRALI.",
             "Your only job is to choose one exact old_text block and its corrected new_text.",
@@ -2627,7 +2635,9 @@ async function requestStructuredToolDecision(
           "Never request a tool that is absent from the supplied tool contracts.",
         ].join("\n");
 
-  await releasePrimaryModelForController();
+  await prepareDecisionModel(
+    decisionModel
+  );
 
   const effectiveBlockers =
     blockers
@@ -2730,8 +2740,14 @@ async function requestStructuredToolDecision(
         : "n/a") +
       " • chars=" +
       controllerInputChars +
-      " • controller=" +
-      controllerModel
+      " • decisionModel=" +
+      decisionModel +
+      " • role=" +
+      (
+        fixedReplaceMode
+          ? "architect-mutation"
+          : "controller"
+      )
   );
 
   const controller = new AbortController();
@@ -2766,7 +2782,7 @@ async function requestStructuredToolDecision(
       },
       signal: controller.signal,
       body: JSON.stringify({
-        model: controllerModel,
+        model: decisionModel,
         stream: false,
         format: decisionFormat,
         messages: [
@@ -2825,9 +2841,15 @@ async function requestStructuredToolDecision(
         options: {
           temperature: 0,
           num_ctx:
-            ultraCompactRetry
-              ? 3072
-              : 4096,
+            fixedReplaceMode
+              ? (
+                  ultraCompactRetry
+                    ? 8192
+                    : 24576
+                )
+              : ultraCompactRetry
+                ? 3072
+                : 4096,
           num_predict:
             fixedReplaceMode
               ? (
@@ -2857,8 +2879,8 @@ async function requestStructuredToolDecision(
       stage(
         "local_agent_controller_compact_retry",
         gapLabel +
-          " ilk mutation controller isteği zaman aşımına uğradı • ultra-kompakt Qwen retry • controller=" +
-          controllerModel
+          " ilk mutation karar isteği zaman aşımına uğradı • ultra-kompakt retry • decisionModel=" +
+          decisionModel
       );
 
       return requestStructuredToolDecision(
@@ -3122,8 +3144,8 @@ async function requestStructuredToolDecision(
         gapLabel +
           " " +
           validationReason +
-          " • controller=" +
-          controllerModel
+          " • decisionModel=" +
+          decisionModel
       );
 
       if (
@@ -3174,8 +3196,8 @@ async function requestStructuredToolDecision(
         gapLabel +
           " " +
           repeatReason +
-          " • controller=" +
-          controllerModel
+          " • decisionModel=" +
+          decisionModel
       );
 
       if (
