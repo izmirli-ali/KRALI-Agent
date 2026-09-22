@@ -1332,12 +1332,35 @@ async function requestStructuredToolDecision(
 
   const phase = developmentPhase();
 
-  const toolContracts = toolsForCurrentPhase()
+  let toolContracts = toolsForCurrentPhase()
     .map((tool) => ({
       name: tool.function.name,
       description: tool.function.description,
       parameters: tool.function.parameters,
     }));
+
+  const previousStructuredError = String(
+    lastStructuredOutcome?.result?.error || ""
+  );
+
+  const exactReplaceFailure =
+    phase === "implementation" &&
+    lastStructuredOutcome?.tool === "replace_text" &&
+    lastStructuredOutcome?.result?.ok === false &&
+    (
+      previousStructuredError.includes("old_text") ||
+      previousStructuredError.includes("eşleş")
+    );
+
+  if (exactReplaceFailure) {
+    const patchContract = toolContracts.find(
+      (tool) => tool.name === "apply_patch"
+    );
+
+    if (patchContract) {
+      toolContracts = [patchContract];
+    }
+  }
 
   const controllerEvidence =
     compactControllerEvidence();
@@ -1422,6 +1445,7 @@ async function requestStructuredToolDecision(
               "During implementation, obey the supplied tool contracts exactly. If only mutation tools are supplied, choose a minimal mutation tool now; do not answer with prose.",
               "read_file evidence lines may be prefixed like '  123 | '; those prefixes are display metadata, not source text. Never copy line-number prefixes into old_text, new_text, file content, or patches.",
               "If lastStructuredOutcome contains a failed real tool result, repair that exact failure with the next minimal mutation instead of repeating the same arguments.",
+              "If replace_text failed because old_text was not found or was ambiguous, do not retry replace_text. Use the supplied apply_patch contract and lastVerifiedRead to produce a minimal context-aware patch.",
               "candidateDiff is the current real worktree diff. Use it together with source evidence to repair only the defect introduced by the candidate.",
               "If lastStructuredOutcome is a failed build_check, compiler output is authoritative: choose a minimum mutation tool to repair the current candidate before running build_check again.",
               "During verification, prefer git_diff and build_check when no compiler failure is already known; mutate when build evidence shows a fix is needed.",
@@ -1443,6 +1467,13 @@ async function requestStructuredToolDecision(
                 1200
               ),
               phase,
+              recoveryHints: {
+                exactReplaceFailure,
+                previousStructuredError: truncate(
+                  previousStructuredError,
+                  1200
+                ),
+              },
               evidence: {
                 sawMutatingTool,
                 sawGitDiff,
@@ -1683,10 +1714,32 @@ async function runStructuredContinuation(
   });
 
   if (!result?.ok) {
-    requestMoreWork([
-      "yapılandırılmış tool başarısız: " +
-        decision.name,
-    ]);
+    const safeArgs = truncate(
+      JSON.stringify(decision.args || {}),
+      1800
+    );
+    const safeError = truncate(
+      result?.error ||
+        result?.output ||
+        "bilinmeyen structured tool hatası",
+      1800
+    );
+
+    stage(
+      "local_agent_structured_failure",
+      gapLabel +
+        " structured tool başarısız • tool=" +
+        decision.name +
+        " • error=" +
+        safeError +
+        " • args=" +
+        safeArgs
+    );
+
+    persistCheckpoint(
+      "structured_tool_failed:" +
+        decision.name
+    );
   }
 
   return true;
@@ -1869,7 +1922,7 @@ async function runVerifiedResumeFastPath() {
     "verified_resume_controller"
   );
 
-  for (let attempt = 1; attempt <= 2; attempt++) {
+  for (let attempt = 1; attempt <= 3; attempt++) {
     const {
       blockers,
     } = currentCandidateBlockers();
@@ -1878,7 +1931,7 @@ async function runVerifiedResumeFastPath() {
       await runStructuredContinuation(
         attempt === 1
           ? "Doğrulanmış implementation checkpoint'inden devam ediliyor. Hedef kaynak zaten okundu; yeni inspection yapmadan minimum generic mutation uygula."
-          : "Önceki structured candidate preflight/build doğrulamasında başarısız oldu. lastStructuredOutcome compiler kanıtını ve candidateDiff'i kullan; yeni inspection veya tekrar build yapmadan önce mevcut candidate'ı minimum mutation ile düzelt.",
+          : "Önceki structured mutation veya candidate preflight gerçek tool kanıtıyla başarısız oldu. lastStructuredOutcome hata kanıtını, lastVerifiedRead kaynağını ve varsa candidateDiff'i kullan. Aynı başarısız argümanları tekrarlama; yeni inspection yapmadan minimum repair mutation uygula.",
         blockers.length > 0
           ? blockers
           : [
@@ -1886,7 +1939,7 @@ async function runVerifiedResumeFastPath() {
             ],
         attempt === 1
           ? "verified_resume"
-          : "verified_resume_build_repair"
+          : "verified_resume_mutation_repair_" + attempt
       );
 
     if (!continued) {
@@ -1904,7 +1957,7 @@ async function runVerifiedResumeFastPath() {
       handoffStructuredCandidateIfReady(
         attempt === 1
           ? "verified_resume"
-          : "verified_resume_build_repair"
+          : "verified_resume_mutation_repair_" + attempt
       )
     ) {
       return true;
