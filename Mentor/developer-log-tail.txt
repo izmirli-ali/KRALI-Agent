@@ -1,12 +1,3 @@
-━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-⚠️ Global Node.js v26 Cline bağımlılıklarıyla uyumlu değil; izole Node 22 runtime hazırlanıyor.
-✅ Developer Agent runtime: v22.23.2
-⚡ Tool-capable model cache kullanılıyor: devstral:24b • yaş=1967s
-Yerel model seçimi: devstral:24b • RAM≈24GB
-✅ Yerel Developer AI hazır + tool-call doğrulandı: devstral:24b
-From https://github.com/izmirli-ali/KRALI-Agent
- * branch            main       -> FETCH_HEAD
-Already up to date.
 Learning Queue job brief bulundu; mutable Mentor latest yerine immutable job kullanılacak.
 Preparing worktree (new branch 'krali-dev-agent/20260922-195428')
 branch 'krali-dev-agent/20260922-195428' set up to track 'origin/main'.
@@ -118,3 +109,12 @@ KRALI_LOCAL_STAGE local_agent_controller_rejected • Uygulama kontrolü (deskto
 Implementation aşamasında ana model zaman aşımına uğradı ve structured controller güvenli devam kararı üretemedi.
 Deleted branch krali-dev-agent/20260922-195428 (was 75e37ff).
 ❌ Native yerel Developer Agent durdu: Implementation aşamasında ana model zaman aşımına uğradı ve structured controller güvenli devam kararı üretemedi.
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+ KRALİ DEVELOPER AGENT
+ 20260922-205333
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+⚠️ Global Node.js v26 Cline bağımlılıklarıyla uyumlu değil; izole Node 22 runtime hazırlanıyor.
+✅ Developer Agent runtime: v22.23.2
+Yerel architect model seçimi: devstral-small-2:24b • RAM≈24GB
+❌ Model indirilmedi; disk alanı korunuyor: devstral-small-2:24b • boş≈17GB
