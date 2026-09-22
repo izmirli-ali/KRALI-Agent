@@ -1,55 +1,3 @@
-⚠️ Candidate repair agent turu tamamlanamadı: 1
-🔧 Candidate repair turu 2/2 başlatılıyor.
-KRALI_LOCAL_STAGE local_agent_starting • Candidate build repair native Ollama agent başlatılıyor: devstral:24b
-KRALI_LOCAL_STAGE local_agent_running • Candidate build repair yerel model çalışıyor • adım 1/8
-KRALI_LOCAL_STAGE local_agent_tool • Candidate build repair araç çalışıyor: read_file
-KRALI_LOCAL_STAGE local_agent_running • Candidate build repair yerel model çalışıyor • adım 2/8
-The issue appears to be duplicate computed property declarations in the AgentEngine.swift file. Let me fix this by removing the duplicate code.
-KRALI_LOCAL_STAGE local_agent_controller_preparing • Candidate build repair structured controller girdisi hazır • chars=3242 • controller=devstral:24b
-KRALI_LOCAL_STAGE local_agent_controller_rejected • Candidate build repair structured controller kararı reddedildi • controller isteği başarısız/zaman aşımı • controller=devstral:24b
-KRALI_LOCAL_STAGE local_agent_completion_rejected • Candidate build repair tamamlanma reddedildi • aktif capability gap için gerçek candidate değişikliği yok • deneme=1/2
-KRALI_LOCAL_STAGE local_agent_running • Candidate build repair yerel model çalışıyor • adım 3/8
-KRALI_LOCAL_STAGE local_agent_request_retry • Candidate build repair model isteği zaman aşımına uğradı; mevcut context korunarak retry 1/2
-Candidate build repair native local agent toplam zaman sınırına ulaştı.
-⚠️ Candidate repair agent turu tamamlanamadı: 2
-
-━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
- KRALİ DEVELOPER AGENT
- 20260922-123331
-━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-⚠️ Global Node.js v26 Cline bağımlılıklarıyla uyumlu değil; izole Node 22 runtime hazırlanıyor.
-✅ Developer Agent runtime: v22.23.2
-Ollama servisi başlatılıyor...
-⚡ Tool-capable model cache kullanılıyor: devstral:24b • yaş=6206s
-Yerel model seçimi: devstral:24b • RAM≈24GB
-✅ Yerel Developer AI hazır + tool-call doğrulandı: devstral:24b
-From https://github.com/izmirli-ali/KRALI-Agent
- * branch            main       -> FETCH_HEAD
-Already up to date.
-Learning Queue job brief bulundu; mutable Mentor latest yerine immutable job kullanılacak.
-Preparing worktree (new branch 'krali-dev-agent/20260922-123331')
-branch 'krali-dev-agent/20260922-123331' set up to track 'origin/main'.
-HEAD is now at 9c40d1d v0.9.03: bump build to 153
-Developer prompt mode: gap • 4262 bytes
-⚡ Structured controller cache adayı yeniden ısıtılıyor: qwen2.5-coder:14b-instruct • yaş=1172s
-🧪 Structured controller JSON probe: qwen2.5-coder:14b-instruct
-controller_probe_ok|qwen2.5-coder:14b-instruct|12450ms
-✅ Structured controller cache doğrulandı ve sıcak: qwen2.5-coder:14b-instruct
-🧭 Structured controller modeli: qwen2.5-coder:14b-instruct • ölçülmüş JSON karar modu
-♻️ Developer checkpoint bulundu; aynı gap teşhisi kaldığı yerden devam edecek: desktop.app-02edb76fda4e
-KRALI_LOCAL_STAGE local_agent_resumed • Uygulama kontrolü (desktop.app) process-level checkpoint yüklendi • evidence=10 • recordedPhase=verification • effectivePhase=implementation • candidateMatch=false
-KRALI_LOCAL_STAGE local_agent_verified_resume_controller • Uygulama kontrolü (desktop.app) doğrulanmış implementation checkpoint'i bulundu • ana model atlanıyor • controller=qwen2.5-coder:14b-instruct
-KRALI_LOCAL_STAGE local_agent_controller_preparing • Uygulama kontrolü (desktop.app) ana model bellekte değil; sıcak controller korunuyor • controller=qwen2.5-coder:14b-instruct
-KRALI_LOCAL_STAGE local_agent_controller_preparing • Uygulama kontrolü (desktop.app) structured controller girdisi hazır • chars=4141 • controller=qwen2.5-coder:14b-instruct
-KRALI_LOCAL_STAGE local_agent_structured_mutation • Uygulama kontrolü (desktop.app) yapılandırılmış devam aracı çalışıyor: replace_text • trigger=verified_resume • phase=implementation • controller=qwen2.5-coder:14b-instruct
-KRALI_LOCAL_STAGE local_agent_structured_tool • Uygulama kontrolü (desktop.app) candidate preflight diff doğrulaması çalışıyor • trigger=verified_resume
-KRALI_LOCAL_STAGE local_agent_structured_tool • Uygulama kontrolü (desktop.app) candidate preflight build_check çalışıyor • trigger=verified_resume
-KRALI_LOCAL_STAGE local_agent_mutation_rolled_back • Uygulama kontrolü (desktop.app) başarısız preflight sonrası son mutation geri alındı • trigger=verified_resume
-KRALI_LOCAL_STAGE local_agent_structured_tool • Uygulama kontrolü (desktop.app) candidate preflight build başarısız • sıcak controller ile repair gerekli • rollback=true • trigger=verified_resume
-KRALI_LOCAL_STAGE local_agent_controller_preparing • Uygulama kontrolü (desktop.app) ana model bellekte değil; sıcak controller korunuyor • controller=qwen2.5-coder:14b-instruct
-KRALI_LOCAL_STAGE local_agent_controller_preparing • Uygulama kontrolü (desktop.app) structured controller girdisi hazır • chars=8261 • controller=qwen2.5-coder:14b-instruct
-KRALI_LOCAL_STAGE local_agent_controller_rejected • Uygulama kontrolü (desktop.app) structured controller kararı reddedildi • apply_patch doğrulanmış target seti dışında • controller=qwen2.5-coder:14b-instruct
-Doğrulanmış implementation checkpoint'inde structured controller güvenli devam kararı üretemedi.
 KRALI_LOCAL_STAGE local_agent_resumed • Uygulama kontrolü (desktop.app) process-level checkpoint yüklendi • evidence=10 • recordedPhase=verification • effectivePhase=implementation • candidateMatch=false
 KRALI_LOCAL_STAGE local_agent_verified_resume_controller • Uygulama kontrolü (desktop.app) doğrulanmış implementation checkpoint'i bulundu • ana model atlanıyor • controller=qwen2.5-coder:14b-instruct
 KRALI_LOCAL_STAGE local_agent_controller_preparing • Uygulama kontrolü (desktop.app) ana model bellekte değil; sıcak controller korunuyor • controller=qwen2.5-coder:14b-instruct
@@ -117,4 +65,56 @@ KRALI_LOCAL_STAGE local_agent_controller_preparing • Uygulama kontrolü (deskt
 KRALI_LOCAL_STAGE local_agent_controller_rejected • Uygulama kontrolü (desktop.app) structured controller kararı reddedildi • controller isteği başarısız/zaman aşımı • controller=qwen2.5-coder:14b-instruct
 Doğrulanmış implementation checkpoint'inde structured controller güvenli devam kararı üretemedi.
 Deleted branch krali-dev-agent/20260922-125946 (was 44af41f).
+❌ Native yerel Developer Agent durdu: Doğrulanmış implementation checkpoint'inde structured controller güvenli devam kararı üretemedi.
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+ KRALİ DEVELOPER AGENT
+ 20260922-140952
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+⚠️ Global Node.js v26 Cline bağımlılıklarıyla uyumlu değil; izole Node 22 runtime hazırlanıyor.
+✅ Developer Agent runtime: v22.23.2
+⚡ Tool-capable model cache kullanılıyor: devstral:24b • yaş=4187s
+Yerel model seçimi: devstral:24b • RAM≈24GB
+✅ Yerel Developer AI hazır + tool-call doğrulandı: devstral:24b
+From https://github.com/izmirli-ali/KRALI-Agent
+ * branch            main       -> FETCH_HEAD
+Already up to date.
+Learning Queue job brief bulundu; mutable Mentor latest yerine immutable job kullanılacak.
+Preparing worktree (new branch 'krali-dev-agent/20260922-140952')
+branch 'krali-dev-agent/20260922-140952' set up to track 'origin/main'.
+HEAD is now at 99d4356 v0.9.05: bump build to 155
+Developer prompt mode: gap • 4262 bytes
+⚡ Structured controller cache adayı yeniden ısıtılıyor: qwen2.5-coder:14b-instruct • yaş=4175s
+🧪 Structured controller JSON probe: qwen2.5-coder:14b-instruct
+controller_probe_ok|qwen2.5-coder:14b-instruct|12659ms
+✅ Structured controller cache doğrulandı ve sıcak: qwen2.5-coder:14b-instruct
+🧭 Structured controller modeli: qwen2.5-coder:14b-instruct • ölçülmüş JSON karar modu
+♻️ Developer checkpoint bulundu; aynı gap teşhisi kaldığı yerden devam edecek: desktop.app-02edb76fda4e
+KRALI_LOCAL_STAGE local_agent_resumed • Uygulama kontrolü (desktop.app) process-level checkpoint yüklendi • evidence=10 • recordedPhase=implementation • effectivePhase=implementation • candidateMatch=false
+KRALI_LOCAL_STAGE local_agent_verified_resume_controller • Uygulama kontrolü (desktop.app) doğrulanmış implementation checkpoint'i bulundu • ana model atlanıyor • controller=qwen2.5-coder:14b-instruct
+KRALI_LOCAL_STAGE local_agent_controller_preparing • Uygulama kontrolü (desktop.app) ana model bellekte değil; sıcak controller korunuyor • controller=qwen2.5-coder:14b-instruct
+KRALI_LOCAL_STAGE local_agent_controller_preparing • Uygulama kontrolü (desktop.app) structured controller girdisi hazır • chars=4164 • controller=qwen2.5-coder:14b-instruct
+KRALI_LOCAL_STAGE local_agent_structured_mutation • Uygulama kontrolü (desktop.app) yapılandırılmış devam aracı çalışıyor: replace_text • trigger=verified_resume • phase=implementation • controller=qwen2.5-coder:14b-instruct
+KRALI_LOCAL_STAGE local_agent_structured_tool • Uygulama kontrolü (desktop.app) candidate preflight diff doğrulaması çalışıyor • trigger=verified_resume
+KRALI_LOCAL_STAGE local_agent_structured_tool • Uygulama kontrolü (desktop.app) candidate preflight build_check çalışıyor • trigger=verified_resume
+KRALI_LOCAL_STAGE local_agent_mutation_rolled_back • Uygulama kontrolü (desktop.app) başarısız preflight sonrası son mutation geri alındı • trigger=verified_resume
+KRALI_LOCAL_STAGE local_agent_structured_tool • Uygulama kontrolü (desktop.app) candidate preflight build başarısız • sıcak controller ile repair gerekli • rollback=true • trigger=verified_resume
+KRALI_LOCAL_STAGE local_agent_controller_preparing • Uygulama kontrolü (desktop.app) ana model bellekte değil; sıcak controller korunuyor • controller=qwen2.5-coder:14b-instruct
+KRALI_LOCAL_STAGE local_agent_controller_preparing • Uygulama kontrolü (desktop.app) structured controller girdisi hazır • chars=7733 • controller=qwen2.5-coder:14b-instruct
+KRALI_LOCAL_STAGE local_agent_controller_rejected • Uygulama kontrolü (desktop.app) structured controller kararı reddedildi • apply_patch doğrulanmış target seti dışında • patchPaths=[] • verifiedTargets=["App/KRALIAgentNative/AgentEngine.swift","App/KRALIAgentNative/AgentInspectorState.swift","App/KRALIAgentNative/ContentView.swift","KRALI_ARCHITECTURE.md","Mentor/README.md","Scripts/publish-mentor-trace.command","Scripts/run-developer-agent.command"] • controller=qwen2.5-coder:14b-instruct
+Doğrulanmış implementation checkpoint'inde structured controller güvenli devam kararı üretemedi.
+KRALI_LOCAL_STAGE local_agent_resumed • Uygulama kontrolü (desktop.app) process-level checkpoint yüklendi • evidence=10 • recordedPhase=implementation • effectivePhase=implementation • candidateMatch=false
+KRALI_LOCAL_STAGE local_agent_verified_resume_controller • Uygulama kontrolü (desktop.app) doğrulanmış implementation checkpoint'i bulundu • ana model atlanıyor • controller=qwen2.5-coder:14b-instruct
+KRALI_LOCAL_STAGE local_agent_controller_preparing • Uygulama kontrolü (desktop.app) ana model bellekte değil; sıcak controller korunuyor • controller=qwen2.5-coder:14b-instruct
+KRALI_LOCAL_STAGE local_agent_controller_preparing • Uygulama kontrolü (desktop.app) structured controller girdisi hazır • chars=4164 • controller=qwen2.5-coder:14b-instruct
+KRALI_LOCAL_STAGE local_agent_structured_mutation • Uygulama kontrolü (desktop.app) yapılandırılmış devam aracı çalışıyor: replace_text • trigger=verified_resume • phase=implementation • controller=qwen2.5-coder:14b-instruct
+KRALI_LOCAL_STAGE local_agent_structured_tool • Uygulama kontrolü (desktop.app) candidate preflight diff doğrulaması çalışıyor • trigger=verified_resume
+KRALI_LOCAL_STAGE local_agent_structured_tool • Uygulama kontrolü (desktop.app) candidate preflight build_check çalışıyor • trigger=verified_resume
+KRALI_LOCAL_STAGE local_agent_mutation_rolled_back • Uygulama kontrolü (desktop.app) başarısız preflight sonrası son mutation geri alındı • trigger=verified_resume
+KRALI_LOCAL_STAGE local_agent_structured_tool • Uygulama kontrolü (desktop.app) candidate preflight build başarısız • sıcak controller ile repair gerekli • rollback=true • trigger=verified_resume
+KRALI_LOCAL_STAGE local_agent_controller_preparing • Uygulama kontrolü (desktop.app) ana model bellekte değil; sıcak controller korunuyor • controller=qwen2.5-coder:14b-instruct
+KRALI_LOCAL_STAGE local_agent_controller_preparing • Uygulama kontrolü (desktop.app) structured controller girdisi hazır • chars=7733 • controller=qwen2.5-coder:14b-instruct
+KRALI_LOCAL_STAGE local_agent_controller_rejected • Uygulama kontrolü (desktop.app) structured controller kararı reddedildi • apply_patch doğrulanmış target seti dışında • patchPaths=[] • verifiedTargets=["App/KRALIAgentNative/AgentEngine.swift","App/KRALIAgentNative/AgentInspectorState.swift","App/KRALIAgentNative/ContentView.swift","KRALI_ARCHITECTURE.md","Mentor/README.md","Scripts/publish-mentor-trace.command","Scripts/run-developer-agent.command"] • controller=qwen2.5-coder:14b-instruct
+Doğrulanmış implementation checkpoint'inde structured controller güvenli devam kararı üretemedi.
+Deleted branch krali-dev-agent/20260922-140952 (was 99d4356).
 ❌ Native yerel Developer Agent durdu: Doğrulanmış implementation checkpoint'inde structured controller güvenli devam kararı üretemedi.
