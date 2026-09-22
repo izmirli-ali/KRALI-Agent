@@ -139,6 +139,13 @@ final class AgentEngine: ObservableObject {
     private var runtimeStepEvidence: [Int: String] = [:]
     private var runtimeExecutedCapabilityIDs = Set<String>()
 
+    private var currentAppVersionString: String {
+        Bundle.main.object(
+            forInfoDictionaryKey:
+                "CFBundleShortVersionString"
+        ) as? String ?? "unknown"
+    }
+
     init() {
         inspectorStateForwarder =
             inspectorState.objectWillChange
@@ -6015,7 +6022,7 @@ final class AgentEngine: ObservableObject {
             developerBridge
                 .readStatus()
                 .freshForApp(
-                    launchAppVersion
+                    currentAppVersionString
                 )
 
         if liveDeveloperStatus
@@ -6123,7 +6130,7 @@ final class AgentEngine: ObservableObject {
             developerBridge
                 .readStatus()
                 .freshForApp(
-                    launchAppVersion
+                    currentAppVersionString
                 )
 
         if liveDeveloperStatus
