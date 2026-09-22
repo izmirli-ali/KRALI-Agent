@@ -111,7 +111,7 @@ CLINE_SETTINGS="${CLINE_PROVIDER_SETTINGS_PATH:-$HOME/.cline/data/settings/provi
 USE_SDK_FALLBACK=0
 SDK_HOST="$STATUS_DIR/cline-sdk-host"
 NATIVE_CLINE_BINARY=""
-TOOL_MODEL_CACHE="$STATUS_DIR/tool-model-cache.txt"
+TOOL_MODEL_CACHE="$STATUS_DIR/tool-model-cache-v2.txt"
 TOOL_MODEL_CACHE_TTL="${KRALI_TOOL_MODEL_CACHE_TTL:-7200}"
 CONTROLLER_MODEL_CACHE="$STATUS_DIR/controller-model-cache.txt"
 CONTROLLER_MODEL_CACHE_TTL="${KRALI_CONTROLLER_MODEL_CACHE_TTL:-7200}"
@@ -434,6 +434,7 @@ select_existing_local_model() {
 select_installed_tool_fallback() {
     local current_model="$1"
     local candidates=(
+        "devstral-small-2:24b"
         "qwen2.5-coder:14b-instruct"
         "qwen2.5-coder:7b-instruct"
         "qwen3:8b"
@@ -455,6 +456,85 @@ select_installed_tool_fallback() {
         fi
     done
 
+    return 1
+}
+
+ollama_version_at_least() {
+    local minimum="$1"
+    local current="$2"
+
+    "$NODE_BIN" - "$minimum" "$current" <<'NODE' >/dev/null 2>&1
+const min = String(process.argv[2] || "").split(".").map(Number);
+const cur = String(process.argv[3] || "").split(".").map(Number);
+for (let i = 0; i < Math.max(min.length, cur.length); i++) {
+  const a = Number(cur[i] || 0);
+  const b = Number(min[i] || 0);
+  if (a > b) process.exit(0);
+  if (a < b) process.exit(1);
+}
+process.exit(0);
+NODE
+}
+
+ensure_devstral2_runtime_compatibility() {
+    if [ "$MODEL" != "devstral-small-2:24b" ] &&
+       [ "$MODEL" != "devstral-small-2" ]; then
+        return 0
+    fi
+
+    local server_version=""
+    server_version="$(
+        /usr/bin/curl -fsS "$OLLAMA_BASE_URL/api/version" 2>/dev/null |
+        "$NODE_BIN" -e '
+let s="";
+process.stdin.on("data",d=>s+=d);
+process.stdin.on("end",()=>{try{process.stdout.write(String(JSON.parse(s).version||""))}catch{}})
+' 2>/dev/null || true
+    )"
+
+    if [ -n "$server_version" ] &&
+       ollama_version_at_least "0.13.3" "$server_version"; then
+        return 0
+    fi
+
+    write_status "local_ai_upgrade_required|Devstral Small 2 için Ollama 0.13.3+ gerekiyor; mevcut=${server_version:-unknown}"
+
+    if [ -n "$BREW_BIN" ] &&
+       "$BREW_BIN" list ollama >/dev/null 2>&1; then
+        echo "♻️ Ollama Devstral Small 2 uyumluluğu için güncelleniyor..." | tee -a "$LOG"
+
+        if "$BREW_BIN" upgrade ollama >>"$LOG" 2>&1; then
+            /usr/bin/pkill -x ollama >/dev/null 2>&1 || true
+            /bin/sleep 1
+            rehash 2>/dev/null || true
+            OLLAMA_BIN="$(command -v ollama || true)"
+            /usr/bin/nohup "$OLLAMA_BIN" serve >>"$LOG_DIR/KRALI-Ollama.log" 2>&1 &
+
+            for _ in {1..30}; do
+                if /usr/bin/curl -fsS "$OLLAMA_BASE_URL/api/tags" >/dev/null 2>&1; then
+                    break
+                fi
+                /bin/sleep 1
+            done
+
+            server_version="$(
+                /usr/bin/curl -fsS "$OLLAMA_BASE_URL/api/version" 2>/dev/null |
+                "$NODE_BIN" -e '
+let s="";
+process.stdin.on("data",d=>s+=d);
+process.stdin.on("end",()=>{try{process.stdout.write(String(JSON.parse(s).version||""))}catch{}})
+' 2>/dev/null || true
+            )"
+
+            if [ -n "$server_version" ] &&
+               ollama_version_at_least "0.13.3" "$server_version"; then
+                echo "✅ Ollama uyumlu sürüme güncellendi: $server_version" | tee -a "$LOG"
+                return 0
+            fi
+        fi
+    fi
+
+    echo "❌ Devstral Small 2 için Ollama 0.13.3+ gerekli; mevcut: ${server_version:-unknown}" | tee -a "$LOG"
     return 1
 }
 
@@ -513,16 +593,22 @@ prepare_ollama_runtime() {
 
     if [ -z "$MODEL" ]; then
         if ! use_cached_tool_model; then
-            if ! select_existing_local_model; then
-                if [ "$MEMORY_GB" -ge 20 ]; then
-                    MODEL="devstral-small-2:24b"
-                else
-                    MODEL="qwen2.5-coder:7b-instruct"
-                fi
+            if [ "$MEMORY_GB" -ge 20 ]; then
+                # v0.10 architect migration: do not silently keep the legacy
+                # Devstral merely because it is already installed. Pull the
+                # newer architect model once, then cache only after probe PASS.
+                MODEL="devstral-small-2:24b"
+            elif ! select_existing_local_model; then
+                MODEL="qwen2.5-coder:7b-instruct"
             fi
         fi
 
-        echo "Yerel model seçimi: $MODEL • RAM≈${MEMORY_GB}GB" | tee -a "$LOG"
+        echo "Yerel architect model seçimi: $MODEL • RAM≈${MEMORY_GB}GB" | tee -a "$LOG"
+    fi
+
+    if ! ensure_devstral2_runtime_compatibility; then
+        write_status "local_ai_failed|Architect model runtime uyumluluğu sağlanamadı: $MODEL"
+        return 1
     fi
 
     if ! ensure_ollama_model "$MODEL"; then
