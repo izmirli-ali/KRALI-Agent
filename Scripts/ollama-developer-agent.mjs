@@ -1245,12 +1245,14 @@ function persistCheckpoint(reason = "progress") {
 
   const status = candidateStatus();
   const payload = {
-    version: 4,
+    version: 5,
     baseHead: currentBaseHead(),
     gapLabel,
     reason,
     model,
+    architectModel,
     controllerModel,
+    rootCauseDiagnosis,
     phase: developmentPhase(),
     inspectionToolCalls,
     implementationPhaseAnnounced,
@@ -1289,7 +1291,7 @@ function loadCheckpoint() {
 
     if (
       !payload ||
-      ![1, 2, 3, 4].includes(Number(payload.version || 0))
+      ![1, 2, 3, 4, 5].includes(Number(payload.version || 0))
     ) {
       return null;
     }
@@ -1395,6 +1397,41 @@ function resumeCheckpointContext() {
   checkpointEvidence = evidence;
 
   if (
+    Number(checkpoint.version || 0) >= 5 &&
+    checkpoint.rootCauseDiagnosis &&
+    typeof checkpoint.rootCauseDiagnosis === "object"
+  ) {
+    rootCauseDiagnosis = {
+      root_cause:
+        String(
+          checkpoint.rootCauseDiagnosis.root_cause || ""
+        ),
+      strategy:
+        String(
+          checkpoint.rootCauseDiagnosis.strategy || ""
+        ),
+      confidence:
+        Number(
+          checkpoint.rootCauseDiagnosis.confidence || 0
+        ),
+      target_symbol:
+        String(
+          checkpoint.rootCauseDiagnosis.target_symbol || ""
+        ),
+      target_path:
+        String(
+          checkpoint.rootCauseDiagnosis.target_path || ""
+        ),
+      alternatives_considered:
+        Array.isArray(
+          checkpoint.rootCauseDiagnosis.alternatives_considered
+        )
+          ? checkpoint.rootCauseDiagnosis.alternatives_considered
+          : [],
+    };
+  }
+
+  if (
     Number(checkpoint.version || 0) >= 3 &&
     (
       checkpoint.phase === "implementation" ||
@@ -1481,6 +1518,15 @@ function resumeCheckpointContext() {
       "Effective resume phase: " + resumedPhase,
       "Checkpoint evidence:",
       truncate(JSON.stringify(evidence), 18000),
+      rootCauseDiagnosis
+        ? (
+            "Root Cause Architect checkpoint: " +
+            truncate(
+              JSON.stringify(rootCauseDiagnosis),
+              3600
+            )
+          )
+        : "",
       resumedPhase === "implementation"
         ? (
             "Implementation navigation state: searchCompleted=" +
