@@ -590,7 +590,7 @@ const tools = [
     function: {
       name: "apply_patch",
       description:
-        "Apply a unified diff inside the isolated candidate worktree.",
+        "Apply a complete unified diff inside the isolated candidate worktree. Prefer --- a/path and +++ b/path headers; a headerless @@ hunk is accepted only when exactly one verified target exists.",
       parameters: {
         type: "object",
         required: ["patch"],
@@ -755,12 +755,20 @@ function toolsForCurrentPhase() {
   });
 }
 
+function currentBaseHead() {
+  const result = runGit(["rev-parse", "HEAD"]);
+  return result.status === 0
+    ? result.stdout.trim()
+    : "";
+}
+
 function persistCheckpoint(reason = "progress") {
   if (!checkpointFile) return;
 
   const status = candidateStatus();
   const payload = {
-    version: 3,
+    version: 4,
+    baseHead: currentBaseHead(),
     gapLabel,
     reason,
     model,
@@ -803,7 +811,7 @@ function loadCheckpoint() {
 
     if (
       !payload ||
-      ![1, 2, 3].includes(Number(payload.version || 0))
+      ![1, 2, 3, 4].includes(Number(payload.version || 0))
     ) {
       return null;
     }
@@ -831,6 +839,44 @@ function recordCheckpointEvidence(name, args, result) {
 function resumeCheckpointContext() {
   const checkpoint = loadCheckpoint();
   if (!checkpoint) return;
+
+  const checkpointBaseHead =
+    typeof checkpoint.baseHead === "string"
+      ? checkpoint.baseHead.trim()
+      : "";
+  const liveBaseHead = currentBaseHead();
+  const staleCheckpoint =
+    !checkpointBaseHead ||
+    !liveBaseHead ||
+    checkpointBaseHead !== liveBaseHead;
+
+  if (staleCheckpoint) {
+    checkpointEvidence = [];
+    implementationSearchCompleted = false;
+    implementationReadCompleted = false;
+    implementationTargetPaths = [];
+    sawMutatingTool = false;
+    sawGitDiff = false;
+    buildCheckPassed = false;
+    inspectionToolCalls = 0;
+    implementationPhaseAnnounced = false;
+
+    stage(
+      "local_agent_checkpoint_stale",
+      gapLabel +
+        " checkpoint source provenance eski • recordedHead=" +
+        (checkpointBaseHead || "<none>") +
+        " • liveHead=" +
+        (liveBaseHead || "<unknown>") +
+        " • source hedefleri yeniden doğrulanacak"
+    );
+
+    try {
+      fs.unlinkSync(checkpointFile);
+    } catch {}
+
+    return;
+  }
 
   const evidence = Array.isArray(checkpoint.evidence)
     ? checkpoint.evidence.slice(-10)
@@ -1065,6 +1111,55 @@ function normalizeRepoRelativePath(value) {
     .replace(/\\/g, "/")
     .replace(/^\.\//, "")
     .replace(/^[ab]\//, "");
+}
+
+function canonicalizeUnifiedPatch(
+  patchValue,
+  verifiedTargets = []
+) {
+  let patch = String(patchValue || "")
+    .trim()
+    .replace(/^\`\`\`(?:diff|patch)?\s*/i, "")
+    .replace(/\s*\`\`\`$/, "")
+    .trim();
+
+  const paths = [];
+  for (const line of patch.split("\n")) {
+    if (
+      !line.startsWith("+++ ") &&
+      !line.startsWith("--- ")
+    ) {
+      continue;
+    }
+
+    let value = line.slice(4).trim().split("\t")[0];
+    if (!value || value === "/dev/null") {
+      continue;
+    }
+
+    value = normalizeRepoRelativePath(value);
+    if (value) paths.push(value);
+  }
+
+  if (
+    paths.length === 0 &&
+    verifiedTargets.length === 1 &&
+    patch.startsWith("@@")
+  ) {
+    const target = normalizeRepoRelativePath(
+      verifiedTargets[0]
+    );
+
+    patch =
+      "--- a/" +
+      target +
+      "\n+++ b/" +
+      target +
+      "\n" +
+      patch;
+  }
+
+  return patch;
 }
 
 function mutationPathsForTool(name, args = {}) {
@@ -1773,15 +1868,20 @@ async function requestStructuredToolDecision(
     }
 
     if (name === "apply_patch") {
+      const verifiedTargets =
+        implementationTargetPaths.map(
+          normalizeRepoRelativePath
+        );
+
+      args.patch = canonicalizeUnifiedPatch(
+        args.patch,
+        verifiedTargets
+      );
+
       const patchPaths =
         mutationPathsForTool(
           "apply_patch",
           args
-        );
-
-      const verifiedTargets =
-        implementationTargetPaths.map(
-          normalizeRepoRelativePath
         );
 
       if (
