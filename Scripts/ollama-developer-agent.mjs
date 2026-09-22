@@ -2590,7 +2590,8 @@ async function requestStructuredToolDecision(
   assistantText,
   blockers,
   ultraCompactRetry = false,
-  validationRetry = 0
+  validationRetry = 0,
+  forcedDecisionModel = ""
 ) {
   if (structuredActions >= maxStructuredActions) {
     return rejectStructuredDecision(
@@ -2663,9 +2664,12 @@ async function requestStructuredToolDecision(
     lastFailedReplaceMutation?.path;
 
   const decisionModel =
-    fixedReplaceMode &&
-    mutationModel
-      ? mutationModel
+    fixedReplaceMode
+      ? (
+          forcedDecisionModel ||
+          mutationModel ||
+          controllerModel
+        )
       : controllerModel;
 
   const fixedReplacePath =
@@ -3097,7 +3101,41 @@ async function requestStructuredToolDecision(
         assistantText,
         blockers,
         true,
-        validationRetry
+        validationRetry,
+        forcedDecisionModel
+      );
+    }
+
+    if (
+      initialMutation &&
+      ultraCompactRetry &&
+      fixedReplaceMode &&
+      rootCauseMutationTargetVerified &&
+      Boolean(
+        mutationProblem
+          .runtime_diagnostic_trace
+      ) &&
+      decisionModel !== controllerModel &&
+      (
+        hardTimeoutMs -
+        (Date.now() - startedAt)
+      ) > 30000
+    ) {
+      stage(
+        "local_agent_mutation_model_fallback",
+        gapLabel +
+          " verified target + runtime trace mevcut; ağır mutation modeli timeout sonrası tek hızlı fallback • " +
+          decisionModel +
+          " → " +
+          controllerModel
+      );
+
+      return requestStructuredToolDecision(
+        assistantText,
+        blockers,
+        true,
+        validationRetry,
+        controllerModel
       );
     }
 
@@ -3376,7 +3414,8 @@ async function requestStructuredToolDecision(
           ].join("\n"),
           blockers,
           ultraCompactRetry,
-          validationRetry + 1
+          validationRetry + 1,
+          forcedDecisionModel
         );
       }
 
@@ -3426,7 +3465,8 @@ async function requestStructuredToolDecision(
           ].join("\n"),
           blockers,
           ultraCompactRetry,
-          validationRetry + 1
+          validationRetry + 1,
+          forcedDecisionModel
         );
       }
 
