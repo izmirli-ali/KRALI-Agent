@@ -1,1 +1,1 @@
-local_agent_tool_protocol_failed|Implementation aşamasında ana model zaman aşımına uğradı ve structured controller güvenli devam kararı üretemedi.|krali-dev-agent/20260922-100740|/Users/medusa/Developer/KRALI-Agent-Dev-20260922-100740|@meta|app=0.8.98|at=1790061537|run=20260922-100740
+local_agent_running|Candidate build repair yerel model çalışıyor • adım 2/8|krali-dev-agent/20260922-104946|/Users/medusa/Developer/KRALI-Agent-Dev-20260922-104946|@meta|app=0.8.99|at=1790063759|run=20260922-104946-repair-2
