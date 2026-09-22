@@ -68,6 +68,7 @@ struct ApplicationResolutionQueryTrace:
     let launchServicesPath: String?
     let launchServicesAccepted: Bool
     let decision: String
+    let failureClass: String
     let topCandidates:
         [ApplicationResolutionCandidateTrace]
 }
@@ -911,6 +912,45 @@ actor AgentDesktopControl {
         return "accepted"
     }
 
+    private func applicationResolutionFailureClass(
+        query: String,
+        launchServicesPath: String?,
+        decision: String,
+        ranked: [
+            (
+                candidate: ApplicationCandidate,
+                score: Double
+            )
+        ]
+    ) -> String {
+        if launchServicesPath != nil {
+            return "launch_services_candidate_rejected"
+        }
+
+        if decision ==
+            "ambiguous_top_candidate_margin" {
+            return "ambiguous_candidate_set"
+        }
+
+        if decision ==
+            "best_score_below_confidence_threshold",
+           ranked.prefix(5).contains(
+            where: {
+                $0.score >= 0.44 &&
+                !$0.candidate.aliases.isEmpty
+            }
+           ) {
+            return "candidate_alias_or_localization_gap_possible"
+        }
+
+        if decision ==
+            "no_positive_alias_score" {
+            return "no_candidate_similarity"
+        }
+
+        return "unresolved_application_lookup"
+    }
+
     private func bestApplicationCandidate(
         from userText: String,
         candidates: [ApplicationCandidate]
@@ -982,6 +1022,12 @@ actor AgentDesktopControl {
                             )
                         }
 
+                let decision =
+                    applicationCandidateDecision(
+                        from: query,
+                        ranked: ranked
+                    )
+
                 return ApplicationResolutionQueryTrace(
                     query: query,
                     normalizedQuery:
@@ -1000,8 +1046,13 @@ actor AgentDesktopControl {
                                 "app"
                             } ?? false,
                     decision:
-                        applicationCandidateDecision(
-                            from: query,
+                        decision,
+                    failureClass:
+                        applicationResolutionFailureClass(
+                            query: query,
+                            launchServicesPath:
+                                launchServicesPath,
+                            decision: decision,
                             ranked: ranked
                         ),
                     topCandidates:
