@@ -953,6 +953,20 @@ if [ "$PROVIDER" = "ollama" ] &&
     fi
 fi
 
+CONTROLLER_MODEL="$MODEL"
+if [ "$PROVIDER" = "ollama" ] &&
+   [ "$LOCAL_AGENT_ENGINE" = "native-ollama" ] &&
+   [ "$LEARNING_PATH" = "primitivePatch" ]; then
+    JSON_CONTROLLER_MODEL="qwen2.5-coder:14b-instruct"
+
+    if "$OLLAMA_BIN" show "$JSON_CONTROLLER_MODEL" >/dev/null 2>&1; then
+        CONTROLLER_MODEL="$JSON_CONTROLLER_MODEL"
+        echo "🧭 Structured controller modeli: $CONTROLLER_MODEL • JSON karar modu" | tee -a "$LOG"
+    else
+        echo "⚠️ JSON controller modeli kurulu değil; ana model kullanılacak: $CONTROLLER_MODEL" | tee -a "$LOG"
+    fi
+fi
+
 if [ -f "$CHECKPOINT_FILE" ]; then
     echo "♻️ Developer checkpoint bulundu; aynı gap teşhisi kaldığı yerden devam edecek: $GAP_KEY" | tee -a "$LOG"
 fi
@@ -992,6 +1006,7 @@ if [ "$PROVIDER" = "ollama" ] &&
     KRALI_WORKTREE="$WORKTREE" \
     KRALI_PROMPT_FILE="$PROMPT_FILE" \
     KRALI_DEV_MODEL="$MODEL" \
+    KRALI_CONTROLLER_MODEL="$CONTROLLER_MODEL" \
     KRALI_OLLAMA_BASE_URL="$OLLAMA_BASE_URL" \
     KRALI_STATUS_FILE="$STATUS" \
     KRALI_BRANCH="$BRANCH" \
