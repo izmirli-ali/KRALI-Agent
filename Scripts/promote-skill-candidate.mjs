@@ -11,6 +11,10 @@ const libraryFile =
   "";
 const runtimeVerified =
   (process.env.KRALI_SKILL_RUNTIME_VERIFIED || "0") === "1";
+const candidateCodeActive =
+  (process.env.KRALI_SKILL_CANDIDATE_ACTIVE || "0") === "1";
+const activeSourceCommit =
+  process.env.KRALI_SKILL_ACTIVE_SOURCE_COMMIT || "";
 const runtimeSummary =
   process.env.KRALI_SKILL_RUNTIME_SUMMARY || "";
 
@@ -23,10 +27,17 @@ if (!candidateFile || !libraryFile) {
   fail("Skill promotion için candidate/library yolu eksik.", 2);
 }
 
+if (!candidateCodeActive) {
+  fail(
+    "Skill promoted edilmedi: candidate kodunun aktif build'e geçtiği kanıtlanmadı.",
+    3
+  );
+}
+
 if (!runtimeVerified) {
   fail(
     "Skill promoted edilmedi: gerçek runtime postcondition doğrulaması gerekli.",
-    3
+    4
   );
 }
 
@@ -45,6 +56,16 @@ if (
 ) {
   fail("Skill promoted edilmedi: build/regression kanıtı eksik.", 5);
 }
+
+candidate.activation =
+  candidate.activation &&
+  typeof candidate.activation === "object"
+    ? candidate.activation
+    : {};
+candidate.activation.candidate_code_active = true;
+candidate.activation.activated_at = new Date().toISOString();
+candidate.activation.active_source_commit =
+  activeSourceCommit || null;
 
 candidate.state = "promoted";
 candidate.validation.runtime_postcondition_verified = true;
