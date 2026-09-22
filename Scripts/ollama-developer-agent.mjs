@@ -1485,7 +1485,9 @@ function summarizeBuildFailure(
   };
 }
 
-function compactControllerEvidence() {
+function compactControllerEvidence(
+  ultraCompact = false
+) {
   const lastRead = [...checkpointEvidence]
     .reverse()
     .find(
@@ -1522,15 +1524,21 @@ function compactControllerEvidence() {
       ? {
           args: truncate(
             lastRead.args || "",
-            800
+            ultraCompact
+              ? 300
+              : initialMutation
+                ? 500
+                : 800
           ),
           result: truncate(
             lastRead.result || "",
-            rollbackRepair
-              ? 6500
-              : initialMutation
-                ? 6000
-                : 12000
+            ultraCompact
+              ? 2200
+              : rollbackRepair
+                ? 6500
+                : initialMutation
+                  ? 4200
+                  : 12000
           ),
         }
       : null,
@@ -1661,7 +1669,8 @@ async function releasePrimaryModelForController() {
 
 async function requestStructuredToolDecision(
   assistantText,
-  blockers
+  blockers,
+  ultraCompactRetry = false
 ) {
   if (structuredActions >= maxStructuredActions) {
     return rejectStructuredDecision(
@@ -1716,7 +1725,9 @@ async function requestStructuredToolDecision(
   }
 
   const controllerEvidence =
-    compactControllerEvidence();
+    compactControllerEvidence(
+      ultraCompactRetry
+    );
 
   const decisionFormat = {
     type: "object",
@@ -1744,9 +1755,30 @@ async function requestStructuredToolDecision(
 
   await releasePrimaryModelForController();
 
+  const effectiveBlockers =
+    blockers
+      .slice(
+        0,
+        ultraCompactRetry
+          ? 2
+          : initialMutation
+            ? 4
+            : 8
+      )
+      .map((value) =>
+        truncate(
+          value,
+          ultraCompactRetry
+            ? 180
+            : initialMutation
+              ? 260
+              : 400
+        )
+      );
+
   const controllerInputChars =
     JSON.stringify({
-      blockers,
+      blockers: effectiveBlockers,
       controllerEvidence,
       toolContracts,
     }).length;
@@ -1761,11 +1793,24 @@ async function requestStructuredToolDecision(
   );
 
   const controller = new AbortController();
+  const remainingControllerBudget =
+    Math.max(
+      1000,
+      hardTimeoutMs - (Date.now() - startedAt)
+    );
+  const requestedControllerBudget =
+    initialMutation
+      ? (
+          ultraCompactRetry
+            ? 90000
+            : 70000
+        )
+      : structuredRequestTimeoutMs;
   const timer = setTimeout(
     () => controller.abort(),
     Math.min(
-      structuredRequestTimeoutMs,
-      Math.max(1000, hardTimeoutMs - (Date.now() - startedAt))
+      requestedControllerBudget,
+      remainingControllerBudget
     )
   );
 
@@ -1810,14 +1855,14 @@ async function requestStructuredToolDecision(
             content: JSON.stringify({
               gap: gapLabel,
               requireChange,
-              blockers: blockers
-                .slice(0, 8)
-                .map((value) =>
-                  truncate(value, 400)
-                ),
+              blockers: effectiveBlockers,
               assistantText: truncate(
                 assistantText || "",
-                1200
+                ultraCompactRetry
+                  ? 350
+                  : initialMutation
+                    ? 650
+                    : 1200
               ),
               phase,
               recoveryHints: {
@@ -1826,7 +1871,9 @@ async function requestStructuredToolDecision(
                 initialMutation,
                 previousStructuredError: truncate(
                   previousStructuredError,
-                  800
+                  ultraCompactRetry
+                    ? 350
+                    : 800
                 ),
               },
               evidence: {
@@ -1848,13 +1895,44 @@ async function requestStructuredToolDecision(
         keep_alive: "2m",
         options: {
           temperature: 0,
-          num_ctx: 4096,
-          num_predict: 1024,
+          num_ctx:
+            ultraCompactRetry
+              ? 3072
+              : 4096,
+          num_predict:
+            ultraCompactRetry
+              ? 512
+              : initialMutation
+                ? 640
+                : 1024,
         },
       }),
     });
   } catch {
     clearTimeout(timer);
+
+    if (
+      initialMutation &&
+      !ultraCompactRetry &&
+      (
+        hardTimeoutMs -
+        (Date.now() - startedAt)
+      ) > 25000
+    ) {
+      stage(
+        "local_agent_controller_compact_retry",
+        gapLabel +
+          " ilk mutation controller isteği zaman aşımına uğradı • ultra-kompakt Qwen retry • controller=" +
+          controllerModel
+      );
+
+      return requestStructuredToolDecision(
+        assistantText,
+        blockers,
+        true
+      );
+    }
+
     return rejectStructuredDecision(
       "controller isteği başarısız/zaman aşımı"
     );
