@@ -181,6 +181,60 @@ Varsayılan provider/model `cline + nvidia/nemotron-3.5-lightning` olarak sabitl
 
 **v0.7.23 Developer Agent fast diagnostic gate + live progress:** Developer Agent artık her tıklamada doğrudan modele gitmez. Yerel `training-latest.json`, `live-eval-latest.json` ve `latest.json` raporları mevcut `VERSION` ile karşılaştırılır. Training Lab ve Live Research Eval güncel sürümde tamamen yeşilse ve güncel mentor trace ek müdahale gerektirmiyorsa Cline çağrısı atlanır; bu hem ChatGPT kullanım limitini hem bekleme süresini korur. Gerçek bir failure varsa Cline çalışır; UI yaklaşık 700 ms aralıkla status dosyasını okuyarak hazırlık, diagnostic kontrol, model çalışması ve build doğrulama aşamalarını canlı gösterir. Cline turu `medium` thinking ve 900 saniye timeout ile sınırlandırılır.
 
+### 0.10.0 — Architect-led self-repair + skill lifecycle
+
+Developer/learning hattı artık tek modelin ilk bulduğu sembolü doğrudan patchlediği mikro-fix döngüsü değildir. Runtime failure çözümü şu sözleşmeye geçer:
+
+```
+FAIL
+  → deterministic source bootstrap
+  → dependency neighborhood
+  → Root Cause Architect
+  → architect-selected mutation target + strategy
+  → exact candidate mutation
+  → diff
+  → build/regression
+  → runtime postcondition
+  → skill distillation
+  → experimental
+  → promoted
+```
+
+**Model rolleri ayrıdır:**
+- **Architect model:** repo/kök neden analizi, dependency neighborhood karşılaştırması, gerçek mutation target seçimi, strateji ve exact code repair. 20 GB+ unified-memory sistemlerde varsayılan yerel architect `devstral-small-2:24b` olur.
+- **Structured controller:** araç/protokol/JSON kararları gibi mekanik görevler. Qwen Coder sınıfı bu rolde tutulabilir; kök neden ve yazılım tasarımı controller'a yüklenmez.
+- Architect ve controller görevleri birbirinin yerine sessizce kullanılmaz; Mentor status hangi rolün aktif olduğunu gösterir.
+
+**İlk sembol düzeltme hedefi değildir.** Runtime hata zincirindeki ilk implementation sembolü yalnız diagnosis giriş noktasıdır. KRALİ minimum ilgili dependency neighborhood'u read-only toplar; Architect birden fazla gerçek source tanımı arasından kök nedeni ve mutation target'ı seçer.
+
+**Mikro-fix döngüsü sınırlandırılır.** Aynı architect-selected strateji için en fazla:
+1. bir exact mutation,
+2. compiler/diff kanıtıyla bir kontrollü repair
+denenir. Bunlar başarısızsa aynı fikri tekrar cilalamak yerine Architect root cause/target/strategy'yi yeniden değerlendirir ve yalnız bir strategy-escalation adayı üretir. Aynı failed mutation/diff fingerprint tekrar uygulanamaz. Bu tur da doğrulanmazsa candidate başarısız sayılır; yeni sürüm numaralarıyla aynı semptomu sonsuz döngüde kovalamak kabul edilmez.
+
+**Kod öğrenmenin kendisi değildir.** Candidate source değişikliği yalnız problemi çözmek ve yeni davranışı sınamak için geçici uygulamadır. Kalıcı öğrenmenin birimi genellenebilir **skill**'dir. Build/regression geçen candidate'tan ham patch yerine şu özet çıkarılır:
+- trigger pattern,
+- skill class / capability class,
+- generalized strategy,
+- preconditions,
+- reusable procedure,
+- verification contract,
+- failure signals,
+- rollback strategy,
+- source/provenance özeti,
+- test sonucu.
+
+Raw patch/diff skill library'nin kalıcı bilgisinin parçası değildir. Skill candidate provenance yalnız gerektiği kadar hash/source-symbol bilgisi taşır.
+
+**Skill lifecycle:**
+- build + regression PASS → `experimental`,
+- runtime postcondition henüz kanıtlanmadıysa promoted olamaz,
+- aynı capability gerçek görevde verifier tarafından PASS olursa experimental skill → `promoted`,
+- promoted skill sonraki benzer gap'lerde strategy context olarak geri çağrılır,
+- runtime doğrulaması başarısızsa skill promoted edilmez; candidate rollback/yeniden araştırma konusu olur.
+
+Bu yapı Memento-Skills yaklaşımındaki READ → EXECUTE → REFLECT → WRITE döngüsünü, AutoSkill'deki DISCARD / IMPROVE / MERGE / CREATE karar mantığını ve genellenebilir skill-library fikrini KRALİ'nin güvenlik/verification sözleşmesine uyarlar. Amaç ham deneyim veya kod yığını büyütmek değil; doğrulanmış, yeniden kullanılabilir yetenek bilgisini artırmaktır.
+
 ### 0.8.x — Memory
 Kısa süreli konuşma belleği ile kalıcı kullanıcı tercihlerini ayırma; bağlam özetleme.
 
