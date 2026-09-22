@@ -66,7 +66,7 @@ struct ApplicationResolutionCandidateTrace:
     let score: Double
     let aliases: [String]
     let aliasProvenance:
-        [ApplicationAliasProvenanceTrace]? = nil
+        [ApplicationAliasProvenanceTrace]?
 }
 
 struct ApplicationResolutionQueryTrace:
