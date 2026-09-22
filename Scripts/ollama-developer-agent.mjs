@@ -1584,6 +1584,14 @@ function resumeCheckpointContext() {
             .filter(Boolean)
             .slice(0, 8)
         : [];
+
+    if (
+      requireRootCauseGate &&
+      !rootCauseMutationTargetVerified
+    ) {
+      implementationReadCompleted = false;
+      implementationTargetPaths = [];
+    }
   }
 
   const currentStatus = candidateStatus();
@@ -5151,8 +5159,11 @@ async function requestRootCauseRanking(
     return [];
   }
 
+  const rankCandidates =
+    candidates.slice(0, 8);
+
   const candidateIDs =
-    candidates.map(
+    rankCandidates.map(
       (item) => item.id
     );
 
@@ -5217,7 +5228,7 @@ async function requestRootCauseRanking(
     runtime_source_hints:
       runtimeSourceHints.slice(0, 4),
     candidates:
-      candidates.slice(0, 8).map(
+      rankCandidates.map(
         (item) => ({
           id: item.id,
           symbol: item.symbol,
@@ -5914,7 +5925,11 @@ async function runVerifiedResumeFastPath() {
   if (
     !resumedFromCheckpoint ||
     developmentPhase() !== "implementation" ||
-    !implementationReadCompleted
+    !implementationReadCompleted ||
+    (
+      requireRootCauseGate &&
+      !rootCauseMutationTargetVerified
+    )
   ) {
     return false;
   }
