@@ -1348,11 +1348,14 @@ if [ "$PROVIDER" = "ollama" ] &&
    [ "$LOCAL_AGENT_ENGINE" = "native-ollama" ]; then
     CLINE_RUN_LOG="$LOG_DIR/KRALI-Developer-Agent-Local-$STAMP.log"
     write_status "local_agent_starting|$GAP_LABEL native Ollama Developer Agent ile öğreniliyor|$BRANCH|$WORKTREE"
+    echo "🧠 Model rolleri: root-cause=$CONTROLLER_MODEL • mutation=$MODEL • controller=$CONTROLLER_MODEL" | tee -a "$LOG"
 
     KRALI_WORKTREE="$WORKTREE" \
     KRALI_PROMPT_FILE="$PROMPT_FILE" \
     KRALI_DEV_MODEL="$MODEL" \
     KRALI_ARCHITECT_MODEL="$MODEL" \
+    KRALI_ROOT_CAUSE_MODEL="$CONTROLLER_MODEL" \
+    KRALI_ARCHITECT_MUTATION_MODEL="$MODEL" \
     KRALI_CONTROLLER_MODEL="$CONTROLLER_MODEL" \
     KRALI_OLLAMA_BASE_URL="$OLLAMA_BASE_URL" \
     KRALI_STATUS_FILE="$STATUS" \
