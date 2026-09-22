@@ -1,1 +1,1 @@
-local_agent_watchdog_timeout|Uygulama kontrolü (desktop.app) native local agent toplam zaman sınırına ulaştı.|krali-dev-agent/20260922-222013|/Users/medusa/Developer/KRALI-Agent-Dev-20260922-222013|@meta|app=0.10.6|at=1790105122|run=20260922-222013
+local_agent_tool_protocol_failed|Yerel model native tool çağrısı üretmedi ve yapılandırılmış devam controller'ı güvenli tool kararı üretemedi.|krali-dev-agent/20260922-223835|/Users/medusa/Developer/KRALI-Agent-Dev-20260922-223835|@meta|app=0.10.7|at=1790106231|run=20260922-223835

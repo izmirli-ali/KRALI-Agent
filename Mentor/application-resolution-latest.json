@@ -1,0 +1,66 @@
+{
+  "createdAt" : "2026-09-22T19:38:35Z",
+  "expandedCandidateCount" : 256,
+  "installedCandidateCount" : 225,
+  "nestedCandidateCount" : 55,
+  "queries" : [
+    "Notlar"
+  ],
+  "queryTraces" : [
+    {
+      "decision" : "best_score_below_confidence_threshold",
+      "launchServicesAccepted" : false,
+      "normalizedQuery" : "notlar",
+      "query" : "Notlar",
+      "topCandidates" : [
+        {
+          "aliases" : [
+            "Software Update"
+          ],
+          "bundleIdentifier" : "com.apple.SoftwareUpdate",
+          "name" : "Software Update",
+          "path" : "/System/Library/CoreServices/Software Update.app",
+          "score" : 0.5714285714285714
+        },
+        {
+          "aliases" : [
+            "Notes"
+          ],
+          "bundleIdentifier" : "com.apple.Notes",
+          "name" : "Notes",
+          "path" : "/System/Applications/Notes.app",
+          "score" : 0.5
+        },
+        {
+          "aliases" : [
+            "Digital Color Meter"
+          ],
+          "bundleIdentifier" : "com.apple.DigitalColorMeter",
+          "name" : "Digital Color Meter",
+          "path" : "/System/Applications/Utilities/Digital Color Meter.app",
+          "score" : 0.5
+        },
+        {
+          "aliases" : [
+            "Installer"
+          ],
+          "bundleIdentifier" : "com.apple.installer",
+          "name" : "Installer",
+          "path" : "/System/Library/CoreServices/Installer.app",
+          "score" : 0.4444444444444444
+        },
+        {
+          "aliases" : [
+            "ZXP Installer"
+          ],
+          "bundleIdentifier" : "com.aescripts.ZXP-Installer",
+          "name" : "ZXP Installer",
+          "path" : "/Applications/ZXP Installer.app",
+          "score" : 0.4444444444444444
+        }
+      ]
+    }
+  ],
+  "refreshedCandidateCount" : 225,
+  "requestedText" : "Notlar uygulamasını aç ve gerçekten ön planda olduğunu doğrula. Başka hiçbir işlem yapma."
+}
