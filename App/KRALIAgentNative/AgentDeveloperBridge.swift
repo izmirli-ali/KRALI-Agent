@@ -83,10 +83,12 @@ struct DeveloperAgentStatus: Hashable {
             "local_agent_tool",
             "local_agent_structured_tool",
             "local_agent_structured_mutation",
+            "local_agent_controller_preparing",
             "local_agent_timeout_controller",
             "local_agent_controller_rejected",
             "local_agent_target_found",
             "local_agent_target_verified",
+            "local_agent_candidate_handoff",
             "local_agent_completed",
             "sdk_fallback_preparing",
             "sdk_fallback_running",
@@ -180,10 +182,14 @@ struct DeveloperAgentStatus: Hashable {
             return "Controller araç devamı uyguluyor"
         case "local_agent_structured_mutation":
             return "Controller kaynak kod değişikliği uyguluyor"
+        case "local_agent_controller_preparing":
+            return "Controller için model ve kanıt hazırlanıyor"
         case "local_agent_timeout_controller":
             return "Zaman aşımı sonrası controller devralıyor"
         case "local_agent_controller_rejected":
             return "Controller kararı güvenlik kontrolünde reddedildi"
+        case "local_agent_candidate_handoff":
+            return "Aday build ve recovery hattına devrediliyor"
         case "local_agent_completed":
             return "Yerel agent turu tamamlandı"
         case "setup_local_ai":
