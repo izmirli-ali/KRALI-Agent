@@ -270,8 +270,12 @@ function mutationProblemContext() {
 
 function runtimeDiagnosticTraceObject() {
   const raw = String(
-    mutationProblemContext()
-      .runtime_diagnostic_trace || ""
+    firstPromptValue(
+      prompt,
+      [
+        "Runtime resolver trace"
+      ]
+    ) || ""
   ).trim();
 
   if (
@@ -5265,6 +5269,10 @@ async function requestRootCauseDiagnosis(
       mutationProblemContext(),
     runtime_source_hints:
       runtimeSourceHints.slice(0, 6),
+    alias_provenance_summary:
+      aliasLocalizationFailureEvidence()
+        ?.missingLocalizedAliasEvidence ??
+      null,
     primary_symbol:
       primary.id,
     previous_attempt:
@@ -5499,6 +5507,10 @@ async function verifyRootCauseTarget(
         mutationProblemContext()
           .runtime_diagnostic_trace,
     },
+    alias_provenance_summary:
+      aliasLocalizationFailureEvidence()
+        ?.missingLocalizedAliasEvidence ??
+      null,
     entry: {
       id: primary.id,
       source: clipExactSource(
