@@ -4819,6 +4819,7 @@ async function verifyRootCauseTarget(
         type: "string",
         enum: [
           "direct_cause",
+          "behavioral_cause",
           "upstream_input",
           "downstream_effect",
           "uncertain",
@@ -4919,9 +4920,11 @@ async function verifyRootCauseTarget(
                 content: [
                   "You are KRALI Root Cause Verifier.",
                   "Do not write code.",
-                  "Decide whether the proposed target itself can plausibly cause the observed runtime failure.",
-                  "Reject a target that merely extracts or forwards an already-correct upstream value while the failure happens later.",
-                  "Accept only when the supplied source directly implements the failing behavior or data transformation.",
+                  "Decide whether the proposed target can causally produce the observed runtime failure.",
+                  "The final throw or error message may happen downstream.",
+                  "Accept target_role=behavioral_cause when the target can return a wrong nil, wrong lookup result, wrong normalization, wrong alias/candidate set, or another incorrect value that directly causes downstream failure.",
+                  "Use direct_cause only when the target itself implements the failing operation/error.",
+                  "Reject only when the target merely forwards an already-correct value or is unrelated.",
                   "When evidence is insufficient, return supported=false and target_role=uncertain.",
                   "Return only JSON matching the schema.",
                 ].join("\n"),
@@ -4962,8 +4965,12 @@ async function verifyRootCauseTarget(
 
     if (
       verdict.supported !== true ||
-      verdict.target_role !==
-        "direct_cause"
+      ![
+        "direct_cause",
+        "behavioral_cause",
+      ].includes(
+        verdict.target_role
+      )
     ) {
       stage(
         "local_agent_root_cause_rejected",
@@ -5016,18 +5023,15 @@ async function verifyRootCauseTarget(
   }
 }
 
-async function resolveRuntimeFailureDependency(
-  errorReadResult
+function collectRootCauseCandidatePool(
+  symbols
 ) {
-  const symbols =
-    runtimeDependencySymbols(
-      errorReadResult,
-      runtimeBootstrapTarget?.line ||
-        0
-    );
+  const candidates = [];
+  const origins = new Map();
+  const seen = new Set();
 
   for (
-    const symbol of symbols
+    const symbol of symbols.slice(0, 8)
   ) {
     const primary =
       definitionEvidenceForSymbol(
@@ -5043,32 +5047,361 @@ async function resolveRuntimeFailureDependency(
         primary
       );
 
-    rootCauseNeighborhood =
-      neighborhood;
-    rootCausePrimaryID =
-      primary.id;
-
     stage(
       "local_agent_dependency_neighborhood_verified",
       gapLabel +
-        " runtime dependency neighborhood doğrulandı • entry=" +
+        " runtime dependency neighborhood havuza eklendi • entry=" +
         primary.symbol +
         " • candidates=" +
         neighborhood.length
     );
 
-    const diagnosis =
-      await requestRootCauseDiagnosis(
-        primary,
-        neighborhood
+    for (
+      const item of neighborhood
+    ) {
+      if (
+        !item?.id ||
+        seen.has(item.id)
+      ) {
+        continue;
+      }
+
+      seen.add(item.id);
+      candidates.push(item);
+      origins.set(
+        item.id,
+        primary
       );
 
-    if (!diagnosis) {
-      continue;
+      if (candidates.length >= 12) {
+        break;
+      }
     }
 
+    if (candidates.length >= 12) {
+      break;
+    }
+  }
+
+  return {
+    candidates,
+    origins,
+  };
+}
+
+async function requestRootCauseRanking(
+  candidates
+) {
+  if (
+    !rootCauseModel ||
+    candidates.length === 0
+  ) {
+    return [];
+  }
+
+  const candidateIDs =
+    candidates.map(
+      (item) => item.id
+    );
+
+  const schema = {
+    type: "object",
+    additionalProperties: false,
+    required: [
+      "ranked",
+    ],
+    properties: {
+      ranked: {
+        type: "array",
+        minItems: 1,
+        maxItems: 2,
+        items: {
+          type: "object",
+          additionalProperties: false,
+          required: [
+            "target_id",
+            "root_cause",
+            "strategy",
+            "confidence",
+          ],
+          properties: {
+            target_id: {
+              type: "string",
+              enum: candidateIDs,
+            },
+            root_cause: {
+              type: "string",
+              minLength: 16,
+              maxLength: 700,
+            },
+            strategy: {
+              type: "string",
+              minLength: 16,
+              maxLength: 700,
+            },
+            confidence: {
+              type: "number",
+              minimum: 0,
+              maximum: 1,
+            },
+          },
+        },
+      },
+    },
+  };
+
+  const evidence = {
+    problem: {
+      runtime_failure:
+        mutationProblemContext()
+          .runtime_failure,
+      failure_reason:
+        mutationProblemContext()
+          .failure_reason,
+      expected_postcondition:
+        mutationProblemContext()
+          .expected_postcondition,
+    },
+    runtime_source_hints:
+      runtimeSourceHints.slice(0, 4),
+    candidates:
+      candidates.map(
+        (item) => ({
+          id: item.id,
+          symbol: item.symbol,
+          path: item.path,
+          source: clipExactSource(
+            item.source,
+            1200
+          ),
+        })
+      ),
+  };
+
+  stage(
+    "local_agent_root_cause_ranking",
+    gapLabel +
+      " tek candidate havuzu sıralanıyor • candidates=" +
+      candidates.length +
+      " • rootCauseModel=" +
+      rootCauseModel
+  );
+
+  const controller =
+    new AbortController();
+  const remaining =
+    Math.max(
+      1000,
+      hardTimeoutMs -
+        (Date.now() - startedAt)
+    );
+  const timer =
+    setTimeout(
+      () => controller.abort(),
+      Math.min(55000, remaining)
+    );
+
+  try {
+    const response =
+      await fetch(
+        baseUrl + "/api/chat",
+        {
+          method: "POST",
+          headers: {
+            "content-type":
+              "application/json",
+          },
+          signal: controller.signal,
+          body: JSON.stringify({
+            model: rootCauseModel,
+            stream: false,
+            format: schema,
+            keep_alive: "10m",
+            options: {
+              temperature: 0.05,
+              num_ctx: 8192,
+              num_predict: 520,
+            },
+            messages: [
+              {
+                role: "system",
+                content: [
+                  "You are KRALI Root Cause Ranker.",
+                  "Do not write code.",
+                  "Rank at most two source definitions that most plausibly explain the runtime failure.",
+                  "The throw site is not necessarily the root cause.",
+                  "A function that returns a wrong nil, wrong lookup result, wrong normalization, wrong alias set, or otherwise corrupts the value consumed later can be the behavioral root cause even if another function emits the final error.",
+                  "Prefer reusable behavioral causes over error-reporting wrappers.",
+                  "Do not hard-code the concrete app, filename, brand, or exact user phrase.",
+                  "Return only JSON matching the schema.",
+                ].join("\n"),
+              },
+              {
+                role: "user",
+                content:
+                  JSON.stringify(
+                    evidence
+                  ),
+              },
+            ],
+          }),
+        }
+      );
+
+    clearTimeout(timer);
+
+    if (!response.ok) {
+      stage(
+        "local_agent_root_cause_ranking_inconclusive",
+        gapLabel +
+          " root-cause ranking HTTP " +
+          response.status
+      );
+      return [];
+    }
+
+    const payload =
+      await response.json();
+    const result =
+      JSON.parse(
+        String(
+          payload?.message?.content || ""
+        ).trim()
+      );
+
+    const ranked =
+      Array.isArray(result?.ranked)
+        ? result.ranked
+        : [];
+
+    return ranked
+      .map((item) => {
+        const target =
+          candidates.find(
+            (candidate) =>
+              candidate.id ===
+              item?.target_id
+          );
+
+        if (!target) {
+          return null;
+        }
+
+        return {
+          target,
+          root_cause:
+            String(
+              item.root_cause || ""
+            ),
+          strategy:
+            String(
+              item.strategy || ""
+            ),
+          confidence:
+            Number(
+              item.confidence || 0
+            ),
+          alternatives_considered:
+            ranked
+              .filter(
+                (other) =>
+                  other?.target_id !==
+                  item?.target_id
+              )
+              .map(
+                (other) =>
+                  String(
+                    other?.root_cause || ""
+                  )
+              )
+              .filter(Boolean),
+        };
+      })
+      .filter(Boolean)
+      .slice(0, 2);
+  } catch (error) {
+    clearTimeout(timer);
+
+    stage(
+      "local_agent_root_cause_ranking_inconclusive",
+      gapLabel +
+        " root-cause ranking tamamlanamadı • " +
+        truncate(
+          error instanceof Error
+            ? error.message
+            : String(error),
+          320
+        )
+    );
+
+    return [];
+  }
+}
+
+async function resolveRuntimeFailureDependency(
+  errorReadResult
+) {
+  const symbols =
+    runtimeDependencySymbols(
+      errorReadResult,
+      runtimeBootstrapTarget?.line ||
+        0
+    );
+
+  const {
+    candidates,
+    origins,
+  } = collectRootCauseCandidatePool(
+    symbols
+  );
+
+  if (candidates.length === 0) {
+    return false;
+  }
+
+  rootCauseNeighborhood =
+    candidates;
+  rootCausePrimaryID =
+    candidates[0]?.id || "";
+
+  stage(
+    "local_agent_root_cause_pool_ready",
+    gapLabel +
+      " dedupe edilmiş root-cause candidate havuzu hazır • candidates=" +
+      candidates.length
+  );
+
+  const ranked =
+    await requestRootCauseRanking(
+      candidates
+    );
+
+  if (ranked.length === 0) {
+    return false;
+  }
+
+  stage(
+    "local_agent_root_cause_ranked",
+    gapLabel +
+      " root-cause adayları sıralandı • top=" +
+      ranked
+        .map(
+          (item) =>
+            item.target.symbol +
+            ":" +
+            item.confidence.toFixed(2)
+        )
+        .join(",")
+  );
+
+  for (
+    const diagnosis of ranked.slice(0, 2)
+  ) {
     const target =
       diagnosis.target;
+    const primary =
+      origins.get(target.id) ||
+      target;
 
     const hypothesisVerified =
       await verifyRootCauseTarget(
@@ -5093,6 +5426,9 @@ async function resolveRuntimeFailureDependency(
       target.read_args,
       target.read_result
     );
+
+    rootCausePrimaryID =
+      primary.id;
 
     rootCauseDiagnosis = {
       root_cause:
@@ -5122,9 +5458,7 @@ async function resolveRuntimeFailureDependency(
     stage(
       "local_agent_root_cause_selected",
       gapLabel +
-        " architect gerçek mutation target seçti • entry=" +
-        primary.symbol +
-        " • target=" +
+        " ranked+verified mutation target seçildi • target=" +
         target.symbol +
         " • path=" +
         target.path +
@@ -5136,14 +5470,14 @@ async function resolveRuntimeFailureDependency(
         rootCauseDiagnosis.confidence.toFixed(
           2
         ) +
-        " • architect=" +
-        architectModel
+        " • rootCauseModel=" +
+        rootCauseModel
     );
 
     messages.push({
       role: "user",
       content: [
-        "KRALI Root Cause Architect dependency neighborhood içinden gerçek mutation target seçti.",
+        "KRALI Root Cause Ranker tek candidate havuzundan gerçek mutation target seçti ve verifier doğruladı.",
         "Target: " +
           target.symbol +
           " @ " +
@@ -5154,7 +5488,7 @@ async function resolveRuntimeFailureDependency(
           rootCauseDiagnosis.root_cause,
         "Strategy: " +
           rootCauseDiagnosis.strategy,
-        "Bu exact source controller için doğrulandı. Patch bu target dışına taşmamalı.",
+        "Bu exact source mutation için doğrulandı. Patch bu target dışına taşmamalı.",
       ].join("\n"),
     });
 
@@ -5164,6 +5498,12 @@ async function resolveRuntimeFailureDependency(
 
     return true;
   }
+
+  stage(
+    "local_agent_root_cause_no_verified_target",
+    gapLabel +
+      " top root-cause adaylarının hiçbiri verifier tarafından kabul edilmedi"
+  );
 
   return false;
 }
