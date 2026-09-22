@@ -63,6 +63,7 @@ struct DeveloperAgentStatus: Hashable {
 
     var isLearningActive: Bool {
         [
+            "checking",
             "learning",
             "running",
             "retrying",
@@ -93,8 +94,16 @@ struct DeveloperAgentStatus: Hashable {
             "local_agent_target_found",
             "local_agent_target_verified",
             "local_agent_dependency_neighborhood_verified",
+            "local_agent_root_cause_pool_ready",
+            "local_agent_root_cause_pruned",
+            "local_agent_root_cause_ranking",
+            "local_agent_root_cause_ranked",
             "local_agent_root_cause_analyzing",
+            "local_agent_root_cause_verifying",
+            "local_agent_root_cause_verified",
+            "local_agent_root_cause_rejected",
             "local_agent_root_cause_selected",
+            "local_agent_mutation_model_fallback",
             "local_agent_repair_anchor_preserved",
             "local_agent_failed_mutation_recorded",
             "local_agent_failed_diff_recorded",
