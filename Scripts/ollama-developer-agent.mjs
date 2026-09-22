@@ -3086,7 +3086,9 @@ async function requestStructuredToolDecision(
             assistantText,
             "Previous replace_text decision was rejected before execution.",
             validationReason,
-            "Choose a longer exact unique multi-line old_text copied verbatim from lastVerifiedRead.content and make a meaningful logic change.",
+            fixedRepairMode
+              ? "The old_text anchor is fixed by KRALI. Return only a materially different new_text that repairs the compiler/runtime evidence."
+              : "Choose a longer exact unique multi-line old_text copied verbatim from lastVerifiedRead.content and make a meaningful logic change.",
           ].join("\n"),
           blockers,
           ultraCompactRetry,
