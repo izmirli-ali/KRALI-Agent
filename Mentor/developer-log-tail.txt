@@ -1,19 +1,3 @@
-KRALI_LOCAL_STAGE local_agent_root_cause_rejected • Uygulama kontrolü (desktop.app) root-cause hypothesis reddedildi • target=resolveRequestedApplication • role=uncertain • reason=The proposed target does not directly implement the failing behavior or data transformation. It appears to be a function that attempts to resolve an application candidate based on user input, but the failure occurs later in the application control process. The target function does not directly cause the 'Uygulama bulun
-…[truncated]
-KRALI_LOCAL_STAGE local_agent_dependency_neighborhood_verified • Uygulama kontrolü (desktop.app) runtime dependency neighborhood doğrulandı • entry=applicationTargetPhrase • candidates=4
-KRALI_LOCAL_STAGE local_agent_root_cause_analyzing • Uygulama kontrolü (desktop.app) dependency neighborhood architect tarafından analiz ediliyor • candidates=4 • rootCauseModel=qwen2.5-coder:14b-instruct
-KRALI_LOCAL_STAGE local_agent_root_cause_verifying • Uygulama kontrolü (desktop.app) seçilen root-cause hypothesis patch öncesi doğrulanıyor • target=applicationTargetPhrase • rootCauseModel=qwen2.5-coder:14b-instruct
-KRALI_LOCAL_STAGE local_agent_root_cause_rejected • Uygulama kontrolü (desktop.app) root-cause hypothesis reddedildi • target=applicationTargetPhrase • role=uncertain • reason=The provided source code does not directly implement the failing behavior or data transformation. It appears to be a function that processes a raw string to extract a target phrase, but it does not directly cause the runtime failure 'Uygulama kontrolü başarısız: Uygulama bulunamadı: notlar'. The failure seems to be rel
-…[truncated]
-KRALI_LOCAL_STAGE local_agent_dependency_neighborhood_verified • Uygulama kontrolü (desktop.app) runtime dependency neighborhood doğrulandı • entry=openOrFocusApplication • candidates=8
-KRALI_LOCAL_STAGE local_agent_root_cause_analyzing • Uygulama kontrolü (desktop.app) dependency neighborhood architect tarafından analiz ediliyor • candidates=5 • rootCauseModel=qwen2.5-coder:14b-instruct
-KRALI_LOCAL_STAGE local_agent_root_cause_verifying • Uygulama kontrolü (desktop.app) seçilen root-cause hypothesis patch öncesi doğrulanıyor • target=resolveRequestedApplication • rootCauseModel=qwen2.5-coder:14b-instruct
-KRALI_LOCAL_STAGE local_agent_root_cause_rejected • Uygulama kontrolü (desktop.app) root-cause hypothesis reddedildi • target=resolveRequestedApplication • role=uncertain • reason=The proposed target `resolveRequestedApplication` is responsible for resolving the application candidate based on user input. However, the failure occurs when the application is not found, which is handled by the `openOrFocusApplication` function. The `resolveRequestedApplication` function does not directly implement t
-…[truncated]
-KRALI_LOCAL_STAGE local_agent_dependency_neighborhood_verified • Uygulama kontrolü (desktop.app) runtime dependency neighborhood doğrulandı • entry=matchingRunningApplication • candidates=2
-KRALI_LOCAL_STAGE local_agent_root_cause_analyzing • Uygulama kontrolü (desktop.app) dependency neighborhood architect tarafından analiz ediliyor • candidates=2 • rootCauseModel=qwen2.5-coder:14b-instruct
-KRALI_LOCAL_STAGE local_agent_root_cause_verifying • Uygulama kontrolü (desktop.app) seçilen root-cause hypothesis patch öncesi doğrulanıyor • target=matchingRunningApplication • rootCauseModel=qwen2.5-coder:14b-instruct
-KRALI_LOCAL_STAGE local_agent_root_cause_verification_inconclusive • Uygulama kontrolü (desktop.app) hypothesis verifier tamamlanamadı • This operation was aborted • mutation yapılmayacak
 KRALI_LOCAL_STAGE local_agent_dependency_neighborhood_verified • Uygulama kontrolü (desktop.app) runtime dependency neighborhood doğrulandı • entry=accessibilityTrusted • candidates=1
 KRALI_LOCAL_STAGE local_agent_root_cause_analyzing • Uygulama kontrolü (desktop.app) dependency neighborhood architect tarafından analiz ediliyor • candidates=1 • rootCauseModel=qwen2.5-coder:14b-instruct
 KRALI_LOCAL_STAGE local_agent_root_cause_inconclusive • Uygulama kontrolü (desktop.app) architect diagnosis tamamlanamadı • This operation was aborted • kör mutation yapılmayacak
@@ -118,3 +102,19 @@ Candidate build repair native local agent toplam zaman sınırına ulaştı.
 🔧 Candidate repair turu 2/2 başlatılıyor.
 KRALI_LOCAL_STAGE local_agent_starting • Candidate build repair native Ollama agent başlatılıyor: devstral-small-2:24b
 KRALI_LOCAL_STAGE local_agent_running • Candidate build repair yerel model çalışıyor • adım 1/8
+KRALI_LOCAL_STAGE local_agent_tool • Candidate build repair araç çalışıyor: search_codebase
+KRALI_LOCAL_STAGE local_agent_running • Candidate build repair yerel model çalışıyor • adım 2/8
+KRALI_LOCAL_STAGE local_agent_tool • Candidate build repair araç çalışıyor: read_file
+KRALI_LOCAL_STAGE local_agent_implementation_phase • Candidate build repair hedefli inspection kanıtı tamamlandı • implementation zorunlu • 2/2
+KRALI_LOCAL_STAGE local_agent_running • Candidate build repair yerel model çalışıyor • adım 3/8
+KRALI_LOCAL_STAGE local_agent_tool • Candidate build repair araç çalışıyor: search_codebase
+KRALI_LOCAL_STAGE local_agent_target_found • Candidate build repair hedef kaynak bulundu • paths=1 • targets=["App/KRALIAgentNative/AgentDesktopControl.swift"]
+KRALI_LOCAL_STAGE local_agent_running • Candidate build repair yerel model çalışıyor • adım 4/8
+KRALI_LOCAL_STAGE local_agent_tool • Candidate build repair araç çalışıyor: read_file
+KRALI_LOCAL_STAGE local_agent_target_verified • Candidate build repair hedef kaynak bölgesi doğrulandı • mutation zorunlu
+KRALI_LOCAL_STAGE local_agent_running • Candidate build repair yerel model çalışıyor • adım 5/8
+KRALI_LOCAL_STAGE local_agent_controller_preparing • Candidate build repair structured controller girdisi hazır • mode=exact_replace • problem=runtime_evidence • chars=1131 • decisionModel=devstral-small-2:24b • role=architect-mutation
+KRALI_LOCAL_STAGE local_agent_controller_rejected • Candidate build repair structured controller kararı reddedildi • controller isteği başarısız/zaman aşımı • controller=devstral-small-2:24b
+KRALI_LOCAL_STAGE local_agent_completion_rejected • Candidate build repair tamamlanma reddedildi • aktif capability gap için gerçek candidate değişikliği yok • deneme=1/2
+Candidate build repair native local agent toplam zaman sınırına ulaştı.
+⚠️ Candidate repair agent turu tamamlanamadı: 2
