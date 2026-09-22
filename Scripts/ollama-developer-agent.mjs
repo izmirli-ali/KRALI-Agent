@@ -5088,6 +5088,8 @@ function collectRootCauseCandidatePool(
 ) {
   const candidates = [];
   const origins = new Map();
+  const supportCounts = new Map();
+  const entryIDs = new Set();
   const seen = new Set();
 
   for (
@@ -5101,6 +5103,8 @@ function collectRootCauseCandidatePool(
     if (!primary) {
       continue;
     }
+
+    entryIDs.add(primary.id);
 
     const neighborhood =
       collectDependencyNeighborhood(
@@ -5119,10 +5123,19 @@ function collectRootCauseCandidatePool(
     for (
       const item of neighborhood
     ) {
-      if (
-        !item?.id ||
-        seen.has(item.id)
-      ) {
+      if (!item?.id) {
+        continue;
+      }
+
+      supportCounts.set(
+        item.id,
+        (
+          supportCounts.get(item.id) ||
+          0
+        ) + 1
+      );
+
+      if (seen.has(item.id)) {
         continue;
       }
 
@@ -5146,7 +5159,125 @@ function collectRootCauseCandidatePool(
   return {
     candidates,
     origins,
+    supportCounts,
+    entryIDs,
   };
+}
+
+function deterministicRootCauseScore(
+  candidate,
+  supportCount,
+  isEntry
+) {
+  const source =
+    String(
+      candidate?.source || ""
+    );
+  const symbol =
+    String(
+      candidate?.symbol || ""
+    );
+
+  let score =
+    Math.max(
+      1,
+      Number(supportCount || 1)
+    ) * 5;
+
+  if (!isEntry) {
+    score += 4;
+  }
+
+  const behavioralSignals = [
+    /\breturn\s+nil\b/i,
+    /\bguard\s+let\b/i,
+    /\bif\s+let\b/i,
+    /\bcompactMap\b/,
+    /\.filter\b/,
+    /\.first\s*\(/,
+    /\bcontains\s*\(/,
+    /\blowercased\s*\(/i,
+    /\bfolding\s*\(/i,
+    /\bnormalize/i,
+    /\bresolve/i,
+    /\blookup/i,
+    /\bmatch/i,
+    /\bcandidate/i,
+    /\balias/i,
+  ];
+
+  for (
+    const pattern of behavioralSignals
+  ) {
+    if (pattern.test(source)) {
+      score += 2;
+    }
+  }
+
+  if (
+    /resolve|lookup|match|candidate|alias|normaliz|search|find/i.test(
+      symbol
+    )
+  ) {
+    score += 4;
+  }
+
+  if (
+    /error|description|message|format/i.test(
+      symbol
+    )
+  ) {
+    score -= 3;
+  }
+
+  if (
+    /\bthrow\b/.test(source) &&
+    !/\breturn\s+nil\b/.test(source)
+  ) {
+    score -= 1;
+  }
+
+  return score;
+}
+
+function pruneRootCauseCandidates(
+  candidates,
+  supportCounts,
+  entryIDs,
+  limit = 4
+) {
+  return candidates
+    .map(
+      (candidate, index) => ({
+        candidate,
+        index,
+        score:
+          deterministicRootCauseScore(
+            candidate,
+            supportCounts.get(
+              candidate.id
+            ) || 1,
+            entryIDs.has(
+              candidate.id
+            )
+          ),
+      })
+    )
+    .sort(
+      (left, right) =>
+        (
+          right.score -
+          left.score
+        ) ||
+        (
+          left.index -
+          right.index
+        )
+    )
+    .slice(
+      0,
+      Math.max(1, limit)
+    );
 }
 
 async function requestRootCauseRanking(
@@ -5160,7 +5291,7 @@ async function requestRootCauseRanking(
   }
 
   const rankCandidates =
-    candidates.slice(0, 8);
+    candidates.slice(0, 4);
 
   const candidateIDs =
     rankCandidates.map(
@@ -5235,7 +5366,7 @@ async function requestRootCauseRanking(
           path: item.path,
           source: clipExactSource(
             item.source,
-            850
+            700
           ),
         })
       ),
@@ -5244,8 +5375,8 @@ async function requestRootCauseRanking(
   stage(
     "local_agent_root_cause_ranking",
     gapLabel +
-      " tek candidate havuzu sıralanıyor • candidates=" +
-      candidates.length +
+      " deterministic pruning sonrası candidate ranking • candidates=" +
+      rankCandidates.length +
       " • rootCauseModel=" +
       rootCauseModel
   );
@@ -5261,7 +5392,7 @@ async function requestRootCauseRanking(
   const timer =
     setTimeout(
       () => controller.abort(),
-      Math.min(55000, remaining)
+      Math.min(45000, remaining)
     );
 
   try {
@@ -5282,8 +5413,8 @@ async function requestRootCauseRanking(
             keep_alive: "10m",
             options: {
               temperature: 0.05,
-              num_ctx: 6144,
-              num_predict: 420,
+              num_ctx: 4096,
+              num_predict: 320,
             },
             messages: [
               {
@@ -5414,6 +5545,8 @@ async function resolveRuntimeFailureDependency(
   const {
     candidates,
     origins,
+    supportCounts,
+    entryIDs,
   } = collectRootCauseCandidatePool(
     symbols
   );
@@ -5434,9 +5567,40 @@ async function resolveRuntimeFailureDependency(
       candidates.length
   );
 
+  const pruned =
+    pruneRootCauseCandidates(
+      candidates,
+      supportCounts,
+      entryIDs,
+      4
+    );
+
+  const rankingCandidates =
+    pruned.map(
+      (item) => item.candidate
+    );
+
+  stage(
+    "local_agent_root_cause_pruned",
+    gapLabel +
+      " deterministic candidate pruning tamamlandı • input=" +
+      candidates.length +
+      " • output=" +
+      rankingCandidates.length +
+      " • top=" +
+      pruned
+        .map(
+          (item) =>
+            item.candidate.symbol +
+            ":" +
+            item.score
+        )
+        .join(",")
+  );
+
   const ranked =
     await requestRootCauseRanking(
-      candidates
+      rankingCandidates
     );
 
   if (ranked.length === 0) {
