@@ -1177,26 +1177,29 @@ const resolverRuntimeEvidence =
                                       .slice(0, 4)
                                   : [],
                               aliasProvenance:
-                                candidate &&
-                                candidate.aliasProvenance &&
-                                typeof candidate
-                                  .aliasProvenance ===
-                                  "object"
-                                  ? Object.fromEntries(
-                                      Object.entries(
-                                        candidate.aliasProvenance
-                                      )
-                                        .slice(0, 8)
-                                        .map(
-                                          ([source, values]) => [
-                                            source,
-                                            Array.isArray(values)
-                                              ? values.slice(0, 4)
-                                              : [],
-                                          ]
-                                        )
-                                    )
-                                  : {},
+                                Array.isArray(
+                                  candidate &&
+                                  candidate.aliasProvenance
+                                )
+                                  ? candidate.aliasProvenance
+                                      .slice(0, 8)
+                                      .map((entry) => ({
+                                        source:
+                                          String(
+                                            entry &&
+                                            entry.source ||
+                                            ""
+                                          ),
+                                        values:
+                                          Array.isArray(
+                                            entry &&
+                                            entry.values
+                                          )
+                                            ? entry.values
+                                                .slice(0, 4)
+                                            : [],
+                                      }))
+                                  : [],
                             })
                           )
                       : [],
