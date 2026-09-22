@@ -1,127 +1,95 @@
 {
   "activityTail" : [
     {
-      "date" : "2026-09-21T19:53:07Z",
+      "date" : "2026-09-22T09:59:46Z",
+      "text" : "Runtime Capability Gap: desktop.app • Provider available olmasına rağmen runtime step tamamlanamadı veya postcondition doğrulanamadı: desktop.app • capability.contract"
+    },
+    {
+      "date" : "2026-09-22T09:59:46Z",
+      "text" : "Uygulama kontrolü başarısız: Uygulama bulunamadı: notlar"
+    },
+    {
+      "date" : "2026-09-22T09:59:46Z",
+      "text" : "Debug/Recovery: Bilinmeyen hata • Hata ayıklanıyor • desktop.app"
+    },
+    {
+      "date" : "2026-09-22T09:59:45Z",
+      "text" : "Semantic rota: Core → Goal → Context → Plan → Desktop → Verify → Response"
+    },
+    {
+      "date" : "2026-09-22T09:59:45Z",
       "text" : "Task Graph: 0:core.reasoning[reason] → 1:context.local[reason] → 2:desktop.app[act]"
     },
     {
-      "date" : "2026-09-21T19:53:07Z",
+      "date" : "2026-09-22T09:59:45Z",
       "text" : "Problem Solver adayları: Mevcut provider'ı kullan[100] | Mevcut provider'ı kullan[100] | Mevcut provider'ı kullan[100] | Kanıtı reasoning ile dönüştür[75]"
     },
     {
-      "date" : "2026-09-21T19:53:07Z",
+      "date" : "2026-09-22T09:59:45Z",
       "text" : "Problem Solver seçimi: Mevcut provider'ı kullan • score=100 • capabilities=core.reasoning"
     },
     {
-      "date" : "2026-09-21T19:53:07Z",
+      "date" : "2026-09-22T09:59:45Z",
       "text" : "Semantic capability planı: context.local, core.reasoning, desktop.app"
     },
     {
-      "date" : "2026-09-21T19:53:07Z",
+      "date" : "2026-09-22T09:59:45Z",
       "text" : "Semantic planner sağlayıcısı: Local Contract Repair"
     },
     {
-      "date" : "2026-09-21T19:53:07Z",
-      "text" : "Semantic Mission: Safari'yi aç ve gerçekten ön planda olduğunu doğrula. Başka hiçbir işlem yapma."
+      "date" : "2026-09-22T09:59:45Z",
+      "text" : "Semantic Mission: Notlar uygulamasını aç ve gerçekten ön planda olduğunu doğrula. Başka hiçbir işlem yapma."
     },
     {
-      "date" : "2026-09-21T19:53:07Z",
+      "date" : "2026-09-22T09:59:45Z",
       "text" : "Outcome Solver: başarı kriterleri mevcut capability'lerle kapsandı • Outcome'u desktop.app ile çöz"
     },
     {
-      "date" : "2026-09-21T19:53:07Z",
+      "date" : "2026-09-22T09:59:45Z",
       "text" : "Seçilen kabiliyetler: Akıl yürütme, Bağlam, Uygulama kontrolü"
     },
     {
-      "date" : "2026-09-21T19:53:07Z",
+      "date" : "2026-09-22T09:59:45Z",
       "text" : "Otomatik rota: Core → Goal → Context → Plan → Desktop → Response"
     },
     {
-      "date" : "2026-09-21T19:53:07Z",
+      "date" : "2026-09-22T09:59:45Z",
       "text" : "Seçilen plan: Uygulama adını çöz, uygulamayı aç veya öne getir ve sonucu doğrula"
     },
     {
-      "date" : "2026-09-21T19:53:07Z",
+      "date" : "2026-09-22T09:59:45Z",
       "text" : "KRALİ Core hedef sözleşmesi: istenen uygulamayı aç veya öne getir"
     },
     {
-      "date" : "2026-09-21T19:53:07Z",
+      "date" : "2026-09-22T09:59:45Z",
       "text" : "Problem Solver başlangıç stratejisi: Mevcut provider'ı kullan • Task Graph bu capability'yi doğrudan seçti ve provider available."
     },
     {
-      "date" : "2026-09-21T19:53:07Z",
-      "text" : "Bağlam hafızası: Çalışma kuralı"
+      "date" : "2026-09-22T09:59:45Z",
+      "text" : "Bağlam firewall: önceki görev bağlamları bu tura taşınmadı"
     },
     {
-      "date" : "2026-09-21T19:52:54Z",
-      "text" : "Görev tamamlandı • 1.96 sn"
-    },
-    {
-      "date" : "2026-09-21T19:52:54Z",
-      "text" : "Mentor trace yerel olarak kaydedildi"
-    },
-    {
-      "date" : "2026-09-21T19:52:54Z",
-      "text" : "Yerel zeka sentezi uygulandı"
-    },
-    {
-      "date" : "2026-09-21T19:52:52Z",
-      "text" : "1 eşleşme bulundu"
-    },
-    {
-      "date" : "2026-09-21T19:52:52Z",
-      "text" : "Dosya arama kökü: Desktop"
-    },
-    {
-      "date" : "2026-09-21T19:52:52Z",
-      "text" : "Yerel dosya araması: görselleri en yeniden eskiye bul • Masaüstü • target=image • scope=Masaüstü • extensions=∅ • filenameQuery=∅ • sort=newestFirst • limit=1 • output=namesOnly • prohibitions=modify,open • status=matched"
-    },
-    {
-      "date" : "2026-09-21T19:52:52Z",
-      "text" : "Seçilen kabiliyetler: Akıl yürütme, Bağlam, Dosya metadata, Dosya arama"
-    },
-    {
-      "date" : "2026-09-21T19:52:52Z",
-      "text" : "Otomatik rota: Core → Goal → Context → Plan → Files → Verify → Response"
-    },
-    {
-      "date" : "2026-09-21T19:52:52Z",
-      "text" : "Seçilen plan: Masaüstü kapsamını salt-okunur tara, filtreleri uygula ve yalnız eşleşen sonuçları göster"
-    },
-    {
-      "date" : "2026-09-21T19:52:52Z",
-      "text" : "KRALİ Core hedef sözleşmesi: görselleri bul → sonucu ve gerekçeyi açıkla"
-    },
-    {
-      "date" : "2026-09-21T19:52:52Z",
-      "text" : "Problem Solver başlangıç stratejisi: Mevcut provider'ı kullan • Task Graph bu capability'yi doğrudan seçti ve provider available."
-    },
-    {
-      "date" : "2026-09-21T19:52:52Z",
-      "text" : "Bağlam hafızası: Çalışma kuralı"
-    },
-    {
-      "date" : "2026-09-21T19:51:02Z",
+      "date" : "2026-09-22T09:59:39Z",
       "text" : "Apple yerel zeka hazır"
     },
     {
-      "date" : "2026-09-21T19:51:02Z",
+      "date" : "2026-09-22T09:59:39Z",
       "text" : "Çalışma klasörü yolu geri yüklendi; indeks gerektiğinde oluşturulacak: Desktop"
     },
     {
-      "date" : "2026-09-21T19:51:02Z",
+      "date" : "2026-09-22T09:59:39Z",
       "text" : "Ağır geliştirici testleri normal açılışta otomatik çalıştırılmıyor"
     },
     {
-      "date" : "2026-09-21T19:51:02Z",
+      "date" : "2026-09-22T09:59:39Z",
       "text" : "Dinamik hedef ve kabiliyet yönlendirme aktif"
     },
     {
-      "date" : "2026-09-21T19:51:02Z",
+      "date" : "2026-09-22T09:59:39Z",
       "text" : "KRALİ Core hazır"
     }
   ],
-  "appVersion" : "0.8.80",
+  "appVersion" : "0.9.04",
   "capabilities" : [
     {
       "available" : true,
@@ -149,7 +117,7 @@
       ],
       "capabilityID" : "desktop.app",
       "capabilityName" : "Uygulama kontrolü",
-      "developerBrief" : "KRALİ Runtime Capability Failure Developer Brief\n\nKullanıcı hedefi:\nSafari'yi aç ve gerçekten ön planda olduğunu doğrula. Başka hiçbir işlem yapma.\n\nRuntime'da başarısız capability:\ndesktop.app — Uygulama kontrolü\n\nStep:\n2: Uygulama kontrolü\nOperation: capability.contract\nRole: act\n\nMevcut strategy adayları:\nYok\n\nSorun:\nProvider available olmasına rağmen runtime step tamamlanamadı veya postcondition doğrulanamadı: desktop.app • capability.contract\n\nÇözüm kuralları:\n- Önce problemi, gözlemleri ve başarısız postcondition'ı tanımla; doğrudan kod satırı aramaya başlama.\n- En az iki makul çözüm stratejisini değerlendir; mevcut capability kombinasyonu problemi çözebiliyorsa yeni provider yazma.\n- Capability zaten available ise önce mevcut provider'ı ve postcondition verifier'ı debug et.\n- Uygulama/marka adına hard-code yazma; hatayı genel resolver/provider/strategy seviyesinde çöz.\n- Başarı gerçek observation/verification ile kanıtlanmadan PASS üretme.\n- Dış dünyaya commit eden eylemlerde kullanıcı onayı korunmalı.\n- Candidate branch/worktree kullan; ana branch'i doğrudan değiştirme.\n- Build + regression + mümkünse runtime probe geçmeden düzeltmeyi available/healthy sayma.\n\nKabul kriteri:\nAynı sınıftaki bilinmeyen hedeflerde de provider doğru hedefi çözebilmeli; başarısız runtime step tamamlanmalı ve verifier gerçek evidence ile PASS verebilmeli.",
+      "developerBrief" : "KRALİ Runtime Capability Failure Developer Brief\n\nKullanıcı hedefi:\nNotlar uygulamasını aç ve gerçekten ön planda olduğunu doğrula. Başka hiçbir işlem yapma.\n\nRuntime'da başarısız capability:\ndesktop.app — Uygulama kontrolü\n\nStep:\n2: Uygulama kontrolü\nOperation: capability.contract\nRole: act\n\nMevcut strategy adayları:\nYok\n\nSorun:\nProvider available olmasına rağmen runtime step tamamlanamadı veya postcondition doğrulanamadı: desktop.app • capability.contract\n\nÇözüm kuralları:\n- Önce problemi, gözlemleri ve başarısız postcondition'ı tanımla; doğrudan kod satırı aramaya başlama.\n- En az iki makul çözüm stratejisini değerlendir; mevcut capability kombinasyonu problemi çözebiliyorsa yeni provider yazma.\n- Capability zaten available ise önce mevcut provider'ı ve postcondition verifier'ı debug et.\n- Uygulama/marka adına hard-code yazma; hatayı genel resolver/provider/strategy seviyesinde çöz.\n- Başarı gerçek observation/verification ile kanıtlanmadan PASS üretme.\n- Dış dünyaya commit eden eylemlerde kullanıcı onayı korunmalı.\n- Candidate branch/worktree kullan; ana branch'i doğrudan değiştirme.\n- Build + regression + mümkünse runtime probe geçmeden düzeltmeyi available/healthy sayma.\n\nKabul kriteri:\nAynı sınıftaki bilinmeyen hedeflerde de provider doğru hedefi çözebilmeli; başarısız runtime step tamamlanmalı ve verifier gerçek evidence ile PASS verebilmeli.",
       "kind" : "strategy",
       "learningPath" : "primitivePatch",
       "reason" : "Provider available olmasına rağmen runtime step tamamlanamadı veya postcondition doğrulanamadı: desktop.app • capability.contract",
@@ -157,14 +125,9 @@
     }
   ],
   "contextMemory" : [
-    {
-      "createdAt" : "2026-09-20T09:47:42Z",
-      "kind" : "userRule",
-      "summary" : "Estafiz'e özel marka detaylarını başka markalara otomatik uygulama",
-      "title" : "Çalışma kuralı"
-    }
+
   ],
-  "createdAt" : "2026-09-21T19:54:00Z",
+  "createdAt" : "2026-09-22T09:59:46Z",
   "executionSteps" : [
     {
       "capabilityID" : "core.reasoning",
@@ -203,7 +166,7 @@
   ],
   "fallbackPlan" : "Tamamlanmayan action step'ini yeniden planla; yürütülmeyen işi başarılı sayma.",
   "finalResponse" : "Görev tamamlanamadı. Eksik kabiliyet: Uygulama kontrolü.\n\nDoğrulama: Semantic mission içindeki zorunlu action step'lerinden bazıları tamamlanmadı: desktop.app\nAlternatif plan: Tamamlanmayan action step'ini yeniden planla; yürütülmeyen işi başarılı sayma.",
-  "goal" : "Safari'yi aç ve gerçekten ön planda olduğunu doğrula. Başka hiçbir işlem yapma.",
+  "goal" : "Notlar uygulamasını aç ve gerçekten ön planda olduğunu doğrula. Başka hiçbir işlem yapma.",
   "inputSource" : "text",
   "learningPlans" : [
 
@@ -219,7 +182,7 @@
       "instrumentalCapabilityIDs" : [
 
       ],
-      "objective" : "Safari'yi aç ve gerçekten ön planda olduğunu doğrula. Başka hiçbir işlem yapma.",
+      "objective" : "Notlar uygulamasını aç ve gerçekten ön planda olduğunu doğrula. Başka hiçbir işlem yapma.",
       "requirements" : [
         {
           "acceptableCapabilityIDs" : [
@@ -310,7 +273,7 @@
       "objective" : "Uygulama kontrolü",
       "observations" : [
         "Başarısız step: Uygulama kontrolü",
-        "Çalışma kuralı: Estafiz'e özel marka detaylarını başka markalara otomatik uygulama"
+        "Bu görev için ek kalıcı bağlam yok."
       ]
     },
     "reflection" : "Mevcut güvenli stratejiler tükendi; capability learning gerekli.",
@@ -351,9 +314,9 @@
       0,
       1
     ],
-    "createdAt" : "2026-09-21T19:53:07Z",
-    "id" : "69DAED68-59A4-4BDF-BADC-ED1A6E40EAE5",
-    "objective" : "Safari'yi aç ve gerçekten ön planda olduğunu doğrula. Başka hiçbir işlem yapma.",
+    "createdAt" : "2026-09-22T09:59:45Z",
+    "id" : "449DA9F1-F0E4-4573-8585-0ED8ACEB915C",
+    "objective" : "Notlar uygulamasını aç ve gerçekten ön planda olduğunu doğrula. Başka hiçbir işlem yapma.",
     "priority" : 0,
     "runningStepIndexes" : [
 
@@ -365,7 +328,7 @@
   },
   "semanticMission" : {
     "confidence" : 0.65,
-    "objective" : "Safari'yi aç ve gerçekten ön planda olduğunu doğrula. Başka hiçbir işlem yapma.",
+    "objective" : "Notlar uygulamasını aç ve gerçekten ön planda olduğunu doğrula. Başka hiçbir işlem yapma.",
     "outcomes" : [
       "open"
     ],
@@ -457,8 +420,8 @@
       "title" : "Uygulama kontrolü"
     }
   ],
-  "traceID" : "A8EB4A43-7755-4C58-852D-4410D2CCC74B",
-  "userInput" : "Safari'yi aç ve gerçekten ön planda olduğunu doğrula. Başka hiçbir işlem yapma.",
+  "traceID" : "0FB27AEA-4D7E-4199-BC83-3A7AF906EEAA",
+  "userInput" : "Notlar uygulamasını aç ve gerçekten ön planda olduğunu doğrula. Başka hiçbir işlem yapma.",
   "verificationState" : "attention",
   "verificationSummary" : "Semantic mission içindeki zorunlu action step'lerinden bazıları tamamlanmadı: desktop.app"
 }
