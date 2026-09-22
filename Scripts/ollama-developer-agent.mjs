@@ -6,6 +6,8 @@ import crypto from "node:crypto";
 const worktree = process.env.KRALI_WORKTREE || "";
 const promptFile = process.env.KRALI_PROMPT_FILE || "";
 const model = process.env.KRALI_DEV_MODEL || "";
+const controllerModel =
+  process.env.KRALI_CONTROLLER_MODEL || model;
 const baseUrl =
   (process.env.KRALI_OLLAMA_BASE_URL || "http://127.0.0.1:11434")
     .replace(/\/$/, "");
@@ -760,6 +762,7 @@ function persistCheckpoint(reason = "progress") {
     gapLabel,
     reason,
     model,
+    controllerModel,
     phase: developmentPhase(),
     inspectionToolCalls,
     implementationPhaseAnnounced,
@@ -1182,7 +1185,7 @@ async function requestStructuredToolDecision(
       },
       signal: controller.signal,
       body: JSON.stringify({
-        model,
+        model: controllerModel,
         stream: false,
         format: "json",
         messages: [
@@ -1190,6 +1193,7 @@ async function requestStructuredToolDecision(
             role: "system",
             content: [
               "You are KRALI Tool Continuation Controller.",
+              "Your only output is one valid JSON object. No markdown fences, no prose before or after JSON.",
               "Return exactly one JSON object describing the NEXT tool KRALI should execute.",
               "This is a controller protocol, not a conversational answer.",
               "Do not claim success. Do not explain source code.",
@@ -1266,7 +1270,20 @@ async function requestStructuredToolDecision(
   try {
     decision = JSON.parse(content);
   } catch {
-    return null;
+    const first = content.indexOf("{");
+    const last = content.lastIndexOf("}");
+
+    if (first < 0 || last <= first) {
+      return null;
+    }
+
+    try {
+      decision = JSON.parse(
+        content.slice(first, last + 1)
+      );
+    } catch {
+      return null;
+    }
   }
 
   const name = String(decision?.name || "");
@@ -1283,6 +1300,48 @@ async function requestStructuredToolDecision(
 
   if (!allowed) {
     return null;
+  }
+
+  if (
+    phase === "implementation" &&
+    mutationToolNames.has(name) &&
+    implementationTargetPaths.length > 0
+  ) {
+    if (
+      name === "replace_text" ||
+      name === "write_file"
+    ) {
+      const targetPath = String(args.path || "");
+
+      if (
+        !implementationTargetPaths.includes(
+          targetPath
+        )
+      ) {
+        return null;
+      }
+    }
+
+    if (name === "apply_patch") {
+      const patch = String(args.patch || "");
+      const patchPaths = [
+        ...patch.matchAll(
+          /^\+\+\+ b\/(.+)$/gm
+        ),
+      ].map((match) => match[1]);
+
+      if (
+        patchPaths.length === 0 ||
+        patchPaths.some(
+          (targetPath) =>
+            !implementationTargetPaths.includes(
+              targetPath
+            )
+        )
+      ) {
+        return null;
+      }
+    }
   }
 
   structuredActions += 1;
@@ -1324,7 +1383,9 @@ async function runStructuredContinuation(
       " • trigger=" +
       trigger +
       " • phase=" +
-      phase
+      phase +
+      " • controller=" +
+      controllerModel
   );
 
   let result;
