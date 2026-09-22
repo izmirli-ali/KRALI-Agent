@@ -842,11 +842,41 @@ function recordCheckpointEvidence(name, args, result) {
     return;
   }
 
-  checkpointEvidence.push({
-    tool: name,
-    args: truncate(JSON.stringify(args || {}), 1600),
-    result: truncate(JSON.stringify(result), 5000),
-  });
+  if (name === "read_file") {
+    checkpointEvidence.push({
+      tool: name,
+      args: {
+        path: String(args?.path || result?.path || ""),
+        start_line:
+          args?.start_line ?? result?.start_line ?? null,
+        end_line:
+          args?.end_line ?? result?.end_line ?? null,
+      },
+      result: {
+        ok: true,
+        path: String(result?.path || args?.path || ""),
+        start_line: result?.start_line ?? null,
+        end_line: result?.end_line ?? null,
+        total_lines: result?.total_lines ?? null,
+        content: truncate(
+          String(result?.content || ""),
+          14000
+        ),
+      },
+    });
+  } else {
+    checkpointEvidence.push({
+      tool: name,
+      args: truncate(
+        JSON.stringify(args || {}),
+        1600
+      ),
+      result: truncate(
+        JSON.stringify(result),
+        5000
+      ),
+    });
+  }
 
   checkpointEvidence = checkpointEvidence.slice(-12);
 }
@@ -1548,6 +1578,17 @@ function compactControllerEvidence(
       parsedReadResult?.content || ""
     );
 
+  const exactSourceContent =
+    verifiedReadContent
+      .split("\n")
+      .map((line) =>
+        line.replace(
+          /^\s*\d+\s*\|\s?/,
+          ""
+        )
+      )
+      .join("\n");
+
   return {
     implementationSearchCompleted,
     implementationReadCompleted,
@@ -1579,14 +1620,14 @@ function compactControllerEvidence(
             parsedReadArgs?.end_line ??
             null,
           content: truncate(
-            verifiedReadContent,
+            exactSourceContent,
             ultraCompact
-              ? 1800
+              ? 2200
               : rollbackRepair
-                ? 5200
+                ? 6200
                 : initialMutation
-                  ? 3000
-                  : 9000
+                  ? 5200
+                  : 10000
           ),
         }
       : null,
@@ -1902,7 +1943,7 @@ async function requestStructuredToolDecision(
               "Respect the supplied development phase and available tool contracts.",
               "During inspection, select the minimum real inspection tool needed.",
               "During implementation, obey the supplied tool contracts exactly. If only mutation tools are supplied, choose a minimal mutation tool now; do not answer with prose.",
-              "read_file evidence lines may be prefixed like '  123 | '; those prefixes are display metadata, not source text. Never copy line-number prefixes into old_text, new_text, file content, or patches.",
+              "lastVerifiedRead.content is exact source text with display line-number prefixes already removed. For replace_text, copy old_text exactly from lastVerifiedRead.content; never invent an old_text phrase from assistantText, blockers, or prose.",
               "If lastStructuredOutcome contains a failed real tool result, repair that exact failure with the next minimal mutation instead of repeating the same arguments.",
               "If replace_text failed because old_text was not found or was ambiguous, do not retry replace_text. Use the supplied apply_patch contract and lastVerifiedRead to produce a minimal context-aware patch.",
               "candidateDiff is the current real worktree diff. Use it together with source evidence to repair only the defect introduced by the candidate.",
