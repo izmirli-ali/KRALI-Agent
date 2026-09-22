@@ -181,6 +181,22 @@ Varsayılan provider/model `cline + nvidia/nemotron-3.5-lightning` olarak sabitl
 
 **v0.7.23 Developer Agent fast diagnostic gate + live progress:** Developer Agent artık her tıklamada doğrudan modele gitmez. Yerel `training-latest.json`, `live-eval-latest.json` ve `latest.json` raporları mevcut `VERSION` ile karşılaştırılır. Training Lab ve Live Research Eval güncel sürümde tamamen yeşilse ve güncel mentor trace ek müdahale gerektirmiyorsa Cline çağrısı atlanır; bu hem ChatGPT kullanım limitini hem bekleme süresini korur. Gerçek bir failure varsa Cline çalışır; UI yaklaşık 700 ms aralıkla status dosyasını okuyarak hazırlık, diagnostic kontrol, model çalışması ve build doğrulama aşamalarını canlı gösterir. Cline turu `medium` thinking ve 900 saniye timeout ile sınırlandırılır.
 
+### 0.10.4 — Verified mutation authority gate
+
+0.10.3 tek-havuz root-cause akışı korunur; diagnostic source ile mutation-authorized source artık ayrı state'lerdir.
+
+- Runtime capability failure koşusunda `KRALI_REQUIRE_ROOT_CAUSE_GATE` aktiftir.
+- Runtime hata metninden bulunan search/read kaynağı yalnız diagnostic evidence'tır; `implementationReadCompleted` veya mutation yetkisi vermez.
+- Mutation yetkisi yalnız root-cause ranking + hypothesis verifier PASS sonrası `rootCauseMutationTargetVerified=true` olduğunda açılır.
+- Structured mutation, native fallback ve checkpoint resume bu proof olmadan mutation başlatamaz.
+- Eski v1–v5 checkpoint'ler source/navigation kanıtı olarak okunabilir ancak yeni proof alanı taşımadıkları için mutation yetkisi kazanamaz.
+- Checkpoint şeması v6, verified-target proof'u kalıcı olarak taşır.
+- Strategy escalation ile seçilen yeni target da mutation öncesi verifier'dan geçmek zorundadır.
+- Ranking yükü en fazla 8 aday × yaklaşık 850 source karakterine düşürülür; Qwen root-cause rolünün watchdog bütçesinde kalma ihtimali artırılır.
+- Candidate build repair ayrı bir compiler-guided recovery hattıdır; root-cause gate bu hatta otomatik açılmaz. Böylece yalnız zaten üretilmiş candidate'ın build onarımı etkilenmeden devam eder.
+- Ranking/verifier inconclusive ise sistem güvenli şekilde durur; generic/native fallback üzerinden kör mutation yapmaz.
+- Rollback, failed mutation/diff fingerprint, bounded repair, build/regression ve skill lifecycle sözleşmeleri değişmez.
+
 ### 0.10.3 — Single-pool root-cause ranking
 
 0.10.2 model rolleri korunur; root-cause orkestrasyonu tek havuzlu seçim akışına geçer.
