@@ -110,6 +110,9 @@ SDK_HOST="$STATUS_DIR/cline-sdk-host"
 NATIVE_CLINE_BINARY=""
 TOOL_MODEL_CACHE="$STATUS_DIR/tool-model-cache.txt"
 TOOL_MODEL_CACHE_TTL="${KRALI_TOOL_MODEL_CACHE_TTL:-7200}"
+CONTROLLER_MODEL_CACHE="$STATUS_DIR/controller-model-cache.txt"
+CONTROLLER_MODEL_CACHE_TTL="${KRALI_CONTROLLER_MODEL_CACHE_TTL:-7200}"
+CONTROLLER_PROBE_TIMEOUT_MS="${KRALI_CONTROLLER_PROBE_TIMEOUT_MS:-30000}"
 MODEL_PROBE_CACHED=0
 
 cline_probe() {
@@ -253,6 +256,95 @@ probe_ollama_model() {
     KRALI_OLLAMA_BASE_URL="$OLLAMA_BASE_URL" \
     KRALI_DEV_MODEL="$requested_model" \
     "$NODE_BIN" "$ROOT/Scripts/ollama-tool-probe.mjs" >>"$LOG" 2>&1
+}
+
+probe_controller_model() {
+    local requested_model="$1"
+
+    echo "🧪 Structured controller JSON probe: $requested_model" | tee -a "$LOG"
+
+    KRALI_OLLAMA_BASE_URL="$OLLAMA_BASE_URL" \
+    KRALI_CONTROLLER_PROBE_MODEL="$requested_model" \
+    KRALI_CONTROLLER_PROBE_TIMEOUT_MS="$CONTROLLER_PROBE_TIMEOUT_MS" \
+    "$NODE_BIN" "$ROOT/Scripts/ollama-controller-probe.mjs" >>"$LOG" 2>&1
+}
+
+remember_controller_model() {
+    local proven_model="$1"
+    printf "%s|%s\n" "$proven_model" "$(/bin/date +%s)" > "$CONTROLLER_MODEL_CACHE"
+}
+
+use_cached_controller_model() {
+    [ -f "$CONTROLLER_MODEL_CACHE" ] || return 1
+
+    local raw cached_model cached_at now age
+    raw="$(/bin/cat "$CONTROLLER_MODEL_CACHE" 2>/dev/null || true)"
+    cached_model="${raw%%|*}"
+    cached_at="${raw#*|}"
+
+    case "$cached_at" in
+        ''|*[!0-9]*) return 1 ;;
+    esac
+
+    now="$(/bin/date +%s)"
+    age="$(( now - cached_at ))"
+
+    if [ "$age" -lt 0 ] ||
+       [ "$age" -gt "$CONTROLLER_MODEL_CACHE_TTL" ]; then
+        return 1
+    fi
+
+    if [ -n "$cached_model" ] &&
+       "$OLLAMA_BIN" show "$cached_model" >/dev/null 2>&1; then
+        CONTROLLER_MODEL="$cached_model"
+        echo "⚡ Structured controller cache kullanılıyor: $CONTROLLER_MODEL • yaş=${age}s" | tee -a "$LOG"
+        return 0
+    fi
+
+    return 1
+}
+
+select_structured_controller_model() {
+    CONTROLLER_MODEL=""
+
+    if use_cached_controller_model; then
+        return 0
+    fi
+
+    local candidates=(
+        "qwen2.5-coder:7b-instruct"
+        "qwen3:8b"
+        "qwen2.5-coder:14b-instruct"
+        "$MODEL"
+    )
+
+    local seen="|"
+
+    for candidate in "${candidates[@]}"; do
+        [ -n "$candidate" ] || continue
+
+        if [[ "$seen" == *"|$candidate|"* ]]; then
+            continue
+        fi
+        seen="${seen}$candidate|"
+
+        if ! "$OLLAMA_BIN" show "$candidate" >/dev/null 2>&1; then
+            continue
+        fi
+
+        if probe_controller_model "$candidate"; then
+            CONTROLLER_MODEL="$candidate"
+            remember_controller_model "$candidate"
+            echo "✅ Structured controller probe geçti: $CONTROLLER_MODEL" | tee -a "$LOG"
+            return 0
+        fi
+
+        echo "⚠️ Structured controller probe geçmedi: $candidate" | tee -a "$LOG"
+    done
+
+    CONTROLLER_MODEL="$MODEL"
+    echo "⚠️ Hızlı JSON controller doğrulanamadı; ana model fallback: $CONTROLLER_MODEL" | tee -a "$LOG"
+    return 1
 }
 
 remember_tool_model() {
@@ -957,14 +1049,8 @@ CONTROLLER_MODEL="$MODEL"
 if [ "$PROVIDER" = "ollama" ] &&
    [ "$LOCAL_AGENT_ENGINE" = "native-ollama" ] &&
    [ "$LEARNING_PATH" = "primitivePatch" ]; then
-    JSON_CONTROLLER_MODEL="qwen2.5-coder:14b-instruct"
-
-    if "$OLLAMA_BIN" show "$JSON_CONTROLLER_MODEL" >/dev/null 2>&1; then
-        CONTROLLER_MODEL="$JSON_CONTROLLER_MODEL"
-        echo "🧭 Structured controller modeli: $CONTROLLER_MODEL • JSON karar modu" | tee -a "$LOG"
-    else
-        echo "⚠️ JSON controller modeli kurulu değil; ana model kullanılacak: $CONTROLLER_MODEL" | tee -a "$LOG"
-    fi
+    select_structured_controller_model || true
+    echo "🧭 Structured controller modeli: $CONTROLLER_MODEL • ölçülmüş JSON karar modu" | tee -a "$LOG"
 fi
 
 if [ -f "$CHECKPOINT_FILE" ]; then
