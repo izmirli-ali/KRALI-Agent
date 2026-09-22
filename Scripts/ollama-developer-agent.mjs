@@ -5298,52 +5298,6 @@ async function requestRootCauseRanking(
       (item) => item.id
     );
 
-  const schema = {
-    type: "object",
-    additionalProperties: false,
-    required: [
-      "ranked",
-    ],
-    properties: {
-      ranked: {
-        type: "array",
-        minItems: 1,
-        maxItems: 2,
-        items: {
-          type: "object",
-          additionalProperties: false,
-          required: [
-            "target_id",
-            "root_cause",
-            "strategy",
-            "confidence",
-          ],
-          properties: {
-            target_id: {
-              type: "string",
-              enum: candidateIDs,
-            },
-            root_cause: {
-              type: "string",
-              minLength: 16,
-              maxLength: 700,
-            },
-            strategy: {
-              type: "string",
-              minLength: 16,
-              maxLength: 700,
-            },
-            confidence: {
-              type: "number",
-              minimum: 0,
-              maximum: 1,
-            },
-          },
-        },
-      },
-    },
-  };
-
   const evidence = {
     problem: {
       runtime_failure:
@@ -5372,6 +5326,215 @@ async function requestRootCauseRanking(
       ),
   };
 
+  function rankingSchema(
+    compact = false
+  ) {
+    return {
+      type: "object",
+      additionalProperties: false,
+      required: [
+        "ranked",
+      ],
+      properties: {
+        ranked: {
+          type: "array",
+          minItems: 1,
+          maxItems: 2,
+          items: {
+            type: "object",
+            additionalProperties: false,
+            required: [
+              "target_id",
+              "root_cause",
+              "strategy",
+              "confidence",
+            ],
+            properties: {
+              target_id: {
+                type: "string",
+                enum: candidateIDs,
+              },
+              root_cause: {
+                type: "string",
+                minLength: 12,
+                maxLength:
+                  compact
+                    ? 260
+                    : 700,
+              },
+              strategy: {
+                type: "string",
+                minLength: 12,
+                maxLength:
+                  compact
+                    ? 260
+                    : 700,
+              },
+              confidence: {
+                type: "number",
+                minimum: 0,
+                maximum: 1,
+              },
+            },
+          },
+        },
+      },
+    };
+  }
+
+  async function runRankingCall(
+    compact = false
+  ) {
+    const controller =
+      new AbortController();
+    const remaining =
+      Math.max(
+        1000,
+        hardTimeoutMs -
+          (Date.now() - startedAt)
+      );
+    const timer =
+      setTimeout(
+        () => controller.abort(),
+        Math.min(
+          compact
+            ? 35000
+            : 50000,
+          remaining
+        )
+      );
+
+    try {
+      const response =
+        await fetch(
+          baseUrl + "/api/chat",
+          {
+            method: "POST",
+            headers: {
+              "content-type":
+                "application/json",
+            },
+            signal: controller.signal,
+            body: JSON.stringify({
+              model: rootCauseModel,
+              stream: false,
+              format:
+                rankingSchema(
+                  compact
+                ),
+              keep_alive: "10m",
+              options: {
+                temperature: 0.02,
+                num_ctx:
+                  compact
+                    ? 3072
+                    : 4096,
+                num_predict:
+                  compact
+                    ? 360
+                    : 620,
+              },
+              messages: [
+                {
+                  role: "system",
+                  content: [
+                    compact
+                      ? "You are KRALI Compact Root Cause Ranker."
+                      : "You are KRALI Root Cause Ranker.",
+                    "Do not write code.",
+                    "Rank at most two source definitions that most plausibly explain the runtime failure.",
+                    "The throw site is not necessarily the root cause.",
+                    "A function that returns a wrong nil, wrong lookup result, wrong normalization, wrong alias set, or otherwise corrupts the value consumed later can be the behavioral root cause even if another function emits the final error.",
+                    "Prefer reusable behavioral causes over error-reporting wrappers.",
+                    "Do not hard-code the concrete app, filename, brand, or exact user phrase.",
+                    compact
+                      ? "Keep root_cause and strategy extremely short so the JSON object is complete."
+                      : "Keep the JSON concise and complete.",
+                    "Return only JSON matching the schema.",
+                  ].join("\n"),
+                },
+                {
+                  role: "user",
+                  content:
+                    JSON.stringify(
+                      compact
+                        ? {
+                            problem:
+                              evidence.problem,
+                            candidates:
+                              evidence.candidates.map(
+                                (item) => ({
+                                  id: item.id,
+                                  symbol:
+                                    item.symbol,
+                                  source:
+                                    clipExactSource(
+                                      item.source,
+                                      420
+                                    ),
+                                })
+                              ),
+                          }
+                        : evidence
+                    ),
+                },
+              ],
+            }),
+          }
+        );
+
+      clearTimeout(timer);
+
+      if (!response.ok) {
+        return {
+          ok: false,
+          error:
+            "HTTP " +
+            response.status,
+        };
+      }
+
+      const payload =
+        await response.json();
+      const content =
+        String(
+          payload?.message?.content || ""
+        ).trim();
+
+      try {
+        return {
+          ok: true,
+          result:
+            JSON.parse(content),
+        };
+      } catch (error) {
+        return {
+          ok: false,
+          parse_error: true,
+          error:
+            error instanceof Error
+              ? error.message
+              : String(error),
+          content:
+            truncate(
+              content,
+              1200
+            ),
+        };
+      }
+    } catch (error) {
+      clearTimeout(timer);
+
+      return {
+        ok: false,
+        error:
+          error instanceof Error
+            ? error.message
+            : String(error),
+      };
+    }
+  }
+
   stage(
     "local_agent_root_cause_ranking",
     gapLabel +
@@ -5381,155 +5544,99 @@ async function requestRootCauseRanking(
       rootCauseModel
   );
 
-  const controller =
-    new AbortController();
-  const remaining =
-    Math.max(
-      1000,
+  let callResult =
+    await runRankingCall(false);
+
+  if (
+    !callResult.ok &&
+    callResult.parse_error === true &&
+    (
       hardTimeoutMs -
-        (Date.now() - startedAt)
+      (Date.now() - startedAt)
+    ) > 40000
+  ) {
+    stage(
+      "local_agent_root_cause_ranking_retry",
+      gapLabel +
+        " ranking JSON tamamlanmadı; aynı candidate set ile tek ultra-compact retry • error=" +
+        truncate(
+          callResult.error,
+          220
+        )
     );
-  const timer =
-    setTimeout(
-      () => controller.abort(),
-      Math.min(45000, remaining)
-    );
 
-  try {
-    const response =
-      await fetch(
-        baseUrl + "/api/chat",
-        {
-          method: "POST",
-          headers: {
-            "content-type":
-              "application/json",
-          },
-          signal: controller.signal,
-          body: JSON.stringify({
-            model: rootCauseModel,
-            stream: false,
-            format: schema,
-            keep_alive: "10m",
-            options: {
-              temperature: 0.05,
-              num_ctx: 4096,
-              num_predict: 320,
-            },
-            messages: [
-              {
-                role: "system",
-                content: [
-                  "You are KRALI Root Cause Ranker.",
-                  "Do not write code.",
-                  "Rank at most two source definitions that most plausibly explain the runtime failure.",
-                  "The throw site is not necessarily the root cause.",
-                  "A function that returns a wrong nil, wrong lookup result, wrong normalization, wrong alias set, or otherwise corrupts the value consumed later can be the behavioral root cause even if another function emits the final error.",
-                  "Prefer reusable behavioral causes over error-reporting wrappers.",
-                  "Do not hard-code the concrete app, filename, brand, or exact user phrase.",
-                  "Return only JSON matching the schema.",
-                ].join("\n"),
-              },
-              {
-                role: "user",
-                content:
-                  JSON.stringify(
-                    evidence
-                  ),
-              },
-            ],
-          }),
-        }
-      );
+    callResult =
+      await runRankingCall(true);
+  }
 
-    clearTimeout(timer);
-
-    if (!response.ok) {
-      stage(
-        "local_agent_root_cause_ranking_inconclusive",
-        gapLabel +
-          " root-cause ranking HTTP " +
-          response.status
-      );
-      return [];
-    }
-
-    const payload =
-      await response.json();
-    const result =
-      JSON.parse(
-        String(
-          payload?.message?.content || ""
-        ).trim()
-      );
-
-    const ranked =
-      Array.isArray(result?.ranked)
-        ? result.ranked
-        : [];
-
-    return ranked
-      .map((item) => {
-        const target =
-          candidates.find(
-            (candidate) =>
-              candidate.id ===
-              item?.target_id
-          );
-
-        if (!target) {
-          return null;
-        }
-
-        return {
-          target,
-          root_cause:
-            String(
-              item.root_cause || ""
-            ),
-          strategy:
-            String(
-              item.strategy || ""
-            ),
-          confidence:
-            Number(
-              item.confidence || 0
-            ),
-          alternatives_considered:
-            ranked
-              .filter(
-                (other) =>
-                  other?.target_id !==
-                  item?.target_id
-              )
-              .map(
-                (other) =>
-                  String(
-                    other?.root_cause || ""
-                  )
-              )
-              .filter(Boolean),
-        };
-      })
-      .filter(Boolean)
-      .slice(0, 2);
-  } catch (error) {
-    clearTimeout(timer);
-
+  if (!callResult.ok) {
     stage(
       "local_agent_root_cause_ranking_inconclusive",
       gapLabel +
         " root-cause ranking tamamlanamadı • " +
         truncate(
-          error instanceof Error
-            ? error.message
-            : String(error),
+          callResult.error ||
+            "bilinmeyen ranking hatası",
           320
         )
     );
 
     return [];
   }
+
+  const result =
+    callResult.result;
+
+  const ranked =
+    Array.isArray(result?.ranked)
+      ? result.ranked
+      : [];
+
+  return ranked
+    .map((item) => {
+      const target =
+        rankCandidates.find(
+          (candidate) =>
+            candidate.id ===
+            item?.target_id
+        );
+
+      if (!target) {
+        return null;
+      }
+
+      return {
+        target,
+        root_cause:
+          String(
+            item.root_cause || ""
+          ),
+        strategy:
+          String(
+            item.strategy || ""
+          ),
+        confidence:
+          Number(
+            item.confidence || 0
+          ),
+        alternatives_considered:
+          ranked
+            .filter(
+              (other) =>
+                other?.target_id !==
+                item?.target_id
+            )
+            .map(
+              (other) =>
+                String(
+                  other?.root_cause || ""
+                )
+            )
+            .filter(Boolean),
+      };
+    })
+    .filter(Boolean)
+    .slice(0, 2);
 }
 
 async function resolveRuntimeFailureDependency(
