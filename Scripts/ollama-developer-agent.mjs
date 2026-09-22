@@ -1136,12 +1136,26 @@ function recordToolEvidence(name, result, args = {}) {
   );
 }
 
+function rejectStructuredDecision(reason) {
+  stage(
+    "local_agent_controller_rejected",
+    gapLabel +
+      " structured controller kararı reddedildi • " +
+      reason +
+      " • controller=" +
+      controllerModel
+  );
+  return null;
+}
+
 async function requestStructuredToolDecision(
   assistantText,
   blockers
 ) {
   if (structuredActions >= maxStructuredActions) {
-    return null;
+    return rejectStructuredDecision(
+      "structured action limiti doldu"
+    );
   }
 
   const phase = developmentPhase();
@@ -1243,13 +1257,17 @@ async function requestStructuredToolDecision(
     });
   } catch {
     clearTimeout(timer);
-    return null;
+    return rejectStructuredDecision(
+      "controller isteği başarısız/zaman aşımı"
+    );
   }
 
   clearTimeout(timer);
 
   if (!response.ok) {
-    return null;
+    return rejectStructuredDecision(
+      "controller HTTP " + response.status
+    );
   }
 
   let payload;
@@ -1257,12 +1275,16 @@ async function requestStructuredToolDecision(
   try {
     payload = await response.json();
   } catch {
-    return null;
+    return rejectStructuredDecision(
+      "controller response JSON parse edilemedi"
+    );
   }
 
   const content = String(payload?.message?.content || "").trim();
   if (!content) {
-    return null;
+    return rejectStructuredDecision(
+      "controller boş cevap verdi"
+    );
   }
 
   let decision;
@@ -1274,7 +1296,9 @@ async function requestStructuredToolDecision(
     const last = content.lastIndexOf("}");
 
     if (first < 0 || last <= first) {
-      return null;
+      return rejectStructuredDecision(
+        "geçerli JSON object bulunamadı"
+      );
     }
 
     try {
@@ -1282,7 +1306,9 @@ async function requestStructuredToolDecision(
         content.slice(first, last + 1)
       );
     } catch {
-      return null;
+      return rejectStructuredDecision(
+        "controller JSON object parse edilemedi"
+      );
     }
   }
 
@@ -1299,7 +1325,10 @@ async function requestStructuredToolDecision(
   );
 
   if (!allowed) {
-    return null;
+    return rejectStructuredDecision(
+      "izin verilmeyen tool: " +
+        (name || "<empty>")
+    );
   }
 
   if (
@@ -1318,7 +1347,9 @@ async function requestStructuredToolDecision(
           targetPath
         )
       ) {
-        return null;
+        return rejectStructuredDecision(
+          "mutation target doğrulanmış path dışında"
+        );
       }
     }
 
@@ -1339,7 +1370,9 @@ async function requestStructuredToolDecision(
             )
         )
       ) {
-        return null;
+        return rejectStructuredDecision(
+          "apply_patch doğrulanmış target seti dışında"
+        );
       }
     }
   }
