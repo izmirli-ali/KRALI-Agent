@@ -1,28 +1,24 @@
-
-━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
- KRALİ DEVELOPER AGENT
- 20260922-194438
 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 ⚠️ Global Node.js v26 Cline bağımlılıklarıyla uyumlu değil; izole Node 22 runtime hazırlanıyor.
 ✅ Developer Agent runtime: v22.23.2
-⚡ Tool-capable model cache kullanılıyor: devstral:24b • yaş=1377s
+⚡ Tool-capable model cache kullanılıyor: devstral:24b • yaş=1967s
 Yerel model seçimi: devstral:24b • RAM≈24GB
 ✅ Yerel Developer AI hazır + tool-call doğrulandı: devstral:24b
 From https://github.com/izmirli-ali/KRALI-Agent
  * branch            main       -> FETCH_HEAD
 Already up to date.
 Learning Queue job brief bulundu; mutable Mentor latest yerine immutable job kullanılacak.
-Preparing worktree (new branch 'krali-dev-agent/20260922-194438')
-branch 'krali-dev-agent/20260922-194438' set up to track 'origin/main'.
-HEAD is now at ca43350 v0.9.21: bump build to 171
+Preparing worktree (new branch 'krali-dev-agent/20260922-195428')
+branch 'krali-dev-agent/20260922-195428' set up to track 'origin/main'.
+HEAD is now at 75e37ff v0.9.22: bump build to 172
 Developer prompt mode: gap • 4761 bytes
-⚡ Structured controller cache adayı yeniden ısıtılıyor: qwen2.5-coder:14b-instruct • yaş=667s
+⚡ Structured controller cache adayı yeniden ısıtılıyor: qwen2.5-coder:14b-instruct • yaş=577s
 🧪 Structured controller JSON probe: qwen2.5-coder:14b-instruct
-controller_probe_ok|qwen2.5-coder:14b-instruct|13207ms
+controller_probe_ok|qwen2.5-coder:14b-instruct|12534ms
 ✅ Structured controller cache doğrulandı ve sıcak: qwen2.5-coder:14b-instruct
 🧭 Structured controller modeli: qwen2.5-coder:14b-instruct • ölçülmüş JSON karar modu
 ♻️ Developer checkpoint bulundu; aynı gap teşhisi kaldığı yerden devam edecek: desktop.app-02edb76fda4e
-KRALI_LOCAL_STAGE local_agent_checkpoint_stale • Uygulama kontrolü (desktop.app) checkpoint source provenance eski • recordedHead=bc4f38e3fd74a27277fe708b4a19a7d8999388ba • liveHead=ca43350afdd9289090e8e1252a4bacc34e9cfb31 • source hedefleri yeniden doğrulanacak
+KRALI_LOCAL_STAGE local_agent_checkpoint_stale • Uygulama kontrolü (desktop.app) checkpoint source provenance eski • recordedHead=ca43350afdd9289090e8e1252a4bacc34e9cfb31 • liveHead=75e37ff4885ebedf8e31d2275a577dc8dcf53187 • source hedefleri yeniden doğrulanacak
 KRALI_LOCAL_STAGE local_agent_target_found • Uygulama kontrolü (desktop.app) hedef kaynak bulundu • paths=1 • targets=["App/KRALIAgentNative/AgentDesktopControl.swift"]
 KRALI_LOCAL_STAGE local_agent_diagnostic_source_bootstrap • Uygulama kontrolü (desktop.app) runtime hata metninden source bootstrap bulundu • hint=Uygulama bulunamadı • targets=["App/KRALIAgentNative/AgentDesktopControl.swift"]
 KRALI_LOCAL_STAGE local_agent_target_verified • Uygulama kontrolü (desktop.app) hedef kaynak bölgesi doğrulandı • mutation zorunlu
@@ -36,9 +32,10 @@ KRALI_LOCAL_STAGE local_agent_structured_mutation • Uygulama kontrolü (deskto
 KRALI_LOCAL_STAGE local_agent_structured_tool • Uygulama kontrolü (desktop.app) candidate preflight diff doğrulaması çalışıyor • trigger=runtime_failure_bootstrap
 KRALI_LOCAL_STAGE local_agent_structured_tool • Uygulama kontrolü (desktop.app) candidate preflight build_check çalışıyor • trigger=runtime_failure_bootstrap
 KRALI_LOCAL_STAGE local_agent_failed_diff_recorded • Uygulama kontrolü (desktop.app) build FAIL candidate diff fingerprint kaydedildi • fingerprint=6ed3cec478d4 • trigger=runtime_failure_bootstrap
+KRALI_LOCAL_STAGE local_agent_repair_anchor_preserved • Uygulama kontrolü (desktop.app) build FAIL sonrası exact repair anchor korundu • path=App/KRALIAgentNative/AgentDesktopControl.swift • oldLength=170 • trigger=runtime_failure_bootstrap
 KRALI_LOCAL_STAGE local_agent_failed_mutation_recorded • Uygulama kontrolü (desktop.app) build FAIL mutation fingerprint kaydedildi • fingerprint=b95899d5f344 • trigger=runtime_failure_bootstrap
 KRALI_LOCAL_STAGE local_agent_mutation_rolled_back • Uygulama kontrolü (desktop.app) başarısız preflight sonrası son mutation geri alındı • trigger=runtime_failure_bootstrap
-KRALI_LOCAL_STAGE local_agent_structured_tool • Uygulama kontrolü (desktop.app) candidate preflight build başarısız • sıcak controller ile repair gerekli • rollback=true • compilerErrors=["/Users/medusa/Developer/KRALI-Agent-Dev-20260922-194438/App/KRALIAgentNative/AgentDesktopControl.swift:592:30: error: value of type 'AgentDesktopControl.ApplicationCandidate' has no member 'isRunning'","     |                              `- error: value of type 'AgentDesktopControl.ApplicationCandidate' has no member 'isRunning'","** BUILD FAILED **","The following build commands failed:","** BUILD FAILED **","The following build commands failed:"] • failedDiff=diff --git a/App/KRALIAgentNative/AgentDesktopControl.swift b/App/KRALIAgentNative/AgentDesktopControl.swift
+KRALI_LOCAL_STAGE local_agent_structured_tool • Uygulama kontrolü (desktop.app) candidate preflight build başarısız • sıcak controller ile repair gerekli • rollback=true • compilerErrors=["/Users/medusa/Developer/KRALI-Agent-Dev-20260922-195428/App/KRALIAgentNative/AgentDesktopControl.swift:592:30: error: value of type 'AgentDesktopControl.ApplicationCandidate' has no member 'isRunning'","     |                              `- error: value of type 'AgentDesktopControl.ApplicationCandidate' has no member 'isRunning'","** BUILD FAILED **","The following build commands failed:","** BUILD FAILED **","The following build commands failed:"] • failedDiff=diff --git a/App/KRALIAgentNative/AgentDesktopControl.swift b/App/KRALIAgentNative/AgentDesktopControl.swift
 index f0afc31..fca983e 100644
 --- a/App/KRALIAgentNative/AgentDesktopControl.swift
 +++ b/App/KRALIAgentNative/AgentDesktopControl.swift
@@ -53,23 +50,24 @@ index f0afc31..fca983e 100644
          }
  • trigger=runtime_failure_bootstrap
 KRALI_LOCAL_STAGE local_agent_controller_preparing • Uygulama kontrolü (desktop.app) ana model bellekte değil; sıcak controller korunuyor • controller=qwen2.5-coder:14b-instruct
-KRALI_LOCAL_STAGE local_agent_controller_preparing • Uygulama kontrolü (desktop.app) structured controller girdisi hazır • mode=exact_replace • problem=runtime_evidence • chars=7455 • controller=qwen2.5-coder:14b-instruct
-KRALI_LOCAL_STAGE local_agent_replace_anchor_rejected • Uygulama kontrolü (desktop.app) replace_text anchor doğrulanmadı • length=110 • occurrences=0 • copiedFromVerifiedRead=false • meaningfulChange=true • controller=qwen2.5-coder:14b-instruct
+KRALI_LOCAL_STAGE local_agent_controller_preparing • Uygulama kontrolü (desktop.app) structured controller girdisi hazır • mode=exact_repair_new_text • problem=runtime_evidence • chars=7888 • controller=qwen2.5-coder:14b-instruct
+KRALI_LOCAL_STAGE local_agent_replace_anchor_rejected • Uygulama kontrolü (desktop.app) replace_text anchor doğrulanmadı • length=170 • occurrences=1 • copiedFromVerifiedRead=true • meaningfulChange=true • differsFromPreviousFailed=false • controller=qwen2.5-coder:14b-instruct
 KRALI_LOCAL_STAGE local_agent_controller_preparing • Uygulama kontrolü (desktop.app) ana model bellekte değil; sıcak controller korunuyor • controller=qwen2.5-coder:14b-instruct
-KRALI_LOCAL_STAGE local_agent_controller_preparing • Uygulama kontrolü (desktop.app) structured controller girdisi hazır • mode=exact_replace • problem=runtime_evidence • chars=7701 • controller=qwen2.5-coder:14b-instruct
-KRALI_LOCAL_STAGE local_agent_replace_anchor_rejected • Uygulama kontrolü (desktop.app) replace_text anchor doğrulanmadı • length=110 • occurrences=0 • copiedFromVerifiedRead=false • meaningfulChange=true • controller=qwen2.5-coder:14b-instruct
+KRALI_LOCAL_STAGE local_agent_controller_preparing • Uygulama kontrolü (desktop.app) structured controller girdisi hazır • mode=exact_repair_new_text • problem=runtime_evidence • chars=8134 • controller=qwen2.5-coder:14b-instruct
+KRALI_LOCAL_STAGE local_agent_replace_anchor_rejected • Uygulama kontrolü (desktop.app) replace_text anchor doğrulanmadı • length=170 • occurrences=1 • copiedFromVerifiedRead=true • meaningfulChange=true • differsFromPreviousFailed=false • controller=qwen2.5-coder:14b-instruct
 KRALI_LOCAL_STAGE local_agent_controller_preparing • Uygulama kontrolü (desktop.app) ana model bellekte değil; sıcak controller korunuyor • controller=qwen2.5-coder:14b-instruct
-KRALI_LOCAL_STAGE local_agent_controller_preparing • Uygulama kontrolü (desktop.app) structured controller girdisi hazır • mode=exact_replace • problem=runtime_evidence • chars=7701 • controller=qwen2.5-coder:14b-instruct
-KRALI_LOCAL_STAGE local_agent_replace_anchor_rejected • Uygulama kontrolü (desktop.app) replace_text anchor doğrulanmadı • length=110 • occurrences=0 • copiedFromVerifiedRead=false • meaningfulChange=true • controller=qwen2.5-coder:14b-instruct
-KRALI_LOCAL_STAGE local_agent_controller_rejected • Uygulama kontrolü (desktop.app) structured controller kararı reddedildi • replace_text anchor doğrulanmadı • length=110 • occurrences=0 • copiedFromVerifiedRead=false • meaningfulChange=true • controller=qwen2.5-coder:14b-instruct
+KRALI_LOCAL_STAGE local_agent_controller_preparing • Uygulama kontrolü (desktop.app) structured controller girdisi hazır • mode=exact_repair_new_text • problem=runtime_evidence • chars=8134 • controller=qwen2.5-coder:14b-instruct
+KRALI_LOCAL_STAGE local_agent_replace_anchor_rejected • Uygulama kontrolü (desktop.app) replace_text anchor doğrulanmadı • length=170 • occurrences=1 • copiedFromVerifiedRead=true • meaningfulChange=true • differsFromPreviousFailed=false • controller=qwen2.5-coder:14b-instruct
+KRALI_LOCAL_STAGE local_agent_controller_rejected • Uygulama kontrolü (desktop.app) structured controller kararı reddedildi • replace_text anchor doğrulanmadı • length=170 • occurrences=1 • copiedFromVerifiedRead=true • meaningfulChange=true • differsFromPreviousFailed=false • controller=qwen2.5-coder:14b-instruct
 KRALI_LOCAL_STAGE local_agent_starting • Uygulama kontrolü (desktop.app) native Ollama agent başlatılıyor: devstral:24b
 KRALI_LOCAL_STAGE local_agent_running • Uygulama kontrolü (desktop.app) yerel model çalışıyor • adım 1/10
 KRALI_LOCAL_STAGE local_agent_timeout_controller • Uygulama kontrolü (desktop.app) implementation isteği zaman aşımına uğradı • doğrulanmış source evidence ile structured controller devralıyor • controller=qwen2.5-coder:14b-instruct
 KRALI_LOCAL_STAGE local_agent_controller_preparing • Uygulama kontrolü (desktop.app) ana model belleği controller için boşaltıldı • devstral:24b → qwen2.5-coder:14b-instruct
-KRALI_LOCAL_STAGE local_agent_controller_preparing • Uygulama kontrolü (desktop.app) structured controller girdisi hazır • mode=exact_replace • problem=runtime_evidence • chars=7430 • controller=qwen2.5-coder:14b-instruct
-KRALI_LOCAL_STAGE local_agent_controller_rejected • Uygulama kontrolü (desktop.app) structured controller kararı reddedildi • controller isteği başarısız/zaman aşımı • controller=qwen2.5-coder:14b-instruct
+KRALI_LOCAL_STAGE local_agent_controller_preparing • Uygulama kontrolü (desktop.app) structured controller girdisi hazır • mode=exact_repair_new_text • problem=runtime_evidence • chars=7863 • controller=qwen2.5-coder:14b-instruct
+KRALI_LOCAL_STAGE local_agent_replace_anchor_rejected • Uygulama kontrolü (desktop.app) replace_text anchor doğrulanmadı • length=170 • occurrences=1 • copiedFromVerifiedRead=true • meaningfulChange=true • differsFromPreviousFailed=false • controller=qwen2.5-coder:14b-instruct
+KRALI_LOCAL_STAGE local_agent_controller_rejected • Uygulama kontrolü (desktop.app) structured controller kararı reddedildi • replace_text anchor doğrulanmadı • length=170 • occurrences=1 • copiedFromVerifiedRead=true • meaningfulChange=true • differsFromPreviousFailed=false • controller=qwen2.5-coder:14b-instruct
 Implementation aşamasında ana model zaman aşımına uğradı ve structured controller güvenli devam kararı üretemedi.
-KRALI_LOCAL_STAGE local_agent_checkpoint_stale • Uygulama kontrolü (desktop.app) checkpoint source provenance eski • recordedHead=bc4f38e3fd74a27277fe708b4a19a7d8999388ba • liveHead=ca43350afdd9289090e8e1252a4bacc34e9cfb31 • source hedefleri yeniden doğrulanacak
+KRALI_LOCAL_STAGE local_agent_checkpoint_stale • Uygulama kontrolü (desktop.app) checkpoint source provenance eski • recordedHead=ca43350afdd9289090e8e1252a4bacc34e9cfb31 • liveHead=75e37ff4885ebedf8e31d2275a577dc8dcf53187 • source hedefleri yeniden doğrulanacak
 KRALI_LOCAL_STAGE local_agent_target_found • Uygulama kontrolü (desktop.app) hedef kaynak bulundu • paths=1 • targets=["App/KRALIAgentNative/AgentDesktopControl.swift"]
 KRALI_LOCAL_STAGE local_agent_diagnostic_source_bootstrap • Uygulama kontrolü (desktop.app) runtime hata metninden source bootstrap bulundu • hint=Uygulama bulunamadı • targets=["App/KRALIAgentNative/AgentDesktopControl.swift"]
 KRALI_LOCAL_STAGE local_agent_target_verified • Uygulama kontrolü (desktop.app) hedef kaynak bölgesi doğrulandı • mutation zorunlu
@@ -83,9 +81,10 @@ KRALI_LOCAL_STAGE local_agent_structured_mutation • Uygulama kontrolü (deskto
 KRALI_LOCAL_STAGE local_agent_structured_tool • Uygulama kontrolü (desktop.app) candidate preflight diff doğrulaması çalışıyor • trigger=runtime_failure_bootstrap
 KRALI_LOCAL_STAGE local_agent_structured_tool • Uygulama kontrolü (desktop.app) candidate preflight build_check çalışıyor • trigger=runtime_failure_bootstrap
 KRALI_LOCAL_STAGE local_agent_failed_diff_recorded • Uygulama kontrolü (desktop.app) build FAIL candidate diff fingerprint kaydedildi • fingerprint=6ed3cec478d4 • trigger=runtime_failure_bootstrap
+KRALI_LOCAL_STAGE local_agent_repair_anchor_preserved • Uygulama kontrolü (desktop.app) build FAIL sonrası exact repair anchor korundu • path=App/KRALIAgentNative/AgentDesktopControl.swift • oldLength=170 • trigger=runtime_failure_bootstrap
 KRALI_LOCAL_STAGE local_agent_failed_mutation_recorded • Uygulama kontrolü (desktop.app) build FAIL mutation fingerprint kaydedildi • fingerprint=b95899d5f344 • trigger=runtime_failure_bootstrap
 KRALI_LOCAL_STAGE local_agent_mutation_rolled_back • Uygulama kontrolü (desktop.app) başarısız preflight sonrası son mutation geri alındı • trigger=runtime_failure_bootstrap
-KRALI_LOCAL_STAGE local_agent_structured_tool • Uygulama kontrolü (desktop.app) candidate preflight build başarısız • sıcak controller ile repair gerekli • rollback=true • compilerErrors=["/Users/medusa/Developer/KRALI-Agent-Dev-20260922-194438/App/KRALIAgentNative/AgentDesktopControl.swift:592:30: error: value of type 'AgentDesktopControl.ApplicationCandidate' has no member 'isRunning'","     |                              `- error: value of type 'AgentDesktopControl.ApplicationCandidate' has no member 'isRunning'","** BUILD FAILED **","The following build commands failed:","** BUILD FAILED **","The following build commands failed:"] • failedDiff=diff --git a/App/KRALIAgentNative/AgentDesktopControl.swift b/App/KRALIAgentNative/AgentDesktopControl.swift
+KRALI_LOCAL_STAGE local_agent_structured_tool • Uygulama kontrolü (desktop.app) candidate preflight build başarısız • sıcak controller ile repair gerekli • rollback=true • compilerErrors=["/Users/medusa/Developer/KRALI-Agent-Dev-20260922-195428/App/KRALIAgentNative/AgentDesktopControl.swift:592:30: error: value of type 'AgentDesktopControl.ApplicationCandidate' has no member 'isRunning'","     |                              `- error: value of type 'AgentDesktopControl.ApplicationCandidate' has no member 'isRunning'","** BUILD FAILED **","The following build commands failed:","** BUILD FAILED **","The following build commands failed:"] • failedDiff=diff --git a/App/KRALIAgentNative/AgentDesktopControl.swift b/App/KRALIAgentNative/AgentDesktopControl.swift
 index f0afc31..fca983e 100644
 --- a/App/KRALIAgentNative/AgentDesktopControl.swift
 +++ b/App/KRALIAgentNative/AgentDesktopControl.swift
@@ -100,21 +99,22 @@ index f0afc31..fca983e 100644
          }
  • trigger=runtime_failure_bootstrap
 KRALI_LOCAL_STAGE local_agent_controller_preparing • Uygulama kontrolü (desktop.app) ana model bellekte değil; sıcak controller korunuyor • controller=qwen2.5-coder:14b-instruct
-KRALI_LOCAL_STAGE local_agent_controller_preparing • Uygulama kontrolü (desktop.app) structured controller girdisi hazır • mode=exact_replace • problem=runtime_evidence • chars=7455 • controller=qwen2.5-coder:14b-instruct
-KRALI_LOCAL_STAGE local_agent_replace_anchor_rejected • Uygulama kontrolü (desktop.app) replace_text anchor doğrulanmadı • length=110 • occurrences=0 • copiedFromVerifiedRead=false • meaningfulChange=true • controller=qwen2.5-coder:14b-instruct
+KRALI_LOCAL_STAGE local_agent_controller_preparing • Uygulama kontrolü (desktop.app) structured controller girdisi hazır • mode=exact_repair_new_text • problem=runtime_evidence • chars=7888 • controller=qwen2.5-coder:14b-instruct
+KRALI_LOCAL_STAGE local_agent_replace_anchor_rejected • Uygulama kontrolü (desktop.app) replace_text anchor doğrulanmadı • length=170 • occurrences=1 • copiedFromVerifiedRead=true • meaningfulChange=true • differsFromPreviousFailed=false • controller=qwen2.5-coder:14b-instruct
 KRALI_LOCAL_STAGE local_agent_controller_preparing • Uygulama kontrolü (desktop.app) ana model bellekte değil; sıcak controller korunuyor • controller=qwen2.5-coder:14b-instruct
-KRALI_LOCAL_STAGE local_agent_controller_preparing • Uygulama kontrolü (desktop.app) structured controller girdisi hazır • mode=exact_replace • problem=runtime_evidence • chars=7701 • controller=qwen2.5-coder:14b-instruct
-KRALI_LOCAL_STAGE local_agent_replace_anchor_rejected • Uygulama kontrolü (desktop.app) replace_text anchor doğrulanmadı • length=110 • occurrences=0 • copiedFromVerifiedRead=false • meaningfulChange=true • controller=qwen2.5-coder:14b-instruct
+KRALI_LOCAL_STAGE local_agent_controller_preparing • Uygulama kontrolü (desktop.app) structured controller girdisi hazır • mode=exact_repair_new_text • problem=runtime_evidence • chars=8134 • controller=qwen2.5-coder:14b-instruct
+KRALI_LOCAL_STAGE local_agent_replace_anchor_rejected • Uygulama kontrolü (desktop.app) replace_text anchor doğrulanmadı • length=170 • occurrences=1 • copiedFromVerifiedRead=true • meaningfulChange=true • differsFromPreviousFailed=false • controller=qwen2.5-coder:14b-instruct
 KRALI_LOCAL_STAGE local_agent_controller_preparing • Uygulama kontrolü (desktop.app) ana model bellekte değil; sıcak controller korunuyor • controller=qwen2.5-coder:14b-instruct
-KRALI_LOCAL_STAGE local_agent_controller_preparing • Uygulama kontrolü (desktop.app) structured controller girdisi hazır • mode=exact_replace • problem=runtime_evidence • chars=7701 • controller=qwen2.5-coder:14b-instruct
-KRALI_LOCAL_STAGE local_agent_replace_anchor_rejected • Uygulama kontrolü (desktop.app) replace_text anchor doğrulanmadı • length=110 • occurrences=0 • copiedFromVerifiedRead=false • meaningfulChange=true • controller=qwen2.5-coder:14b-instruct
-KRALI_LOCAL_STAGE local_agent_controller_rejected • Uygulama kontrolü (desktop.app) structured controller kararı reddedildi • replace_text anchor doğrulanmadı • length=110 • occurrences=0 • copiedFromVerifiedRead=false • meaningfulChange=true • controller=qwen2.5-coder:14b-instruct
+KRALI_LOCAL_STAGE local_agent_controller_preparing • Uygulama kontrolü (desktop.app) structured controller girdisi hazır • mode=exact_repair_new_text • problem=runtime_evidence • chars=8134 • controller=qwen2.5-coder:14b-instruct
+KRALI_LOCAL_STAGE local_agent_replace_anchor_rejected • Uygulama kontrolü (desktop.app) replace_text anchor doğrulanmadı • length=170 • occurrences=1 • copiedFromVerifiedRead=true • meaningfulChange=true • differsFromPreviousFailed=false • controller=qwen2.5-coder:14b-instruct
+KRALI_LOCAL_STAGE local_agent_controller_rejected • Uygulama kontrolü (desktop.app) structured controller kararı reddedildi • replace_text anchor doğrulanmadı • length=170 • occurrences=1 • copiedFromVerifiedRead=true • meaningfulChange=true • differsFromPreviousFailed=false • controller=qwen2.5-coder:14b-instruct
 KRALI_LOCAL_STAGE local_agent_starting • Uygulama kontrolü (desktop.app) native Ollama agent başlatılıyor: devstral:24b
 KRALI_LOCAL_STAGE local_agent_running • Uygulama kontrolü (desktop.app) yerel model çalışıyor • adım 1/10
 KRALI_LOCAL_STAGE local_agent_timeout_controller • Uygulama kontrolü (desktop.app) implementation isteği zaman aşımına uğradı • doğrulanmış source evidence ile structured controller devralıyor • controller=qwen2.5-coder:14b-instruct
 KRALI_LOCAL_STAGE local_agent_controller_preparing • Uygulama kontrolü (desktop.app) ana model belleği controller için boşaltıldı • devstral:24b → qwen2.5-coder:14b-instruct
-KRALI_LOCAL_STAGE local_agent_controller_preparing • Uygulama kontrolü (desktop.app) structured controller girdisi hazır • mode=exact_replace • problem=runtime_evidence • chars=7430 • controller=qwen2.5-coder:14b-instruct
-KRALI_LOCAL_STAGE local_agent_controller_rejected • Uygulama kontrolü (desktop.app) structured controller kararı reddedildi • controller isteği başarısız/zaman aşımı • controller=qwen2.5-coder:14b-instruct
+KRALI_LOCAL_STAGE local_agent_controller_preparing • Uygulama kontrolü (desktop.app) structured controller girdisi hazır • mode=exact_repair_new_text • problem=runtime_evidence • chars=7863 • controller=qwen2.5-coder:14b-instruct
+KRALI_LOCAL_STAGE local_agent_replace_anchor_rejected • Uygulama kontrolü (desktop.app) replace_text anchor doğrulanmadı • length=170 • occurrences=1 • copiedFromVerifiedRead=true • meaningfulChange=true • differsFromPreviousFailed=false • controller=qwen2.5-coder:14b-instruct
+KRALI_LOCAL_STAGE local_agent_controller_rejected • Uygulama kontrolü (desktop.app) structured controller kararı reddedildi • replace_text anchor doğrulanmadı • length=170 • occurrences=1 • copiedFromVerifiedRead=true • meaningfulChange=true • differsFromPreviousFailed=false • controller=qwen2.5-coder:14b-instruct
 Implementation aşamasında ana model zaman aşımına uğradı ve structured controller güvenli devam kararı üretemedi.
-Deleted branch krali-dev-agent/20260922-194438 (was ca43350).
+Deleted branch krali-dev-agent/20260922-195428 (was 75e37ff).
 ❌ Native yerel Developer Agent durdu: Implementation aşamasında ana model zaman aşımına uğradı ve structured controller güvenli devam kararı üretemedi.
