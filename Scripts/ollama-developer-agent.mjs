@@ -4570,7 +4570,7 @@ async function requestRootCauseDiagnosis(
   reconsideration = null
 ) {
   if (
-    !architectModel ||
+    !rootCauseModel ||
     neighborhood.length === 0
   ) {
     return null;
