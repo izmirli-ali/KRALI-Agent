@@ -1025,25 +1025,8 @@ CHECKPOINT_DIR="$STATUS_DIR/checkpoints"
 mkdir -p "$CHECKPOINT_DIR"
 CHECKPOINT_FILE="$CHECKPOINT_DIR/$GAP_KEY.json"
 
-if [ "$PROVIDER" = "ollama" ] &&
-   [ "$LOCAL_AGENT_ENGINE" = "native-ollama" ] &&
-   [ "$LEARNING_PATH" = "primitivePatch" ]; then
-    PATCH_MODEL="qwen2.5-coder:14b-instruct"
-
-    if [ "$MODEL" != "$PATCH_MODEL" ] &&
-       "$OLLAMA_BIN" show "$PATCH_MODEL" >/dev/null 2>&1; then
-        echo "🧠 Primitive patch için daha hafif model deneniyor: $PATCH_MODEL" | tee -a "$LOG"
-
-        if probe_ollama_model "$PATCH_MODEL"; then
-            MODEL="$PATCH_MODEL"
-            MODEL_PROBE_CACHED=0
-            write_status "local_model_specialized|$GAP_LABEL için primitive patch modeli seçildi: $MODEL|$BRANCH|$WORKTREE"
-            echo "✅ Primitive patch modeli: $MODEL" | tee -a "$LOG"
-        else
-            echo "⚠️ $PATCH_MODEL tool-call probe geçmedi; mevcut model korunuyor: $MODEL" | tee -a "$LOG"
-        fi
-    fi
-fi
+# Ana Developer Agent yalnız native tool-call probe geçmiş modelde kalır.
+# Structured JSON continuation modeli aşağıda bağımsız latency probe ile seçilir.
 
 CONTROLLER_MODEL="$MODEL"
 if [ "$PROVIDER" = "ollama" ] &&
