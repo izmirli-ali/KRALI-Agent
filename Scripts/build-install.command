@@ -101,13 +101,18 @@ run_build
 BUILD_EXIT="$?"
 
 if [ "$BUILD_EXIT" -ne 0 ]; then
-    echo ""
-    echo "⚠️ Incremental build başarısız; bir kez temiz build deneniyor..."
-    rm -rf "$BUILD_DIR"
-    : > "$BUILD_LOG"
+    if /usr/bin/grep -E -q "\.swift:.*error:|SwiftCompile.*failed" "$BUILD_LOG"; then
+        echo ""
+        echo "⚠️ Kaynak kod derleme hatası algılandı; temiz build tekrarı atlanıyor."
+    else
+        echo ""
+        echo "⚠️ Incremental build başarısız; cache kaynaklı olasılık için bir kez temiz build deneniyor..."
+        rm -rf "$BUILD_DIR"
+        : > "$BUILD_LOG"
 
-    run_build
-    BUILD_EXIT="$?"
+        run_build
+        BUILD_EXIT="$?"
+    fi
 fi
 
 if [ "$BUILD_EXIT" -ne 0 ]; then
