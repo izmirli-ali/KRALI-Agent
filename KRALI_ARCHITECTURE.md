@@ -181,6 +181,18 @@ Varsayılan provider/model `cline + nvidia/nemotron-3.5-lightning` olarak sabitl
 
 **v0.7.23 Developer Agent fast diagnostic gate + live progress:** Developer Agent artık her tıklamada doğrudan modele gitmez. Yerel `training-latest.json`, `live-eval-latest.json` ve `latest.json` raporları mevcut `VERSION` ile karşılaştırılır. Training Lab ve Live Research Eval güncel sürümde tamamen yeşilse ve güncel mentor trace ek müdahale gerektirmiyorsa Cline çağrısı atlanır; bu hem ChatGPT kullanım limitini hem bekleme süresini korur. Gerçek bir failure varsa Cline çalışır; UI yaklaşık 700 ms aralıkla status dosyasını okuyarak hazırlık, diagnostic kontrol, model çalışması ve build doğrulama aşamalarını canlı gösterir. Cline turu `medium` thinking ve 900 saniye timeout ile sınırlandırılır.
 
+### 0.10.6 — Resilient structured ranking delivery
+
+0.10.5 deterministic pruning ve 0.10.4 mutation gate korunur; yalnız root-cause ranking JSON teslimi sağlamlaştırılır.
+
+- İlk ranking çağrısı en fazla 4 pruned candidate üzerinde çalışır ve output bütçesi 620 token'a yükseltilir.
+- JSON parse hatası alınırsa timeout/network hatasından farklı ele alınır.
+- Yalnız parse/truncation durumunda aynı candidate set ile tek ultra-compact retry yapılır.
+- Compact retry daha küçük source özeti, 3072 context, 360 output token ve daha kısa root_cause/strategy alanları kullanır.
+- İkinci retry yoktur; retry de parse/timeout olursa gate güvenli şekilde mutation'ı engeller.
+- Retry hiçbir şekilde yeni candidate üretmez, candidate set'i genişletmez veya mutation gate'i bypass etmez.
+- Rollback, verifier, checkpoint proof, bounded repair, build/regression ve skill lifecycle değişmez.
+
 ### 0.10.5 — Deterministic root-cause pruning
 
 0.10.4 mutation authority gate korunur; root-cause modeline giden aday sayısı model kullanmadan önce daraltılır.
