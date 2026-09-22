@@ -187,6 +187,235 @@ function clipExactSource(
   return selected.join("\n");
 }
 
+function clipDiagnosticOutput(
+  value,
+  limit = 24000
+) {
+  const text = String(value ?? "");
+
+  if (text.length <= limit) {
+    return text;
+  }
+
+  const diagnosticLines = text
+    .split("\n")
+    .filter((line) =>
+      /\berror:|fatal error:|SwiftCompile|CompileSwift|Command .* failed|BUILD FAILED|The following build commands failed/i.test(
+        line
+      )
+    )
+    .slice(-60)
+    .join("\n");
+
+  const reserved =
+    Math.min(
+      Math.max(
+        diagnosticLines.length + 800,
+        5000
+      ),
+      Math.floor(limit * 0.55)
+    );
+
+  const tailBudget =
+    Math.max(
+      4000,
+      limit - reserved
+    );
+
+  const tail =
+    text.slice(-tailBudget);
+
+  return [
+    diagnosticLines
+      ? "KRALI_DIAGNOSTICS\n" +
+        diagnosticLines
+      : "",
+    "KRALI_OUTPUT_TAIL\n" + tail,
+  ]
+    .filter(Boolean)
+    .join("\n");
+}
+
+function definitionSourceRange(
+  relativePath,
+  definitionLine,
+  maxLines = 260
+) {
+  const { absolute } =
+    safeRelativePath(
+      relativePath
+    );
+
+  const lines =
+    fs.readFileSync(
+      absolute,
+      "utf8"
+    ).split("\n");
+
+  const startIndex =
+    Math.max(
+      0,
+      Number(definitionLine) - 1
+    );
+  const maxIndex =
+    Math.min(
+      lines.length - 1,
+      startIndex + maxLines - 1
+    );
+
+  let blockComment = false;
+  let quote = "";
+  let escaped = false;
+  let depth = 0;
+  let sawOpeningBrace = false;
+
+  for (
+    let index = startIndex;
+    index <= maxIndex;
+    index += 1
+  ) {
+    const line = lines[index];
+
+    for (
+      let offset = 0;
+      offset < line.length;
+      offset += 1
+    ) {
+      const char = line[offset];
+      const next =
+        line[offset + 1] || "";
+
+      if (blockComment) {
+        if (
+          char === "*" &&
+          next === "/"
+        ) {
+          blockComment = false;
+          offset += 1;
+        }
+        continue;
+      }
+
+      if (quote) {
+        if (escaped) {
+          escaped = false;
+          continue;
+        }
+
+        if (char === "\\") {
+          escaped = true;
+          continue;
+        }
+
+        if (char === quote) {
+          quote = "";
+        }
+        continue;
+      }
+
+      if (
+        char === "/" &&
+        next === "/"
+      ) {
+        break;
+      }
+
+      if (
+        char === "/" &&
+        next === "*"
+      ) {
+        blockComment = true;
+        offset += 1;
+        continue;
+      }
+
+      if (
+        char === "\"" ||
+        char === "'"
+      ) {
+        quote = char;
+        continue;
+      }
+
+      if (char === "{") {
+        depth += 1;
+        sawOpeningBrace = true;
+        continue;
+      }
+
+      if (
+        char === "}" &&
+        sawOpeningBrace
+      ) {
+        depth -= 1;
+
+        if (depth === 0) {
+          return {
+            start_line:
+              startIndex + 1,
+            end_line:
+              index + 1,
+            mode:
+              "brace",
+          };
+        }
+      }
+    }
+  }
+
+  const definitionIndent =
+    (lines[startIndex].match(
+      /^\s*/
+    )?.[0] || "").length;
+
+  let sawBodyLine = false;
+
+  for (
+    let index = startIndex + 1;
+    index <= maxIndex;
+    index += 1
+  ) {
+    const line = lines[index];
+
+    if (!line.trim()) {
+      continue;
+    }
+
+    const indent =
+      (line.match(
+        /^\s*/
+      )?.[0] || "").length;
+
+    if (
+      sawBodyLine &&
+      indent <= definitionIndent &&
+      !/^\s*[})\]]/.test(line)
+    ) {
+      return {
+        start_line:
+          startIndex + 1,
+        end_line:
+          index,
+        mode:
+          "indent",
+      };
+    }
+
+    if (indent > definitionIndent) {
+      sawBodyLine = true;
+    }
+  }
+
+  return {
+    start_line:
+      startIndex + 1,
+    end_line:
+      maxIndex + 1,
+    mode:
+      "bounded",
+  };
+}
+
 function runGit(args, options = {}) {
   const result = spawnSync(
     "/usr/bin/git",
@@ -541,13 +770,24 @@ function executeTool(name, args = {}) {
         }
       );
 
+      const combinedOutput =
+        (result.stdout || "") +
+        "\n" +
+        (result.stderr || "");
+
       return {
         ok: result.status === 0,
         exit_code: result.status ?? 1,
-        output: truncate(
-          (result.stdout || "") + "\n" + (result.stderr || ""),
-          24000
-        ),
+        output:
+          result.status === 0
+            ? truncate(
+                combinedOutput,
+                24000
+              )
+            : clipDiagnosticOutput(
+                combinedOutput,
+                24000
+              ),
       };
     }
 
@@ -1540,11 +1780,11 @@ function summarizeBuildFailure(
   const compilerLines = rawOutput
     .split("\n")
     .filter((line) =>
-      /error:|fatal error:|SwiftCompile.*failed/i.test(
+      /\berror:|fatal error:|SwiftCompile|CompileSwift|Command .* failed|BUILD FAILED|The following build commands failed/i.test(
         line
       )
     )
-    .slice(-30);
+    .slice(-40);
 
   return {
     ok: false,
@@ -3281,12 +3521,18 @@ function resolveRuntimeFailureDependency(
       found.args
     );
 
+    const sourceRange =
+      definitionSourceRange(
+        definitionPath,
+        definitionLine
+      );
+
     const readArgs = {
       path: definitionPath,
       start_line:
-        definitionLine,
+        sourceRange.start_line,
       end_line:
-        definitionLine + 110,
+        sourceRange.end_line,
     };
 
     const readResult =
@@ -3313,7 +3559,13 @@ function resolveRuntimeFailureDependency(
         " • path=" +
         definitionPath +
         " • line=" +
-        definitionLine
+        definitionLine +
+        " • range=" +
+        sourceRange.start_line +
+        "-" +
+        sourceRange.end_line +
+        " • rangeMode=" +
+        sourceRange.mode
     );
 
     messages.push({
