@@ -578,7 +578,12 @@ const tools = [
         required: ["path", "old_text", "new_text"],
         properties: {
           path: { type: "string" },
-          old_text: { type: "string" },
+          old_text: {
+            type: "string",
+            minLength: 80,
+            description:
+              "Exact source block copied verbatim from the verified read. Use a sufficiently long unique anchor, preferably multiple complete lines."
+          },
           new_text: { type: "string" },
           replace_all: { type: "boolean" },
         },
@@ -1765,7 +1770,8 @@ async function releasePrimaryModelForController() {
 async function requestStructuredToolDecision(
   assistantText,
   blockers,
-  ultraCompactRetry = false
+  ultraCompactRetry = false,
+  validationRetry = 0
 ) {
   if (structuredActions >= maxStructuredActions) {
     return rejectStructuredDecision(
@@ -1805,10 +1811,7 @@ async function requestStructuredToolDecision(
     implementationReadCompleted &&
     !sawMutatingTool;
 
-  if (
-    exactReplaceFailure ||
-    rollbackRepair
-  ) {
+  if (rollbackRepair) {
     const patchContract = toolContracts.find(
       (tool) => tool.name === "apply_patch"
     );
@@ -1816,7 +1819,10 @@ async function requestStructuredToolDecision(
     if (patchContract) {
       toolContracts = [patchContract];
     }
-  } else if (initialMutation) {
+  } else if (
+    initialMutation ||
+    exactReplaceFailure
+  ) {
     const replaceContract = toolContracts.find(
       (tool) => tool.name === "replace_text"
     );
@@ -1846,9 +1852,12 @@ async function requestStructuredToolDecision(
           (tool) => tool.name
         ),
       },
-      arguments: {
-        type: "object",
-      },
+      arguments:
+        toolContracts.length === 1
+          ? toolContracts[0].parameters
+          : {
+              type: "object",
+            },
       reason: {
         type: "string",
       },
@@ -1944,8 +1953,10 @@ async function requestStructuredToolDecision(
               "During inspection, select the minimum real inspection tool needed.",
               "During implementation, obey the supplied tool contracts exactly. If only mutation tools are supplied, choose a minimal mutation tool now; do not answer with prose.",
               "lastVerifiedRead.content is exact source text with display line-number prefixes already removed. For replace_text, copy old_text exactly from lastVerifiedRead.content; never invent an old_text phrase from assistantText, blockers, or prose.",
+              "A replace_text old_text must be a sufficiently long unique source block, preferably at least 3 complete lines. Never use a short identifier fragment, partial token, prefix completion, or typo-like replacement.",
+              "new_text must be a meaningful logic change, not merely completion of a truncated identifier that already exists in source.",
               "If lastStructuredOutcome contains a failed real tool result, repair that exact failure with the next minimal mutation instead of repeating the same arguments.",
-              "If replace_text failed because old_text was not found or was ambiguous, do not retry replace_text. Use the supplied apply_patch contract and lastVerifiedRead to produce a minimal context-aware patch.",
+              "If replace_text failed because old_text was not found or was ambiguous, stay with replace_text when that is the supplied tool: choose a longer exact unique block from lastVerifiedRead.content.",
               "candidateDiff is the current real worktree diff. Use it together with source evidence to repair only the defect introduced by the candidate.",
               "If lastStructuredOutcome is a failed build_check, compiler_errors, output_tail, and failed_candidate_diff are authoritative. If mutation_rolled_back is true, the bad mutation is no longer present: use the single supplied apply_patch tool to generate an alternative minimum patch against lastVerifiedRead; never reapply the failed diff.",
               "During verification, prefer git_diff and build_check when no compiler failure is already known; mutate when build evidence shows a fix is needed.",
@@ -1971,6 +1982,7 @@ async function requestStructuredToolDecision(
                 exactReplaceFailure,
                 rollbackRepair,
                 initialMutation,
+                validationRetry,
                 previousStructuredError: truncate(
                   previousStructuredError,
                   ultraCompactRetry
@@ -2031,7 +2043,8 @@ async function requestStructuredToolDecision(
       return requestStructuredToolDecision(
         assistantText,
         blockers,
-        true
+        true,
+        validationRetry
       );
     }
 
@@ -2174,6 +2187,114 @@ async function requestStructuredToolDecision(
             )
         );
       }
+    }
+  }
+
+  if (
+    phase === "implementation" &&
+    name === "replace_text"
+  ) {
+    const targetPath =
+      normalizeRepoRelativePath(
+        args.path
+      );
+    const oldText =
+      String(args.old_text || "");
+    const newText =
+      String(args.new_text ?? "");
+
+    let source = "";
+    try {
+      const { absolute } =
+        safeRelativePath(
+          targetPath
+        );
+      source =
+        fs.readFileSync(
+          absolute,
+          "utf8"
+        );
+    } catch {}
+
+    const occurrences =
+      oldText
+        ? source.split(oldText).length - 1
+        : 0;
+
+    const verifiedRead =
+      compactControllerEvidence(
+        ultraCompactRetry
+      )?.lastVerifiedRead?.content || "";
+
+    const copiedFromVerifiedRead =
+      Boolean(
+        oldText &&
+        verifiedRead.includes(
+          oldText
+        )
+      );
+
+    const meaningfulChange =
+      Boolean(
+        oldText &&
+        newText !== oldText &&
+        !(
+          oldText.length < 120 &&
+          (
+            newText.startsWith(oldText) ||
+            oldText.startsWith(newText)
+          )
+        )
+      );
+
+    if (
+      oldText.length < 80 ||
+      occurrences !== 1 ||
+      !copiedFromVerifiedRead ||
+      !meaningfulChange
+    ) {
+      const validationReason = [
+        "replace_text anchor doğrulanmadı",
+        "length=" + oldText.length,
+        "occurrences=" + occurrences,
+        "copiedFromVerifiedRead=" +
+          String(copiedFromVerifiedRead),
+        "meaningfulChange=" +
+          String(meaningfulChange),
+      ].join(" • ");
+
+      stage(
+        "local_agent_replace_anchor_rejected",
+        gapLabel +
+          " " +
+          validationReason +
+          " • controller=" +
+          controllerModel
+      );
+
+      if (
+        validationRetry < 2 &&
+        (
+          hardTimeoutMs -
+          (Date.now() - startedAt)
+        ) > 25000
+      ) {
+        return requestStructuredToolDecision(
+          [
+            assistantText,
+            "Previous replace_text decision was rejected before execution.",
+            validationReason,
+            "Choose a longer exact unique multi-line old_text copied verbatim from lastVerifiedRead.content and make a meaningful logic change.",
+          ].join("\n"),
+          blockers,
+          ultraCompactRetry,
+          validationRetry + 1
+        );
+      }
+
+      return rejectStructuredDecision(
+        validationReason
+      );
     }
   }
 
