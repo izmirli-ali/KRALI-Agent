@@ -1,1 +1,1 @@
-local_agent_tool_protocol_failed|Yerel model gerçek tool çağrısı üretmedi.|krali-dev-agent/20260922-010358|/Users/medusa/Developer/KRALI-Agent-Dev-20260922-010358|@meta|app=0.8.93|at=1790028399|run=20260922-010358
+local_agent_tool_protocol_failed|Yerel model native tool çağrısı üretmedi ve yapılandırılmış devam controller'ı güvenli tool kararı üretemedi.|krali-dev-agent/20260922-083528|/Users/medusa/Developer/KRALI-Agent-Dev-20260922-083528|@meta|app=0.8.94|at=1790055535|run=20260922-083528
