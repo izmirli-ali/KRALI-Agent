@@ -303,6 +303,11 @@ struct AgentSkillLibraryStore {
                         as? [String: Any],
                 provenance["app_version"] as? String ==
                     appVersion,
+                let activation =
+                    candidate["activation"]
+                        as? [String: Any],
+                activation["candidate_code_active"]
+                    as? Bool == true,
                 var validation =
                     candidate["validation"]
                         as? [String: Any],
