@@ -228,8 +228,9 @@ Raw patch/diff skill library'nin kalıcı bilgisinin parçası değildir. Skill 
 
 **Skill lifecycle:**
 - build + regression PASS → `experimental`,
-- runtime postcondition henüz kanıtlanmadıysa promoted olamaz,
-- aynı capability gerçek görevde verifier tarafından PASS olursa experimental skill → `promoted`,
+- experimental skill candidate kodunun aktif/kurulu build'e geçtiğine dair source-activation kanıtı olmadan promoted olamaz,
+- source activation doğrulandıktan sonra aynı capability gerçek görevde verifier tarafından PASS olursa experimental skill → `promoted`,
+- yalnız app version eşleşmesi activation kanıtı sayılmaz; build geçip henüz main/aktif uygulamaya taşınmamış candidate'tan kalıcı öğrenme yapılmaz,
 - promoted skill sonraki benzer gap'lerde strategy context olarak geri çağrılır,
 - runtime doğrulaması başarısızsa skill promoted edilmez; candidate rollback/yeniden araştırma konusu olur.
 
