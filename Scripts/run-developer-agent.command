@@ -901,12 +901,13 @@ if [ -n "$LEARNING_JOB_FILE" ] &&
     GAP_SOURCE="$LEARNING_JOB_FILE"
 fi
 
-GAP_MODE="$("$NODE_BIN" - "$GAP_SOURCE" "$PROMPT_FILE" "$LOCAL_MENTOR_DIR/latest.json" <<'NODE'
+GAP_MODE="$("$NODE_BIN" - "$GAP_SOURCE" "$PROMPT_FILE" "$LOCAL_MENTOR_DIR/latest.json" "$LOCAL_MENTOR_DIR/application-resolution-latest.json" <<'NODE'
 const fs = require("fs");
 
 const source = process.argv[2];
 const target = process.argv[3];
 const mentorPath = process.argv[4];
+const resolutionTracePath = process.argv[5];
 
 let payload = null;
 try { payload = JSON.parse(fs.readFileSync(source, "utf8")); } catch {}
@@ -915,6 +916,16 @@ let currentMentor = null;
 try {
   currentMentor = JSON.parse(
     fs.readFileSync(mentorPath, "utf8")
+  );
+} catch {}
+
+let resolutionTrace = null;
+try {
+  resolutionTrace = JSON.parse(
+    fs.readFileSync(
+      resolutionTracePath,
+      "utf8"
+    )
   );
 } catch {}
 
@@ -966,6 +977,137 @@ const runtimeEvidence =
         .slice(0, 8)
     : [];
 
+const resolutionTraceMatches =
+  String(gap.capabilityID || "") ===
+    "desktop.app" &&
+  resolutionTrace &&
+  currentMentor &&
+  String(
+    resolutionTrace.requestedText || ""
+  ) ===
+  String(
+    currentMentor.userInput || ""
+  );
+
+const resolverRuntimeEvidence =
+  resolutionTraceMatches
+    ? JSON.stringify({
+        requestedText:
+          String(
+            resolutionTrace.requestedText || ""
+          ),
+        queries:
+          Array.isArray(
+            resolutionTrace.queries
+          )
+            ? resolutionTrace.queries
+                .slice(0, 4)
+            : [],
+        candidateCounts: {
+          cacheBefore:
+            resolutionTrace
+              .cacheCandidateCountBefore ??
+            null,
+          installed:
+            Number(
+              resolutionTrace
+                .installedCandidateCount ||
+              0
+            ),
+          refreshed:
+            Number(
+              resolutionTrace
+                .refreshedCandidateCount ||
+              0
+            ),
+          nested:
+            Number(
+              resolutionTrace
+                .nestedCandidateCount ||
+              0
+            ),
+          expanded:
+            Number(
+              resolutionTrace
+                .expandedCandidateCount ||
+              0
+            ),
+        },
+        queryTraces:
+          Array.isArray(
+            resolutionTrace.queryTraces
+          )
+            ? resolutionTrace.queryTraces
+                .slice(0, 4)
+                .map((item) => ({
+                  query:
+                    String(
+                      item && item.query ||
+                      ""
+                    ),
+                  normalizedQuery:
+                    String(
+                      item &&
+                      item.normalizedQuery ||
+                      ""
+                    ),
+                  launchServicesPath:
+                    item &&
+                    item.launchServicesPath ||
+                    null,
+                  launchServicesAccepted:
+                    item &&
+                    item
+                      .launchServicesAccepted ===
+                      true,
+                  decision:
+                    String(
+                      item &&
+                      item.decision ||
+                      ""
+                    ),
+                  topCandidates:
+                    Array.isArray(
+                      item &&
+                      item.topCandidates
+                    )
+                      ? item.topCandidates
+                          .slice(0, 3)
+                          .map(
+                            (candidate) => ({
+                              name:
+                                String(
+                                  candidate &&
+                                  candidate.name ||
+                                  ""
+                                ),
+                              bundleIdentifier:
+                                candidate &&
+                                candidate
+                                  .bundleIdentifier ||
+                                null,
+                              score:
+                                Number(
+                                  candidate &&
+                                  candidate.score ||
+                                  0
+                                ),
+                              aliases:
+                                Array.isArray(
+                                  candidate &&
+                                  candidate.aliases
+                                )
+                                  ? candidate.aliases
+                                      .slice(0, 4)
+                                  : [],
+                            })
+                          )
+                      : [],
+                }))
+            : [],
+      })
+    : "";
+
 const learningPath =
   String(gap.learningPath || "integration");
 
@@ -1010,6 +1152,10 @@ const prompt = [
   runtimeEvidence.length > 0
     ? runtimeEvidence.join("\n")
     : "Ek runtime hata satırı yok.",
+  "",
+  "Runtime resolver trace:",
+  resolverRuntimeEvidence ||
+    "Bu gap için eşleşen resolver trace yok.",
   "",
   "Kurallar:",
   learningPathRule,
