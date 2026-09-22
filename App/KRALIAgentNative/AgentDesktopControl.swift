@@ -48,6 +48,46 @@ struct DesktopControlProbeReport: Codable, Hashable, Sendable {
     let screenSummary: String?
 }
 
+struct ApplicationResolutionCandidateTrace:
+    Codable,
+    Hashable,
+    Sendable {
+    let name: String
+    let bundleIdentifier: String?
+    let path: String
+    let score: Double
+    let aliases: [String]
+}
+
+struct ApplicationResolutionQueryTrace:
+    Codable,
+    Hashable,
+    Sendable {
+    let query: String
+    let normalizedQuery: String
+    let launchServicesPath: String?
+    let launchServicesAccepted: Bool
+    let decision: String
+    let topCandidates:
+        [ApplicationResolutionCandidateTrace]
+}
+
+struct ApplicationResolutionTrace:
+    Codable,
+    Hashable,
+    Sendable {
+    let createdAt: Date
+    let requestedText: String
+    let queries: [String]
+    let cacheCandidateCountBefore: Int?
+    let installedCandidateCount: Int
+    let refreshedCandidateCount: Int
+    let nestedCandidateCount: Int
+    let expandedCandidateCount: Int
+    let queryTraces:
+        [ApplicationResolutionQueryTrace]
+}
+
 enum DesktopControlError: LocalizedError {
     case applicationNotFound(String)
     case launchFailed(String)
@@ -70,6 +110,8 @@ enum DesktopControlError: LocalizedError {
 
 actor AgentDesktopControl {
     private let fileManager = FileManager.default
+    private let resolutionTraceStore =
+        ApplicationResolutionTraceStore()
     private let screenPerception = AgentScreenPerception()
     private let languageResolver =
         AgentNaturalLanguageResolver()
@@ -581,6 +623,8 @@ actor AgentDesktopControl {
         let queries = applicationResolutionQueries(
             from: userText
         )
+        let cacheCandidateCountBefore =
+            cachedApplicationCandidates?.count
 
         // Ask LaunchServices first. It knows the user's localized
         // application display names even when the on-disk .app filename and
@@ -622,10 +666,12 @@ actor AgentDesktopControl {
             }
         }
 
+        let nested =
+            nestedApplicationCandidates()
         let expanded =
             mergeCandidates(
                 refreshed +
-                nestedApplicationCandidates()
+                nested
             )
 
         cachedApplicationCandidates =
@@ -640,6 +686,21 @@ actor AgentDesktopControl {
                 return candidate
             }
         }
+
+        saveApplicationResolutionFailureTrace(
+            requestedText: userText,
+            queries: queries,
+            cacheCandidateCountBefore:
+                cacheCandidateCountBefore,
+            installedCandidateCount:
+                installed.count,
+            refreshedCandidateCount:
+                refreshed.count,
+            nestedCandidateCount:
+                nested.count,
+            expandedCandidates:
+                expanded
+        )
 
         return nil
     }
@@ -781,56 +842,196 @@ actor AgentDesktopControl {
         )
     }
 
-    private func bestApplicationCandidate(
+    private func rankedApplicationCandidates(
         from userText: String,
         candidates: [ApplicationCandidate]
-    ) -> ApplicationCandidate? {
-        let ranked = candidates
+    ) -> [
+        (
+            candidate: ApplicationCandidate,
+            score: Double
+        )
+    ] {
+        candidates
             .map { candidate in
                 (
-                    candidate,
-                    languageResolver.bestAliasScore(
-                        input: userText,
-                        aliases:
-                            candidate.aliases
-                    )
+                    candidate: candidate,
+                    score:
+                        languageResolver
+                            .bestAliasScore(
+                                input: userText,
+                                aliases:
+                                    candidate.aliases
+                            )
                 )
             }
-            .filter { $0.1 > 0 }
+            .filter { $0.score > 0 }
             .sorted {
-                if $0.1 == $1.1 {
+                if $0.score == $1.score {
                     return
-                        $0.0.name.count <
-                        $1.0.name.count
+                        $0.candidate.name.count <
+                        $1.candidate.name.count
                 }
 
-                return $0.1 > $1.1
+                return $0.score > $1.score
             }
+    }
 
+    private func applicationCandidateDecision(
+        from userText: String,
+        ranked: [
+            (
+                candidate: ApplicationCandidate,
+                score: Double
+            )
+        ]
+    ) -> String {
         guard let best = ranked.first else {
-            return nil
+            return "no_positive_alias_score"
         }
 
         guard
             languageResolver
                 .isConfidentAliasMatch(
-                    score: best.1,
+                    score: best.score,
                     input: userText
                 )
         else {
-            return nil
+            return "best_score_below_confidence_threshold"
         }
 
         if ranked.count > 1 {
             let second = ranked[1]
 
-            if best.1 < 0.94,
-               best.1 - second.1 < 0.08 {
-                return nil
+            if best.score < 0.94,
+               best.score - second.score < 0.08 {
+                return "ambiguous_top_candidate_margin"
             }
         }
 
-        return best.0
+        return "accepted"
+    }
+
+    private func bestApplicationCandidate(
+        from userText: String,
+        candidates: [ApplicationCandidate]
+    ) -> ApplicationCandidate? {
+        let ranked =
+            rankedApplicationCandidates(
+                from: userText,
+                candidates: candidates
+            )
+
+        guard
+            applicationCandidateDecision(
+                from: userText,
+                ranked: ranked
+            ) == "accepted"
+        else {
+            return nil
+        }
+
+        return ranked.first?.candidate
+    }
+
+    private func saveApplicationResolutionFailureTrace(
+        requestedText: String,
+        queries: [String],
+        cacheCandidateCountBefore: Int?,
+        installedCandidateCount: Int,
+        refreshedCandidateCount: Int,
+        nestedCandidateCount: Int,
+        expandedCandidates:
+            [ApplicationCandidate]
+    ) {
+        let queryTraces =
+            queries.map { query in
+                let ranked =
+                    rankedApplicationCandidates(
+                        from: query,
+                        candidates:
+                            expandedCandidates
+                    )
+                let launchServicesPath =
+                    NSWorkspace.shared
+                        .fullPath(
+                            forApplication:
+                                query
+                        )
+
+                let topCandidates =
+                    ranked
+                        .prefix(5)
+                        .map { item in
+                            ApplicationResolutionCandidateTrace(
+                                name:
+                                    item.candidate.name,
+                                bundleIdentifier:
+                                    item.candidate
+                                        .bundleIdentifier,
+                                path:
+                                    item.candidate.url.path,
+                                score:
+                                    item.score,
+                                aliases:
+                                    Array(
+                                        item.candidate
+                                            .aliases
+                                            .sorted()
+                                            .prefix(8)
+                                    )
+                            )
+                        }
+
+                return ApplicationResolutionQueryTrace(
+                    query: query,
+                    normalizedQuery:
+                        languageResolver
+                            .normalized(query),
+                    launchServicesPath:
+                        launchServicesPath,
+                    launchServicesAccepted:
+                        launchServicesPath
+                            .map {
+                                URL(
+                                    fileURLWithPath: $0
+                                )
+                                .pathExtension
+                                .lowercased() ==
+                                "app"
+                            } ?? false,
+                    decision:
+                        applicationCandidateDecision(
+                            from: query,
+                            ranked: ranked
+                        ),
+                    topCandidates:
+                        topCandidates
+                )
+            }
+
+        let trace =
+            ApplicationResolutionTrace(
+                createdAt: Date(),
+                requestedText:
+                    requestedText,
+                queries: queries,
+                cacheCandidateCountBefore:
+                    cacheCandidateCountBefore,
+                installedCandidateCount:
+                    installedCandidateCount,
+                refreshedCandidateCount:
+                    refreshedCandidateCount,
+                nestedCandidateCount:
+                    nestedCandidateCount,
+                expandedCandidateCount:
+                    expandedCandidates.count,
+                queryTraces:
+                    queryTraces
+            )
+
+        try? resolutionTraceStore.save(
+            trace
+        )
     }
 
     private func installedApplicationCandidates()
@@ -1734,6 +1935,49 @@ actor AgentDesktopControl {
             .trimmingCharacters(
                 in: .whitespacesAndNewlines
             )
+    }
+}
+
+struct ApplicationResolutionTraceStore {
+    private let fileManager =
+        FileManager.default
+
+    var outputURL: URL {
+        fileManager.homeDirectoryForCurrentUser
+            .appendingPathComponent(
+                "Library/Application Support/KRALI Agent/Mentor/application-resolution-latest.json",
+                isDirectory: false
+            )
+    }
+
+    func save(
+        _ trace: ApplicationResolutionTrace
+    ) throws {
+        let directory =
+            outputURL
+                .deletingLastPathComponent()
+
+        try fileManager.createDirectory(
+            at: directory,
+            withIntermediateDirectories: true
+        )
+
+        let encoder = JSONEncoder()
+        encoder.outputFormatting = [
+            .prettyPrinted,
+            .sortedKeys,
+            .withoutEscapingSlashes
+        ]
+        encoder.dateEncodingStrategy =
+            .iso8601
+
+        let data =
+            try encoder.encode(trace)
+
+        try data.write(
+            to: outputURL,
+            options: .atomic
+        )
     }
 }
 
