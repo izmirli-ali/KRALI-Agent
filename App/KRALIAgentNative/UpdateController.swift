@@ -139,12 +139,7 @@ final class UpdateController: ObservableObject {
             process.arguments = ["-lc", command]
             try process.run()
 
-            statusText = "KRALİ kapanacak; güncelleme bitince yeniden açılacak…"
-
-            Task {
-                try? await Task.sleep(for: .milliseconds(700))
-                NSApplication.shared.terminate(nil)
-            }
+            statusText = "Güncelleme hazırlanıyor… KRALİ build tamamlanana kadar açık kalacak."
         } catch {
             isLaunchingUpdate = false
             statusText = "Updater başlatılamadı"
