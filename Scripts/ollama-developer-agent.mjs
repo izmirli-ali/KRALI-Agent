@@ -1344,7 +1344,14 @@ function recordToolEvidence(name, result, args = {}) {
           "local_agent_target_found",
           gapLabel +
             " hedef kaynak bulundu • paths=" +
-            implementationTargetPaths.length
+            implementationTargetPaths.length +
+            " • targets=" +
+            truncate(
+              JSON.stringify(
+                implementationTargetPaths
+              ),
+              1200
+            )
         );
       }
     }
