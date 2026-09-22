@@ -256,6 +256,15 @@ function mutationProblemContext() {
       ),
       620
     ),
+    runtime_diagnostic_trace: truncate(
+      firstPromptValue(
+        prompt,
+        [
+          "Runtime resolver trace"
+        ]
+      ),
+      2400
+    ),
   };
 }
 
@@ -2879,6 +2888,13 @@ async function requestStructuredToolDecision(
                 mutationProblem.expected_postcondition || "",
                 420
               ),
+            runtime_diagnostic_trace:
+              truncate(
+                mutationProblem.runtime_diagnostic_trace || "",
+                ultraCompactRetry
+                  ? 900
+                  : 1700
+              ),
           },
           failure: {
             blockers:
@@ -4901,6 +4917,9 @@ async function verifyRootCauseTarget(
       expected_postcondition:
         mutationProblemContext()
           .expected_postcondition,
+      runtime_diagnostic_trace:
+        mutationProblemContext()
+          .runtime_diagnostic_trace,
     },
     entry: {
       id: primary.id,
@@ -5309,6 +5328,9 @@ async function requestRootCauseRanking(
       expected_postcondition:
         mutationProblemContext()
           .expected_postcondition,
+      runtime_diagnostic_trace:
+        mutationProblemContext()
+          .runtime_diagnostic_trace,
     },
     runtime_source_hints:
       runtimeSourceHints.slice(0, 4),
