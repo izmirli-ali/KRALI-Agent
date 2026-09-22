@@ -1,1 +1,1 @@
-local_agent_tool_protocol_failed|Doğrulanmış implementation checkpoint'inde structured controller güvenli devam kararı üretemedi.|krali-dev-agent/20260922-140952|/Users/medusa/Developer/KRALI-Agent-Dev-20260922-140952|@meta|app=0.9.05|at=1790075480|run=20260922-140952
+local_agent_watchdog_timeout|Uygulama kontrolü (desktop.app) native local agent toplam zaman sınırına ulaştı.|krali-dev-agent/20260922-143049|/Users/medusa/Developer/KRALI-Agent-Dev-20260922-143049|@meta|app=0.9.06|at=1790076964|run=20260922-143049
