@@ -6,6 +6,8 @@ import crypto from "node:crypto";
 const worktree = process.env.KRALI_WORKTREE || "";
 const promptFile = process.env.KRALI_PROMPT_FILE || "";
 const model = process.env.KRALI_DEV_MODEL || "";
+const architectModel =
+  process.env.KRALI_ARCHITECT_MODEL || model;
 const controllerModel =
   process.env.KRALI_CONTROLLER_MODEL || model;
 const baseUrl =
@@ -1156,6 +1158,7 @@ let lastFailedReplaceMutation = null;
 const failedMutationFingerprints = new Set();
 const failedDiffFingerprints = new Set();
 let runtimeBootstrapTarget = null;
+let rootCauseDiagnosis = null;
 
 const inspectionToolNames = new Set([
   "list_files",
@@ -2548,6 +2551,7 @@ async function requestStructuredToolDecision(
             "old_text must be copied verbatim from lastVerifiedRead.content.",
             "Use a unique multi-line source block; do not invent text outside the visible source.",
             "new_text must be a meaningful generic repair for the runtime failure.",
+            "Use root_cause_diagnosis as the architect-selected explanation and strategy. Do not reselect a different source target.",
             "Use problem.objective, problem.runtime_failure, problem.failure_reason, and problem.expected_postcondition to infer the missing behavior. The source may be syntactically valid but behaviorally incomplete.",
             "Returning unchanged source is invalid. old_text and new_text must differ in behaviorally meaningful code.",
             "Do not hard-code the concrete app, brand, filename, or exact user phrase from problem evidence; generalize the fix to the capability class.",
@@ -2608,6 +2612,8 @@ async function requestStructuredToolDecision(
               ? "exact_repair_new_text"
               : "exact_replace",
           target: fixedReplacePath,
+          root_cause_diagnosis:
+            rootCauseDiagnosis,
           fixed_old_text:
             fixedRepairMode
               ? fixedRepairOldText
@@ -4017,6 +4023,11 @@ function findDefinitionForSymbol(
     "func " + symbol + "(",
     "function " + symbol + "(",
     "def " + symbol + "(",
+    "struct " + symbol,
+    "class " + symbol,
+    "actor " + symbol,
+    "enum " + symbol,
+    "protocol " + symbol,
     "const " + symbol + " =",
     "let " + symbol + " =",
     "var " + symbol + " =",
@@ -4083,7 +4094,448 @@ function findDefinitionForSymbol(
   return null;
 }
 
-function resolveRuntimeFailureDependency(
+function exactSourceFromReadResult(
+  readResult
+) {
+  return sourceLinesFromReadResult(
+    readResult
+  )
+    .map((item) => item.text)
+    .join("\n");
+}
+
+function dependencySymbolsFromDefinition(
+  symbol,
+  readResult
+) {
+  const source =
+    exactSourceFromReadResult(
+      readResult
+    );
+
+  const ignored = new Set([
+    symbol,
+    "if",
+    "for",
+    "while",
+    "switch",
+    "guard",
+    "return",
+    "throw",
+    "catch",
+    "await",
+    "try",
+    "print",
+    "init",
+    "super",
+    "self",
+    "Task",
+    "String",
+    "URL",
+    "Set",
+    "Array",
+    "Dictionary",
+    "Int",
+    "Double",
+    "Float",
+    "Bool",
+    "Date",
+    "Data",
+    "Optional",
+    "Result",
+    "Foundation",
+  ]);
+
+  const ordered = [];
+
+  function add(value) {
+    const clean =
+      String(value || "").trim();
+
+    if (
+      !clean ||
+      ignored.has(clean) ||
+      ordered.includes(clean)
+    ) {
+      return;
+    }
+
+    ordered.push(clean);
+  }
+
+  const callPattern =
+    /\b([A-Za-z_][A-Za-z0-9_]*)\s*\(/g;
+  let match;
+
+  while (
+    (match =
+      callPattern.exec(source))
+  ) {
+    add(match[1]);
+  }
+
+  const typePattern =
+    /\b([A-Z][A-Za-z0-9_]{2,})\b/g;
+
+  while (
+    (match =
+      typePattern.exec(source))
+  ) {
+    add(match[1]);
+  }
+
+  return ordered.slice(0, 18);
+}
+
+function definitionEvidenceForSymbol(
+  symbol
+) {
+  const found =
+    findDefinitionForSymbol(
+      symbol
+    );
+
+  if (!found) {
+    return null;
+  }
+
+  const parts =
+    found.match.split(":");
+  const definitionPath =
+    normalizeRepoRelativePath(
+      parts.shift() || ""
+    );
+  const definitionLine =
+    Number(
+      parts.shift() || 0
+    );
+
+  if (
+    !definitionPath ||
+    !Number.isFinite(
+      definitionLine
+    ) ||
+    definitionLine <= 0
+  ) {
+    return null;
+  }
+
+  const sourceRange =
+    definitionSourceRange(
+      definitionPath,
+      definitionLine
+    );
+
+  const readArgs = {
+    path: definitionPath,
+    start_line:
+      sourceRange.start_line,
+    end_line:
+      sourceRange.end_line,
+  };
+
+  const readResult =
+    executeTool(
+      "read_file",
+      readArgs
+    );
+
+  if (!readResult?.ok) {
+    return null;
+  }
+
+  return {
+    id:
+      symbol +
+      "@" +
+      definitionPath +
+      ":" +
+      definitionLine,
+    symbol,
+    path: definitionPath,
+    line: definitionLine,
+    start_line:
+      sourceRange.start_line,
+    end_line:
+      sourceRange.end_line,
+    range_mode:
+      sourceRange.mode,
+    read_args: readArgs,
+    read_result: readResult,
+    source:
+      exactSourceFromReadResult(
+        readResult
+      ),
+  };
+}
+
+function collectDependencyNeighborhood(
+  primary
+) {
+  const records = [primary];
+  const seen = new Set([
+    primary.id,
+    primary.symbol,
+  ]);
+
+  const dependencies =
+    dependencySymbolsFromDefinition(
+      primary.symbol,
+      primary.read_result
+    );
+
+  for (
+    const symbol of dependencies
+  ) {
+    if (records.length >= 8) {
+      break;
+    }
+
+    if (seen.has(symbol)) {
+      continue;
+    }
+
+    const evidence =
+      definitionEvidenceForSymbol(
+        symbol
+      );
+
+    if (!evidence) {
+      continue;
+    }
+
+    if (
+      seen.has(evidence.id)
+    ) {
+      continue;
+    }
+
+    seen.add(symbol);
+    seen.add(evidence.id);
+    records.push(evidence);
+  }
+
+  return records;
+}
+
+async function requestRootCauseDiagnosis(
+  primary,
+  neighborhood
+) {
+  if (
+    !architectModel ||
+    neighborhood.length === 0
+  ) {
+    return null;
+  }
+
+  const candidateIDs =
+    neighborhood.map(
+      (item) => item.id
+    );
+
+  const schema = {
+    type: "object",
+    additionalProperties: false,
+    required: [
+      "root_cause",
+      "target_id",
+      "strategy",
+      "confidence",
+      "alternatives_considered",
+    ],
+    properties: {
+      root_cause: {
+        type: "string",
+        minLength: 20,
+        maxLength: 1400,
+      },
+      target_id: {
+        type: "string",
+        enum: candidateIDs,
+      },
+      strategy: {
+        type: "string",
+        minLength: 20,
+        maxLength: 1400,
+      },
+      confidence: {
+        type: "number",
+        minimum: 0,
+        maximum: 1,
+      },
+      alternatives_considered: {
+        type: "array",
+        minItems: 2,
+        maxItems: 5,
+        items: {
+          type: "string",
+          maxLength: 500,
+        },
+      },
+    },
+  };
+
+  const evidence = {
+    problem:
+      mutationProblemContext(),
+    runtime_source_hints:
+      runtimeSourceHints.slice(0, 6),
+    primary_symbol:
+      primary.id,
+    candidates:
+      neighborhood.map(
+        (item) => ({
+          id: item.id,
+          symbol: item.symbol,
+          path: item.path,
+          start_line:
+            item.start_line,
+          end_line:
+            item.end_line,
+          source: clipExactSource(
+            item.source,
+            6500
+          ),
+        })
+      ),
+  };
+
+  stage(
+    "local_agent_root_cause_analyzing",
+    gapLabel +
+      " dependency neighborhood architect tarafından analiz ediliyor • candidates=" +
+      neighborhood.length +
+      " • architect=" +
+      architectModel
+  );
+
+  const controller =
+    new AbortController();
+  const timer = setTimeout(
+    () => controller.abort(),
+    Math.min(
+      Number(
+        process.env.KRALI_ARCHITECT_TIMEOUT_MS ||
+          "90000"
+      ),
+      Math.max(
+        1000,
+        hardTimeoutMs -
+          (Date.now() - startedAt)
+      )
+    )
+  );
+
+  try {
+    const response = await fetch(
+      baseUrl + "/api/chat",
+      {
+        method: "POST",
+        headers: {
+          "content-type":
+            "application/json",
+        },
+        signal: controller.signal,
+        body: JSON.stringify({
+          model: architectModel,
+          stream: false,
+          format: schema,
+          keep_alive: "10m",
+          options: {
+            temperature: 0.1,
+            num_predict: 1200,
+          },
+          messages: [
+            {
+              role: "system",
+              content: [
+                "You are KRALI Root Cause Architect.",
+                "Do not write code and do not propose a patch.",
+                "The first symbol in a runtime call chain is only a diagnostic entry point, not automatically the mutation target.",
+                "Compare the supplied dependency neighborhood and select the source definition whose behavior most plausibly causes the observed runtime failure.",
+                "Prefer the deepest reusable cause over a caller-level workaround.",
+                "Do not hard-code the concrete app, brand, filename, or exact test phrase.",
+                "Consider at least two plausible strategies before choosing.",
+                "Return only JSON matching the schema.",
+              ].join("\n"),
+            },
+            {
+              role: "user",
+              content:
+                JSON.stringify(
+                  evidence
+                ),
+            },
+          ],
+        }),
+      }
+    );
+
+    clearTimeout(timer);
+
+    if (!response.ok) {
+      stage(
+        "local_agent_root_cause_inconclusive",
+        gapLabel +
+          " architect HTTP " +
+          response.status +
+          " • kör mutation yapılmayacak"
+      );
+      return null;
+    }
+
+    const payload =
+      await response.json();
+    const content =
+      String(
+        payload?.message?.content || ""
+      ).trim();
+
+    const diagnosis =
+      JSON.parse(content);
+
+    const target =
+      neighborhood.find(
+        (item) =>
+          item.id ===
+          diagnosis.target_id
+      );
+
+    if (!target) {
+      stage(
+        "local_agent_root_cause_inconclusive",
+        gapLabel +
+          " architect geçersiz mutation target seçti • kör mutation yapılmayacak"
+      );
+      return null;
+    }
+
+    return {
+      ...diagnosis,
+      target,
+    };
+  } catch (error) {
+    clearTimeout(timer);
+
+    stage(
+      "local_agent_root_cause_inconclusive",
+      gapLabel +
+        " architect diagnosis tamamlanamadı • " +
+        truncate(
+          error instanceof Error
+            ? error.message
+            : String(error),
+          500
+        ) +
+        " • kör mutation yapılmayacak"
+    );
+
+    return null;
+  }
+}
+
+async function resolveRuntimeFailureDependency(
   errorReadResult
 ) {
   const symbols =
@@ -4096,113 +4548,129 @@ function resolveRuntimeFailureDependency(
   for (
     const symbol of symbols
   ) {
-    const found =
-      findDefinitionForSymbol(
+    const primary =
+      definitionEvidenceForSymbol(
         symbol
       );
 
-    if (!found) {
+    if (!primary) {
       continue;
     }
 
-    const parts =
-      found.match.split(":");
-    const definitionPath =
-      normalizeRepoRelativePath(
-        parts.shift() || ""
+    const neighborhood =
+      collectDependencyNeighborhood(
+        primary
       );
-    const definitionLine =
-      Number(
-        parts.shift() || 0
-      );
-
-    if (
-      !definitionPath ||
-      !Number.isFinite(
-        definitionLine
-      ) ||
-      definitionLine <= 0
-    ) {
-      continue;
-    }
-
-    implementationSearchCompleted =
-      false;
-    implementationReadCompleted =
-      false;
-
-    recordToolEvidence(
-      "search_codebase",
-      found.result,
-      found.args
-    );
-
-    const sourceRange =
-      definitionSourceRange(
-        definitionPath,
-        definitionLine
-      );
-
-    const readArgs = {
-      path: definitionPath,
-      start_line:
-        sourceRange.start_line,
-      end_line:
-        sourceRange.end_line,
-    };
-
-    const readResult =
-      executeTool(
-        "read_file",
-        readArgs
-      );
-
-    if (!readResult?.ok) {
-      continue;
-    }
-
-    recordToolEvidence(
-      "read_file",
-      readResult,
-      readArgs
-    );
 
     stage(
-      "local_agent_dependency_symbol_verified",
+      "local_agent_dependency_neighborhood_verified",
       gapLabel +
-        " runtime hata zincirinden implementation sembolü doğrulandı • symbol=" +
-        symbol +
+        " runtime dependency neighborhood doğrulandı • entry=" +
+        primary.symbol +
+        " • candidates=" +
+        neighborhood.length
+    );
+
+    const diagnosis =
+      await requestRootCauseDiagnosis(
+        primary,
+        neighborhood
+      );
+
+    if (!diagnosis) {
+      continue;
+    }
+
+    const target =
+      diagnosis.target;
+
+    implementationSearchCompleted =
+      true;
+    implementationReadCompleted =
+      true;
+    implementationTargetPaths = [
+      target.path,
+    ];
+
+    recordCheckpointEvidence(
+      "read_file",
+      target.read_args,
+      target.read_result
+    );
+
+    rootCauseDiagnosis = {
+      root_cause:
+        String(
+          diagnosis.root_cause || ""
+        ),
+      strategy:
+        String(
+          diagnosis.strategy || ""
+        ),
+      confidence:
+        Number(
+          diagnosis.confidence || 0
+        ),
+      target_symbol:
+        target.symbol,
+      target_path:
+        target.path,
+      alternatives_considered:
+        Array.isArray(
+          diagnosis.alternatives_considered
+        )
+          ? diagnosis.alternatives_considered
+          : [],
+    };
+
+    stage(
+      "local_agent_root_cause_selected",
+      gapLabel +
+        " architect gerçek mutation target seçti • entry=" +
+        primary.symbol +
+        " • target=" +
+        target.symbol +
         " • path=" +
-        definitionPath +
-        " • line=" +
-        definitionLine +
+        target.path +
         " • range=" +
-        sourceRange.start_line +
+        target.start_line +
         "-" +
-        sourceRange.end_line +
-        " • rangeMode=" +
-        sourceRange.mode
+        target.end_line +
+        " • confidence=" +
+        rootCauseDiagnosis.confidence.toFixed(
+          2
+        ) +
+        " • architect=" +
+        architectModel
     );
 
     messages.push({
       role: "user",
       content: [
-        "KRALI deterministic runtime dependency resolver implementation sembolünü doğruladı.",
-        "Symbol: " + symbol,
-        "Definition: " +
-          definitionPath +
+        "KRALI Root Cause Architect dependency neighborhood içinden gerçek mutation target seçti.",
+        "Target: " +
+          target.symbol +
+          " @ " +
+          target.path +
           ":" +
-          definitionLine,
-        "Bu source gerçek implementation kanıtıdır. Yeni repo keşfi yapmadan minimum generic fix üret.",
+          target.line,
+        "Root cause: " +
+          rootCauseDiagnosis.root_cause,
+        "Strategy: " +
+          rootCauseDiagnosis.strategy,
+        "Bu exact source controller için doğrulandı. Patch bu target dışına taşmamalı.",
       ].join("\n"),
     });
+
+    persistCheckpoint(
+      "root_cause_target_selected"
+    );
 
     return true;
   }
 
   return false;
 }
-
 async function runRuntimeFailureBootstrapFastPath() {
   if (!bootstrapRuntimeFailureSourceEvidence()) {
     return false;
@@ -4259,7 +4727,7 @@ async function runRuntimeFailureBootstrapFastPath() {
   // Resolve the nearest implementation call chain deterministically first;
   // only fall back to the conversational agent if no source definition can be found.
   const dependencyResolved =
-    resolveRuntimeFailureDependency(
+    await resolveRuntimeFailureDependency(
       errorReadResult
     );
 
