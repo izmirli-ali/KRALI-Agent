@@ -508,24 +508,21 @@ struct AgentLearningQueueStore {
 
         if gap.capabilityID ==
             "desktop.app",
-           let resolverData =
-                try? Data(
-                    contentsOf:
-                        resolverURL
-                ),
            let resolverObject =
-                try? JSONSerialization
-                    .jsonObject(
-                        with:
-                            resolverData
-                    )
-                    as? [String: Any],
+                readJSONObject(
+                    at: resolverURL
+                ),
            normalize(
                 resolverObject[
                     "requestedText"
                 ] as? String ?? ""
            ) ==
-            normalize(sourceGoal) {
+            normalize(sourceGoal),
+           let resolverData =
+                try? Data(
+                    contentsOf:
+                        resolverURL
+                ) {
             resolverTraceJSON =
                 String(
                     data: resolverData,
@@ -563,13 +560,14 @@ struct AgentLearningQueueStore {
                 try? JSONSerialization
                     .jsonObject(
                         with: data
-                    )
-                    as? [String: Any]
+                    ),
+            let dictionary =
+                object as? [String: Any]
         else {
             return nil
         }
 
-        return object
+        return dictionary
     }
 
     private func isTransientReason(
