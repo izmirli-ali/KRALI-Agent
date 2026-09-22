@@ -1059,12 +1059,22 @@ function currentCandidateDiff(limit = 12000) {
 }
 
 
+function normalizeRepoRelativePath(value) {
+  return String(value || "")
+    .trim()
+    .replace(/\\/g, "/")
+    .replace(/^\.\//, "")
+    .replace(/^[ab]\//, "");
+}
+
 function mutationPathsForTool(name, args = {}) {
   if (
     name === "replace_text" ||
     name === "write_file"
   ) {
-    const target = String(args.path || "").trim();
+    const target = normalizeRepoRelativePath(
+      args.path
+    );
     return target ? [target] : [];
   }
 
@@ -1085,7 +1095,7 @@ function mutationPathsForTool(name, args = {}) {
         continue;
       }
 
-      value = value.replace(/^[ab]\//, "");
+      value = normalizeRepoRelativePath(value);
       if (value) {
         paths.push(value);
       }
@@ -1713,24 +1723,41 @@ async function requestStructuredToolDecision(
     }
 
     if (name === "apply_patch") {
-      const patch = String(args.patch || "");
-      const patchPaths = [
-        ...patch.matchAll(
-          /^\+\+\+ b\/(.+)$/gm
-        ),
-      ].map((match) => match[1]);
+      const patchPaths =
+        mutationPathsForTool(
+          "apply_patch",
+          args
+        );
+
+      const verifiedTargets =
+        implementationTargetPaths.map(
+          normalizeRepoRelativePath
+        );
 
       if (
         patchPaths.length === 0 ||
         patchPaths.some(
           (targetPath) =>
-            !implementationTargetPaths.includes(
-              targetPath
+            !verifiedTargets.includes(
+              normalizeRepoRelativePath(
+                targetPath
+              )
             )
         )
       ) {
         return rejectStructuredDecision(
-          "apply_patch doğrulanmış target seti dışında"
+          "apply_patch doğrulanmış target seti dışında • patchPaths=" +
+            truncate(
+              JSON.stringify(patchPaths),
+              800
+            ) +
+            " • verifiedTargets=" +
+            truncate(
+              JSON.stringify(
+                verifiedTargets
+              ),
+              800
+            )
         );
       }
     }
