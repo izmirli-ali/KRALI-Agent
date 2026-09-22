@@ -1,1 +1,1 @@
-local_agent_completion_gate_failed|Uygulama kontrolü (desktop.app) yerel model açıklama ile erken tamamlanmaya devam etti: yapılandırılmış tool başarısız: replace_text|krali-dev-agent/20260922-114630|/Users/medusa/Developer/KRALI-Agent-Dev-20260922-114630|@meta|app=0.9.00|at=1790066910|run=20260922-114630
+local_agent_running|Candidate build repair yerel model çalışıyor • adım 1/8|krali-dev-agent/20260922-121348|/Users/medusa/Developer/KRALI-Agent-Dev-20260922-121348|@meta|app=0.9.01|at=1790068636|run=20260922-121348-repair-1
