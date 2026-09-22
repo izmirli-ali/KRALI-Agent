@@ -1264,6 +1264,30 @@ async function requestStructuredToolDecision(
   const controllerEvidence =
     compactControllerEvidence();
 
+  const decisionFormat = {
+    type: "object",
+    additionalProperties: false,
+    required: [
+      "name",
+      "arguments",
+      "reason",
+    ],
+    properties: {
+      name: {
+        type: "string",
+        enum: toolContracts.map(
+          (tool) => tool.name
+        ),
+      },
+      arguments: {
+        type: "object",
+      },
+      reason: {
+        type: "string",
+      },
+    },
+  };
+
   await releasePrimaryModelForController();
 
   const controllerInputChars =
@@ -1303,14 +1327,14 @@ async function requestStructuredToolDecision(
       body: JSON.stringify({
         model: controllerModel,
         stream: false,
-        format: "json",
+        format: decisionFormat,
         messages: [
           {
             role: "system",
             content: [
               "You are KRALI Tool Continuation Controller.",
-              "Your only output is one valid JSON object. No markdown fences, no prose before or after JSON.",
-              "Return exactly one JSON object describing the NEXT tool KRALI should execute.",
+              "Your output is constrained by a runtime JSON schema.",
+              "Return exactly one NEXT tool decision; no prose outside the schema.",
               "This is a controller protocol, not a conversational answer.",
               "Do not claim success. Do not explain source code.",
               "Choose only from the supplied tool contracts.",
@@ -1356,8 +1380,8 @@ async function requestStructuredToolDecision(
         keep_alive: "2m",
         options: {
           temperature: 0,
-          num_ctx: 8192,
-          num_predict: 2048,
+          num_ctx: 4096,
+          num_predict: 1024,
         },
       }),
     });
