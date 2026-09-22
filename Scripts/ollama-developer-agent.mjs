@@ -8,6 +8,12 @@ const promptFile = process.env.KRALI_PROMPT_FILE || "";
 const model = process.env.KRALI_DEV_MODEL || "";
 const architectModel =
   process.env.KRALI_ARCHITECT_MODEL || model;
+const rootCauseModel =
+  process.env.KRALI_ROOT_CAUSE_MODEL ||
+  architectModel;
+const mutationModel =
+  process.env.KRALI_ARCHITECT_MUTATION_MODEL ||
+  architectModel;
 const controllerModel =
   process.env.KRALI_CONTROLLER_MODEL || model;
 const baseUrl =
@@ -2605,8 +2611,8 @@ async function requestStructuredToolDecision(
 
   const decisionModel =
     fixedReplaceMode &&
-    architectModel
-      ? architectModel
+    mutationModel
+      ? mutationModel
       : controllerModel;
 
   const fixedReplacePath =
@@ -2947,11 +2953,7 @@ async function requestStructuredToolDecision(
           temperature: 0,
           num_ctx:
             fixedReplaceMode
-              ? (
-                  ultraCompactRetry
-                    ? 8192
-                    : 24576
-                )
+              ? 8192
               : ultraCompactRetry
                 ? 3072
                 : 4096,
@@ -2959,8 +2961,8 @@ async function requestStructuredToolDecision(
             fixedReplaceMode
               ? (
                   ultraCompactRetry
-                    ? 900
-                    : 1200
+                    ? 620
+                    : 760
                 )
               : ultraCompactRetry
                 ? 512
@@ -4531,8 +4533,11 @@ async function requestRootCauseDiagnosis(
     return null;
   }
 
+  const architectNeighborhood =
+    neighborhood.slice(0, 5);
+
   const candidateIDs =
-    neighborhood.map(
+    architectNeighborhood.map(
       (item) => item.id
     );
 
@@ -4588,7 +4593,7 @@ async function requestRootCauseDiagnosis(
     previous_attempt:
       reconsideration,
     candidates:
-      neighborhood.map(
+      architectNeighborhood.map(
         (item) => ({
           id: item.id,
           symbol: item.symbol,
@@ -4599,7 +4604,7 @@ async function requestRootCauseDiagnosis(
             item.end_line,
           source: clipExactSource(
             item.source,
-            6500
+            2200
           ),
         })
       ),
@@ -4609,9 +4614,9 @@ async function requestRootCauseDiagnosis(
     "local_agent_root_cause_analyzing",
     gapLabel +
       " dependency neighborhood architect tarafından analiz ediliyor • candidates=" +
-      neighborhood.length +
-      " • architect=" +
-      architectModel
+      architectNeighborhood.length +
+      " • rootCauseModel=" +
+      rootCauseModel
   );
 
   const controller =
@@ -4642,13 +4647,14 @@ async function requestRootCauseDiagnosis(
         },
         signal: controller.signal,
         body: JSON.stringify({
-          model: architectModel,
+          model: rootCauseModel,
           stream: false,
           format: schema,
           keep_alive: "10m",
           options: {
-            temperature: 0.1,
-            num_predict: 1200,
+            temperature: 0.05,
+            num_ctx: 8192,
+            num_predict: 480,
           },
           messages: [
             {
@@ -4740,6 +4746,233 @@ async function requestRootCauseDiagnosis(
   }
 }
 
+async function verifyRootCauseTarget(
+  primary,
+  diagnosis
+) {
+  const target =
+    diagnosis?.target;
+
+  if (
+    !target ||
+    !rootCauseModel
+  ) {
+    return false;
+  }
+
+  const schema = {
+    type: "object",
+    additionalProperties: false,
+    required: [
+      "supported",
+      "target_role",
+      "reason",
+    ],
+    properties: {
+      supported: {
+        type: "boolean",
+      },
+      target_role: {
+        type: "string",
+        enum: [
+          "direct_cause",
+          "upstream_input",
+          "downstream_effect",
+          "uncertain",
+        ],
+      },
+      reason: {
+        type: "string",
+        minLength: 12,
+        maxLength: 420,
+      },
+    },
+  };
+
+  const evidence = {
+    problem: {
+      runtime_failure:
+        mutationProblemContext()
+          .runtime_failure,
+      expected_postcondition:
+        mutationProblemContext()
+          .expected_postcondition,
+    },
+    entry: {
+      id: primary.id,
+      source: clipExactSource(
+        primary.source,
+        900
+      ),
+    },
+    proposed_target: {
+      id: target.id,
+      source: clipExactSource(
+        target.source,
+        2200
+      ),
+    },
+    hypothesis: {
+      root_cause:
+        truncate(
+          diagnosis.root_cause || "",
+          520
+        ),
+      strategy:
+        truncate(
+          diagnosis.strategy || "",
+          520
+        ),
+    },
+  };
+
+  stage(
+    "local_agent_root_cause_verifying",
+    gapLabel +
+      " seçilen root-cause hypothesis patch öncesi doğrulanıyor • target=" +
+      target.symbol +
+      " • rootCauseModel=" +
+      rootCauseModel
+  );
+
+  const controller =
+    new AbortController();
+  const remaining =
+    Math.max(
+      1000,
+      hardTimeoutMs -
+        (Date.now() - startedAt)
+    );
+  const timer =
+    setTimeout(
+      () => controller.abort(),
+      Math.min(45000, remaining)
+    );
+
+  try {
+    const response =
+      await fetch(
+        baseUrl + "/api/chat",
+        {
+          method: "POST",
+          headers: {
+            "content-type":
+              "application/json",
+          },
+          signal: controller.signal,
+          body: JSON.stringify({
+            model: rootCauseModel,
+            stream: false,
+            format: schema,
+            keep_alive: "10m",
+            options: {
+              temperature: 0,
+              num_ctx: 4096,
+              num_predict: 260,
+            },
+            messages: [
+              {
+                role: "system",
+                content: [
+                  "You are KRALI Root Cause Verifier.",
+                  "Do not write code.",
+                  "Decide whether the proposed target itself can plausibly cause the observed runtime failure.",
+                  "Reject a target that merely extracts or forwards an already-correct upstream value while the failure happens later.",
+                  "Accept only when the supplied source directly implements the failing behavior or data transformation.",
+                  "When evidence is insufficient, return supported=false and target_role=uncertain.",
+                  "Return only JSON matching the schema.",
+                ].join("\n"),
+              },
+              {
+                role: "user",
+                content:
+                  JSON.stringify(
+                    evidence
+                  ),
+              },
+            ],
+          }),
+        }
+      );
+
+    clearTimeout(timer);
+
+    if (!response.ok) {
+      stage(
+        "local_agent_root_cause_verification_inconclusive",
+        gapLabel +
+          " hypothesis verifier HTTP " +
+          response.status +
+          " • mutation yapılmayacak"
+      );
+      return false;
+    }
+
+    const payload =
+      await response.json();
+    const verdict =
+      JSON.parse(
+        String(
+          payload?.message?.content || ""
+        ).trim()
+      );
+
+    if (
+      verdict.supported !== true ||
+      verdict.target_role !==
+        "direct_cause"
+    ) {
+      stage(
+        "local_agent_root_cause_rejected",
+        gapLabel +
+          " root-cause hypothesis reddedildi • target=" +
+          target.symbol +
+          " • role=" +
+          String(
+            verdict.target_role || "uncertain"
+          ) +
+          " • reason=" +
+          truncate(
+            verdict.reason || "",
+            320
+          )
+      );
+      return false;
+    }
+
+    stage(
+      "local_agent_root_cause_verified",
+      gapLabel +
+        " root-cause hypothesis doğrulandı • target=" +
+        target.symbol +
+        " • reason=" +
+        truncate(
+          verdict.reason || "",
+          320
+        )
+    );
+
+    return true;
+  } catch (error) {
+    clearTimeout(timer);
+
+    stage(
+      "local_agent_root_cause_verification_inconclusive",
+      gapLabel +
+        " hypothesis verifier tamamlanamadı • " +
+        truncate(
+          error instanceof Error
+            ? error.message
+            : String(error),
+          320
+        ) +
+        " • mutation yapılmayacak"
+    );
+
+    return false;
+  }
+}
+
 async function resolveRuntimeFailureDependency(
   errorReadResult
 ) {
@@ -4793,6 +5026,16 @@ async function resolveRuntimeFailureDependency(
 
     const target =
       diagnosis.target;
+
+    const hypothesisVerified =
+      await verifyRootCauseTarget(
+        primary,
+        diagnosis
+      );
+
+    if (!hypothesisVerified) {
+      continue;
+    }
 
     implementationSearchCompleted =
       true;
