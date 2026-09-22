@@ -1,6 +1,6 @@
 {
-  "createdAt" : "2026-09-22T19:38:35Z",
-  "expandedCandidateCount" : 256,
+  "createdAt" : "2026-09-22T19:54:55Z",
+  "expandedCandidateCount" : 255,
   "installedCandidateCount" : 225,
   "nestedCandidateCount" : 55,
   "queries" : [
@@ -9,6 +9,7 @@
   "queryTraces" : [
     {
       "decision" : "best_score_below_confidence_threshold",
+      "failureClass" : "candidate_alias_or_localization_gap_possible",
       "launchServicesAccepted" : false,
       "normalizedQuery" : "notlar",
       "query" : "Notlar",
