@@ -336,15 +336,43 @@ function clipDiagnosticOutput(
     return text;
   }
 
-  const diagnosticLines = text
-    .split("\n")
-    .filter((line) =>
-      /\berror:|fatal error:|SwiftCompile|CompileSwift|Command .* failed|BUILD FAILED|The following build commands failed/i.test(
-        line
+  const outputLines =
+    text.split("\n");
+
+  const primaryErrors =
+    outputLines
+      .filter((line) =>
+        /(?:^|\s)(?:fatal\s+)?error:/i.test(
+          line
+        )
       )
-    )
-    .slice(-60)
-    .join("\n");
+      .slice(-30);
+
+  const buildFailures =
+    outputLines
+      .filter((line) =>
+        /Command .* failed|BUILD FAILED|The following build commands failed/i.test(
+          line
+        )
+      )
+      .slice(-12);
+
+  const compileStages =
+    outputLines
+      .filter((line) =>
+        /SwiftCompile|CompileSwift/i.test(
+          line
+        )
+      )
+      .slice(-8);
+
+  const diagnosticLines = [
+    ...primaryErrors,
+    ...buildFailures,
+    ...(primaryErrors.length === 0
+      ? compileStages
+      : []),
+  ].join("\n");
 
   const reserved =
     Math.min(
@@ -1122,6 +1150,8 @@ let implementationReadCompleted = false;
 let implementationTargetPaths = [];
 let lastStructuredOutcome = null;
 let lastMutationSnapshot = null;
+let lastMutationFingerprint = "";
+const failedMutationFingerprints = new Set();
 let runtimeBootstrapTarget = null;
 
 const inspectionToolNames = new Set([
@@ -1907,6 +1937,61 @@ function rejectStructuredDecision(reason) {
   return null;
 }
 
+function mutationFingerprint(
+  name,
+  args = {}
+) {
+  if (!mutationToolNames.has(name)) {
+    return "";
+  }
+
+  const normalized =
+    name === "replace_text"
+      ? {
+          name,
+          path:
+            normalizeRepoRelativePath(
+              args.path
+            ),
+          old_text:
+            String(
+              args.old_text || ""
+            ),
+          new_text:
+            String(
+              args.new_text ?? ""
+            ),
+        }
+      : name === "apply_patch"
+        ? {
+            name,
+            patch:
+              String(
+                args.patch || ""
+              )
+                .replace(/\r\n/g, "\n")
+                .trim(),
+          }
+        : {
+            name,
+            path:
+              normalizeRepoRelativePath(
+                args.path
+              ),
+            content:
+              String(
+                args.content || ""
+              ),
+          };
+
+  return crypto
+    .createHash("sha256")
+    .update(
+      JSON.stringify(normalized)
+    )
+    .digest("hex");
+}
+
 function summarizeBuildFailure(
   buildResult,
   failedCandidateDiff,
@@ -1916,14 +2001,46 @@ function summarizeBuildFailure(
     buildResult?.output || ""
   );
 
-  const compilerLines = rawOutput
-    .split("\n")
-    .filter((line) =>
-      /\berror:|fatal error:|SwiftCompile|CompileSwift|Command .* failed|BUILD FAILED|The following build commands failed/i.test(
-        line
+  const outputLines =
+    rawOutput.split("\n");
+
+  const primaryCompilerErrors =
+    outputLines
+      .filter((line) =>
+        /(?:^|\s)(?:fatal\s+)?error:/i.test(
+          line
+        )
       )
-    )
-    .slice(-40);
+      .slice(-30);
+
+  const secondaryBuildFailures =
+    outputLines
+      .filter((line) =>
+        /Command .* failed|BUILD FAILED|The following build commands failed/i.test(
+          line
+        )
+      )
+      .slice(-12);
+
+  const compilerStageLines =
+    outputLines
+      .filter((line) =>
+        /SwiftCompile|CompileSwift/i.test(
+          line
+        )
+      )
+      .slice(-8);
+
+  const compilerLines =
+    primaryCompilerErrors.length > 0
+      ? [
+          ...primaryCompilerErrors,
+          ...secondaryBuildFailures,
+        ]
+      : [
+          ...secondaryBuildFailures,
+          ...compilerStageLines,
+        ];
 
   return {
     ok: false,
@@ -2022,6 +2139,12 @@ function compactControllerEvidence(
     implementationReadCompleted,
     implementationTargetPaths:
       implementationTargetPaths.slice(0, 8),
+    failedMutationFingerprints:
+      [...failedMutationFingerprints]
+        .slice(-6)
+        .map((value) =>
+          value.slice(0, 12)
+        ),
     rollbackRepair,
     initialMutation,
     candidateDiff: currentCandidateDiff(
@@ -2355,6 +2478,7 @@ async function requestStructuredToolDecision(
           "Do not hard-code the concrete app, brand, filename, or exact user phrase from problem evidence; generalize the fix to the capability class.",
           "Do not include path, tool name, reason, markdown, prose, or code fences.",
           "If build failure evidence exists, repair that failure against the clean verified source and do not repeat the failed diff.",
+          "failedMutationFingerprints identify strategies already proven to fail. Produce a materially different semantic change, not a cosmetically different anchor for the same failed edit.",
         ].join("\n")
       : [
           "You are KRALI Tool Continuation Controller.",
@@ -2866,6 +2990,56 @@ async function requestStructuredToolDecision(
         validationReason
       );
     }
+
+    const fingerprint =
+      mutationFingerprint(
+        name,
+        args
+      );
+
+    if (
+      fingerprint &&
+      failedMutationFingerprints.has(
+        fingerprint
+      )
+    ) {
+      const repeatReason =
+        "önceden build FAIL alan mutation tekrarlandı • fingerprint=" +
+        fingerprint.slice(0, 12);
+
+      stage(
+        "local_agent_repeated_failed_mutation_rejected",
+        gapLabel +
+          " " +
+          repeatReason +
+          " • controller=" +
+          controllerModel
+      );
+
+      if (
+        validationRetry < 2 &&
+        (
+          hardTimeoutMs -
+          (Date.now() - startedAt)
+        ) > 25000
+      ) {
+        return requestStructuredToolDecision(
+          [
+            assistantText,
+            "Previous mutation is a known failed strategy and was rejected before execution.",
+            repeatReason,
+            "Produce a materially different repair strategy using exact verified source. Do not repeat the failed semantic change.",
+          ].join("\n"),
+          blockers,
+          ultraCompactRetry,
+          validationRetry + 1
+        );
+      }
+
+      return rejectStructuredDecision(
+        repeatReason
+      );
+    }
   }
 
   structuredActions += 1;
@@ -2925,6 +3099,13 @@ async function runStructuredContinuation(
         decision.args
       )
     : null;
+  const mutationDecisionFingerprint =
+    isMutation
+      ? mutationFingerprint(
+          decision.name,
+          decision.args
+        )
+      : "";
 
   try {
     result = executeTool(
@@ -2955,6 +3136,8 @@ async function runStructuredContinuation(
 
   if (isMutation && result?.ok) {
     lastMutationSnapshot = mutationSnapshot;
+    lastMutationFingerprint =
+      mutationDecisionFingerprint;
   }
 
   messages.push({
@@ -3120,6 +3303,24 @@ function handoffStructuredCandidateIfReady(
     let mutationRolledBack = false;
 
     if (!buildResult?.ok && lastMutationSnapshot) {
+      if (lastMutationFingerprint) {
+        failedMutationFingerprints.add(
+          lastMutationFingerprint
+        );
+
+        stage(
+          "local_agent_failed_mutation_recorded",
+          gapLabel +
+            " build FAIL mutation fingerprint kaydedildi • fingerprint=" +
+            lastMutationFingerprint.slice(
+              0,
+              12
+            ) +
+            " • trigger=" +
+            trigger
+        );
+      }
+
       mutationRolledBack =
         restoreMutationSnapshot(
           lastMutationSnapshot
@@ -3135,6 +3336,7 @@ function handoffStructuredCandidateIfReady(
       }
 
       lastMutationSnapshot = null;
+      lastMutationFingerprint = "";
     }
 
     const buildEvidence = buildResult?.ok
