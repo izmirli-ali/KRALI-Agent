@@ -32,6 +32,13 @@ enum AgentLearningJobState: String, Codable, Hashable, Sendable {
     }
 }
 
+struct AgentLearningEvidenceSnapshot: Codable, Hashable, Sendable {
+    let sourceGoal: String
+    let capturedAt: Date
+    let runtimeEvidence: [String]
+    let resolverTraceJSON: String?
+}
+
 struct AgentLearningJob: Identifiable, Codable, Hashable, Sendable {
     let id: UUID
     let fingerprint: String
@@ -44,6 +51,8 @@ struct AgentLearningJob: Identifiable, Codable, Hashable, Sendable {
     let candidateCapabilityIDs: [String]
     var sourceGoals: [String]
     var evidenceCount: Int
+    var evidenceSnapshots:
+        [AgentLearningEvidenceSnapshot]? = nil
     let createdAt: Date
     var updatedAt: Date
     var state: AgentLearningJobState
@@ -64,6 +73,8 @@ struct AgentLearningJobBrief: Codable, Sendable {
     let gap: CapabilityGapResolution
     let sourceGoals: [String]
     let evidenceCount: Int
+    let evidenceSnapshots:
+        [AgentLearningEvidenceSnapshot]?
     let createdAt: Date
 }
 
@@ -83,6 +94,14 @@ struct AgentLearningQueueStore {
             .appendingPathComponent(
                 "learning-queue.json",
                 isDirectory: false
+            )
+    }
+
+    private var mentorDirectoryURL: URL {
+        fileManager.homeDirectoryForCurrentUser
+            .appendingPathComponent(
+                "Library/Application Support/KRALI Agent/Mentor",
+                isDirectory: true
             )
     }
 
@@ -142,6 +161,12 @@ struct AgentLearningQueueStore {
         var jobs = existing
 
         for gap in gaps {
+            let evidenceSnapshot =
+                captureEvidenceSnapshot(
+                    for: gap,
+                    sourceGoal:
+                        sourceGoal
+                )
             guard !isTransientReason(
                 gap.reason
             ) else {
@@ -175,9 +200,30 @@ struct AgentLearningQueueStore {
                         .evidenceCount += 1
                 }
 
+                if let evidenceSnapshot {
+                    var snapshots =
+                        jobs[index]
+                            .evidenceSnapshots ??
+                        []
+
+                    if !snapshots.contains(
+                        evidenceSnapshot
+                    ) {
+                        snapshots.append(
+                            evidenceSnapshot
+                        )
+                        jobs[index]
+                            .evidenceSnapshots =
+                            Array(
+                                snapshots
+                                    .suffix(8)
+                            )
+                    }
+                }
+
                 jobs[index].updatedAt = Date()
                 jobs[index].lastStatus =
-                    "Yeni kanıt aynı öğrenme işine eklendi."
+                    "Yeni immutable kanıt aynı öğrenme işine eklendi."
                 continue
             }
 
@@ -202,6 +248,9 @@ struct AgentLearningQueueStore {
                     sourceGoals:
                         [sourceGoal],
                     evidenceCount: 1,
+                    evidenceSnapshots:
+                        evidenceSnapshot
+                            .map { [$0] },
                     createdAt: now,
                     updatedAt: now,
                     state: .queued,
@@ -286,6 +335,8 @@ struct AgentLearningQueueStore {
                         job.sourceGoals,
                     evidenceCount:
                         job.evidenceCount,
+                    evidenceSnapshots:
+                        job.evidenceSnapshots,
                     createdAt:
                         job.createdAt
                 )
@@ -361,6 +412,164 @@ struct AgentLearningQueueStore {
 
         save(recovered)
         return recovered
+    }
+
+    private func captureEvidenceSnapshot(
+        for gap: CapabilityGapResolution,
+        sourceGoal: String
+    ) -> AgentLearningEvidenceSnapshot? {
+        let mentorURL =
+            mentorDirectoryURL
+                .appendingPathComponent(
+                    "latest.json",
+                    isDirectory: false
+                )
+        let resolverURL =
+            mentorDirectoryURL
+                .appendingPathComponent(
+                    "application-resolution-latest.json",
+                    isDirectory: false
+                )
+
+        let mentor =
+            readJSONObject(
+                at: mentorURL
+            )
+        let mentorInput =
+            mentor?["userInput"]
+                as? String
+
+        var runtimeEvidence: [String] = []
+
+        if let mentor,
+           normalize(
+                mentorInput ?? ""
+           ) ==
+            normalize(sourceGoal),
+           let gaps =
+                mentor["capabilityGaps"]
+                    as? [[String: Any]],
+           gaps.contains(
+                where: {
+                    normalize(
+                        $0["capabilityID"]
+                            as? String ??
+                        ""
+                    ) ==
+                    normalize(
+                        gap.capabilityID
+                    )
+                }
+           ),
+           let activity =
+                mentor["activityTail"]
+                    as? [[String: Any]] {
+            runtimeEvidence =
+                activity
+                    .compactMap {
+                        $0["text"]
+                            as? String
+                    }
+                    .filter {
+                        let normalized =
+                            normalize($0)
+
+                        return
+                            normalized
+                                .contains(
+                                    "basarisiz"
+                                ) ||
+                            normalized
+                                .contains(
+                                    "bulunamadi"
+                                ) ||
+                            normalized
+                                .contains(
+                                    "runtime capability gap"
+                                ) ||
+                            normalized
+                                .contains(
+                                    "postcondition"
+                                ) ||
+                            normalized
+                                .contains(
+                                    "failed"
+                                ) ||
+                            normalized
+                                .contains(
+                                    "error"
+                                )
+                    }
+                    .prefix(10)
+                    .map { $0 }
+        }
+
+        var resolverTraceJSON: String?
+
+        if gap.capabilityID ==
+            "desktop.app",
+           let resolverData =
+                try? Data(
+                    contentsOf:
+                        resolverURL
+                ),
+           let resolverObject =
+                try? JSONSerialization
+                    .jsonObject(
+                        with:
+                            resolverData
+                    )
+                    as? [String: Any],
+           normalize(
+                resolverObject[
+                    "requestedText"
+                ] as? String ?? ""
+           ) ==
+            normalize(sourceGoal) {
+            resolverTraceJSON =
+                String(
+                    data: resolverData,
+                    encoding: .utf8
+                )
+        }
+
+        guard
+            !runtimeEvidence.isEmpty ||
+            resolverTraceJSON != nil
+        else {
+            return nil
+        }
+
+        return AgentLearningEvidenceSnapshot(
+            sourceGoal:
+                sourceGoal,
+            capturedAt:
+                Date(),
+            runtimeEvidence:
+                runtimeEvidence,
+            resolverTraceJSON:
+                resolverTraceJSON
+        )
+    }
+
+    private func readJSONObject(
+        at url: URL
+    ) -> [String: Any]? {
+        guard
+            let data = try? Data(
+                contentsOf: url
+            ),
+            let object =
+                try? JSONSerialization
+                    .jsonObject(
+                        with: data
+                    )
+                    as? [String: Any]
+        else {
+            return nil
+        }
+
+        return object
     }
 
     private func isTransientReason(
