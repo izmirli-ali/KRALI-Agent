@@ -2060,7 +2060,11 @@ async function requestStructuredToolDecision(
   stage(
     "local_agent_controller_preparing",
     gapLabel +
-      " structured controller girdisi hazır • chars=" +
+      " structured controller girdisi hazır • mode=" +
+      (fixedReplaceMode
+        ? "exact_replace"
+        : "general") +
+      " • chars=" +
       controllerInputChars +
       " • controller=" +
       controllerModel
