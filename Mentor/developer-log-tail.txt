@@ -1,54 +1,3 @@
-KRALI_LOCAL_STAGE local_agent_controller_preparing • Uygulama kontrolü (desktop.app) structured controller girdisi hazır • mode=exact_replace • problem=runtime_evidence • chars=3866 • decisionModel=devstral-small-2:24b • role=architect-mutation
-KRALI_LOCAL_STAGE local_agent_structured_mutation • Uygulama kontrolü (desktop.app) yapılandırılmış devam aracı çalışıyor: replace_text • trigger=native_tool_missing • phase=implementation • controller=qwen2.5-coder:14b-instruct
-KRALI_LOCAL_STAGE local_agent_running • Uygulama kontrolü (desktop.app) yerel model çalışıyor • adım 2/10
-KRALI_LOCAL_STAGE local_agent_tool • Uygulama kontrolü (desktop.app) araç çalışıyor: git_diff
-KRALI_LOCAL_STAGE local_agent_running • Uygulama kontrolü (desktop.app) yerel model çalışıyor • adım 3/10
-KRALI_LOCAL_STAGE local_agent_tool • Uygulama kontrolü (desktop.app) araç çalışıyor: build_check
-KRALI_LOCAL_STAGE local_agent_running • Uygulama kontrolü (desktop.app) yerel model çalışıyor • adım 4/10
-KRALI_LOCAL_STAGE local_agent_request_retry • Uygulama kontrolü (desktop.app) model isteği zaman aşımına uğradı; mevcut context korunarak retry 1/2
-Uygulama kontrolü (desktop.app) native local agent toplam zaman sınırına ulaştı.
-KRALI_LOCAL_STAGE local_agent_checkpoint_stale • Uygulama kontrolü (desktop.app) checkpoint source provenance eski • recordedHead=051e6fb2d862c94788af82084ef7e4912c9a42bc • liveHead=5e43bdc51383007ab01f8a487c29af949658b090 • source hedefleri yeniden doğrulanacak
-KRALI_LOCAL_STAGE local_agent_target_found • Uygulama kontrolü (desktop.app) hedef kaynak bulundu • paths=1 • targets=["App/KRALIAgentNative/AgentDesktopControl.swift"]
-KRALI_LOCAL_STAGE local_agent_diagnostic_source_bootstrap • Uygulama kontrolü (desktop.app) runtime hata metninden source bootstrap bulundu • hint=Uygulama bulunamadı • targets=["App/KRALIAgentNative/AgentDesktopControl.swift"]
-KRALI_LOCAL_STAGE local_agent_target_verified • Uygulama kontrolü (desktop.app) hedef kaynak bölgesi doğrulandı • mutation zorunlu
-KRALI_LOCAL_STAGE local_agent_diagnostic_error_window • Uygulama kontrolü (desktop.app) runtime hata noktası çevresi okundu • path=App/KRALIAgentNative/AgentDesktopControl.swift • line=60
-KRALI_LOCAL_STAGE local_agent_dependency_neighborhood_verified • Uygulama kontrolü (desktop.app) runtime dependency neighborhood havuza eklendi • entry=resolveRequestedApplication • candidates=8
-KRALI_LOCAL_STAGE local_agent_dependency_neighborhood_verified • Uygulama kontrolü (desktop.app) runtime dependency neighborhood havuza eklendi • entry=applicationTargetPhrase • candidates=4
-KRALI_LOCAL_STAGE local_agent_root_cause_pool_ready • Uygulama kontrolü (desktop.app) dedupe edilmiş root-cause candidate havuzu hazır • candidates=12
-KRALI_LOCAL_STAGE local_agent_root_cause_ranking • Uygulama kontrolü (desktop.app) tek candidate havuzu sıralanıyor • candidates=12 • rootCauseModel=qwen2.5-coder:14b-instruct
-KRALI_LOCAL_STAGE local_agent_root_cause_ranking_inconclusive • Uygulama kontrolü (desktop.app) root-cause ranking tamamlanamadı • This operation was aborted
-KRALI_LOCAL_STAGE local_agent_starting • Uygulama kontrolü (desktop.app) native Ollama agent başlatılıyor: devstral-small-2:24b
-KRALI_LOCAL_STAGE local_agent_running • Uygulama kontrolü (desktop.app) yerel model çalışıyor • adım 1/10
-KRALI_LOCAL_STAGE local_agent_controller_preparing • Uygulama kontrolü (desktop.app) structured controller girdisi hazır • mode=exact_replace • problem=runtime_evidence • chars=3866 • decisionModel=devstral-small-2:24b • role=architect-mutation
-KRALI_LOCAL_STAGE local_agent_structured_mutation • Uygulama kontrolü (desktop.app) yapılandırılmış devam aracı çalışıyor: replace_text • trigger=native_tool_missing • phase=implementation • controller=qwen2.5-coder:14b-instruct
-KRALI_LOCAL_STAGE local_agent_running • Uygulama kontrolü (desktop.app) yerel model çalışıyor • adım 2/10
-KRALI_LOCAL_STAGE local_agent_tool • Uygulama kontrolü (desktop.app) araç çalışıyor: git_diff
-KRALI_LOCAL_STAGE local_agent_running • Uygulama kontrolü (desktop.app) yerel model çalışıyor • adım 3/10
-KRALI_LOCAL_STAGE local_agent_tool • Uygulama kontrolü (desktop.app) araç çalışıyor: build_check
-KRALI_LOCAL_STAGE local_agent_running • Uygulama kontrolü (desktop.app) yerel model çalışıyor • adım 4/10
-KRALI_LOCAL_STAGE local_agent_request_retry • Uygulama kontrolü (desktop.app) model isteği zaman aşımına uğradı; mevcut context korunarak retry 1/2
-Uygulama kontrolü (desktop.app) native local agent toplam zaman sınırına ulaştı.
-🧩 Developer Agent hata verdi ancak candidate değişiklik üretti; recovery başlatılıyor.
-⚠️ İlk candidate build başarısız; bounded repair değerlendiriliyor.
-🔧 Candidate repair turu 1/2 başlatılıyor.
-KRALI_LOCAL_STAGE local_agent_starting • Candidate build repair native Ollama agent başlatılıyor: devstral-small-2:24b
-KRALI_LOCAL_STAGE local_agent_running • Candidate build repair yerel model çalışıyor • adım 1/8
-KRALI_LOCAL_STAGE local_agent_tool • Candidate build repair araç çalışıyor: search_codebase
-KRALI_LOCAL_STAGE local_agent_running • Candidate build repair yerel model çalışıyor • adım 2/8
-KRALI_LOCAL_STAGE local_agent_tool • Candidate build repair araç çalışıyor: read_file
-KRALI_LOCAL_STAGE local_agent_implementation_phase • Candidate build repair hedefli inspection kanıtı tamamlandı • implementation zorunlu • 2/2
-KRALI_LOCAL_STAGE local_agent_running • Candidate build repair yerel model çalışıyor • adım 3/8
-KRALI_LOCAL_STAGE local_agent_tool • Candidate build repair araç çalışıyor: search_codebase
-KRALI_LOCAL_STAGE local_agent_target_found • Candidate build repair hedef kaynak bulundu • paths=1 • targets=["App/KRALIAgentNative/AgentDesktopControl.swift"]
-KRALI_LOCAL_STAGE local_agent_running • Candidate build repair yerel model çalışıyor • adım 4/8
-KRALI_LOCAL_STAGE local_agent_tool • Candidate build repair araç çalışıyor: read_file
-KRALI_LOCAL_STAGE local_agent_target_verified • Candidate build repair hedef kaynak bölgesi doğrulandı • mutation zorunlu
-KRALI_LOCAL_STAGE local_agent_running • Candidate build repair yerel model çalışıyor • adım 5/8
-KRALI_LOCAL_STAGE local_agent_controller_preparing • Candidate build repair structured controller girdisi hazır • mode=exact_replace • problem=runtime_evidence • chars=1131 • decisionModel=devstral-small-2:24b • role=architect-mutation
-KRALI_LOCAL_STAGE local_agent_controller_rejected • Candidate build repair structured controller kararı reddedildi • controller isteği başarısız/zaman aşımı • controller=devstral-small-2:24b
-KRALI_LOCAL_STAGE local_agent_completion_rejected • Candidate build repair tamamlanma reddedildi • aktif capability gap için gerçek candidate değişikliği yok • deneme=1/2
-Candidate build repair native local agent toplam zaman sınırına ulaştı.
-⚠️ Candidate repair agent turu tamamlanamadı: 1
 🔧 Candidate repair turu 2/2 başlatılıyor.
 KRALI_LOCAL_STAGE local_agent_starting • Candidate build repair native Ollama agent başlatılıyor: devstral-small-2:24b
 KRALI_LOCAL_STAGE local_agent_running • Candidate build repair yerel model çalışıyor • adım 1/8
@@ -117,4 +66,55 @@ KRALI_LOCAL_STAGE local_agent_root_cause_ranking • Uygulama kontrolü (desktop
 KRALI_LOCAL_STAGE local_agent_root_cause_ranking_inconclusive • Uygulama kontrolü (desktop.app) root-cause ranking tamamlanamadı • This operation was aborted
 Root-cause ranking/verifier mutation target doğrulamadı; güvenli olarak candidate mutation başlatılmadı.
 Deleted branch krali-dev-agent/20260922-220738 (was 302c5e5).
+❌ Native yerel Developer Agent durdu: Root-cause ranking/verifier mutation target doğrulamadı; güvenli olarak candidate mutation başlatılmadı.
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+ KRALİ DEVELOPER AGENT
+ 20260922-221536
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+⚠️ Global Node.js v26 Cline bağımlılıklarıyla uyumlu değil; izole Node 22 runtime hazırlanıyor.
+✅ Developer Agent runtime: v22.23.2
+⚡ Tool-capable model cache kullanılıyor: devstral-small-2:24b • yaş=4512s
+Yerel architect model seçimi: devstral-small-2:24b • RAM≈24GB
+✅ Yerel Developer AI hazır + tool-call doğrulandı: devstral-small-2:24b
+From https://github.com/izmirli-ali/KRALI-Agent
+ * branch            main       -> FETCH_HEAD
+Already up to date.
+Learning Queue job brief bulundu; mutable Mentor latest yerine immutable job kullanılacak.
+Preparing worktree (new branch 'krali-dev-agent/20260922-221536')
+branch 'krali-dev-agent/20260922-221536' set up to track 'origin/main'.
+HEAD is now at 9867dcb v0.10.5: document deterministic root-cause pruning
+Developer prompt mode: gap • 4761 bytes
+⚡ Structured controller cache adayı yeniden ısıtılıyor: qwen2.5-coder:14b-instruct • yaş=466s
+🧪 Structured controller JSON probe: qwen2.5-coder:14b-instruct
+controller_probe_ok|qwen2.5-coder:14b-instruct|9533ms
+✅ Structured controller cache doğrulandı ve sıcak: qwen2.5-coder:14b-instruct
+🧭 Structured controller modeli: qwen2.5-coder:14b-instruct • ölçülmüş JSON karar modu
+♻️ Developer checkpoint bulundu; aynı gap teşhisi kaldığı yerden devam edecek: desktop.app-02edb76fda4e
+🧠 Model rolleri: root-cause=qwen2.5-coder:14b-instruct • mutation=devstral-small-2:24b • controller=qwen2.5-coder:14b-instruct
+KRALI_LOCAL_STAGE local_agent_checkpoint_stale • Uygulama kontrolü (desktop.app) checkpoint source provenance eski • recordedHead=302c5e5e885d25702957b346bca110bc832267fd • liveHead=9867dcb3e678cb0eb8494ec5a622b6060ebd0353 • source hedefleri yeniden doğrulanacak
+KRALI_LOCAL_STAGE local_agent_target_found • Uygulama kontrolü (desktop.app) hedef kaynak bulundu • paths=1 • targets=["App/KRALIAgentNative/AgentDesktopControl.swift"]
+KRALI_LOCAL_STAGE local_agent_diagnostic_source_bootstrap • Uygulama kontrolü (desktop.app) runtime hata metninden source bootstrap bulundu • hint=Uygulama bulunamadı • targets=["App/KRALIAgentNative/AgentDesktopControl.swift"]
+KRALI_LOCAL_STAGE local_agent_diagnostic_target_read • Uygulama kontrolü (desktop.app) diagnostic source okundu • root-cause verifier PASS olmadan mutation yetkisi verilmeyecek • path=App/KRALIAgentNative/AgentDesktopControl.swift
+KRALI_LOCAL_STAGE local_agent_diagnostic_error_window • Uygulama kontrolü (desktop.app) runtime hata noktası çevresi okundu • path=App/KRALIAgentNative/AgentDesktopControl.swift • line=60
+KRALI_LOCAL_STAGE local_agent_dependency_neighborhood_verified • Uygulama kontrolü (desktop.app) runtime dependency neighborhood havuza eklendi • entry=resolveRequestedApplication • candidates=8
+KRALI_LOCAL_STAGE local_agent_dependency_neighborhood_verified • Uygulama kontrolü (desktop.app) runtime dependency neighborhood havuza eklendi • entry=applicationTargetPhrase • candidates=4
+KRALI_LOCAL_STAGE local_agent_root_cause_pool_ready • Uygulama kontrolü (desktop.app) dedupe edilmiş root-cause candidate havuzu hazır • candidates=12
+KRALI_LOCAL_STAGE local_agent_root_cause_pruned • Uygulama kontrolü (desktop.app) deterministic candidate pruning tamamlandı • input=12 • output=4 • top=installedApplicationCandidates:23,bestApplicationCandidate:23,launchServicesApplicationCandidate:21,mergeCandidates:21
+KRALI_LOCAL_STAGE local_agent_root_cause_ranking • Uygulama kontrolü (desktop.app) deterministic pruning sonrası candidate ranking • candidates=4 • rootCauseModel=qwen2.5-coder:14b-instruct
+KRALI_LOCAL_STAGE local_agent_root_cause_ranking_inconclusive • Uygulama kontrolü (desktop.app) root-cause ranking tamamlanamadı • Unterminated string in JSON at position 971 (line 10 column 36)
+Root-cause ranking/verifier mutation target doğrulamadı; güvenli olarak candidate mutation başlatılmadı.
+KRALI_LOCAL_STAGE local_agent_checkpoint_stale • Uygulama kontrolü (desktop.app) checkpoint source provenance eski • recordedHead=302c5e5e885d25702957b346bca110bc832267fd • liveHead=9867dcb3e678cb0eb8494ec5a622b6060ebd0353 • source hedefleri yeniden doğrulanacak
+KRALI_LOCAL_STAGE local_agent_target_found • Uygulama kontrolü (desktop.app) hedef kaynak bulundu • paths=1 • targets=["App/KRALIAgentNative/AgentDesktopControl.swift"]
+KRALI_LOCAL_STAGE local_agent_diagnostic_source_bootstrap • Uygulama kontrolü (desktop.app) runtime hata metninden source bootstrap bulundu • hint=Uygulama bulunamadı • targets=["App/KRALIAgentNative/AgentDesktopControl.swift"]
+KRALI_LOCAL_STAGE local_agent_diagnostic_target_read • Uygulama kontrolü (desktop.app) diagnostic source okundu • root-cause verifier PASS olmadan mutation yetkisi verilmeyecek • path=App/KRALIAgentNative/AgentDesktopControl.swift
+KRALI_LOCAL_STAGE local_agent_diagnostic_error_window • Uygulama kontrolü (desktop.app) runtime hata noktası çevresi okundu • path=App/KRALIAgentNative/AgentDesktopControl.swift • line=60
+KRALI_LOCAL_STAGE local_agent_dependency_neighborhood_verified • Uygulama kontrolü (desktop.app) runtime dependency neighborhood havuza eklendi • entry=resolveRequestedApplication • candidates=8
+KRALI_LOCAL_STAGE local_agent_dependency_neighborhood_verified • Uygulama kontrolü (desktop.app) runtime dependency neighborhood havuza eklendi • entry=applicationTargetPhrase • candidates=4
+KRALI_LOCAL_STAGE local_agent_root_cause_pool_ready • Uygulama kontrolü (desktop.app) dedupe edilmiş root-cause candidate havuzu hazır • candidates=12
+KRALI_LOCAL_STAGE local_agent_root_cause_pruned • Uygulama kontrolü (desktop.app) deterministic candidate pruning tamamlandı • input=12 • output=4 • top=installedApplicationCandidates:23,bestApplicationCandidate:23,launchServicesApplicationCandidate:21,mergeCandidates:21
+KRALI_LOCAL_STAGE local_agent_root_cause_ranking • Uygulama kontrolü (desktop.app) deterministic pruning sonrası candidate ranking • candidates=4 • rootCauseModel=qwen2.5-coder:14b-instruct
+KRALI_LOCAL_STAGE local_agent_root_cause_ranking_inconclusive • Uygulama kontrolü (desktop.app) root-cause ranking tamamlanamadı • Unterminated string in JSON at position 971 (line 10 column 36)
+Root-cause ranking/verifier mutation target doğrulamadı; güvenli olarak candidate mutation başlatılmadı.
+Deleted branch krali-dev-agent/20260922-221536 (was 9867dcb).
 ❌ Native yerel Developer Agent durdu: Root-cause ranking/verifier mutation target doğrulamadı; güvenli olarak candidate mutation başlatılmadı.
