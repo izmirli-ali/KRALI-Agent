@@ -2120,7 +2120,8 @@ async function requestStructuredToolDecision(
   const initialMutation =
     phase === "implementation" &&
     implementationReadCompleted &&
-    !sawMutatingTool;
+    !sawMutatingTool &&
+    !rollbackRepair;
 
   if (
     rollbackRepair ||
