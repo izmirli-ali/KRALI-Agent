@@ -1277,6 +1277,38 @@ function restoreMutationSnapshot(snapshot) {
   }
 }
 
+function isEligibleImplementationTargetPath(value) {
+  const normalized = normalizeRepoRelativePath(value);
+
+  if (
+    !normalized ||
+    normalized === "VERSION" ||
+    normalized.startsWith("Mentor/") ||
+    normalized.startsWith(".git/")
+  ) {
+    return false;
+  }
+
+  const extension = path.extname(normalized).toLowerCase();
+  const implementationExtensions = new Set([
+    ".swift",
+    ".mjs",
+    ".js",
+    ".ts",
+    ".tsx",
+    ".jsx",
+    ".py",
+    ".sh",
+    ".command",
+    ".json",
+    ".yml",
+    ".yaml",
+    ".toml",
+  ]);
+
+  return implementationExtensions.has(extension);
+}
+
 function recordToolEvidence(name, result, args = {}) {
   if (result?.ok && inspectionToolNames.has(name)) {
     const weight = inspectionWeight(name);
@@ -1298,9 +1330,13 @@ function recordToolEvidence(name, result, args = {}) {
           ...new Set(
             matches
               .map((line) =>
-                String(line || "").split(":")[0]
+                normalizeRepoRelativePath(
+                  String(line || "").split(":")[0]
+                )
               )
-              .filter(Boolean)
+              .filter(
+                isEligibleImplementationTargetPath
+              )
           ),
         ].slice(0, 8);
 
@@ -1437,24 +1473,38 @@ function compactControllerEvidence() {
     lastStructuredOutcome?.result?.ok === false &&
     lastStructuredOutcome?.result?.mutation_rolled_back === true;
 
+  const initialMutation =
+    developmentPhase() === "implementation" &&
+    implementationReadCompleted &&
+    !sawMutatingTool;
+
   return {
     implementationSearchCompleted,
     implementationReadCompleted,
     implementationTargetPaths:
       implementationTargetPaths.slice(0, 8),
     rollbackRepair,
+    initialMutation,
     candidateDiff: currentCandidateDiff(
-      rollbackRepair ? 4000 : 12000
+      rollbackRepair
+        ? 4000
+        : initialMutation
+          ? 0
+          : 12000
     ),
     lastVerifiedRead: lastRead
       ? {
           args: truncate(
             lastRead.args || "",
-            1000
+            800
           ),
           result: truncate(
             lastRead.result || "",
-            rollbackRepair ? 6500 : 12000
+            rollbackRepair
+              ? 6500
+              : initialMutation
+                ? 6000
+                : 12000
           ),
         }
       : null,
@@ -1620,7 +1670,16 @@ async function requestStructuredToolDecision(
     lastStructuredOutcome?.result?.ok === false &&
     lastStructuredOutcome?.result?.mutation_rolled_back === true;
 
-  if (exactReplaceFailure || rollbackRepair) {
+  const initialMutation =
+    phase === "implementation" &&
+    implementationReadCompleted &&
+    !sawMutatingTool;
+
+  if (
+    exactReplaceFailure ||
+    rollbackRepair ||
+    initialMutation
+  ) {
     const patchContract = toolContracts.find(
       (tool) => tool.name === "apply_patch"
     );
@@ -1738,9 +1797,10 @@ async function requestStructuredToolDecision(
               recoveryHints: {
                 exactReplaceFailure,
                 rollbackRepair,
+                initialMutation,
                 previousStructuredError: truncate(
                   previousStructuredError,
-                  1200
+                  800
                 ),
               },
               evidence: {
