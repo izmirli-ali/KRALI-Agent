@@ -18,6 +18,22 @@ const appVersion = process.env.KRALI_APP_VERSION || "unknown";
 const runID = process.env.KRALI_RUN_ID || "";
 const checkpointFile =
   process.env.KRALI_CHECKPOINT_FILE || "";
+const runtimeSourceHints = (() => {
+  try {
+    const value = JSON.parse(
+      process.env.KRALI_RUNTIME_SOURCE_HINTS || "[]"
+    );
+
+    return Array.isArray(value)
+      ? value
+          .map((item) => String(item || "").trim())
+          .filter(Boolean)
+          .slice(0, 6)
+      : [];
+  } catch {
+    return [];
+  }
+})();
 const requireChange =
   (process.env.KRALI_REQUIRE_CHANGE || "0") === "1";
 const maxCompletionRejections = Number(
@@ -1372,6 +1388,9 @@ function recordToolEvidence(name, result, args = {}) {
         )
       ) {
         implementationReadCompleted = true;
+        implementationTargetPaths = [
+          normalizeRepoRelativePath(readPath)
+        ];
         stage(
           "local_agent_target_verified",
           gapLabel +
@@ -2307,6 +2326,164 @@ function handoffStructuredCandidateIfReady(
   );
 }
 
+function bootstrapRuntimeFailureSourceEvidence() {
+  if (
+    !requireChange ||
+    implementationSearchCompleted ||
+    runtimeSourceHints.length === 0
+  ) {
+    return false;
+  }
+
+  implementationPhaseAnnounced = true;
+  inspectionToolCalls = Math.max(
+    inspectionToolCalls,
+    maxInspectionTools
+  );
+
+  for (const hint of runtimeSourceHints) {
+    const args = {
+      query: hint,
+      max_results: 40,
+    };
+
+    const result = executeTool(
+      "search_codebase",
+      args
+    );
+
+    if (!result?.ok) {
+      continue;
+    }
+
+    const eligibleMatches = Array.isArray(
+      result.matches
+    )
+      ? result.matches.filter((line) => {
+          const matchPath =
+            normalizeRepoRelativePath(
+              String(line || "").split(":")[0]
+            );
+
+          return isEligibleImplementationTargetPath(
+            matchPath
+          );
+        })
+      : [];
+
+    if (eligibleMatches.length === 0) {
+      continue;
+    }
+
+    result.matches = eligibleMatches;
+    recordToolEvidence(
+      "search_codebase",
+      result,
+      args
+    );
+
+    stage(
+      "local_agent_diagnostic_source_bootstrap",
+      gapLabel +
+        " runtime hata metninden source bootstrap bulundu • hint=" +
+        truncate(hint, 180) +
+        " • targets=" +
+        truncate(
+          JSON.stringify(
+            implementationTargetPaths
+          ),
+          1000
+        )
+    );
+
+    messages.push({
+      role: "user",
+      content: [
+        "KRALI runtime failure source bootstrap gerçek code search kanıtı üretti.",
+        "Hata ipucu: " + hint,
+        "Eşleşen implementation targets: " +
+          JSON.stringify(
+            implementationTargetPaths
+          ),
+        "Genel repo keşfi yapma. Önce bu hata tanımını içeren minimum kaynağı read_file ile doğrula.",
+      ].join("\n"),
+    });
+
+    return true;
+  }
+
+  return false;
+}
+
+async function runRuntimeFailureBootstrapFastPath() {
+  if (!bootstrapRuntimeFailureSourceEvidence()) {
+    return false;
+  }
+
+  const readContinued =
+    await runStructuredContinuation(
+      "Runtime hata metni source içinde deterministik olarak bulundu. Yeni arama yapmadan doğrulanmış target listesinden hata tanımını içeren minimum dosya bölgesini oku.",
+      [
+        "runtime hata tanımının bulunduğu source read_file ile doğrulanmalı",
+      ],
+      "runtime_failure_bootstrap_read"
+    );
+
+  if (
+    !readContinued ||
+    !implementationReadCompleted
+  ) {
+    persistCheckpoint(
+      "runtime_failure_bootstrap_read_incomplete"
+    );
+    return false;
+  }
+
+  for (let attempt = 1; attempt <= 3; attempt++) {
+    const {
+      blockers,
+    } = currentCandidateBlockers();
+
+    const continued =
+      await runStructuredContinuation(
+        attempt === 1
+          ? "Runtime hata tanımının gerçek source bölgesi doğrulandı. Yeni inspection yapmadan bu failure class için minimum generic mutation üret."
+          : "Önceki mutation veya build gerçek tool kanıtıyla başarısız oldu. lastStructuredOutcome ve lastVerifiedRead kanıtına göre aynı başarısız değişikliği tekrarlamadan minimum repair mutation üret.",
+        blockers.length > 0
+          ? blockers
+          : [
+              "doğrulanmış runtime error source sonrası minimum mutation gerekli",
+            ],
+        attempt === 1
+          ? "runtime_failure_bootstrap_mutation"
+          : "runtime_failure_bootstrap_repair_" + attempt
+      );
+
+    if (!continued) {
+      persistCheckpoint(
+        "runtime_failure_bootstrap_controller_unavailable"
+      );
+      return false;
+    }
+
+    if (
+      handoffStructuredCandidateIfReady(
+        attempt === 1
+          ? "runtime_failure_bootstrap"
+          : "runtime_failure_bootstrap_repair_" + attempt
+      )
+    ) {
+      return true;
+    }
+  }
+
+  persistCheckpoint(
+    "runtime_failure_bootstrap_no_candidate"
+  );
+
+  return false;
+}
+
 async function runVerifiedResumeFastPath() {
   if (
     !resumedFromCheckpoint ||
@@ -2425,6 +2602,7 @@ function requestMoreWork(reasons) {
 
 resumeCheckpointContext();
 
+await runRuntimeFailureBootstrapFastPath();
 await runVerifiedResumeFastPath();
 
 stage(
