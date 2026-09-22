@@ -268,6 +268,158 @@ function mutationProblemContext() {
   };
 }
 
+function runtimeDiagnosticTraceObject() {
+  const raw = String(
+    mutationProblemContext()
+      .runtime_diagnostic_trace || ""
+  ).trim();
+
+  if (
+    !raw ||
+    (
+      !raw.startsWith("{") &&
+      !raw.startsWith("[")
+    )
+  ) {
+    return null;
+  }
+
+  try {
+    const parsed = JSON.parse(raw);
+
+    return (
+      parsed &&
+      typeof parsed === "object"
+    )
+      ? parsed
+      : null;
+  } catch {
+    return null;
+  }
+}
+
+function aliasLocalizationFailureEvidence() {
+  const trace =
+    runtimeDiagnosticTraceObject();
+
+  if (
+    !trace ||
+    !Array.isArray(trace.queryTraces)
+  ) {
+    return null;
+  }
+
+  const queryTraces =
+    trace.queryTraces.filter(
+      (item) =>
+        String(
+          item?.failureClass || ""
+        ) ===
+          "candidate_alias_or_localization_gap_possible"
+    );
+
+  if (queryTraces.length === 0) {
+    return null;
+  }
+
+  const counts =
+    trace.candidateCounts &&
+    typeof trace.candidateCounts === "object"
+      ? trace.candidateCounts
+      : {};
+
+  const candidateCount = Math.max(
+    Number(counts.installed || 0),
+    Number(counts.refreshed || 0),
+    Number(counts.nested || 0),
+    Number(counts.expanded || 0)
+  );
+
+  const topCandidates =
+    queryTraces
+      .flatMap((item) =>
+        Array.isArray(item?.topCandidates)
+          ? item.topCandidates
+          : []
+      )
+      .filter(Boolean);
+
+  return {
+    trace,
+    queryTraces,
+    candidateCount,
+    topCandidates,
+    hasPositiveCandidate:
+      topCandidates.some(
+        (item) =>
+          Number(item?.score || 0) > 0
+      ),
+  };
+}
+
+function deterministicRootCauseContradiction(
+  target,
+  diagnosis,
+  verdict = null
+) {
+  const evidence =
+    aliasLocalizationFailureEvidence();
+
+  if (!evidence) {
+    return "";
+  }
+
+  const symbol =
+    String(target?.symbol || "");
+  const explanation = [
+    diagnosis?.root_cause,
+    diagnosis?.strategy,
+    verdict?.reason,
+  ]
+    .filter(Boolean)
+    .join(" ");
+
+  if (
+    /launchservices/i.test(symbol) &&
+    (
+      evidence.candidateCount > 0 ||
+      evidence.hasPositiveCandidate
+    )
+  ) {
+    return (
+      "runtime trace installed/expanded candidate havuzunda pozitif adaylar bulunduğunu ve failure class'ın alias/localization olduğunu kanıtlıyor; LaunchServices miss downstream symptom olarak kalmalı"
+    );
+  }
+
+  if (!verdict) {
+    return "";
+  }
+
+  const aliasEvidenceTerms =
+    /alias|localiz|display\s*name|bundle\s*name|finder|confidence|score|threshold|normaliz/i;
+  const genericAbsenceClaim =
+    /not found|not accessible|cannot find|fails? to (?:find|identify|return)|does not (?:find|identify|return)|returns? nil|missing application/i;
+
+  if (
+    /installedApplicationCandidates|nestedApplicationCandidates|mergeCandidates/i.test(
+      symbol
+    ) &&
+    evidence.hasPositiveCandidate &&
+    genericAbsenceClaim.test(
+      explanation
+    ) &&
+    !aliasEvidenceTerms.test(
+      explanation
+    )
+  ) {
+    return (
+      "runtime trace candidate varlığını kanıtlıyor; verifier generic 'application missing/not returned' açıklamasını alias/localization üretim kanıtı olmadan kabul edemez"
+    );
+  }
+
+  return "";
+}
+
 function safeRelativePath(input = "") {
   const value = String(input || "").trim();
   const candidate = path.resolve(root, value || ".");
@@ -1169,6 +1321,8 @@ let implementationSearchCompleted = false;
 let implementationReadCompleted = false;
 let implementationTargetPaths = [];
 let lastStructuredOutcome = null;
+let lastStructuredDecisionFailure = "";
+let mutationControllerTimeoutCount = 0;
 let lastMutationSnapshot = null;
 let lastMutationFingerprint = "";
 let lastAppliedMutationDecision = null;
@@ -1276,7 +1430,7 @@ function persistCheckpoint(reason = "progress") {
 
   const status = candidateStatus();
   const payload = {
-    version: 6,
+    version: 7,
     baseHead: currentBaseHead(),
     gapLabel,
     reason,
@@ -1290,6 +1444,7 @@ function persistCheckpoint(reason = "progress") {
         ? verifiedMutationSource
         : "",
     rootCauseMutationTargetVerified,
+    mutationControllerTimeoutCount,
     rootCauseNeighborhood:
       rootCauseNeighborhood
         .slice(0, 8)
@@ -1344,7 +1499,7 @@ function loadCheckpoint() {
 
     if (
       !payload ||
-      ![1, 2, 3, 4, 5, 6].includes(Number(payload.version || 0))
+      ![1, 2, 3, 4, 5, 6, 7].includes(Number(payload.version || 0))
     ) {
       return null;
     }
@@ -1551,6 +1706,18 @@ function resumeCheckpointContext() {
             checkpoint.verifiedMutationSource || ""
           )
         : "";
+  }
+
+  if (
+    Number(checkpoint.version || 0) >= 7
+  ) {
+    mutationControllerTimeoutCount =
+      Math.max(
+        0,
+        Number(
+          checkpoint.mutationControllerTimeoutCount || 0
+        )
+      );
   }
 
   if (
@@ -2155,6 +2322,18 @@ function recordToolEvidence(name, result, args = {}) {
 }
 
 function rejectStructuredDecision(reason) {
+  lastStructuredDecisionFailure =
+    String(reason || "");
+
+  if (
+    rootCauseMutationTargetVerified &&
+    /zaman aşımı|timeout/i.test(
+      lastStructuredDecisionFailure
+    )
+  ) {
+    mutationControllerTimeoutCount += 1;
+  }
+
   stage(
     "local_agent_controller_rejected",
     gapLabel +
@@ -2726,8 +2905,14 @@ async function requestStructuredToolDecision(
     fixedReplaceMode
       ? (
           forcedDecisionModel ||
-          mutationModel ||
-          controllerModel
+          (
+            mutationControllerTimeoutCount > 0
+              ? controllerModel
+              : (
+                  mutationModel ||
+                  controllerModel
+                )
+          )
         )
       : controllerModel;
 
@@ -2899,12 +3084,12 @@ async function requestStructuredToolDecision(
                   root_cause:
                     truncate(
                       rootCauseDiagnosis.root_cause || "",
-                      520
+                      360
                     ),
                   strategy:
                     truncate(
                       rootCauseDiagnosis.strategy || "",
-                      520
+                      420
                     ),
                   target_symbol:
                     rootCauseDiagnosis.target_symbol,
@@ -2922,36 +3107,36 @@ async function requestStructuredToolDecision(
                   String(
                     lastFailedReplaceMutation?.new_text || ""
                   ),
-                  2200
+                  1200
                 )
               : undefined,
           problem: {
             objective:
               truncate(
                 mutationProblem.objective || "",
-                260
+                220
               ),
             runtime_failure:
               truncate(
                 mutationProblem.runtime_failure || "",
-                520
+                360
               ),
             failure_reason:
               truncate(
                 mutationProblem.failure_reason || "",
-                420
+                300
               ),
             expected_postcondition:
               truncate(
                 mutationProblem.expected_postcondition || "",
-                420
+                320
               ),
             runtime_diagnostic_trace:
               truncate(
                 mutationProblem.runtime_diagnostic_trace || "",
                 ultraCompactRetry
-                  ? 900
-                  : 1700
+                  ? 650
+                  : 1100
               ),
           },
           failure: {
@@ -2968,7 +3153,16 @@ async function requestStructuredToolDecision(
           },
           evidence: {
             lastVerifiedRead:
-              controllerEvidence.lastVerifiedRead,
+              controllerEvidence.lastVerifiedRead
+                ? {
+                    path:
+                      controllerEvidence.lastVerifiedRead.path,
+                    start_line:
+                      controllerEvidence.lastVerifiedRead.start_line,
+                    end_line:
+                      controllerEvidence.lastVerifiedRead.end_line,
+                  }
+                : null,
             lastStructuredOutcome:
               fixedRepairMode
                 ? controllerEvidence.lastStructuredOutcome
@@ -3032,8 +3226,8 @@ async function requestStructuredToolDecision(
     initialMutation
       ? (
           ultraCompactRetry
-            ? 90000
-            : 70000
+            ? 60000
+            : 50000
         )
       : structuredRequestTimeoutMs;
   const timer = setTimeout(
@@ -3114,7 +3308,11 @@ async function requestStructuredToolDecision(
           temperature: 0,
           num_ctx:
             fixedReplaceMode
-              ? 8192
+              ? (
+                  ultraCompactRetry
+                    ? 4096
+                    : 6144
+                )
               : ultraCompactRetry
                 ? 3072
                 : 4096,
@@ -3122,8 +3320,8 @@ async function requestStructuredToolDecision(
             fixedReplaceMode
               ? (
                   ultraCompactRetry
-                    ? 620
-                    : 760
+                    ? 520
+                    : 640
                 )
               : ultraCompactRetry
                 ? 512
@@ -3135,6 +3333,39 @@ async function requestStructuredToolDecision(
     });
   } catch {
     clearTimeout(timer);
+
+    if (
+      initialMutation &&
+      !ultraCompactRetry &&
+      fixedReplaceMode &&
+      rootCauseMutationTargetVerified &&
+      Boolean(
+        mutationProblem
+          .runtime_diagnostic_trace
+      ) &&
+      decisionModel !== controllerModel &&
+      (
+        hardTimeoutMs -
+        (Date.now() - startedAt)
+      ) > 30000
+    ) {
+      stage(
+        "local_agent_mutation_model_fallback",
+        gapLabel +
+          " verified target + runtime trace mevcut; ilk ağır mutation timeout sonrası aynı modeli tekrar etmeden hızlı fallback • " +
+          decisionModel +
+          " → " +
+          controllerModel
+      );
+
+      return requestStructuredToolDecision(
+        assistantText,
+        blockers,
+        true,
+        validationRetry,
+        controllerModel
+      );
+    }
 
     if (
       initialMutation &&
@@ -3535,6 +3766,11 @@ async function requestStructuredToolDecision(
   }
 
   structuredActions += 1;
+  lastStructuredDecisionFailure = "";
+
+  if (fixedReplaceMode) {
+    mutationControllerTimeoutCount = 0;
+  }
 
   return {
     name,
@@ -4692,47 +4928,149 @@ function definitionEvidenceForSymbol(
 function collectDependencyNeighborhood(
   primary
 ) {
+  const aliasEvidence =
+    aliasLocalizationFailureEvidence();
+  const maxDepth =
+    aliasEvidence ? 2 : 1;
+  const maxRecords =
+    aliasEvidence ? 10 : 8;
   const records = [primary];
   const seen = new Set([
     primary.id,
     primary.symbol,
   ]);
+  const queue = [
+    {
+      record: primary,
+      depth: 0,
+    },
+  ];
 
-  const dependencies =
-    dependencySymbolsFromDefinition(
-      primary.symbol,
-      primary.read_result
-    );
-
-  for (
-    const symbol of dependencies
+  function dependencyPriority(
+    symbol
   ) {
-    if (records.length >= 8) {
-      break;
-    }
+    const value =
+      String(symbol || "");
 
-    if (seen.has(symbol)) {
-      continue;
-    }
-
-    const evidence =
-      definitionEvidenceForSymbol(
-        symbol
-      );
-
-    if (!evidence) {
-      continue;
+    if (
+      /alias|localiz|displayname|bundlename|finder/i.test(
+        value
+      )
+    ) {
+      return 40;
     }
 
     if (
-      seen.has(evidence.id)
+      /score|rank|confidence|decision|normaliz|match/i.test(
+        value
+      )
+    ) {
+      return 30;
+    }
+
+    if (
+      /candidate|installed|merge|nested|resolve|lookup/i.test(
+        value
+      )
+    ) {
+      return 20;
+    }
+
+    return 0;
+  }
+
+  while (
+    queue.length > 0 &&
+    records.length < maxRecords
+  ) {
+    const current =
+      queue.shift();
+
+    if (
+      !current ||
+      current.depth >= maxDepth
     ) {
       continue;
     }
 
-    seen.add(symbol);
-    seen.add(evidence.id);
-    records.push(evidence);
+    let dependencies =
+      dependencySymbolsFromDefinition(
+        current.record.symbol,
+        current.record.read_result
+      );
+
+    if (aliasEvidence) {
+      dependencies =
+        dependencies
+          .map(
+            (symbol, index) => ({
+              symbol,
+              index,
+              priority:
+                dependencyPriority(
+                  symbol
+                ),
+            })
+          )
+          .sort(
+            (left, right) =>
+              (
+                right.priority -
+                left.priority
+              ) ||
+              (
+                left.index -
+                right.index
+              )
+          )
+          .map(
+            (item) => item.symbol
+          );
+    }
+
+    for (
+      const symbol of dependencies
+    ) {
+      if (
+        records.length >= maxRecords
+      ) {
+        break;
+      }
+
+      if (seen.has(symbol)) {
+        continue;
+      }
+
+      const evidence =
+        definitionEvidenceForSymbol(
+          symbol
+        );
+
+      if (!evidence) {
+        continue;
+      }
+
+      if (
+        seen.has(evidence.id)
+      ) {
+        continue;
+      }
+
+      seen.add(symbol);
+      seen.add(evidence.id);
+      records.push(evidence);
+
+      if (
+        current.depth + 1 <
+          maxDepth
+      ) {
+        queue.push({
+          record: evidence,
+          depth:
+            current.depth + 1,
+        });
+      }
+    }
   }
 
   return records;
@@ -4977,6 +5315,24 @@ async function verifyRootCauseTarget(
     return false;
   }
 
+  const deterministicContradiction =
+    deterministicRootCauseContradiction(
+      target,
+      diagnosis
+    );
+
+  if (deterministicContradiction) {
+    stage(
+      "local_agent_root_cause_rejected",
+      gapLabel +
+        " root-cause hypothesis deterministic runtime evidence ile çelişti • target=" +
+        target.symbol +
+        " • reason=" +
+        deterministicContradiction
+    );
+    return false;
+  }
+
   const schema = {
     type: "object",
     additionalProperties: false,
@@ -5168,6 +5524,25 @@ async function verifyRootCauseTarget(
       return false;
     }
 
+    const verdictContradiction =
+      deterministicRootCauseContradiction(
+        target,
+        diagnosis,
+        verdict
+      );
+
+    if (verdictContradiction) {
+      stage(
+        "local_agent_root_cause_rejected",
+        gapLabel +
+          " verifier PASS deterministic runtime evidence ile çelişti • target=" +
+          target.symbol +
+          " • reason=" +
+          verdictContradiction
+      );
+      return false;
+    }
+
     stage(
       "local_agent_root_cause_verified",
       gapLabel +
@@ -5352,17 +5727,31 @@ function deterministicRootCauseScore(
     )
   ) {
     if (
-      /alias|localiz|displayname|bundlename/i.test(
+      /alias|localiz|displayname|bundlename|finder/i.test(
         symbol
       )
     ) {
-      score += 14;
+      score += 20;
     } else if (
-      /candidate|installed|merge/i.test(
+      /score|rank|confidence|decision|normaliz|match/i.test(
         symbol
       )
     ) {
-      score += 4;
+      score += 12;
+    } else if (
+      /candidate|installed|merge|nested/i.test(
+        symbol
+      )
+    ) {
+      score += 2;
+    }
+
+    if (
+      /localizedBundleAliases|bestAliasScore|isConfidentAliasMatch/i.test(
+        source
+      )
+    ) {
+      score += 8;
     }
 
     if (
@@ -5370,7 +5759,7 @@ function deterministicRootCauseScore(
         symbol
       )
     ) {
-      score -= 5;
+      score -= 12;
     }
   }
 
@@ -6302,6 +6691,22 @@ async function runRuntimeFailureBootstrapFastPath() {
       );
 
     if (!continued) {
+      if (
+        rootCauseMutationTargetVerified &&
+        /zaman aşımı|timeout/i.test(
+          lastStructuredDecisionFailure
+        )
+      ) {
+        persistCheckpoint(
+          "verified_mutation_controller_timeout"
+        );
+        fail(
+          "Doğrulanmış root-cause checkpoint'i korundu; mutation controller timeout sonrası aynı diagnosis yeniden başlatılmadı.",
+          25,
+          "local_agent_mutation_controller_timeout"
+        );
+      }
+
       break;
     }
 
