@@ -109,6 +109,145 @@ if (!worktree || !promptFile || !model) {
 const root = fs.realpathSync(worktree);
 const prompt = fs.readFileSync(promptFile, "utf8");
 
+function firstPromptValue(
+  text,
+  labels
+) {
+  const lines =
+    String(text || "").split("\n");
+
+  for (const label of labels) {
+    const prefix =
+      String(label || "") + ":";
+
+    for (
+      let index = 0;
+      index < lines.length;
+      index += 1
+    ) {
+      const line =
+        String(lines[index] || "");
+      const trimmed = line.trim();
+
+      if (
+        trimmed.toLocaleLowerCase("tr-TR")
+          .startsWith(
+            prefix.toLocaleLowerCase("tr-TR")
+          )
+      ) {
+        const inline =
+          trimmed.slice(prefix.length)
+            .trim();
+
+        if (inline) {
+          return inline;
+        }
+
+        for (
+          let next = index + 1;
+          next < Math.min(
+            lines.length,
+            index + 8
+          );
+          next += 1
+        ) {
+          const candidate =
+            String(
+              lines[next] || ""
+            ).trim();
+
+          if (
+            candidate &&
+            !/^[A-Za-zÇĞİÖŞÜçğıöşü][^:]{0,80}:$/.test(
+              candidate
+            )
+          ) {
+            return candidate.replace(
+              /^\d+\.\s*/,
+              ""
+            );
+          }
+        }
+      }
+    }
+  }
+
+  return "";
+}
+
+function runtimeFailureFromPrompt(
+  text
+) {
+  const lines =
+    String(text || "").split("\n");
+
+  const candidates =
+    lines
+      .map((line) =>
+        String(line || "").trim()
+      )
+      .filter((line) =>
+        /başarısız\s*:|bulunamadı|runtime capability gap|postcondition|\bfailed\b|\berror\b/i.test(
+          line
+        )
+      )
+      .filter((line) =>
+        !/^[-*]\s/.test(line)
+      );
+
+  return (
+    candidates.find((line) =>
+      /başarısız\s*:|bulunamadı/i.test(
+        line
+      )
+    ) ||
+    candidates[0] ||
+    runtimeSourceHints[0] ||
+    ""
+  );
+}
+
+function mutationProblemContext() {
+  return {
+    objective: truncate(
+      firstPromptValue(
+        prompt,
+        [
+          "Kullanıcı hedefi",
+          "Bu öğrenme işine kanıt sağlayan kullanıcı hedefleri"
+        ]
+      ),
+      420
+    ),
+    runtime_failure: truncate(
+      runtimeFailureFromPrompt(
+        prompt
+      ),
+      520
+    ),
+    failure_reason: truncate(
+      firstPromptValue(
+        prompt,
+        [
+          "Sorun",
+          "Neden"
+        ]
+      ),
+      520
+    ),
+    expected_postcondition: truncate(
+      firstPromptValue(
+        prompt,
+        [
+          "Kabul kriteri",
+          "Araştırma hedefi"
+        ]
+      ),
+      620
+    ),
+  };
+}
+
 function safeRelativePath(input = "") {
   const value = String(input || "").trim();
   const candidate = path.resolve(root, value || ".");
@@ -2211,6 +2350,9 @@ async function requestStructuredToolDecision(
           "old_text must be copied verbatim from lastVerifiedRead.content.",
           "Use a unique multi-line source block; do not invent text outside the visible source.",
           "new_text must be a meaningful generic repair for the runtime failure.",
+          "Use problem.objective, problem.runtime_failure, problem.failure_reason, and problem.expected_postcondition to infer the missing behavior. The source may be syntactically valid but behaviorally incomplete.",
+          "Returning unchanged source is invalid. old_text and new_text must differ in behaviorally meaningful code.",
+          "Do not hard-code the concrete app, brand, filename, or exact user phrase from problem evidence; generalize the fix to the capability class.",
           "Do not include path, tool name, reason, markdown, prose, or code fences.",
           "If build failure evidence exists, repair that failure against the clean verified source and do not repeat the failed diff.",
         ].join("\n")
@@ -2264,6 +2406,8 @@ async function requestStructuredToolDecision(
       ? {
           mode: "exact_replace",
           target: fixedReplacePath,
+          problem:
+            mutationProblemContext(),
           failure: {
             blockers: effectiveBlockers,
             assistantText: truncate(
@@ -2305,6 +2449,15 @@ async function requestStructuredToolDecision(
       (fixedReplaceMode
         ? "exact_replace"
         : "general") +
+      " • problem=" +
+      (fixedReplaceMode
+        ? (
+            mutationProblemContext()
+              .runtime_failure
+              ? "runtime_evidence"
+              : "missing"
+          )
+        : "n/a") +
       " • chars=" +
       controllerInputChars +
       " • controller=" +
