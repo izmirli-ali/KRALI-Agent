@@ -292,6 +292,11 @@ const candidate = {
     candidate_diff_sha256: diffHash,
     raw_patch_retained: false,
   },
+  activation: {
+    candidate_code_active: false,
+    activated_at: null,
+    active_source_commit: null,
+  },
   validation: {
     build_passed: true,
     regression_passed: true,
