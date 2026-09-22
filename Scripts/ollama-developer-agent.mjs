@@ -1161,6 +1161,7 @@ let runtimeBootstrapTarget = null;
 let rootCauseDiagnosis = null;
 let rootCauseNeighborhood = [];
 let rootCausePrimaryID = "";
+let strategyEscalationCount = 0;
 
 const inspectionToolNames = new Set([
   "list_files",
@@ -1255,6 +1256,23 @@ function persistCheckpoint(reason = "progress") {
     architectModel,
     controllerModel,
     rootCauseDiagnosis,
+    rootCausePrimaryID,
+    rootCauseNeighborhood:
+      rootCauseNeighborhood
+        .slice(0, 8)
+        .map((item) => ({
+          id: item.id,
+          symbol: item.symbol,
+          path: item.path,
+          line: item.line,
+        })),
+    strategyEscalationCount,
+    failedMutationFingerprints:
+      [...failedMutationFingerprints]
+        .slice(-12),
+    failedDiffFingerprints:
+      [...failedDiffFingerprints]
+        .slice(-12),
     phase: developmentPhase(),
     inspectionToolCalls,
     implementationPhaseAnnounced,
@@ -1397,6 +1415,80 @@ function resumeCheckpointContext() {
   if (evidence.length === 0) return;
 
   checkpointEvidence = evidence;
+
+  if (
+    Number(checkpoint.version || 0) >= 5
+  ) {
+    for (
+      const value of
+        Array.isArray(
+          checkpoint.failedMutationFingerprints
+        )
+          ? checkpoint.failedMutationFingerprints
+          : []
+    ) {
+      if (value) {
+        failedMutationFingerprints.add(
+          String(value)
+        );
+      }
+    }
+
+    for (
+      const value of
+        Array.isArray(
+          checkpoint.failedDiffFingerprints
+        )
+          ? checkpoint.failedDiffFingerprints
+          : []
+    ) {
+      if (value) {
+        failedDiffFingerprints.add(
+          String(value)
+        );
+      }
+    }
+
+    strategyEscalationCount =
+      Math.max(
+        0,
+        Number(
+          checkpoint.strategyEscalationCount || 0
+        )
+      );
+
+    rootCausePrimaryID =
+      String(
+        checkpoint.rootCausePrimaryID || ""
+      );
+
+    const neighborhoodMetadata =
+      Array.isArray(
+        checkpoint.rootCauseNeighborhood
+      )
+        ? checkpoint.rootCauseNeighborhood
+        : [];
+
+    rootCauseNeighborhood =
+      neighborhoodMetadata
+        .map((item) => {
+          const symbol =
+            String(item?.symbol || "");
+
+          if (!symbol) {
+            return null;
+          }
+
+          return (
+            definitionEvidenceForSymbol(
+              symbol
+            ) ||
+            null
+          );
+        })
+        .filter(Boolean)
+        .slice(0, 8);
+  }
 
   if (
     Number(checkpoint.version || 0) >= 5 &&
@@ -4752,6 +4844,17 @@ async function resolveRuntimeFailureDependency(
 }
 async function reconsiderRootCauseAfterFailedRepairs() {
   if (
+    strategyEscalationCount >= 1
+  ) {
+    stage(
+      "local_agent_strategy_escalation_inconclusive",
+      gapLabel +
+        " aynı failure class için architect escalation bütçesi doldu • yeni mutation yapılmayacak"
+    );
+    return false;
+  }
+
+  if (
     rootCauseNeighborhood.length === 0 ||
     !rootCauseDiagnosis
   ) {
@@ -4877,6 +4980,8 @@ async function reconsiderRootCauseAfterFailedRepairs() {
   sawMutatingTool = false;
   sawGitDiff = false;
   buildCheckPassed = false;
+
+  strategyEscalationCount += 1;
 
   stage(
     "local_agent_strategy_escalated",
