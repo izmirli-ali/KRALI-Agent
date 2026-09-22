@@ -53,13 +53,23 @@ else
     echo "1/2  İkon scripti yok; asset hazırlığı atlandı."
 fi
 
-echo "2/2  Uygulama derleniyor (kurulum yapılmaz)..."
-rm -rf "$BUILD_DIR"
+echo "2/2  Uygulama incremental derleniyor (kurulum yapılmaz)..."
 
 if xcodebuild     -project "$PROJECT"     -scheme "$SCHEME"     -configuration Debug     -derivedDataPath "$BUILD_DIR"     -allowProvisioningUpdates     build
 then
     echo ""
     echo "✅ Build check başarılı."
+    exit 0
+fi
+
+echo ""
+echo "⚠️ Incremental build check başarısız; temiz DerivedData ile bir kez tekrar deneniyor..."
+rm -rf "$BUILD_DIR"
+
+if xcodebuild     -project "$PROJECT"     -scheme "$SCHEME"     -configuration Debug     -derivedDataPath "$BUILD_DIR"     -allowProvisioningUpdates     build
+then
+    echo ""
+    echo "✅ Temiz build check başarılı."
     exit 0
 fi
 
