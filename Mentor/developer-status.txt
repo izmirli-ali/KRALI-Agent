@@ -1,1 +1,1 @@
-recovered_candidate_build_failed|Candidate repair sınırı doldu; branch korundu ve main değiştirilmedi|krali-dev-agent/20260922-214839|/Users/medusa/Developer/KRALI-Agent-Dev-20260922-214839|@meta|app=0.10.3|at=1790103633|run=20260922-214839
+local_agent_root_cause_gate_blocked|Root-cause ranking/verifier mutation target doğrulamadı; güvenli olarak candidate mutation başlatılmadı.|krali-dev-agent/20260922-220738|/Users/medusa/Developer/KRALI-Agent-Dev-20260922-220738|@meta|app=0.10.4|at=1790104129|run=20260922-220738
