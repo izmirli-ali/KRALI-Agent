@@ -1096,7 +1096,7 @@ if [ "$PROVIDER" = "ollama" ] &&
     KRALI_LOCAL_AGENT_MAX_STRUCTURED_ACTIONS="$([ "$LEARNING_PATH" = "primitivePatch" ] && echo 6 || echo 8)" \
     KRALI_LOCAL_AGENT_MAX_INSPECTIONS="$([ "$LEARNING_PATH" = "primitivePatch" ] && echo 4 || echo 6)" \
     KRALI_LOCAL_AGENT_MAX_ITERATIONS="$([ "$LEARNING_PATH" = "primitivePatch" ] && echo 10 || echo 16)" \
-    KRALI_LOCAL_AGENT_TIMEOUT_MS="$([ "$LEARNING_PATH" = "primitivePatch" ] && echo 180000 || echo 300000)" \
+    KRALI_LOCAL_AGENT_TIMEOUT_MS="$([ "$LEARNING_PATH" = "primitivePatch" ] && echo 300000 || echo 300000)" \
     KRALI_LOCAL_AGENT_REQUEST_TIMEOUT_MS="$([ "$LEARNING_PATH" = "primitivePatch" ] && echo 45000 || echo 60000)" \
     KRALI_LOCAL_AGENT_STRUCTURED_TIMEOUT_MS="$([ "$LEARNING_PATH" = "primitivePatch" ] && echo 90000 || echo 60000)" \
     "$NODE_BIN" "$ROOT/Scripts/ollama-developer-agent.mjs" \
