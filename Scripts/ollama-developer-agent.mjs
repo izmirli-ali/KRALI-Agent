@@ -1179,6 +1179,7 @@ let runtimeBootstrapTarget = null;
 let rootCauseDiagnosis = null;
 let rootCauseNeighborhood = [];
 let rootCausePrimaryID = "";
+let verifiedMutationSource = "";
 let rootCauseMutationTargetVerified =
   !requireRootCauseGate;
 let strategyEscalationCount = 0;
@@ -1284,6 +1285,10 @@ function persistCheckpoint(reason = "progress") {
     controllerModel,
     rootCauseDiagnosis,
     rootCausePrimaryID,
+    verifiedMutationSource:
+      rootCauseMutationTargetVerified
+        ? verifiedMutationSource
+        : "",
     rootCauseMutationTargetVerified,
     rootCauseNeighborhood:
       rootCauseNeighborhood
@@ -1413,6 +1418,7 @@ function resumeCheckpointContext() {
     implementationSearchCompleted = false;
     implementationReadCompleted = false;
     implementationTargetPaths = [];
+    verifiedMutationSource = "";
     rootCauseMutationTargetVerified =
       !requireRootCauseGate;
     sawMutatingTool = false;
@@ -1538,6 +1544,13 @@ function resumeCheckpointContext() {
       requireRootCauseGate
         ? checkpoint.rootCauseMutationTargetVerified === true
         : true;
+
+    verifiedMutationSource =
+      rootCauseMutationTargetVerified
+        ? String(
+            checkpoint.verifiedMutationSource || ""
+          )
+        : "";
   }
 
   if (
@@ -2586,6 +2599,52 @@ async function prepareDecisionModel(
   }
 }
 
+function verifiedInitialMutationOldText() {
+  if (
+    !rootCauseMutationTargetVerified ||
+    !verifiedMutationSource ||
+    implementationTargetPaths.length !== 1
+  ) {
+    return "";
+  }
+
+  const targetPath =
+    normalizeRepoRelativePath(
+      implementationTargetPaths[0]
+    );
+
+  try {
+    const { absolute } =
+      safeRelativePath(targetPath);
+    const source =
+      fs.readFileSync(
+        absolute,
+        "utf8"
+      );
+
+    const occurrences =
+      source.split(
+        verifiedMutationSource
+      ).length - 1;
+
+    if (occurrences !== 1) {
+      stage(
+        "local_agent_verified_anchor_inconclusive",
+        gapLabel +
+          " verified source exact anchor benzersiz değil • occurrences=" +
+          occurrences +
+          " • path=" +
+          targetPath
+      );
+      return "";
+    }
+
+    return verifiedMutationSource;
+  } catch {
+    return "";
+  }
+}
+
 async function requestStructuredToolDecision(
   assistantText,
   blockers,
@@ -2690,39 +2749,36 @@ async function requestStructuredToolDecision(
         )
       : "";
 
+  const fixedInitialOldText =
+    fixedReplaceMode &&
+    !fixedRepairMode
+      ? verifiedInitialMutationOldText()
+      : "";
+
+  if (
+    fixedReplaceMode &&
+    !fixedRepairMode &&
+    !fixedInitialOldText
+  ) {
+    return rejectStructuredDecision(
+      "verified mutation source exact anchor üretilemedi"
+    );
+  }
+
   const decisionFormat = fixedReplaceMode
-    ? fixedRepairMode
-      ? {
-          type: "object",
-          additionalProperties: false,
-          required: [
-            "new_text",
-          ],
-          properties: {
-            new_text: {
-              type: "string",
-              minLength: 1,
-            },
+    ? {
+        type: "object",
+        additionalProperties: false,
+        required: [
+          "new_text",
+        ],
+        properties: {
+          new_text: {
+            type: "string",
+            minLength: 1,
           },
-        }
-      : {
-          type: "object",
-          additionalProperties: false,
-          required: [
-            "old_text",
-            "new_text",
-          ],
-          properties: {
-            old_text: {
-              type: "string",
-              minLength: 80,
-            },
-            new_text: {
-              type: "string",
-              minLength: 1,
-            },
-          },
-        }
+        },
+      }
     : {
     type: "object",
     additionalProperties: false,
@@ -2768,18 +2824,16 @@ async function requestStructuredToolDecision(
         : [
             "You are KRALI Exact Mutation Architect.",
             "Return JSON matching the supplied schema and nothing else.",
-            "The target path and tool are already fixed by KRALI.",
-            "Your only job is to choose one exact old_text block and its corrected new_text.",
-            "old_text must be copied verbatim from lastVerifiedRead.content.",
-            "Use a unique multi-line source block; do not invent text outside the visible source.",
-            "new_text must be a meaningful generic repair for the runtime failure.",
+            "The target path, tool, and exact old_text are already fixed by KRALI.",
+            "Return only the corrected new_text replacement for fixed_old_text.",
+            "Do not choose, shorten, expand, or invent an old_text anchor.",
+            "new_text must replace the complete verified function/source definition and remain syntactically complete.",
             "Use root_cause_diagnosis as the architect-selected explanation and strategy. Do not reselect a different source target.",
-            "Use problem.objective, problem.runtime_failure, problem.failure_reason, and problem.expected_postcondition to infer the missing behavior. The source may be syntactically valid but behaviorally incomplete.",
-            "Returning unchanged source is invalid. old_text and new_text must differ in behaviorally meaningful code.",
+            "Use problem.objective, problem.runtime_failure, problem.failure_reason, problem.expected_postcondition, and problem.runtime_diagnostic_trace to infer the missing behavior.",
+            "Returning unchanged source is invalid. new_text must differ in behaviorally meaningful code.",
             "Do not hard-code the concrete app, brand, filename, or exact user phrase from problem evidence; generalize the fix to the capability class.",
-            "Do not include path, tool name, reason, markdown, prose, or code fences.",
-            "If build failure evidence exists, repair that failure against the clean verified source and do not repeat the failed diff.",
-            "failedMutationFingerprints and failedDiffFingerprints identify strategies already proven to fail. Produce a materially different semantic change, not a cosmetically different anchor for the same failed edit.",
+            "Do not include path, tool name, old_text, reason, markdown, prose, or code fences.",
+            "failedMutationFingerprints and failedDiffFingerprints identify strategies already proven to fail. Produce a materially different semantic change.",
           ].join("\n")
       : [
           "You are KRALI Tool Continuation Controller.",
@@ -2861,7 +2915,7 @@ async function requestStructuredToolDecision(
           fixed_old_text:
             fixedRepairMode
               ? fixedRepairOldText
-              : undefined,
+              : fixedInitialOldText,
           previous_failed_new_text:
             fixedRepairMode
               ? truncate(
@@ -3208,9 +3262,7 @@ async function requestStructuredToolDecision(
           old_text:
             fixedRepairMode
               ? fixedRepairOldText
-              : String(
-                  decision?.old_text || ""
-                ),
+              : fixedInitialOldText,
           new_text:
             String(
               decision?.new_text ?? ""
@@ -3338,7 +3390,13 @@ async function requestStructuredToolDecision(
         ultraCompactRetry
       )?.lastVerifiedRead?.content || "";
 
+    const deterministicVerifiedAnchor =
+      fixedReplaceMode &&
+      !fixedRepairMode &&
+      oldText === fixedInitialOldText;
+
     const copiedFromVerifiedRead =
+      deterministicVerifiedAnchor ||
       Boolean(
         oldText &&
         verifiedRead.includes(
@@ -5809,6 +5867,8 @@ async function resolveRuntimeFailureDependency(
       continue;
     }
 
+    verifiedMutationSource =
+      String(target.source || "");
     rootCauseMutationTargetVerified =
       true;
     implementationSearchCompleted =
@@ -6014,6 +6074,8 @@ async function reconsiderRootCauseAfterFailedRepairs() {
     return false;
   }
 
+  verifiedMutationSource =
+    String(target.source || "");
   rootCauseMutationTargetVerified =
     true;
   implementationSearchCompleted =
