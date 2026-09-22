@@ -147,6 +147,46 @@ function truncate(value, limit = 16000) {
     : text.slice(0, limit) + "\n…[truncated]";
 }
 
+function clipExactSource(
+  value,
+  limit = 16000
+) {
+  const text = String(value ?? "");
+
+  if (text.length <= limit) {
+    return text;
+  }
+
+  const lines = text.split("\n");
+  const selected = [];
+  let used = 0;
+
+  for (const line of lines) {
+    const cost =
+      line.length +
+      (selected.length > 0 ? 1 : 0);
+
+    if (
+      selected.length > 0 &&
+      used + cost > limit
+    ) {
+      break;
+    }
+
+    if (
+      selected.length === 0 &&
+      cost > limit
+    ) {
+      return "";
+    }
+
+    selected.push(line);
+    used += cost;
+  }
+
+  return selected.join("\n");
+}
+
 function runGit(args, options = {}) {
   const result = spawnSync(
     "/usr/bin/git",
@@ -324,7 +364,10 @@ function executeTool(name, args = {}) {
         start_line: start,
         end_line: end,
         total_lines: lines.length,
-        content: truncate(content, 24000),
+        content: clipExactSource(
+          content,
+          24000
+        ),
       };
     }
 
@@ -863,7 +906,7 @@ function recordCheckpointEvidence(name, args, result) {
         start_line: result?.start_line ?? null,
         end_line: result?.end_line ?? null,
         total_lines: result?.total_lines ?? null,
-        content: truncate(
+        content: clipExactSource(
           String(result?.content || ""),
           14000
         ),
@@ -1625,7 +1668,7 @@ function compactControllerEvidence(
             parsedReadResult?.end_line ??
             parsedReadArgs?.end_line ??
             null,
-          content: truncate(
+          content: clipExactSource(
             exactSourceContent,
             ultraCompact
               ? 2200
@@ -1973,7 +2016,7 @@ async function requestStructuredToolDecision(
               "Respect the supplied development phase and available tool contracts.",
               "During inspection, select the minimum real inspection tool needed.",
               "During implementation, obey the supplied tool contracts exactly. If only mutation tools are supplied, choose a minimal mutation tool now; do not answer with prose.",
-              "lastVerifiedRead.content is exact source text with display line-number prefixes already removed. For replace_text, copy old_text exactly from lastVerifiedRead.content; never invent an old_text phrase from assistantText, blockers, or prose.",
+              "lastVerifiedRead.content contains only exact source characters copied from disk; it never contains truncation markers or synthetic suffixes. For replace_text, copy old_text exactly from this source window; never invent or extend beyond the visible source.",
               "A replace_text old_text must be a sufficiently long unique source block, preferably at least 3 complete lines. Never use a short identifier fragment, partial token, prefix completion, or typo-like replacement.",
               "new_text must be a meaningful logic change, not merely completion of a truncated identifier that already exists in source.",
               "If lastStructuredOutcome contains a failed real tool result, repair that exact failure with the next minimal mutation instead of repeating the same arguments.",
@@ -3123,12 +3166,9 @@ function resolveRuntimeFailureDependency(
     const readArgs = {
       path: definitionPath,
       start_line:
-        Math.max(
-          1,
-          definitionLine - 24
-        ),
+        definitionLine,
       end_line:
-        definitionLine + 180,
+        definitionLine + 110,
     };
 
     const readResult =
