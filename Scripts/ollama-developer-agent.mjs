@@ -2364,12 +2364,12 @@ function compactControllerEvidence(
           content: clipExactSource(
             exactSourceContent,
             ultraCompact
-              ? 2200
+              ? 1800
               : rollbackRepair
-                ? 6200
+                ? 3200
                 : initialMutation
-                  ? 5200
-                  : 10000
+                  ? 2800
+                  : 7000
           ),
         }
       : null,
@@ -2387,19 +2387,19 @@ function compactControllerEvidence(
                     Array.isArray(
                       lastStructuredOutcome.result?.compiler_errors
                     )
-                      ? lastStructuredOutcome.result.compiler_errors.slice(-20)
+                      ? lastStructuredOutcome.result.compiler_errors.slice(-10)
                       : [],
                   output_tail: truncate(
                     lastStructuredOutcome.result?.output_tail || "",
                     ultraCompact
-                      ? 1800
-                      : 3200
+                      ? 1000
+                      : 1800
                   ),
                   failed_candidate_diff: truncate(
                     lastStructuredOutcome.result?.failed_candidate_diff || "",
                     ultraCompact
-                      ? 2200
-                      : 4200
+                      ? 1400
+                      : 2400
                   ),
                   mutation_rolled_back: true,
                 },
@@ -2771,6 +2771,9 @@ async function requestStructuredToolDecision(
         )
       );
 
+  const mutationProblem =
+    mutationProblemContext();
+
   const fixedReplacePayload =
     fixedReplaceMode
       ? {
@@ -2780,38 +2783,78 @@ async function requestStructuredToolDecision(
               : "exact_replace",
           target: fixedReplacePath,
           root_cause_diagnosis:
-            rootCauseDiagnosis,
+            rootCauseDiagnosis
+              ? {
+                  root_cause:
+                    truncate(
+                      rootCauseDiagnosis.root_cause || "",
+                      520
+                    ),
+                  strategy:
+                    truncate(
+                      rootCauseDiagnosis.strategy || "",
+                      520
+                    ),
+                  target_symbol:
+                    rootCauseDiagnosis.target_symbol,
+                  confidence:
+                    rootCauseDiagnosis.confidence,
+                }
+              : null,
           fixed_old_text:
             fixedRepairMode
               ? fixedRepairOldText
               : undefined,
           previous_failed_new_text:
             fixedRepairMode
-              ? String(
-                  lastFailedReplaceMutation?.new_text || ""
+              ? truncate(
+                  String(
+                    lastFailedReplaceMutation?.new_text || ""
+                  ),
+                  2200
                 )
               : undefined,
-          problem:
-            mutationProblemContext(),
+          problem: {
+            objective:
+              truncate(
+                mutationProblem.objective || "",
+                260
+              ),
+            runtime_failure:
+              truncate(
+                mutationProblem.runtime_failure || "",
+                520
+              ),
+            failure_reason:
+              truncate(
+                mutationProblem.failure_reason || "",
+                420
+              ),
+            expected_postcondition:
+              truncate(
+                mutationProblem.expected_postcondition || "",
+                420
+              ),
+          },
           failure: {
-            blockers: effectiveBlockers,
-            assistantText: truncate(
-              assistantText || "",
-              ultraCompactRetry
-                ? 220
-                : 420
-            ),
+            blockers:
+              effectiveBlockers.slice(0, 3),
             rollbackRepair,
-            previousStructuredError: truncate(
-              previousStructuredError,
-              500
-            ),
+            previousStructuredError:
+              fixedRepairMode
+                ? truncate(
+                    previousStructuredError,
+                    320
+                  )
+                : "",
           },
           evidence: {
             lastVerifiedRead:
               controllerEvidence.lastVerifiedRead,
             lastStructuredOutcome:
-              controllerEvidence.lastStructuredOutcome,
+              fixedRepairMode
+                ? controllerEvidence.lastStructuredOutcome
+                : null,
             failedMutationFingerprints:
               controllerEvidence.failedMutationFingerprints,
             failedDiffFingerprints:
