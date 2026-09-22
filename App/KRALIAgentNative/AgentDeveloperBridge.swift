@@ -446,6 +446,7 @@ struct DeveloperAgentStatus: Hashable {
             "setup_cline_auth",
             "waiting_cline_auth",
             "setup_local_ai",
+            "local_ai_upgrade_required",
             "local_storage_low"
         ].contains(state)
     }
