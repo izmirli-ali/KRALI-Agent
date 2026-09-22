@@ -181,6 +181,20 @@ Varsayılan provider/model `cline + nvidia/nemotron-3.5-lightning` olarak sabitl
 
 **v0.7.23 Developer Agent fast diagnostic gate + live progress:** Developer Agent artık her tıklamada doğrudan modele gitmez. Yerel `training-latest.json`, `live-eval-latest.json` ve `latest.json` raporları mevcut `VERSION` ile karşılaştırılır. Training Lab ve Live Research Eval güncel sürümde tamamen yeşilse ve güncel mentor trace ek müdahale gerektirmiyorsa Cline çağrısı atlanır; bu hem ChatGPT kullanım limitini hem bekleme süresini korur. Gerçek bir failure varsa Cline çalışır; UI yaklaşık 700 ms aralıkla status dosyasını okuyarak hazırlık, diagnostic kontrol, model çalışması ve build doğrulama aşamalarını canlı gösterir. Cline turu `medium` thinking ve 900 saniye timeout ile sınırlandırılır.
 
+### 0.10.7 — Runtime resolver observability + bounded mutation fallback
+
+0.10.6 ranking/verifier gate korunur; kaynak koddan tahmin etmek yerine gerçek resolver çalışmasının kanıtı Developer Agent'a taşınır.
+
+- `desktop.app` uygulama çözümlemesi tüm güvenli yolları tüketip başarısız olduğunda tek bir overwrite edilen `application-resolution-latest.json` runtime trace üretilir.
+- Trace; gerçek query varyantlarını, normalize query'yi, LaunchServices sonucunu, cache/installed/refreshed/nested/expanded candidate sayılarını, en yüksek fuzzy adayları, skorları, alias örneklerini ve reddedilme nedenini içerir.
+- Trace uygulama/marka/test adına özel hard-code içermez ve kalıcı history üretmez; son diagnostic evidence olarak overwrite edilir.
+- Developer Agent yalnız capability `desktop.app` olduğunda ve trace.requestedText güncel Mentor userInput ile birebir eşleştiğinde bu kanıtı prompt'a alır. Stale trace başka göreve taşınmaz.
+- Runtime resolver trace root-cause ranker, hypothesis verifier ve exact mutation controller'ın evidence payload'ına aktarılır.
+- Verified mutation target + gerçek runtime trace mevcutken Devstral exact mutation çağrısı ve compact retry ikisi de timeout olursa yalnız bir kez hızlı controller modeline exact mutation fallback yapılabilir.
+- Fallback target seçemez; target/path önceki ranking + verifier proof ile sabittir. Aynı replace_text doğrulama, diff fingerprint, build, rollback ve repair kuralları geçerlidir.
+- Model fallback zinciri yoktur: tek ağır model + tek hızlı fallback sonrası başarısızlıkta sistem durur.
+- Mentor sync resolver trace dosyasını da taşır; dış inceleme aynı runtime evidence'i görebilir.
+
 ### 0.10.6 — Resilient structured ranking delivery
 
 0.10.5 deterministic pruning ve 0.10.4 mutation gate korunur; yalnız root-cause ranking JSON teslimi sağlamlaştırılır.
