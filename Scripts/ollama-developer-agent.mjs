@@ -1148,6 +1148,100 @@ function rejectStructuredDecision(reason) {
   return null;
 }
 
+function compactControllerEvidence() {
+  const lastRead = [...checkpointEvidence]
+    .reverse()
+    .find(
+      (item) =>
+        item &&
+        item.tool === "read_file"
+    );
+
+  return {
+    implementationSearchCompleted,
+    implementationReadCompleted,
+    implementationTargetPaths:
+      implementationTargetPaths.slice(0, 8),
+    lastVerifiedRead: lastRead
+      ? {
+          args: truncate(
+            lastRead.args || "",
+            1200
+          ),
+          result: truncate(
+            lastRead.result || "",
+            12000
+          ),
+        }
+      : null,
+  };
+}
+
+async function releasePrimaryModelForController() {
+  if (
+    !model ||
+    !controllerModel ||
+    model === controllerModel
+  ) {
+    return true;
+  }
+
+  const controller = new AbortController();
+  const timer = setTimeout(
+    () => controller.abort(),
+    10000
+  );
+
+  try {
+    const response = await fetch(
+      baseUrl + "/api/chat",
+      {
+        method: "POST",
+        headers: {
+          "content-type": "application/json",
+        },
+        signal: controller.signal,
+        body: JSON.stringify({
+          model,
+          messages: [],
+          stream: false,
+          keep_alive: 0,
+        }),
+      }
+    );
+
+    clearTimeout(timer);
+
+    if (!response.ok) {
+      stage(
+        "local_agent_controller_preparing",
+        gapLabel +
+          " ana model belleği boşaltılamadı; controller yine denenecek • HTTP " +
+          response.status
+      );
+      return false;
+    }
+
+    stage(
+      "local_agent_controller_preparing",
+      gapLabel +
+        " ana model belleği controller için boşaltıldı • " +
+        model +
+        " → " +
+        controllerModel
+    );
+    return true;
+  } catch {
+    clearTimeout(timer);
+    stage(
+      "local_agent_controller_preparing",
+      gapLabel +
+        " ana model bellek bırakma isteği zaman aşımına uğradı; controller yine denenecek"
+    );
+    return false;
+  }
+}
+
 async function requestStructuredToolDecision(
   assistantText,
   blockers
@@ -1167,18 +1261,26 @@ async function requestStructuredToolDecision(
       parameters: tool.function.parameters,
     }));
 
-  const recentContext = messages
-    .slice(-8)
-    .map((item) => ({
-      role: item.role,
-      name: item.name || item.tool_name || "",
-      content: truncate(
-        typeof item.content === "string"
-          ? item.content
-          : JSON.stringify(item.content ?? ""),
-        3500
-      ),
-    }));
+  const controllerEvidence =
+    compactControllerEvidence();
+
+  await releasePrimaryModelForController();
+
+  const controllerInputChars =
+    JSON.stringify({
+      blockers,
+      controllerEvidence,
+      toolContracts,
+    }).length;
+
+  stage(
+    "local_agent_controller_preparing",
+    gapLabel +
+      " structured controller girdisi hazır • chars=" +
+      controllerInputChars +
+      " • controller=" +
+      controllerModel
+  );
 
   const controller = new AbortController();
   const timer = setTimeout(
@@ -1225,23 +1327,24 @@ async function requestStructuredToolDecision(
             content: JSON.stringify({
               gap: gapLabel,
               requireChange,
-              blockers,
-              assistantText: truncate(assistantText || "", 4000),
+              blockers: blockers
+                .slice(0, 8)
+                .map((value) =>
+                  truncate(value, 400)
+                ),
+              assistantText: truncate(
+                assistantText || "",
+                1200
+              ),
               phase,
               evidence: {
-                inspectionToolCalls,
-                maxInspectionTools,
                 sawMutatingTool,
                 sawGitDiff,
                 buildCheckPassed,
                 structuredActions,
-                implementationSearchCompleted,
-                implementationReadCompleted,
-                implementationTargetPaths,
-                checkpointEvidence: checkpointEvidence.slice(-6),
+                ...controllerEvidence,
               },
               tools: toolContracts,
-              recentContext,
               outputContract: {
                 name: "one exact tool name",
                 arguments: "JSON object for that tool",
@@ -1250,8 +1353,11 @@ async function requestStructuredToolDecision(
             }),
           },
         ],
+        keep_alive: "2m",
         options: {
           temperature: 0,
+          num_ctx: 8192,
+          num_predict: 2048,
         },
       }),
     });
@@ -1654,6 +1760,30 @@ for (let iteration = 1; iteration <= maxIterations; iteration++) {
           )
         ) {
           consecutiveRequestTimeouts = 0;
+
+          const handoffStatus =
+            candidateStatus();
+
+          if (
+            sawMutatingTool &&
+            handoffStatus?.ok === true &&
+            handoffStatus.dirty === true
+          ) {
+            stage(
+              "local_agent_candidate_handoff",
+              gapLabel +
+                " structured controller gerçek candidate üretti • mevcut recovery/build pipeline'ına devrediliyor"
+            );
+            persistCheckpoint(
+              "structured_candidate_handoff"
+            );
+            fail(
+              "Structured controller candidate üretti; build ve recovery pipeline'ına devrediliyor.",
+              28,
+              "local_agent_candidate_handoff"
+            );
+          }
+
           continue;
         }
 
