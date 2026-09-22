@@ -151,6 +151,31 @@ if pgrep -f "$APP_EXEC" >/dev/null 2>&1; then
     echo "📍 $TARGET"
 else
     echo ""
-    echo "⚠️ Güncelleme kuruldu ancak uygulama otomatik açılamadı."
-    echo "Finder > Applications > KRALİ üzerinden açabilirsin."
+    echo "❌ Yeni KRALİ build'i launch edilemedi."
+
+    if [ -d "$BACKUP" ]; then
+        echo "↩️ Son çalışan sürüm otomatik geri yükleniyor..."
+
+        if [ -w "/Applications" ]; then
+            rm -rf "$TARGET"
+            ditto "$BACKUP" "$TARGET"
+        else
+            sudo rm -rf "$TARGET"
+            sudo ditto "$BACKUP" "$TARGET"
+        fi
+
+        xattr -dr com.apple.quarantine "$TARGET" 2>/dev/null || true
+        /usr/bin/open -n "$TARGET" >/dev/null 2>&1 || true
+        sleep 2
+
+        if pgrep -f "$APP_EXEC" >/dev/null 2>&1; then
+            echo "✅ Önceki çalışan sürüm geri yüklendi ve açıldı."
+        else
+            echo "⚠️ Yedek geri yüklendi ancak otomatik launch doğrulanamadı."
+        fi
+    else
+        echo "⚠️ Geri dönecek uygulama yedeği bulunamadı."
+    fi
+
+    exit 3
 fi
