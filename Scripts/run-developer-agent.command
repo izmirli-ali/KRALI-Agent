@@ -1016,6 +1016,109 @@ try {
 NODE
 )"
 
+RUNTIME_SOURCE_HINTS="$("$NODE_BIN" - "$LOCAL_MENTOR_DIR/latest.json" "$GAP_SOURCE" <<'NODE'
+const fs = require("fs");
+
+function readJSON(file) {
+  try {
+    return JSON.parse(fs.readFileSync(file, "utf8"));
+  } catch {
+    return null;
+  }
+}
+
+const mentor = readJSON(process.argv[2]);
+const source = readJSON(process.argv[3]);
+
+const gap =
+  source && source.gap
+    ? source.gap
+    : (
+        source &&
+        Array.isArray(source.capabilityGaps)
+          ? source.capabilityGaps[0]
+          : null
+      );
+
+const capabilityID = String(
+  gap && gap.capabilityID || ""
+);
+
+const lines =
+  mentor &&
+  Array.isArray(mentor.activityTail)
+    ? mentor.activityTail.map(
+        (item) => String(item && item.text || "")
+      )
+    : [];
+
+const hints = [];
+
+function add(value) {
+  const clean = String(value || "")
+    .replace(/\s+/g, " ")
+    .trim()
+    .replace(/[.•|]+$/g, "")
+    .trim();
+
+  if (
+    clean.length < 6 ||
+    clean.length > 140 ||
+    clean === capabilityID ||
+    hints.includes(clean)
+  ) {
+    return;
+  }
+
+  hints.push(clean);
+}
+
+for (const line of lines) {
+  let segment = "";
+
+  const failureMatch =
+    line.match(
+      /(?:başarısız|failed|error)\s*:\s*(.+)$/i
+    );
+
+  if (failureMatch) {
+    segment = failureMatch[1].trim();
+  } else {
+    const notFoundMatch =
+      line.match(/(.{3,80}?bulunamadı)\s*:/i);
+
+    if (notFoundMatch) {
+      segment = notFoundMatch[1].trim();
+    }
+  }
+
+  if (!segment) continue;
+
+  const parts = segment
+    .split(":")
+    .map((part) => part.trim())
+    .filter(Boolean);
+
+  if (parts.length > 1) {
+    const tail = parts[parts.length - 1];
+
+    if (
+      tail.length <= 80 &&
+      tail.split(/\s+/).length <= 8
+    ) {
+      add(parts.slice(0, -1).join(": "));
+    }
+  }
+
+  add(segment);
+}
+
+process.stdout.write(
+  JSON.stringify(hints.slice(0, 6))
+);
+NODE
+)"
+
 GAP_KEY="$("$NODE_BIN" - "$GAP_SOURCE" <<'NODE'
 const fs = require("fs");
 const crypto = require("crypto");
@@ -1124,6 +1227,7 @@ if [ "$PROVIDER" = "ollama" ] &&
     KRALI_APP_VERSION="$(/bin/cat "$ROOT/VERSION" 2>/dev/null | /usr/bin/tr -d '[:space:]')" \
     KRALI_RUN_ID="$STAMP" \
     KRALI_CHECKPOINT_FILE="$CHECKPOINT_FILE" \
+    KRALI_RUNTIME_SOURCE_HINTS="$RUNTIME_SOURCE_HINTS" \
     KRALI_REQUIRE_CHANGE="$([ "$GAP_MODE" = "gap" ] && echo 1 || echo 0)" \
     KRALI_LOCAL_AGENT_MAX_COMPLETION_REJECTIONS="$([ "$LEARNING_PATH" = "primitivePatch" ] && echo 2 || echo 3)" \
     KRALI_LOCAL_AGENT_MAX_STRUCTURED_ACTIONS="$([ "$LEARNING_PATH" = "primitivePatch" ] && echo 6 || echo 8)" \
