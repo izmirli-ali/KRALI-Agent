@@ -1151,6 +1151,8 @@ let implementationTargetPaths = [];
 let lastStructuredOutcome = null;
 let lastMutationSnapshot = null;
 let lastMutationFingerprint = "";
+let lastAppliedMutationDecision = null;
+let lastFailedReplaceMutation = null;
 const failedMutationFingerprints = new Set();
 const failedDiffFingerprints = new Set();
 let runtimeBootstrapTarget = null;
@@ -2439,32 +2441,63 @@ async function requestStructuredToolDecision(
     toolContracts[0]?.name === "replace_text" &&
     implementationTargetPaths.length === 1;
 
+  const fixedRepairMode =
+    fixedReplaceMode &&
+    rollbackRepair &&
+    lastFailedReplaceMutation?.old_text &&
+    lastFailedReplaceMutation?.path;
+
   const fixedReplacePath =
-    fixedReplaceMode
+    fixedRepairMode
       ? normalizeRepoRelativePath(
-          implementationTargetPaths[0]
+          lastFailedReplaceMutation.path
+        )
+      : fixedReplaceMode
+        ? normalizeRepoRelativePath(
+            implementationTargetPaths[0]
+          )
+        : "";
+
+  const fixedRepairOldText =
+    fixedRepairMode
+      ? String(
+          lastFailedReplaceMutation.old_text || ""
         )
       : "";
 
   const decisionFormat = fixedReplaceMode
-    ? {
-        type: "object",
-        additionalProperties: false,
-        required: [
-          "old_text",
-          "new_text",
-        ],
-        properties: {
-          old_text: {
-            type: "string",
-            minLength: 80,
+    ? fixedRepairMode
+      ? {
+          type: "object",
+          additionalProperties: false,
+          required: [
+            "new_text",
+          ],
+          properties: {
+            new_text: {
+              type: "string",
+              minLength: 1,
+            },
           },
-          new_text: {
-            type: "string",
-            minLength: 1,
+        }
+      : {
+          type: "object",
+          additionalProperties: false,
+          required: [
+            "old_text",
+            "new_text",
+          ],
+          properties: {
+            old_text: {
+              type: "string",
+              minLength: 80,
+            },
+            new_text: {
+              type: "string",
+              minLength: 1,
+            },
           },
-        },
-      }
+        }
     : {
     type: "object",
     additionalProperties: false,
@@ -2494,21 +2527,34 @@ async function requestStructuredToolDecision(
 
   const controllerSystemPrompt =
     fixedReplaceMode
-      ? [
-          "You are KRALI Exact Mutation Controller.",
-          "Return JSON matching the supplied schema and nothing else.",
-          "The target path and tool are already fixed by KRALI.",
-          "Your only job is to choose one exact old_text block and its corrected new_text.",
-          "old_text must be copied verbatim from lastVerifiedRead.content.",
-          "Use a unique multi-line source block; do not invent text outside the visible source.",
-          "new_text must be a meaningful generic repair for the runtime failure.",
-          "Use problem.objective, problem.runtime_failure, problem.failure_reason, and problem.expected_postcondition to infer the missing behavior. The source may be syntactically valid but behaviorally incomplete.",
-          "Returning unchanged source is invalid. old_text and new_text must differ in behaviorally meaningful code.",
-          "Do not hard-code the concrete app, brand, filename, or exact user phrase from problem evidence; generalize the fix to the capability class.",
-          "Do not include path, tool name, reason, markdown, prose, or code fences.",
-          "If build failure evidence exists, repair that failure against the clean verified source and do not repeat the failed diff.",
-          "failedMutationFingerprints and failedDiffFingerprints identify strategies already proven to fail. Produce a materially different semantic change, not a cosmetically different anchor for the same failed edit.",
-        ].join("\n")
+      ? fixedRepairMode
+        ? [
+            "You are KRALI Exact Repair Controller.",
+            "Return JSON matching the supplied schema and nothing else.",
+            "The target path, tool, and exact old_text are already fixed by KRALI.",
+            "Return only a corrected new_text replacement for fixed_old_text.",
+            "Do not choose or invent an old_text anchor.",
+            "Use compiler_errors and failed_candidate_diff as authoritative evidence for why the previous replacement failed.",
+            "new_text must compile against the visible verified source and must materially differ from both fixed_old_text and previous_failed_new_text.",
+            "Do not repeat the previous failed semantic change through different formatting.",
+            "Use problem evidence to repair behavior generically; do not hard-code the concrete app, brand, filename, or exact user phrase.",
+            "Do not include path, tool name, old_text, reason, markdown, prose, or code fences.",
+          ].join("\n")
+        : [
+            "You are KRALI Exact Mutation Controller.",
+            "Return JSON matching the supplied schema and nothing else.",
+            "The target path and tool are already fixed by KRALI.",
+            "Your only job is to choose one exact old_text block and its corrected new_text.",
+            "old_text must be copied verbatim from lastVerifiedRead.content.",
+            "Use a unique multi-line source block; do not invent text outside the visible source.",
+            "new_text must be a meaningful generic repair for the runtime failure.",
+            "Use problem.objective, problem.runtime_failure, problem.failure_reason, and problem.expected_postcondition to infer the missing behavior. The source may be syntactically valid but behaviorally incomplete.",
+            "Returning unchanged source is invalid. old_text and new_text must differ in behaviorally meaningful code.",
+            "Do not hard-code the concrete app, brand, filename, or exact user phrase from problem evidence; generalize the fix to the capability class.",
+            "Do not include path, tool name, reason, markdown, prose, or code fences.",
+            "If build failure evidence exists, repair that failure against the clean verified source and do not repeat the failed diff.",
+            "failedMutationFingerprints and failedDiffFingerprints identify strategies already proven to fail. Produce a materially different semantic change, not a cosmetically different anchor for the same failed edit.",
+          ].join("\n")
       : [
           "You are KRALI Tool Continuation Controller.",
           "Your output is constrained by a runtime JSON schema.",
@@ -2557,8 +2603,21 @@ async function requestStructuredToolDecision(
   const fixedReplacePayload =
     fixedReplaceMode
       ? {
-          mode: "exact_replace",
+          mode:
+            fixedRepairMode
+              ? "exact_repair_new_text"
+              : "exact_replace",
           target: fixedReplacePath,
+          fixed_old_text:
+            fixedRepairMode
+              ? fixedRepairOldText
+              : undefined,
+          previous_failed_new_text:
+            fixedRepairMode
+              ? String(
+                  lastFailedReplaceMutation?.new_text || ""
+                )
+              : undefined,
           problem:
             mutationProblemContext(),
           failure: {
@@ -2603,9 +2662,11 @@ async function requestStructuredToolDecision(
     "local_agent_controller_preparing",
     gapLabel +
       " structured controller girdisi hazır • mode=" +
-      (fixedReplaceMode
-        ? "exact_replace"
-        : "general") +
+      (fixedRepairMode
+        ? "exact_repair_new_text"
+        : fixedReplaceMode
+          ? "exact_replace"
+          : "general") +
       " • problem=" +
       (fixedReplaceMode
         ? (
@@ -2823,9 +2884,11 @@ async function requestStructuredToolDecision(
       ? {
           path: fixedReplacePath,
           old_text:
-            String(
-              decision?.old_text || ""
-            ),
+            fixedRepairMode
+              ? fixedRepairOldText
+              : String(
+                  decision?.old_text || ""
+                ),
           new_text:
             String(
               decision?.new_text ?? ""
@@ -2974,11 +3037,19 @@ async function requestStructuredToolDecision(
         )
       );
 
+    const differsFromPreviousFailed =
+      !fixedRepairMode ||
+      newText !==
+        String(
+          lastFailedReplaceMutation?.new_text ?? ""
+        );
+
     if (
       oldText.length < 80 ||
       occurrences !== 1 ||
       !copiedFromVerifiedRead ||
-      !meaningfulChange
+      !meaningfulChange ||
+      !differsFromPreviousFailed
     ) {
       const validationReason = [
         "replace_text anchor doğrulanmadı",
@@ -2988,6 +3059,10 @@ async function requestStructuredToolDecision(
           String(copiedFromVerifiedRead),
         "meaningfulChange=" +
           String(meaningfulChange),
+        "differsFromPreviousFailed=" +
+          String(
+            differsFromPreviousFailed
+          ),
       ].join(" • ");
 
       stage(
@@ -3171,6 +3246,14 @@ async function runStructuredContinuation(
     lastMutationSnapshot = mutationSnapshot;
     lastMutationFingerprint =
       mutationDecisionFingerprint;
+    lastAppliedMutationDecision = {
+      name: decision.name,
+      args: {
+        ...decision.args,
+      },
+      fingerprint:
+        mutationDecisionFingerprint,
+    };
   }
 
   messages.push({
@@ -3441,6 +3524,42 @@ function handoffStructuredCandidateIfReady(
     let mutationRolledBack = false;
 
     if (!buildResult?.ok && lastMutationSnapshot) {
+      if (
+        lastAppliedMutationDecision?.name ===
+          "replace_text" &&
+        lastAppliedMutationDecision?.args?.old_text
+      ) {
+        lastFailedReplaceMutation = {
+          path:
+            String(
+              lastAppliedMutationDecision.args.path || ""
+            ),
+          old_text:
+            String(
+              lastAppliedMutationDecision.args.old_text || ""
+            ),
+          new_text:
+            String(
+              lastAppliedMutationDecision.args.new_text ?? ""
+            ),
+          fingerprint:
+            String(
+              lastAppliedMutationDecision.fingerprint || ""
+            ),
+        };
+
+        stage(
+          "local_agent_repair_anchor_preserved",
+          gapLabel +
+            " build FAIL sonrası exact repair anchor korundu • path=" +
+            lastFailedReplaceMutation.path +
+            " • oldLength=" +
+            lastFailedReplaceMutation.old_text.length +
+            " • trigger=" +
+            trigger
+        );
+      }
+
       if (lastMutationFingerprint) {
         failedMutationFingerprints.add(
           lastMutationFingerprint
@@ -3475,6 +3594,7 @@ function handoffStructuredCandidateIfReady(
 
       lastMutationSnapshot = null;
       lastMutationFingerprint = "";
+      lastAppliedMutationDecision = null;
     }
 
     const buildEvidence = buildResult?.ok
