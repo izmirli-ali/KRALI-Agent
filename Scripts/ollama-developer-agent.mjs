@@ -695,6 +695,7 @@ let implementationReadCompleted = false;
 let implementationTargetPaths = [];
 let lastStructuredOutcome = null;
 let lastMutationSnapshot = null;
+let runtimeBootstrapTarget = null;
 
 const inspectionToolNames = new Set([
   "list_files",
@@ -1765,8 +1766,7 @@ async function requestStructuredToolDecision(
 
   if (
     exactReplaceFailure ||
-    rollbackRepair ||
-    initialMutation
+    rollbackRepair
   ) {
     const patchContract = toolContracts.find(
       (tool) => tool.name === "apply_patch"
@@ -1774,6 +1774,14 @@ async function requestStructuredToolDecision(
 
     if (patchContract) {
       toolContracts = [patchContract];
+    }
+  } else if (initialMutation) {
+    const replaceContract = toolContracts.find(
+      (tool) => tool.name === "replace_text"
+    );
+
+    if (replaceContract) {
+      toolContracts = [replaceContract];
     }
   }
 
@@ -2507,6 +2515,27 @@ function bootstrapRuntimeFailureSourceEvidence() {
     }
 
     result.matches = eligibleMatches;
+
+    const firstMatch =
+      String(eligibleMatches[0] || "");
+    const matchParts =
+      firstMatch.split(":");
+    const matchPath =
+      normalizeRepoRelativePath(
+        matchParts.shift() || ""
+      );
+    const matchLine =
+      Number(matchParts.shift() || 0);
+
+    runtimeBootstrapTarget = {
+      path: matchPath,
+      line:
+        Number.isFinite(matchLine)
+          ? matchLine
+          : 0,
+      hint,
+    };
+
     recordToolEvidence(
       "search_codebase",
       result,
@@ -2551,21 +2580,92 @@ async function runRuntimeFailureBootstrapFastPath() {
     return false;
   }
 
-  const readContinued =
+  if (
+    !runtimeBootstrapTarget?.path ||
+    !runtimeBootstrapTarget?.line
+  ) {
+    persistCheckpoint(
+      "runtime_failure_bootstrap_target_missing"
+    );
+    return false;
+  }
+
+  const errorReadArgs = {
+    path: runtimeBootstrapTarget.path,
+    start_line: Math.max(
+      1,
+      runtimeBootstrapTarget.line - 35
+    ),
+    end_line:
+      runtimeBootstrapTarget.line + 90,
+  };
+
+  const errorReadResult = executeTool(
+    "read_file",
+    errorReadArgs
+  );
+
+  if (!errorReadResult?.ok) {
+    persistCheckpoint(
+      "runtime_failure_bootstrap_error_read_failed"
+    );
+    return false;
+  }
+
+  recordToolEvidence(
+    "read_file",
+    errorReadResult,
+    errorReadArgs
+  );
+
+  stage(
+    "local_agent_diagnostic_error_window",
+    gapLabel +
+      " runtime hata noktası çevresi okundu • path=" +
+      runtimeBootstrapTarget.path +
+      " • line=" +
+      runtimeBootstrapTarget.line
+  );
+
+  // Error declaration/throw site is evidence, not automatically the fix site.
+  // Ask the controller for one concrete implementation-symbol hop visible in
+  // this bounded window before allowing mutation.
+  implementationSearchCompleted = false;
+
+  const dependencySearch =
     await runStructuredContinuation(
-      "Runtime hata metni source içinde deterministik olarak bulundu. Yeni arama yapmadan doğrulanmış target listesinden hata tanımını içeren minimum dosya bölgesini oku.",
+      "Runtime hata noktası çevresi okundu. Bu pencere içindeki somut resolver/provider/helper çağrılarından hatanın nedenini uygulayan en ilgili sembolü seç ve yalnız o sembolü search_codebase ile ara. Hata metnini, capability ID'sini veya genel klasör adını tekrar arama.",
       [
-        "runtime hata tanımının bulunduğu source read_file ile doğrulanmalı",
+        "error declaration/throw site semptomdur; gerçek implementation sembolüne bir diagnostic hop gerekli",
       ],
-      "runtime_failure_bootstrap_read"
+      "runtime_failure_dependency_search"
     );
 
   if (
-    !readContinued ||
+    !dependencySearch ||
+    !implementationSearchCompleted
+  ) {
+    persistCheckpoint(
+      "runtime_failure_dependency_search_incomplete"
+    );
+    return false;
+  }
+
+  const dependencyRead =
+    await runStructuredContinuation(
+      "Diagnostic hop implementation sembolünü buldu. Yeni arama yapmadan o sembolün tanımlandığı minimum source bölgesini read_file ile doğrula.",
+      [
+        "implementation sembolünün tanımı read_file ile doğrulanmalı",
+      ],
+      "runtime_failure_dependency_read"
+    );
+
+  if (
+    !dependencyRead ||
     !implementationReadCompleted
   ) {
     persistCheckpoint(
-      "runtime_failure_bootstrap_read_incomplete"
+      "runtime_failure_dependency_read_incomplete"
     );
     return false;
   }
@@ -2578,12 +2678,12 @@ async function runRuntimeFailureBootstrapFastPath() {
     const continued =
       await runStructuredContinuation(
         attempt === 1
-          ? "Runtime hata tanımının gerçek source bölgesi doğrulandı. Yeni inspection yapmadan bu failure class için minimum generic mutation üret."
+          ? "Runtime failure'ın implementation sembolü doğrulandı. Yeni inspection yapmadan minimum generic exact replacement mutation üret."
           : "Önceki mutation veya build gerçek tool kanıtıyla başarısız oldu. lastStructuredOutcome ve lastVerifiedRead kanıtına göre aynı başarısız değişikliği tekrarlamadan minimum repair mutation üret.",
         blockers.length > 0
           ? blockers
           : [
-              "doğrulanmış runtime error source sonrası minimum mutation gerekli",
+              "doğrulanmış implementation source sonrası minimum mutation gerekli",
             ],
         attempt === 1
           ? "runtime_failure_bootstrap_mutation"
