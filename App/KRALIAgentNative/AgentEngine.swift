@@ -98,6 +98,7 @@ final class AgentEngine: ObservableObject {
     private let routeBuilder = AgentRouteBuilder()
     private let capabilityLearner = AgentCapabilityLearner()
     private let learningStore = AgentLearningStore()
+    private let skillLibraryStore = AgentSkillLibraryStore()
     private let webResearchService = AgentWebResearchService()
     private let webSourceReader = AgentWebSourceReader()
     private let mentorTraceStore = MentorTraceStore()
@@ -1763,6 +1764,18 @@ final class AgentEngine: ObservableObject {
             }
         }
 
+        if pendingTaskApproval == nil {
+            promoteVerifiedSkills(
+                executedCapabilityIDs:
+                    executedSemanticCapabilities
+                        .union(
+                            runtimeExecutedCapabilityIDs
+                        ),
+                verification:
+                    finalVerification
+            )
+        }
+
         let replyWithSuggestion = appendSuggestion(
             to: finalBaseReply,
             suggestion: decision.proactiveSuggestion
@@ -1865,6 +1878,67 @@ final class AgentEngine: ObservableObject {
         }
 
         startNextLearningJobIfNeeded()
+    }
+
+    private func promoteVerifiedSkills(
+        executedCapabilityIDs:
+            Set<String>,
+        verification:
+            AgentVerificationResult
+    ) {
+        guard
+            verification.state == .passed
+        else {
+            return
+        }
+
+        let appVersion =
+            Bundle.main.object(
+                forInfoDictionaryKey:
+                    "CFBundleShortVersionString"
+            ) as? String ?? "unknown"
+
+        let foundational =
+            Set([
+                "core.reasoning",
+                "context.local"
+            ])
+
+        let blocked =
+            Set(
+                currentCapabilityGaps
+                    .map(\.capabilityID)
+            )
+
+        let promotable =
+            executedCapabilityIDs
+                .subtracting(
+                    foundational
+                )
+                .subtracting(
+                    blocked
+                )
+
+        for capabilityID in
+            promotable.sorted() {
+            if let skillName =
+                skillLibraryStore
+                    .promoteLatestExperimentalSkill(
+                        capabilityID:
+                            capabilityID,
+                        appVersion:
+                            appVersion,
+                        verificationSummary:
+                            verification.summary
+                    ) {
+                log(
+                    "Skill promoted • " +
+                    capabilityID +
+                    " • " +
+                    skillName
+                )
+            }
+        }
     }
 
     private struct SemanticMissionExecutionResult {
