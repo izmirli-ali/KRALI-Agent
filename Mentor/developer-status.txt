@@ -1,1 +1,1 @@
-local_agent_tool_protocol_failed|Implementation aşamasında ana model zaman aşımına uğradı ve structured controller güvenli devam kararı üretemedi.|krali-dev-agent/20260922-190351|/Users/medusa/Developer/KRALI-Agent-Dev-20260922-190351|@meta|app=0.9.18|at=1790093745|run=20260922-190351
+local_agent_tool_protocol_failed|Yerel model native tool çağrısı üretmedi ve yapılandırılmış devam controller'ı güvenli tool kararı üretemedi.|krali-dev-agent/20260922-192125|/Users/medusa/Developer/KRALI-Agent-Dev-20260922-192125|@meta|app=0.9.19|at=1790094416|run=20260922-192125
