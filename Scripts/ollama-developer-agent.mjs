@@ -1901,7 +1901,39 @@ async function requestStructuredToolDecision(
       ultraCompactRetry
     );
 
-  const decisionFormat = {
+  const fixedReplaceMode =
+    phase === "implementation" &&
+    toolContracts.length === 1 &&
+    toolContracts[0]?.name === "replace_text" &&
+    implementationTargetPaths.length === 1;
+
+  const fixedReplacePath =
+    fixedReplaceMode
+      ? normalizeRepoRelativePath(
+          implementationTargetPaths[0]
+        )
+      : "";
+
+  const decisionFormat = fixedReplaceMode
+    ? {
+        type: "object",
+        additionalProperties: false,
+        required: [
+          "old_text",
+          "new_text",
+        ],
+        properties: {
+          old_text: {
+            type: "string",
+            minLength: 80,
+          },
+          new_text: {
+            type: "string",
+            minLength: 1,
+          },
+        },
+      }
+    : {
     type: "object",
     additionalProperties: false,
     required: [
@@ -1928,6 +1960,41 @@ async function requestStructuredToolDecision(
     },
   };
 
+  const controllerSystemPrompt =
+    fixedReplaceMode
+      ? [
+          "You are KRALI Exact Mutation Controller.",
+          "Return JSON matching the supplied schema and nothing else.",
+          "The target path and tool are already fixed by KRALI.",
+          "Your only job is to choose one exact old_text block and its corrected new_text.",
+          "old_text must be copied verbatim from lastVerifiedRead.content.",
+          "Use a unique multi-line source block; do not invent text outside the visible source.",
+          "new_text must be a meaningful generic repair for the runtime failure.",
+          "Do not include path, tool name, reason, markdown, prose, or code fences.",
+          "If build failure evidence exists, repair that failure against the clean verified source and do not repeat the failed diff.",
+        ].join("\n")
+      : [
+          "You are KRALI Tool Continuation Controller.",
+          "Your output is constrained by a runtime JSON schema.",
+          "Return exactly one NEXT tool decision; no prose outside the schema.",
+          "This is a controller protocol, not a conversational answer.",
+          "Do not claim success. Do not explain source code.",
+          "Choose only from the supplied tool contracts.",
+          "Arguments must satisfy that tool's schema.",
+          "Respect the supplied development phase and available tool contracts.",
+          "During inspection, select the minimum real inspection tool needed.",
+          "During implementation, obey the supplied tool contracts exactly. If only mutation tools are supplied, choose a minimal mutation tool now; do not answer with prose.",
+          "lastVerifiedRead.content contains only exact source characters copied from disk; it never contains truncation markers or synthetic suffixes. For replace_text, copy old_text exactly from this source window; never invent or extend beyond the visible source.",
+          "A replace_text old_text must be a sufficiently long unique source block, preferably at least 3 complete lines. Never use a short identifier fragment, partial token, prefix completion, or typo-like replacement.",
+          "new_text must be a meaningful logic change, not merely completion of a truncated identifier that already exists in source.",
+          "If lastStructuredOutcome contains a failed real tool result, repair that exact failure with the next minimal mutation instead of repeating the same arguments.",
+          "If replace_text failed because old_text was not found or was ambiguous, stay with replace_text when that is the supplied tool: choose a longer exact unique block from lastVerifiedRead.content.",
+          "candidateDiff is the current real worktree diff. Use it together with source evidence to repair only the defect introduced by the candidate.",
+          "If lastStructuredOutcome is a failed build_check, compiler_errors, output_tail, and failed_candidate_diff are authoritative. If mutation_rolled_back is true, the bad mutation is no longer present. Use the supplied replace_text tool against clean lastVerifiedRead source to produce an alternative unique multi-line repair. Do not reapply the failed diff.",
+          "During verification, prefer git_diff and build_check when no compiler failure is already known; mutate when build evidence shows a fix is needed.",
+          "Never request a tool that is absent from the supplied tool contracts.",
+        ].join("\n");
+
   await releasePrimaryModelForController();
 
   const effectiveBlockers =
@@ -1951,12 +2018,44 @@ async function requestStructuredToolDecision(
         )
       );
 
+  const fixedReplacePayload =
+    fixedReplaceMode
+      ? {
+          mode: "exact_replace",
+          target: fixedReplacePath,
+          failure: {
+            blockers: effectiveBlockers,
+            assistantText: truncate(
+              assistantText || "",
+              ultraCompactRetry
+                ? 220
+                : 420
+            ),
+            rollbackRepair,
+            previousStructuredError: truncate(
+              previousStructuredError,
+              500
+            ),
+          },
+          evidence: {
+            lastVerifiedRead:
+              controllerEvidence.lastVerifiedRead,
+            lastStructuredOutcome:
+              controllerEvidence.lastStructuredOutcome,
+          },
+        }
+      : null;
+
   const controllerInputChars =
-    JSON.stringify({
-      blockers: effectiveBlockers,
-      controllerEvidence,
-      toolContracts,
-    }).length;
+    JSON.stringify(
+      fixedReplaceMode
+        ? fixedReplacePayload
+        : {
+            blockers: effectiveBlockers,
+            controllerEvidence,
+            toolContracts,
+          }
+    ).length;
 
   stage(
     "local_agent_controller_preparing",
@@ -2005,31 +2104,14 @@ async function requestStructuredToolDecision(
         messages: [
           {
             role: "system",
-            content: [
-              "You are KRALI Tool Continuation Controller.",
-              "Your output is constrained by a runtime JSON schema.",
-              "Return exactly one NEXT tool decision; no prose outside the schema.",
-              "This is a controller protocol, not a conversational answer.",
-              "Do not claim success. Do not explain source code.",
-              "Choose only from the supplied tool contracts.",
-              "Arguments must satisfy that tool's schema.",
-              "Respect the supplied development phase and available tool contracts.",
-              "During inspection, select the minimum real inspection tool needed.",
-              "During implementation, obey the supplied tool contracts exactly. If only mutation tools are supplied, choose a minimal mutation tool now; do not answer with prose.",
-              "lastVerifiedRead.content contains only exact source characters copied from disk; it never contains truncation markers or synthetic suffixes. For replace_text, copy old_text exactly from this source window; never invent or extend beyond the visible source.",
-              "A replace_text old_text must be a sufficiently long unique source block, preferably at least 3 complete lines. Never use a short identifier fragment, partial token, prefix completion, or typo-like replacement.",
-              "new_text must be a meaningful logic change, not merely completion of a truncated identifier that already exists in source.",
-              "If lastStructuredOutcome contains a failed real tool result, repair that exact failure with the next minimal mutation instead of repeating the same arguments.",
-              "If replace_text failed because old_text was not found or was ambiguous, stay with replace_text when that is the supplied tool: choose a longer exact unique block from lastVerifiedRead.content.",
-              "candidateDiff is the current real worktree diff. Use it together with source evidence to repair only the defect introduced by the candidate.",
-              "If lastStructuredOutcome is a failed build_check, compiler_errors, output_tail, and failed_candidate_diff are authoritative. If mutation_rolled_back is true, the bad mutation is no longer present. Use the supplied replace_text tool against clean lastVerifiedRead source to produce an alternative unique multi-line repair. Do not reapply the failed diff.",
-              "During verification, prefer git_diff and build_check when no compiler failure is already known; mutate when build evidence shows a fix is needed.",
-              "Never request a tool that is absent from the supplied tool contracts.",
-            ].join("\n"),
+            content: controllerSystemPrompt,
           },
           {
             role: "user",
-            content: JSON.stringify({
+            content: JSON.stringify(
+              fixedReplaceMode
+                ? fixedReplacePayload
+                : {
               gap: gapLabel,
               requireChange,
               blockers: effectiveBlockers,
@@ -2067,7 +2149,8 @@ async function requestStructuredToolDecision(
                 arguments: "JSON object for that tool",
                 reason: "short internal reason",
               },
-            }),
+            }
+            ),
           },
         ],
         keep_alive: "2m",
@@ -2078,11 +2161,17 @@ async function requestStructuredToolDecision(
               ? 3072
               : 4096,
           num_predict:
-            ultraCompactRetry
-              ? 512
-              : initialMutation
-                ? 640
-                : 1024,
+            fixedReplaceMode
+              ? (
+                  ultraCompactRetry
+                    ? 900
+                    : 1200
+                )
+              : ultraCompactRetry
+                ? 512
+                : initialMutation
+                  ? 640
+                  : 1024,
         },
       }),
     });
@@ -2167,13 +2256,32 @@ async function requestStructuredToolDecision(
     }
   }
 
-  const name = String(decision?.name || "");
+  const name =
+    fixedReplaceMode
+      ? "replace_text"
+      : String(
+          decision?.name || ""
+        );
+
   const args =
-    decision?.arguments &&
-    typeof decision.arguments === "object" &&
-    !Array.isArray(decision.arguments)
-      ? decision.arguments
-      : {};
+    fixedReplaceMode
+      ? {
+          path: fixedReplacePath,
+          old_text:
+            String(
+              decision?.old_text || ""
+            ),
+          new_text:
+            String(
+              decision?.new_text ?? ""
+            ),
+          replace_all: false,
+        }
+      : decision?.arguments &&
+          typeof decision.arguments === "object" &&
+          !Array.isArray(decision.arguments)
+        ? decision.arguments
+        : {};
 
   const allowed = toolContracts.some(
     (tool) => tool.name === name
@@ -2367,7 +2475,13 @@ async function requestStructuredToolDecision(
   return {
     name,
     args,
-    reason: truncate(decision?.reason || "", 500),
+    reason:
+      fixedReplaceMode
+        ? ""
+        : truncate(
+            decision?.reason || "",
+            500
+          ),
   };
 }
 
