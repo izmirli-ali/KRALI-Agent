@@ -92,6 +92,16 @@ struct DeveloperAgentStatus: Hashable {
             "local_agent_controller_rejected",
             "local_agent_target_found",
             "local_agent_target_verified",
+            "local_agent_dependency_neighborhood_verified",
+            "local_agent_root_cause_analyzing",
+            "local_agent_root_cause_selected",
+            "local_agent_repair_anchor_preserved",
+            "local_agent_failed_mutation_recorded",
+            "local_agent_failed_diff_recorded",
+            "local_agent_repeated_failed_mutation_rejected",
+            "local_agent_repeated_failed_diff_rejected",
+            "skill_extracting",
+            "skill_candidate_ready",
             "local_agent_candidate_handoff",
             "local_agent_completed",
             "sdk_fallback_preparing",
@@ -123,7 +133,9 @@ struct DeveloperAgentStatus: Hashable {
             "local_ai_failed",
             "local_model_failed",
             "local_model_specialized",
+            "local_ai_upgrade_required",
             "local_tool_probe_failed",
+            "local_agent_root_cause_inconclusive",
             "local_agent_resumed",
             "local_storage_low",
             "local_agent_failed",
@@ -200,6 +212,28 @@ struct DeveloperAgentStatus: Hashable {
             return "Zaman aşımı sonrası controller devralıyor"
         case "local_agent_controller_rejected":
             return "Controller kararı güvenlik kontrolünde reddedildi"
+        case "local_agent_dependency_neighborhood_verified":
+            return "Bağımlılık çevresi doğrulanıyor"
+        case "local_agent_root_cause_analyzing":
+            return "Kök neden analiz ediliyor"
+        case "local_agent_root_cause_selected":
+            return "Gerçek düzeltme hedefi seçildi"
+        case "local_agent_root_cause_inconclusive":
+            return "Kök neden analizi sonuçsuz"
+        case "local_agent_repair_anchor_preserved":
+            return "Repair kaynağı korunuyor"
+        case "local_agent_failed_mutation_recorded",
+             "local_agent_failed_diff_recorded":
+            return "Başarısız strateji kaydediliyor"
+        case "local_agent_repeated_failed_mutation_rejected",
+             "local_agent_repeated_failed_diff_rejected":
+            return "Tekrarlanan başarısız strateji engellendi"
+        case "skill_extracting":
+            return "Genellenebilir skill çıkarılıyor"
+        case "skill_candidate_ready":
+            return "Experimental skill adayı hazır"
+        case "local_ai_upgrade_required":
+            return "Ollama güncellemesi gerekli"
         case "local_agent_candidate_handoff":
             return "Aday build ve recovery hattına devrediliyor"
         case "local_agent_completed":
@@ -432,6 +466,8 @@ struct DeveloperAgentStatus: Hashable {
             return "Yerel Ollama runtime otomatik hazırlanamadı."
         case "local_storage_low":
             return "Diskte yeterli boş alan yok. KRALİ yeni büyük model indirmeyi durdurdu; mevcut kurulu model korunuyor."
+        case "local_ai_upgrade_required":
+            return "Devstral Small 2 için Ollama 0.13.3 veya daha yeni sürüm gerekir; KRALİ Homebrew kurulumunda otomatik güncellemeyi dener."
         case "setup_cline_repair":
             return "Cline otomatik onarılamadı; Developer Agent logu incelenmeli."
         case "setup_cline_auth":
