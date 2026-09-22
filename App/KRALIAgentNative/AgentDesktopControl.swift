@@ -48,6 +48,14 @@ struct DesktopControlProbeReport: Codable, Hashable, Sendable {
     let screenSummary: String?
 }
 
+struct ApplicationAliasProvenanceTrace:
+    Codable,
+    Hashable,
+    Sendable {
+    let source: String
+    let values: [String]
+}
+
 struct ApplicationResolutionCandidateTrace:
     Codable,
     Hashable,
@@ -58,7 +66,7 @@ struct ApplicationResolutionCandidateTrace:
     let score: Double
     let aliases: [String]
     let aliasProvenance:
-        [String: [String]]
+        [ApplicationAliasProvenanceTrace]
 }
 
 struct ApplicationResolutionQueryTrace:
@@ -1410,7 +1418,7 @@ actor AgentDesktopControl {
 
     private func applicationAliasProvenance(
         _ candidate: ApplicationCandidate
-    ) -> [String: [String]] {
+    ) -> [ApplicationAliasProvenanceTrace] {
         let url = candidate.url
         let bundle = Bundle(url: url)
         let baseName =
@@ -1499,6 +1507,20 @@ actor AgentDesktopControl {
         }
 
         return result
+            .keys
+            .sorted()
+            .compactMap { source in
+                guard let values =
+                    result[source]
+                else {
+                    return nil
+                }
+
+                return ApplicationAliasProvenanceTrace(
+                    source: source,
+                    values: values
+                )
+            }
     }
 
     private func localizedBundleAliases(
