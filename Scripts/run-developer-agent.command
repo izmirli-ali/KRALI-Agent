@@ -1066,6 +1066,12 @@ const resolverRuntimeEvidence =
                       item.decision ||
                       ""
                     ),
+                  failureClass:
+                    String(
+                      item &&
+                      item.failureClass ||
+                      ""
+                    ),
                   topCandidates:
                     Array.isArray(
                       item &&
