@@ -270,8 +270,12 @@ function mutationProblemContext() {
 
 function runtimeDiagnosticTraceObject() {
   const raw = String(
-    mutationProblemContext()
-      .runtime_diagnostic_trace || ""
+    firstPromptValue(
+      prompt,
+      [
+        "Runtime resolver trace"
+      ]
+    ) || ""
   ).trim();
 
   if (
@@ -296,6 +300,19 @@ function runtimeDiagnosticTraceObject() {
   } catch {
     return null;
   }
+}
+
+function normalizedEvidenceValue(
+  value
+) {
+  return String(value || "")
+    .normalize("NFD")
+    .replace(/[\u0300-\u036f]/g, "")
+    .toLocaleLowerCase("tr-TR")
+    .replace(/ı/g, "i")
+    .replace(/[^a-z0-9]+/g, " ")
+    .trim()
+    .replace(/\s+/g, " ");
 }
 
 function aliasLocalizationFailureEvidence() {
@@ -344,11 +361,95 @@ function aliasLocalizationFailureEvidence() {
       )
       .filter(Boolean);
 
+  const missingLocalizedAliasEvidence =
+    queryTraces.map((queryTrace) => {
+      const normalizedQuery =
+        normalizedEvidenceValue(
+          queryTrace?.normalizedQuery ||
+          queryTrace?.query ||
+          ""
+        );
+      const candidates =
+        Array.isArray(
+          queryTrace?.topCandidates
+        )
+          ? queryTrace.topCandidates
+          : [];
+
+      const candidateEvidence =
+        candidates.map((candidate) => {
+          const aliases =
+            Array.isArray(
+              candidate?.aliases
+            )
+              ? candidate.aliases
+              : [];
+          const provenanceEntries =
+            Array.isArray(
+              candidate?.aliasProvenance
+            )
+              ? candidate.aliasProvenance
+              : [];
+          const provenanceValues =
+            provenanceEntries
+              .flatMap((entry) =>
+                Array.isArray(entry?.values)
+                  ? entry.values
+                  : []
+              );
+
+          return {
+            bundleIdentifier:
+              String(
+                candidate?.bundleIdentifier ||
+                ""
+              ),
+            finalAliasHasQuery:
+              aliases.some(
+                (value) =>
+                  normalizedEvidenceValue(
+                    value
+                  ) === normalizedQuery
+              ),
+            provenanceHasQuery:
+              provenanceValues.some(
+                (value) =>
+                  normalizedEvidenceValue(
+                    value
+                  ) === normalizedQuery
+              ),
+            provenanceSourceCount:
+              provenanceEntries.length,
+          };
+        });
+
+      return {
+        normalizedQuery,
+        candidateEvidence,
+        anyFinalAliasHasQuery:
+          candidateEvidence.some(
+            (item) =>
+              item.finalAliasHasQuery
+          ),
+        anyProvenanceHasQuery:
+          candidateEvidence.some(
+            (item) =>
+              item.provenanceHasQuery
+          ),
+        hasProvenance:
+          candidateEvidence.some(
+            (item) =>
+              item.provenanceSourceCount > 0
+          ),
+      };
+    });
+
   return {
     trace,
     queryTraces,
     candidateCount,
     topCandidates,
+    missingLocalizedAliasEvidence,
     hasPositiveCandidate:
       topCandidates.some(
         (item) =>
@@ -378,6 +479,27 @@ function deterministicRootCauseContradiction(
   ]
     .filter(Boolean)
     .join(" ");
+
+  const provenanceGap =
+    evidence
+      .missingLocalizedAliasEvidence
+      ?.some(
+        (item) =>
+          item.hasProvenance &&
+          !item.anyProvenanceHasQuery &&
+          !item.anyFinalAliasHasQuery
+      ) === true;
+
+  if (
+    /^(mergedAliases|mergeCandidates)$/i.test(
+      symbol
+    ) &&
+    provenanceGap
+  ) {
+    return (
+      "runtime alias provenance, istenen localized alias'ın hiçbir upstream kaynaktan üretilmediğini gösteriyor; yalnız merge/dedupe yapan aggregator eksik alias'ı yaratamayacağı için root cause olamaz"
+    );
+  }
 
   if (
     /launchservices/i.test(symbol) &&
@@ -5143,6 +5265,10 @@ async function requestRootCauseDiagnosis(
       mutationProblemContext(),
     runtime_source_hints:
       runtimeSourceHints.slice(0, 6),
+    alias_provenance_summary:
+      aliasLocalizationFailureEvidence()
+        ?.missingLocalizedAliasEvidence ??
+      null,
     primary_symbol:
       primary.id,
     previous_attempt:
@@ -5220,6 +5346,8 @@ async function requestRootCauseDiagnosis(
                 "The first symbol in a runtime call chain is only a diagnostic entry point, not automatically the mutation target.",
                 "Compare the supplied dependency neighborhood and select the source definition whose behavior most plausibly causes the observed runtime failure.",
                 "Prefer the deepest reusable cause over a caller-level workaround.",
+                "When runtime alias provenance is available, use it to distinguish alias producers from merge/dedupe aggregators. If the requested localized alias never appears in any provenance source, an aggregator that only merges existing aliases is not the causal producer.",
+                "Prefer metadata/localization acquisition functions when provenance shows the localized alias was never produced upstream.",
                 "Do not hard-code the concrete app, brand, filename, or exact test phrase.",
                 "Consider at least two plausible strategies before choosing.",
                 "If previous_attempt is supplied, treat its compiler/diff evidence as proof that the prior strategy or implementation may be wrong. Reconsider both target and strategy instead of polishing the same idea.",
@@ -5375,6 +5503,10 @@ async function verifyRootCauseTarget(
         mutationProblemContext()
           .runtime_diagnostic_trace,
     },
+    alias_provenance_summary:
+      aliasLocalizationFailureEvidence()
+        ?.missingLocalizedAliasEvidence ??
+      null,
     entry: {
       id: primary.id,
       source: clipExactSource(
@@ -5457,6 +5589,7 @@ async function verifyRootCauseTarget(
                   "The final throw or error message may happen downstream.",
                   "Accept target_role=behavioral_cause when the target can return a wrong nil, wrong lookup result, wrong normalization, wrong alias/candidate set, or another incorrect value that directly causes downstream failure.",
                   "If runtime_diagnostic_trace shows an installed candidate exists but alias/localization evidence is incomplete, treat alias/localization production as a stronger behavioral cause than a downstream LaunchServices nil unless the proposed target itself owns that evidence.",
+                  "If alias provenance shows the requested localized alias never existed in any upstream metadata source, reject merge/dedupe-only aggregators as causal targets; they cannot manufacture a missing alias.",
                   "Use direct_cause only when the target itself implements the failing operation/error.",
                   "Reject only when the target merely forwards an already-correct value or is unrelated.",
                   "When evidence is insufficient, return supported=false and target_role=uncertain.",
@@ -5726,6 +5859,18 @@ function deterministicRootCauseScore(
       "candidate_alias_or_localization_gap_possible"
     )
   ) {
+    const aliasEvidence =
+      aliasLocalizationFailureEvidence();
+    const provenanceGap =
+      aliasEvidence
+        ?.missingLocalizedAliasEvidence
+        ?.some(
+          (item) =>
+            item.hasProvenance &&
+            !item.anyProvenanceHasQuery &&
+            !item.anyFinalAliasHasQuery
+        ) === true;
+
     if (
       /alias|localiz|displayname|bundlename|finder/i.test(
         symbol
@@ -5752,6 +5897,23 @@ function deterministicRootCauseScore(
       )
     ) {
       score += 8;
+    }
+
+    if (
+      provenanceGap &&
+      /^(mergedAliases|mergeCandidates)$/i.test(
+        symbol
+      )
+    ) {
+      score -= 28;
+    }
+
+    if (
+      /localizedBundleAliases/i.test(
+        symbol
+      )
+    ) {
+      score += 18;
     }
 
     if (

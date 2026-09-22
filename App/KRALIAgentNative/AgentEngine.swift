@@ -7299,64 +7299,68 @@ final class AgentEngine: ObservableObject {
         folderSearchResults = []
         fileSearchTitle = outcome.title
 
-        log(
-            "Yerel dosya araması: " +
-            outcome.title +
-            " • target=" +
-            String(
-                describing:
-                    decision.target
-            ) +
-            " • scope=" +
-            outcome.query.scope.title +
-            " • extensions=" +
-            (
-                outcome.query.extensions.isEmpty
-                    ? "∅"
-                    : outcome.query.extensions
-                        .sorted()
-                        .joined(separator: ",")
-            ) +
-            " • filenameQuery=" +
-            (
-                outcome.query.filenameQuery.isEmpty
-                    ? "∅"
-                    : outcome.query.filenameQuery
-            ) +
-            " • sort=" +
-            String(
-                describing:
-                    outcome.query.sortMode
-            ) +
-            " • limit=" +
-            (
-                outcome.query.resultLimit
-                    .map {
-                        String($0)
-                    } ??
-                "∅"
-            ) +
-            " • output=" +
-            outcome.query
-                .outputProjection
-                .rawValue +
-            " • prohibitions=" +
-            (
-                outcome.query
-                    .prohibitions
-                    .map(\.rawValue)
-                    .sorted()
-                    .joined(separator: ",")
-                    .isEmpty
+        let extensionSummary =
+            outcome.query.extensions.isEmpty
                 ? "∅"
-                : outcome.query
-                    .prohibitions
-                    .map(\.rawValue)
+                : outcome.query.extensions
                     .sorted()
                     .joined(separator: ",")
-            ) +
-            " • status=" +
-            outcome.status.rawValue
+
+        let filenameQuerySummary =
+            outcome.query.filenameQuery.isEmpty
+                ? "∅"
+                : outcome.query.filenameQuery
+
+        let limitSummary =
+            outcome.query.resultLimit
+                .map(String.init) ??
+            "∅"
+
+        let prohibitionValues =
+            outcome.query.prohibitions
+                .map(\.rawValue)
+                .sorted()
+
+        let prohibitionSummary =
+            prohibitionValues.isEmpty
+                ? "∅"
+                : prohibitionValues
+                    .joined(separator: ",")
+
+        let searchLogParts = [
+            "Yerel dosya araması: " +
+                outcome.title,
+            "target=" +
+                String(
+                    describing:
+                        decision.target
+                ),
+            "scope=" +
+                outcome.query.scope.title,
+            "extensions=" +
+                extensionSummary,
+            "filenameQuery=" +
+                filenameQuerySummary,
+            "sort=" +
+                String(
+                    describing:
+                        outcome.query.sortMode
+                ),
+            "limit=" +
+                limitSummary,
+            "output=" +
+                outcome.query
+                    .outputProjection
+                    .rawValue,
+            "prohibitions=" +
+                prohibitionSummary,
+            "status=" +
+                outcome.status.rawValue
+        ]
+
+        log(
+            searchLogParts
+                .joined(separator: " • ")
         )
 
         if let rootName = outcome.rootName {

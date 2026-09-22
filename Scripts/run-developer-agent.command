@@ -1176,6 +1176,30 @@ const resolverRuntimeEvidence =
                                   ? candidate.aliases
                                       .slice(0, 4)
                                   : [],
+                              aliasProvenance:
+                                Array.isArray(
+                                  candidate &&
+                                  candidate.aliasProvenance
+                                )
+                                  ? candidate.aliasProvenance
+                                      .slice(0, 8)
+                                      .map((entry) => ({
+                                        source:
+                                          String(
+                                            entry &&
+                                            entry.source ||
+                                            ""
+                                          ),
+                                        values:
+                                          Array.isArray(
+                                            entry &&
+                                            entry.values
+                                          )
+                                            ? entry.values
+                                                .slice(0, 4)
+                                            : [],
+                                      }))
+                                  : [],
                             })
                           )
                       : [],
@@ -1590,12 +1614,14 @@ CLINE_ARGS=(
 )
 
 CLINE_RUN_LOG="$LOG_DIR/KRALI-Developer-Agent-Cline-$STAMP.log"
+CLINE_RUN_STREAMED_TO_LOG=0
 
 CLINE_STARTED_AT="$(date +%s)"
 
 if [ "$PROVIDER" = "ollama" ] &&
    [ "$LOCAL_AGENT_ENGINE" = "native-ollama" ]; then
     CLINE_RUN_LOG="$LOG_DIR/KRALI-Developer-Agent-Local-$STAMP.log"
+    CLINE_RUN_STREAMED_TO_LOG=1
     write_status "local_agent_starting|$GAP_LABEL native Ollama Developer Agent ile öğreniliyor|$BRANCH|$WORKTREE"
     echo "🧠 Model rolleri: root-cause=$CONTROLLER_MODEL • mutation=$MODEL • controller=$CONTROLLER_MODEL" | tee -a "$LOG"
 
@@ -1628,6 +1654,7 @@ if [ "$PROVIDER" = "ollama" ] &&
         2> >(tee -a "$CLINE_RUN_LOG" >>"$LOG" >&2)
     CLINE_EXIT=$?
 elif [ "$USE_SDK_FALLBACK" -eq 1 ]; then
+    CLINE_RUN_STREAMED_TO_LOG=1
     if prepare_sdk_fallback; then
         write_status "sdk_fallback_running|$GAP_LABEL ClineCore SDK üzerinden öğreniliyor|$BRANCH|$WORKTREE"
         KRALI_CLINE_SDK_HOST="$SDK_HOST" \
@@ -1662,7 +1689,9 @@ fi
 
 CLINE_DURATION="$(( $(date +%s) - CLINE_STARTED_AT ))"
 
-cat "$CLINE_RUN_LOG" >>"$LOG"
+if [ "$CLINE_RUN_STREAMED_TO_LOG" -eq 0 ]; then
+    cat "$CLINE_RUN_LOG" >>"$LOG"
+fi
 
 if [ "$CLINE_EXIT" -eq 25 ] &&
    [ "$PROVIDER" = "ollama" ] &&
@@ -1699,7 +1728,6 @@ if [ "$CLINE_EXIT" -eq 25 ] &&
             > >(tee "$TOOL_RETRY_LOG" >>"$LOG") \
             2> >(tee -a "$TOOL_RETRY_LOG" >>"$LOG" >&2)
         CLINE_EXIT=$?
-        cat "$TOOL_RETRY_LOG" >>"$LOG"
     fi
 fi
 

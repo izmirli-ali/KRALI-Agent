@@ -217,3 +217,16 @@ Target runtime:
 - Duplicate `AgentDeveloperBridge.estimatedRemainingRange` switch literals cleaned up to remove compiler warnings from repeated local-agent states.
 - No rollback of v0.10.10 immutable Learning evidence binding or per-run Developer Agent isolation.
 - VERSION 0.10.11 / build 184.
+
+
+## v0.10.12 progress
+
+- Application resolver failure trace artık her top candidate için alias provenance kaydediyor: path basename, Finder display name, URL localized name, localized InfoDictionary ve localization-specific InfoPlist.strings kaynakları.
+- Resolver trace modeli geriye uyumlu tutuldu; eski trace dosyalarında provenance alanı yoksa decode bozulmuyor.
+- Developer Agent runtime evidence, provenance kayıtlarını kompakt biçimde immutable Learning brief içinden taşıyor.
+- Root-cause scoring ve deterministic verifier artık alias producer ile merge/dedupe aggregator'ı ayırıyor.
+- Runtime provenance istenen localized alias'ın hiçbir upstream kaynaktan üretilmediğini gösteriyorsa `mergedAliases` / `mergeCandidates` root cause olarak reddediliyor.
+- `localizedBundleAliases` gibi gerçek localization producer hedefleri alias/localization failure class'ında daha yüksek öncelik alıyor.
+- Deterministic guard tam resolver trace'i parse ediyor; modellere yalnız küçük provenance özeti veriliyor, mutation context tekrar şişmiyor.
+- Native Ollama / SDK çıktısının ana Developer loguna ikinci kez eklenmesine neden olan çift log append kaldırıldı.
+- VERSION 0.10.12 / build 185.
