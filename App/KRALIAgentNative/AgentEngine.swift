@@ -3251,6 +3251,16 @@ final class AgentEngine: ObservableObject {
             case .idle, .checking:
                 break
             }
+
+            promoteVerifiedSkills(
+                executedCapabilityIDs:
+                    result.executedCapabilityIDs
+                        .union(
+                            runtimeExecutedCapabilityIDs
+                        ),
+                verification:
+                    verification
+            )
         }
 
         let baseReply =
