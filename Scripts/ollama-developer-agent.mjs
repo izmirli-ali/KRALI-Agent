@@ -1474,14 +1474,25 @@ function resumeCheckpointContext() {
         .map((item) => {
           const symbol =
             String(item?.symbol || "");
+          const targetPath =
+            String(item?.path || "");
+          const targetLine =
+            Number(item?.line || 0);
 
-          if (!symbol) {
+          if (
+            !symbol ||
+            !targetPath ||
+            !Number.isFinite(targetLine) ||
+            targetLine <= 0
+          ) {
             return null;
           }
 
           return (
-            definitionEvidenceForSymbol(
-              symbol
+            definitionEvidenceFromLocation(
+              symbol,
+              targetPath,
+              targetLine
             ) ||
             null
           );
@@ -4349,6 +4360,76 @@ function dependencySymbolsFromDefinition(
   return ordered.slice(0, 18);
 }
 
+function definitionEvidenceFromLocation(
+  symbol,
+  definitionPath,
+  definitionLine
+) {
+  const normalizedPath =
+    normalizeRepoRelativePath(
+      definitionPath
+    );
+  const line =
+    Number(definitionLine || 0);
+
+  if (
+    !symbol ||
+    !normalizedPath ||
+    !Number.isFinite(line) ||
+    line <= 0
+  ) {
+    return null;
+  }
+
+  const sourceRange =
+    definitionSourceRange(
+      normalizedPath,
+      line
+    );
+
+  const readArgs = {
+    path: normalizedPath,
+    start_line:
+      sourceRange.start_line,
+    end_line:
+      sourceRange.end_line,
+  };
+
+  const readResult =
+    executeTool(
+      "read_file",
+      readArgs
+    );
+
+  if (!readResult?.ok) {
+    return null;
+  }
+
+  return {
+    id:
+      symbol +
+      "@" +
+      normalizedPath +
+      ":" +
+      line,
+    symbol,
+    path: normalizedPath,
+    line,
+    start_line:
+      sourceRange.start_line,
+    end_line:
+      sourceRange.end_line,
+    range_mode:
+      sourceRange.mode,
+    read_args: readArgs,
+    read_result: readResult,
+    source:
+      exactSourceFromReadResult(
+        readResult
+      ),
+  };
+}
+
 function definitionEvidenceForSymbol(
   symbol
 ) {
@@ -4382,53 +4463,11 @@ function definitionEvidenceForSymbol(
     return null;
   }
 
-  const sourceRange =
-    definitionSourceRange(
-      definitionPath,
-      definitionLine
-    );
-
-  const readArgs = {
-    path: definitionPath,
-    start_line:
-      sourceRange.start_line,
-    end_line:
-      sourceRange.end_line,
-  };
-
-  const readResult =
-    executeTool(
-      "read_file",
-      readArgs
-    );
-
-  if (!readResult?.ok) {
-    return null;
-  }
-
-  return {
-    id:
-      symbol +
-      "@" +
-      definitionPath +
-      ":" +
-      definitionLine,
+  return definitionEvidenceFromLocation(
     symbol,
-    path: definitionPath,
-    line: definitionLine,
-    start_line:
-      sourceRange.start_line,
-    end_line:
-      sourceRange.end_line,
-    range_mode:
-      sourceRange.mode,
-    read_args: readArgs,
-    read_result: readResult,
-    source:
-      exactSourceFromReadResult(
-        readResult
-      ),
-  };
+    definitionPath,
+    definitionLine
+  );
 }
 
 function collectDependencyNeighborhood(
