@@ -1,6 +1,38 @@
 {
   "activityTail" : [
     {
+      "date" : "2026-09-22T17:53:34Z",
+      "text" : "Developer Agent durumu: Yerel model hazırlanamadı: devstral-small-2:24b"
+    },
+    {
+      "date" : "2026-09-22T17:53:34Z",
+      "text" : "Debug/Recovery: Bilinmeyen hata • Geliştirmeye yükseltildi • Developer Agent"
+    },
+    {
+      "date" : "2026-09-22T17:53:34Z",
+      "text" : "Learning Queue job tamamlandı • desktop.app • Başarısız"
+    },
+    {
+      "date" : "2026-09-22T17:53:33Z",
+      "text" : "Developer Agent Learning Queue job'u başlatıldı"
+    },
+    {
+      "date" : "2026-09-22T17:53:33Z",
+      "text" : "Learning Queue worker başlatılıyor • desktop.app • Dar primitive patch • job=A516A5B1"
+    },
+    {
+      "date" : "2026-09-22T17:53:33Z",
+      "text" : "Capability gap Learning Queue'ya alındı • sırada=1"
+    },
+    {
+      "date" : "2026-09-22T17:53:33Z",
+      "text" : "Görev tamamlandı • 1.13 sn"
+    },
+    {
+      "date" : "2026-09-22T17:53:33Z",
+      "text" : "Mentor trace yerel olarak kaydedildi"
+    },
+    {
       "date" : "2026-09-22T17:53:33Z",
       "text" : "Runtime Capability Gap: desktop.app • Provider available olmasına rağmen runtime step tamamlanamadı veya postcondition doğrulanamadı: desktop.app • capability.contract"
     },
@@ -127,7 +159,7 @@
   "contextMemory" : [
 
   ],
-  "createdAt" : "2026-09-22T17:53:33Z",
+  "createdAt" : "2026-09-22T17:57:10Z",
   "executionSteps" : [
     {
       "capabilityID" : "core.reasoning",
@@ -311,11 +343,11 @@
   ],
   "runtimeTask" : {
     "completedStepIndexes" : [
-      0,
-      1
+      1,
+      0
     ],
-    "createdAt" : "2026-09-22T17:53:32Z",
-    "id" : "711B704B-FA11-4BFC-91AC-1FEEACB50259",
+    "createdAt" : "2026-09-22T17:57:10Z",
+    "id" : "B41310F6-7CB0-4717-A9AA-8544EB1D02B7",
     "objective" : "Notlar uygulamasını aç ve gerçekten ön planda olduğunu doğrula. Başka hiçbir işlem yapma.",
     "priority" : 0,
     "runningStepIndexes" : [
@@ -420,7 +452,7 @@
       "title" : "Uygulama kontrolü"
     }
   ],
-  "traceID" : "B6B6B954-4AF0-47AB-98E3-9FDFF8D37B57",
+  "traceID" : "534B56C1-4267-403B-8287-652F86556D50",
   "userInput" : "Notlar uygulamasını aç ve gerçekten ön planda olduğunu doğrula. Başka hiçbir işlem yapma.",
   "verificationState" : "attention",
   "verificationSummary" : "Semantic mission içindeki zorunlu action step'lerinden bazıları tamamlanmadı: desktop.app"
