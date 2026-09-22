@@ -11,11 +11,14 @@ LOG="$LOG_DIR/KRALI-Developer-Agent.log"
 STATUS_DIR="$HOME/Library/Application Support/KRALI Agent/Developer"
 STATUS="$STATUS_DIR/latest.txt"
 LOCAL_MENTOR_DIR="$HOME/Library/Application Support/KRALI Agent/Mentor"
+SKILL_DIR="$HOME/Library/Application Support/KRALI Agent/Skills"
+SKILL_CANDIDATE_DIR="$SKILL_DIR/Candidates"
+SKILL_LIBRARY_FILE="$SKILL_DIR/skill-library.json"
 LEARNING_JOB_FILE="${KRALI_LEARNING_JOB_FILE:-}"
 
 export PATH="/opt/homebrew/bin:/usr/local/bin:$HOME/.npm-global/bin:/usr/bin:/bin:/usr/sbin:/sbin:$PATH"
 
-mkdir -p "$LOG_DIR" "$STATUS_DIR"
+mkdir -p "$LOG_DIR" "$STATUS_DIR" "$SKILL_CANDIDATE_DIR"
 
 write_status() {
     APP_VERSION="$(
@@ -211,6 +214,7 @@ prepare_sdk_fallback() {
 model_required_free_gb() {
     case "$1" in
         qwen3-coder:30b) echo 24 ;;
+        devstral-small-2:24b) echo 18 ;;
         devstral:24b) echo 18 ;;
         qwen2.5-coder:14b-instruct) echo 12 ;;
         qwen3:8b) echo 8 ;;
@@ -320,9 +324,9 @@ select_structured_controller_model() {
     fi
 
     local candidates=(
-        "qwen2.5-coder:7b-instruct"
-        "qwen3:8b"
         "qwen2.5-coder:14b-instruct"
+        "qwen3:8b"
+        "qwen2.5-coder:7b-instruct"
         "$MODEL"
     )
 
@@ -395,14 +399,16 @@ select_existing_local_model() {
 
     if [ "$MEMORY_GB" -ge 32 ]; then
         candidates=(
-            "devstral:24b"
+            "devstral-small-2:24b"
             "qwen3-coder:30b"
+            "devstral:24b"
             "qwen2.5-coder:14b-instruct"
             "qwen3:8b"
             "qwen2.5-coder:7b-instruct"
         )
     elif [ "$MEMORY_GB" -ge 20 ]; then
         candidates=(
+            "devstral-small-2:24b"
             "devstral:24b"
             "qwen2.5-coder:14b-instruct"
             "qwen3:8b"
@@ -509,7 +515,7 @@ prepare_ollama_runtime() {
         if ! use_cached_tool_model; then
             if ! select_existing_local_model; then
                 if [ "$MEMORY_GB" -ge 20 ]; then
-                    MODEL="qwen2.5-coder:14b-instruct"
+                    MODEL="devstral-small-2:24b"
                 else
                     MODEL="qwen2.5-coder:7b-instruct"
                 fi
@@ -1168,6 +1174,47 @@ NODE
 CHECKPOINT_DIR="$STATUS_DIR/checkpoints"
 mkdir -p "$CHECKPOINT_DIR"
 CHECKPOINT_FILE="$CHECKPOINT_DIR/$GAP_KEY.json"
+SKILL_CANDIDATE_FILE="$SKILL_CANDIDATE_DIR/$GAP_KEY-$STAMP.json"
+
+CAPABILITY_ID="$("$NODE_BIN" - "$GAP_SOURCE" <<'NODE'
+const fs = require("fs");
+try {
+  const payload = JSON.parse(fs.readFileSync(process.argv[2], "utf8"));
+  const gap = payload?.gap || (Array.isArray(payload?.capabilityGaps) ? payload.capabilityGaps[0] : null);
+  process.stdout.write(String(gap?.capabilityID || ""));
+} catch {}
+NODE
+)"
+
+if [ -f "$SKILL_LIBRARY_FILE" ] && [ -n "$CAPABILITY_ID" ]; then
+    PROMOTED_SKILLS="$("$NODE_BIN" - "$SKILL_LIBRARY_FILE" "$CAPABILITY_ID" <<'NODE'
+const fs = require("fs");
+try {
+  const library = JSON.parse(fs.readFileSync(process.argv[2], "utf8"));
+  const capabilityID = process.argv[3];
+  const skills = Array.isArray(library?.skills)
+    ? library.skills.filter(s => s?.state === "promoted" && s?.capability_id === capabilityID).slice(0, 5)
+    : [];
+  if (skills.length) {
+    process.stdout.write(skills.map(s =>
+      "- " + String(s.name || s.id) + ": " + String(s.generalized_strategy || "") +
+      "\n  Trigger: " + String(s.trigger_pattern || "") +
+      "\n  Verify: " + (Array.isArray(s.verification_contract) ? s.verification_contract.join(" | ") : "")
+    ).join("\n"));
+  }
+} catch {}
+NODE
+)"
+    if [ -n "$PROMOTED_SKILLS" ]; then
+        {
+            echo ""
+            echo "KRALİ promoted skill library — bu capability için doğrulanmış yeniden kullanılabilir stratejiler:"
+            echo "$PROMOTED_SKILLS"
+            echo "Bu skill'leri körlemesine kopyalama; mevcut kanıtla uyumluysa yeniden kullan veya geliştir."
+        } >> "$PROMPT_FILE"
+        echo "🧠 Promoted skill context eklendi: $CAPABILITY_ID" | tee -a "$LOG"
+    fi
+fi
 
 # Ana Developer Agent yalnız native tool-call probe geçmiş modelde kalır.
 # Structured JSON continuation modeli aşağıda bağımsız latency probe ile seçilir.
@@ -1219,6 +1266,7 @@ if [ "$PROVIDER" = "ollama" ] &&
     KRALI_WORKTREE="$WORKTREE" \
     KRALI_PROMPT_FILE="$PROMPT_FILE" \
     KRALI_DEV_MODEL="$MODEL" \
+    KRALI_ARCHITECT_MODEL="$MODEL" \
     KRALI_CONTROLLER_MODEL="$CONTROLLER_MODEL" \
     KRALI_OLLAMA_BASE_URL="$OLLAMA_BASE_URL" \
     KRALI_STATUS_FILE="$STATUS" \
@@ -1469,6 +1517,26 @@ if ! /bin/zsh "$WORKTREE/Scripts/build-check.command" "$WORKTREE" >>"$LOG" 2>&1;
 fi
 
 rm -rf "$WORKTREE/.build-check"
+
+if [ "$PROVIDER" = "ollama" ] && [ -n "$MODEL" ]; then
+    write_status "skill_extracting|Build/regression geçen adaydan genellenebilir experimental skill çıkarılıyor|$BRANCH|$WORKTREE"
+    if KRALI_WORKTREE="$WORKTREE" \
+       KRALI_GAP_SOURCE="$GAP_SOURCE" \
+       KRALI_DEV_MODEL="$MODEL" \
+       KRALI_ARCHITECT_MODEL="$MODEL" \
+       KRALI_OLLAMA_BASE_URL="$OLLAMA_BASE_URL" \
+       KRALI_SKILL_CANDIDATE_FILE="$SKILL_CANDIDATE_FILE" \
+       KRALI_APP_VERSION="$(/bin/cat "$ROOT/VERSION" 2>/dev/null | /usr/bin/tr -d '[:space:]')" \
+       KRALI_BRANCH="$BRANCH" \
+       KRALI_RUN_ID="$STAMP" \
+       "$NODE_BIN" "$ROOT/Scripts/ollama-skill-extractor.mjs" >>"$LOG" 2>&1; then
+        write_status "skill_candidate_ready|Experimental skill candidate hazır; runtime postcondition doğrulaması sonrası promote edilebilir|$BRANCH|$WORKTREE"
+        echo "🧠 Experimental skill candidate: $SKILL_CANDIDATE_FILE" | tee -a "$LOG"
+    else
+        echo "⚠️ Kod adayı build geçti ancak skill distillation tamamlanamadı; bu aday öğrenilmiş sayılmayacak." | tee -a "$LOG"
+    fi
+fi
+
 git add -A
 if ! git commit -m "Developer Agent candidate" >>"$LOG" 2>&1; then
     write_status "failed|Aday değişiklik commit edilemedi|$BRANCH|$WORKTREE"
