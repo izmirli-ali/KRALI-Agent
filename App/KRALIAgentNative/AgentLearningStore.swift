@@ -401,11 +401,14 @@ struct AgentSkillLibraryStore {
                 try? Data(
                     contentsOf: url
                 ),
-            let object =
+            let rawObject =
                 try? JSONSerialization
                     .jsonObject(
                         with: data
-                    ) as? [String: Any]
+                    ),
+            let object =
+                rawObject as?
+                    [String: Any]
         else {
             return nil
         }
