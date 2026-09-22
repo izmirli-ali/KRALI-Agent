@@ -185,3 +185,13 @@ Target runtime:
 `Outcome → Strategy 1 → evidence? → Strategy 2 → evidence? → ... → Verify → Learning only after exhaustion`
 
 - Outcome Chain execution ownership is gated to supported runtime strategy classes; unrelated reasoning/file tasks remain on their existing execution paths.
+
+
+## v0.10.9 progress
+
+- Developer Agent runtime evidence artık `candidate_alias_or_localization_gap_possible` failure class'ında dependency neighborhood'u iki hop'a kadar genişletiyor; alias/localization/scoring producer'ları downstream lookup wrapper'larından önce değerlendirebiliyor.
+- Root-cause verifier önüne deterministic contradiction guard eklendi. Runtime trace candidate havuzunda pozitif adaylar varken LaunchServices miss tek başına behavioral root cause kabul edilmiyor; generic “application missing/not returned” açıklaması alias/localization kanıtı olmadan PASS alamıyor.
+- Exact mutation payload'ındaki yinelenen verified source kaldırıldı ve problem evidence sınırları küçültüldü.
+- İlk ağır mutation-model timeout'unda aynı ağır model ultra-compact modda tekrar denenmiyor; doğrudan hızlı structured controller fallback'ine geçiliyor.
+- Verified root cause sonrasında mutation controller timeout olursa checkpoint korunuyor ve aynı diagnosis yeniden başlatılmıyor. Sonraki resume doğrulanmış target'tan devam ediyor.
+- Mutation timeout sayısı checkpoint v7 ile kalıcı tutuluyor; resume koşusunda daha önce timeout veren ağır mutation modeli atlanabiliyor.
