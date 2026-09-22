@@ -1474,6 +1474,13 @@ if [ "$CLINE_EXIT" -eq 137 ] &&
     cat "$RETRY_LOG" >>"$LOG"
 fi
 
+if [ "$CLINE_EXIT" -eq 28 ] &&
+   [ "$PROVIDER" = "ollama" ] &&
+   [ "$LOCAL_AGENT_ENGINE" = "native-ollama" ]; then
+    echo "✅ Structured candidate preflight build geçti; normal verification + skill extraction hattına devam ediliyor." | tee -a "$LOG"
+    CLINE_EXIT=0
+fi
+
 if [ "$CLINE_EXIT" -ne 0 ]; then
     FAILURE_BASE="$(
         /bin/cat "$STATUS" 2>/dev/null |
