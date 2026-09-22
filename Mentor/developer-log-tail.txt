@@ -1,45 +1,3 @@
-Deleted branch krali-dev-agent/20260922-010358 (was dd3d774).
-❌ Native yerel Developer Agent durdu: Yerel model gerçek tool çağrısı üretmedi.
-
-━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
- KRALİ DEVELOPER AGENT
- 20260922-083528
-━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-⚠️ Global Node.js v26 Cline bağımlılıklarıyla uyumlu değil; izole Node 22 runtime hazırlanıyor.
-✅ Developer Agent runtime: v22.23.2
-Yerel model seçimi: devstral:24b • RAM≈24GB
-Yerel tool-call probe: devstral:24b
-tool_call_ok|devstral:24b
-✅ Yerel Developer AI hazır + tool-call doğrulandı: devstral:24b
-From https://github.com/izmirli-ali/KRALI-Agent
- * branch            main       -> FETCH_HEAD
-Already up to date.
-Learning Queue job brief bulundu; mutable Mentor latest yerine immutable job kullanılacak.
-Preparing worktree (new branch 'krali-dev-agent/20260922-083528')
-branch 'krali-dev-agent/20260922-083528' set up to track 'origin/main'.
-HEAD is now at e262fd3 v0.8.94: bump build to 144
-Developer prompt mode: gap • 4262 bytes
-🧠 Primitive patch için daha hafif model deneniyor: qwen2.5-coder:14b-instruct
-Yerel tool-call probe: qwen2.5-coder:14b-instruct
-KRALI local tool probe: native tool_call görülmedi • text={"name": "krali_tool_probe", "arguments": {}}
-⚠️ qwen2.5-coder:14b-instruct tool-call probe geçmedi; mevcut model korunuyor: devstral:24b
-♻️ Developer checkpoint bulundu; aynı gap teşhisi kaldığı yerden devam edecek: desktop.app-02edb76fda4e
-KRALI_LOCAL_STAGE local_agent_resumed • Uygulama kontrolü (desktop.app) process-level checkpoint yüklendi • evidence=10 • recordedPhase=implementation • effectivePhase=implementation • candidateMatch=false
-KRALI_LOCAL_STAGE local_agent_starting • Uygulama kontrolü (desktop.app) native Ollama agent başlatılıyor: devstral:24b • checkpoint resume
-KRALI_LOCAL_STAGE local_agent_running • Uygulama kontrolü (desktop.app) yerel model çalışıyor • adım 1/10
-KRALI_LOCAL_STAGE local_agent_request_retry • Uygulama kontrolü (desktop.app) model isteği zaman aşımına uğradı; mevcut context korunarak retry 1/2
-KRALI_LOCAL_STAGE local_agent_running • Uygulama kontrolü (desktop.app) yerel model çalışıyor • adım 2/10
-I'm sorry, but I don't have the necessary tools to assist with your request. However, I'm here to help with any other questions or concerns you might have! Let's focus on what we can accomplish together.
-Yerel model native tool çağrısı üretmedi ve yapılandırılmış devam controller'ı güvenli tool kararı üretemedi.
-KRALI_LOCAL_STAGE local_agent_resumed • Uygulama kontrolü (desktop.app) process-level checkpoint yüklendi • evidence=10 • recordedPhase=implementation • effectivePhase=implementation • candidateMatch=false
-KRALI_LOCAL_STAGE local_agent_starting • Uygulama kontrolü (desktop.app) native Ollama agent başlatılıyor: devstral:24b • checkpoint resume
-KRALI_LOCAL_STAGE local_agent_running • Uygulama kontrolü (desktop.app) yerel model çalışıyor • adım 1/10
-KRALI_LOCAL_STAGE local_agent_request_retry • Uygulama kontrolü (desktop.app) model isteği zaman aşımına uğradı; mevcut context korunarak retry 1/2
-KRALI_LOCAL_STAGE local_agent_running • Uygulama kontrolü (desktop.app) yerel model çalışıyor • adım 2/10
-I'm sorry, but I don't have the necessary tools to assist with your request. However, I'm here to help with any other questions or concerns you might have! Let's focus on what we can accomplish together.
-Yerel model native tool çağrısı üretmedi ve yapılandırılmış devam controller'ı güvenli tool kararı üretemedi.
-Deleted branch krali-dev-agent/20260922-083528 (was e262fd3).
-❌ Native yerel Developer Agent durdu: Yerel model native tool çağrısı üretmedi ve yapılandırılmış devam controller'ı güvenli tool kararı üretemedi.
 
 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
  KRALİ DEVELOPER AGENT
@@ -117,4 +75,46 @@ KRALI_LOCAL_STAGE local_agent_timeout_controller • Uygulama kontrolü (desktop
 KRALI_LOCAL_STAGE local_agent_controller_rejected • Uygulama kontrolü (desktop.app) structured controller kararı reddedildi • controller isteği başarısız/zaman aşımı • controller=qwen2.5-coder:14b-instruct
 Implementation aşamasında ana model zaman aşımına uğradı ve structured controller güvenli devam kararı üretemedi.
 Deleted branch krali-dev-agent/20260922-090524 (was 889d6ea).
+❌ Native yerel Developer Agent durdu: Implementation aşamasında ana model zaman aşımına uğradı ve structured controller güvenli devam kararı üretemedi.
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+ KRALİ DEVELOPER AGENT
+ 20260922-091917
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+⚠️ Global Node.js v26 Cline bağımlılıklarıyla uyumlu değil; izole Node 22 runtime hazırlanıyor.
+✅ Developer Agent runtime: v22.23.2
+⚡ Tool-capable model cache kullanılıyor: devstral:24b • yaş=2609s
+Yerel model seçimi: devstral:24b • RAM≈24GB
+✅ Yerel Developer AI hazır + tool-call doğrulandı: devstral:24b
+From https://github.com/izmirli-ali/KRALI-Agent
+ * branch            main       -> FETCH_HEAD
+Already up to date.
+Learning Queue job brief bulundu; mutable Mentor latest yerine immutable job kullanılacak.
+Preparing worktree (new branch 'krali-dev-agent/20260922-091917')
+branch 'krali-dev-agent/20260922-091917' set up to track 'origin/main'.
+HEAD is now at 4f5184c v0.8.97: bump build to 147
+Developer prompt mode: gap • 4262 bytes
+🧠 Primitive patch için daha hafif model deneniyor: qwen2.5-coder:14b-instruct
+Yerel tool-call probe: qwen2.5-coder:14b-instruct
+KRALI local tool probe: native tool_call görülmedi • text={"name": "krali_tool_probe", "arguments": {}}
+⚠️ qwen2.5-coder:14b-instruct tool-call probe geçmedi; mevcut model korunuyor: devstral:24b
+🧭 Structured controller modeli: qwen2.5-coder:14b-instruct • JSON karar modu
+♻️ Developer checkpoint bulundu; aynı gap teşhisi kaldığı yerden devam edecek: desktop.app-02edb76fda4e
+KRALI_LOCAL_STAGE local_agent_resumed • Uygulama kontrolü (desktop.app) process-level checkpoint yüklendi • evidence=10 • recordedPhase=implementation • effectivePhase=implementation • candidateMatch=false
+KRALI_LOCAL_STAGE local_agent_starting • Uygulama kontrolü (desktop.app) native Ollama agent başlatılıyor: devstral:24b • checkpoint resume
+KRALI_LOCAL_STAGE local_agent_running • Uygulama kontrolü (desktop.app) yerel model çalışıyor • adım 1/10
+KRALI_LOCAL_STAGE local_agent_timeout_controller • Uygulama kontrolü (desktop.app) implementation isteği zaman aşımına uğradı • doğrulanmış source evidence ile structured controller devralıyor • controller=qwen2.5-coder:14b-instruct
+KRALI_LOCAL_STAGE local_agent_controller_preparing • Uygulama kontrolü (desktop.app) ana model belleği controller için boşaltıldı • devstral:24b → qwen2.5-coder:14b-instruct
+KRALI_LOCAL_STAGE local_agent_controller_preparing • Uygulama kontrolü (desktop.app) structured controller girdisi hazır • chars=4093 • controller=qwen2.5-coder:14b-instruct
+KRALI_LOCAL_STAGE local_agent_controller_rejected • Uygulama kontrolü (desktop.app) structured controller kararı reddedildi • controller isteği başarısız/zaman aşımı • controller=qwen2.5-coder:14b-instruct
+Implementation aşamasında ana model zaman aşımına uğradı ve structured controller güvenli devam kararı üretemedi.
+KRALI_LOCAL_STAGE local_agent_resumed • Uygulama kontrolü (desktop.app) process-level checkpoint yüklendi • evidence=10 • recordedPhase=implementation • effectivePhase=implementation • candidateMatch=false
+KRALI_LOCAL_STAGE local_agent_starting • Uygulama kontrolü (desktop.app) native Ollama agent başlatılıyor: devstral:24b • checkpoint resume
+KRALI_LOCAL_STAGE local_agent_running • Uygulama kontrolü (desktop.app) yerel model çalışıyor • adım 1/10
+KRALI_LOCAL_STAGE local_agent_timeout_controller • Uygulama kontrolü (desktop.app) implementation isteği zaman aşımına uğradı • doğrulanmış source evidence ile structured controller devralıyor • controller=qwen2.5-coder:14b-instruct
+KRALI_LOCAL_STAGE local_agent_controller_preparing • Uygulama kontrolü (desktop.app) ana model belleği controller için boşaltıldı • devstral:24b → qwen2.5-coder:14b-instruct
+KRALI_LOCAL_STAGE local_agent_controller_preparing • Uygulama kontrolü (desktop.app) structured controller girdisi hazır • chars=4093 • controller=qwen2.5-coder:14b-instruct
+KRALI_LOCAL_STAGE local_agent_controller_rejected • Uygulama kontrolü (desktop.app) structured controller kararı reddedildi • controller isteği başarısız/zaman aşımı • controller=qwen2.5-coder:14b-instruct
+Implementation aşamasında ana model zaman aşımına uğradı ve structured controller güvenli devam kararı üretemedi.
+Deleted branch krali-dev-agent/20260922-091917 (was 4f5184c).
 ❌ Native yerel Developer Agent durdu: Implementation aşamasında ana model zaman aşımına uğradı ve structured controller güvenli devam kararı üretemedi.
