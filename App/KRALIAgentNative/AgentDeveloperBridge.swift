@@ -79,6 +79,7 @@ struct DeveloperAgentStatus: Hashable {
             "local_ai_ready",
             "local_agent_starting",
             "local_agent_resumed",
+            "local_agent_verified_resume_controller",
             "local_agent_running",
             "local_agent_tool",
             "local_agent_structured_tool",
@@ -174,6 +175,8 @@ struct DeveloperAgentStatus: Hashable {
             return "Native yerel agent başlatılıyor"
         case "local_agent_resumed":
             return "Checkpoint'ten devam ediyor"
+        case "local_agent_verified_resume_controller":
+            return "Doğrulanmış checkpoint'ten controller devam ediyor"
         case "local_agent_running":
             return "Native yerel agent çalışıyor"
         case "local_agent_tool":
