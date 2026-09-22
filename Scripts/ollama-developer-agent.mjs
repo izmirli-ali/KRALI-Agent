@@ -384,19 +384,17 @@ function aliasLocalizationFailureEvidence() {
             )
               ? candidate.aliases
               : [];
-          const provenance =
-            candidate?.aliasProvenance &&
-            typeof candidate.aliasProvenance ===
-              "object"
-              ? candidate.aliasProvenance
-              : {};
-          const provenanceValues =
-            Object.values(
-              provenance
+          const provenanceEntries =
+            Array.isArray(
+              candidate?.aliasProvenance
             )
-              .flatMap((values) =>
-                Array.isArray(values)
-                  ? values
+              ? candidate.aliasProvenance
+              : [];
+          const provenanceValues =
+            provenanceEntries
+              .flatMap((entry) =>
+                Array.isArray(entry?.values)
+                  ? entry.values
                   : []
               );
 
@@ -421,9 +419,7 @@ function aliasLocalizationFailureEvidence() {
                   ) === normalizedQuery
               ),
             provenanceSourceCount:
-              Object.keys(
-                provenance
-              ).length,
+              provenanceEntries.length,
           };
         });
 
