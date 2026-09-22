@@ -14,7 +14,28 @@ DESKTOP_SOURCE="$HOME/Library/Application Support/KRALI Agent/Mentor/desktop-con
 DESKTOP_STATUS_SOURCE="$HOME/Library/Application Support/KRALI Agent/Mentor/desktop-control-status.txt"
 RESOLUTION_TRACE_SOURCE="$HOME/Library/Application Support/KRALI Agent/Mentor/application-resolution-latest.json"
 DEVELOPER_STATUS_SOURCE="$HOME/Library/Application Support/KRALI Agent/Developer/latest.txt"
+DEVELOPER_RUN_LOG_DIR="$HOME/Library/Logs/KRALI-Developer-Agent-Runs"
+DEVELOPER_LOG_POINTER="$HOME/Library/Application Support/KRALI Agent/Developer/active-run-log.txt"
 DEVELOPER_LOG_SOURCE="$HOME/Library/Logs/KRALI-Developer-Agent.log"
+
+if [ -f "$DEVELOPER_STATUS_SOURCE" ]; then
+    DEVELOPER_RUN_ID="$(
+        /usr/bin/sed -n 's/.*|run=\([^|]*\).*$/\1/p' "$DEVELOPER_STATUS_SOURCE" |
+        /usr/bin/tail -n 1
+    )"
+
+    if [ -n "$DEVELOPER_RUN_ID" ] &&
+       [ -f "$DEVELOPER_RUN_LOG_DIR/$DEVELOPER_RUN_ID.log" ]; then
+        DEVELOPER_LOG_SOURCE="$DEVELOPER_RUN_LOG_DIR/$DEVELOPER_RUN_ID.log"
+    elif [ -f "$DEVELOPER_LOG_POINTER" ]; then
+        POINTER_LOG="$(/bin/cat "$DEVELOPER_LOG_POINTER" 2>/dev/null || true)"
+        if [ -n "$POINTER_LOG" ] &&
+           [ -f "$POINTER_LOG" ]; then
+            DEVELOPER_LOG_SOURCE="$POINTER_LOG"
+        fi
+    fi
+fi
+
 SEMANTIC_LOG_SOURCE="$HOME/Library/Logs/KRALI-Semantic-Planner.log"
 TRACE_DEST="$ROOT/Mentor/latest.json"
 HISTORY_DEST="$ROOT/Mentor/History"

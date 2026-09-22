@@ -6011,6 +6011,21 @@ final class AgentEngine: ObservableObject {
             return
         }
 
+        let liveDeveloperStatus =
+            developerBridge
+                .readStatus()
+                .freshForApp(
+                    launchAppVersion
+                )
+
+        if liveDeveloperStatus
+            .isLearningActive {
+            inspectorState
+                .developerAgentStatus =
+                liveDeveloperStatus
+            return
+        }
+
         guard let next =
             learningQueueStore.nextQueued(
                 from: inspectorState.learningQueueJobs
@@ -6099,6 +6114,43 @@ final class AgentEngine: ObservableObject {
                 log(
                     "Developer Agent meşgul; job sırada kalıyor • " +
                     learningJob.shortID
+                )
+            }
+            return
+        }
+
+        let liveDeveloperStatus =
+            developerBridge
+                .readStatus()
+                .freshForApp(
+                    launchAppVersion
+                )
+
+        if liveDeveloperStatus
+            .isLearningActive {
+            inspectorState
+                .developerAgentStatus =
+                liveDeveloperStatus
+
+            if let learningJob {
+                log(
+                    "Aktif Developer Agent run'ı korunuyor; yeni job sırada kalıyor • " +
+                    learningJob.shortID +
+                    " • run=" +
+                    (
+                        liveDeveloperStatus
+                            .runID ??
+                        "unknown"
+                    )
+                )
+            } else {
+                log(
+                    "Developer Agent zaten aktif • run=" +
+                    (
+                        liveDeveloperStatus
+                            .runID ??
+                        "unknown"
+                    )
                 )
             }
             return

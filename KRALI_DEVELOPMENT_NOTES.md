@@ -195,3 +195,16 @@ Target runtime:
 - İlk ağır mutation-model timeout'unda aynı ağır model ultra-compact modda tekrar denenmiyor; doğrudan hızlı structured controller fallback'ine geçiliyor.
 - Verified root cause sonrasında mutation controller timeout olursa checkpoint korunuyor ve aynı diagnosis yeniden başlatılmıyor. Sonraki resume doğrulanmış target'tan devam ediyor.
 - Mutation timeout sayısı checkpoint v7 ile kalıcı tutuluyor; resume koşusunda daha önce timeout veren ağır mutation modeli atlanabiliyor.
+
+
+## v0.10.10 progress
+
+- Learning Queue işleri artık runtime evidence'i iş oluşturulduğu anda immutable snapshot olarak saklıyor. Sonraki kullanıcı komutları aynı capability üzerinde çalışsa bile ilk job'ın goal/runtime/resolver kanıtını ezemiyor.
+- Immutable snapshot; source goal, ilgili Mentor runtime hata satırları ve eşleşen application resolver trace JSON'unu birlikte taşıyor.
+- Developer Agent bir Learning Queue brief'i aldığında mutable `Mentor/latest.json` ve `application-resolution-latest.json` yerine öncelikle job içine bağlı ilk immutable evidence snapshot'ını kullanıyor.
+- Runtime source hint üretimi de aynı primary snapshot'tan yapılıyor; böylece bir job'ın source bootstrap/root-cause zinciri başka bir görevin son Mentor state'iyle karışmıyor.
+- Developer Agent logları artık run başına `~/Library/Logs/KRALI-Developer-Agent-Runs/<run-id>.log` altında tutuluyor.
+- Mentor sync, `developer-status.txt` içindeki run id ile yalnız aktif run'ın log tail'ini yayımlıyor; iki process'in satırları tek global logda karışmıyor.
+- `checking` ve root-cause pipeline'ın ara stage'leri aktif Developer Agent durumu olarak tanınıyor.
+- Güncel app sürümünde fresh/active bir Developer Agent run'ı varsa yeni Learning Queue worker veya manuel Developer Agent run'ı başlatılmıyor; yeni job sırada kalıyor.
+- VERSION 0.10.10 / build 183.
