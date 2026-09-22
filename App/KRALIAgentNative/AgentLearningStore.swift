@@ -211,3 +211,249 @@ struct AgentLearningStore {
         }
     }
 }
+
+
+struct AgentSkillLibraryStore {
+    private let fileManager = FileManager.default
+
+    private var rootURL: URL {
+        fileManager.homeDirectoryForCurrentUser
+            .appendingPathComponent(
+                "Library/Application Support/KRALI Agent/Skills",
+                isDirectory: true
+            )
+    }
+
+    private var candidatesURL: URL {
+        rootURL.appendingPathComponent(
+            "Candidates",
+            isDirectory: true
+        )
+    }
+
+    private var libraryURL: URL {
+        rootURL.appendingPathComponent(
+            "skill-library.json",
+            isDirectory: false
+        )
+    }
+
+    func promoteLatestExperimentalSkill(
+        capabilityID: String,
+        appVersion: String,
+        verificationSummary: String
+    ) -> String? {
+        guard
+            !capabilityID.isEmpty,
+            let candidateURLs =
+                try? fileManager.contentsOfDirectory(
+                    at: candidatesURL,
+                    includingPropertiesForKeys: [
+                        .contentModificationDateKey
+                    ],
+                    options: [
+                        .skipsHiddenFiles
+                    ]
+                )
+        else {
+            return nil
+        }
+
+        let ordered =
+            candidateURLs
+                .filter {
+                    $0.pathExtension
+                        .lowercased() == "json"
+                }
+                .sorted { left, right in
+                    let leftDate =
+                        (
+                            try? left.resourceValues(
+                                forKeys: [
+                                    .contentModificationDateKey
+                                ]
+                            )
+                        )?.contentModificationDate ??
+                        .distantPast
+                    let rightDate =
+                        (
+                            try? right.resourceValues(
+                                forKeys: [
+                                    .contentModificationDateKey
+                                ]
+                            )
+                        )?.contentModificationDate ??
+                        .distantPast
+
+                    return leftDate > rightDate
+                }
+
+        for candidateURL in ordered {
+            guard
+                var candidate =
+                    readObject(
+                        at: candidateURL
+                    ),
+                candidate["state"] as? String ==
+                    "experimental",
+                candidate["capability_id"] as? String ==
+                    capabilityID,
+                let provenance =
+                    candidate["provenance"]
+                        as? [String: Any],
+                provenance["app_version"] as? String ==
+                    appVersion,
+                var validation =
+                    candidate["validation"]
+                        as? [String: Any],
+                validation["build_passed"] as? Bool ==
+                    true,
+                validation["regression_passed"] as? Bool ==
+                    true
+            else {
+                continue
+            }
+
+            validation[
+                "runtime_postcondition_verified"
+            ] = true
+            validation[
+                "runtime_validation_summary"
+            ] = verificationSummary
+
+            candidate["state"] = "promoted"
+            candidate["validation"] = validation
+            candidate["updated_at"] =
+                ISO8601DateFormatter()
+                    .string(from: Date())
+
+            guard
+                writeObject(
+                    candidate,
+                    to: candidateURL
+                )
+            else {
+                return nil
+            }
+
+            var library =
+                readObject(
+                    at: libraryURL
+                ) ?? [
+                    "schema_version": 1,
+                    "skills": []
+                ]
+
+            var skills =
+                library["skills"]
+                    as? [[String: Any]] ??
+                []
+
+            let skillID =
+                candidate["id"] as? String ??
+                candidateURL
+                    .deletingPathExtension()
+                    .lastPathComponent
+
+            skills.removeAll {
+                ($0["id"] as? String) ==
+                    skillID
+            }
+            skills.insert(
+                candidate,
+                at: 0
+            )
+
+            skills =
+                Array(
+                    skills
+                        .filter {
+                            $0["state"] as? String ==
+                                "promoted"
+                        }
+                        .prefix(200)
+                )
+
+            library["schema_version"] = 1
+            library["skills"] = skills
+
+            guard
+                writeObject(
+                    library,
+                    to: libraryURL
+                )
+            else {
+                return nil
+            }
+
+            return candidate["name"] as? String ??
+                skillID
+        }
+
+        return nil
+    }
+
+    private func readObject(
+        at url: URL
+    ) -> [String: Any]? {
+        guard
+            let data =
+                try? Data(
+                    contentsOf: url
+                ),
+            let object =
+                try? JSONSerialization
+                    .jsonObject(
+                        with: data
+                    ) as? [String: Any]
+        else {
+            return nil
+        }
+
+        return object
+    }
+
+    @discardableResult
+    private func writeObject(
+        _ object: [String: Any],
+        to url: URL
+    ) -> Bool {
+        guard
+            JSONSerialization
+                .isValidJSONObject(
+                    object
+                ),
+            let data =
+                try? JSONSerialization
+                    .data(
+                        withJSONObject:
+                            object,
+                        options: [
+                            .prettyPrinted,
+                            .sortedKeys,
+                            .withoutEscapingSlashes
+                        ]
+                    )
+        else {
+            return false
+        }
+
+        do {
+            try fileManager
+                .createDirectory(
+                    at:
+                        url
+                            .deletingLastPathComponent(),
+                    withIntermediateDirectories:
+                        true
+                )
+            try data.write(
+                to: url,
+                options: .atomic
+            )
+            return true
+        } catch {
+            return false
+        }
+    }
+}
