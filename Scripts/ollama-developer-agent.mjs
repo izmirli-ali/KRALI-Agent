@@ -2575,6 +2575,413 @@ function bootstrapRuntimeFailureSourceEvidence() {
   return false;
 }
 
+function sourceLinesFromReadResult(
+  readResult
+) {
+  return String(
+    readResult?.content || ""
+  )
+    .split("\n")
+    .map((raw) => {
+      const match = raw.match(
+        /^\s*(\d+)\s*\|\s?(.*)$/
+      );
+
+      if (!match) {
+        return null;
+      }
+
+      return {
+        line: Number(match[1]),
+        text: match[2],
+      };
+    })
+    .filter(Boolean);
+}
+
+function runtimeDependencySymbols(
+  readResult,
+  errorLine
+) {
+  const lines =
+    sourceLinesFromReadResult(
+      readResult
+    );
+
+  if (lines.length === 0) {
+    return [];
+  }
+
+  const errorIndex =
+    lines.findIndex(
+      (item) =>
+        item.line === errorLine
+    );
+
+  const contextIndex =
+    errorIndex >= 0
+      ? errorIndex
+      : Math.floor(
+          lines.length / 2
+        );
+
+  let failureToken = "";
+
+  for (
+    let index = Math.max(
+      0,
+      contextIndex - 4
+    );
+    index <= Math.min(
+      lines.length - 1,
+      contextIndex + 4
+    );
+    index += 1
+  ) {
+    const caseMatch =
+      lines[index].text.match(
+        /\bcase\s+([A-Za-z_][A-Za-z0-9_]*)/
+      );
+
+    if (caseMatch) {
+      failureToken = caseMatch[1];
+      break;
+    }
+  }
+
+  let emissionIndex = -1;
+
+  if (failureToken) {
+    emissionIndex =
+      lines.findIndex(
+        (item, index) =>
+          index !== contextIndex &&
+          item.text.includes(
+            failureToken
+          ) &&
+          /\b(?:throw|raise|return|fail|reject)\b/i.test(
+            item.text
+          )
+      );
+  }
+
+  if (emissionIndex < 0) {
+    emissionIndex =
+      lines.findIndex(
+        (item, index) =>
+          index > contextIndex &&
+          /\b(?:throw|raise|fail|reject)\b/i.test(
+            item.text
+          )
+      );
+  }
+
+  const anchorIndex =
+    emissionIndex >= 0
+      ? emissionIndex
+      : contextIndex;
+
+  const ignored = new Set([
+    "if",
+    "for",
+    "while",
+    "switch",
+    "guard",
+    "return",
+    "throw",
+    "raise",
+    "catch",
+    "await",
+    "try",
+    "print",
+    "init",
+    "super",
+    "self",
+    "Task",
+    "String",
+    "URL",
+    "Set",
+    "Array",
+    "Dictionary",
+    "Int",
+    "Double",
+    "Bool",
+  ]);
+
+  const scores = new Map();
+
+  const start =
+    Math.max(
+      0,
+      anchorIndex - 28
+    );
+  const end =
+    Math.min(
+      lines.length - 1,
+      anchorIndex + 12
+    );
+
+  for (
+    let index = start;
+    index <= end;
+    index += 1
+  ) {
+    const item = lines[index];
+    const callPattern =
+      /\b([A-Za-z_][A-Za-z0-9_]*)\s*\(/g;
+    let match;
+
+    while (
+      (match =
+        callPattern.exec(
+          item.text
+        ))
+    ) {
+      const symbol = match[1];
+
+      if (
+        ignored.has(symbol) ||
+        symbol === failureToken
+      ) {
+        continue;
+      }
+
+      const distance =
+        Math.abs(
+          index - anchorIndex
+        );
+      const beforeBonus =
+        index <= anchorIndex
+          ? 12
+          : 0;
+      const lowerCaseBonus =
+        /^[a-z_]/.test(symbol)
+          ? 8
+          : 0;
+      const controlFlowBonus =
+        /\b(?:guard|if|let|var)\b/.test(
+          item.text
+        )
+          ? 4
+          : 0;
+
+      const score =
+        100 -
+        distance * 3 +
+        beforeBonus +
+        lowerCaseBonus +
+        controlFlowBonus;
+
+      if (
+        !scores.has(symbol) ||
+        score >
+          scores.get(symbol)
+      ) {
+        scores.set(
+          symbol,
+          score
+        );
+      }
+    }
+  }
+
+  return [
+    ...scores.entries(),
+  ]
+    .sort(
+      (a, b) =>
+        b[1] - a[1]
+    )
+    .map(
+      ([symbol]) => symbol
+    )
+    .slice(0, 10);
+}
+
+function findDefinitionForSymbol(
+  symbol
+) {
+  const definitionQueries = [
+    "func " + symbol + "(",
+    "function " + symbol + "(",
+    "def " + symbol + "(",
+    "const " + symbol + " =",
+    "let " + symbol + " =",
+    "var " + symbol + " =",
+  ];
+
+  for (
+    const query of
+      definitionQueries
+  ) {
+    const args = {
+      query,
+      max_results: 30,
+    };
+
+    const result =
+      executeTool(
+        "search_codebase",
+        args
+      );
+
+    if (
+      !result?.ok ||
+      !Array.isArray(
+        result.matches
+      )
+    ) {
+      continue;
+    }
+
+    const eligible =
+      result.matches.filter(
+        (line) => {
+          const matchPath =
+            normalizeRepoRelativePath(
+              String(line || "")
+                .split(":")[0]
+            );
+
+          return isEligibleImplementationTargetPath(
+            matchPath
+          );
+        }
+      );
+
+    if (
+      eligible.length === 0
+    ) {
+      continue;
+    }
+
+    result.matches = eligible;
+
+    return {
+      args,
+      result,
+      symbol,
+      match:
+        String(
+          eligible[0] || ""
+        ),
+    };
+  }
+
+  return null;
+}
+
+function resolveRuntimeFailureDependency(
+  errorReadResult
+) {
+  const symbols =
+    runtimeDependencySymbols(
+      errorReadResult,
+      runtimeBootstrapTarget?.line ||
+        0
+    );
+
+  for (
+    const symbol of symbols
+  ) {
+    const found =
+      findDefinitionForSymbol(
+        symbol
+      );
+
+    if (!found) {
+      continue;
+    }
+
+    const parts =
+      found.match.split(":");
+    const definitionPath =
+      normalizeRepoRelativePath(
+        parts.shift() || ""
+      );
+    const definitionLine =
+      Number(
+        parts.shift() || 0
+      );
+
+    if (
+      !definitionPath ||
+      !Number.isFinite(
+        definitionLine
+      ) ||
+      definitionLine <= 0
+    ) {
+      continue;
+    }
+
+    implementationSearchCompleted =
+      false;
+    implementationReadCompleted =
+      false;
+
+    recordToolEvidence(
+      "search_codebase",
+      found.result,
+      found.args
+    );
+
+    const readArgs = {
+      path: definitionPath,
+      start_line:
+        Math.max(
+          1,
+          definitionLine - 24
+        ),
+      end_line:
+        definitionLine + 180,
+    };
+
+    const readResult =
+      executeTool(
+        "read_file",
+        readArgs
+      );
+
+    if (!readResult?.ok) {
+      continue;
+    }
+
+    recordToolEvidence(
+      "read_file",
+      readResult,
+      readArgs
+    );
+
+    stage(
+      "local_agent_dependency_symbol_verified",
+      gapLabel +
+        " runtime hata zincirinden implementation sembolü doğrulandı • symbol=" +
+        symbol +
+        " • path=" +
+        definitionPath +
+        " • line=" +
+        definitionLine
+    );
+
+    messages.push({
+      role: "user",
+      content: [
+        "KRALI deterministic runtime dependency resolver implementation sembolünü doğruladı.",
+        "Symbol: " + symbol,
+        "Definition: " +
+          definitionPath +
+          ":" +
+          definitionLine,
+        "Bu source gerçek implementation kanıtıdır. Yeni repo keşfi yapmadan minimum generic fix üret.",
+      ].join("\n"),
+    });
+
+    return true;
+  }
+
+  return false;
+}
+
 async function runRuntimeFailureBootstrapFastPath() {
   if (!bootstrapRuntimeFailureSourceEvidence()) {
     return false;
@@ -2628,44 +3035,19 @@ async function runRuntimeFailureBootstrapFastPath() {
   );
 
   // Error declaration/throw site is evidence, not automatically the fix site.
-  // Ask the controller for one concrete implementation-symbol hop visible in
-  // this bounded window before allowing mutation.
-  implementationSearchCompleted = false;
-
-  const dependencySearch =
-    await runStructuredContinuation(
-      "Runtime hata noktası çevresi okundu. Bu pencere içindeki somut resolver/provider/helper çağrılarından hatanın nedenini uygulayan en ilgili sembolü seç ve yalnız o sembolü search_codebase ile ara. Hata metnini, capability ID'sini veya genel klasör adını tekrar arama.",
-      [
-        "error declaration/throw site semptomdur; gerçek implementation sembolüne bir diagnostic hop gerekli",
-      ],
-      "runtime_failure_dependency_search"
+  // Resolve the nearest implementation call chain deterministically first;
+  // only fall back to the conversational agent if no source definition can be found.
+  const dependencyResolved =
+    resolveRuntimeFailureDependency(
+      errorReadResult
     );
 
   if (
-    !dependencySearch ||
-    !implementationSearchCompleted
-  ) {
-    persistCheckpoint(
-      "runtime_failure_dependency_search_incomplete"
-    );
-    return false;
-  }
-
-  const dependencyRead =
-    await runStructuredContinuation(
-      "Diagnostic hop implementation sembolünü buldu. Yeni arama yapmadan o sembolün tanımlandığı minimum source bölgesini read_file ile doğrula.",
-      [
-        "implementation sembolünün tanımı read_file ile doğrulanmalı",
-      ],
-      "runtime_failure_dependency_read"
-    );
-
-  if (
-    !dependencyRead ||
+    !dependencyResolved ||
     !implementationReadCompleted
   ) {
     persistCheckpoint(
-      "runtime_failure_dependency_read_incomplete"
+      "runtime_failure_dependency_resolution_incomplete"
     );
     return false;
   }
