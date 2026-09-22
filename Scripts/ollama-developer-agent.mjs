@@ -1474,6 +1474,44 @@ async function runStructuredContinuation(
   return true;
 }
 
+function currentCandidateBlockers() {
+  const status = candidateStatus();
+  const blockers = [];
+
+  if (!status.ok) {
+    blockers.push(
+      "candidate git status okunamadı"
+    );
+    return { status, blockers };
+  }
+
+  if (requireChange && !status.dirty) {
+    blockers.push(
+      "aktif capability gap için gerçek candidate değişikliği yok"
+    );
+  }
+
+  if (status.dirty && !sawMutatingTool) {
+    blockers.push(
+      "candidate değişikliği için mutation tool kanıtı yok"
+    );
+  }
+
+  if (status.dirty && !sawGitDiff) {
+    blockers.push(
+      "candidate diff henüz incelenmedi"
+    );
+  }
+
+  if (status.dirty && !buildCheckPassed) {
+    blockers.push(
+      "candidate build_check PASS almadı"
+    );
+  }
+
+  return { status, blockers };
+}
+
 function requestMoreWork(reasons) {
   completionRejections += 1;
 
@@ -1586,6 +1624,51 @@ for (let iteration = 1; iteration <= maxIterations; iteration++) {
       consecutiveRequestTimeouts += 1;
 
       if (
+        developmentPhase() === "implementation" &&
+        implementationReadCompleted
+      ) {
+        stage(
+          "local_agent_timeout_controller",
+          gapLabel +
+            " implementation isteği zaman aşımına uğradı • doğrulanmış source evidence ile structured controller devralıyor • controller=" +
+            controllerModel
+        );
+
+        persistCheckpoint(
+          "implementation_timeout_controller"
+        );
+
+        const {
+          blockers,
+        } = currentCandidateBlockers();
+
+        if (
+          await runStructuredContinuation(
+            "Ana Developer Agent implementation aşamasında zaman aşımına uğradı. Hedef kaynak daha önce doğrulandı; yeni inspection yapmadan güvenli minimum mutation ile devam et.",
+            blockers.length > 0
+              ? blockers
+              : [
+                  "doğrulanmış source evidence sonrası minimum mutation gerekli",
+                ],
+            "implementation_timeout"
+          )
+        ) {
+          consecutiveRequestTimeouts = 0;
+          continue;
+        }
+
+        persistCheckpoint(
+          "implementation_timeout_controller_unavailable"
+        );
+
+        fail(
+          "Implementation aşamasında ana model zaman aşımına uğradı ve structured controller güvenli devam kararı üretemedi.",
+          25,
+          "local_agent_tool_protocol_failed"
+        );
+      }
+
+      if (
         consecutiveRequestTimeouts <=
         maxRequestTimeoutRetries
       ) {
@@ -1662,28 +1745,10 @@ for (let iteration = 1; iteration <= maxIterations; iteration++) {
       process.stdout.write(message.content + "\n");
     }
 
-    const status = candidateStatus();
-    const blockers = [];
-
-    if (!status.ok) {
-      blockers.push("candidate git status okunamadı");
-    } else {
-      if (requireChange && !status.dirty) {
-        blockers.push("aktif capability gap için gerçek candidate değişikliği yok");
-      }
-
-      if (status.dirty && !sawMutatingTool) {
-        blockers.push("candidate değişikliği için mutation tool kanıtı yok");
-      }
-
-      if (status.dirty && !sawGitDiff) {
-        blockers.push("candidate diff henüz incelenmedi");
-      }
-
-      if (status.dirty && !buildCheckPassed) {
-        blockers.push("candidate build_check PASS almadı");
-      }
-    }
+    const {
+      status,
+      blockers,
+    } = currentCandidateBlockers();
 
     if (blockers.length > 0) {
       const phase = developmentPhase();
