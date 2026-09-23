@@ -1,1 +1,1 @@
-local_agent_running|Candidate build repair yerel model çalışıyor • adım 2/12|krali-dev-agent/20260924-001808|/Users/medusa/Developer/KRALI-Agent-Dev-20260924-001808|@meta|app=0.10.37|at=1790198527|run=20260924-001808-repair-2
+local_agent_iteration_limit|Candidate build repair native local agent iteration sınırına ulaştı.|krali-dev-agent/20260924-001808|/Users/medusa/Developer/KRALI-Agent-Dev-20260924-001808|@meta|app=0.10.37|at=1790198583|run=20260924-001808-repair-2
