@@ -1,0 +1,47 @@
+{
+  "developerTask": {
+    "capabilityID": "developer.task.learning-suggestions-sidebar-ui",
+    "capabilityName": "Learning Suggestions Sidebar UI",
+    "kind": "developerTask",
+    "learningPath": "primitivePatch",
+    "reason": "Learning Suggestions core approval gate tamamlandıktan sonra önerilerin sol sohbet sidebar'ında görünür ve kullanıcı kontrollü olması gerekiyor.",
+    "researchGoal": "Render approved-safe Learning Suggestions in the conversation sidebar without changing learning authority or adding dashboard complexity.",
+    "candidateCapabilityIDs": [],
+    "developerBrief": "Bu FAZ 2'dir. Yalnız Learning Suggestions core main'de mevcutsa çalış.\nAgentEngine'deki published learningSuggestions ve accept/defer/suppress methodlarını kullan; learning policy veya queue mantığını değiştirme.\nConversationSidebarView içinde Aktif sohbet ile Geçmiş arasına yalnız proposed suggestion varsa 'GELİŞTİRME ÖNERİLERİ' bölümü ekle.\nEn fazla 2 kompakt kart göster. Kart: capability adı, kısa reason, learningPath.title ve occurrenceCount.\nAna butonlar: 'Öğrenmeye başla' -> engine.acceptLearningSuggestion(id), 'Şimdi değil' -> engine.deferLearningSuggestion(id).\nContext/ellipsis menü: 'Bir daha önerme' -> engine.suppressLearningSuggestion(id).\nUI sade sohbet sidebar ritmini korusun; ağır dashboard kartları, grafikler veya developer paneli ekleme.\nÖneri count varsa section label yanında küçük count gösterebilirsin. 0 öneride bölüm tamamen gizli.\nAccessibility/help text ekle.\nScripts/learning-suggestion-sidebar-self-test.mjs oluştur; source-level olarak section label ve üç kullanıcı aksiyonunun engine methodlarına bağlandığını doğrulasın.\nİş sonunda self-test, build_check, git_diff."
+  },
+  "taskMetadata": {
+    "owner": "ChatGPT Lead / KRALİ team",
+    "risk": "low",
+    "allowedScope": [
+      "App/KRALIAgentNative/ConversationSidebarView.swift",
+      "Scripts/learning-suggestion-sidebar-self-test.mjs"
+    ],
+    "forbiddenScope": [
+      "App/KRALIAgentNative/AgentEngine.swift",
+      "App/KRALIAgentNative/AgentLearningQueue.swift",
+      "App/KRALIAgentNative/AgentLearningStore.swift",
+      "App/KRALIAgentNative/AgentLearningSuggestionStore.swift",
+      "App/KRALIAgentNative/AgentPlanner.swift",
+      "App/KRALIAgentNative/AgentTaskOrchestrator.swift",
+      "Cloud/**",
+      "Mentor/**",
+      "VERSION",
+      ".github/**"
+    ],
+    "requiresPhysicalAction": false,
+    "requiresMainAccess": false,
+    "verification": {
+      "command": [
+        "node",
+        "Scripts/learning-suggestion-sidebar-self-test.mjs"
+      ],
+      "requireExitCode": 0,
+      "requiredStdout": [
+        "learning_suggestion_sidebar_self_test_ok",
+        "actions=accept,defer,suppress"
+      ],
+      "requiredArtifacts": [],
+      "timeoutSeconds": 120
+    }
+  }
+}
