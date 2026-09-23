@@ -4,6 +4,14 @@ import Combine
 
 @MainActor
 final class AgentEngine: ObservableObject {
+    private enum PendingDeveloperToolAction {
+        case desktopControlProbe
+        case developerSystemMutation(
+            learningJob: AgentLearningJob?,
+            briefURL: URL?
+        )
+    }
+
     @Published var messages: [ChatMessage] = []
     @Published var conversationHistory: [ConversationArchiveSegment] = []
     @Published var selectedConversationArchiveID: String?
@@ -142,6 +150,8 @@ final class AgentEngine: ObservableObject {
         TaskApprovalAudit?
     private var runtimeStepEvidence: [Int: String] = [:]
     private var runtimeExecutedCapabilityIDs = Set<String>()
+    private var pendingDeveloperToolAction:
+        PendingDeveloperToolAction?
 
     private var currentAppVersionString: String {
         Bundle.main.object(
