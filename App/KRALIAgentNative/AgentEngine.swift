@@ -5594,8 +5594,8 @@ final class AgentEngine: ObservableObject {
         guard !inspectorState.trainingLabBusy else { return }
 
         inspectorState.trainingLabBusy = true
-        inspectorState.trainingLabStatus = "KRALİ kendi temel yeterlilik testlerini çalıştırıyor…"
-        log("Training Lab başladı")
+        inspectorState.trainingLabStatus = "Simülasyon tabanlı temel yeterlilik testleri çalışıyor • fiziksel eylem uygulanmaz."
+        log("Training Lab başladı • simulation-only")
 
         Task {
             await Task.yield()
@@ -5695,8 +5695,8 @@ final class AgentEngine: ObservableObject {
 
         inspectorState.arenaBusy = true
         inspectorState.arenaStatus =
-            "KRALİ açık-dünya görevlerini planner + reviewer ile test ediyor…"
-        log("KRALİ Arena başladı")
+            "Planner + reviewer simülasyonu çalışıyor • fiziksel eylem uygulanmaz."
+        log("KRALİ Arena başladı • simulation-only")
 
         Task {
             let monitor = Task { @MainActor [weak self] in
