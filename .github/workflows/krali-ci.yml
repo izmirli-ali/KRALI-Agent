@@ -33,6 +33,22 @@ jobs:
           done
           node Scripts/cursor-architect-bridge.mjs --self-test
 
+      - name: Validate KRALI developer task cards
+        shell: bash
+        run: |
+          set -euo pipefail
+          python3 - <<'PY'
+          import glob, json
+          for path in glob.glob("DeveloperAgent/Tasks/*.json"):
+              print(f"Checking {path}")
+              with open(path, "r", encoding="utf-8") as f:
+                  data = json.load(f)
+              task = data.get("developerTask")
+              assert isinstance(task, dict), f"{path}: developerTask missing"
+              assert task.get("capabilityID"), f"{path}: capabilityID missing"
+              assert task.get("developerBrief"), f"{path}: developerBrief missing"
+          PY
+
       - name: Select newest Xcode
         shell: bash
         run: |

@@ -24,6 +24,25 @@ const branchName = process.env.KRALI_BRANCH || "";
 const gapLabel = process.env.KRALI_GAP_LABEL || "Capability";
 const appVersion = process.env.KRALI_APP_VERSION || "unknown";
 const runID = process.env.KRALI_RUN_ID || "";
+
+function parseStringArrayEnv(name) {
+  try {
+    const value = JSON.parse(process.env[name] || "[]");
+    return Array.isArray(value)
+      ? value.map((item) => String(item || "").trim()).filter(Boolean)
+      : [];
+  } catch {
+    return [];
+  }
+}
+
+const taskAllowedGlobs = parseStringArrayEnv(
+  "KRALI_TASK_ALLOWED_SCOPE"
+);
+const taskForbiddenGlobs = parseStringArrayEnv(
+  "KRALI_TASK_FORBIDDEN_SCOPE"
+);
+
 const checkpointFile =
   process.env.KRALI_CHECKPOINT_FILE || "";
 const runtimeSourceHints = (() => {
@@ -656,6 +675,46 @@ function safeRelativePath(input = "") {
   return { absolute: candidate, relative };
 }
 
+function globToRegExp(pattern) {
+  const normalized = String(pattern || "")
+    .replace(/\\/g, "/")
+    .replace(/^\.\//, "");
+
+  let output = "^";
+  for (let index = 0; index < normalized.length; index += 1) {
+    const char = normalized[index];
+
+    if (char === "*" && normalized[index + 1] === "*") {
+      output += ".*";
+      index += 1;
+      continue;
+    }
+
+    if (char === "*") {
+      output += "[^/]*";
+      continue;
+    }
+
+    if (char === "?") {
+      output += "[^/]";
+      continue;
+    }
+
+    output += /[.*+?^$()|[\]\\]/.test(char)
+      ? "\\" + char
+      : char;
+  }
+
+  output += "$";
+  return new RegExp(output);
+}
+
+function matchesAnyGlob(value, patterns) {
+  return patterns.some((pattern) =>
+    globToRegExp(pattern).test(value)
+  );
+}
+
 function assertMutablePath(relative) {
   const normalized = String(relative || "")
     .replace(/\\/g, "/")
@@ -668,6 +727,24 @@ function assertMutablePath(relative) {
   ) {
     throw new Error(
       "Korunan proje alanına yazma reddedildi: " + normalized
+    );
+  }
+
+  if (
+    taskForbiddenGlobs.length > 0 &&
+    matchesAnyGlob(normalized, taskForbiddenGlobs)
+  ) {
+    throw new Error(
+      "Developer task forbiddenScope yazma reddedildi: " + normalized
+    );
+  }
+
+  if (
+    taskAllowedGlobs.length > 0 &&
+    !matchesAnyGlob(normalized, taskAllowedGlobs)
+  ) {
+    throw new Error(
+      "Developer task allowedScope dışında yazma reddedildi: " + normalized
     );
   }
 }

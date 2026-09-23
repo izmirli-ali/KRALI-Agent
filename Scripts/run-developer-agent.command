@@ -16,6 +16,7 @@ SKILL_DIR="$HOME/Library/Application Support/KRALI Agent/Skills"
 SKILL_CANDIDATE_DIR="$SKILL_DIR/Candidates"
 SKILL_LIBRARY_FILE="$SKILL_DIR/skill-library.json"
 LEARNING_JOB_FILE="${KRALI_LEARNING_JOB_FILE:-}"
+DEV_TASK_FILE="${KRALI_DEV_TASK_FILE:-}"
 APPROVED_SYSTEM_EFFECT="${KRALI_APPROVED_SYSTEM_EFFECT:-}"
 APPROVED_SYSTEM_EFFECT_USED=0
 CURSOR_ARCHITECT_ENABLED="${KRALI_CURSOR_ARCHITECT_ENABLED:-1}"
@@ -912,6 +913,12 @@ if [ -n "$LEARNING_JOB_FILE" ] &&
     echo "Learning Queue job brief bulundu; mutable Mentor latest yerine immutable job kullanılacak." | tee -a "$LOG"
 fi
 
+if [ -n "$DEV_TASK_FILE" ] &&
+   [ -f "$DEV_TASK_FILE" ]; then
+    DIAGNOSTIC_DECISION="run"
+    echo "Kontrollü KRALİ Developer görevi bulundu; task kartı kullanılacak." | tee -a "$LOG"
+fi
+
 if [ "$DIAGNOSTIC_DECISION" = "green" ]; then
     write_status "no_change|Training Lab, Live Research Eval ve Arena güncel sürümde yeşil; Developer Agent çalıştırılmadı"
     echo "✅ Güncel diagnostic'ler yeşil. Cline çağrısı gereksiz olduğu için atlandı." | tee -a "$LOG"
@@ -929,6 +936,10 @@ GAP_SOURCE="$LOCAL_MENTOR_DIR/latest.json"
 if [ -n "$LEARNING_JOB_FILE" ] &&
    [ -f "$LEARNING_JOB_FILE" ]; then
     GAP_SOURCE="$LEARNING_JOB_FILE"
+fi
+if [ -n "$DEV_TASK_FILE" ] &&
+   [ -f "$DEV_TASK_FILE" ]; then
+    GAP_SOURCE="$DEV_TASK_FILE"
 fi
 
 GAP_MODE="$("$NODE_BIN" - "$GAP_SOURCE" "$PROMPT_FILE" "$LOCAL_MENTOR_DIR/latest.json" "$LOCAL_MENTOR_DIR/application-resolution-latest.json" <<'NODE'
@@ -960,19 +971,40 @@ try {
 } catch {}
 
 const gap =
-  payload && payload.gap
-    ? payload.gap
+  payload && payload.developerTask
+    ? payload.developerTask
     : (
-        payload &&
-        Array.isArray(payload.capabilityGaps)
-          ? payload.capabilityGaps[0]
-          : null
+        payload && payload.gap
+          ? payload.gap
+          : (
+              payload &&
+              Array.isArray(payload.capabilityGaps)
+                ? payload.capabilityGaps[0]
+                : null
+            )
       );
 
 if (!gap) {
   process.stdout.write("full");
   process.exit(0);
 }
+
+const taskMetadata =
+  payload && payload.developerTask &&
+  payload.taskMetadata &&
+  typeof payload.taskMetadata === "object"
+    ? payload.taskMetadata
+    : null;
+
+const taskAllowedScope =
+  taskMetadata && Array.isArray(taskMetadata.allowedScope)
+    ? taskMetadata.allowedScope.map(String)
+    : [];
+
+const taskForbiddenScope =
+  taskMetadata && Array.isArray(taskMetadata.forbiddenScope)
+    ? taskMetadata.forbiddenScope.map(String)
+    : [];
 
 const candidates =
   Array.isArray(gap.candidateCapabilityIDs) &&
@@ -1370,6 +1402,15 @@ const prompt = [
   "",
   "Developer Brief:", String(gap.developerBrief || ""),
   "",
+  "Developer task mutation scope:",
+  taskMetadata
+    ? (
+        "ALLOW=" + JSON.stringify(taskAllowedScope) +
+        "\nDENY=" + JSON.stringify(taskForbiddenScope) +
+        "\nBu scope yalnız açıklama değil; mutation tool katmanı tarafından da enforce edilir."
+      )
+    : "Runtime capability gap için standart protected-path policy kullanılıyor.",
+  "",
   "Güncel runtime kanıtı:",
   runtimeEvidence.length > 0
     ? runtimeEvidence.join("\n")
@@ -1440,12 +1481,16 @@ const file = process.argv[2];
 try {
   const payload = JSON.parse(fs.readFileSync(file, "utf8"));
   const gap =
-    payload && payload.gap
-      ? payload.gap
+    payload && payload.developerTask
+      ? payload.developerTask
       : (
-          Array.isArray(payload.capabilityGaps)
-            ? payload.capabilityGaps[0]
-            : null
+          payload && payload.gap
+            ? payload.gap
+            : (
+                Array.isArray(payload.capabilityGaps)
+                  ? payload.capabilityGaps[0]
+                  : null
+              )
         );
   if (gap) {
     process.stdout.write(
@@ -1462,12 +1507,16 @@ const fs = require("fs");
 try {
   const payload = JSON.parse(fs.readFileSync(process.argv[2], "utf8"));
   const gap =
-    payload && payload.gap
-      ? payload.gap
+    payload && payload.developerTask
+      ? payload.developerTask
       : (
-          Array.isArray(payload && payload.capabilityGaps)
-            ? payload.capabilityGaps[0]
-            : null
+          payload && payload.gap
+            ? payload.gap
+            : (
+                Array.isArray(payload && payload.capabilityGaps)
+                  ? payload.capabilityGaps[0]
+                  : null
+              )
         );
   process.stdout.write(String(gap && gap.learningPath || "integration"));
 } catch {
@@ -1491,13 +1540,17 @@ const mentor = readJSON(process.argv[2]);
 const source = readJSON(process.argv[3]);
 
 const gap =
-  source && source.gap
-    ? source.gap
+  source && source.developerTask
+    ? source.developerTask
     : (
-        source &&
-        Array.isArray(source.capabilityGaps)
-          ? source.capabilityGaps[0]
-          : null
+        source && source.gap
+          ? source.gap
+          : (
+              source &&
+              Array.isArray(source.capabilityGaps)
+                ? source.capabilityGaps[0]
+                : null
+            )
       );
 
 const capabilityID = String(
@@ -1613,12 +1666,16 @@ const crypto = require("crypto");
 try {
   const payload = JSON.parse(fs.readFileSync(process.argv[2], "utf8"));
   const gap =
-    payload && payload.gap
-      ? payload.gap
+    payload && payload.developerTask
+      ? payload.developerTask
       : (
-          Array.isArray(payload && payload.capabilityGaps)
-            ? payload.capabilityGaps[0]
-            : null
+          payload && payload.gap
+            ? payload.gap
+            : (
+                Array.isArray(payload && payload.capabilityGaps)
+                  ? payload.capabilityGaps[0]
+                  : null
+              )
         );
 
   if (!gap) {
@@ -1963,7 +2020,7 @@ if [ "$CLINE_EXIT" -ne 0 ]; then
 
     CURSOR_ARCHITECT_ELIGIBLE=0
     case "$FAILURE_STATE" in
-        local_agent_iteration_limit|local_agent_root_cause_inconclusive|local_agent_strategy_escalation_inconclusive|local_agent_tool_protocol_failed)
+        local_agent_iteration_limit|local_agent_root_cause_inconclusive|local_agent_strategy_escalation_inconclusive|local_agent_tool_protocol_failed|local_agent_completion_gate_failed)
             CURSOR_ARCHITECT_ELIGIBLE=1
             ;;
     esac
@@ -1975,7 +2032,7 @@ if [ "$CLINE_EXIT" -ne 0 ]; then
     CURSOR_ARCHITECT_CACHED=0
     if [ -f "$CURSOR_ARCHITECT_RESULT" ] &&
        [ "$CURSOR_ARCHITECT_ELIGIBLE" -eq 1 ]; then
-        CURSOR_ARCHITECT_CACHED="$("$NODE_BIN" - "$CURSOR_ARCHITECT_RESULT" "$GAP_LABEL" "$(/bin/cat "$ROOT/VERSION" 2>/dev/null | /usr/bin/tr -d '[:space:]')" <<'NODE'
+        CURSOR_ARCHITECT_CACHED="$("$NODE_BIN" - "$CURSOR_ARCHITECT_RESULT" "$GAP_LABEL" "$(/bin/cat "$ROOT/VERSION" 2>/dev/null | /usr/bin/tr -d '[:space:]')" "$CURSOR_ARCHITECT_FINGERPRINT" <<'NODE'
 const fs = require("fs");
 try {
   const payload = JSON.parse(fs.readFileSync(process.argv[2], "utf8"));

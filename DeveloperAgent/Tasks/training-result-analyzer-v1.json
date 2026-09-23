@@ -1,0 +1,32 @@
+{
+  "developerTask": {
+    "capabilityID": "developer.task.training-result-analyzer",
+    "capabilityName": "Training Result Analyzer",
+    "kind": "developerTask",
+    "learningPath": "primitivePatch",
+    "reason": "KRALİ geliştirme ekibinde kontrollü junior developer olarak düşük riskli ve objektif ölçülebilir bir ilk görev üstlenecek.",
+    "researchGoal": "Mentor/training-latest.json ve Mentor/regression-status.json girdilerinden sürüm tazeliği, Core/North Star PASS/FAIL, bilinen failure listesi ve önceki run'a göre delta üreten genel bir analyzer geliştir.",
+    "candidateCapabilityIDs": [],
+    "developerBrief": "Amaç: Scripts/training-result-analyzer.mjs adında side-effect-free bir Node aracı oluştur.\nGirdi: --current <training.json> --regression <regression-status.json> ve opsiyonel --previous <training.json>.\nÇıktı: stdout'ta valid JSON. İsteğe bağlı --markdown ile insan okunur özet.\nZorunlu alanlar: currentVersion, trainingVersion, freshness, totals, core, northStar, failedScenarioIDs, fixedSincePrevious, newFailuresSincePrevious, unchangedFailures, delta.\nRegression status current version ile training appVersion farklıysa freshness=stale olmalı; stale rapordan yeni sürüm için başarı sonucu çıkarılmamalı.\nÖnceki run verilmezse delta alanları unknown/null semantiğiyle açıkça belirtilmeli.\nScenario ID bazında karşılaştır; sıralama farkını regression sayma.\nYeni dependency ekleme.\nGerçek Mac action, network, shell side effect veya repo dışı yazma yapma.\nNode built-in test veya küçük fixture'larla en az şu durumları doğrula: stale current, fresh current, fixed failure, new failure, unchanged failure, previous missing.\nMevcut core runtime/planner/approval dosyalarını değiştirme.\nİş sonunda git diff + build-check PASS raporla."
+  },
+  "taskMetadata": {
+    "owner": "ChatGPT Lead / KRALİ team",
+    "risk": "low",
+    "allowedScope": [
+      "Scripts/training-result-analyzer.mjs",
+      "DeveloperAgent/Tests/training-result-analyzer/**",
+      "DeveloperAgent/README.md"
+    ],
+    "forbiddenScope": [
+      "VERSION",
+      "Mentor/**",
+      ".github/**",
+      "App/KRALIAgentNative/AgentApproval*.swift",
+      "App/KRALIAgentNative/AgentEngine.swift",
+      "App/KRALIAgentNative/AgentTaskGraph*.swift",
+      "App/KRALIAgentNative.xcodeproj/**"
+    ],
+    "requiresPhysicalAction": false,
+    "requiresMainAccess": false
+  }
+}
