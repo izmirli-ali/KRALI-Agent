@@ -80,6 +80,7 @@ struct MentorTrace: Codable {
     let semanticMission: AgentSemanticMission?
     let semanticPlannerProvider: String?
     let taskGraph: [MentorTraceTaskGraphStep]
+    let approvalAudit: TaskApprovalAudit?
     let runtimeTask: AgentRuntimeTask?
     let problemResolution: AgentProblemResolution?
     let outcomeResolution: AgentOutcomeResolution?
@@ -127,6 +128,7 @@ struct MentorTraceStore {
         semanticMission: AgentSemanticMission?,
         semanticPlannerProvider: String?,
         taskGraph: AgentTaskGraph?,
+        approvalAudit: TaskApprovalAudit?,
         runtimeTask: AgentRuntimeTask?,
         problemResolution: AgentProblemResolution?,
         outcomeResolution: AgentOutcomeResolution?,
@@ -205,6 +207,8 @@ struct MentorTraceStore {
                                 .sorted()
                     )
                 } ?? [],
+            approvalAudit:
+                approvalAudit,
             runtimeTask:
                 runtimeTask,
             problemResolution:
