@@ -1,12 +1,12 @@
 {
-  "appVersion" : "0.8.27",
-  "corePassed" : 27,
-  "coreTotal" : 27,
-  "createdAt" : "2026-09-20T12:41:52Z",
-  "failed" : 0,
+  "appVersion" : "0.10.17",
+  "corePassed" : 54,
+  "coreTotal" : 65,
+  "createdAt" : "2026-09-23T11:08:51Z",
+  "failed" : 11,
   "northStarPassed" : 4,
   "northStarTotal" : 4,
-  "passed" : 31,
+  "passed" : 58,
   "results" : [
     {
       "diagnostics" : [
@@ -96,7 +96,7 @@
       "diagnostics" : [
 
       ],
-      "goal" : "bulguları analiz et → bağımsız fikir ve çıkarım üret → sonucu ve gerekçeyi açıkla",
+      "goal" : "Bu verileri analiz et, önemli çıkarımları nedenleriyle açıkla ve benim söylemediğim olası fırsatları da ekle",
       "passed" : true,
       "prompt" : "Bu verileri analiz et, önemli çıkarımları nedenleriyle açıkla ve benim söylemediğim olası fırsatları da ekle",
       "route" : [
@@ -176,7 +176,7 @@
       "diagnostics" : [
 
       ],
-      "goal" : "bağımsız fikir ve çıkarım üret → sonucu ve gerekçeyi açıkla",
+      "goal" : "bu hesap için az önce söylediklerinden 3 reels fikri çıkar",
       "passed" : true,
       "prompt" : "bu hesap için az önce söylediklerinden 3 reels fikri çıkar",
       "route" : [
@@ -200,7 +200,7 @@
       "diagnostics" : [
 
       ],
-      "goal" : "verilen veya önceki çıktıyı istenen formata dönüştür",
+      "goal" : "şimdi Estafiz'e dön, az önceki Reels fikirlerinden birincisini 30 saniyelik çekim senaryosuna çevir",
       "passed" : true,
       "prompt" : "şimdi Estafiz'e dön, az önceki Reels fikirlerinden birincisini 30 saniyelik çekim senaryosuna çevir",
       "route" : [
@@ -222,17 +222,21 @@
     },
     {
       "diagnostics" : [
-
+        "Eksik hedef sonuçları: research",
+        "Seçilmemiş capability: research.web",
+        "Yanlış capability seçimi: files.search",
+        "Eksik rota aşaması: Research",
+        "Plan adımı eksik: Kaynakları oku"
       ],
-      "goal" : "bulguları analiz et → güncel kaynaklarla araştır → sonucu ve gerekçeyi açıkla",
-      "passed" : true,
+      "goal" : "videoları bul → bulguları analiz et → sonucu ve gerekçeyi açıkla",
+      "passed" : false,
       "prompt" : "Sony A7 IV ile Fuji X-T5 arasında video açısından temel farklar neler?",
       "route" : [
         "Core",
         "Goal",
         "Context",
         "Plan",
-        "Research",
+        "Files",
         "Verify",
         "Response"
       ],
@@ -240,7 +244,8 @@
       "selectedCapabilities" : [
         "context.local",
         "core.reasoning",
-        "research.web"
+        "files.metadata",
+        "files.search"
       ],
       "tier" : "core",
       "title" : "Bilgi karşılaştırmasını yerel dosya aramasından ayırma",
@@ -250,17 +255,21 @@
     },
     {
       "diagnostics" : [
-
+        "Eksik hedef sonuçları: research",
+        "Seçilmemiş capability: research.web",
+        "Yanlış capability seçimi: files.search",
+        "Eksik rota aşaması: Research",
+        "Plan adımı eksik: Kaynakları oku"
       ],
-      "goal" : "bulguları analiz et → güncel kaynaklarla araştır → sonucu ve gerekçeyi açıkla",
-      "passed" : true,
+      "goal" : "videoları bul → bulguları analiz et → sonucu ve gerekçeyi açıkla",
+      "passed" : false,
       "prompt" : "Sony A7 IV ile Fuji X-T5 arasında video açısından temel farklar neler?",
       "route" : [
         "Core",
         "Goal",
         "Context",
         "Plan",
-        "Research",
+        "Files",
         "Verify",
         "Response"
       ],
@@ -268,7 +277,8 @@
       "selectedCapabilities" : [
         "context.local",
         "core.reasoning",
-        "research.web"
+        "files.metadata",
+        "files.search"
       ],
       "tier" : "core",
       "title" : "Eski hafıza güncel karşılaştırmayı bastırmamalı",
@@ -280,7 +290,7 @@
       "diagnostics" : [
 
       ],
-      "goal" : "istenen içeriği oluştur → verilen veya önceki çıktıyı istenen formata dönüştür → sonucu ve gerekçeyi açıkla",
+      "goal" : "Estafiz için 30 saniyelik bir Reels çekim planı hazırla. 3 bölüm olsun: açılış, ana mesaj ve kapanış. Her bölüm için süre aralığını yaz. Önemli cümleleri kalın göster, maddeler kullan ve kısa bir Neden işe yarar bölümü ekle.",
       "passed" : true,
       "prompt" : "Estafiz için 30 saniyelik bir Reels çekim planı hazırla. 3 bölüm olsun: açılış, ana mesaj ve kapanış. Her bölüm için süre aralığını yaz. Önemli cümleleri kalın göster, maddeler kullan ve kısa bir Neden işe yarar bölümü ekle.",
       "route" : [
@@ -304,7 +314,7 @@
       "diagnostics" : [
 
       ],
-      "goal" : "istenen içeriği oluştur",
+      "goal" : "Şimdi Vox Coffee Co. için 30 saniyelik bir Reels planı hazırla. Estafiz'den öğrendiğin marka detaylarını kullanma; yalnızca genel çalışma yöntemini kullan.",
       "passed" : true,
       "prompt" : "Şimdi Vox Coffee Co. için 30 saniyelik bir Reels planı hazırla. Estafiz'den öğrendiğin marka detaylarını kullanma; yalnızca genel çalışma yöntemini kullan.",
       "route" : [
@@ -328,7 +338,7 @@
       "diagnostics" : [
 
       ],
-      "goal" : "verilen veya önceki çıktıyı istenen formata dönüştür",
+      "goal" : "şu metni düzgün Türkçeyle yeniden yaz: “şuan birşey yapmıyorum ama yada yarın devam ederiz, herkez gelirse kapanışda konuşuruz”",
       "passed" : true,
       "prompt" : "şu metni düzgün Türkçeyle yeniden yaz: “şuan birşey yapmıyorum ama yada yarın devam ederiz, herkez gelirse kapanışda konuşuruz”",
       "route" : [
@@ -496,7 +506,7 @@
       "diagnostics" : [
 
       ],
-      "goal" : "doğal konuşmayı sürdür",
+      "goal" : "nasılsın, bugün ne yapıyorsun?",
       "passed" : true,
       "prompt" : "nasılsın, bugün ne yapıyorsun?",
       "route" : [
@@ -528,6 +538,7 @@
         "Goal",
         "Context",
         "Plan",
+        "Desktop",
         "Files",
         "Verify",
         "Response"
@@ -536,6 +547,7 @@
       "selectedCapabilities" : [
         "context.local",
         "core.reasoning",
+        "desktop.app",
         "files.reveal"
       ],
       "tier" : "core",
@@ -575,31 +587,33 @@
     },
     {
       "diagnostics" : [
-
+        "Eksik hedef sonuçları: communicate",
+        "Seçilmemiş capability: mail.work",
+        "Eksik rota aşaması: Learn, Mail, Verify",
+        "Plan adımı eksik: Yetkinlik edinme planı oluştur",
+        "Eksik öğrenme planı: mail.work"
       ],
-      "goal" : "iletişim görevini yürüt",
-      "passed" : true,
+      "goal" : "istenen uygulamayı aç veya öne getir",
+      "passed" : false,
       "prompt" : "günlük iş özetimi mail taslağına çevir ve göndermeden önce bana göster",
       "route" : [
         "Core",
         "Goal",
         "Context",
         "Plan",
-        "Mail",
-        "Learn",
-        "Verify",
+        "Desktop",
         "Response"
       ],
       "scenarioID" : "mail-gap",
       "selectedCapabilities" : [
         "context.local",
         "core.reasoning",
-        "mail.work"
+        "desktop.app"
       ],
       "tier" : "core",
       "title" : "Mail capability gap",
       "unavailableCapabilities" : [
-        "mail.work"
+
       ]
     },
     {
@@ -663,7 +677,7 @@
       "diagnostics" : [
 
       ],
-      "goal" : "bulguları analiz et → sonucu ve gerekçeyi açıkla",
+      "goal" : "bulguları analiz et → istenen sonucu aç → güncel kaynaklarla araştır → sonucu ve gerekçeyi açıkla",
       "passed" : true,
       "prompt" : "markanın resmi sitesine gir, ürün sayfalarını incele ve rakiplerine göre eksik gördüğün alanları raporla",
       "route" : [
@@ -672,6 +686,8 @@
         "Context",
         "Plan",
         "Browser",
+        "Desktop",
+        "Screen",
         "Learn",
         "Verify",
         "Response"
@@ -680,7 +696,10 @@
       "selectedCapabilities" : [
         "browser.control",
         "context.local",
-        "core.reasoning"
+        "core.reasoning",
+        "desktop.app",
+        "perception.screen",
+        "system.open.url"
       ],
       "tier" : "northStar",
       "title" : "Tarayıcıda yeni görev",
@@ -789,6 +808,29 @@
       "diagnostics" : [
 
       ],
+      "goal" : "Yalnız açık devam referansında önceki task/research metnini taşı",
+      "passed" : true,
+      "prompt" : "Mail uygulamasını aç, son gelen maili incele ve cevap taslağı hazırla.",
+      "route" : [
+        "Core",
+        "Context",
+        "Verify"
+      ],
+      "scenarioID" : "execution-context-firewall",
+      "selectedCapabilities" : [
+        "context.local",
+        "core.reasoning"
+      ],
+      "tier" : "core",
+      "title" : "Yeni görev sentezini eski task metninden ayırma",
+      "unavailableCapabilities" : [
+
+      ]
+    },
+    {
+      "diagnostics" : [
+
+      ],
       "goal" : "Yeni kullanıcı girdisini stale fileSearch goal'ünden ayır",
       "passed" : true,
       "prompt" : "Bu yaptığımız çalışma biçimini ileride benzer sosyal medya video işleri için de kullan. Ama Estafiz'e özel marka detaylarını başka markalara otomatik uygulama.",
@@ -811,7 +853,7 @@
       "diagnostics" : [
 
       ],
-      "goal" : "Kullanıcının hedefini anlamlandır ve uygulanabilir bir sonraki adımı seç",
+      "goal" : "istenen uygulamayı aç veya öne getir",
       "passed" : true,
       "prompt" : "Notlar uygulamasını aç.",
       "route" : [
@@ -828,7 +870,872 @@
       "unavailableCapabilities" : [
 
       ]
+    },
+    {
+      "diagnostics" : [
+
+      ],
+      "goal" : "uygulama kelimesi olmadan hedef uygulamayı aç",
+      "passed" : true,
+      "prompt" : "spotifyı aç",
+      "route" : [
+        "Core",
+        "Desktop"
+      ],
+      "scenarioID" : "natural-language-short-app-open",
+      "selectedCapabilities" : [
+        "desktop.app"
+      ],
+      "tier" : "core",
+      "title" : "Kısa uygulama açma komutunu algılama",
+      "unavailableCapabilities" : [
+
+      ]
+    },
+    {
+      "diagnostics" : [
+
+      ],
+      "goal" : "Türkçe belirtme ekini uygulama adından ayır",
+      "passed" : true,
+      "prompt" : "takvimi aç",
+      "route" : [
+        "Core",
+        "Desktop"
+      ],
+      "scenarioID" : "natural-language-inflected-app-name",
+      "selectedCapabilities" : [
+        "desktop.app"
+      ],
+      "tier" : "core",
+      "title" : "Türkçe ekli uygulama adını çözme",
+      "unavailableCapabilities" : [
+
+      ]
+    },
+    {
+      "diagnostics" : [
+
+      ],
+      "goal" : "Türkçe ek çözümünü yalnız kullanıcı girdisine uygula; canonical candidate aliaslarını bozma",
+      "passed" : true,
+      "prompt" : "Canonical app aliaslarını dil-spesifik ek kurallarıyla değiştirme",
+      "route" : [
+        "Core",
+        "Language",
+        "Desktop"
+      ],
+      "scenarioID" : "candidate-alias-suffix-isolation",
+      "selectedCapabilities" : [
+        "desktop.app"
+      ],
+      "tier" : "core",
+      "title" : "Candidate aliaslarında Türkçe suffix stripping izolasyonu",
+      "unavailableCapabilities" : [
+
+      ]
+    },
+    {
+      "diagnostics" : [
+
+      ],
+      "goal" : "küçük yazım hatasını güvenli fuzzy eşleşmeyle düzelt",
+      "passed" : true,
+      "prompt" : "spotfiy aç",
+      "route" : [
+        "Core",
+        "Desktop"
+      ],
+      "scenarioID" : "natural-language-typo-app-name",
+      "selectedCapabilities" : [
+        "desktop.app"
+      ],
+      "tier" : "core",
+      "title" : "Küçük yazım hatalı uygulama adını çözme",
+      "unavailableCapabilities" : [
+
+      ]
+    },
+    {
+      "diagnostics" : [
+
+      ],
+      "goal" : "Çalışan uygulama ve disk kaynaklarından gelen aynı bundle aliaslarını kaybetmeden birleştir",
+      "passed" : true,
+      "prompt" : "Örnek uygulamasını aç",
+      "route" : [
+        "Core",
+        "Desktop"
+      ],
+      "scenarioID" : "duplicate-application-localized-alias-merge",
+      "selectedCapabilities" : [
+        "desktop.app"
+      ],
+      "tier" : "core",
+      "title" : "Aynı bundle için yerelleştirilmiş uygulama aliaslarını koruma",
+      "unavailableCapabilities" : [
+
+      ]
+    },
+    {
+      "diagnostics" : [
+
+      ],
+      "goal" : "Yerelleştirilmiş uygulama adını normalize etmeden macOS çözümleyicisine aktar",
+      "passed" : true,
+      "prompt" : "Sistem Ayarları uygulamasını aç ve gerçekten ön planda olduğunu doğrula.",
+      "route" : [
+        "Core",
+        "Desktop",
+        "LaunchServices"
+      ],
+      "scenarioID" : "localized-application-display-target",
+      "selectedCapabilities" : [
+        "desktop.app"
+      ],
+      "tier" : "core",
+      "title" : "LaunchServices için kullanıcıdaki uygulama adını koruma",
+      "unavailableCapabilities" : [
+
+      ]
+    },
+    {
+      "diagnostics" : [
+        "Negatif 'değiştirme' talimatı app.workflow capability'sini yanlışlıkla ekledi."
+      ],
+      "goal" : "Yalnız uygulamayı aç ve foreground doğrula; yasaklanan değişikliği capability isteği sayma",
+      "passed" : false,
+      "prompt" : "Sistem Ayarları uygulamasını aç ve gerçekten ön planda olduğunu doğrula. Herhangi bir ayarı değiştirme.",
+      "route" : [
+        "Core",
+        "Goal",
+        "Desktop"
+      ],
+      "scenarioID" : "prohibited-app-mutation-no-workflow",
+      "selectedCapabilities" : [
+        "app.workflow",
+        "context.local",
+        "core.reasoning",
+        "desktop.app",
+        "desktop.control"
+      ],
+      "tier" : "core",
+      "title" : "Negatif uygulama talimatını workflow isteği saymama",
+      "unavailableCapabilities" : [
+
+      ]
+    },
+    {
+      "diagnostics" : [
+
+      ],
+      "goal" : "uygulama açma isteğini uygulama capability'sine yönlendir",
+      "passed" : true,
+      "prompt" : "Mail'i aç",
+      "route" : [
+        "Core",
+        "Desktop"
+      ],
+      "scenarioID" : "mail-app-open-routing",
+      "selectedCapabilities" : [
+        "core.reasoning",
+        "context.local",
+        "desktop.app"
+      ],
+      "tier" : "core",
+      "title" : "Mail uygulaması açma intent ayrımı",
+      "unavailableCapabilities" : [
+
+      ]
+    },
+    {
+      "diagnostics" : [
+
+      ],
+      "goal" : "uygulama açma isteğini uygulama capability'sine yönlendir",
+      "passed" : true,
+      "prompt" : "Finder'ı aç",
+      "route" : [
+        "Core",
+        "Desktop"
+      ],
+      "scenarioID" : "finder-app-open-routing",
+      "selectedCapabilities" : [
+        "core.reasoning",
+        "context.local",
+        "desktop.app"
+      ],
+      "tier" : "core",
+      "title" : "Finder uygulaması açma intent ayrımı",
+      "unavailableCapabilities" : [
+
+      ]
+    },
+    {
+      "diagnostics" : [
+
+      ],
+      "goal" : "mail taslağı isteğini iletişim capability'sine yönlendir",
+      "passed" : true,
+      "prompt" : "Bugün yaptıklarımı müdürüme göndermek için mail taslağı hazırla.",
+      "route" : [
+        "Core",
+        "Mail"
+      ],
+      "scenarioID" : "mail-workflow-routing",
+      "selectedCapabilities" : [
+        "core.reasoning",
+        "context.local",
+        "mail.work"
+      ],
+      "tier" : "core",
+      "title" : "Mail uygulaması ile mail iş akışını ayırma",
+      "unavailableCapabilities" : [
+        "mail.work"
+      ]
+    },
+    {
+      "diagnostics" : [
+        "Cross-provider task graph rol/dependency/blocked capability sözleşmesi bozuldu."
+      ],
+      "goal" : "Provider bağımsız dependency zinciri kur",
+      "passed" : false,
+      "prompt" : "Uygulama verisini oku, araştır, analiz et ve dosyaya yaz.",
+      "route" : [
+        "Core",
+        "Desktop",
+        "Screen",
+        "Research",
+        "Files"
+      ],
+      "scenarioID" : "task-graph-cross-provider-dataflow",
+      "selectedCapabilities" : [
+        "desktop.app",
+        "perception.screen",
+        "research.web",
+        "core.reasoning",
+        "files.write.text"
+      ],
+      "tier" : "core",
+      "title" : "Cross-provider veri akışı görev grafiği",
+      "unavailableCapabilities" : [
+
+      ]
+    },
+    {
+      "diagnostics" : [
+
+      ],
+      "goal" : "Hazırlık step'lerini commit step'inden ayır",
+      "passed" : true,
+      "prompt" : "Oku, analiz et, taslak oluştur; gönderimi onay kapısında durdur.",
+      "route" : [
+        "Core",
+        "Mail",
+        "Approval"
+      ],
+      "scenarioID" : "task-graph-external-commit-approval",
+      "selectedCapabilities" : [
+        "mail.work",
+        "core.reasoning",
+        "mail.work",
+        "mail.work"
+      ],
+      "tier" : "core",
+      "title" : "External commit öncesi kullanıcı onayı",
+      "unavailableCapabilities" : [
+        "mail.work"
+      ]
+    },
+    {
+      "diagnostics" : [
+
+      ],
+      "goal" : "Çok adımlı hedefi semantic task graph planner'a bırak",
+      "passed" : true,
+      "prompt" : "Mail uygulamasını aç, son gelen maili incele, ne yapmamız gerektiğini analiz et ve cevap taslağı hazırla.",
+      "route" : [
+        "Core",
+        "Plan"
+      ],
+      "scenarioID" : "compound-command-bypasses-app-fast-path",
+      "selectedCapabilities" : [
+
+      ],
+      "tier" : "core",
+      "title" : "Karmaşık komutu basit app-open'dan ayırma",
+      "unavailableCapabilities" : [
+
+      ]
+    },
+    {
+      "diagnostics" : [
+        "Current-goal mission normalizer capability veya operation zincirini yanlış kurdu."
+      ],
+      "goal" : "Stale capability/step kalıntılarını atıp gerçek cross-provider zinciri kur",
+      "passed" : false,
+      "prompt" : "Bir uygulamayı aç, şu anda açık olan içeriği bul, bununla ilgili bilgiyi araştır, analiz et ve masaüstündeki proje klasörüne txt dosyası olarak kaydet.",
+      "route" : [
+        "Core",
+        "Desktop",
+        "Screen",
+        "Research",
+        "Files"
+      ],
+      "scenarioID" : "compound-mission-current-goal-normalization",
+      "selectedCapabilities" : [
+        "context.local",
+        "core.reasoning",
+        "files.search",
+        "files.write.text",
+        "research.web"
+      ],
+      "tier" : "core",
+      "title" : "Karmaşık görevi current goal'den yeniden kurma",
+      "unavailableCapabilities" : [
+
+      ]
+    },
+    {
+      "diagnostics" : [
+
+      ],
+      "goal" : "Özel provider bilinmese de açma dışındaki uygulama içi hedefi gerçek observation strategy'sine taşı",
+      "passed" : true,
+      "prompt" : "Takvim uygulamasını aç. Yarınki ilk etkinliği bul, başlığını ve saatini bana söyle. Ardından bu etkinlik için 15 dakika öncesine bir hatırlatma eklemeyi hazırla ama benden onay almadan hiçbir değişiklik yapma.",
+      "route" : [
+        "Core",
+        "Desktop",
+        "Learn",
+        "GapResolver"
+      ],
+      "scenarioID" : "generic-app-workflow-gap",
+      "selectedCapabilities" : [
+        "app.workflow",
+        "context.local",
+        "core.reasoning",
+        "desktop.app"
+      ],
+      "tier" : "core",
+      "title" : "Bilinmeyen uygulama içi işi generic read-only strategy'ye yönlendirme",
+      "unavailableCapabilities" : [
+
+      ]
+    },
+    {
+      "diagnostics" : [
+
+      ],
+      "goal" : "Salt-okunur observation ve uygulanmamış hazırlık serbest; doğrudan dış değişiklik yasak",
+      "passed" : true,
+      "prompt" : "Yarınki ilk kaydı bul ve değişikliği yalnız hazırla; onay almadan ekleme yapma.",
+      "route" : [
+        "Desktop",
+        "ScreenPerception",
+        "AppWorkflow",
+        "Verify"
+      ],
+      "scenarioID" : "generic-app-workflow-commit-safety",
+      "selectedCapabilities" : [
+        "desktop.app",
+        "perception.screen",
+        "app.workflow"
+      ],
+      "tier" : "core",
+      "title" : "Generic app workflow hazırlık ile dış commit'i ayırmalı",
+      "unavailableCapabilities" : [
+
+      ]
+    },
+    {
+      "diagnostics" : [
+
+      ],
+      "goal" : "Desktop provider'a tüm görev yerine yalnız hedef uygulama adını gönder",
+      "passed" : true,
+      "prompt" : "Takvim uygulamasını aç. Yarınki ilk etkinliği bul, başlığını ve saatini bana söyle.",
+      "route" : [
+        "Core",
+        "Goal",
+        "Desktop"
+      ],
+      "scenarioID" : "compound-app-target-extraction",
+      "selectedCapabilities" : [
+        "desktop.app"
+      ],
+      "tier" : "core",
+      "title" : "Karmaşık komuttan uygulama hedefini ayırma",
+      "unavailableCapabilities" : [
+
+      ]
+    },
+    {
+      "diagnostics" : [
+
+      ],
+      "goal" : "Açılacak uygulamayı sonraki bölüm/cihaz adlarından ayır",
+      "passed" : true,
+      "prompt" : "Sistem Ayarları uygulamasını aç. Bluetooth bölümüne git ve bağlı cihazları listele.",
+      "route" : [
+        "Core",
+        "Goal",
+        "Desktop"
+      ],
+      "scenarioID" : "secondary-noun-app-isolation",
+      "selectedCapabilities" : [
+        "desktop.app",
+        "app.workflow"
+      ],
+      "tier" : "core",
+      "title" : "İkinci görev nesnesini uygulama adı sanmama",
+      "unavailableCapabilities" : [
+
+      ]
+    },
+    {
+      "diagnostics" : [
+        "Safari/URL görevi desktop.app + browser.control contract'ına doğru normalize edilmedi veya salt-okunur gezinme gereksiz approval istedi."
+      ],
+      "goal" : "Planner başarısız olsa bile desktop + browser contract üret ve Learn hattına geçir",
+      "passed" : false,
+      "prompt" : "Safari’yi aç. example.com adresine git ve sayfadaki ana başlığı oku, bana söyle. Ardından yeni bir sekmede wikipedia.org adresini açmayı hazırla ama benden onay almadan yeni sekme açma.",
+      "route" : [
+        "Core",
+        "Goal",
+        "Desktop",
+        "Browser",
+        "Learn"
+      ],
+      "scenarioID" : "browser-workflow-contract",
+      "selectedCapabilities" : [
+        "browser.control",
+        "context.local",
+        "core.reasoning",
+        "desktop.app",
+        "perception.screen"
+      ],
+      "tier" : "core",
+      "title" : "URL içeren tarayıcı görevini capability gap'e dönüştürme",
+      "unavailableCapabilities" : [
+        "browser.control"
+      ]
+    },
+    {
+      "diagnostics" : [
+
+      ],
+      "goal" : "Debug/retry sonrası tamamlanmayan root provider'ı generic runtime gap say",
+      "passed" : true,
+      "prompt" : "Bir masaüstü uygulamasını aç ve içeriğini incele.",
+      "route" : [
+        "Core",
+        "Debug",
+        "GapResolver",
+        "Learn"
+      ],
+      "scenarioID" : "runtime-provider-failure-escalation",
+      "selectedCapabilities" : [
+        "desktop.app"
+      ],
+      "tier" : "core",
+      "title" : "Available provider runtime hatasını Learn hattına eskale etme",
+      "unavailableCapabilities" : [
+
+      ]
+    },
+    {
+      "diagnostics" : [
+
+      ],
+      "goal" : "Tek writer worker için fingerprint/dedupe kuyruğu oluştur",
+      "passed" : true,
+      "prompt" : "Arka arkaya bağımsız görevlerden aynı desktop.app hatası ve ayrı browser.control gap'i üret.",
+      "route" : [
+        "Debug",
+        "LearningQueue",
+        "DeveloperAgent"
+      ],
+      "scenarioID" : "learning-queue-deduplication",
+      "selectedCapabilities" : [
+        "desktop.app",
+        "browser.control"
+      ],
+      "tier" : "core",
+      "title" : "Aynı kök öğrenme hatasını birleştir, farklı capability'yi sıraya al",
+      "unavailableCapabilities" : [
+
+      ]
+    },
+    {
+      "diagnostics" : [
+
+      ],
+      "goal" : "Sadece gerçek commit eylemlerinde approval gate aç",
+      "passed" : true,
+      "prompt" : "Takvimde hatırlatmayı hazırla ama onay almadan hiçbir değişiklik yapma.",
+      "route" : [
+        "Core",
+        "Plan",
+        "Approval"
+      ],
+      "scenarioID" : "non-commit-workflow-approval",
+      "selectedCapabilities" : [
+        "app.workflow"
+      ],
+      "tier" : "core",
+      "title" : "Hazırlık görevini dış dünya commit'i gibi onaya sokmama",
+      "unavailableCapabilities" : [
+        "app.workflow"
+      ]
+    },
+    {
+      "diagnostics" : [
+
+      ],
+      "goal" : "Capability gap'i self-evolution hattına hazırla",
+      "passed" : true,
+      "prompt" : "Unavailable provider için güvenli developer brief üret.",
+      "route" : [
+        "Core",
+        "GapResolver"
+      ],
+      "scenarioID" : "capability-gap-classification",
+      "selectedCapabilities" : [
+        "mail.work"
+      ],
+      "tier" : "core",
+      "title" : "Eksik provider'ı strategy/code/integration olarak sınıflandırma",
+      "unavailableCapabilities" : [
+        "mail.work"
+      ]
+    },
+    {
+      "diagnostics" : [
+
+      ],
+      "goal" : "Scope=Desktop, filenameQuery=boş",
+      "passed" : true,
+      "prompt" : "masaüstündeki dosyaları bul",
+      "route" : [
+        "Core",
+        "Files",
+        "Query Parser"
+      ],
+      "scenarioID" : "file-query-desktop-scope",
+      "selectedCapabilities" : [
+        "files.search"
+      ],
+      "tier" : "core",
+      "title" : "Dosya sorgusunda Masaüstü kapsamını ayırma",
+      "unavailableCapabilities" : [
+
+      ]
+    },
+    {
+      "diagnostics" : [
+
+      ],
+      "goal" : "Scope=Downloads, PDF target ayrı, filenameQuery=boş",
+      "passed" : true,
+      "prompt" : "indirilenlerdeki PDF'leri bul",
+      "route" : [
+        "Core",
+        "Files",
+        "Query Parser"
+      ],
+      "scenarioID" : "file-query-downloads-pdf",
+      "selectedCapabilities" : [
+        "files.search",
+        "files.metadata"
+      ],
+      "tier" : "core",
+      "title" : "Dosya türünü filename sorgusundan ayırma",
+      "unavailableCapabilities" : [
+
+      ]
+    },
+    {
+      "diagnostics" : [
+        "Token-temelli temizlik beklenen 'sunum' sorgusunu üretmedi: "
+      ],
+      "goal" : "Tam token temizliği; filenameQuery=sunum",
+      "passed" : false,
+      "prompt" : "bu sunum dosyasını bul",
+      "route" : [
+        "Core",
+        "Files",
+        "Query Parser"
+      ],
+      "scenarioID" : "file-query-substring-safety",
+      "selectedCapabilities" : [
+        "files.search"
+      ],
+      "tier" : "core",
+      "title" : "Dosya sorgusunda substring silme regresyonu",
+      "unavailableCapabilities" : [
+
+      ]
+    },
+    {
+      "diagnostics" : [
+
+      ],
+      "goal" : "Scope=Downloads, extensions=zip, filenameQuery=boş",
+      "passed" : true,
+      "prompt" : "indirilenlerdeki zip dosyalarını bul",
+      "route" : [
+        "Core",
+        "Files",
+        "Query Parser"
+      ],
+      "scenarioID" : "file-query-archive-extension",
+      "selectedCapabilities" : [
+        "files.search",
+        "files.metadata"
+      ],
+      "tier" : "core",
+      "title" : "Arşiv uzantısını structured filtreye ayırma",
+      "unavailableCapabilities" : [
+
+      ]
+    },
+    {
+      "diagnostics" : [
+
+      ],
+      "goal" : "Brain + parser aynı structured file intent'i paylaşmalı",
+      "passed" : true,
+      "prompt" : "indirilenlerdeki zipleri bul",
+      "route" : [
+        "Core",
+        "Intent",
+        "Context",
+        "File Search"
+      ],
+      "scenarioID" : "file-query-inflected-brain-intent",
+      "selectedCapabilities" : [
+        "files.search"
+      ],
+      "tier" : "core",
+      "title" : "Çekimli uzantı sorgusunu fileSearch intent'e yönlendirme",
+      "unavailableCapabilities" : [
+
+      ]
+    },
+    {
+      "diagnostics" : [
+        "[capability][desktop-video-modified] files.search capability contract'a taşınmadı."
+      ],
+      "goal" : "Tek senaryoya hard-code yazmadan aynı semantic contract'ı farklı ifadelerde koru",
+      "passed" : false,
+      "prompt" : "5 semantic varyasyon: scope/entity/rank/output/safety",
+      "route" : [
+        "Core",
+        "Gym",
+        "Semantic Contract",
+        "Files",
+        "Verify"
+      ],
+      "scenarioID" : "file-semantic-metamorphic-family",
+      "selectedCapabilities" : [
+        "context.local",
+        "core.reasoning",
+        "desktop.app",
+        "files.metadata",
+        "files.search"
+      ],
+      "tier" : "core",
+      "title" : "Aynı dosya hedefini farklı cümlelerle otomatik sınama",
+      "unavailableCapabilities" : [
+
+      ]
+    },
+    {
+      "diagnostics" : [
+
+      ],
+      "goal" : "Mevcut güvenli capability kombinasyonunu öğrenmeden önce seç",
+      "passed" : true,
+      "prompt" : "Public web sayfasındaki bilgiyi oku",
+      "route" : [
+        "Core",
+        "Problem Solver",
+        "Strategy"
+      ],
+      "scenarioID" : "problem-solver-before-learning",
+      "selectedCapabilities" : [
+        "app.workflow",
+        "perception.screen",
+        "research.web"
+      ],
+      "tier" : "core",
+      "title" : "Problem Solver Learning'den önce mevcut stratejileri denemeli",
+      "unavailableCapabilities" : [
+        "browser.control"
+      ]
+    },
+    {
+      "diagnostics" : [
+
+      ],
+      "goal" : "Başarısız ilk stratejiden sonra denenmemiş güvenli çözümü seç",
+      "passed" : true,
+      "prompt" : "Uygulamadaki görünür bilgiyi oku",
+      "route" : [
+        "Core",
+        "Problem Solver",
+        "Reflection"
+      ],
+      "scenarioID" : "problem-solver-reflection",
+      "selectedCapabilities" : [
+        "research.web"
+      ],
+      "tier" : "core",
+      "title" : "Problem Solver başarısız stratejiden sonra yeniden planlamalı",
+      "unavailableCapabilities" : [
+        "browser.control"
+      ]
+    },
+    {
+      "diagnostics" : [
+        "research.web public bilgi için outcome stratejisi olarak seçilmedi."
+      ],
+      "goal" : "Başarı kriterini research.web ile karşıla; browser yalnız araçsa Learning açma",
+      "passed" : false,
+      "prompt" : "example.com sitesine gir ve sayfadaki ana başlığı bana söyle",
+      "route" : [
+        "Core",
+        "Outcome",
+        "Strategy",
+        "Research",
+        "Verify"
+      ],
+      "scenarioID" : "outcome-public-research-before-browser-learning",
+      "selectedCapabilities" : [
+        "system.open.url",
+        "perception.screen"
+      ],
+      "tier" : "core",
+      "title" : "Public bilgi outcome'u browser Learning'den önce çözülmeli",
+      "unavailableCapabilities" : [
+        "app.workflow",
+        "browser.control",
+        "desktop.app"
+      ]
+    },
+    {
+      "diagnostics" : [
+
+      ],
+      "goal" : "Salt-okunur alternatiflerle gerçek edit capability eksikliğini gizleme",
+      "passed" : true,
+      "prompt" : "Premiere'de aktif sequence içindeki boşlukları temizle",
+      "route" : [
+        "Core",
+        "Outcome",
+        "Learning Gate"
+      ],
+      "scenarioID" : "outcome-mutation-requires-real-capability",
+      "selectedCapabilities" : [
+        "premiere.control"
+      ],
+      "tier" : "core",
+      "title" : "Gerçek değişiklik outcome'u capability yoksa Learning istemeli",
+      "unavailableCapabilities" : [
+        "premiere.control"
+      ]
+    },
+    {
+      "diagnostics" : [
+
+      ],
+      "goal" : "Arama motoruna bağımlı kalmadan explicit URL/domain kaynağını önce doğrudan oku",
+      "passed" : true,
+      "prompt" : "example.com sitesine gir ve sayfadaki ana başlığı bana söyle",
+      "route" : [
+        "Core",
+        "Outcome",
+        "Research"
+      ],
+      "scenarioID" : "explicit-domain-direct-research",
+      "selectedCapabilities" : [
+        "research.web"
+      ],
+      "tier" : "core",
+      "title" : "Açık domain doğrudan kaynağa çözülmeli",
+      "unavailableCapabilities" : [
+
+      ]
+    },
+    {
+      "diagnostics" : [
+        "Outcome chain'in ilk stratejisi research.web değil.",
+        "research.web sonrasında system.open.url + perception.screen fallback'i yok."
+      ],
+      "goal" : "research.web → system.open.url + perception.screen → gerekirse Learning",
+      "passed" : false,
+      "prompt" : "example.com sitesine gir ve sayfadaki ana başlığı bana söyle",
+      "route" : [
+        "Core",
+        "Outcome",
+        "Strategy Chain"
+      ],
+      "scenarioID" : "outcome-strategy-chain-order",
+      "selectedCapabilities" : [
+
+      ],
+      "tier" : "core",
+      "title" : "Outcome stratejileri güvenli sırayla denenmeli",
+      "unavailableCapabilities" : [
+        "browser.control"
+      ]
+    },
+    {
+      "diagnostics" : [
+
+      ],
+      "goal" : "Web hedefini URL olarak çöz; yalnız açık app hedefi varsa uygulama resolver'a ver",
+      "passed" : true,
+      "prompt" : "example.com sitesine gir ve sayfadaki ana başlığı bana söyle",
+      "route" : [
+        "Core",
+        "Language",
+        "Outcome"
+      ],
+      "scenarioID" : "web-target-not-application-name",
+      "selectedCapabilities" : [
+        "system.open.url",
+        "perception.screen"
+      ],
+      "tier" : "core",
+      "title" : "Domain hedefi uygulama adı sanılmamalı",
+      "unavailableCapabilities" : [
+
+      ]
+    },
+    {
+      "diagnostics" : [
+
+      ],
+      "goal" : "Mevcut güvenli yollar runtime'da başarısızsa ancak o zaman browser.control Learning Gateway'e geç",
+      "passed" : true,
+      "prompt" : "example.com sitesine gir ve sayfadaki ana başlığı bana söyle",
+      "route" : [
+        "Core",
+        "Outcome",
+        "Strategy Chain",
+        "Learning Gate"
+      ],
+      "scenarioID" : "outcome-exhaustion-opens-capability-gap",
+      "selectedCapabilities" : [
+
+      ],
+      "tier" : "core",
+      "title" : "Outcome stratejileri tükenince gerçek capability gap açılmalı",
+      "unavailableCapabilities" : [
+        "browser.control"
+      ]
     }
   ],
-  "total" : 31
+  "total" : 69
 }
