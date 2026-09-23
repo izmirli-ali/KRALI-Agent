@@ -163,12 +163,18 @@ struct DeveloperAgentStatus: Hashable {
             "recovered_candidate_build_failed",
             "candidate_recovery_failed",
             "candidate_repair_failed",
+            "system_action_approval_required",
+            "system_action_rejected",
             "failed"
         ].contains(state)
     }
 
     var learningStageTitle: String {
         switch state {
+        case "system_action_approval_required":
+            return "Sistem işlemi için onay bekliyor"
+        case "system_action_rejected":
+            return "Sistem işlemi kullanıcı tarafından reddedildi"
         case "learning":
             return "Öğreniyor"
         case "running":
