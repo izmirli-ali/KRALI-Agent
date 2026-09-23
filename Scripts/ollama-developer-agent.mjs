@@ -541,7 +541,7 @@ function isAliasProducerSymbol(
   }
 
   return (
-    /alias|localiz|displayname|bundlename|finder/i.test(
+    /alias|localiz|displayname|bundlename|finder|applicationnamevariants|semantic.*application|variant/i.test(
       value
     )
   );
