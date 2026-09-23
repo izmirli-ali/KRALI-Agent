@@ -6076,7 +6076,10 @@ final class AgentEngine: ObservableObject {
     }
 
     private func startNextLearningJobIfNeeded() {
-        guard !inspectorState.developerAgentBusy else {
+        guard
+            !inspectorState.developerAgentBusy,
+            pendingDeveloperToolApproval == nil
+        else {
             return
         }
 
