@@ -285,3 +285,13 @@ Target runtime:
 - Developer Agent applicationNameVariants / semantic variant producer sembollerini alias producer sınıfında önceliklendirebilir.
 - Uygulama adına özel sözlük/hard-code eklenmedi.
 - VERSION 0.10.16 / build 189.
+
+
+## v0.10.17 progress
+
+- Claude incelemesiyle ortaya çıkan deterministic alias scoring bug'ı doğrulandı: candidate alias token'larına Türkçe suffix stripping uygulanması arbitrary-language metadata üzerinde yapay formlar üretebiliyordu (ör. canonical son `e` harfinin ek sanılması).
+- `bestAliasScore` artık asimetrik çalışıyor: kullanıcı target token'ları Türkçe çekim çözümü için `wordVariants` kullanmaya devam ederken candidate alias tarafı yalnız gerçek normalize edilmiş alias ve gerçek token'ları kullanıyor.
+- Runtime'a uygulama adına özel mapping/hard-code eklenmedi.
+- Training Lab'e `candidate-alias-suffix-isolation` regression senaryosu eklendi. Test, candidate alias'ın yapay exact forma dönüştürülmediğini ve Türkçe çekimli kullanıcı girdisinin hâlâ exact çözüm ürettiğini birlikte doğruluyor.
+- Mentor regression freshness raporu VERSION=0.10.17 için Training/Arena/Live Eval suite'lerinin hâlâ 0.8.27 olduğunu açıkça stale olarak işaretliyor.
+- VERSION 0.10.17 / build 190.
