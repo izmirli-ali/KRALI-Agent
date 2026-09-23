@@ -32,8 +32,6 @@ const sandbox = {
 };
 
 const cliConfig = {
-  version: 1,
-  editor: { vimMode: false },
   permissions: {
     allow: ["Read(**)"],
     deny: [
