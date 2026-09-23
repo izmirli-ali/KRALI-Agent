@@ -7,7 +7,7 @@
     "reason": "Revision v2 candidate produced an untrustworthy PASS report because the static checker targeted incorrect source shapes and execution evidence was not required before declaring PASS.",
     "researchGoal": "Create a source-level UI regression checker that validates the real Swift source forms and cannot report PASS unless the checker actually runs to completion with exit code 0.",
     "candidateCapabilityIDs": [],
-    "developerBrief": "Fresh main üzerinden çalış. Önceki candidate dosyalarını source of truth kabul etme; review bulgularını uygula.\nDeveloperAgent/Tests/ui-regression/** altında dependency-free Node checker, checklist JSON ve README oluştur/güncelle. App/** yalnız SALT OKUNUR.\nZorunlu source hedefleri: App/KRALIAgentNative/KRALIAgentNativeApp.swift, App/KRALIAgentNative/ContentView.swift, App/KRALIAgentNative/ConversationStore.swift, App/KRALIAgentNative/ConversationSidebarView.swift.\nRepo root script konumundan deterministik hesaplanmalı; process.cwd() bağımlılığına güvenme.\nWindow minWidth: KRALIAgentNativeApp.swift içindeki .frame(minWidth: 680, ...) biçimini parse et; numeric value <= 700 ise PASS.\nCompact sidebar: ContentView.swift içindeki usesCompactSidebar(_:) fonksiyonunda width < 780 koşulunu doğrula.\nOverlay Inspector: usesOverlayInspector(_:) fonksiyonunda width < 1120 koşulunu doğrula.\nInspector sadeleştirmesi: ana sidePane akışında inspectorDeveloperMode / Özet-Developer / Summary-Developer picker bulunmadığını doğrula.\nArchive delete API: ConversationStore.swift içinde func deleteArchive(...) bulunduğunu doğrula.\nDestructive delete confirmation: ConversationSidebarView.swift içinde confirmationDialog ve role: .destructive birlikteliğini doğrula.\nMessage copy: ContentView.swift içinde messageBubble context/visible copy action, copyMessageText(...) ve NSPasteboard.general + setString(..., forType: .string) uygulamasını doğrula.\nHer check gerçek source kanıtı (dosya + line/snippet veya symbol) üretmeli. False-positive önlemek için genel tüm dosya regex taraması yerine hedef dosya/symbol bazlı kontrol kullan.\nKRİTİK: checklist.json önceden PASS yazılarak üretilmemeli. Önce static-check.js çalıştır. execute_command sonucu exitCode=0 ve stdout içinde tüm kontroller PASS değilse overall PASS yazma. Checker kendi output JSON'unu gerçek çalıştırma sonunda üretmeli.\nİş sonunda şu kanıtları raporla: exact test command, exit code, stdout summary, checked files, git diff, build-check. execute_command sonucu alınmadan görev tamamlandı deme. Yeni dependency, UI otomasyonu, network veya App mutation yapma."
+    "developerBrief": "Fresh main üzerinden çalış. Önceki candidate dosyalarını source of truth kabul etme; review bulgularını uygula.\nDeveloperAgent/Tests/ui-regression/** altında dependency-free Node checker, checklist JSON/sonuç artifact'ı ve README oluştur/güncelle. App/** yalnız SALT OKUNUR.\nRepo root process.cwd() ile bulunmamalı. static-check.js dosyasının __dirname konumundan repository root'u deterministik olarak türet.\nWindow minWidth: KRALIAgentNativeApp.swift içindeki gerçek .frame(minWidth: 680, ...) biçimini parse et; <=700 PASS.\nusesCompactSidebar ve usesOverlayInspector Swift fonksiyonlarında private modifier, çok satırlı parametreler ve -> Bool return type bulunduğunu hesaba kat. Basit 'func name(...) {' regex'i kullanma. Hedef fonksiyon gövdesini gerçek Swift source formuna göre doğrula.\nCompact sidebar için usesCompactSidebar(_:) gövdesinde width < 780; overlay Inspector için usesOverlayInspector(_:) gövdesinde width < 1120 doğrulanmalı.\nInspector sadeleştirmesinde ana sidePane akışında inspectorDeveloperMode / Özet-Developer / Summary-Developer picker bulunmamalı.\nConversationStore.swift içinde private/public modifier fark etmeksizin func deleteArchive(...) bulunduğunu doğrula.\nConversationSidebarView.swift içinde confirmationDialog ile role: .destructive aynı delete akışında bulunmalı.\nMessage copy kontrolü ContentView.swift içinde copyMessageText(...), NSPasteboard.general ve çok satırlı setString(text, forType: .string) biçimini doğrulamalı. '${...}' benzeri JavaScript-template biçimi arama.\nHer kontrol hedef dosya/symbol bazlı source evidence üretmeli.\nChecker gerçek çalıştırma sonunda DeveloperAgent/Tests/ui-regression/static-check-results.json üretmeli.\nStdout summary tam olarak 'Overall: PASS' ve 'Failed: 0' satırlarını içermeli; herhangi bir kontrol FAIL ise process exit 1 olmalı.\nchecklist.json varsa pending template olarak bırakılmamalı; gerçek test sonucuyla uyumlu olmalı veya tek source of truth olarak static-check-results.json kullanılmalı.\nİş sonunda build_check ve git_diff yap. Runner ayrıca task verification contract'ı bağımsız çalıştıracak; bu contract geçmeden candidate ready sayılamaz.\nYeni dependency, UI otomasyonu, network veya App mutation yapma."
   },
   "taskMetadata": {
     "owner": "ChatGPT Lead / KRALİ team",
@@ -25,6 +25,21 @@
       ".github/**"
     ],
     "requiresPhysicalAction": false,
-    "requiresMainAccess": false
+    "requiresMainAccess": false,
+    "verification": {
+      "command": [
+        "node",
+        "DeveloperAgent/Tests/ui-regression/static-check.js"
+      ],
+      "requireExitCode": 0,
+      "requiredStdout": [
+        "Overall: PASS",
+        "Failed: 0"
+      ],
+      "requiredArtifacts": [
+        "DeveloperAgent/Tests/ui-regression/static-check-results.json"
+      ],
+      "timeoutSeconds": 120
+    }
   }
 }
