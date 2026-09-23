@@ -1,1 +1,1 @@
-runtime|app=Notes|activate=false|frontmost=false|source=unverified
+runtime|app=Notes|activate=true|workspace=false|ax=true|screenKit=false|screenPerception=false|frontmost=true|source=AX
