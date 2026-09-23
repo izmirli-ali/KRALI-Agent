@@ -3223,10 +3223,24 @@ final class AgentEngine: ObservableObject {
     }
 
     func approvePendingTaskApproval() {
+        guard let approval =
+            pendingTaskApproval
+        else {
+            return
+        }
+
+        if approval.taskID
+            .hasPrefix(
+                "developer-tool:"
+            ) {
+            approvePendingDeveloperToolAction(
+                approval
+            )
+            return
+        }
+
         guard
             !busy,
-            let approval =
-                pendingTaskApproval,
             let mission =
                 currentSemanticMission,
             let decision =
@@ -3320,6 +3334,16 @@ final class AgentEngine: ObservableObject {
             return
         }
 
+        if approval.taskID
+            .hasPrefix(
+                "developer-tool:"
+            ) {
+            cancelPendingDeveloperToolAction(
+                approval
+            )
+            return
+        }
+
         appendConversationMessage(
             ChatMessage(
                 role: .user,
@@ -3372,6 +3396,198 @@ final class AgentEngine: ObservableObject {
                 approval.stepIndex
             )
         )
+    }
+
+    private func requestDeveloperToolApproval(
+        title: String,
+        reason: String,
+        targetSummary: String?,
+        operation: String,
+        action: PendingDeveloperToolAction
+    ) {
+        guard pendingTaskApproval == nil else {
+            log(
+                "Developer Tool approval ertelendi: başka bir onay zaten bekliyor"
+            )
+            return
+        }
+
+        pendingDeveloperToolAction =
+            action
+
+        pendingTaskApproval =
+            PendingTaskApproval(
+                taskID:
+                    "developer-tool:" +
+                    UUID().uuidString,
+                stepIndex: -1,
+                title: title,
+                reason: reason,
+                capabilityID:
+                    "developer.tool",
+                operation:
+                    operation,
+                targetSummary:
+                    targetSummary
+            )
+
+        log(
+            "Developer Tool kullanıcı onayı bekliyor • " +
+            operation
+        )
+    }
+
+    private func approvePendingDeveloperToolAction(
+        _ approval: PendingTaskApproval
+    ) {
+        guard let action =
+            pendingDeveloperToolAction
+        else {
+            pendingTaskApproval = nil
+            return
+        }
+
+        appendConversationMessage(
+            ChatMessage(
+                role: .user,
+                text:
+                    "Onaylıyorum: " +
+                    approval.title
+            )
+        )
+
+        currentTaskApprovalAudit =
+            TaskApprovalAudit(
+                stepIndex:
+                    approval.stepIndex,
+                title:
+                    approval.title,
+                capabilityID:
+                    approval.capabilityID,
+                targetSummary:
+                    approval.targetSummary,
+                targetName:
+                    approval.targetName,
+                targetBundleIdentifier:
+                    approval.targetBundleIdentifier,
+                targetPath:
+                    approval.targetPath,
+                decision:
+                    "approved",
+                recordedAt:
+                    Date()
+            )
+
+        pendingTaskApproval = nil
+        pendingDeveloperToolAction = nil
+
+        switch action {
+        case .desktopControlProbe:
+            executeDesktopControlProbe()
+
+        case let .developerSystemMutation(
+            learningJob,
+            briefURL
+        ):
+            runDeveloperAgent(
+                learningJob:
+                    learningJob,
+                learningJobBriefURL:
+                    briefURL,
+                allowSystemMutation:
+                    true
+            )
+        }
+
+        log(
+            "Developer Tool approval kullanıcı tarafından verildi • " +
+            approval.operation
+        )
+    }
+
+    private func cancelPendingDeveloperToolAction(
+        _ approval: PendingTaskApproval
+    ) {
+        appendConversationMessage(
+            ChatMessage(
+                role: .user,
+                text:
+                    "İptal: " +
+                    approval.title
+            )
+        )
+
+        currentTaskApprovalAudit =
+            TaskApprovalAudit(
+                stepIndex:
+                    approval.stepIndex,
+                title:
+                    approval.title,
+                capabilityID:
+                    approval.capabilityID,
+                targetSummary:
+                    approval.targetSummary,
+                targetName:
+                    approval.targetName,
+                targetBundleIdentifier:
+                    approval.targetBundleIdentifier,
+                targetPath:
+                    approval.targetPath,
+                decision:
+                    "rejected",
+                recordedAt:
+                    Date()
+            )
+
+        if case .developerSystemMutation =
+            pendingDeveloperToolAction {
+            requeueActiveLearningJobAfterApprovalDecline()
+        }
+
+        pendingTaskApproval = nil
+        pendingDeveloperToolAction = nil
+
+        postAssistantMessage(
+            "İşlemi iptal ettim. Developer Tools içindeki sistem etkili adım uygulanmadı."
+        )
+
+        log(
+            "Developer Tool approval kullanıcı tarafından reddedildi • " +
+            approval.operation
+        )
+    }
+
+    private func requeueActiveLearningJobAfterApprovalDecline() {
+        guard
+            let activeLearningJobID,
+            let index =
+                inspectorState.learningQueueJobs
+                    .firstIndex(
+                        where: {
+                            $0.id ==
+                                activeLearningJobID
+                        }
+                    )
+        else {
+            self.activeLearningJobID =
+                nil
+            return
+        }
+
+        inspectorState.learningQueueJobs[index]
+            .state = .queued
+        inspectorState.learningQueueJobs[index]
+            .updatedAt = Date()
+        inspectorState.learningQueueJobs[index]
+            .lastStatus =
+                "Sistem etkili Developer Agent adımı kullanıcı tarafından onaylanmadı; öğrenme işi sırada tutuluyor."
+
+        learningQueueStore.save(
+            inspectorState.learningQueueJobs
+        )
+
+        self.activeLearningJobID =
+            nil
     }
 
     private func resumeApprovedSemanticTask(
