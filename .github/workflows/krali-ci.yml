@@ -34,6 +34,7 @@ jobs:
           node Scripts/cursor-architect-bridge.mjs --self-test
           node Scripts/cloudflare-ollama-proxy.mjs --self-test
           node Scripts/developer-orchestration-policy-self-test.mjs
+          node Scripts/developer-task-verifier.mjs --self-test
 
       - name: Validate KRALI developer task cards
         shell: bash
@@ -49,6 +50,16 @@ jobs:
               assert isinstance(task, dict), f"{path}: developerTask missing"
               assert task.get("capabilityID"), f"{path}: capabilityID missing"
               assert task.get("developerBrief"), f"{path}: developerBrief missing"
+              meta = data.get("taskMetadata") or {}
+              verification = meta.get("verification")
+              if verification is not None:
+                  assert isinstance(verification, dict), f"{path}: verification must be object"
+                  command = verification.get("command")
+                  assert isinstance(command, list) and command and all(isinstance(x, str) and x for x in command), f"{path}: verification.command must be non-empty string array"
+                  required_artifacts = verification.get("requiredArtifacts", [])
+                  required_stdout = verification.get("requiredStdout", [])
+                  assert isinstance(required_artifacts, list), f"{path}: requiredArtifacts must be array"
+                  assert isinstance(required_stdout, list), f"{path}: requiredStdout must be array"
           PY
 
       - name: Select newest Xcode
