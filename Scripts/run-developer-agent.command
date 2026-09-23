@@ -167,6 +167,108 @@ CONTROLLER_MODEL_CACHE_TTL="${KRALI_CONTROLLER_MODEL_CACHE_TTL:-7200}"
 CONTROLLER_PROBE_TIMEOUT_MS="${KRALI_CONTROLLER_PROBE_TIMEOUT_MS:-30000}"
 MODEL_PROBE_CACHED=0
 
+REMOTE_PROVIDER_MODE=0
+REMOTE_PROVIDER_NAME=""
+REMOTE_PROXY_PID=""
+REMOTE_CONFIG_DIR="$HOME/Library/Application Support/KRALI Agent/Cloud"
+CLOUDFLARE_CONFIG="$REMOTE_CONFIG_DIR/cloudflare-workers-ai.json"
+CLOUDFLARE_KEYCHAIN_SERVICE="KRALI Cloudflare Workers AI"
+CLOUDFLARE_KEYCHAIN_ACCOUNT="api-token"
+REMOTE_MAIN_ALIAS="cloudflare-main"
+REMOTE_JSON_ALIAS="cloudflare-json"
+
+cleanup_remote_proxy() {
+    if [ -n "$REMOTE_PROXY_PID" ]; then
+        /bin/kill "$REMOTE_PROXY_PID" >/dev/null 2>&1 || true
+        /usr/bin/wait "$REMOTE_PROXY_PID" >/dev/null 2>&1 || true
+        REMOTE_PROXY_PID=""
+    fi
+}
+
+trap cleanup_remote_proxy EXIT INT TERM
+
+load_cloudflare_remote_provider() {
+    [ -f "$CLOUDFLARE_CONFIG" ] || return 1
+
+    local parsed token
+    parsed="$(
+        "$NODE_BIN" - "$CLOUDFLARE_CONFIG" <<'NODE'
+const fs = require("fs");
+try {
+  const cfg = JSON.parse(fs.readFileSync(process.argv[2], "utf8"));
+  if (cfg.enabled !== true) process.exit(2);
+  const accountId = String(cfg.accountId || "").trim();
+  const mainModel = String(cfg.mainModel || "@cf/zai-org/glm-4.7-flash").trim();
+  const jsonModel = String(cfg.jsonModel || "@cf/meta/llama-3.3-70b-instruct-fp8-fast").trim();
+  if (!accountId || !mainModel || !jsonModel) process.exit(3);
+  process.stdout.write(
+    JSON.stringify({ accountId, mainModel, jsonModel })
+  );
+} catch {
+  process.exit(4);
+}
+NODE
+    )" || return 1
+
+    token="$(
+        /usr/bin/security find-generic-password             -s "$CLOUDFLARE_KEYCHAIN_SERVICE"             -a "$CLOUDFLARE_KEYCHAIN_ACCOUNT"             -w 2>/dev/null || true
+    )"
+    [ -n "$token" ] || return 1
+
+    KRALI_CF_ACCOUNT_ID="$(
+        printf '%s' "$parsed" |
+        "$NODE_BIN" -e 'let s="";process.stdin.on("data",d=>s+=d);process.stdin.on("end",()=>process.stdout.write(JSON.parse(s).accountId))'
+    )"
+    KRALI_CF_MAIN_MODEL="$(
+        printf '%s' "$parsed" |
+        "$NODE_BIN" -e 'let s="";process.stdin.on("data",d=>s+=d);process.stdin.on("end",()=>process.stdout.write(JSON.parse(s).mainModel))'
+    )"
+    KRALI_CF_JSON_MODEL="$(
+        printf '%s' "$parsed" |
+        "$NODE_BIN" -e 'let s="";process.stdin.on("data",d=>s+=d);process.stdin.on("end",()=>process.stdout.write(JSON.parse(s).jsonModel))'
+    )"
+    KRALI_CF_API_TOKEN="$token"
+
+    local proxy_port
+    proxy_port="$(( 14000 + ($ % 18000) ))"
+
+    KRALI_CF_ACCOUNT_ID="$KRALI_CF_ACCOUNT_ID" \
+    KRALI_CF_API_TOKEN="$KRALI_CF_API_TOKEN" \
+    KRALI_CF_MAIN_MODEL="$KRALI_CF_MAIN_MODEL" \
+    KRALI_CF_JSON_MODEL="$KRALI_CF_JSON_MODEL" \
+    KRALI_CF_PROXY_PORT="$proxy_port" \
+        "$NODE_BIN" "$ROOT/Scripts/cloudflare-ollama-proxy.mjs" \
+        >>"$LOG" 2>&1 &
+    REMOTE_PROXY_PID=$!
+
+    local ready=0
+    for _ in {1..20}; do
+        if /usr/bin/curl -fsS "http://127.0.0.1:$proxy_port/api/tags" >/dev/null 2>&1; then
+            ready=1
+            break
+        fi
+        /bin/sleep 0.15
+    done
+
+    if [ "$ready" -ne 1 ]; then
+        cleanup_remote_proxy
+        unset KRALI_CF_API_TOKEN
+        return 1
+    fi
+
+    OLLAMA_BASE_URL="http://127.0.0.1:$proxy_port"
+    MODEL="$REMOTE_MAIN_ALIAS"
+    REMOTE_PROVIDER_MODE=1
+    REMOTE_PROVIDER_NAME="cloudflare-workers-ai"
+    unset KRALI_CF_API_TOKEN
+
+    echo "☁️ Remote-first Developer AI hazır: Cloudflare Workers AI • main=$KRALI_CF_MAIN_MODEL • json=$KRALI_CF_JSON_MODEL" | tee -a "$LOG"
+    write_status "remote_ai_ready|Cloudflare Workers AI remote-first provider hazır; ağır local inference atlandı"
+    return 0
+}
+
+load_cloudflare_remote_provider || true
+
 cline_probe() {
     CLINE_PROBE_OUTPUT=""
     CLINE_PROBE_EXIT=127
@@ -648,10 +750,9 @@ prepare_ollama_runtime() {
     if [ -z "$MODEL" ]; then
         if ! use_cached_tool_model; then
             if [ "$MEMORY_GB" -ge 20 ]; then
-                # v0.10 architect migration: do not silently keep the legacy
-                # Devstral merely because it is already installed. Pull the
-                # newer architect model once, then cache only after probe PASS.
-                MODEL="devstral-small-2:24b"
+                # Remote-first architecture: local inference is fallback only.
+                # Prefer a lighter model to reduce sustained thermal/RAM load.
+                MODEL="qwen2.5-coder:7b-instruct"
             elif ! select_existing_local_model; then
                 MODEL="qwen2.5-coder:7b-instruct"
             fi
@@ -746,8 +847,12 @@ if ! cline_probe; then
 fi
 
 if [ "$PROVIDER" = "ollama" ]; then
-    if ! prepare_ollama_runtime; then
-        exit 11
+    if [ "$REMOTE_PROVIDER_MODE" -eq 1 ]; then
+        echo "☁️ Yerel Ollama hazırlığı atlandı; Developer inference remote-first çalışacak." | tee -a "$LOG"
+    else
+        if ! prepare_ollama_runtime; then
+            exit 11
+        fi
     fi
 
     if [ "$LOCAL_AGENT_ENGINE" != "native-ollama" ]; then
@@ -1783,9 +1888,12 @@ fi
 # Structured JSON continuation modeli aşağıda bağımsız latency probe ile seçilir.
 
 CONTROLLER_MODEL="$MODEL"
-if [ "$PROVIDER" = "ollama" ] &&
-   [ "$LOCAL_AGENT_ENGINE" = "native-ollama" ] &&
-   [ "$LEARNING_PATH" = "primitivePatch" ]; then
+if [ "$REMOTE_PROVIDER_MODE" -eq 1 ]; then
+    CONTROLLER_MODEL="$REMOTE_JSON_ALIAS"
+    echo "☁️ Structured controller remote: $KRALI_CF_JSON_MODEL" | tee -a "$LOG"
+elif [ "$PROVIDER" = "ollama" ] &&
+     [ "$LOCAL_AGENT_ENGINE" = "native-ollama" ] &&
+     [ "$LEARNING_PATH" = "primitivePatch" ]; then
     select_structured_controller_model || true
     echo "🧭 Structured controller modeli: $CONTROLLER_MODEL • ölçülmüş JSON karar modu" | tee -a "$LOG"
 fi
@@ -1862,10 +1970,16 @@ if [ "$PROVIDER" = "ollama" ] &&
    [ "$LOCAL_AGENT_ENGINE" = "native-ollama" ]; then
     CLINE_RUN_LOG="$LOG_DIR/KRALI-Developer-Agent-Local-$STAMP.log"
     CLINE_RUN_STREAMED_TO_LOG=1
-    write_status "local_agent_starting|$GAP_LABEL native Ollama Developer Agent ile öğreniliyor|$BRANCH|$WORKTREE"
-    echo "🧠 Model rolleri: root-cause=$CONTROLLER_MODEL • mutation=$MODEL • controller=$CONTROLLER_MODEL" | tee -a "$LOG"
+    if [ "$REMOTE_PROVIDER_MODE" -eq 1 ]; then
+        write_status "remote_agent_starting|$GAP_LABEL Cloudflare Workers AI ile öğreniliyor|$BRANCH|$WORKTREE"
+        echo "☁️ Model rolleri: remote main=$KRALI_CF_MAIN_MODEL • structured=$KRALI_CF_JSON_MODEL" | tee -a "$LOG"
+    else
+        write_status "local_agent_starting|$GAP_LABEL native Ollama Developer Agent ile öğreniliyor|$BRANCH|$WORKTREE"
+        echo "🧠 Model rolleri: root-cause=$CONTROLLER_MODEL • mutation=$MODEL • controller=$CONTROLLER_MODEL" | tee -a "$LOG"
+    fi
 
     KRALI_WORKTREE="$WORKTREE" \
+    KRALI_INFERENCE_MODE="$([ "$REMOTE_PROVIDER_MODE" -eq 1 ] && echo remote || echo local)" \
     KRALI_PROMPT_FILE="$PROMPT_FILE" \
     KRALI_DEV_MODEL="$MODEL" \
     KRALI_ARCHITECT_MODEL="$MODEL" \
@@ -2045,7 +2159,7 @@ if [ "$CLINE_EXIT" -ne 0 ]; then
 
     CURSOR_ARCHITECT_ELIGIBLE=0
     case "$FAILURE_STATE" in
-        local_agent_iteration_limit|local_agent_root_cause_inconclusive|local_agent_strategy_escalation_inconclusive|local_agent_tool_protocol_failed|local_agent_completion_gate_failed)
+        local_agent_iteration_limit|local_agent_root_cause_inconclusive|local_agent_strategy_escalation_inconclusive|local_agent_tool_protocol_failed|local_agent_completion_gate_failed|local_agent_watchdog_timeout)
             CURSOR_ARCHITECT_ELIGIBLE=1
             ;;
     esac
