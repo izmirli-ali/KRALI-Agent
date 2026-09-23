@@ -8,7 +8,6 @@ struct ContentView: View {
     @State private var developerToolsExpanded = false
     @State private var inspectorVisible = false
     @State private var compactSidebarVisible = false
-    @State private var inspectorDeveloperMode = false
     @StateObject private var updater = UpdateController()
 
     var body: some View {
@@ -416,7 +415,7 @@ struct ContentView: View {
                 ScrollView {
                     LazyVStack(
                         alignment: .leading,
-                        spacing: 18
+                        spacing: 22
                     ) {
                         ForEach(
                             engine.visibleConversationMessages
@@ -461,7 +460,7 @@ struct ContentView: View {
                         }
                     }
                     .frame(
-                        maxWidth: 860,
+                        maxWidth: 820,
                         alignment: .leading
                     )
                     .padding(
@@ -805,70 +804,137 @@ struct ContentView: View {
     ) -> some View {
         Group {
             if message.role == .user {
-                HStack(alignment: .top) {
-                    Spacer(minLength: 100)
-
-                    Text(message.text)
-                        .font(
-                            .system(
-                                size: 14.5,
-                                weight: .medium
-                            )
-                        )
-                        .lineSpacing(3)
-                        .textSelection(.enabled)
-                        .padding(.horizontal, 14)
-                        .padding(.vertical, 11)
-                        .background(
-                            Color.accentColor
-                                .opacity(0.14)
-                        )
-                        .clipShape(
-                            RoundedRectangle(
-                                cornerRadius: 16,
-                                style: .continuous
-                            )
-                        )
-                        .frame(
-                            maxWidth: 620,
-                            alignment: .trailing
-                        )
-                }
-            } else {
                 HStack(
                     alignment: .top,
-                    spacing: 11
+                    spacing: 0
                 ) {
-                    ZStack {
-                        Circle()
-                            .fill(
+                    Spacer(minLength: 72)
+
+                    VStack(
+                        alignment: .trailing,
+                        spacing: 5
+                    ) {
+                        Text(message.text)
+                            .font(
+                                .system(
+                                    size: 15,
+                                    weight: .regular
+                                )
+                            )
+                            .lineSpacing(4)
+                            .textSelection(
+                                .enabled
+                            )
+                            .padding(
+                                .horizontal,
+                                15
+                            )
+                            .padding(
+                                .vertical,
+                                11
+                            )
+                            .background(
                                 Color.accentColor
-                                    .opacity(0.10)
+                                    .opacity(0.13)
+                            )
+                            .clipShape(
+                                RoundedRectangle(
+                                    cornerRadius: 17,
+                                    style:
+                                        .continuous
+                                )
                             )
                             .frame(
-                                width: 30,
-                                height: 30
+                                maxWidth: 600,
+                                alignment:
+                                    .trailing
+                            )
+                    }
+                }
+            } else {
+                VStack(
+                    alignment: .leading,
+                    spacing: 7
+                ) {
+                    HStack(spacing: 7) {
+                        Image(
+                            systemName:
+                                "sparkles"
+                        )
+                        .font(.caption2)
+                        .foregroundStyle(
+                            .secondary
+                        )
+
+                        Text("KRALİ")
+                            .font(
+                                .caption
+                                    .weight(
+                                        .semibold
+                                    )
+                            )
+                            .foregroundStyle(
+                                .secondary
                             )
 
-                        Image(
-                            systemName: "sparkles"
+                        Spacer()
+
+                        Button {
+                            copyMessageText(
+                                message.text
+                            )
+                        } label: {
+                            Image(
+                                systemName:
+                                    "doc.on.doc"
+                            )
+                            .font(.caption2)
+                        }
+                        .buttonStyle(.borderless)
+                        .foregroundStyle(
+                            .secondary
                         )
-                        .font(.caption)
+                        .help("Mesajı kopyala")
                     }
 
                     AssistantMessageText(
                         text: message.text
                     )
                     .textSelection(.enabled)
-                    .frame(
-                        maxWidth: 760,
-                        alignment: .leading
-                    )
-
-                    Spacer(minLength: 20)
                 }
+                .padding(.horizontal, 4)
+                .padding(.vertical, 3)
+                .frame(
+                    maxWidth: 760,
+                    alignment: .leading
+                )
             }
         }
+        .contextMenu {
+            Button {
+                copyMessageText(
+                    message.text
+                )
+            } label: {
+                Label(
+                    "Kopyala",
+                    systemImage:
+                        "doc.on.doc"
+                )
+            }
+        }
+    }
+
+    private func copyMessageText(
+        _ text: String
+    ) {
+        let pasteboard =
+            NSPasteboard.general
+        pasteboard.clearContents()
+        pasteboard.setString(
+            text,
+            forType: .string
+        )
     }
 
     private func fileActionApprovalCard(
@@ -1335,622 +1401,365 @@ struct ContentView: View {
 
     private var sidePane: some View {
         ScrollView {
-            VStack(alignment: .leading, spacing: 14) {
-                Picker(
-                    "Inspector görünümü",
-                    selection:
-                        $inspectorDeveloperMode
-                ) {
-                    Text("Özet")
-                        .tag(false)
-                    Text("Developer")
-                        .tag(true)
-                }
-                .pickerStyle(.segmented)
-                .labelsHidden()
+            VStack(
+                alignment: .leading,
+                spacing: 14
+            ) {
+                HStack {
+                    Text("KRALİ Durumu")
+                        .font(.headline)
 
-                sectionTitle("Durum")
+                    Spacer()
 
-                VStack(alignment: .leading, spacing: 9) {
-                    HStack(alignment: .top, spacing: 8) {
+                    Button {
+                        inspectorVisible = false
+                    } label: {
                         Image(
-                            systemName: engine.busy
-                                ? "sparkles"
-                                : engine.verificationState.systemImage
+                            systemName: "xmark"
                         )
-                        .foregroundStyle(
-                            engine.verificationState == .attention ||
-                            engine.verificationState == .partial
-                                ? Color.orange
-                                : Color.secondary
-                        )
-
-                        VStack(alignment: .leading, spacing: 3) {
-                            Text(engine.currentGoal)
-                                .font(.headline)
-
-                            Text(
-                                engine.busy
-                                    ? "KRALİ çalışıyor…"
-                                    : engine.verificationSummary
-                            )
-                            .font(.caption2)
-                            .foregroundStyle(.secondary)
-                            .fixedSize(
-                                horizontal: false,
-                                vertical: true
-                            )
-                        }
-
-                        Spacer()
                     }
-
-                    if engine.currentPlan != "Yeni görevi bekliyor" {
-                        Divider()
-
-                        Text(engine.currentPlan)
-                            .font(.caption)
-                            .foregroundStyle(.secondary)
-                            .fixedSize(
-                                horizontal: false,
-                                vertical: true
-                            )
-                    }
-
-                    if !engine.selectedCapabilities.isEmpty {
-                        Divider()
-
-                        HStack(spacing: 6) {
-                            ForEach(
-                                engine.selectedCapabilities.prefix(4)
-                            ) { capability in
-                                Text(capability.name)
-                                    .font(.caption2)
-                                    .lineLimit(1)
-                                    .padding(.horizontal, 7)
-                                    .padding(.vertical, 4)
-                                    .background(
-                                        capability.isAvailable
-                                            ? Color.accentColor.opacity(0.10)
-                                            : Color.orange.opacity(0.10)
-                                    )
-                                    .clipShape(Capsule())
-                            }
-
-                            Spacer()
-                        }
-                    }
-
-                    if let root = engine.selectedRootURL {
-                        Divider()
-
-                        Label(
-                            engine.workspaceIndexReady
-                                ? "\(root.lastPathComponent) • \(engine.indexedFiles.count) dosya"
-                                : "\(root.lastPathComponent) • indeks gerektiğinde hazırlanacak",
-                            systemImage: "folder"
-                        )
-                        .font(.caption2)
-                        .foregroundStyle(.secondary)
-                    }
-
-                    if engine.intelligenceProviderStatus !=
-                        "Sentez sağlayıcısı henüz kullanılmadı." {
-                        Text(engine.intelligenceProviderStatus)
-                            .font(.caption2)
-                            .foregroundStyle(.secondary)
-                            .lineLimit(2)
-                    }
+                    .buttonStyle(.borderless)
+                    .help("Paneli kapat")
                 }
-                .padding(11)
-                .background(Color(nsColor: .controlBackgroundColor))
-                .clipShape(RoundedRectangle(cornerRadius: 11))
 
+                compactStatusCard
 
                 systemHealthSection
 
-                if inspectorDeveloperMode {
-                    contextInspectorSection
-                }
-
-                if !engine.webResearchResults.isEmpty {
-                    sectionTitle("Kaynaklar")
-
-                    VStack(alignment: .leading, spacing: 8) {
-                        HStack {
-                            Text(
-                                "\(engine.webResearchResults.count) kaynak • \(engine.webResearchEvidence.count) doğrulanmış kanıt"
-                            )
-                            .font(.caption2)
-                            .foregroundStyle(.secondary)
-
-                            Spacer()
-                        }
-
-                        ForEach(
-                            engine.webResearchResults.prefix(4)
-                        ) { result in
-                            Link(destination: result.url) {
-                                HStack(alignment: .top, spacing: 7) {
-                                    Image(systemName: "globe")
-                                        .font(.caption2)
-                                        .foregroundStyle(.secondary)
-
-                                    VStack(alignment: .leading, spacing: 1) {
-                                        Text(result.title)
-                                            .font(.caption.weight(.medium))
-                                            .lineLimit(2)
-                                            .multilineTextAlignment(.leading)
-
-                                        Text(result.domain)
-                                            .font(.caption2)
-                                            .foregroundStyle(.secondary)
-                                    }
-
-                                    Spacer()
-
-                                    Image(systemName: "arrow.up.right")
-                                        .font(.caption2)
-                                        .foregroundStyle(.secondary)
-                                }
-                            }
-                            .buttonStyle(.plain)
-                        }
-                    }
-                    .padding(11)
-                    .background(Color(nsColor: .controlBackgroundColor))
-                    .clipShape(RoundedRectangle(cornerRadius: 11))
-                }
-
-                if inspectorDeveloperMode,
-                   let incident =
-                    engine.inspectorState.debugIncident {
-                    sectionTitle("Hata Ayıklama")
-
-                    VStack(alignment: .leading, spacing: 8) {
-                        HStack(alignment: .top, spacing: 8) {
-                            if incident.progress.isActive {
-                                ProgressView()
-                                    .controlSize(.small)
-                                    .frame(width: 16, height: 16)
-                            } else {
-                                Image(systemName: incident.kind.systemImage)
-                                    .font(.caption)
-                                    .foregroundStyle(
-                                        incident.progress == .recovered
-                                            ? Color.green
-                                            : Color.orange
-                                    )
-                                    .frame(width: 16)
-                            }
-
-                            VStack(alignment: .leading, spacing: 2) {
-                                Text(incident.progress.title)
-                                    .font(.caption.weight(.semibold))
-
-                                Text(
-                                    incident.kind.title +
-                                    " • " +
-                                    incident.source
-                                )
-                                .font(.caption2.weight(.medium))
-                                .foregroundStyle(.secondary)
-
-                                Text(incident.summary)
-                                    .font(.caption2)
-                                    .foregroundStyle(.secondary)
-                                    .fixedSize(
-                                        horizontal: false,
-                                        vertical: true
-                                    )
-                            }
-
-                            Spacer()
-                        }
-
-                        Divider()
-
-                        VStack(alignment: .leading, spacing: 2) {
-                            Text("Recovery planı")
-                                .font(.caption2.weight(.semibold))
-
-                            Text(incident.recoveryPlan)
-                                .font(.caption2)
-                                .foregroundStyle(.secondary)
-                                .fixedSize(
-                                    horizontal: false,
-                                    vertical: true
-                                )
-                        }
-
-                        if let evidence = incident.evidence,
-                           !evidence.isEmpty {
-                            Text("Kanıt: " + evidence)
-                                .font(.caption2.monospaced())
-                                .foregroundStyle(.secondary)
-                                .fixedSize(
-                                    horizontal: false,
-                                    vertical: true
-                                )
-                        }
-                    }
-                    .padding(11)
-                    .background(
-                        incident.progress == .recovered
-                            ? Color.green.opacity(0.07)
-                            : Color.orange.opacity(0.07)
+                if let incident =
+                    engine.inspectorState
+                        .debugIncident {
+                    compactDebugCard(
+                        incident
                     )
-                    .overlay(
-                        RoundedRectangle(cornerRadius: 11)
-                            .stroke(
-                                incident.progress == .recovered
-                                    ? Color.green.opacity(0.25)
-                                    : Color.orange.opacity(0.25),
-                                lineWidth: 1
-                            )
-                    )
-                    .clipShape(RoundedRectangle(cornerRadius: 11))
                 }
 
-                if inspectorDeveloperMode &&
-                   (
-                       !engine.capabilityLearningPlans.isEmpty ||
-                       !engine.inspectorState.activeLearningJobs.isEmpty ||
-                       engine.inspectorState.shouldShowPrimaryDeveloperStatus
-                   ) {
-                    sectionTitle("Öğrenme")
-
-                    VStack(alignment: .leading, spacing: 8) {
-                        let activeQueueJobs =
-                            engine.inspectorState.activeLearningJobs
-
-                        if !activeQueueJobs.isEmpty {
-                            HStack(spacing: 6) {
-                                Image(
-                                    systemName:
-                                        "list.number"
-                                )
-                                .font(.caption2)
-                                .foregroundStyle(
-                                    .secondary
-                                )
-
-                                Text(
-                                    "Öğrenme kuyruğu • " +
-                                    String(
-                                        activeQueueJobs
-                                            .count
-                                    ) +
-                                    " iş"
-                                )
-                                .font(
-                                    .caption
-                                        .weight(
-                                            .semibold
-                                        )
-                                )
-
-                                Spacer()
-                            }
-
-                            ForEach(
-                                activeQueueJobs
-                                    .prefix(4)
-                            ) { job in
-                                HStack(
-                                    alignment: .top,
-                                    spacing: 7
-                                ) {
-                                    if job.state ==
-                                        .running {
-                                        ProgressView()
-                                            .controlSize(
-                                                .mini
-                                            )
-                                            .frame(
-                                                width: 14,
-                                                height: 14
-                                            )
-                                    } else {
-                                        Image(
-                                            systemName:
-                                                "clock"
-                                        )
-                                        .font(
-                                            .caption2
-                                        )
-                                        .foregroundStyle(
-                                            .secondary
-                                        )
-                                        .frame(
-                                            width: 14
-                                        )
-                                    }
-
-                                    VStack(
-                                        alignment:
-                                            .leading,
-                                        spacing: 2
-                                    ) {
-                                        Text(
-                                            job.capabilityName +
-                                            " • " +
-                                            job.state.title
-                                        )
-                                        .font(
-                                            .caption
-                                                .weight(
-                                                    .medium
-                                                )
-                                        )
-
-                                        Text(
-                                            "Kanıt: " +
-                                            String(
-                                                job.evidenceCount
-                                            ) +
-                                            " • job " +
-                                            job.shortID
-                                        )
-                                        .font(
-                                            .caption2
-                                                .monospacedDigit()
-                                        )
-                                        .foregroundStyle(
-                                            .secondary
-                                        )
-
-                                        if let status =
-                                            job.lastStatus {
-                                            Text(status)
-                                                .font(
-                                                    .caption2
-                                                )
-                                                .foregroundStyle(
-                                                    .secondary
-                                                )
-                                                .lineLimit(
-                                                    2
-                                                )
-                                        }
-                                    }
-
-                                    Spacer()
-                                }
-                            }
-
-                            if engine.inspectorState
-                                .shouldShowPrimaryDeveloperStatus ||
-                               !engine
-                                .capabilityLearningPlans
-                                .isEmpty {
-                                Divider()
-                            }
-                        }
-
-                        if engine.inspectorState.shouldShowPrimaryDeveloperStatus {
-                            HStack(alignment: .top, spacing: 8) {
-                                if engine.inspectorState.developerAgentStatus.isLearningActive {
-                                    ProgressView()
-                                        .controlSize(.small)
-                                        .frame(width: 16, height: 16)
-                                } else {
-                                    Image(
-                                        systemName:
-                                            engine.inspectorState.developerAgentStatus
-                                            .isReadyForReview &&
-                                        engine.inspectorState.developerAgentStatus.state !=
-                                            "build_failed" &&
-                                        engine.inspectorState.developerAgentStatus.state !=
-                                            "recovered_candidate_build_failed"
-                                                ? "checkmark.circle.fill"
-                                                : "exclamationmark.triangle.fill"
-                                    )
-                                    .font(.caption)
-                                    .foregroundStyle(
-                                        engine.inspectorState.developerAgentStatus
-                                            .isReadyForReview &&
-                                        engine.inspectorState.developerAgentStatus.state !=
-                                            "build_failed" &&
-                                        engine.inspectorState.developerAgentStatus.state !=
-                                            "recovered_candidate_build_failed"
-                                            ? Color.green
-                                            : Color.orange
-                                    )
-                                    .frame(width: 16)
-                                }
-
-                                VStack(alignment: .leading, spacing: 2) {
-                                    Text(
-                                        engine.inspectorState.developerAgentStatus
-                                            .learningStageTitle
-                                    )
-                                    .font(.caption.weight(.semibold))
-
-                                    Text(engine.inspectorState.developerAgentStatus.message)
-                                        .font(.caption2)
-                                        .foregroundStyle(.secondary)
-                                        .fixedSize(
-                                            horizontal: false,
-                                            vertical: true
-                                        )
-
-                                    if let timing =
-                                        engine.inspectorState.developerAgentStatus
-                                            .learningTimingText {
-                                        Text(timing)
-                                            .font(.caption2.monospacedDigit())
-                                            .foregroundStyle(.tertiary)
-                                    }
-                                }
-
-                                Spacer()
-                            }
-
-                            if !engine.capabilityLearningPlans.isEmpty {
-                                Divider()
-                            }
-                        }
-
-                        ForEach(
-                            engine.capabilityLearningPlans.prefix(3)
-                        ) { plan in
-                            HStack(alignment: .top, spacing: 7) {
-                                Image(systemName: plan.state.systemImage)
-                                    .font(.caption)
-                                    .foregroundStyle(.orange)
-
-                                VStack(alignment: .leading, spacing: 2) {
-                                    Text(plan.capabilityName)
-                                        .font(.caption.weight(.medium))
-
-                                    Text(plan.nextStep)
-                                        .font(.caption2)
-                                        .foregroundStyle(.secondary)
-                                        .lineLimit(2)
-                                }
-
-                                Spacer()
-                            }
-                        }
-
-                    }
-                    .padding(11)
-                    .background(Color(nsColor: .controlBackgroundColor))
-                    .clipShape(RoundedRectangle(cornerRadius: 11))
+                if engine.inspectorState
+                    .shouldShowPrimaryDeveloperStatus ||
+                   !engine.inspectorState
+                    .activeLearningJobs
+                    .isEmpty {
+                    compactDeveloperCard
                 }
 
-                if let action = engine.pendingFileAction {
-                    sectionTitle("Onay bekliyor")
-
-                    VStack(alignment: .leading, spacing: 9) {
-                        Label(
-                            action.title,
-                            systemImage: "folder.badge.gearshape"
-                        )
-                        .font(.headline)
-
-                        Text(action.detail)
-                            .font(.caption)
-                            .foregroundStyle(.secondary)
-
-                        HStack {
-                            Button("Onayla") {
-                                let reply =
-                                    engine.approvePendingFileAction()
-                                engine.postAssistantMessage(
-                                    reply
-                                )
-                            }
-                            .buttonStyle(.borderedProminent)
-
-                            Button("İptal", role: .cancel) {
-                                engine.cancelPendingFileAction()
-                            }
-                            .buttonStyle(.bordered)
-                        }
-                    }
-                    .padding(11)
-                    .background(Color.orange.opacity(0.09))
-                    .overlay(
-                        RoundedRectangle(cornerRadius: 11)
-                            .stroke(
-                                Color.orange.opacity(0.35),
-                                lineWidth: 1
-                            )
-                    )
-                    .clipShape(RoundedRectangle(cornerRadius: 11))
-                }
-
-                if engine.activeRoute.contains("Files") &&
-                   (
-                       !engine.fileSearchResults.isEmpty ||
-                       !engine.folderSearchResults.isEmpty
-                   ) {
-                    sectionTitle("Sonuçlar")
-
-                    VStack(spacing: 6) {
-                        ForEach(
-                            engine.folderSearchResults.prefix(5)
-                        ) { folder in
-                            Button {
-                                engine.revealFolder(folder)
-                            } label: {
-                                HStack(spacing: 8) {
-                                    Image(systemName: "folder.fill")
-
-                                    Text(folder.name)
-                                        .font(.caption)
-                                        .lineLimit(1)
-
-                                    Spacer()
-
-                                    Image(
-                                        systemName: "arrow.forward.circle"
-                                    )
-                                    .foregroundStyle(.secondary)
-                                }
-                                .contentShape(Rectangle())
-                            }
-                            .buttonStyle(.plain)
-                        }
-
-                        ForEach(
-                            engine.fileSearchResults.prefix(5)
-                        ) { file in
-                            Button {
-                                engine.revealFile(file)
-                            } label: {
-                                HStack(spacing: 8) {
-                                    Image(
-                                        systemName: file.isScreenshot
-                                            ? "photo"
-                                            : "doc"
-                                    )
-
-                                    Text(file.name)
-                                        .font(.caption)
-                                        .lineLimit(1)
-
-                                    Spacer()
-
-                                    Image(
-                                        systemName: "arrow.forward.circle"
-                                    )
-                                    .foregroundStyle(.secondary)
-                                }
-                                .contentShape(Rectangle())
-                            }
-                            .buttonStyle(.plain)
-                        }
-                    }
-                    .padding(11)
-                    .background(Color(nsColor: .controlBackgroundColor))
-                    .clipShape(RoundedRectangle(cornerRadius: 11))
-                }
-
-                if engine.lastUndoAction != nil {
-                    Button {
-                        let reply = engine.undoLastFileAction()
-                        engine.postAssistantMessage(
-                            reply
-                        )
-                    } label: {
-                        Label(
-                            "Son dosya işlemini geri al",
-                            systemImage: "arrow.uturn.backward"
-                        )
-                    }
-                    .buttonStyle(.bordered)
-                    .controlSize(.small)
-                }
-
-                if inspectorDeveloperMode {
-                    developerToolsSection
-                }
+                developerToolsSection
             }
             .padding(14)
         }
+    }
+
+    private var compactStatusCard: some View {
+        VStack(
+            alignment: .leading,
+            spacing: 9
+        ) {
+            HStack(
+                alignment: .top,
+                spacing: 9
+            ) {
+                Image(
+                    systemName:
+                        engine.busy
+                        ? "sparkles"
+                        : engine
+                            .verificationState
+                            .systemImage
+                )
+                .foregroundStyle(
+                    engine.verificationState ==
+                        .attention ||
+                    engine.verificationState ==
+                        .partial
+                        ? Color.orange
+                        : Color.secondary
+                )
+                .frame(width: 18)
+
+                VStack(
+                    alignment: .leading,
+                    spacing: 3
+                ) {
+                    Text(engine.currentGoal)
+                        .font(
+                            .system(
+                                size: 14,
+                                weight: .semibold
+                            )
+                        )
+                        .fixedSize(
+                            horizontal: false,
+                            vertical: true
+                        )
+
+                    Text(
+                        engine.busy
+                            ? "KRALİ çalışıyor…"
+                            : engine
+                                .verificationSummary
+                    )
+                    .font(.caption)
+                    .foregroundStyle(
+                        .secondary
+                    )
+                    .fixedSize(
+                        horizontal: false,
+                        vertical: true
+                    )
+                }
+
+                Spacer(minLength: 0)
+            }
+
+            if engine.currentPlan !=
+                "Yeni görevi bekliyor" {
+                Divider()
+
+                Text(engine.currentPlan)
+                    .font(.caption)
+                    .foregroundStyle(
+                        .secondary
+                    )
+                    .fixedSize(
+                        horizontal: false,
+                        vertical: true
+                    )
+            }
+
+            if let root =
+                engine.selectedRootURL {
+                Label(
+                    engine.workspaceIndexReady
+                        ? root.lastPathComponent +
+                            " • " +
+                            String(
+                                engine
+                                    .indexedFiles
+                                    .count
+                            ) +
+                            " dosya"
+                        : root.lastPathComponent +
+                            " • indeks gerektiğinde hazırlanacak",
+                    systemImage: "folder"
+                )
+                .font(.caption2)
+                .foregroundStyle(
+                    .tertiary
+                )
+                .lineLimit(2)
+            }
+        }
+        .padding(12)
+        .background(
+            Color(
+                nsColor:
+                    .controlBackgroundColor
+            )
+            .opacity(0.82)
+        )
+        .clipShape(
+            RoundedRectangle(
+                cornerRadius: 12,
+                style: .continuous
+            )
+        )
+    }
+
+    private func compactDebugCard(
+        _ incident: AgentDebugIncident
+    ) -> some View {
+        VStack(
+            alignment: .leading,
+            spacing: 7
+        ) {
+            HStack(spacing: 7) {
+                if incident.progress.isActive {
+                    ProgressView()
+                        .controlSize(.small)
+                } else {
+                    Image(
+                        systemName:
+                            incident
+                                .kind
+                                .systemImage
+                    )
+                    .foregroundStyle(
+                        incident.progress ==
+                            .recovered
+                            ? Color.green
+                            : Color.orange
+                    )
+                }
+
+                Text(
+                    incident.progress.title
+                )
+                .font(
+                    .caption
+                        .weight(.semibold)
+                )
+
+                Spacer()
+            }
+
+            Text(incident.summary)
+                .font(.caption2)
+                .foregroundStyle(
+                    .secondary
+                )
+                .fixedSize(
+                    horizontal: false,
+                    vertical: true
+                )
+
+            if incident.progress.isActive {
+                Divider()
+
+                Text(
+                    incident.recoveryPlan
+                )
+                .font(.caption2)
+                .foregroundStyle(
+                    .secondary
+                )
+                .fixedSize(
+                    horizontal: false,
+                    vertical: true
+                )
+            }
+        }
+        .padding(11)
+        .background(
+            incident.progress == .recovered
+                ? Color.green.opacity(0.06)
+                : Color.orange.opacity(0.06)
+        )
+        .clipShape(
+            RoundedRectangle(
+                cornerRadius: 11,
+                style: .continuous
+            )
+        )
+    }
+
+    private var compactDeveloperCard: some View {
+        VStack(
+            alignment: .leading,
+            spacing: 8
+        ) {
+            let status =
+                engine.inspectorState
+                    .developerAgentStatus
+
+            HStack(spacing: 7) {
+                if status.isLearningActive {
+                    ProgressView()
+                        .controlSize(.small)
+                } else {
+                    Image(
+                        systemName:
+                            status.isReadyForReview
+                            ? "checkmark.circle.fill"
+                            : "hammer"
+                    )
+                    .foregroundStyle(
+                        status.isReadyForReview
+                            ? Color.green
+                            : Color.secondary
+                    )
+                }
+
+                Text("Geliştirme")
+                    .font(
+                        .caption
+                            .weight(.semibold)
+                    )
+
+                Spacer()
+
+                if !engine.inspectorState
+                    .activeLearningJobs
+                    .isEmpty {
+                    Text(
+                        String(
+                            engine
+                                .inspectorState
+                                .activeLearningJobs
+                                .count
+                        ) +
+                        " iş"
+                    )
+                    .font(
+                        .caption2
+                            .monospacedDigit()
+                    )
+                    .foregroundStyle(
+                        .secondary
+                    )
+                }
+            }
+
+            if engine.inspectorState
+                .shouldShowPrimaryDeveloperStatus {
+                Text(
+                    status
+                        .learningStageTitle
+                )
+                .font(
+                    .caption
+                        .weight(.medium)
+                )
+
+                Text(status.message)
+                    .font(.caption2)
+                    .foregroundStyle(
+                        .secondary
+                    )
+                    .fixedSize(
+                        horizontal: false,
+                        vertical: true
+                    )
+            }
+
+            ForEach(
+                engine.inspectorState
+                    .activeLearningJobs
+                    .prefix(2)
+            ) { job in
+                Divider()
+
+                VStack(
+                    alignment: .leading,
+                    spacing: 2
+                ) {
+                    Text(
+                        job.capabilityName
+                    )
+                    .font(
+                        .caption
+                            .weight(.medium)
+                    )
+
+                    Text(job.state.title)
+                        .font(.caption2)
+                        .foregroundStyle(
+                            .secondary
+                        )
+                }
+            }
+        }
+        .padding(11)
+        .background(
+            Color(
+                nsColor:
+                    .controlBackgroundColor
+            )
+        )
+        .clipShape(
+            RoundedRectangle(
+                cornerRadius: 11,
+                style: .continuous
+            )
+        )
     }
 
 
@@ -2379,7 +2188,7 @@ private struct AssistantMessageText: View {
     }
 
     var body: some View {
-        VStack(alignment: .leading, spacing: 6) {
+        VStack(alignment: .leading, spacing: 7) {
             ForEach(
                 Array(lines.enumerated()),
                 id: \.offset
@@ -2430,9 +2239,9 @@ private struct AssistantMessageText: View {
                 inlineMarkdown(
                     String(trimmed.dropFirst(2))
                 )
-                .font(.system(size: 14, weight: .regular))
+                .font(.system(size: 15, weight: .regular))
                 .foregroundStyle(.secondary)
-                .lineSpacing(3)
+                .lineSpacing(4)
             }
         } else if let bullet = bulletText(trimmed) {
             HStack(alignment: .firstTextBaseline, spacing: 8) {
@@ -2441,8 +2250,8 @@ private struct AssistantMessageText: View {
                     .foregroundStyle(.secondary)
 
                 inlineMarkdown(bullet)
-                    .font(.system(size: 14.5, weight: .regular))
-                    .lineSpacing(3)
+                    .font(.system(size: 15, weight: .regular))
+                    .lineSpacing(4)
             }
         } else if let numbered = numberedText(trimmed) {
             HStack(alignment: .firstTextBaseline, spacing: 8) {
@@ -2452,13 +2261,13 @@ private struct AssistantMessageText: View {
                     .frame(minWidth: 22, alignment: .trailing)
 
                 inlineMarkdown(numbered.text)
-                    .font(.system(size: 14.5, weight: .regular))
-                    .lineSpacing(3)
+                    .font(.system(size: 15, weight: .regular))
+                    .lineSpacing(4)
             }
         } else {
             inlineMarkdown(trimmed)
-                .font(.system(size: 14.5, weight: .regular))
-                .lineSpacing(3)
+                .font(.system(size: 15, weight: .regular))
+                .lineSpacing(4)
         }
     }
 
