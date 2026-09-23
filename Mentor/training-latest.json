@@ -1,12 +1,12 @@
 {
-  "appVersion" : "0.10.20",
-  "corePassed" : 56,
+  "appVersion" : "0.10.21",
+  "corePassed" : 58,
   "coreTotal" : 69,
-  "createdAt" : "2026-09-23T12:25:22Z",
-  "failed" : 13,
+  "createdAt" : "2026-09-23T13:24:37Z",
+  "failed" : 11,
   "northStarPassed" : 4,
   "northStarTotal" : 4,
-  "passed" : 60,
+  "passed" : 62,
   "results" : [
     {
       "diagnostics" : [
@@ -1216,11 +1216,11 @@
     },
     {
       "diagnostics" : [
-        "External commit approval gate yanlış step'e uygulandı."
+
       ],
-      "goal" : "Hazırlık step'lerini commit step'inden ayır",
-      "passed" : false,
-      "prompt" : "Oku, analiz et, taslak oluştur; gönderimi onay kapısında durdur.",
+      "goal" : "Mail hesabına dokunan read/draft/send adımlarını kullanıcı onayına bağla; yalnız iç reasoning otomatik ilerlesin",
+      "passed" : true,
+      "prompt" : "Mail hesabı üzerinde yapılan her dış adımı ayrı onay kapısında durdur.",
       "route" : [
         "Core",
         "Mail",
@@ -1234,7 +1234,7 @@
         "mail.work"
       ],
       "tier" : "core",
-      "title" : "External commit öncesi kullanıcı onayı",
+      "title" : "Mail dış etkileşimlerinde Strict Approval",
       "unavailableCapabilities" : [
         "mail.work"
       ]
@@ -1414,10 +1414,10 @@
     },
     {
       "diagnostics" : [
-        "Runtime'da başarısız desktop.app provider'ı tek root gap olarak üretilmedi."
+
       ],
       "goal" : "Debug/retry sonrası tamamlanmayan root provider'ı generic runtime gap say",
-      "passed" : false,
+      "passed" : true,
       "prompt" : "Bir masaüstü uygulamasını aç ve içeriğini incele.",
       "route" : [
         "Core",
@@ -1427,7 +1427,7 @@
       ],
       "scenarioID" : "runtime-provider-failure-escalation",
       "selectedCapabilities" : [
-
+        "desktop.app"
       ],
       "tier" : "core",
       "title" : "Available provider runtime hatasını Learn hattına eskale etme",
