@@ -6862,6 +6862,9 @@ final class AgentEngine: ObservableObject {
                 "İptal edildi • fiziksel uygulama açma testi çalıştırılmadı."
 
         case .developerSystemEffects:
+            let rejectedDeveloperTask =
+                pendingDeveloperTask
+
             requeueActiveLearningJobAfterDeveloperApprovalRejection(
                 approval.reason
             )
@@ -6874,7 +6877,9 @@ final class AgentEngine: ObservableObject {
                     state:
                         "system_action_rejected",
                     message:
-                        "Kullanıcı sistem etkisi oluşturan Developer Agent adımını onaylamadı. Öğrenme işi capability failure sayılmadan sırada tutuluyor.",
+                        rejectedDeveloperTask == nil
+                            ? "Kullanıcı sistem etkisi oluşturan Developer Agent adımını onaylamadı. Öğrenme işi capability failure sayılmadan sırada tutuluyor."
+                            : "Kullanıcı sistem etkisi oluşturan Developer Agent adımını onaylamadı. Kontrollü geliştirici görevi herhangi bir fiziksel/sistem işlemi uygulanmadan durduruldu.",
                     branch: nil,
                     worktree: nil,
                     appVersion:
