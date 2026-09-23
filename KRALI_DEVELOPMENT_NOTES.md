@@ -570,3 +570,18 @@ Target runtime:
 - This release provides advisory task decomposition. Persistent per-subtask checkpoint execution is the next orchestration phase.
 - VERSION 0.10.38 / build 211.
 
+## v0.10.39 progress
+
+- Added a deterministic Developer Task Graph executor inside the native Developer Agent.
+- OpenAI Teacher plan review subtasks are validated as a DAG before use: unique IDs, known dependencies, cycle rejection, non-empty scope/result/verification, and strict scope containment under the parent developer task.
+- Active subtask scope now further narrows the existing task allowedScope; mutations for future/later subtasks are rejected.
+- A subtask is verified only after a real mutation, git diff evidence and successful build_check on the cumulative candidate.
+- Verified nodes automatically advance to the next dependency-ready node inside the same worktree/session.
+- Per-subtask inspection/mutation state resets on graph advancement while previous candidate changes remain cumulative.
+- Developer Agent completion and structured candidate handoff are blocked until every graph node is verified.
+- Developer task graph state is persisted in checkpoint schema v8 and restored only when the graph fingerprint matches.
+- Teacher-plan sessions receive a bounded 32-iteration / 12-minute execution budget; sessions without Teacher graph retain existing limits.
+- Parent task verification contract remains authoritative after the full graph completes.
+- Added dedicated Developer Task Graph CI self-test and orchestration invariant checks.
+- VERSION 0.10.39 / build 212.
+
