@@ -533,3 +533,13 @@ Target runtime:
 - No approval, planner, runtime execution authority, or main-branch authority was expanded.
 - VERSION 0.10.35 / build 208.
 
+## v0.10.36 progress
+
+- Cursor Architect Config Repair candidate reviewed and merged through PR #64.
+- Project-level .cursor/cli.json generation no longer writes unsupported version/editor keys; read-only permissions, workspace_readonly sandbox and default network deny remain unchanged.
+- Learning Suggestions Foundation controlled task card added.
+- Planned behavior: capability gaps become user-visible proposals first; automatic learning does not start without explicit user approval.
+- Suggested learning path/provenance remains compact and generalized; raw chat/mail/web/file bodies must not be persisted as learning memory.
+- Learning Suggestions task is protected by the Developer task verification contract and a dedicated source-level policy self-test.
+- VERSION 0.10.36 / build 209.
+
