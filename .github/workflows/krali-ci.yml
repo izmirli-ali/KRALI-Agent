@@ -31,6 +31,7 @@ jobs:
             echo "Checking $script"
             node --check "$script"
           done
+          node Scripts/cursor-architect-bridge.mjs --self-test
 
       - name: Select newest Xcode
         shell: bash
