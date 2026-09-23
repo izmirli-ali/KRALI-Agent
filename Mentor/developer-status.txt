@@ -1,1 +1,1 @@
-stale_run|Önceki Developer Agent oturumu aktif değil veya bu sürüme ait değil.|krali-dev-agent/20260923-191032|/Users/medusa/Developer/KRALI-Agent-Dev-20260923-191032|@meta|app=0.10.24|at=1790180842|run=20260923-191032
+local_agent_running|Uygulama kontrolü (desktop.app) yerel model çalışıyor • adım 1/10|krali-dev-agent/20260923-210747|/Users/medusa/Developer/KRALI-Agent-Dev-20260923-210747|@meta|app=0.10.26|at=1790186883|run=20260923-210747

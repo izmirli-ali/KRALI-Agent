@@ -1,5 +1,5 @@
 {
-  "createdAt" : "2026-09-23T16:27:31Z",
+  "createdAt" : "2026-09-23T18:07:14Z",
   "expandedCandidateCount" : 257,
   "installedCandidateCount" : 226,
   "nestedCandidateCount" : 56,
@@ -197,16 +197,17 @@
       "Notes",
       "Note",
       "Memorandum",
-      "Journal"
+      "Journal",
+      "Notlar uygulaması"
     ],
     "providerAvailable" : true,
     "query" : "Notlar",
-    "reason" : "variant: Girdideki 'Notlar' ifadesi, işletim sistemi lokalizasyonu ve kanonik ad olarak aynı uygulamayı ifade eder. | localization: Notlar için standart İngilizce kanonik isimler Notes, Note, Memorandum ve Journal'dır. | selectedSource: localization | verifier: Kullanıcının adı ile candidate gerçekten aynı uygulamanın adıdır.",
+    "reason" : "variant: Girdideki 'Notlar' ifadesi, yaygın kanonik ad ve işletim sistemi lokalizasyonu olarak aynı uygulamayı ifade eder. | localization: Notlar ifadesi İngilizce'de 'Notes' olarak standartlaştırılmıştır; diğer varyantlar bu temel anlamla ilişkilidir. | selectedSource: localization | verifier: Kullanıcının uygulaması 'Notlar' ve candidate'ın alias'ı olan 'Notes' aynı uygulamanın yerel adıdır.",
     "selectedBundleIdentifier" : "com.apple.Notes",
     "selectedIndex" : 36,
     "selectedName" : "Notes",
     "selectedVariant" : "Notes",
-    "selectionConfidence" : 1,
+    "selectionConfidence" : 0.95,
     "stage" : "accepted",
     "variantDiagnostics" : [
       {
@@ -254,6 +255,15 @@
         "intermediateVerificationStage" : "deferred-to-final-candidate-verifier",
         "source" : "localization",
         "value" : "Journal"
+      },
+      {
+        "exactMatchBundleIdentifiers" : [
+
+        ],
+        "exactMatchCount" : 0,
+        "intermediateVerificationStage" : "variant-requires-unique-exact-match",
+        "source" : "variant",
+        "value" : "Notlar uygulaması"
       }
     ],
     "verificationConfidence" : 0.95
