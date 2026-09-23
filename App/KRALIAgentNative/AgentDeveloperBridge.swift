@@ -714,6 +714,35 @@ struct AgentDebugRecoveryCenter {
     }
 }
 
+enum AgentDeveloperToolOperation:
+    String,
+    Hashable {
+    case trainingLab
+    case arena
+    case liveResearchEval
+    case screenPerceptionProbe
+    case desktopControlProbe
+    case developerSystemEffects
+}
+
+struct AgentDeveloperToolSafetyPolicy {
+    func requiresApproval(
+        _ operation: AgentDeveloperToolOperation
+    ) -> Bool {
+        switch operation {
+        case .desktopControlProbe,
+             .developerSystemEffects:
+            return true
+
+        case .trainingLab,
+             .arena,
+             .liveResearchEval,
+             .screenPerceptionProbe:
+            return false
+        }
+    }
+}
+
 struct AgentDeveloperBridge {
     private let fileManager = FileManager.default
 
