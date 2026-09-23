@@ -2286,6 +2286,7 @@ NODE
         KRALI_NODE_BIN="$NODE_BIN" \
         KRALI_RECOVERY_MODEL="$MODEL" \
         KRALI_OLLAMA_BASE_URL="$OLLAMA_BASE_URL" \
+        KRALI_DEV_TASK_FILE="$DEV_TASK_FILE" \
         KRALI_CANDIDATE_REPAIR_ATTEMPTS="2" \
         /bin/zsh "$ROOT/Scripts/recover-developer-candidate.command" >>"$LOG" 2>&1 || true
 
@@ -2302,6 +2303,10 @@ NODE
             recovered_candidate_build_failed)
                 echo "⚠️ Candidate GitHub'a korundu ancak build geçmedi." | tee -a "$LOG"
                 exit 21
+                ;;
+            recovered_candidate_verification_failed)
+                echo "⚠️ Candidate build geçti ancak task verification contract geçmedi; branch korundu." | tee -a "$LOG"
+                exit 27
                 ;;
             candidate_recovery_failed)
                 echo "❌ Candidate recovery başarısız oldu." | tee -a "$LOG"
@@ -2371,6 +2376,23 @@ fi
 
 rm -rf "$WORKTREE/.build-check"
 
+if [ -n "$DEV_TASK_FILE" ] && [ -f "$DEV_TASK_FILE" ]; then
+    write_status "task_verifying|$GAP_LABEL task verification contract çalıştırılıyor|$BRANCH|$WORKTREE"
+
+    if ! KRALI_DEV_TASK_FILE="$DEV_TASK_FILE" \
+         KRALI_WORKTREE="$WORKTREE" \
+         "$NODE_BIN" "$ROOT/Scripts/developer-task-verifier.mjs" >>"$LOG" 2>&1; then
+        git add -A
+        git commit -m "Developer Agent candidate (task verification failed)" >>"$LOG" 2>&1 || true
+        git push -u origin "$BRANCH" >>"$LOG" 2>&1 || true
+        write_status "task_verification_failed|Aday build geçti ancak görev kartı doğrulama sözleşmesi geçmedi; branch inceleme için korundu|$BRANCH|$WORKTREE"
+        echo "❌ Task verification contract başarısız; candidate ready sayılmadı." | tee -a "$LOG"
+        exit 27
+    fi
+
+    echo "✅ Task verification contract geçti." | tee -a "$LOG"
+fi
+
 if [ "$PROVIDER" = "ollama" ] && [ -n "$MODEL" ]; then
     write_status "skill_extracting|Build/regression geçen adaydan genellenebilir experimental skill çıkarılıyor|$BRANCH|$WORKTREE"
     if KRALI_WORKTREE="$WORKTREE" \
@@ -2402,6 +2424,6 @@ if ! git push -u origin "$BRANCH" >>"$LOG" 2>&1; then
 fi
 
 rm -f "$CHECKPOINT_FILE"
-write_status "ready_for_review|$GAP_LABEL öğrenme adayı hazır; build geçti ve incelemeye hazır|$BRANCH|$WORKTREE"
+write_status "ready_for_review|$GAP_LABEL öğrenme adayı hazır; build ve varsa task verification contract geçti|$BRANCH|$WORKTREE"
 echo "✅ Developer Agent adayı hazır: $BRANCH" | tee -a "$LOG"
 echo "ℹ️ Main branch değiştirilmedi." | tee -a "$LOG"
