@@ -4907,13 +4907,6 @@ function currentCandidateBlockers() {
 function handoffStructuredCandidateIfReady(
   trigger
 ) {
-  if (
-    developerTaskGraph &&
-    !developerTaskGraphComplete()
-  ) {
-    return false;
-  }
-
   const status = candidateStatus();
 
   if (
@@ -5219,6 +5212,22 @@ function handoffStructuredCandidateIfReady(
       );
       return false;
     }
+  }
+
+  if (
+    developerTaskGraph &&
+    !developerTaskGraphComplete()
+  ) {
+    stage(
+      "local_agent_task_graph_continue",
+      gapLabel +
+        " structured preflight aktif subtask'ı doğruladı; graph devam ediyor • " +
+        developerTaskGraphSummary()
+    );
+    persistCheckpoint(
+      "structured_subtask_verified:" + trigger
+    );
+    return false;
   }
 
   stage(
