@@ -16,7 +16,7 @@ SKILL_DIR="$HOME/Library/Application Support/KRALI Agent/Skills"
 SKILL_CANDIDATE_DIR="$SKILL_DIR/Candidates"
 SKILL_LIBRARY_FILE="$SKILL_DIR/skill-library.json"
 LEARNING_JOB_FILE="${KRALI_LEARNING_JOB_FILE:-}"
-ALLOW_SYSTEM_EFFECTS="${KRALI_ALLOW_SYSTEM_EFFECTS:-0}"
+APPROVED_SYSTEM_EFFECT="${KRALI_APPROVED_SYSTEM_EFFECT:-}"
 
 export PATH="/opt/homebrew/bin:/usr/local/bin:$HOME/.npm-global/bin:/usr/bin:/bin:/usr/sbin:/sbin:$PATH"
 
@@ -38,13 +38,14 @@ write_status() {
 }
 
 require_system_effect_approval() {
-    local reason="$1"
+    local effect_key="$1"
+    local reason="$2"
 
-    if [ "$ALLOW_SYSTEM_EFFECTS" = "1" ]; then
+    if [ "$APPROVED_SYSTEM_EFFECT" = "$effect_key" ]; then
         return 0
     fi
 
-    write_status "system_action_approval_required|$reason"
+    write_status "system_action_approval_required|${effect_key}::${reason}"
     echo "⛔ Sistem etkisi kullanıcı onayı bekliyor: $reason" | tee -a "$LOG"
     exit 42
 }
@@ -90,7 +91,7 @@ case "$NODE_MAJOR" in
             echo "⚠️ Global Node.js v$NODE_MAJOR Cline bağımlılıklarıyla uyumlu değil; izole Node 22 runtime hazırlanıyor." | tee -a "$LOG"
 
             if ! "$BREW_BIN" list node@22 >/dev/null 2>&1; then
-                require_system_effect_approval "Homebrew ile Node.js 22 kurulumu yapılacak."
+                require_system_effect_approval "brew-install-node22" "Homebrew ile Node.js 22 kurulumu yapılacak."
                 if ! "$BREW_BIN" install node@22 >>"$LOG" 2>&1; then
                     write_status "setup_node_supported|Node.js 22 otomatik kurulamadı; Developer Agent runtime onarımı gerekli"
                     exit 11
@@ -261,7 +262,7 @@ ensure_ollama_model() {
         return 1
     fi
 
-    require_system_effect_approval "Ollama modeli indirilecek: $requested_model"
+    require_system_effect_approval "ollama-model-pull:$requested_model" "Ollama modeli indirilecek: $requested_model"
     write_status "local_model_downloading|Yerel model indiriliyor: $requested_model"
     echo "Yerel model indiriliyor: $requested_model" | tee -a "$LOG"
 
@@ -518,7 +519,7 @@ process.stdin.on("end",()=>{try{process.stdout.write(String(JSON.parse(s).versio
 
     if [ -n "$BREW_BIN" ] &&
        "$BREW_BIN" list ollama >/dev/null 2>&1; then
-        require_system_effect_approval "Homebrew ile Ollama güncellenecek ve yerel servis yeniden başlatılacak."
+        require_system_effect_approval "brew-upgrade-ollama" "Homebrew ile Ollama güncellenecek ve yerel servis yeniden başlatılacak."
         echo "♻️ Ollama Devstral Small 2 uyumluluğu için güncelleniyor..." | tee -a "$LOG"
 
         if "$BREW_BIN" upgrade ollama >>"$LOG" 2>&1; then
@@ -568,7 +569,7 @@ prepare_ollama_runtime() {
             return 1
         fi
 
-        require_system_effect_approval "Homebrew ile Ollama kurulacak."
+        require_system_effect_approval "brew-install-ollama" "Homebrew ile Ollama kurulacak."
         write_status "local_ai_installing|Ücretsiz yerel AI runtime Ollama kuruluyor"
         echo "Ollama kuruluyor..." | tee -a "$LOG"
 
@@ -587,7 +588,7 @@ prepare_ollama_runtime() {
     fi
 
     if ! /usr/bin/curl -fsS "$OLLAMA_BASE_URL/api/tags" >/dev/null 2>&1; then
-        require_system_effect_approval "Ollama yerel servisi arka planda başlatılacak."
+        require_system_effect_approval "ollama-service-start" "Ollama yerel servisi arka planda başlatılacak."
         write_status "local_ai_starting|Yerel AI servisi başlatılıyor"
         echo "Ollama servisi başlatılıyor..." | tee -a "$LOG"
 
@@ -659,7 +660,7 @@ prepare_ollama_runtime() {
 }
 
 repair_cline() {
-    require_system_effect_approval "Cline CLI onarımı veya global npm kurulumu yapılabilir."
+    require_system_effect_approval "cline-repair-global" "Cline CLI onarımı veya global npm kurulumu yapılabilir."
     write_status "repairing_cline|Cline CLI sağlığı kontrol ediliyor ve otomatik onarım deneniyor"
 
     echo "Cline path: ${CLINE_BIN:-bulunamadı}" | tee -a "$LOG"
@@ -762,7 +763,7 @@ NODE
 )"
 
     if [ "$CLINE_AUTH_STATE" != "ready" ]; then
-        require_system_effect_approval "Cline/OpenAI giriş akışı için Terminal ve kimlik doğrulama ekranı açılacak."
+        require_system_effect_approval "cline-auth-terminal" "Cline/OpenAI giriş akışı için Terminal ve kimlik doğrulama ekranı açılacak."
         AUTH_SCRIPT="$STATUS_DIR/cline-auth.command"
 
         cat > "$AUTH_SCRIPT" <<EOF
