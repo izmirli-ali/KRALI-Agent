@@ -165,6 +165,9 @@ struct AgentTrainingLab {
             semanticExactAliasSafetyResult()
         )
         results.append(
+            semanticLocalizationProvenancePriorityResult()
+        )
+        results.append(
             strictExternalApprovalResult()
         )
         results.append(
@@ -2035,6 +2038,75 @@ struct AgentTrainingLab {
                 ? []
                 : [
                     "Semantic exact alias gate fuzzy/prefix eşleşmeye izin verdi veya exact aliası reddetti."
+                ]
+        )
+    }
+
+    private func semanticLocalizationProvenancePriorityResult()
+        -> TrainingScenarioResult {
+        let candidates =
+            languageResolver
+                .semanticApplicationNameCandidates(
+                    query: "Örnekler",
+                    localizationNames: [
+                        "Examples",
+                        "Sample"
+                    ],
+                    variantNames: [
+                        "Examples",
+                        "Example"
+                    ]
+                )
+
+        let examples =
+            candidates.first {
+                languageResolver
+                    .normalized(
+                        $0.value
+                    ) == "examples"
+            }
+
+        let duplicateCount =
+            candidates.filter {
+                languageResolver
+                    .normalized(
+                        $0.value
+                    ) == "examples"
+            }
+            .count
+
+        let passed =
+            examples?.source ==
+                "localization" &&
+            duplicateCount == 1 &&
+            candidates.first?
+                .source == "source"
+
+        return TrainingScenarioResult(
+            scenarioID:
+                "semantic-localization-provenance-priority",
+            title:
+                "Localization provenance önceliği",
+            tier: .core,
+            prompt:
+                "Aynı canonical ad localization ve generic variant kaynaklarından gelirse güvenli localization provenance'ını koru",
+            passed: passed,
+            goal:
+                "Localization exact-match yolunun redundant ara verifier tarafından kaybedilmesini önle",
+            route: [
+                "Core",
+                "Language",
+                "Desktop",
+                "Safety"
+            ],
+            selectedCapabilities: [
+                "desktop.app"
+            ],
+            unavailableCapabilities: [],
+            diagnostics: passed
+                ? []
+                : [
+                    "Semantic isim dedupe işlemi localization provenance'ını korumadı."
                 ]
         )
     }
