@@ -2926,10 +2926,10 @@ final class AgentEngine: ObservableObject {
                                 result
                                     .workspaceFrontmostVerified
                             ) +
-                            "|ax=" +
+                            "|axRecovery=" +
                             String(
                                 result
-                                    .accessibilityFrontmostVerified
+                                    .accessibilityRecoveryAttempted
                             ) +
                             "|screenKit=" +
                             String(
@@ -2964,10 +2964,10 @@ final class AgentEngine: ObservableObject {
                             result
                                 .workspaceFrontmostVerified
                         ) +
-                        " • ax=" +
+                        " • axRecovery=" +
                         String(
                             result
-                                .accessibilityFrontmostVerified
+                                .accessibilityRecoveryAttempted
                         ) +
                         " • screenKit=" +
                         String(
