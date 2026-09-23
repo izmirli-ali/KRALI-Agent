@@ -106,6 +106,21 @@ struct PendingTaskApproval: Identifiable, Hashable {
     }
 }
 
+struct TaskApprovalAudit:
+    Codable,
+    Hashable,
+    Sendable {
+    let stepIndex: Int
+    let title: String
+    let capabilityID: String
+    let targetSummary: String?
+    let targetName: String?
+    let targetBundleIdentifier: String?
+    let targetPath: String?
+    let decision: String
+    let recordedAt: Date
+}
+
 struct FileMoveRecord: Identifiable {
     let id = UUID()
     let originalURL: URL
