@@ -1,0 +1,30 @@
+{
+  "developerTask": {
+    "capabilityID": "developer.task.ui-regression-checklist-revision",
+    "capabilityName": "UI Regression Checklist Revision",
+    "kind": "developerTask",
+    "learningPath": "primitivePatch",
+    "reason": "İlk UI Regression Checklist candidate review'unda orchestration başarılı oldu ancak static checker içinde repo-root, read-scope, pattern evaluation, minWidth doğrulaması ve gerçek test sonucu üretimi sorunları bulundu.",
+    "researchGoal": "UI Regression Checklist candidate'ını gerçek App kaynaklarını salt-okunur doğrulayan, gerçekten çalıştırılmış ve PASS/FAIL sonucu üreten merge-ready bir regression kontrolüne dönüştür.",
+    "candidateCapabilityIDs": [],
+    "developerBrief": "Amaç: UI Regression Checklist'i merge-ready hale getir.\nFresh main üzerinden çalış; önceki candidate'ı source of truth kabul etme, yalnız review bulgularını uygula.\nDeveloperAgent/Tests/ui-regression altında checklist JSON, README ve dependency-free Node static checker oluştur veya düzelt.\nApp/** kaynaklarını yalnız SALT OKUNUR incele; App/** altında hiçbir mutation yapma.\nMutation scope ile read scope'u birbirine karıştırma.\nstatic-check.js gerçek repository root'u doğru hesaplamalı ve App/KRALIAgentNative kaynaklarını okuyabilmeli.\nsearch/evaluation veri yapıları tutarlı olmalı; pattern/patterns uyuşmazlığı veya undefined.some gibi runtime hataları olmamalı.\nWindow minimum width kontrolünde literal 700 metni arama; KRALIAgentNativeApp.swift içindeki gerçek minWidth değerini sayısal parse et ve <=700 ise PASS ver. Mevcut 680 PASS olmalı.\nContentView.swift içinden compact sidebar threshold 780 ve overlay Inspector threshold 1120 değerlerini doğrula.\nAna Inspector akışında inspectorDeveloperMode veya Özet-Developer/Summary-Developer picker olmadığını doğrula.\nConversationStore/Engine kaynaklarında archived conversation delete API bulunduğunu doğrula.\nConversationSidebarView içinde destructive delete confirmation bulunduğunu doğrula.\nContentView içinde messageBubble copy action ve NSPasteboard tabanlı copy implementation bulunduğunu doğrula.\nStatic check gerçekten çalıştırılmadan görev tamamlanmış sayılmasın.\nHer kontrol için PASS/FAIL, kontrol edilen dosya ve mümkünse kaynak kanıtı raporla.\nchecklist JSON içindeki test_result pending bırakılmamalı; gerçek çalıştırma sonucu, checked_files, failures ve warnings ile güncellenmeli.\nREADME yalnız gerçekten uygulanan davranışı anlatmalı.\nYeni dependency ekleme. Mac UI otomasyonu, uygulama açma, sistem mutation veya network işlemi yapma.\nİş sonunda static check komutu + gerçek sonucu + git diff + build-check raporla."
+  },
+  "taskMetadata": {
+    "owner": "ChatGPT Lead / KRALİ team",
+    "risk": "low",
+    "allowedScope": [
+      "DeveloperAgent/Tests/ui-regression/**",
+      "DeveloperAgent/README.md"
+    ],
+    "forbiddenScope": [
+      "App/**",
+      "Scripts/**",
+      "Cloud/**",
+      "VERSION",
+      "Mentor/**",
+      ".github/**"
+    ],
+    "requiresPhysicalAction": false,
+    "requiresMainAccess": false
+  }
+}
