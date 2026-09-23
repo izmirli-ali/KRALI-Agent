@@ -6504,26 +6504,24 @@ final class AgentEngine: ObservableObject {
         token: String,
         reason: String
     ) {
-        let parts =
-            raw.split(
-                separator: ":",
-                maxSplits: 2,
-                omittingEmptySubsequences:
-                    false
-            )
-
-        if parts.count >= 3,
-           parts[1].isEmpty {
+        if let separatorRange =
+            raw.range(
+                of: "@@"
+            ) {
             let token =
-                String(parts[0])
-                    .trimmingCharacters(
-                        in: .whitespacesAndNewlines
-                    )
+                String(
+                    raw[..<separatorRange.lowerBound]
+                )
+                .trimmingCharacters(
+                    in: .whitespacesAndNewlines
+                )
             let reason =
-                String(parts[2])
-                    .trimmingCharacters(
-                        in: .whitespacesAndNewlines
-                    )
+                String(
+                    raw[separatorRange.upperBound...]
+                )
+                .trimmingCharacters(
+                    in: .whitespacesAndNewlines
+                )
 
             if !token.isEmpty {
                 return (
