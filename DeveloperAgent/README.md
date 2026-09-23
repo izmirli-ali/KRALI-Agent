@@ -67,7 +67,7 @@ Güvenlik sözleşmesi:
 - `Write(**)`, `Shell(*)`, `WebFetch(*)` ve `Mcp(*:*)` açıkça deny edilir.
 - Explicit `CURSOR_API_KEY` / `CURSOR_AUTH_TOKEN` ortam değişkenleri bridge tarafından kaldırılır; yalnız kullanıcının `agent login` oturumu kullanılır.
 - Cursor kod değiştirmez, candidate üretmez, branch/commit/push yapmaz.
-- Aynı VERSION + gap için hazır diagnosis tekrar kullanılır; ücretsiz kota tekrar tüketilmez.
+- Aynı VERSION + gap + failure evidence fingerprint için hazır diagnosis tekrar kullanılır; kanıt değiştiyse eski teşhis körlemesine yeniden kullanılmaz.
 - Diagnosis `~/Library/Application Support/KRALI Agent/Mentor/cursor-architect-latest.json` altında saklanır ve Mentor Sync ile repo tarafındaki `Mentor/cursor-architect-latest.json` dosyasına taşınır.
 - Sonraki Developer Agent turunda diagnosis yalnız advisory/hypothesis olarak prompt'a eklenir. Mutation öncesi exact source ve runtime evidence bağımsız olarak yeniden doğrulanmalıdır.
 
