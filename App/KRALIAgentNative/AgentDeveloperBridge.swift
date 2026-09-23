@@ -32,6 +32,7 @@ struct DeveloperAgentStatus: Hashable {
     let appVersion: String?
     let updatedAt: Date?
     let runID: String?
+    let approvalActionID: String?
 
     init(
         state: String,
@@ -40,7 +41,8 @@ struct DeveloperAgentStatus: Hashable {
         worktree: String?,
         appVersion: String? = nil,
         updatedAt: Date? = nil,
-        runID: String? = nil
+        runID: String? = nil,
+        approvalActionID: String? = nil
     ) {
         self.state = state
         self.message = message
@@ -49,6 +51,8 @@ struct DeveloperAgentStatus: Hashable {
         self.appVersion = appVersion
         self.updatedAt = updatedAt
         self.runID = runID
+        self.approvalActionID =
+            approvalActionID
     }
 
     func freshForApp(
@@ -959,7 +963,7 @@ struct AgentDeveloperBridge {
 
     func run(
         learningJobBriefURL: URL? = nil,
-        allowSystemMutation: Bool = false
+        approvedSystemActionID: String? = nil
     ) async -> DeveloperAgentStatus {
         guard fileManager.fileExists(
             atPath: scriptURL.path
@@ -991,11 +995,10 @@ struct AgentDeveloperBridge {
                 ProcessInfo.processInfo
                     .environment
             environment[
-                "KRALI_ALLOW_SYSTEM_MUTATION"
+                "KRALI_APPROVED_SYSTEM_ACTION"
             ] =
-                allowSystemMutation
-                ? "1"
-                : "0"
+                approvedSystemActionID ??
+                ""
 
             if let learningJobBriefURL {
                 environment[
