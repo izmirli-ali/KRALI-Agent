@@ -159,6 +159,9 @@ struct AgentTrainingLab {
             inflectedAppNameLanguageResult()
         )
         results.append(
+            candidateAliasSuffixIsolationResult()
+        )
+        results.append(
             typoAppNameLanguageResult()
         )
         results.append(
@@ -1914,6 +1917,62 @@ struct AgentTrainingLab {
                 : [
                     "Türkçe ekli uygulama adı normalize edilemedi."
                 ]
+        )
+    }
+
+    private func candidateAliasSuffixIsolationResult()
+        -> TrainingScenarioResult {
+        let canonicalAliasScore =
+            languageResolver.bestAliasScore(
+                input: "exampl",
+                aliases: ["Example"]
+            )
+
+        let inflectedUserScore =
+            languageResolver.bestAliasScore(
+                input: "takvimi",
+                aliases: ["Takvim"]
+            )
+
+        let passed =
+            canonicalAliasScore < 1.0 &&
+            inflectedUserScore == 1.0
+
+        var diagnostics: [String] = []
+
+        if canonicalAliasScore >= 1.0 {
+            diagnostics.append(
+                "Candidate alias Türkçe suffix stripping ile yapay exact forma dönüştürüldü."
+            )
+        }
+
+        if inflectedUserScore < 1.0 {
+            diagnostics.append(
+                "Kullanıcı tarafındaki Türkçe çekim çözümleme regression oluşturdu."
+            )
+        }
+
+        return TrainingScenarioResult(
+            scenarioID:
+                "candidate-alias-suffix-isolation",
+            title:
+                "Candidate aliaslarında Türkçe suffix stripping izolasyonu",
+            tier: .core,
+            prompt:
+                "Canonical app aliaslarını dil-spesifik ek kurallarıyla değiştirme",
+            passed: passed,
+            goal:
+                "Türkçe ek çözümünü yalnız kullanıcı girdisine uygula; canonical candidate aliaslarını bozma",
+            route: [
+                "Core",
+                "Language",
+                "Desktop"
+            ],
+            selectedCapabilities: [
+                "desktop.app"
+            ],
+            unavailableCapabilities: [],
+            diagnostics: diagnostics
         )
     }
 

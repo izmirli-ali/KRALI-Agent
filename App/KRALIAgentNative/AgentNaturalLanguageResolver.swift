@@ -586,16 +586,18 @@ struct AgentNaturalLanguageResolver: Sendable {
                 }
                 .max() ?? 0
 
+        // Inflection stripping is intentionally asymmetric.
+        // User input may contain Turkish case/possessive suffixes, but
+        // installed application aliases are canonical metadata and must not
+        // be rewritten with Turkish suffix rules. Applying wordVariants()
+        // to arbitrary-language aliases can manufacture false forms such as
+        // "Example" -> "exampl" or "Software" -> "softwar".
         let aliasVariants =
             normalizedAliases
                 .flatMap {
                     [$0] +
                     $0.split(separator: " ")
-                        .flatMap {
-                            wordVariants(
-                                String($0)
-                            )
-                        }
+                        .map(String.init)
                 }
                 .filter {
                     !$0.isEmpty
