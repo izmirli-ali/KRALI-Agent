@@ -15,6 +15,25 @@ struct DesktopAppActionResult: Codable, Hashable, Sendable {
     let screenSummary: String?
 }
 
+struct DesktopApplicationApprovalTarget:
+    Codable,
+    Hashable,
+    Sendable {
+    let name: String
+    let bundleIdentifier: String?
+    let path: String
+
+    var summary: String {
+        if let bundleIdentifier,
+           !bundleIdentifier.isEmpty {
+            return name + " • " +
+                bundleIdentifier
+        }
+
+        return name + " • " + path
+    }
+}
+
 struct DesktopWebActionResult: Hashable, Sendable {
     let requestedURL: String
     let openSucceeded: Bool
@@ -128,6 +147,7 @@ enum DesktopControlError: LocalizedError {
     case launchFailed(String)
     case invalidWebURL(String)
     case webURLOpenFailed(String)
+    case approvedTargetMismatch(String)
 
     var errorDescription: String? {
         switch self {
@@ -139,6 +159,8 @@ enum DesktopControlError: LocalizedError {
             return "Geçerli HTTP/HTTPS adresi çözülemedi: \(value)"
         case .webURLOpenFailed(let value):
             return "Web adresi macOS varsayılan işleyicisiyle açılamadı: \(value)"
+        case .approvedTargetMismatch(let value):
+            return "Onaylanan uygulama hedefi değişti veya doğrulanamadı: \(value)"
         }
     }
 }
@@ -168,6 +190,27 @@ actor AgentDesktopControl {
         )
     }
 
+    func applicationApprovalTarget(
+        from userText: String
+    ) async -> DesktopApplicationApprovalTarget? {
+        guard let candidate =
+            await resolveRequestedApplication(
+                from: userText
+            )
+        else {
+            return nil
+        }
+
+        return DesktopApplicationApprovalTarget(
+            name: candidate.name,
+            bundleIdentifier:
+                candidate.bundleIdentifier,
+            path:
+                candidate.url
+                    .standardizedFileURL.path
+        )
+    }
+
     func openOrFocusApplication(
         from userText: String
     ) async throws -> DesktopAppActionResult {
@@ -185,6 +228,71 @@ actor AgentDesktopControl {
                 )
         }
 
+        return try await performOpenOrFocus(
+            candidate,
+            requestedText: userText
+        )
+    }
+
+    func openOrFocusApprovedApplication(
+        _ target:
+            DesktopApplicationApprovalTarget,
+        requestedText: String
+    ) async throws -> DesktopAppActionResult {
+        let url =
+            URL(
+                fileURLWithPath:
+                    target.path
+            )
+            .standardizedFileURL
+
+        guard
+            fileManager.fileExists(
+                atPath: url.path
+            )
+        else {
+            throw DesktopControlError
+                .approvedTargetMismatch(
+                    target.summary
+                )
+        }
+
+        let actualBundleIdentifier =
+            Bundle(url: url)?
+                .bundleIdentifier
+
+        if let expected =
+            target.bundleIdentifier,
+           actualBundleIdentifier !=
+            expected {
+            throw DesktopControlError
+                .approvedTargetMismatch(
+                    target.summary
+                )
+        }
+
+        let candidate =
+            ApplicationCandidate(
+                name: target.name,
+                aliases: [target.name],
+                bundleIdentifier:
+                    actualBundleIdentifier ??
+                    target.bundleIdentifier,
+                url: url
+            )
+
+        return try await performOpenOrFocus(
+            candidate,
+            requestedText:
+                requestedText
+        )
+    }
+
+    private func performOpenOrFocus(
+        _ candidate:
+            ApplicationCandidate,
+        requestedText: String
+    ) async throws -> DesktopAppActionResult {
         let runningBefore =
             matchingRunningApplication(
                 named: candidate.name,
@@ -272,7 +380,7 @@ actor AgentDesktopControl {
         }
 
         return DesktopAppActionResult(
-            requestedText: userText,
+            requestedText: requestedText,
             resolvedApplicationName:
                 candidate.name,
             resolvedApplicationURL:
@@ -854,54 +962,116 @@ actor AgentDesktopControl {
             let score: Double
         }
 
+        let normalizedQuery =
+            languageResolver
+                .normalized(query)
+
+        var verifiedVariants: [String] = []
+
+        for variant in
+            variantPlan.variants {
+            let normalizedVariant =
+                languageResolver
+                    .normalized(
+                        variant
+                    )
+
+            if normalizedVariant ==
+                normalizedQuery {
+                verifiedVariants.append(
+                    variant
+                )
+                continue
+            }
+
+            if let verification =
+                await localIntelligence
+                    .verifyApplicationNameVariant(
+                        query: query,
+                        variant: variant
+                    ),
+               verification.equivalent,
+               verification.confidence >=
+                    0.94 {
+                verifiedVariants.append(
+                    variant
+                )
+            }
+        }
+
+        guard !verifiedVariants.isEmpty else {
+            return (
+                nil,
+                ApplicationSemanticResolutionTrace(
+                    attempted: true,
+                    providerAvailable: true,
+                    query: query,
+                    selectedIndex: nil,
+                    selectedName: nil,
+                    selectedBundleIdentifier: nil,
+                    selectionConfidence:
+                        variantPlan.confidence,
+                    verificationConfidence: 0,
+                    accepted: false,
+                    stage:
+                        "variant_verification_rejected",
+                    evaluatedBatchCount: nil,
+                    finalistCount: nil,
+                    generatedVariants:
+                        variantPlan.variants,
+                    deterministicMatchCount: 0,
+                    selectedVariant: nil,
+                    reason:
+                        "semantic_variants_failed_equivalence_gate"
+                )
+            )
+        }
+
         var matches:
             [DeterministicSemanticMatch] = []
 
         for (
             variantOrder,
             variant
-        ) in variantPlan.variants.enumerated() {
-            if let launchCandidate =
-                launchServicesApplicationCandidate(
-                    named: variant
-                ) {
-                matches.append(
-                    DeterministicSemanticMatch(
-                        variant: variant,
-                        variantOrder:
-                            variantOrder,
-                        candidate:
-                            launchCandidate,
-                        score: 1.0
+        ) in verifiedVariants.enumerated() {
+            let normalizedVariant =
+                languageResolver
+                    .normalized(
+                        variant
                     )
-                )
+
+            let exactMatches =
+                candidates.filter {
+                    candidate in
+
+                    ([candidate.name] +
+                        candidate.aliases)
+                        .contains {
+                            languageResolver
+                                .normalized(
+                                    $0
+                                ) ==
+                                normalizedVariant
+                        }
+                }
+
+            guard exactMatches.count == 1,
+                  let exact =
+                    exactMatches.first
+            else {
+                continue
             }
 
-            let ranked =
-                rankedApplicationCandidates(
-                    from: variant,
-                    candidates: candidates
+            matches.append(
+                DeterministicSemanticMatch(
+                    variant: variant,
+                    variantOrder:
+                        variantOrder,
+                    candidate:
+                        exact,
+                    score: 1.0
                 )
-
-            if
-                applicationCandidateDecision(
-                    from: variant,
-                    ranked: ranked
-                ) == "accepted",
-                let best =
-                    ranked.first
-            {
-                matches.append(
-                    DeterministicSemanticMatch(
-                        variant: variant,
-                        variantOrder:
-                            variantOrder,
-                        candidate:
-                            best.candidate,
-                        score: best.score
-                    )
-                )
-            }
+            )
         }
 
         var bestByPath:
@@ -976,6 +1146,57 @@ actor AgentDesktopControl {
             )
         }
 
+        if
+            chosen.candidate
+                .bundleIdentifier ==
+                Bundle.main
+                    .bundleIdentifier
+        {
+            let directQueryMatchesSelf =
+                ([chosen.candidate.name] +
+                    chosen.candidate.aliases)
+                    .contains {
+                        languageResolver
+                            .normalized(
+                                $0
+                            ) ==
+                            normalizedQuery
+                    }
+
+            guard directQueryMatchesSelf else {
+                return (
+                    nil,
+                    ApplicationSemanticResolutionTrace(
+                        attempted: true,
+                        providerAvailable: true,
+                        query: query,
+                        selectedIndex: nil,
+                        selectedName:
+                            chosen.candidate.name,
+                        selectedBundleIdentifier:
+                            chosen.candidate
+                                .bundleIdentifier,
+                        selectionConfidence:
+                            variantPlan.confidence,
+                        verificationConfidence: 0,
+                        accepted: false,
+                        stage:
+                            "self_target_blocked",
+                        evaluatedBatchCount: nil,
+                        finalistCount: nil,
+                        generatedVariants:
+                            variantPlan.variants,
+                        deterministicMatchCount:
+                            deterministicMatches.count,
+                        selectedVariant:
+                            chosen.variant,
+                        reason:
+                            "semantic_resolution_cannot_redirect_unrelated_query_to_running_agent"
+                    )
+                )
+            }
+        }
+
         let selectedIndex =
             candidates.firstIndex {
                 $0.url.standardizedFileURL.path ==
@@ -1039,7 +1260,7 @@ actor AgentDesktopControl {
 
         let accepted =
             verification.equivalent &&
-            verification.confidence >= 0.86
+            verification.confidence >= 0.94
 
         return (
             accepted
