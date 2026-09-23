@@ -399,3 +399,19 @@ Target runtime:
 - Yeni `desktop-ax-recovery-is-not-proof` regression'ı: activation=true + AX recovery=true olsa bile bağımsız observation yoksa foreground=false olmalı.
 - Resolver, Strict Approval, UI ve provider selection değiştirilmedi.
 - VERSION 0.10.25 / build 198.
+
+
+## v0.10.26 progress
+
+- Cursor CLI, yerel Developer Agent'ın yerine geçmeyen read-only `Cursor Architect` escalation provider olarak eklendi.
+- Tetikleme yalnız diagnosis başarısızlıklarında: iteration limit, root-cause inconclusive, strategy escalation inconclusive ve tool-protocol failure.
+- Cursor çağrısı `--mode=ask --print --sandbox enabled` ile yapılır.
+- Geçici worktree policy: `workspace_readonly`; Write/Shell/WebFetch/MCP açıkça deny edilir.
+- Bridge explicit Cursor API key/auth-token environment yollarını kaldırır; yalnız kullanıcının mevcut `agent login` oturumunu kullanır.
+- Cursor hiçbir mutation/candidate/commit/push üretmez; yalnız structured diagnosis yazar.
+- Aynı VERSION + gap diagnosis tekrar kullanılır; aynı probleme tekrar Cursor kotası harcanmaz.
+- Cursor diagnosis sonraki Developer Agent prompt'una advisory/hypothesis olarak eklenir ve source/runtime evidence ile bağımsız doğrulama zorunludur.
+- Mentor Sync artık `Mentor/cursor-architect-latest.json` dosyasını da taşır.
+- CI, `cursor-architect-bridge.mjs --self-test` ile read-only güvenlik sözleşmesini doğrular.
+- Cursor bulunamaz, login hazır olmaz veya ücretsiz quota biterse yerel Qwen/Devstral yolu değişmeden devam eder.
+- VERSION 0.10.26 / build 199.
