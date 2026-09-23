@@ -6474,6 +6474,209 @@ final class AgentEngine: ObservableObject {
         }
     }
 
+    func approvePendingDeveloperToolApproval() {
+        guard let approval =
+            pendingDeveloperToolApproval
+        else {
+            return
+        }
+
+        appendConversationMessage(
+            ChatMessage(
+                role: .user,
+                text:
+                    "Onaylıyorum: " +
+                    approval.title
+            )
+        )
+
+        pendingDeveloperToolApproval = nil
+
+        switch approval.action {
+        case .desktopControlProbe:
+            executeDesktopControlProbe()
+
+        case .developerSystemEffects:
+            let learningJob =
+                pendingDeveloperLearningJob
+            let briefURL =
+                pendingDeveloperLearningJobBriefURL
+
+            pendingDeveloperLearningJob = nil
+            pendingDeveloperLearningJobBriefURL = nil
+
+            resumeActiveLearningJobAfterDeveloperApproval()
+
+            runDeveloperAgent(
+                learningJob:
+                    learningJob,
+                learningJobBriefURL:
+                    briefURL,
+                allowSystemEffects:
+                    true
+            )
+        }
+
+        log(
+            "Developer Tool approval kullanıcı tarafından onaylandı • " +
+            approval.action.rawValue
+        )
+    }
+
+    func cancelPendingDeveloperToolApproval() {
+        guard let approval =
+            pendingDeveloperToolApproval
+        else {
+            return
+        }
+
+        appendConversationMessage(
+            ChatMessage(
+                role: .user,
+                text:
+                    "İptal: " +
+                    approval.title
+            )
+        )
+
+        pendingDeveloperToolApproval = nil
+
+        switch approval.action {
+        case .desktopControlProbe:
+            inspectorState.desktopControlStatus =
+                "İptal edildi • fiziksel uygulama açma testi çalıştırılmadı."
+
+        case .developerSystemEffects:
+            failActiveLearningJobAfterDeveloperApprovalRejection(
+                approval.reason
+            )
+            pendingDeveloperLearningJob = nil
+            pendingDeveloperLearningJobBriefURL = nil
+
+            let rejectedStatus =
+                DeveloperAgentStatus(
+                    state:
+                        "system_action_rejected",
+                    message:
+                        "Kullanıcı sistem etkisi oluşturan Developer Agent adımını onaylamadı.",
+                    branch: nil,
+                    worktree: nil,
+                    appVersion:
+                        currentAppVersionString,
+                    updatedAt:
+                        Date()
+                )
+
+            inspectorState.developerAgentStatus =
+                rejectedStatus
+            developerBridge.writeStatus(
+                rejectedStatus
+            )
+        }
+
+        postAssistantMessage(
+            "İşlemi iptal ettim. Developer aracının fiziksel/sistem etkisi oluşturan adımı uygulanmadı."
+        )
+
+        log(
+            "Developer Tool approval kullanıcı tarafından reddedildi • " +
+            approval.action.rawValue
+        )
+    }
+
+    private func pauseActiveLearningJobForDeveloperApproval(
+        _ status: DeveloperAgentStatus
+    ) {
+        guard
+            let activeLearningJobID,
+            let index =
+                inspectorState.learningQueueJobs
+                    .firstIndex(
+                        where: {
+                            $0.id ==
+                                activeLearningJobID
+                        }
+                    )
+        else {
+            return
+        }
+
+        inspectorState.learningQueueJobs[index]
+            .state = .queued
+        inspectorState.learningQueueJobs[index]
+            .updatedAt = Date()
+        inspectorState.learningQueueJobs[index]
+            .lastStatus =
+                "Sistem işlemi için kullanıcı onayı bekleniyor: " +
+                status.message
+
+        learningQueueStore.save(
+            inspectorState.learningQueueJobs
+        )
+    }
+
+    private func resumeActiveLearningJobAfterDeveloperApproval() {
+        guard
+            let activeLearningJobID,
+            let index =
+                inspectorState.learningQueueJobs
+                    .firstIndex(
+                        where: {
+                            $0.id ==
+                                activeLearningJobID
+                        }
+                    )
+        else {
+            return
+        }
+
+        inspectorState.learningQueueJobs[index]
+            .state = .running
+        inspectorState.learningQueueJobs[index]
+            .updatedAt = Date()
+        inspectorState.learningQueueJobs[index]
+            .lastStatus =
+                "Kullanıcı sistem işlemini onayladı; Developer Agent devam ediyor."
+
+        learningQueueStore.save(
+            inspectorState.learningQueueJobs
+        )
+    }
+
+    private func failActiveLearningJobAfterDeveloperApprovalRejection(
+        _ reason: String
+    ) {
+        guard
+            let activeLearningJobID,
+            let index =
+                inspectorState.learningQueueJobs
+                    .firstIndex(
+                        where: {
+                            $0.id ==
+                                activeLearningJobID
+                        }
+                    )
+        else {
+            self.activeLearningJobID = nil
+            return
+        }
+
+        inspectorState.learningQueueJobs[index]
+            .state = .failed
+        inspectorState.learningQueueJobs[index]
+            .updatedAt = Date()
+        inspectorState.learningQueueJobs[index]
+            .lastStatus =
+                "Kullanıcı sistem işlemini onaylamadı: " +
+                reason
+
+        learningQueueStore.save(
+            inspectorState.learningQueueJobs
+        )
+
+        self.activeLearningJobID = nil
+    }
+
     private func updateRunningLearningJob(
         with status: DeveloperAgentStatus
     ) {
