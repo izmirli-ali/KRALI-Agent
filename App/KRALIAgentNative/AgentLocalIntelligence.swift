@@ -1467,9 +1467,7 @@ actor AgentLocalIntelligence {
                             $0.index ==
                                 selectedIndex
                         }
-                    ),
-                finalSelection.confidence >=
-                    0.82
+                    )
             else {
                 return AgentSemanticApplicationResolution(
                     selectedIndex:
@@ -1479,8 +1477,14 @@ actor AgentLocalIntelligence {
                         finalSelection.confidence,
                     verificationConfidence: 0,
                     equivalent: false,
+                    stage:
+                        "selection_invalid_index",
+                    evaluatedBatchCount:
+                        evaluatedBatchCount,
+                    finalistCount:
+                        finalCandidates.count,
                     reason:
-                        "semantic_selection_below_threshold"
+                        "semantic_selection_invalid_index"
                 )
             }
 
