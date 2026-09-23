@@ -1249,6 +1249,24 @@ const resolverRuntimeEvidence =
                   boundResolutionTrace
                     .semanticResolution
                     .accepted === true,
+                stage:
+                  String(
+                    boundResolutionTrace
+                      .semanticResolution
+                      .stage || ""
+                  ),
+                evaluatedBatchCount:
+                  Number(
+                    boundResolutionTrace
+                      .semanticResolution
+                      .evaluatedBatchCount || 0
+                  ),
+                finalistCount:
+                  Number(
+                    boundResolutionTrace
+                      .semanticResolution
+                      .finalistCount || 0
+                  ),
                 reason:
                   String(
                     boundResolutionTrace

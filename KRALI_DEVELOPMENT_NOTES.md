@@ -255,3 +255,17 @@ Target runtime:
 - Immutable Learning / Developer Agent resolver evidence sıkıştırması semanticResolution alanını da koruyor.
 - Semantic candidate kabul edilse bile mevcut gerçek foreground/ScreenCaptureKit doğrulaması değişmeden zorunlu kalıyor.
 - VERSION 0.10.14 / build 187.
+
+
+## v0.10.15 progress
+
+- Semantic application resolver artık tüm kurulu uygulamaları tek dev prompt'a vermiyor; candidate havuzunu küçük batch'lere bölerek tarıyor.
+- Batch seçim prompt'larından kopyalanabilir örnek JSON değerleri kaldırıldı; model alan değerlerini girdiden üretmek zorunda.
+- Placeholder/template echo çıktıları deterministic olarak geçersiz sayılıyor.
+- Batch finalist eşiği yalnız aday toplamak için kullanılıyor; finalistler her durumda ayrı final semantic selection çağrısından geçiyor.
+- Final selection ve bağımsız verifier için yüksek güven eşiği korunuyor; iki aşama da geçmeden uygulama candidate kabul edilmiyor.
+- Semantic trace artık stage, evaluatedBatchCount ve finalistCount alanlarını kaydediyor.
+- Stage örnekleri: selection_template_echo, scan_no_match, finalist_inconclusive, verifier_invalid_output, verifier_rejected, accepted.
+- Developer Agent immutable resolver evidence bu stage ve sayaçları da koruyor.
+- Uygulama adına özel sözlük/hard-code eklenmedi; foreground/ScreenCaptureKit gerçek doğrulaması değişmeden zorunlu.
+- VERSION 0.10.15 / build 188.
