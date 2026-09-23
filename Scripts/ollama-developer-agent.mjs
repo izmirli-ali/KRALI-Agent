@@ -6127,6 +6127,10 @@ async function requestRootCauseRanking(
     },
     runtime_source_hints:
       runtimeSourceHints.slice(0, 4),
+    alias_provenance_summary:
+      aliasLocalizationFailureEvidence()
+        ?.missingLocalizedAliasEvidence ??
+      null,
     candidates:
       rankCandidates.map(
         (item) => ({
@@ -6526,7 +6530,82 @@ async function resolveRuntimeFailureDependency(
       rankingCandidates
     );
 
-  if (ranked.length === 0) {
+  const deterministicProducer =
+    aliasProvenanceGapActive()
+      ? pruned.find(
+          (item) =>
+            item.score >= 30 &&
+            isAliasProducerSymbol(
+              item.candidate?.symbol
+            )
+        )
+      : null;
+
+  const producerDiagnosis =
+    deterministicProducer
+      ? {
+          target:
+            deterministicProducer
+              .candidate,
+          root_cause:
+            "Runtime alias provenance, istenen localized alias'ın upstream metadata/alias üretim katmanında hiç üretilmediğini kanıtlıyor; bu producer downstream candidate seçiminin kullandığı alias setini doğrudan besliyor.",
+          strategy:
+            "Generic localized alias acquisition/production davranışını bu producer katmanında düzelt; downstream scoring/selection eşiklerini veya uygulama adına özel eşlemeyi değiştirme.",
+          confidence:
+            Math.min(
+              0.86,
+              0.68 +
+                (
+                  deterministicProducer
+                    .score /
+                  200
+                )
+            ),
+          alternatives_considered:
+            ranked
+              .map(
+                (item) =>
+                  String(
+                    item?.root_cause ||
+                    ""
+                  )
+              )
+              .filter(Boolean)
+              .slice(0, 2),
+        }
+      : null;
+
+  const rankedForVerification = [
+    ...(
+      producerDiagnosis
+        ? [producerDiagnosis]
+        : []
+    ),
+    ...ranked.filter(
+      (item) =>
+        !producerDiagnosis ||
+        item.target?.id !==
+          producerDiagnosis.target?.id
+    ),
+  ].slice(0, 3);
+
+  if (
+    ranked.length === 0 &&
+    producerDiagnosis
+  ) {
+    stage(
+      "local_agent_root_cause_deterministic_fallback",
+      gapLabel +
+        " model ranking sonuç üretmedi; güçlü provenance evidence ile producer verifier'a taşındı • target=" +
+        producerDiagnosis.target.symbol +
+        " • score=" +
+        deterministicProducer.score
+    );
+  }
+
+  if (
+    rankedForVerification.length === 0
+  ) {
     return false;
   }
 
@@ -6534,7 +6613,7 @@ async function resolveRuntimeFailureDependency(
     "local_agent_root_cause_ranked",
     gapLabel +
       " root-cause adayları sıralandı • top=" +
-      ranked
+      rankedForVerification
         .map(
           (item) =>
             item.target.symbol +
@@ -6545,7 +6624,8 @@ async function resolveRuntimeFailureDependency(
   );
 
   for (
-    const diagnosis of ranked.slice(0, 2)
+    const diagnosis of
+      rankedForVerification
   ) {
     const target =
       diagnosis.target;
