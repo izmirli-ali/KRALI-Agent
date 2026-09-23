@@ -29,24 +29,30 @@ write_status() {
     )"
     NOW_EPOCH="$(/bin/date +%s)"
 
-    printf "%s|@meta|app=%s|at=%s|run=%s\n" \
+    printf "%s|@meta|app=%s|at=%s|run=%s|approval=%s\n" \
         "$1" \
         "${APP_VERSION:-unknown}" \
         "$NOW_EPOCH" \
-        "$STAMP" > "$STATUS"
+        "$STAMP" \
+        "${PENDING_APPROVAL_ACTION_ID:-}" > "$STATUS"
 }
 
-ALLOW_SYSTEM_MUTATION="${KRALI_ALLOW_SYSTEM_MUTATION:-0}"
+APPROVED_SYSTEM_ACTION="${KRALI_APPROVED_SYSTEM_ACTION:-}"
+PENDING_APPROVAL_ACTION_ID=""
 
 require_system_mutation_approval() {
-    local action="$1"
+    local action_id="$1"
+    local action="$2"
 
-    if [ "$ALLOW_SYSTEM_MUTATION" = "1" ]; then
+    if [ "$APPROVED_SYSTEM_ACTION" = "$action_id" ]; then
+        APPROVED_SYSTEM_ACTION=""
+        echo "🛡️ Kullanıcı onayı tüketildi: $action_id" | tee -a "$LOG"
         return 0
     fi
 
+    PENDING_APPROVAL_ACTION_ID="$action_id"
     write_status "approval_required|$action|$BRANCH|$WORKTREE"
-    echo "🛡️ Kullanıcı onayı gerekli: $action" | tee -a "$LOG"
+    echo "🛡️ Kullanıcı onayı gerekli: $action • id=$action_id" | tee -a "$LOG"
     exit 41
 }
 
@@ -91,7 +97,7 @@ case "$NODE_MAJOR" in
             echo "⚠️ Global Node.js v$NODE_MAJOR Cline bağımlılıklarıyla uyumlu değil; izole Node 22 runtime hazırlanıyor." | tee -a "$LOG"
 
             if ! "$BREW_BIN" list node@22 >/dev/null 2>&1; then
-                require_system_mutation_approval "Developer Agent için Node.js 22 Homebrew ile kurulacak."
+                require_system_mutation_approval "brew-install-node22" "Developer Agent için Node.js 22 Homebrew ile kurulacak."
                 if ! "$BREW_BIN" install node@22 >>"$LOG" 2>&1; then
                     write_status "setup_node_supported|Node.js 22 otomatik kurulamadı; Developer Agent runtime onarımı gerekli"
                     exit 11
@@ -265,7 +271,7 @@ ensure_ollama_model() {
     write_status "local_model_downloading|Yerel model indiriliyor: $requested_model"
     echo "Yerel model indiriliyor: $requested_model" | tee -a "$LOG"
 
-    require_system_mutation_approval "Yerel AI modeli indirilecek: $requested_model"
+    require_system_mutation_approval "ollama-pull-model" "Yerel AI modeli indirilecek: $requested_model"
     "$OLLAMA_BIN" pull "$requested_model" >>"$LOG" 2>&1
 }
 
@@ -521,13 +527,13 @@ process.stdin.on("end",()=>{try{process.stdout.write(String(JSON.parse(s).versio
        "$BREW_BIN" list ollama >/dev/null 2>&1; then
         echo "♻️ Ollama Devstral Small 2 uyumluluğu için güncelleniyor..." | tee -a "$LOG"
 
-        require_system_mutation_approval "Ollama Homebrew paketi güncellenecek ve yerel servis yeniden başlatılacak."
+        require_system_mutation_approval "brew-upgrade-ollama" "Ollama Homebrew paketi güncellenecek ve yerel servis yeniden başlatılacak."
         if "$BREW_BIN" upgrade ollama >>"$LOG" 2>&1; then
             /usr/bin/pkill -x ollama >/dev/null 2>&1 || true
             /bin/sleep 1
             rehash 2>/dev/null || true
             OLLAMA_BIN="$(command -v ollama || true)"
-            require_system_mutation_approval "Ollama yerel servisi arka planda başlatılacak."
+            require_system_mutation_approval "start-ollama-service" "Ollama yerel servisi arka planda başlatılacak."
         /usr/bin/nohup "$OLLAMA_BIN" serve >>"$LOG_DIR/KRALI-Ollama.log" 2>&1 &
 
             for _ in {1..30}; do
@@ -573,7 +579,7 @@ prepare_ollama_runtime() {
         write_status "local_ai_installing|Ücretsiz yerel AI runtime Ollama kuruluyor"
         echo "Ollama kuruluyor..." | tee -a "$LOG"
 
-        require_system_mutation_approval "Ollama Homebrew ile bilgisayara kurulacak."
+        require_system_mutation_approval "brew-install-ollama" "Ollama Homebrew ile bilgisayara kurulacak."
         if ! "$BREW_BIN" install ollama >>"$LOG" 2>&1; then
             write_status "setup_local_ai|Ollama otomatik kurulamadı"
             return 1
@@ -680,7 +686,7 @@ repair_cline() {
     echo "Cline CLI yeniden kuruluyor: npm install -g --allow-scripts=cline,protobufjs cline@latest" | tee -a "$LOG"
     write_status "repairing_cline|Cline CLI resmi paketle ve gerekli install script izinleriyle yeniden kuruluyor"
 
-    require_system_mutation_approval "Cline CLI global npm paketi kurulacak veya güncellenecek."
+    require_system_mutation_approval "npm-install-cline" "Cline CLI global npm paketi kurulacak veya güncellenecek."
     if ! "$NPM_BIN" install -g --allow-scripts=cline,protobufjs cline@latest >>"$LOG" 2>&1; then
         return 1
     fi
@@ -793,7 +799,7 @@ EOF
         /bin/chmod +x "$AUTH_SCRIPT" 2>/dev/null || true
         write_status "waiting_cline_auth|ChatGPT giriş ekranı otomatik açılıyor; girişten sonra Developer Agent devam edecek"
 
-        require_system_mutation_approval "Cline kimlik doğrulaması için Terminal penceresi açılacak."
+        require_system_mutation_approval "open-cline-auth-terminal" "Cline kimlik doğrulaması için Terminal penceresi açılacak."
         if /usr/bin/open -a Terminal "$AUTH_SCRIPT" >>"$LOG" 2>&1; then
             echo "🔐 Cline OAuth Terminal penceresi otomatik açıldı." | tee -a "$LOG"
         else
