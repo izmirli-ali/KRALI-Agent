@@ -1,5 +1,29 @@
 import Foundation
 
+enum AgentDeveloperToolEffect:
+    String,
+    Hashable,
+    Sendable {
+    case codeOnly
+    case systemMutation
+    case foregroundInteraction
+}
+
+struct AgentDeveloperToolApprovalPolicy:
+    Sendable {
+    func requiresUserApproval(
+        for effect: AgentDeveloperToolEffect
+    ) -> Bool {
+        switch effect {
+        case .codeOnly:
+            return false
+        case .systemMutation,
+             .foregroundInteraction:
+            return true
+        }
+    }
+}
+
 struct DeveloperAgentStatus: Hashable {
     let state: String
     let message: String
@@ -128,6 +152,7 @@ struct DeveloperAgentStatus: Hashable {
             "sdk_session_ended",
             "sdk_session_completed",
             "provider_platform_bug",
+            "approval_required",
             "recovering_candidate",
             "candidate_recovered",
             "candidate_repair_running"
@@ -255,6 +280,8 @@ struct DeveloperAgentStatus: Hashable {
             return "Yerel agent turu tamamlandı"
         case "setup_local_ai":
             return "Yerel AI kurulumu gerekli"
+        case "approval_required":
+            return "Kullanıcı onayı bekleniyor"
         case "local_ai_failed":
             return "Yerel AI başlatılamadı"
         case "local_model_failed":
@@ -931,7 +958,8 @@ struct AgentDeveloperBridge {
     }
 
     func run(
-        learningJobBriefURL: URL? = nil
+        learningJobBriefURL: URL? = nil,
+        allowSystemMutation: Bool = false
     ) async -> DeveloperAgentStatus {
         guard fileManager.fileExists(
             atPath: scriptURL.path
@@ -959,17 +987,25 @@ struct AgentDeveloperBridge {
                 scriptPath
             ]
 
+            var environment =
+                ProcessInfo.processInfo
+                    .environment
+            environment[
+                "KRALI_ALLOW_SYSTEM_MUTATION"
+            ] =
+                allowSystemMutation
+                ? "1"
+                : "0"
+
             if let learningJobBriefURL {
-                var environment =
-                    ProcessInfo.processInfo
-                        .environment
                 environment[
                     "KRALI_LEARNING_JOB_FILE"
                 ] =
                     learningJobBriefURL.path
-                process.environment =
-                    environment
             }
+
+            process.environment =
+                environment
 
             process.standardOutput = pipe
             process.standardError = pipe
