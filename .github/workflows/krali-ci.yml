@@ -35,6 +35,7 @@ jobs:
           node Scripts/cloudflare-ollama-proxy.mjs --self-test
           node Scripts/developer-orchestration-policy-self-test.mjs
           node Scripts/developer-task-verifier.mjs --self-test
+          node Scripts/openai-teacher-bridge.mjs --self-test
 
       - name: Validate KRALI developer task cards
         shell: bash
