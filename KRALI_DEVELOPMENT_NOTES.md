@@ -359,6 +359,7 @@ Target runtime:
 - Developer Agent varsayılan olarak restricted system mode ile başlar. Kod okuma/değiştirme, worktree, build ve regression gibi developer-sandbox işlemleri çalışabilir.
 - Homebrew Node kurulumu, Ollama kurulum/güncelleme, Ollama servis başlatma, model indirme, Cline global onarım/kurulum ve Cline/OpenAI auth Terminal akışı onaysız çalışmaz.
 - Sistem etkileri blanket izin kullanmaz. Her fiziksel adım ayrı scoped token ile onaylanır; bir adımın onayı sonraki sistem adımına taşınmaz.
+- Scoped approval token süreç içinde tek kullanımlıdır; aynı token ikinci fiziksel/system-effect çağrısını otomatik yetkilendirmez. Cline SDK yerel paket indirmesi de bu gate kapsamındadır.
 - Sistem etkisi gerektiğinde Developer Agent job'u failed sayılmaz; güvenli biçimde approval bekler. Reddedilirse fiziksel işlem uygulanmadan job durdurulur.
 - `developer-tools-physical-approval-policy` Training regression'ı eklendi.
 - Mevcut semantic task Strict Approval ve desktop.app localization/resolver zincirine dokunulmadı.
