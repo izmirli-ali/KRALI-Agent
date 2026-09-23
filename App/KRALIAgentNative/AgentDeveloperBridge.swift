@@ -152,7 +152,6 @@ struct DeveloperAgentStatus: Hashable {
             "sdk_session_ended",
             "sdk_session_completed",
             "provider_platform_bug",
-            "approval_required",
             "recovering_candidate",
             "candidate_recovered",
             "candidate_repair_running"
@@ -179,6 +178,7 @@ struct DeveloperAgentStatus: Hashable {
             "local_agent_iteration_limit",
             "local_agent_watchdog_timeout",
             "sdk_tool_protocol_failed",
+            "approval_required",
             "no_change_unverified",
             "sdk_provider_failed",
             "sdk_failed",
