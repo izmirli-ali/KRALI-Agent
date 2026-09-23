@@ -1,0 +1,149 @@
+{
+  "createdAt": "2026-09-23T21:20:52.246Z",
+  "provider": "cursor-cli",
+  "mode": "architect-readonly",
+  "appVersion": "0.10.37",
+  "runID": "20260924-001808",
+  "diagnosticFingerprint": "528e8af3cd4237008dd53b7efb34ba5f3c13eabc512812a4036dfabd59aa5f61",
+  "failureState": "local_agent_iteration_limit",
+  "failureMessage": "Learning Suggestions Foundation (developer.task.learning-suggestions-foundation) native local agent iteration sınırına ulaştı.",
+  "gapLabel": "Learning Suggestions Foundation (developer.task.learning-suggestions-foundation)",
+  "safety": {
+    "cliMode": "ask",
+    "nonInteractive": true,
+    "sandbox": "workspace_readonly",
+    "writesDenied": true,
+    "shellDenied": true,
+    "webFetchDenied": true,
+    "mcpDenied": true,
+    "explicitAPIKeyDisabled": true
+  },
+  "diagnosis": {
+    "summary": "local_agent_iteration_limit without a candidate came from the local agent burning the post-inspection budget on rejected read/search instead of mutating; the workspace still has only a partial Learning Suggestions scaffold that leaves auto-enqueue/start live and omits the userApproved approval gate.",
+    "confidence": 0.86,
+    "rootCauseHypotheses": [
+      {
+        "hypothesis": "Process failure: after local_agent_implementation_phase / local_agent_target_found for AgentEngine.swift, the native agent kept calling read_file/search_codebase (rejected as implementation_required through grace then budget) and never issued replace_text/write_file/apply_patch, so no trustworthy candidate was produced before local_agent_iteration_limit.",
+        "confidence": 0.9,
+        "evidence": [
+          "Mentor/developer-log-tail.txt shows implementation phase at step ~1–2, then repeated local_agent_implementation_required + local_agent_iteration_grace for read_file/search_codebase through step 14/14, ending in local_agent_iteration_limit with no mutation stage.",
+          "Task reason in learning-suggestions-foundation-v1.json already records a prior 14-iteration read/search burn with no mutation.",
+          "Runtime source hints are empty; failure is budget exhaustion, not a thrown provider/resolver error."
+        ],
+        "sourceTargets": [
+          {
+            "path": "Mentor/developer-log-tail.txt",
+            "symbols": [
+              "local_agent_implementation_phase",
+              "local_agent_implementation_required",
+              "local_agent_iteration_grace",
+              "local_agent_iteration_limit"
+            ]
+          },
+          {
+            "path": "DeveloperAgent/Tasks/learning-suggestions-foundation-v1.json",
+            "symbols": [
+              "developer.task.learning-suggestions-foundation",
+              "primitivePatch"
+            ]
+          },
+          {
+            "path": "App/KRALIAgentNative/AgentDeveloperBridge.swift",
+            "symbols": [
+              "local_agent_iteration_limit"
+            ]
+          }
+        ]
+      },
+      {
+        "hypothesis": "Semantic/product gap still open: capability-gap completion still auto-enqueues learning and may start workers, while AgentLearningSuggestionStore is only stub-wired (load on init) without accept/defer/suppress or observe-on-gap-completion, so the approval-gate contract is unimplemented.",
+        "confidence": 0.88,
+        "evidence": [
+          "AgentEngine still calls learningQueueStore.enqueue(...) then startNextLearningJobIfNeeded() on two capability-gap completion paths (~2050–2072 and ~3782–3797).",
+          "learningSuggestionStore is constructed and load()ed into @Published learningSuggestions, but has no other call sites; acceptLearningSuggestion/deferLearningSuggestion/suppressLearningSuggestion symbols are absent.",
+          "AgentLearningJob has no userApproved; nextQueued filters only state == .queued; enqueue has no userApproved parameter (default false required by brief).",
+          "Scripts/learning-suggestion-policy-self-test.mjs is missing despite verification.command requiring it."
+        ],
+        "sourceTargets": [
+          {
+            "path": "App/KRALIAgentNative/AgentEngine.swift",
+            "symbols": [
+              "learningSuggestionStore",
+              "learningSuggestions",
+              "learningQueueStore.enqueue",
+              "startNextLearningJobIfNeeded"
+            ]
+          },
+          {
+            "path": "App/KRALIAgentNative/AgentLearningQueue.swift",
+            "symbols": [
+              "AgentLearningJob",
+              "enqueue",
+              "nextQueued"
+            ]
+          },
+          {
+            "path": "App/KRALIAgentNative/AgentLearningSuggestionStore.swift",
+            "symbols": [
+              "AgentLearningSuggestionStore.observe",
+              "AgentLearningSuggestion",
+              "updateState"
+            ]
+          }
+        ]
+      },
+      {
+        "hypothesis": "Partial scaffold is not build-integrable as-is: AgentLearningSuggestionStore.swift is untracked in project.pbxproj, and observe mutates let occurrenceCount/updatedAt (only state is var), plus deferred≥2 re-propose and suppressed permanence are missing—so even a narrow store-only edit would not satisfy the foundation gate.",
+        "confidence": 0.82,
+        "evidence": [
+          "project.pbxproj references AgentLearningStore.swift and AgentLearningQueue.swift but not AgentLearningSuggestionStore.swift.",
+          "AgentLearningSuggestion.occurrenceCount and updatedAt are let; observe does += 1 and updatedAt = Date().",
+          "observe duplicates by capabilityID+kind+reason and increments count but never transitions deferred→proposed after ≥2 new occurrences; suppressed auto-return is not implemented (also not incorrectly auto-returning).",
+          "sourceGoal is a parameter to observe but must not become a persisted suggestion field (model currently omits raw-content fields—good—but complete gate still missing)."
+        ],
+        "sourceTargets": [
+          {
+            "path": "App/KRALIAgentNative/AgentLearningSuggestionStore.swift",
+            "symbols": [
+              "AgentLearningSuggestion",
+              "observe",
+              "updateState",
+              "fingerprint"
+            ]
+          },
+          {
+            "path": "App/KRALIAgentNative.xcodeproj/project.pbxproj",
+            "symbols": [
+              "AgentLearningQueue.swift",
+              "AgentLearningStore.swift"
+            ]
+          }
+        ]
+      }
+    ],
+    "recommendedNextSteps": [
+      "Prefer mutation over further broad inspection: ALLOW paths already contain the full Phase-1 surface; target AgentLearningSuggestionStore + AgentLearningQueue + two AgentEngine gap-completion sites first.",
+      "Finish AgentLearningSuggestionStore: make occurrenceCount/updatedAt mutable (or reconstruct via copy), keep compact metadata only, upsert by capability fingerprint without persisting sourceGoal/raw bodies, implement deferred reopen after ≥2 new occurrences, never auto-unsuppress.",
+      "Add optional userApproved to AgentLearningJob (nil→false), enqueue(..., userApproved: Bool = false), and gate nextQueued on state==queued && userApproved==true.",
+      "Replace both AgentEngine gap-completion learningQueueStore.enqueue + unconditional startNextLearningJobIfNeeded chains with learningSuggestionStore.observe → learningSuggestions; do not auto-start workers from gap completion.",
+      "Add acceptLearningSuggestion(id)/deferLearningSuggestion(id)/suppressLearningSuggestion(id): accept builds generalized CapabilityGapResolution from suggestion metadata, enqueues with userApproved=true and generic source label (not raw prompt), then may call startNextLearningJobIfNeeded; defer/suppress only update suggestion state.",
+      "On learning job readyForReview/completed, mark matching suggestion approved/completed; ensure failed jobs do not auto-retry via startNextLearningJobIfNeeded.",
+      "Add AgentLearningSuggestionStore.swift to project.pbxproj; create Scripts/learning-suggestion-policy-self-test.mjs asserting nextQueued requires approval, gap paths do not auto-enqueue, accept path enqueues+starts, suggestion model lacks raw-content fields; then build_check + git_diff."
+    ],
+    "testsRequired": [
+      "node Scripts/learning-suggestion-policy-self-test.mjs must exit 0 with learning_suggestion_policy_self_test_ok, auto_learning_gate=manual, raw_content_persistence=forbidden",
+      "Assert nextQueued returns nil for queued jobs with userApproved nil/false and returns only userApproved==true",
+      "Assert AgentEngine gap-completion paths call learningSuggestionStore.observe (or equivalent) and do not call learningQueueStore.enqueue",
+      "Assert acceptLearningSuggestion path enqueues with userApproved=true and may invoke startNextLearningJobIfNeeded; defer/suppress do not",
+      "Assert AgentLearningSuggestion has no sourceGoal/rawContent/body/messageText/mailBody/webContent/screenshot fields",
+      "/bin/zsh Scripts/build-check.command PASS after pbxproj membership"
+    ],
+    "warnings": [
+      "Do not mutate ConversationSidebarView or other DENY paths; UI is Phase 2.",
+      "Do not alter existing system/physical approval chains; only insert the learning-suggestion approval gate.",
+      "Do not persist raw user prompts or task bodies into suggestion memory; accept must use a generic provenance/source label.",
+      "Failure of a learning job must not automatically start the next unapproved job.",
+      "Incomplete untracked AgentLearningSuggestionStore.swift alone is not a valid candidate without queue gating, Engine rewiring, pbxproj, and policy self-test."
+    ]
+  }
+}

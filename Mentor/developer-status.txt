@@ -1,1 +1,1 @@
-local_agent_iteration_limit|Learning Suggestions Foundation (developer.task.learning-suggestions-foundation) native local agent iteration sınırına ulaştı.|krali-dev-agent/20260924-001234|/Users/medusa/Developer/KRALI-Agent-Dev-20260924-001234|@meta|app=0.10.36|at=1790198021|run=20260924-001234
+local_agent_running|Candidate build repair yerel model çalışıyor • adım 2/12|krali-dev-agent/20260924-001808|/Users/medusa/Developer/KRALI-Agent-Dev-20260924-001808|@meta|app=0.10.37|at=1790198527|run=20260924-001808-repair-2
