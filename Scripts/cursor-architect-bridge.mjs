@@ -31,6 +31,8 @@ const sandbox = {
   }
 };
 
+const workspaceTrustFlag = "--trust";
+
 const cliConfig = {
   permissions: {
     allow: ["Read(**)"],
@@ -48,6 +50,7 @@ if (process.argv.includes("--self-test")) {
   const safe =
     sandbox.type === "workspace_readonly" &&
     sandbox.networkPolicy.default === "deny" &&
+    workspaceTrustFlag === "--trust" &&
     cliConfig.permissions.allow.includes("Read(**)") &&
     deny.has("Write(**)") &&
     deny.has("Shell(*)") &&
@@ -185,7 +188,7 @@ delete env.CURSOR_AUTH_TOKEN;
 const args = [
   "--mode=ask",
   "--print",
-  "--trust",
+  workspaceTrustFlag,
   "--output-format",
   "text",
   "--sandbox",
