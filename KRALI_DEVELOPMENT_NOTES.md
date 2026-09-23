@@ -374,3 +374,16 @@ Target runtime:
 - Inspector `Özet / Developer` olarak iki görünüme ayrıldı. Normal kullanımda teknik gürültü azaltıldı; debug, bağlam, learning queue ve geliştirici araçları Developer görünümünde tutuldu.
 - Inspector özetine Training/Core/North Star sayılarını ve bilinen açık sayısını gösteren Sistem Sağlığı kartı eklendi.
 - VERSION 0.10.23 / build 196.
+
+
+## v0.10.24 progress
+
+- Desktop app activation sonucu ile gerçek foreground postcondition doğrulaması ayrıldı; API aktivasyon sonucu artık tek başına PASS/FAIL belirlemiyor.
+- Normal chat `desktop.app` yolu ile Desktop Control Probe arasındaki verification standardı yakınlaştırıldı.
+- Foreground kanıtı generic olarak NSWorkspace, Accessibility (AX), ScreenCaptureKit ve structured Screen Perception kaynaklarından birleştiriliyor.
+- `focusCandidate` tarafından bulunan NSWorkspace foreground kanıtı artık çöpe atılmıyor.
+- Screen Perception fallback yalnız semantic özet üretmekle kalmıyor; structured `frontmostApplication` hedef uygulamayla eşleşiyorsa postcondition kanıtına katılıyor.
+- Mentor/runtime status satırı activation, workspace, AX, ScreenCaptureKit, ScreenPerception ve final foreground sonuçlarını ayrı ayrı raporluyor.
+- `desktop-foreground-evidence-fusion` fiziksel eylem yapmayan Training regression senaryosu eklendi.
+- Resolver, Strict Approval, UI ve provider selection mantığı değiştirilmedi.
+- VERSION 0.10.24 / build 197.
