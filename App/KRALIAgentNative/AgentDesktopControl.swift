@@ -896,64 +896,11 @@ actor AgentDesktopControl {
             )
         }
 
-        guard let variantPlan =
+        let variantPlan =
             await localIntelligence
                 .applicationNameVariants(
                     query: query
                 )
-        else {
-            return (
-                nil,
-                ApplicationSemanticResolutionTrace(
-                    attempted: true,
-                    providerAvailable: true,
-                    query: query,
-                    selectedIndex: nil,
-                    selectedName: nil,
-                    selectedBundleIdentifier: nil,
-                    selectionConfidence: nil,
-                    verificationConfidence: nil,
-                    accepted: false,
-                    stage: "variant_resolver_no_result",
-                    evaluatedBatchCount: nil,
-                    finalistCount: nil,
-                    generatedVariants: nil,
-                    deterministicMatchCount: 0,
-                    selectedVariant: nil,
-                    reason:
-                        "Semantic variant resolver geçerli bir karar üretemedi."
-                )
-            )
-        }
-
-        guard
-            variantPlan.confidence >= 0.60,
-            !variantPlan.variants.isEmpty
-        else {
-            return (
-                nil,
-                ApplicationSemanticResolutionTrace(
-                    attempted: true,
-                    providerAvailable: true,
-                    query: query,
-                    selectedIndex: nil,
-                    selectedName: nil,
-                    selectedBundleIdentifier: nil,
-                    selectionConfidence:
-                        variantPlan.confidence,
-                    verificationConfidence: 0,
-                    accepted: false,
-                    stage: variantPlan.stage,
-                    evaluatedBatchCount: nil,
-                    finalistCount: nil,
-                    generatedVariants:
-                        variantPlan.variants,
-                    deterministicMatchCount: 0,
-                    selectedVariant: nil,
-                    reason: variantPlan.reason
-                )
-            )
-        }
 
         let localizationPlan =
             await localIntelligence
@@ -961,8 +908,15 @@ actor AgentDesktopControl {
                     query: query
                 )
 
-        var generatedVariants =
-            variantPlan.variants
+        var generatedVariants = [
+            query
+        ]
+
+        if let variantPlan,
+           variantPlan.confidence >= 0.60 {
+            generatedVariants +=
+                variantPlan.variants
+        }
 
         if let localizationPlan,
            localizationPlan.confidence >= 0.72 {
@@ -991,19 +945,58 @@ actor AgentDesktopControl {
 
         let semanticConfidence =
             max(
-                variantPlan.confidence,
+                variantPlan?
+                    .confidence ?? 0,
                 localizationPlan?
                     .confidence ?? 0
             )
 
         let semanticReason =
-            variantPlan.reason +
-            (
-                localizationPlan.map {
-                    " | localization: " +
+            [
+                variantPlan.map {
+                    "variant: " +
                     $0.reason
-                } ?? ""
+                },
+                localizationPlan.map {
+                    "localization: " +
+                    $0.reason
+                }
+            ]
+            .compactMap { $0 }
+            .joined(separator: " | ")
+
+        guard
+            semanticConfidence >= 0.60,
+            !generatedVariants.isEmpty
+        else {
+            return (
+                nil,
+                ApplicationSemanticResolutionTrace(
+                    attempted: true,
+                    providerAvailable: true,
+                    query: query,
+                    selectedIndex: nil,
+                    selectedName: nil,
+                    selectedBundleIdentifier: nil,
+                    selectionConfidence:
+                        semanticConfidence,
+                    verificationConfidence: 0,
+                    accepted: false,
+                    stage:
+                        "semantic_name_generation_unavailable",
+                    evaluatedBatchCount: nil,
+                    finalistCount: nil,
+                    generatedVariants:
+                        generatedVariants,
+                    deterministicMatchCount: 0,
+                    selectedVariant: nil,
+                    reason:
+                        semanticReason.isEmpty
+                            ? "semantic_name_generation_unavailable"
+                            : semanticReason
+                )
             )
+        }
 
         struct DeterministicSemanticMatch {
             let variant: String
