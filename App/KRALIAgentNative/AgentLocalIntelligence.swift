@@ -22,6 +22,9 @@ struct AgentSemanticApplicationResolution:
     let selectionConfidence: Double
     let verificationConfidence: Double
     let equivalent: Bool
+    let stage: String
+    let evaluatedBatchCount: Int
+    let finalistCount: Int
     let reason: String
 
     var confidence: Double {
@@ -1297,6 +1300,17 @@ actor AgentLocalIntelligence {
                                     .whitespacesAndNewlines
                             )
 
+                    if
+                        raw.localizedCaseInsensitiveContains(
+                            "\"reason\": \"kısa gerekçe\""
+                        ) ||
+                        raw.localizedCaseInsensitiveContains(
+                            "\"reason\":\"kısa gerekçe\""
+                        )
+                    {
+                        templateEchoCount += 1
+                    }
+
                     return decodedSelection(
                         from: raw,
                         allowedIndices:
@@ -1307,7 +1321,9 @@ actor AgentLocalIntelligence {
                 }
             }
 
-            let batchSize = 32
+            let batchSize = 48
+            var templateEchoCount = 0
+            var evaluatedBatchCount = 0
             var finalists:
                 [
                     (
@@ -1330,6 +1346,8 @@ actor AgentLocalIntelligence {
                     Array(
                         candidates[offset..<upper]
                     )
+
+                evaluatedBatchCount += 1
 
                 if let selection =
                     await runSelection(
@@ -1391,53 +1409,53 @@ actor AgentLocalIntelligence {
                     selectionConfidence: 0,
                     verificationConfidence: 0,
                     equivalent: false,
+                    stage:
+                        templateEchoCount > 0
+                            ? "selection_template_echo"
+                            : "scan_no_match",
+                    evaluatedBatchCount:
+                        evaluatedBatchCount,
+                    finalistCount: 0,
                     reason:
-                        "semantic_scan_no_equivalent_candidate"
+                        templateEchoCount > 0
+                            ? "semantic_selection_template_echo_detected"
+                            : "semantic_scan_no_equivalent_candidate"
                 )
             }
 
             let finalCandidates =
                 deduplicatedFinalists
                     .prefix(12)
-                    .map(\.candidate)
+                    .map { $0.candidate }
 
-            let finalSelection: Selection
-
-            if finalCandidates.count == 1,
-               let only =
-                deduplicatedFinalists.first {
-                finalSelection =
-                    Selection(
-                        equivalent: true,
-                        selectedIndex:
-                            only.candidate.index,
-                        confidence:
-                            only.confidence,
-                        reason:
-                            only.reason
-                    )
-            } else {
-                guard
-                    let resolved =
-                        await runSelection(
-                            Array(finalCandidates),
-                            role:
-                                "finalist_comparison"
-                        ),
-                    resolved.equivalent,
-                    resolved.confidence >= 0.82
-                else {
-                    return AgentSemanticApplicationResolution(
-                        selectedIndex: nil,
-                        selectionConfidence: 0,
-                        verificationConfidence: 0,
-                        equivalent: false,
-                        reason:
-                            "semantic_finalist_comparison_inconclusive"
-                    )
-                }
-
-                finalSelection = resolved
+            guard
+                let finalSelection =
+                    await runSelection(
+                        Array(finalCandidates),
+                        role:
+                            "finalist_comparison"
+                    ),
+                finalSelection.equivalent,
+                finalSelection.confidence >= 0.86
+            else {
+                return AgentSemanticApplicationResolution(
+                    selectedIndex: nil,
+                    selectionConfidence: 0,
+                    verificationConfidence: 0,
+                    equivalent: false,
+                    stage:
+                        templateEchoCount > 0
+                            ? "finalist_template_echo"
+                            : "finalist_inconclusive",
+                    evaluatedBatchCount:
+                        evaluatedBatchCount,
+                    finalistCount:
+                        finalCandidates.count,
+                    reason:
+                        templateEchoCount > 0
+                            ? "semantic_finalist_template_echo_detected"
+                            : "semantic_finalist_comparison_inconclusive"
+                )
             }
 
             guard
@@ -1549,6 +1567,12 @@ actor AgentLocalIntelligence {
                                 .confidence,
                         verificationConfidence: 0,
                         equivalent: false,
+                        stage:
+                            "verifier_invalid_output",
+                        evaluatedBatchCount:
+                            evaluatedBatchCount,
+                        finalistCount:
+                            finalCandidates.count,
                         reason:
                             "semantic_verifier_invalid_output"
                     )
@@ -1595,6 +1619,18 @@ actor AgentLocalIntelligence {
                         verification.confidence,
                     equivalent:
                         accepted,
+                    stage:
+                        accepted
+                            ? "accepted"
+                            : (
+                                verifierPlaceholder
+                                    ? "verifier_template_echo"
+                                    : "verifier_rejected"
+                            ),
+                    evaluatedBatchCount:
+                        evaluatedBatchCount,
+                    finalistCount:
+                        finalCandidates.count,
                     reason:
                         accepted
                             ? (
@@ -1617,6 +1653,12 @@ actor AgentLocalIntelligence {
                         finalSelection.confidence,
                     verificationConfidence: 0,
                     equivalent: false,
+                    stage:
+                        "verifier_call_failed",
+                    evaluatedBatchCount:
+                        evaluatedBatchCount,
+                    finalistCount:
+                        finalCandidates.count,
                     reason:
                         "semantic_verifier_call_failed"
                 )
