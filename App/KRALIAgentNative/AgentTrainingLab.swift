@@ -174,6 +174,9 @@ struct AgentTrainingLab {
             developerToolPhysicalApprovalPolicyResult()
         )
         results.append(
+            desktopForegroundEvidenceFusionResult()
+        )
+        results.append(
             resolvedApprovalTargetRequiredResult()
         )
         results.append(
@@ -2110,6 +2113,98 @@ struct AgentTrainingLab {
                 ? []
                 : [
                     "Semantic isim dedupe işlemi localization provenance'ını korumadı."
+                ]
+        )
+    }
+
+
+    private func desktopForegroundEvidenceFusionResult()
+        -> TrainingScenarioResult {
+        let activationOnly =
+            DesktopForegroundVerificationEvidence(
+                activationSucceeded: true,
+                workspaceFrontmostVerified: false,
+                accessibilityFrontmostVerified: false,
+                screenKitFrontmostVerified: false,
+                screenPerceptionFrontmostVerified: false
+            )
+
+        let workspaceEvidence =
+            DesktopForegroundVerificationEvidence(
+                activationSucceeded: false,
+                workspaceFrontmostVerified: true,
+                accessibilityFrontmostVerified: false,
+                screenKitFrontmostVerified: false,
+                screenPerceptionFrontmostVerified: false
+            )
+
+        let accessibilityEvidence =
+            DesktopForegroundVerificationEvidence(
+                activationSucceeded: false,
+                workspaceFrontmostVerified: false,
+                accessibilityFrontmostVerified: true,
+                screenKitFrontmostVerified: false,
+                screenPerceptionFrontmostVerified: false
+            )
+
+        let screenKitEvidence =
+            DesktopForegroundVerificationEvidence(
+                activationSucceeded: false,
+                workspaceFrontmostVerified: false,
+                accessibilityFrontmostVerified: false,
+                screenKitFrontmostVerified: true,
+                screenPerceptionFrontmostVerified: false
+            )
+
+        let screenPerceptionEvidence =
+            DesktopForegroundVerificationEvidence(
+                activationSucceeded: false,
+                workspaceFrontmostVerified: false,
+                accessibilityFrontmostVerified: false,
+                screenKitFrontmostVerified: false,
+                screenPerceptionFrontmostVerified: true
+            )
+
+        let passed =
+            !activationOnly.frontmostVerified &&
+            workspaceEvidence.frontmostVerified &&
+            accessibilityEvidence.frontmostVerified &&
+            screenKitEvidence.frontmostVerified &&
+            screenPerceptionEvidence.frontmostVerified &&
+            workspaceEvidence.sourceSummary
+                .contains("NSWorkspace") &&
+            accessibilityEvidence.sourceSummary
+                .contains("AX") &&
+            screenKitEvidence.sourceSummary
+                .contains("ScreenCaptureKit") &&
+            screenPerceptionEvidence.sourceSummary
+                .contains("ScreenPerception")
+
+        return TrainingScenarioResult(
+            scenarioID:
+                "desktop-foreground-evidence-fusion",
+            title:
+                "Desktop foreground doğrulamasında çoklu kanıt birleştirme",
+            tier: .core,
+            prompt:
+                "Aktivasyon isteğini gerçek foreground postcondition'ından ayır; NSWorkspace, AX, ScreenCaptureKit veya structured Screen Perception kanıtlarından biri hedefi doğrulayabilsin.",
+            passed: passed,
+            goal:
+                "Tek bir verifier kaçırdığında gerçek foreground kanıtını kaybetmeden false failure üretme",
+            route: [
+                "Desktop",
+                "Verify",
+                "Evidence Fusion"
+            ],
+            selectedCapabilities: [
+                "desktop.app",
+                "perception.screen"
+            ],
+            unavailableCapabilities: [],
+            diagnostics: passed
+                ? []
+                : [
+                    "Desktop foreground evidence fusion aktivasyon ile postcondition'ı ayırmadı veya bağımsız verifier kanıtlarından birini kabul etmedi."
                 ]
         )
     }
