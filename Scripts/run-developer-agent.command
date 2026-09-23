@@ -1715,7 +1715,7 @@ fi
 if [ -f "$CURSOR_ARCHITECT_RESULT" ] &&
    [ "$GAP_MODE" = "gap" ] &&
    [ -n "$GAP_LABEL" ]; then
-    CURSOR_ARCHITECT_CONTEXT="$("$NODE_BIN" - "$CURSOR_ARCHITECT_RESULT" "$GAP_LABEL" "$(/bin/cat "$ROOT/VERSION" 2>/dev/null | /usr/bin/tr -d '[:space:]')" <<'NODE'
+    CURSOR_ARCHITECT_CONTEXT="$("$NODE_BIN" - "$CURSOR_ARCHITECT_RESULT" "$GAP_LABEL" "$(/bin/cat "$ROOT/VERSION" 2>/dev/null | /usr/bin/tr -d '[:space:]')" "$CURSOR_ARCHITECT_FINGERPRINT" <<'NODE'
 const fs = require("fs");
 const file = process.argv[2];
 const expectedGap = process.argv[3];
@@ -1968,6 +1968,10 @@ if [ "$CLINE_EXIT" -ne 0 ]; then
             ;;
     esac
 
+    CURSOR_ARCHITECT_FINGERPRINT="$(
+        KRALI_CURSOR_FINGERPRINT_INPUT="$GAP_LABEL|$FAILURE_STATE|$FAILURE_MESSAGE|$RUNTIME_SOURCE_HINTS"         "$NODE_BIN" -e 'const crypto=require("crypto"); process.stdout.write(crypto.createHash("sha256").update(process.env.KRALI_CURSOR_FINGERPRINT_INPUT||"").digest("hex"))'
+    )"
+
     CURSOR_ARCHITECT_CACHED=0
     if [ -f "$CURSOR_ARCHITECT_RESULT" ] &&
        [ "$CURSOR_ARCHITECT_ELIGIBLE" -eq 1 ]; then
@@ -1978,7 +1982,8 @@ try {
   process.stdout.write(
     payload &&
     payload.gapLabel === process.argv[3] &&
-    payload.appVersion === process.argv[4]
+    payload.appVersion === process.argv[4] &&
+    payload.diagnosticFingerprint === process.argv[5]
       ? "1"
       : "0"
   );
@@ -1997,7 +2002,7 @@ NODE
         write_status "cursor_architect_running|$GAP_LABEL için Cursor read-only architect ikinci görüşü alınıyor|$BRANCH|$WORKTREE"
         echo "🧭 Cursor Architect devreye giriyor • mode=ask • workspace_readonly • tek danışma" | tee -a "$LOG"
 
-        KRALI_WORKTREE="$WORKTREE"         KRALI_PROMPT_FILE="$PROMPT_FILE"         KRALI_CURSOR_RESULT_FILE="$CURSOR_ARCHITECT_RESULT"         KRALI_CURSOR_AGENT_BIN="$CURSOR_AGENT_BIN"         KRALI_FAILURE_STATE="$FAILURE_STATE"         KRALI_FAILURE_MESSAGE="$FAILURE_MESSAGE"         KRALI_GAP_LABEL="$GAP_LABEL"         KRALI_RUNTIME_SOURCE_HINTS="$RUNTIME_SOURCE_HINTS"         KRALI_APP_VERSION="$(/bin/cat "$ROOT/VERSION" 2>/dev/null | /usr/bin/tr -d '[:space:]')"         KRALI_RUN_ID="$STAMP"         "$NODE_BIN" "$ROOT/Scripts/cursor-architect-bridge.mjs" >>"$LOG" 2>&1
+        KRALI_WORKTREE="$WORKTREE"         KRALI_PROMPT_FILE="$PROMPT_FILE"         KRALI_CURSOR_RESULT_FILE="$CURSOR_ARCHITECT_RESULT"         KRALI_CURSOR_AGENT_BIN="$CURSOR_AGENT_BIN"         KRALI_FAILURE_STATE="$FAILURE_STATE"         KRALI_FAILURE_MESSAGE="$FAILURE_MESSAGE"         KRALI_GAP_LABEL="$GAP_LABEL"         KRALI_RUNTIME_SOURCE_HINTS="$RUNTIME_SOURCE_HINTS"         KRALI_APP_VERSION="$(/bin/cat "$ROOT/VERSION" 2>/dev/null | /usr/bin/tr -d '[:space:]')"         KRALI_RUN_ID="$STAMP"         KRALI_CURSOR_DIAGNOSTIC_FINGERPRINT="$CURSOR_ARCHITECT_FINGERPRINT"         "$NODE_BIN" "$ROOT/Scripts/cursor-architect-bridge.mjs" >>"$LOG" 2>&1
         CURSOR_EXIT=$?
 
         case "$CURSOR_EXIT" in
