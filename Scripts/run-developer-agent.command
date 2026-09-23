@@ -1963,7 +1963,7 @@ if [ "$CLINE_EXIT" -ne 0 ]; then
 
     CURSOR_ARCHITECT_ELIGIBLE=0
     case "$FAILURE_STATE" in
-        local_agent_iteration_limit|local_agent_root_cause_inconclusive|local_agent_strategy_escalation_inconclusive|local_agent_tool_protocol_failed)
+        local_agent_iteration_limit|local_agent_root_cause_inconclusive|local_agent_strategy_escalation_inconclusive|local_agent_tool_protocol_failed|local_agent_completion_gate_failed)
             CURSOR_ARCHITECT_ELIGIBLE=1
             ;;
     esac
@@ -1975,7 +1975,7 @@ if [ "$CLINE_EXIT" -ne 0 ]; then
     CURSOR_ARCHITECT_CACHED=0
     if [ -f "$CURSOR_ARCHITECT_RESULT" ] &&
        [ "$CURSOR_ARCHITECT_ELIGIBLE" -eq 1 ]; then
-        CURSOR_ARCHITECT_CACHED="$("$NODE_BIN" - "$CURSOR_ARCHITECT_RESULT" "$GAP_LABEL" "$(/bin/cat "$ROOT/VERSION" 2>/dev/null | /usr/bin/tr -d '[:space:]')" <<'NODE'
+        CURSOR_ARCHITECT_CACHED="$("$NODE_BIN" - "$CURSOR_ARCHITECT_RESULT" "$GAP_LABEL" "$(/bin/cat "$ROOT/VERSION" 2>/dev/null | /usr/bin/tr -d '[:space:]')" "$CURSOR_ARCHITECT_FINGERPRINT" <<'NODE'
 const fs = require("fs");
 try {
   const payload = JSON.parse(fs.readFileSync(process.argv[2], "utf8"));
