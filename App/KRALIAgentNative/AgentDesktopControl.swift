@@ -96,6 +96,9 @@ struct ApplicationSemanticResolutionTrace:
     let selectionConfidence: Double?
     let verificationConfidence: Double?
     let accepted: Bool
+    let stage: String?
+    let evaluatedBatchCount: Int?
+    let finalistCount: Int?
     let reason: String
 }
 
@@ -771,6 +774,9 @@ actor AgentDesktopControl {
                     selectionConfidence: nil,
                     verificationConfidence: nil,
                     accepted: false,
+                    stage: "provider_unavailable",
+                    evaluatedBatchCount: 0,
+                    finalistCount: 0,
                     reason: availability.title
                 )
             )
@@ -810,6 +816,9 @@ actor AgentDesktopControl {
                     selectionConfidence: nil,
                     verificationConfidence: nil,
                     accepted: false,
+                    stage: "resolver_no_result",
+                    evaluatedBatchCount: 0,
+                    finalistCount: 0,
                     reason:
                         "Semantic resolver geçerli bir karar üretemedi."
                 )
@@ -849,6 +858,12 @@ actor AgentDesktopControl {
                     resolution.verificationConfidence,
                 accepted:
                     acceptedCandidate != nil,
+                stage:
+                    resolution.stage,
+                evaluatedBatchCount:
+                    resolution.evaluatedBatchCount,
+                finalistCount:
+                    resolution.finalistCount,
                 reason:
                     resolution.reason
             )
