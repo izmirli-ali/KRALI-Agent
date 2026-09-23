@@ -66,25 +66,9 @@ struct ConversationSidebarView: View {
                         ForEach(
                             engine.conversationHistory
                         ) { segment in
-                            conversationButton(
-                                title: segment.title,
-                                subtitle:
-                                    segment.subtitle +
-                                    " • " +
-                                    String(
-                                        segment.messageCount
-                                    ) +
-                                    " mesaj",
-                                systemImage: "clock",
-                                selected:
-                                    engine
-                                        .selectedConversationArchiveID ==
-                                    segment.id
-                            ) {
-                                engine.openConversationArchive(
-                                    segment
-                                )
-                            }
+                            archiveConversationRow(
+                                segment
+                            )
                         }
                     }
                 }
@@ -155,6 +139,105 @@ struct ConversationSidebarView: View {
             .foregroundStyle(.tertiary)
             .padding(.horizontal, 8)
             .padding(.top, 4)
+    }
+
+    private func archiveConversationRow(
+        _ segment: ConversationArchiveSegment
+    ) -> some View {
+        HStack(spacing: 4) {
+            conversationButton(
+                title: segment.title,
+                subtitle:
+                    segment.subtitle +
+                    " • " +
+                    String(
+                        segment.messageCount
+                    ) +
+                    " mesaj",
+                systemImage: "clock",
+                selected:
+                    engine
+                        .selectedConversationArchiveID ==
+                    segment.id
+            ) {
+                engine.openConversationArchive(
+                    segment
+                )
+            }
+
+            Menu {
+                Button {
+                    engine.openConversationArchive(
+                        segment
+                    )
+                } label: {
+                    Label(
+                        "Sohbeti aç",
+                        systemImage: "message"
+                    )
+                }
+
+                Divider()
+
+                Button(
+                    role: .destructive
+                ) {
+                    _ =
+                        engine
+                            .deleteConversationArchive(
+                                segment
+                            )
+                } label: {
+                    Label(
+                        "Sohbeti sil",
+                        systemImage: "trash"
+                    )
+                }
+            } label: {
+                Image(
+                    systemName: "ellipsis"
+                )
+                .font(.caption)
+                .foregroundStyle(.secondary)
+                .frame(
+                    width: 24,
+                    height: 28
+                )
+                .contentShape(
+                    Rectangle()
+                )
+            }
+            .menuStyle(.borderlessButton)
+            .menuIndicator(.hidden)
+            .help("Sohbet seçenekleri")
+        }
+        .contextMenu {
+            Button {
+                engine.openConversationArchive(
+                    segment
+                )
+            } label: {
+                Label(
+                    "Sohbeti aç",
+                    systemImage: "message"
+                )
+            }
+
+            Button(
+                role: .destructive
+            ) {
+                _ =
+                    engine
+                        .deleteConversationArchive(
+                            segment
+                        )
+            } label: {
+                Label(
+                    "Sohbeti sil",
+                    systemImage: "trash"
+                )
+            }
+        }
     }
 
     private func conversationButton(
