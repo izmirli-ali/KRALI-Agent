@@ -6191,6 +6191,16 @@ final class AgentEngine: ObservableObject {
             return
         }
 
+        guard developerToolApprovalPolicy
+            .requiresUserApproval(
+                for:
+                    .foregroundInteraction
+            )
+        else {
+            executeDesktopControlProbe()
+            return
+        }
+
         inspectorState.desktopControlStatus =
             "Onay bekleniyor: Desktop Control Probe Notlar uygulamasını açıp öne getirecek."
 
@@ -6560,6 +6570,18 @@ final class AgentEngine: ObservableObject {
 
             if status.state ==
                 "approval_required" {
+                guard developerToolApprovalPolicy
+                    .requiresUserApproval(
+                        for:
+                            .systemMutation
+                    )
+                else {
+                    finishActiveLearningJob(
+                        with: status
+                    )
+                    return
+                }
+
                 updateRunningLearningJob(
                     with: status
                 )
