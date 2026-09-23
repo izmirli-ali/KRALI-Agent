@@ -50,3 +50,12 @@ KRALİ uygulamasına service-role/secret key gömülmez. Desktop client publisha
 4. Sonra — queue authority + optional external inference routing.
 
 Bu klasörde secret, project URL veya credential commit edilmez.
+
+
+## v0.10.29 güvenlik güncellemesi
+
+- Desktop istemci için modern `sb_publishable_...` anahtarı kullanılacak.
+- Secret / service-role key uygulamaya, repoya veya Mentor kayıtlarına konmayacak.
+- Data API tablolarında `anon` erişimi revoke edilir; authenticated kullanıcı için explicit grants + owner RLS kullanılır.
+- İlk bağlantıda önerilen Auth modeli: tek KRALİ kurulumu için anonim Supabase Auth oturumu; bu oturum authenticated role + owner UUID sağlar. Anonymous sign-in proje dashboard'unda açıkça etkinleştirilmeden bağlantı açılmaz.
+- Canlı bağlantı açılana kadar local state authoritative kalır; cloud yalnız tasarlanmış mirror/control-plane katmanıdır.
