@@ -16,6 +16,7 @@ DESKTOP_SOURCE="$HOME/Library/Application Support/KRALI Agent/Mentor/desktop-con
 DESKTOP_STATUS_SOURCE="$HOME/Library/Application Support/KRALI Agent/Mentor/desktop-control-status.txt"
 RESOLUTION_TRACE_SOURCE="$HOME/Library/Application Support/KRALI Agent/Mentor/application-resolution-latest.json"
 DEVELOPER_STATUS_SOURCE="$HOME/Library/Application Support/KRALI Agent/Developer/latest.txt"
+CURSOR_ARCHITECT_SOURCE="$HOME/Library/Application Support/KRALI Agent/Mentor/cursor-architect-latest.json"
 DEVELOPER_RUN_LOG_DIR="$HOME/Library/Logs/KRALI-Developer-Agent-Runs"
 DEVELOPER_LOG_POINTER="$HOME/Library/Application Support/KRALI Agent/Developer/active-run-log.txt"
 DEVELOPER_LOG_SOURCE="$HOME/Library/Logs/KRALI-Developer-Agent.log"
@@ -51,6 +52,7 @@ DESKTOP_DEST="$ROOT/Mentor/desktop-control-latest.json"
 DESKTOP_STATUS_DEST="$ROOT/Mentor/desktop-control-status.txt"
 RESOLUTION_TRACE_DEST="$ROOT/Mentor/application-resolution-latest.json"
 DEVELOPER_STATUS_DEST="$ROOT/Mentor/developer-status.txt"
+CURSOR_ARCHITECT_DEST="$ROOT/Mentor/cursor-architect-latest.json"
 DEVELOPER_LOG_DEST="$ROOT/Mentor/developer-log-tail.txt"
 SEMANTIC_LOG_DEST="$ROOT/Mentor/semantic-planner-log-tail.txt"
 REGRESSION_STATUS_DEST="$ROOT/Mentor/regression-status.json"
@@ -147,6 +149,11 @@ fi
 if [ -f "$DEVELOPER_STATUS_SOURCE" ]; then
     cp "$DEVELOPER_STATUS_SOURCE" "$DEVELOPER_STATUS_DEST"
     FILES+=("Mentor/developer-status.txt")
+fi
+
+if [ -f "$CURSOR_ARCHITECT_SOURCE" ]; then
+    cp "$CURSOR_ARCHITECT_SOURCE" "$CURSOR_ARCHITECT_DEST"
+    FILES+=("Mentor/cursor-architect-latest.json")
 fi
 
 if [ -f "$DEVELOPER_LOG_SOURCE" ]; then
