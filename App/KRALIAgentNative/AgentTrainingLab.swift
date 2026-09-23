@@ -174,6 +174,9 @@ struct AgentTrainingLab {
             resolvedApprovalTargetRequiredResult()
         )
         results.append(
+            developerToolApprovalBoundaryResult()
+        )
+        results.append(
             typoAppNameLanguageResult()
         )
         results.append(
@@ -304,6 +307,97 @@ struct AgentTrainingLab {
             northStarPassed: northStar.filter(\.passed).count,
             northStarTotal: northStar.count,
             results: results
+        )
+    }
+
+    private func developerToolApprovalBoundaryResult()
+        -> TrainingScenarioResult {
+        let policy =
+            AgentDeveloperToolApprovalPolicy()
+
+        let approvalStatus =
+            DeveloperAgentStatus(
+                state:
+                    "approval_required",
+                message:
+                    "Ollama Homebrew ile bilgisayara kurulacak.",
+                branch:
+                    nil,
+                worktree:
+                    nil,
+                approvalActionID:
+                    "brew-install-ollama"
+            )
+
+        var diagnostics: [String] = []
+
+        if policy.requiresUserApproval(
+            for:
+                .codeOnly
+        ) {
+            diagnostics.append(
+                "Code-only branch/worktree/build denemesi gereksiz kullanıcı onayı istiyor."
+            )
+        }
+
+        if !policy.requiresUserApproval(
+            for:
+                .systemMutation
+        ) {
+            diagnostics.append(
+                "Developer Tools sistem değişikliği kullanıcı onayı istemiyor."
+            )
+        }
+
+        if !policy.requiresUserApproval(
+            for:
+                .foregroundInteraction
+        ) {
+            diagnostics.append(
+                "Developer Tools foreground/fiziksel etkileşimi kullanıcı onayı istemiyor."
+            )
+        }
+
+        if approvalStatus.isLearningActive {
+            diagnostics.append(
+                "Approval bekleyen Developer Agent yanlışlıkla aktif worker sayılıyor."
+            )
+        }
+
+        if !approvalStatus
+            .shouldShowLearningStatus ||
+           approvalStatus
+            .approvalActionID !=
+                "brew-install-ollama" {
+            diagnostics.append(
+                "Developer Agent approval durumu veya tek-adım action ID provenance'ı korunmuyor."
+            )
+        }
+
+        return TrainingScenarioResult(
+            scenarioID:
+                "developer-tool-approval-boundary",
+            title:
+                "Developer Tools fiziksel eylem approval sınırı",
+            tier:
+                .core,
+            prompt:
+                "Developer Tools içinde kodu test et; bilgisayarı etkileyen gerçek bir adıma geçersen önce onay iste.",
+            passed:
+                diagnostics.isEmpty,
+            goal:
+                "Code-only sandbox otomatik kalsın; sistem ve foreground etkileri tek-adım kullanıcı onayı gerektirsin",
+            route: [
+                "Developer",
+                "Approval",
+                "Sandbox"
+            ],
+            selectedCapabilities: [
+                "developer.tool"
+            ],
+            unavailableCapabilities: [],
+            diagnostics:
+                diagnostics
         )
     }
 
