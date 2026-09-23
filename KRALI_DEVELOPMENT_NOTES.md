@@ -467,3 +467,19 @@ Target runtime:
 - Cloudflare provider errors are logged in sanitized form without token/account-secret leakage.
 - No changes to approval authority, worktree isolation, mutation scopes, build-check, main access, or Keychain secret storage.
 - VERSION 0.10.30 / build 203.
+
+
+## v0.10.31 progress
+
+- UI responsiveness prioritized after user screenshot showed the fixed 1000px minimum and three inline columns clipping content.
+- App minimum window reduced from 1000x700 to 680x620.
+- Layout now uses geometry-aware responsive breakpoints:
+  - >=1120px: right Inspector can remain inline.
+  - <1120px: Inspector becomes a right-side overlay and no longer squeezes the chat.
+  - <780px: conversation history becomes a left-side overlay with a top-bar sidebar button.
+- Inline conversation sidebar width can shrink to 186px before compact mode.
+- Chat horizontal padding drops from 28px to 16px on narrower windows.
+- Inspector goal/plan/debug/recovery/developer status text uses vertical wrapping instead of aggressive fixed line limits.
+- KRALİ candidate run 20260923-222642 was reviewed and preserved. It produced a build-passing analyzer candidate, but review found freshness/version semantics, previous-run unknown semantics, missing automated coverage, and markdown percentage issues; it is not merged.
+- New controlled KRALİ task: Training Result Analyzer Revision. It must recreate the analyzer from fresh main with six automated cases and the review corrections; App/UI/Cloud/core files are forbidden.
+- VERSION 0.10.31 / build 204.
