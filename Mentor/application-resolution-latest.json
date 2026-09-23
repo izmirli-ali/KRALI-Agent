@@ -1,5 +1,5 @@
 {
-  "createdAt" : "2026-09-23T12:20:46Z",
+  "createdAt" : "2026-09-23T16:10:14Z",
   "expandedCandidateCount" : 257,
   "installedCandidateCount" : 226,
   "nestedCandidateCount" : 56,
@@ -191,21 +191,22 @@
   "semanticResolution" : {
     "accepted" : true,
     "attempted" : true,
-    "deterministicMatchCount" : 1,
+    "deterministicMatchCount" : 2,
     "generatedVariants" : [
       "Notlar",
       "Notes",
-      "Note",
-      "Memo"
+      "Memo",
+      "Reminder",
+      "Journal"
     ],
     "providerAvailable" : true,
     "query" : "Notlar",
-    "reason" : "variant: Girdideki 'Notlar' ifadesi, işletim sistemi lokalizasyonu ve kanonik ad olarak aynı uygulamayı ifade eder. | localization: Notlar, İngilizce'de standart olarak 'Notes' olarak adlandırılır. | selectedSource: localization | verifier: Kullanıcının uygulaması 'Notlar' ve candidate'in alias'ı 'Notes' aynı uygulamanın yerel adıdır.",
+    "reason" : "variant: Girdi, işletim sistemi lokalizasyonu ve aynı kanonik ad olan 'Notlar' ile tam olarak eşleşmektedir. | localization: Notlar'ın İngilizce kanonik kullanımı genellikle 'Notes', 'Memo', 'Reminder' veya 'Journal' olarak karşılık bulunur; bu isimler yerel kullanımın doğrudan çevirisiyle uyumludur. | selectedSource: localization | verifier: Kullanıcının uygulaması 'Notlar' ile candidate'deki 'Notes' isimleri aynıdır ve aynı uygulama olarak kabul edilir.",
     "selectedBundleIdentifier" : "com.apple.Notes",
     "selectedIndex" : 36,
     "selectedName" : "Notes",
     "selectedVariant" : "Notes",
-    "selectionConfidence" : 0.95,
+    "selectionConfidence" : 1,
     "stage" : "accepted",
     "variantDiagnostics" : [
       {
@@ -234,7 +235,7 @@
         "exactMatchCount" : 0,
         "intermediateVerificationStage" : "localization-requires-unique-exact-match",
         "source" : "localization",
-        "value" : "Note"
+        "value" : "Memo"
       },
       {
         "exactMatchBundleIdentifiers" : [
@@ -243,7 +244,16 @@
         "exactMatchCount" : 0,
         "intermediateVerificationStage" : "localization-requires-unique-exact-match",
         "source" : "localization",
-        "value" : "Memo"
+        "value" : "Reminder"
+      },
+      {
+        "exactMatchBundleIdentifiers" : [
+          "com.apple.journal"
+        ],
+        "exactMatchCount" : 1,
+        "intermediateVerificationStage" : "deferred-to-final-candidate-verifier",
+        "source" : "localization",
+        "value" : "Journal"
       }
     ],
     "verificationConfidence" : 0.95
