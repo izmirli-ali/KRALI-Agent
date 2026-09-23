@@ -78,6 +78,8 @@ struct DeveloperAgentStatus: Hashable {
             "local_model_fallback",
             "local_model_specialized",
             "local_ai_ready",
+            "remote_ai_ready",
+            "remote_agent_starting",
             "local_agent_starting",
             "local_agent_resumed",
             "local_agent_verified_resume_controller",
@@ -206,6 +208,10 @@ struct DeveloperAgentStatus: Hashable {
             return "Göreve uygun yerel model seçildi"
         case "local_ai_ready":
             return "Ücretsiz yerel AI hazır"
+        case "remote_ai_ready":
+            return "Remote Developer AI hazır"
+        case "remote_agent_starting":
+            return "Remote Developer Agent başlatılıyor"
         case "local_agent_starting":
             return "Native yerel agent başlatılıyor"
         case "local_agent_resumed":
@@ -425,6 +431,8 @@ struct DeveloperAgentStatus: Hashable {
              "local_tool_probe",
              "local_model_fallback",
              "local_ai_ready",
+             "remote_ai_ready",
+             "remote_agent_starting",
              "sdk_fallback_preparing",
              "sdk_importing",
              "sdk_import_ready",
@@ -435,6 +443,7 @@ struct DeveloperAgentStatus: Hashable {
 
         case "sdk_session_starting",
              "sdk_session_running",
+             "remote_agent_starting",
              "local_agent_starting",
              "local_agent_running",
              "learning",
