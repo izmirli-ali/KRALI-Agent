@@ -1,5 +1,5 @@
 {
-  "createdAt" : "2026-09-23T08:42:09Z",
+  "createdAt" : "2026-09-23T11:16:46Z",
   "expandedCandidateCount" : 257,
   "installedCandidateCount" : 226,
   "nestedCandidateCount" : 56,
@@ -14,41 +14,6 @@
       "normalizedQuery" : "notlar",
       "query" : "Notlar",
       "topCandidates" : [
-        {
-          "aliasProvenance" : [
-            {
-              "source" : "bundle.localizedInfoDictionary",
-              "values" : [
-                "Software Update"
-              ]
-            },
-            {
-              "source" : "finder.displayName",
-              "values" : [
-                "Software Update"
-              ]
-            },
-            {
-              "source" : "path.basename",
-              "values" : [
-                "Software Update"
-              ]
-            },
-            {
-              "source" : "url.localizedName",
-              "values" : [
-                "Software Update"
-              ]
-            }
-          ],
-          "aliases" : [
-            "Software Update"
-          ],
-          "bundleIdentifier" : "com.apple.SoftwareUpdate",
-          "name" : "Software Update",
-          "path" : "/System/Library/CoreServices/Software Update.app",
-          "score" : 0.5714285714285714
-        },
         {
           "aliasProvenance" : [
             {
@@ -82,6 +47,41 @@
           "bundleIdentifier" : "com.apple.Notes",
           "name" : "Notes",
           "path" : "/System/Applications/Notes.app",
+          "score" : 0.5
+        },
+        {
+          "aliasProvenance" : [
+            {
+              "source" : "bundle.localizedInfoDictionary",
+              "values" : [
+                "Software Update"
+              ]
+            },
+            {
+              "source" : "finder.displayName",
+              "values" : [
+                "Software Update"
+              ]
+            },
+            {
+              "source" : "path.basename",
+              "values" : [
+                "Software Update"
+              ]
+            },
+            {
+              "source" : "url.localizedName",
+              "values" : [
+                "Software Update"
+              ]
+            }
+          ],
+          "aliases" : [
+            "Software Update"
+          ],
+          "bundleIdentifier" : "com.apple.SoftwareUpdate",
+          "name" : "Software Update",
+          "path" : "/System/Library/CoreServices/Software Update.app",
           "score" : 0.5
         },
         {
@@ -189,15 +189,22 @@
   "refreshedCandidateCount" : 226,
   "requestedText" : "Notlar uygulamasını aç ve gerçekten ön planda olduğunu doğrula. Başka hiçbir işlem yapma.",
   "semanticResolution" : {
-    "accepted" : false,
+    "accepted" : true,
     "attempted" : true,
-    "evaluatedBatchCount" : 6,
-    "finalistCount" : 0,
+    "deterministicMatchCount" : 1,
+    "generatedVariants" : [
+      "Notlar",
+      "Kral"
+    ],
     "providerAvailable" : true,
     "query" : "Notlar",
-    "reason" : "semantic_scan_no_equivalent_candidate",
-    "selectionConfidence" : 0,
-    "stage" : "scan_no_match",
-    "verificationConfidence" : 0
+    "reason" : "Girdi, aynı uygulama kavramını ifade eden tekrarlı bir isimdir. Çeşitli yazım ve vurgu varyantları üretilmiştir. | verifier: İki uygulama adı aynı temel işlev ve kategoriye sahip ve belirgin bir benzerlik gösteriyor. Deterministik resolver, canonical ad eşdeğerliği ve uygulama kavramı tutarlılığı nedeniyle doğru bir şekilde aynı uygulamayı tanımladı.",
+    "selectedBundleIdentifier" : "com.aliihsancanuysal.kraliagent",
+    "selectedIndex" : 4,
+    "selectedName" : "KRALİ",
+    "selectedVariant" : "Kral",
+    "selectionConfidence" : 0.95,
+    "stage" : "accepted",
+    "verificationConfidence" : 0.98
   }
 }
