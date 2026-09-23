@@ -510,3 +510,12 @@ Target runtime:
 - Redundant read/search attempts rejected during implementation gain a small separate grace budget (primitivePatch: 4) instead of consuming the entire base iteration budget immediately.
 - New source-level CI invariant test: Scripts/developer-orchestration-policy-self-test.mjs.
 - VERSION 0.10.33 / build 206.
+
+## v0.10.34 progress
+
+- Developer task-card delivery issue repaired after V3/Cursor/Browser cards were silently skipped by JSONSerialization.
+- Root cause was invalid raw newline encoding inside developerBrief JSON strings; all newly added task cards are now valid JSON and parse successfully.
+- Fixed task cards: UI Regression Checklist Revision V3, Cursor Architect Config Repair, Right Panel Browser.
+- Existing updater already compares local HEAD against origin/main in addition to VERSION; this release bumps VERSION explicitly so installed v0.10.33 clients receive a clear update signal.
+- No approval, planner, runtime execution, or main-branch authority was expanded.
+- VERSION 0.10.34 / build 207.
