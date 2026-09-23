@@ -1,1 +1,1 @@
-recovered_candidate_ready|Kurtarılan öğrenme adayı build geçti ve incelemeye hazır|krali-dev-agent/20260923-230914|/Users/medusa/Developer/KRALI-Agent-Dev-20260923-230914|@meta|app=0.10.33|at=1790194441|run=20260923-230914
+local_agent_running|UI Regression Checklist Revision (developer.task.ui-regression-checklist-revision) yerel model çalışıyor • adım 6/14|krali-dev-agent/20260923-232105|/Users/medusa/Developer/KRALI-Agent-Dev-20260923-232105|@meta|app=0.10.33|at=1790194898|run=20260923-232105
