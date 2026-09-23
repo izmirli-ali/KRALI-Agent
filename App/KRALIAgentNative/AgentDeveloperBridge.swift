@@ -931,7 +931,8 @@ struct AgentDeveloperBridge {
     }
 
     func run(
-        learningJobBriefURL: URL? = nil
+        learningJobBriefURL: URL? = nil,
+        allowSystemEffects: Bool = false
     ) async -> DeveloperAgentStatus {
         guard fileManager.fileExists(
             atPath: scriptURL.path
@@ -959,17 +960,26 @@ struct AgentDeveloperBridge {
                 scriptPath
             ]
 
+            var environment =
+                ProcessInfo.processInfo
+                    .environment
+
+            environment[
+                "KRALI_ALLOW_SYSTEM_EFFECTS"
+            ] =
+                allowSystemEffects
+                ? "1"
+                : "0"
+
             if let learningJobBriefURL {
-                var environment =
-                    ProcessInfo.processInfo
-                        .environment
                 environment[
                     "KRALI_LEARNING_JOB_FILE"
                 ] =
                     learningJobBriefURL.path
-                process.environment =
-                    environment
             }
+
+            process.environment =
+                environment
 
             process.standardOutput = pipe
             process.standardError = pipe
