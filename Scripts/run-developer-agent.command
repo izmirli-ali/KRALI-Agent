@@ -18,8 +18,11 @@ SKILL_LIBRARY_FILE="$SKILL_DIR/skill-library.json"
 LEARNING_JOB_FILE="${KRALI_LEARNING_JOB_FILE:-}"
 APPROVED_SYSTEM_EFFECT="${KRALI_APPROVED_SYSTEM_EFFECT:-}"
 APPROVED_SYSTEM_EFFECT_USED=0
+CURSOR_ARCHITECT_ENABLED="${KRALI_CURSOR_ARCHITECT_ENABLED:-1}"
+CURSOR_AGENT_BIN="${KRALI_CURSOR_AGENT_BIN:-$HOME/.local/bin/agent}"
+CURSOR_ARCHITECT_RESULT="$LOCAL_MENTOR_DIR/cursor-architect-latest.json"
 
-export PATH="/opt/homebrew/bin:/usr/local/bin:$HOME/.npm-global/bin:/usr/bin:/bin:/usr/sbin:/sbin:$PATH"
+export PATH="/opt/homebrew/bin:/usr/local/bin:$HOME/.npm-global/bin:$HOME/.local/bin:/usr/bin:/bin:/usr/sbin:/sbin:$PATH"
 
 mkdir -p "$LOG_DIR" "$RUN_LOG_DIR" "$STATUS_DIR" "$SKILL_CANDIDATE_DIR"
 printf "%s\n" "$LOG" > "$STATUS_DIR/active-run-log.txt"
@@ -1709,6 +1712,42 @@ if [ -f "$CHECKPOINT_FILE" ]; then
     echo "♻️ Developer checkpoint bulundu; aynı gap teşhisi kaldığı yerden devam edecek: $GAP_KEY" | tee -a "$LOG"
 fi
 
+if [ -f "$CURSOR_ARCHITECT_RESULT" ] &&
+   [ "$GAP_MODE" = "gap" ] &&
+   [ -n "$GAP_LABEL" ]; then
+    CURSOR_ARCHITECT_CONTEXT="$("$NODE_BIN" - "$CURSOR_ARCHITECT_RESULT" "$GAP_LABEL" "$(/bin/cat "$ROOT/VERSION" 2>/dev/null | /usr/bin/tr -d '[:space:]')" <<'NODE'
+const fs = require("fs");
+const file = process.argv[2];
+const expectedGap = process.argv[3];
+const expectedVersion = process.argv[4];
+
+try {
+  const payload = JSON.parse(fs.readFileSync(file, "utf8"));
+  if (
+    payload &&
+    payload.gapLabel === expectedGap &&
+    payload.appVersion === expectedVersion &&
+    payload.diagnosis
+  ) {
+    process.stdout.write(
+      JSON.stringify(payload.diagnosis, null, 2).slice(0, 12000)
+    );
+  }
+} catch {}
+NODE
+)"
+
+    if [ -n "$CURSOR_ARCHITECT_CONTEXT" ]; then
+        {
+            echo ""
+            echo "Cursor Architect previous read-only advisory:"
+            echo "$CURSOR_ARCHITECT_CONTEXT"
+            echo "Bu advisory yalnız hipotezdir. Mutation yapmadan önce exact source/symbol ve runtime evidence ile bağımsız doğrula."
+        } >> "$PROMPT_FILE"
+        echo "🧭 Cursor Architect advisory context eklendi: $GAP_LABEL" | tee -a "$LOG"
+    fi
+fi
+
 if [ "$GAP_MODE" = "gap" ] && [ -n "$GAP_LABEL" ]; then
     write_status "learning|$GAP_LABEL için provider/strategy öğreniliyor|$BRANCH|$WORKTREE"
 else
@@ -1919,6 +1958,71 @@ if [ "$CLINE_EXIT" -ne 0 ]; then
         fi
     fi
 
+    PRE_CURSOR_DIRTY="$(git -C "$WORKTREE" status --porcelain --untracked-files=all 2>/dev/null || true)"
+    CURSOR_ARCHITECT_READY=0
+
+    CURSOR_ARCHITECT_ELIGIBLE=0
+    case "$FAILURE_STATE" in
+        local_agent_iteration_limit|local_agent_root_cause_inconclusive|local_agent_strategy_escalation_inconclusive|local_agent_tool_protocol_failed)
+            CURSOR_ARCHITECT_ELIGIBLE=1
+            ;;
+    esac
+
+    CURSOR_ARCHITECT_CACHED=0
+    if [ -f "$CURSOR_ARCHITECT_RESULT" ] &&
+       [ "$CURSOR_ARCHITECT_ELIGIBLE" -eq 1 ]; then
+        CURSOR_ARCHITECT_CACHED="$("$NODE_BIN" - "$CURSOR_ARCHITECT_RESULT" "$GAP_LABEL" "$(/bin/cat "$ROOT/VERSION" 2>/dev/null | /usr/bin/tr -d '[:space:]')" <<'NODE'
+const fs = require("fs");
+try {
+  const payload = JSON.parse(fs.readFileSync(process.argv[2], "utf8"));
+  process.stdout.write(
+    payload &&
+    payload.gapLabel === process.argv[3] &&
+    payload.appVersion === process.argv[4]
+      ? "1"
+      : "0"
+  );
+} catch {
+  process.stdout.write("0");
+}
+NODE
+)"
+    fi
+
+    if [ "$CURSOR_ARCHITECT_ENABLED" = "1" ] &&
+       [ "$CURSOR_ARCHITECT_ELIGIBLE" -eq 1 ] &&
+       [ "$CURSOR_ARCHITECT_CACHED" -ne 1 ] &&
+       [ -z "$PRE_CURSOR_DIRTY" ] &&
+       [ -x "$CURSOR_AGENT_BIN" ]; then
+        write_status "cursor_architect_running|$GAP_LABEL için Cursor read-only architect ikinci görüşü alınıyor|$BRANCH|$WORKTREE"
+        echo "🧭 Cursor Architect devreye giriyor • mode=ask • workspace_readonly • tek danışma" | tee -a "$LOG"
+
+        KRALI_WORKTREE="$WORKTREE"         KRALI_PROMPT_FILE="$PROMPT_FILE"         KRALI_CURSOR_RESULT_FILE="$CURSOR_ARCHITECT_RESULT"         KRALI_CURSOR_AGENT_BIN="$CURSOR_AGENT_BIN"         KRALI_FAILURE_STATE="$FAILURE_STATE"         KRALI_FAILURE_MESSAGE="$FAILURE_MESSAGE"         KRALI_GAP_LABEL="$GAP_LABEL"         KRALI_RUNTIME_SOURCE_HINTS="$RUNTIME_SOURCE_HINTS"         KRALI_APP_VERSION="$(/bin/cat "$ROOT/VERSION" 2>/dev/null | /usr/bin/tr -d '[:space:]')"         KRALI_RUN_ID="$STAMP"         "$NODE_BIN" "$ROOT/Scripts/cursor-architect-bridge.mjs" >>"$LOG" 2>&1
+        CURSOR_EXIT=$?
+
+        case "$CURSOR_EXIT" in
+            0)
+                CURSOR_ARCHITECT_READY=1
+                echo "✅ Cursor Architect read-only diagnosis hazır: $CURSOR_ARCHITECT_RESULT" | tee -a "$LOG"
+                ;;
+            42)
+                echo "ℹ️ Cursor Architect ücretsiz kullanım limiti nedeniyle atlandı; yerel KRALİ yolu korunuyor." | tee -a "$LOG"
+                ;;
+            43)
+                echo "ℹ️ Cursor Architect login hazır değil; yerel KRALİ yolu korunuyor." | tee -a "$LOG"
+                ;;
+            40)
+                echo "ℹ️ Cursor CLI bulunamadı veya bridge girdisi eksik; yerel KRALİ yolu korunuyor." | tee -a "$LOG"
+                ;;
+            *)
+                echo "⚠️ Cursor Architect diagnosis tamamlanamadı (exit $CURSOR_EXIT); yerel KRALİ yolu korunuyor." | tee -a "$LOG"
+                ;;
+        esac
+    elif [ "$CURSOR_ARCHITECT_CACHED" -eq 1 ] &&
+         [ "$CURSOR_ARCHITECT_ELIGIBLE" -eq 1 ]; then
+        echo "🧭 Aynı sürüm/gap için mevcut Cursor Architect diagnosis yeniden kullanılacak; ücretsiz kota tekrar tüketilmiyor." | tee -a "$LOG"
+    fi
+
     # Session prompt/build cache are orchestration artifacts, not source candidates.
     rm -f "$PROMPT_FILE"
     rm -rf "$WORKTREE/.build-check"
@@ -1961,6 +2065,12 @@ if [ "$CLINE_EXIT" -ne 0 ]; then
     else
         git -C "$ROOT" worktree remove "$WORKTREE" --force >>"$LOG" 2>&1 || true
         git -C "$ROOT" branch -D "$BRANCH" >>"$LOG" 2>&1 || true
+    fi
+
+    if [ "$CURSOR_ARCHITECT_READY" -eq 1 ]; then
+        write_status "cursor_architect_ready|$GAP_LABEL için read-only Cursor Architect diagnosis hazır; mutation uygulanmadı|$BRANCH|$WORKTREE"
+        echo "🧭 Yerel agent durdu; Cursor Architect yalnız teşhis üretti. Kod değişikliği uygulanmadı." | tee -a "$LOG"
+        exit 20
     fi
 
     if [ "$PROVIDER" = "ollama" ] &&
