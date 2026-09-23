@@ -295,3 +295,19 @@ Target runtime:
 - Training Lab'e `candidate-alias-suffix-isolation` regression senaryosu eklendi. Test, candidate alias'ın yapay exact forma dönüştürülmediğini ve Türkçe çekimli kullanıcı girdisinin hâlâ exact çözüm ürettiğini birlikte doğruluyor.
 - Mentor regression freshness raporu VERSION=0.10.17 için Training/Arena/Live Eval suite'lerinin hâlâ 0.8.27 olduğunu açıkça stale olarak işaretliyor.
 - VERSION 0.10.17 / build 190.
+
+
+## v0.10.18 progress
+
+- Strict Approval Mode kullanıcı talebi doğrultusunda aktif hale getirildi.
+- `desktop.app`, `system.open.url`, `files.reveal`, `desktop.control`, `browser.control`, `premiere.control`, `photoshop.control`, `mail.work`, `files.write.text`, `files.move.reversible` kullanıcı onayı olmadan çalıştırılamaz.
+- Salt-okunur reasoning/context/screen observation ve statik `research.web` kullanıcı cihazında görünür/kalıcı işlem yapmadığı için otomatik kalır.
+- Chat içindeki task approval card çözülen hedefi gösterir. Desktop uygulama onayı path + bundle kimliğiyle sabitlenir; onay sonrası aynı hedef dışında uygulama açılamaz.
+- Outcome Solver'ın otomatik `openURLAndObserve` fallback'i approval-aware resume eklenene kadar fail-closed durumuna alındı; kullanıcı onayı olmadan URL açamaz.
+- v0.10.16 semantic app promptlarında kaçan Swift interpolation bug'ı düzeltildi. Foundation Models artık literal `(trimmedQuery)` değil gerçek sorgu/candidate değerlerini görür.
+- Üretilen semantic app varyantları önce bağımsız equivalence gate'ten geçer; identity dışındaki varyantlarda confidence >= 0.94 zorunludur.
+- Semantic varyantlar installed candidate listesine yalnız exact normalized alias eşleşmesiyle bağlanır; fuzzy/prefix candidate selection kaldırıldı.
+- Final semantic candidate verifier eşiği >= 0.94'e yükseltildi; aynı kategori/işlev benzerliği açıkça eşdeğerlik sayılmaz.
+- KRALİ'nin kendi bundle'ına alakasız semantic sorgudan yönelme `self_target_blocked` guard ile reddedilir.
+- Training Lab'e `semantic-app-exact-alias-safety` ve `strict-external-action-approval` regression senaryoları eklendi.
+- VERSION 0.10.18 / build 191.

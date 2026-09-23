@@ -1121,16 +1121,16 @@ actor AgentLocalIntelligence {
 
             let instructions = """
             Sen KRALİ'nin dilsel uygulama adı çözümleme katmanısın.
-            Görevin kurulu uygulama seçmek DEĞİL; yalnız kullanıcının verdiği uygulama adının aynı kavramı ifade eden arama varyantlarını üretmek.
-            Varyantlar aynı uygulama adının farklı dildeki/lokalize karşılığı, yaygın kanonik adı veya gerçekten eşdeğer alternatif yazımı olabilir.
-            Kullanıcının ifadesi lokalize veya İngilizce değilse, anlam açık olduğunda İngilizce kanonik karşılığını da üret.
-            Benzer işlevdeki başka uygulamaları, kategori isimlerini, üretici adlarını veya çağrışımlı ürünleri üretme.
-            Belirsiz bir ifadeden marka/ürün uydurma.
+            Görevin kurulu uygulama seçmek DEĞİL; yalnız kullanıcının verdiği uygulama adının gerçekten aynı uygulamayı ifade eden isim varyantlarını üretmek.
+            Yalnız şu ilişkiler kabul edilir: farklı dilde birebir uygulama adı çevirisi, işletim sistemi lokalizasyonu veya aynı uygulamanın yaygın kanonik adı.
+            Benzer yazım, ortak kelime kökü, aynı kategori, aynı işlev, aynı üretici veya çağrışım eşdeğerlik değildir.
+            Kullanıcının ifadesinden marka/ürün uydurma, kelimeyi başka bir kelimeye tamamlama veya tahmin etme.
+            Emin olmadığın varyantı hiç üretme.
             En fazla 8 kısa uygulama adı varyantı üret.
             Kullanıcının özgün ifadesini de varyantlar içinde koru.
             Çıktı yalnız JSON object olmalı.
             Alanlar tam olarak:
-            variants: aynı uygulama kavramını ifade eden string dizisi
+            variants: gerçekten aynı uygulamayı ifade eden string dizisi
             confidence: 0 ile 1 arasında, dilsel eşdeğerlik güveni
             reason: girdiye özgü kısa gerekçe
             Placeholder, şema örneği veya alan açıklamasını cevap olarak kopyalama.
@@ -1138,9 +1138,9 @@ actor AgentLocalIntelligence {
 
             let prompt = """
             Kullanıcının uygulama adı:
-            (trimmedQuery)
+            \(trimmedQuery)
 
-            Bu adın aynı uygulama kavramını ifade eden güvenli arama varyantlarını üret.
+            Bu adın gerçekten aynı uygulamayı ifade eden güvenli isim varyantlarını üret.
             """
 
             do {
@@ -1333,6 +1333,179 @@ actor AgentLocalIntelligence {
         return nil
     }
 
+    func verifyApplicationNameVariant(
+        query: String,
+        variant: String
+    ) async -> AgentSemanticApplicationVerification? {
+        let trimmedQuery =
+            query.trimmingCharacters(
+                in: .whitespacesAndNewlines
+            )
+        let trimmedVariant =
+            variant.trimmingCharacters(
+                in: .whitespacesAndNewlines
+            )
+
+        guard
+            !trimmedQuery.isEmpty,
+            !trimmedVariant.isEmpty
+        else {
+            return nil
+        }
+
+        func normalized(
+            _ value: String
+        ) -> String {
+            value
+                .folding(
+                    options: [
+                        .diacriticInsensitive,
+                        .caseInsensitive
+                    ],
+                    locale:
+                        Locale(
+                            identifier: "tr_TR"
+                        )
+                )
+                .lowercased()
+                .replacingOccurrences(
+                    of: "ı",
+                    with: "i"
+                )
+                .trimmingCharacters(
+                    in: .whitespacesAndNewlines
+                )
+        }
+
+        if normalized(trimmedQuery) ==
+            normalized(trimmedVariant) {
+            return AgentSemanticApplicationVerification(
+                equivalent: true,
+                confidence: 1,
+                stage:
+                    "variant_identity",
+                reason:
+                    "variant_matches_source"
+            )
+        }
+
+        #if canImport(FoundationModels)
+        if #available(macOS 26.0, *) {
+            let model =
+                SystemLanguageModel.default
+
+            guard model.isAvailable else {
+                return nil
+            }
+
+            struct Verification:
+                Codable,
+                Sendable {
+                let equivalent: Bool
+                let confidence: Double
+                let reason: String
+            }
+
+            let instructions = """
+            Sen KRALİ'nin uygulama adı güvenlik doğrulayıcısısın.
+            Sana kaynak uygulama adı ile üretilmiş bir isim varyantı verilecek.
+            equivalent=true yalnız iki ifade aynı uygulamanın birebir lokalize/çevrilmiş/kanonik adıysa verilebilir.
+            Benzer yazım, ortak kök, aynı kategori, aynı işlev, aynı üretici, çağrışım veya tahmin ASLA eşdeğerlik değildir.
+            Kaynak adın anlamını bilmiyorsan veya varyant başka bir kelime/markaya kayıyorsa equivalent=false döndür.
+            Şüphede false.
+            Çıktı yalnız JSON object olmalı.
+            Alanlar:
+            equivalent: boolean
+            confidence: 0 ile 1 arasında sayı
+            reason: girdiye özgü kısa gerekçe
+            """
+
+            let prompt = """
+            Kaynak uygulama adı:
+            \(trimmedQuery)
+
+            Önerilen isim varyantı:
+            \(trimmedVariant)
+
+            Bu iki ifade gerçekten aynı uygulamanın adı mı?
+            """
+
+            do {
+                let session =
+                    LanguageModelSession(
+                        model: model,
+                        instructions: instructions
+                    )
+                let response =
+                    try await session
+                        .respond(to: prompt)
+                let raw =
+                    response.content
+                        .trimmingCharacters(
+                            in: .whitespacesAndNewlines
+                        )
+
+                guard
+                    let json =
+                        extractJSONObject(
+                            from: raw
+                        ),
+                    let data =
+                        json.data(
+                            using: .utf8
+                        ),
+                    let verification =
+                        try? JSONDecoder()
+                            .decode(
+                                Verification.self,
+                                from: data
+                            ),
+                    verification.confidence >= 0,
+                    verification.confidence <= 1
+                else {
+                    return AgentSemanticApplicationVerification(
+                        equivalent: false,
+                        confidence: 0,
+                        stage:
+                            "variant_verifier_invalid_output",
+                        reason:
+                            "semantic_variant_verifier_invalid_output"
+                    )
+                }
+
+                let accepted =
+                    verification.equivalent &&
+                    verification.confidence >=
+                        0.94
+
+                return AgentSemanticApplicationVerification(
+                    equivalent:
+                        accepted,
+                    confidence:
+                        verification.confidence,
+                    stage:
+                        accepted
+                            ? "variant_verified"
+                            : "variant_rejected",
+                    reason:
+                        verification.reason
+                )
+            } catch {
+                return AgentSemanticApplicationVerification(
+                    equivalent: false,
+                    confidence: 0,
+                    stage:
+                        "variant_verifier_call_failed",
+                    reason:
+                        "semantic_variant_verifier_call_failed"
+                )
+            }
+        }
+        #endif
+
+        return nil
+    }
+
     func verifyApplicationAliasEquivalence(
         query: String,
         candidate:
@@ -1366,11 +1539,11 @@ actor AgentLocalIntelligence {
 
             let instructions = """
             Sen KRALİ'nin bağımsız semantic application verifier katmanısın.
-            Sana kullanıcıdaki uygulama adı ile deterministik resolver'ın gerçekten kurulu uygulamalar arasından seçtiği tek candidate verilecek.
+            Sana kullanıcıdaki uygulama adı ile deterministik resolver'ın exact alias eşleşmesiyle seçtiği tek kurulu candidate verilecek.
             Candidate seçimini doğru kabul etme.
-            İki ad gerçekten aynı uygulama kavramını ifade ediyorsa equivalent=true döndür.
-            Farklı dil/lokalizasyon veya yerleşik kanonik ad eşdeğer olabilir.
-            Yalnız benzer işlev, kategori, üretici veya çağrışım eşdeğerlik değildir.
+            equivalent=true yalnız kullanıcıdaki ad ile candidate gerçekten aynı uygulamanın lokalize/çevrilmiş/kanonik adıysa verilebilir.
+            Benzer yazım, ortak kelime, aynı temel işlev, aynı kategori, aynı üretici veya çağrışım eşdeğerlik değildir.
+            "İkisi de not alma uygulaması" gibi kategori gerekçeleri true için yeterli değildir.
             Şüphede equivalent=false döndür.
             Çıktı yalnız JSON object olmalı.
             Alanlar tam olarak:
@@ -1387,14 +1560,14 @@ actor AgentLocalIntelligence {
 
             let prompt = """
             Kullanıcının uygulama adı:
-            (trimmedQuery)
+            \(trimmedQuery)
 
-            Deterministik resolver candidate:
-            İsim: (candidate.name)
-            Aliaslar: (aliases.isEmpty ? "∅" : aliases)
-            Bundle ID: (candidate.bundleIdentifier ?? "∅")
+            Exact alias resolver candidate:
+            İsim: \(candidate.name)
+            Aliaslar: \(aliases.isEmpty ? "∅" : aliases)
+            Bundle ID: \(candidate.bundleIdentifier ?? "∅")
 
-            Bu iki uygulama adının gerçekten aynı uygulamayı ifade edip etmediğini bağımsız doğrula.
+            Kullanıcının adı ile bu candidate gerçekten aynı uygulamanın adı mı?
             """
 
             do {
@@ -1478,7 +1651,7 @@ actor AgentLocalIntelligence {
                 let accepted =
                     verification.equivalent &&
                     verification.confidence >=
-                        0.86
+                        0.94
 
                 return AgentSemanticApplicationVerification(
                     equivalent:

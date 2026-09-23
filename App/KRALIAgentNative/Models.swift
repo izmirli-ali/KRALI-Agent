@@ -73,6 +73,10 @@ struct PendingTaskApproval: Identifiable, Hashable {
     let reason: String
     let capabilityID: String
     let operation: String
+    let targetSummary: String?
+    let targetName: String?
+    let targetBundleIdentifier: String?
+    let targetPath: String?
 
     init(
         id: UUID = UUID(),
@@ -81,7 +85,11 @@ struct PendingTaskApproval: Identifiable, Hashable {
         title: String,
         reason: String,
         capabilityID: String,
-        operation: String
+        operation: String,
+        targetSummary: String? = nil,
+        targetName: String? = nil,
+        targetBundleIdentifier: String? = nil,
+        targetPath: String? = nil
     ) {
         self.id = id
         self.taskID = taskID
@@ -90,6 +98,11 @@ struct PendingTaskApproval: Identifiable, Hashable {
         self.reason = reason
         self.capabilityID = capabilityID
         self.operation = operation
+        self.targetSummary = targetSummary
+        self.targetName = targetName
+        self.targetBundleIdentifier =
+            targetBundleIdentifier
+        self.targetPath = targetPath
     }
 }
 

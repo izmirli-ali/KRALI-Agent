@@ -136,6 +136,8 @@ final class AgentEngine: ObservableObject {
     private var currentOutcomeFailureIsTransient = false
     private var currentTaskInput = ""
     private var approvedRuntimeStepIndexes = Set<Int>()
+    private var approvedRuntimeApplicationTargets:
+        [Int: DesktopApplicationApprovalTarget] = [:]
     private var runtimeStepEvidence: [Int: String] = [:]
     private var runtimeExecutedCapabilityIDs = Set<String>()
 
@@ -1572,7 +1574,7 @@ final class AgentEngine: ObservableObject {
                 AgentVerificationResult(
                     state: .partial,
                     summary:
-                        "Görev güvenli biçimde duraklatıldı. Mutasyon uygulanmadı; kullanıcı onayı bekleniyor: " +
+                        "Görev güvenli biçimde duraklatıldı. Dış işlem uygulanmadı; kullanıcı onayı bekleniyor: " +
                         pending.title,
                     fallback: nil
                 )
@@ -2357,11 +2359,68 @@ final class AgentEngine: ObservableObject {
                     ) {
                 let reason =
                     graphStep.approvalReason ??
-                    "Bu adım dış uygulama veya kullanıcı verisi üzerinde değişiklik yapacak."
+                    "Bu adım kullanıcı cihazı veya dış dünya üzerinde bir işlem yapacak."
+
+                var targetSummary: String?
+                var targetName: String?
+                var targetBundleIdentifier:
+                    String?
+                var targetPath: String?
+
+                if graphStep.capabilityID ==
+                    "desktop.app" {
+                    if let target =
+                        await desktopControl
+                            .applicationApprovalTarget(
+                                from: userInput
+                            ) {
+                        targetSummary =
+                            target.summary
+                        targetName =
+                            target.name
+                        targetBundleIdentifier =
+                            target.bundleIdentifier
+                        targetPath =
+                            target.path
+                    } else {
+                        targetSummary =
+                            naturalLanguageResolver
+                                .applicationTargetDisplayPhrase(
+                                    from: userInput
+                                ) ??
+                            userInput
+                    }
+                } else if
+                    graphStep.capabilityID ==
+                        "system.open.url" ||
+                    graphStep.capabilityID ==
+                        "browser.control"
+                {
+                    targetSummary =
+                        naturalLanguageResolver
+                            .webURL(
+                                from: userInput
+                            )?
+                            .absoluteString
+                } else if
+                    graphStep.capabilityID ==
+                        "files.write.text" ||
+                    graphStep.capabilityID ==
+                        "files.move.reversible" ||
+                    graphStep.capabilityID ==
+                        "files.reveal"
+                {
+                    targetSummary =
+                        selectedRootURL?
+                            .path
+                }
 
                 let approvalMessage =
                     "Onay bekleniyor: " +
                     step.title +
+                    (targetSummary.map {
+                        "\nHedef: " + $0
+                    } ?? "") +
                     "\nNeden: " +
                     reason
 
@@ -2379,7 +2438,15 @@ final class AgentEngine: ObservableObject {
                             capabilityID:
                                 step.capabilityID,
                             operation:
-                                step.operation
+                                step.operation,
+                            targetSummary:
+                                targetSummary,
+                            targetName:
+                                targetName,
+                            targetBundleIdentifier:
+                                targetBundleIdentifier,
+                            targetPath:
+                                targetPath
                         )
                 }
 
@@ -2727,11 +2794,33 @@ final class AgentEngine: ObservableObject {
                 }
 
             case "desktop.app":
+                guard let approvedTarget =
+                    approvedRuntimeApplicationTargets[
+                        stepIndex
+                    ]
+                else {
+                    outputs.append(
+                        "Strict Approval Mode: onaylanmış uygulama hedefi bulunmadığı için hiçbir uygulama açılmadı."
+                    )
+                    log(
+                        "Strict Approval blokladı: desktop.app için sabitlenmiş onay hedefi yok • step=" +
+                        String(stepIndex)
+                    )
+                    continue
+                }
+
+                approvedRuntimeApplicationTargets
+                    .removeValue(
+                        forKey: stepIndex
+                    )
+
                 do {
                     let result =
                         try await desktopControl
-                            .openOrFocusApplication(
-                                from: userInput
+                            .openOrFocusApprovedApplication(
+                                approvedTarget,
+                                requestedText:
+                                    userInput
                             )
 
                     let verified =
@@ -3089,6 +3178,25 @@ final class AgentEngine: ObservableObject {
                 approval.stepIndex
             )
 
+        if
+            approval.capabilityID ==
+                "desktop.app",
+            let targetName =
+                approval.targetName,
+            let targetPath =
+                approval.targetPath
+        {
+            approvedRuntimeApplicationTargets[
+                approval.stepIndex
+            ] =
+                DesktopApplicationApprovalTarget(
+                    name: targetName,
+                    bundleIdentifier:
+                        approval.targetBundleIdentifier,
+                    path: targetPath
+                )
+        }
+
         pendingTaskApproval = nil
         currentRuntimeTask?.state =
             .running
@@ -3133,7 +3241,7 @@ final class AgentEngine: ObservableObject {
         verificationState =
             .partial
         verificationSummary =
-            "Kullanıcı onay vermedi; mutasyon uygulanmadı."
+            "Kullanıcı onay vermedi; dış işlem uygulanmadı."
 
         postAssistantMessage(
             "İşlemi iptal ettim. Onay gerektiren adım uygulanmadı."
@@ -3233,7 +3341,7 @@ final class AgentEngine: ObservableObject {
                 AgentVerificationResult(
                     state: .partial,
                     summary:
-                        "Görev güvenli biçimde duraklatıldı. Sıradaki mutasyon kullanıcı onayı bekliyor: " +
+                        "Görev güvenli biçimde duraklatıldı. Sıradaki dış işlem kullanıcı onayı bekliyor: " +
                         pending.title,
                     fallback: nil
                 )
@@ -4070,6 +4178,7 @@ final class AgentEngine: ObservableObject {
         currentRuntimeTask = nil
         pendingTaskApproval = nil
         approvedRuntimeStepIndexes = []
+        approvedRuntimeApplicationTargets = [:]
         runtimeStepEvidence = [:]
         runtimeExecutedCapabilityIDs = []
         currentTaskInput = ""
@@ -4884,230 +4993,24 @@ final class AgentEngine: ObservableObject {
             )
 
         case .openURLAndObserve:
-            guard
-                let url =
-                    naturalLanguageResolver
-                        .webURL(
-                            from:
-                                userInput
-                        )
-            else {
-                return OutcomeStrategyExecutionResult(
-                    succeeded: false,
-                    reply: "",
-                    summary:
-                        "Kullanıcı girdisinden güvenilir HTTP/HTTPS hedefi çözülemedi.",
-                    executedCapabilityIDs: []
-                )
-            }
-
-            do {
-                let result =
-                    try await desktopControl
-                        .openWebURL(
-                            url
-                        )
-
-                let observation =
-                    AgentOutcomeObservationMetadata(
-                        captureScope:
-                            result.captureScope,
-                        applicationBundleIdentifier:
-                            result
-                                .capturedApplicationBundleIdentifier,
-                        windowTitle:
-                            result
-                                .capturedWindowTitle,
-                        recognizedTextLineCount:
-                            result
-                                .recognizedText
-                                .count,
-                        frontmostApplication:
-                            result.frontmostAfter,
-                        windowID:
-                            result.capturedWindowID,
-                        observationAttemptCount:
-                            result.observationAttemptCount
+            let targetURL =
+                naturalLanguageResolver
+                    .webURL(
+                        from:
+                            userInput
                     )
 
-                guard
-                    result.handlerVerifiedFrontmost &&
-                    result.observationStable
-                else {
-                    return OutcomeStrategyExecutionResult(
-                        succeeded: false,
-                        reply: "",
-                        summary:
-                            "URL açıldı ancak varsayılan URL işleyicisi ekran gözlemi boyunca frontmost kalmadı. Kullanıcı veya başka bir uygulama odağı değiştirmiş olabilir; bu gözlem başarı kanıtı olarak kullanılamaz.",
-                        executedCapabilityIDs:
-                            Set([
-                                "system.open.url"
-                            ]),
-                        observation:
-                            observation
-                    )
-                }
-
-                guard
-                    !result.recognizedText.isEmpty
-                else {
-                    return OutcomeStrategyExecutionResult(
-                        succeeded: false,
-                        reply: "",
-                        summary:
-                            "Observation hazır değil: hedef web penceresi " +
-                            String(
-                                result.observationAttemptCount
-                            ) +
-                            " denemede OCR kanıtı üretmedi. Bu geçici algı/yüklenme belirsizliği capability eksikliği sayılmamalı.",
-                        executedCapabilityIDs:
-                            Set([
-                                "system.open.url"
-                            ]),
-                        observation:
-                            observation
-                    )
-                }
-
-                let observed = [
-                    result.recognizedText
-                        .joined(
-                            separator: "\n"
-                        ),
-                    result.visibleWindows
-                        .joined(
-                            separator: "\n"
-                        )
-                ]
-                .joined(separator: "\n")
-
-                let normalizedEvidence =
-                    normalizeSemanticText(
-                        observed
-                    )
-                let rawHost =
-                    (url.host ?? "")
-                        .lowercased()
-                let hostWithoutWWW =
-                    rawHost.hasPrefix(
-                        "www."
-                    )
-                    ? String(
-                        rawHost
-                            .dropFirst(4)
-                    )
-                    : rawHost
-                let normalizedHost =
-                    normalizeSemanticText(
-                        hostWithoutWWW
-                    )
-                let targetObserved =
-                    !normalizedHost.isEmpty &&
-                    normalizedEvidence
-                        .contains(
-                            normalizedHost
-                        )
-
-                guard targetObserved else {
-                    return OutcomeStrategyExecutionResult(
-                        succeeded: false,
-                        reply: "",
-                        summary:
-                            "Observation belirsiz: URL açıldı ve hedef pencere yakalandı ancak ham ekran/OCR kanıtında tam hedef domain doğrulanamadı. Bu tek başına browser.control capability eksikliği kanıtı değildir.",
-                        executedCapabilityIDs:
-                            Set([
-                                "system.open.url"
-                            ]),
-                        observation:
-                            observation
-                    )
-                }
-
-                let evidence = [
-                    "URL: " +
-                        url.absoluteString,
-                    "Öndeki uygulama: " +
-                        (
-                            result.frontmostAfter ??
-                            "Bilinmiyor"
-                        ),
-                    "Ekran özeti: " +
-                        result.screenSummary,
-                    "OCR:\n" +
-                        result.recognizedText
-                            .prefix(80)
-                            .joined(
-                                separator: "\n"
-                            )
-                ]
-                .joined(
-                    separator: "\n\n"
-                )
-
-                let extracted =
-                    await localIntelligence
-                        .executeReasoningStep(
-                            goal:
-                                userInput,
-                            title:
-                                requirement.title,
-                            purpose:
-                                requirement.successCriterion +
-                                " Yalnız verilen ekran kanıtına dayan; kanıtta olmayan bilgiyi uydurma.",
-                            operation:
-                                "outcome.web.open-and-observe",
-                            dependencyEvidence:
-                                evidence
-                        )
-
-                let output =
-                    extracted?
-                        .trimmingCharacters(
-                            in:
-                                .whitespacesAndNewlines
-                        )
-
-                guard
-                    let output,
-                    !output.isEmpty
-                else {
-                    return OutcomeStrategyExecutionResult(
-                        succeeded: false,
-                        reply: "",
-                        summary:
-                            "Hedef sayfa gözlemlendi fakat kullanıcı outcome'u için güvenilir çıktı çıkarılamadı.",
-                        executedCapabilityIDs:
-                            Set(
-                                strategy
-                                    .capabilityIDs
-                            ),
-                        observation:
-                            observation
-                    )
-                }
-
-                return OutcomeStrategyExecutionResult(
-                    succeeded: true,
-                    reply: output,
-                    summary:
-                        "URL generic macOS provider ile açıldı; varsayılan URL işleyicisi observation boyunca frontmost ve stabil kaldı, hedef ekran kanıtıyla doğrulandı ve istenen bilgi çıkarıldı.",
-                    executedCapabilityIDs:
-                        Set(
-                            strategy
-                                .capabilityIDs
-                        ),
-                    observation:
-                        observation
-                )
-            } catch {
-                return OutcomeStrategyExecutionResult(
-                    succeeded: false,
-                    reply: "",
-                    summary:
-                        error.localizedDescription,
-                    executedCapabilityIDs: []
-                )
-            }
+            return OutcomeStrategyExecutionResult(
+                succeeded: false,
+                reply: "",
+                summary:
+                    "Strict Approval Mode: otomatik URL açma fallback'i kullanıcı onayı olmadan çalıştırılmadı." +
+                    (targetURL.map {
+                        " Hedef: " +
+                            $0.absoluteString
+                    } ?? ""),
+                executedCapabilityIDs: []
+            )
 
         case .screenObservation:
             do {

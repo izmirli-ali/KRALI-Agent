@@ -649,6 +649,22 @@ struct AgentNaturalLanguageResolver: Sendable {
         return best
     }
 
+    func isExactApplicationAliasMatch(
+        input raw: String,
+        aliases: [String]
+    ) -> Bool {
+        let key =
+            normalized(raw)
+
+        guard !key.isEmpty else {
+            return false
+        }
+
+        return aliases.contains {
+            normalized($0) == key
+        }
+    }
+
     func isConfidentAliasMatch(
         score: Double,
         input raw: String

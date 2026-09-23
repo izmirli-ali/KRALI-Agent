@@ -162,6 +162,12 @@ struct AgentTrainingLab {
             candidateAliasSuffixIsolationResult()
         )
         results.append(
+            semanticExactAliasSafetyResult()
+        )
+        results.append(
+            strictExternalApprovalResult()
+        )
+        results.append(
             typoAppNameLanguageResult()
         )
         results.append(
@@ -1970,6 +1976,158 @@ struct AgentTrainingLab {
             ],
             selectedCapabilities: [
                 "desktop.app"
+            ],
+            unavailableCapabilities: [],
+            diagnostics: diagnostics
+        )
+    }
+
+    private func semanticExactAliasSafetyResult()
+        -> TrainingScenarioResult {
+        let exact =
+            languageResolver
+                .isExactApplicationAliasMatch(
+                    input: "Example",
+                    aliases: [
+                        "Example",
+                        "Örnek"
+                    ]
+                )
+
+        let fuzzy =
+            languageResolver
+                .isExactApplicationAliasMatch(
+                    input: "Exampl",
+                    aliases: [
+                        "Example"
+                    ]
+                )
+
+        let passed =
+            exact &&
+            !fuzzy
+
+        return TrainingScenarioResult(
+            scenarioID:
+                "semantic-app-exact-alias-safety",
+            title:
+                "Semantic uygulama hedefinde exact alias güvenlik kapısı",
+            tier: .core,
+            prompt:
+                "Semantic isim varyantı yalnız gerçek canonical alias ile birebir eşleşirse candidate seç",
+            passed: passed,
+            goal:
+                "Fuzzy/prefix benzerliğinin semantic uygulama seçimini tetiklemesini engelle",
+            route: [
+                "Core",
+                "Language",
+                "Desktop",
+                "Safety"
+            ],
+            selectedCapabilities: [
+                "desktop.app"
+            ],
+            unavailableCapabilities: [],
+            diagnostics: passed
+                ? []
+                : [
+                    "Semantic exact alias gate fuzzy/prefix eşleşmeye izin verdi veya exact aliası reddetti."
+                ]
+        )
+    }
+
+    private func strictExternalApprovalResult()
+        -> TrainingScenarioResult {
+        let desktop =
+            capabilityRegistry.all.first {
+                $0.id == "desktop.app"
+            }
+        let reveal =
+            capabilityRegistry.all.first {
+                $0.id == "files.reveal"
+            }
+        let research =
+            capabilityRegistry.all.first {
+                $0.id == "research.web"
+            }
+
+        let desktopApproval =
+            taskOrchestrator
+                .approvalReason(
+                    title:
+                        "Uygulama kontrolü",
+                    operation:
+                        "capability.contract",
+                    capability:
+                        desktop
+                )
+
+        let revealApproval =
+            taskOrchestrator
+                .approvalReason(
+                    title:
+                        "Finder'da göster",
+                    operation:
+                        "files.reveal",
+                    capability:
+                        reveal
+                )
+
+        let researchApproval =
+            taskOrchestrator
+                .approvalReason(
+                    title:
+                        "Web araştır",
+                    operation:
+                        "research.web",
+                    capability:
+                        research
+                )
+
+        let passed =
+            desktopApproval != nil &&
+            revealApproval != nil &&
+            researchApproval == nil
+
+        var diagnostics: [String] = []
+
+        if desktopApproval == nil {
+            diagnostics.append(
+                "desktop.app capability.contract Strict Approval kapısını atladı."
+            )
+        }
+
+        if revealApproval == nil {
+            diagnostics.append(
+                "Finder görünür etkileşimi Strict Approval kapısını atladı."
+            )
+        }
+
+        if researchApproval != nil {
+            diagnostics.append(
+                "Salt-okunur statik web araştırması gereksiz kullanıcı onayına bağlandı."
+            )
+        }
+
+        return TrainingScenarioResult(
+            scenarioID:
+                "strict-external-action-approval",
+            title:
+                "Dış kullanıcı etkileşimlerinde Strict Approval",
+            tier: .core,
+            prompt:
+                "Kullanıcı cihazında görünür işlem yapmadan önce chat onayı iste",
+            passed: passed,
+            goal:
+                "Uygulama/Finder gibi kullanıcı yüzeylerini onaysız değiştirme; salt-okunur araştırmayı bloklama",
+            route: [
+                "Core",
+                "Safety",
+                "Approval"
+            ],
+            selectedCapabilities: [
+                "desktop.app",
+                "files.reveal"
             ],
             unavailableCapabilities: [],
             diagnostics: diagnostics

@@ -578,12 +578,55 @@ struct ContentView: View {
                 Text(approval.title)
                     .font(.callout.weight(.medium))
 
+                if let target =
+                    approval.targetSummary,
+                   !target.isEmpty {
+                    VStack(
+                        alignment: .leading,
+                        spacing: 3
+                    ) {
+                        Text("Hedef")
+                            .font(
+                                .caption2
+                                    .weight(
+                                        .semibold
+                                    )
+                            )
+                            .foregroundStyle(
+                                .secondary
+                            )
+
+                        Text(target)
+                            .font(
+                                .caption
+                                    .monospaced()
+                            )
+                            .textSelection(
+                                .enabled
+                            )
+                    }
+                    .padding(8)
+                    .frame(
+                        maxWidth: .infinity,
+                        alignment: .leading
+                    )
+                    .background(
+                        Color.orange
+                            .opacity(0.06)
+                    )
+                    .clipShape(
+                        RoundedRectangle(
+                            cornerRadius: 8
+                        )
+                    )
+                }
+
                 Text(approval.reason)
                     .font(.caption)
                     .foregroundStyle(.secondary)
 
                 Text(
-                    "İşlem henüz uygulanmadı. Onay verirsen KRALİ aynı görevde kaldığı adımdan devam edecek."
+                    "İşlem henüz uygulanmadı. Bu onay yalnız bu adıma ve gösterilen hedefe geçerlidir; sonraki dış işlemler ayrıca onay ister."
                 )
                 .font(.caption2)
                 .foregroundStyle(.secondary)
