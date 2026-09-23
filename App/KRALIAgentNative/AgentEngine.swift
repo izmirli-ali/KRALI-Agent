@@ -5524,6 +5524,8 @@ final class AgentEngine: ObservableObject {
                     currentSemanticPlannerProvider,
                 taskGraph:
                     currentTaskGraph,
+                approvalAudit:
+                    currentTaskApprovalAudit,
                 runtimeTask:
                     currentRuntimeTask,
                 problemResolution:
