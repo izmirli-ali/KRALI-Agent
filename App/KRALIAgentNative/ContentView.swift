@@ -1210,180 +1210,10 @@ struct ContentView: View {
                 .clipShape(RoundedRectangle(cornerRadius: 11))
 
 
-                if let report =
-                    engine.inspectorState
-                        .trainingLabReport {
-                    sectionTitle("Sistem sağlığı")
-
-                    VStack(
-                        alignment: .leading,
-                        spacing: 9
-                    ) {
-                        HStack {
-                            Label(
-                                "Training",
-                                systemImage:
-                                    "checklist"
-                            )
-                            .font(
-                                .caption
-                                    .weight(
-                                        .semibold
-                                    )
-                            )
-
-                            Spacer()
-
-                            Text(
-                                String(
-                                    report.passed
-                                ) +
-                                "/" +
-                                String(
-                                    report.total
-                                )
-                            )
-                            .font(
-                                .caption
-                                    .monospacedDigit()
-                                    .weight(
-                                        .semibold
-                                    )
-                            )
-                        }
-
-                        HStack(spacing: 8) {
-                            Text(
-                                "Core " +
-                                String(
-                                    report.corePassed
-                                ) +
-                                "/" +
-                                String(
-                                    report.coreTotal
-                                )
-                            )
-
-                            Text("•")
-
-                            Text(
-                                "North Star " +
-                                String(
-                                    report.northStarPassed
-                                ) +
-                                "/" +
-                                String(
-                                    report.northStarTotal
-                                )
-                            )
-
-                            Spacer()
-                        }
-                        .font(.caption2)
-                        .foregroundStyle(
-                            .secondary
-                        )
-
-                        if report.failed > 0 {
-                            Label(
-                                String(
-                                    report.failed
-                                ) +
-                                " bilinen açık",
-                                systemImage:
-                                    "exclamationmark.triangle"
-                            )
-                            .font(.caption2)
-                            .foregroundStyle(
-                                Color.orange
-                            )
-                        } else {
-                            Label(
-                                "Tüm regression testleri geçti",
-                                systemImage:
-                                    "checkmark.seal.fill"
-                            )
-                            .font(.caption2)
-                            .foregroundStyle(
-                                Color.green
-                            )
-                        }
-                    }
-                    .padding(11)
-                    .background(
-                        Color(nsColor:
-                            .controlBackgroundColor)
-                    )
-                    .clipShape(
-                        RoundedRectangle(
-                            cornerRadius: 11
-                        )
-                    )
-                }
+                systemHealthSection
 
                 if inspectorDeveloperMode {
-                    sectionTitle("Bağlam")
-
-                    VStack(alignment: .leading, spacing: 8) {
-                    HStack {
-                        Label(
-                            engine.contextMemoryStatus,
-                            systemImage: "brain"
-                        )
-                        .font(.caption)
-                        .foregroundStyle(.secondary)
-
-                        Spacer()
-
-                        Text("\(engine.contextMemoryEntries.count)")
-                            .font(.caption2.monospacedDigit())
-                            .foregroundStyle(.secondary)
-                    }
-
-                    let visibleContext =
-                        engine.activeContextMemories.isEmpty
-                            ? Array(engine.contextMemoryEntries.prefix(3))
-                            : Array(engine.activeContextMemories.prefix(3))
-
-                    if visibleContext.isEmpty {
-                        Text(
-                            "KRALİ tamamlanan görevlerden henüz yeniden kullanılabilir bir bağlam oluşturmadı."
-                        )
-                        .font(.caption2)
-                        .foregroundStyle(.secondary)
-                    } else {
-                        ForEach(visibleContext) { memory in
-                            VStack(alignment: .leading, spacing: 2) {
-                                HStack(spacing: 5) {
-                                    Image(
-                                        systemName: memory.kind == .userRule
-                                            ? "bookmark.fill"
-                                            : memory.kind == .research
-                                                ? "globe"
-                                                : "clock.arrow.circlepath"
-                                    )
-                                    .font(.caption2)
-                                    .foregroundStyle(.secondary)
-
-                                    Text(memory.title)
-                                        .font(.caption.weight(.medium))
-                                        .lineLimit(1)
-
-                                    Spacer()
-                                }
-
-                                Text(memoryPreview(memory.summary))
-                                    .font(.caption2)
-                                    .foregroundStyle(.secondary)
-                                    .lineSpacing(1.5)
-                                    .lineLimit(3)
-                            }
-                        }
-                    }
-                }
-                    .padding(11)
-                    .background(Color(nsColor: .controlBackgroundColor))
-                    .clipShape(RoundedRectangle(cornerRadius: 11))
+                    contextInspectorSection
                 }
 
                 if !engine.webResearchResults.isEmpty {
@@ -1867,149 +1697,391 @@ struct ContentView: View {
                 }
 
                 if inspectorDeveloperMode {
-                    DisclosureGroup(
-                        "Geliştirici araçları",
-                        isExpanded:
-                            $developerToolsExpanded
-                    ) {
-                    VStack(alignment: .leading, spacing: 10) {
-                        Divider()
-
-                        HStack {
-                            VStack(alignment: .leading, spacing: 2) {
-                                Text("Training Lab")
-                                    .font(.caption.weight(.medium))
-                                Text(engine.inspectorState.trainingLabStatus)
-                                    .font(.caption2)
-                                    .foregroundStyle(.secondary)
-                                    .lineLimit(2)
-                            }
-
-                            Spacer()
-
-                            Button("Çalıştır") {
-                                engine.runTrainingLab()
-                            }
-                            .controlSize(.small)
-                            .disabled(engine.inspectorState.trainingLabBusy)
-                        }
-
-                        HStack {
-                            VStack(alignment: .leading, spacing: 2) {
-                                Text("Live Research Eval")
-                                    .font(.caption.weight(.medium))
-                                Text(engine.inspectorState.liveResearchEvalStatus)
-                                    .font(.caption2)
-                                    .foregroundStyle(.secondary)
-                                    .lineLimit(2)
-                            }
-
-                            Spacer()
-
-                            Button("Çalıştır") {
-                                engine.runLiveResearchEval()
-                            }
-                            .controlSize(.small)
-                            .disabled(engine.inspectorState.liveResearchEvalBusy)
-                        }
-
-                        HStack {
-                            VStack(alignment: .leading, spacing: 2) {
-                                Text("KRALİ Arena")
-                                    .font(.caption.weight(.medium))
-                                Text(engine.inspectorState.arenaStatus)
-                                    .font(.caption2)
-                                    .foregroundStyle(.secondary)
-                                    .lineLimit(2)
-                            }
-
-                            Spacer()
-
-                            Button("Çalıştır") {
-                                engine.runArena()
-                            }
-                            .controlSize(.small)
-                            .disabled(engine.inspectorState.arenaBusy)
-                        }
-
-                        HStack {
-                            VStack(alignment: .leading, spacing: 2) {
-                                Text("Screen Perception Probe")
-                                    .font(.caption.weight(.medium))
-                                Text(engine.inspectorState.screenPerceptionStatus)
-                                    .font(.caption2)
-                                    .foregroundStyle(.secondary)
-                                    .lineLimit(3)
-                            }
-
-                            Spacer()
-
-                            Button("Test") {
-                                engine.runScreenPerceptionProbe()
-                            }
-                            .controlSize(.small)
-                            .disabled(engine.inspectorState.screenPerceptionBusy)
-                        }
-
-                        HStack {
-                            VStack(alignment: .leading, spacing: 2) {
-                                Text("Desktop Control Probe")
-                                    .font(.caption.weight(.medium))
-                                Text(engine.inspectorState.desktopControlStatus)
-                                    .font(.caption2)
-                                    .foregroundStyle(.secondary)
-                                    .lineLimit(3)
-                            }
-
-                            Spacer()
-
-                            Button("Test") {
-                                engine.runDesktopControlProbe()
-                            }
-                            .controlSize(.small)
-                            .disabled(engine.inspectorState.desktopControlBusy)
-                        }
-
-                        HStack {
-                            VStack(alignment: .leading, spacing: 2) {
-                                Text("Developer Agent")
-                                    .font(.caption.weight(.medium))
-                                Text(engine.inspectorState.developerAgentStatus.message)
-                                    .font(.caption2)
-                                    .foregroundStyle(.secondary)
-                                    .lineLimit(2)
-                            }
-
-                            Spacer()
-
-                            Button("Çalıştır") {
-                                engine.runDeveloperAgent()
-                            }
-                            .controlSize(.small)
-                            .disabled(engine.inspectorState.developerAgentBusy)
-                        }
-
-                        Text(
-                            "Bu butonlar yalnız geliştirici testi / tanısı içindir. Günlük KRALİ kullanımı doğal dil komutlarıyla yapılır; capability'ler için ayrı kullanıcı butonları gerekmez."
-                        )
-                        .font(.caption2)
-                        .foregroundStyle(.secondary)
-
-                        Text(
-                            "Mentor gönderimi üst çubuktaki Mentor düğmesinden yapılır."
-                        )
-                        .font(.caption2)
-                        .foregroundStyle(.secondary)
-                    }
-                    .padding(.top, 4)
-                }
-                    .font(.caption.weight(.medium))
-                    .padding(11)
-                    .background(Color(nsColor: .controlBackgroundColor))
-                    .clipShape(RoundedRectangle(cornerRadius: 11))
+                    developerToolsSection
                 }
             }
             .padding(14)
+        }
+    }
+
+
+    @ViewBuilder
+    private var systemHealthSection: some View {
+        if let report =
+            engine.inspectorState
+                .trainingLabReport {
+            sectionTitle("Sistem sağlığı")
+
+            VStack(
+                alignment: .leading,
+                spacing: 9
+            ) {
+                HStack {
+                    Label(
+                        "Training",
+                        systemImage:
+                            "checklist"
+                    )
+                    .font(
+                        .caption
+                            .weight(.semibold)
+                    )
+
+                    Spacer()
+
+                    Text(
+                        String(report.passed) +
+                        "/" +
+                        String(report.total)
+                    )
+                    .font(
+                        .caption
+                            .monospacedDigit()
+                            .weight(.semibold)
+                    )
+                }
+
+                HStack(spacing: 8) {
+                    Text(
+                        "Core " +
+                        String(
+                            report.corePassed
+                        ) +
+                        "/" +
+                        String(
+                            report.coreTotal
+                        )
+                    )
+
+                    Text("•")
+
+                    Text(
+                        "North Star " +
+                        String(
+                            report.northStarPassed
+                        ) +
+                        "/" +
+                        String(
+                            report.northStarTotal
+                        )
+                    )
+
+                    Spacer()
+                }
+                .font(.caption2)
+                .foregroundStyle(.secondary)
+
+                if report.failed > 0 {
+                    Label(
+                        String(report.failed) +
+                        " bilinen açık",
+                        systemImage:
+                            "exclamationmark.triangle"
+                    )
+                    .font(.caption2)
+                    .foregroundStyle(
+                        Color.orange
+                    )
+                } else {
+                    Label(
+                        "Tüm regression testleri geçti",
+                        systemImage:
+                            "checkmark.seal.fill"
+                    )
+                    .font(.caption2)
+                    .foregroundStyle(
+                        Color.green
+                    )
+                }
+            }
+            .padding(11)
+            .background(
+                Color(nsColor:
+                    .controlBackgroundColor)
+            )
+            .clipShape(
+                RoundedRectangle(
+                    cornerRadius: 11
+                )
+            )
+        }
+    }
+
+    private var contextInspectorSection: some View {
+        Group {
+            sectionTitle("Bağlam")
+
+            VStack(
+                alignment: .leading,
+                spacing: 8
+            ) {
+                HStack {
+                    Label(
+                        engine.contextMemoryStatus,
+                        systemImage: "brain"
+                    )
+                    .font(.caption)
+                    .foregroundStyle(.secondary)
+
+                    Spacer()
+
+                    Text(
+                        String(
+                            engine
+                                .contextMemoryEntries
+                                .count
+                        )
+                    )
+                    .font(
+                        .caption2
+                            .monospacedDigit()
+                    )
+                    .foregroundStyle(.secondary)
+                }
+
+                let visibleContext =
+                    engine
+                        .activeContextMemories
+                        .isEmpty
+                        ? Array(
+                            engine
+                                .contextMemoryEntries
+                                .prefix(3)
+                        )
+                        : Array(
+                            engine
+                                .activeContextMemories
+                                .prefix(3)
+                        )
+
+                if visibleContext.isEmpty {
+                    Text(
+                        "KRALİ tamamlanan görevlerden henüz yeniden kullanılabilir bir bağlam oluşturmadı."
+                    )
+                    .font(.caption2)
+                    .foregroundStyle(.secondary)
+                } else {
+                    ForEach(
+                        visibleContext
+                    ) { memory in
+                        VStack(
+                            alignment: .leading,
+                            spacing: 2
+                        ) {
+                            HStack(spacing: 5) {
+                                Image(
+                                    systemName:
+                                        memory.kind ==
+                                            .userRule
+                                        ? "bookmark.fill"
+                                        : memory.kind ==
+                                            .research
+                                            ? "globe"
+                                            : "clock.arrow.circlepath"
+                                )
+                                .font(.caption2)
+                                .foregroundStyle(
+                                    .secondary
+                                )
+
+                                Text(memory.title)
+                                    .font(
+                                        .caption
+                                            .weight(
+                                                .medium
+                                            )
+                                    )
+                                    .lineLimit(1)
+
+                                Spacer()
+                            }
+
+                            Text(
+                                memoryPreview(
+                                    memory.summary
+                                )
+                            )
+                            .font(.caption2)
+                            .foregroundStyle(
+                                .secondary
+                            )
+                            .lineSpacing(1.5)
+                            .lineLimit(3)
+                        }
+                    }
+                }
+            }
+            .padding(11)
+            .background(
+                Color(nsColor:
+                    .controlBackgroundColor)
+            )
+            .clipShape(
+                RoundedRectangle(
+                    cornerRadius: 11
+                )
+            )
+        }
+    }
+
+    private var developerToolsSection: some View {
+        DisclosureGroup(
+            "Geliştirici araçları",
+            isExpanded:
+                $developerToolsExpanded
+        ) {
+            VStack(
+                alignment: .leading,
+                spacing: 10
+            ) {
+                Divider()
+
+                developerToolRow(
+                    title: "Training Lab",
+                    status:
+                        engine.inspectorState
+                            .trainingLabStatus,
+                    buttonTitle: "Çalıştır",
+                    busy:
+                        engine.inspectorState
+                            .trainingLabBusy
+                ) {
+                    engine.runTrainingLab()
+                }
+
+                developerToolRow(
+                    title: "Live Research Eval",
+                    status:
+                        engine.inspectorState
+                            .liveResearchEvalStatus,
+                    buttonTitle: "Çalıştır",
+                    busy:
+                        engine.inspectorState
+                            .liveResearchEvalBusy
+                ) {
+                    engine.runLiveResearchEval()
+                }
+
+                developerToolRow(
+                    title: "KRALİ Arena",
+                    status:
+                        engine.inspectorState
+                            .arenaStatus,
+                    buttonTitle: "Çalıştır",
+                    busy:
+                        engine.inspectorState
+                            .arenaBusy
+                ) {
+                    engine.runArena()
+                }
+
+                developerToolRow(
+                    title:
+                        "Screen Perception Probe",
+                    status:
+                        engine.inspectorState
+                            .screenPerceptionStatus,
+                    buttonTitle: "Test",
+                    busy:
+                        engine.inspectorState
+                            .screenPerceptionBusy
+                ) {
+                    engine
+                        .runScreenPerceptionProbe()
+                }
+
+                developerToolRow(
+                    title:
+                        "Desktop Control Probe",
+                    status:
+                        engine.inspectorState
+                            .desktopControlStatus,
+                    buttonTitle: "Test",
+                    busy:
+                        engine.inspectorState
+                            .desktopControlBusy
+                ) {
+                    engine
+                        .runDesktopControlProbe()
+                }
+
+                developerToolRow(
+                    title: "Developer Agent",
+                    status:
+                        engine.inspectorState
+                            .developerAgentStatus
+                            .message,
+                    buttonTitle: "Çalıştır",
+                    busy:
+                        engine.inspectorState
+                            .developerAgentBusy
+                ) {
+                    engine.runDeveloperAgent()
+                }
+
+                Text(
+                    "Bu butonlar yalnız geliştirici testi / tanısı içindir. Günlük KRALİ kullanımı doğal dil komutlarıyla yapılır."
+                )
+                .font(.caption2)
+                .foregroundStyle(.secondary)
+
+                Text(
+                    "Fiziksel veya sistem etkili developer adımları yine chat onayı ister."
+                )
+                .font(.caption2)
+                .foregroundStyle(
+                    Color.orange
+                )
+            }
+            .padding(.top, 4)
+        }
+        .font(.caption.weight(.medium))
+        .padding(11)
+        .background(
+            Color(nsColor:
+                .controlBackgroundColor)
+        )
+        .clipShape(
+            RoundedRectangle(
+                cornerRadius: 11
+            )
+        )
+    }
+
+    private func developerToolRow(
+        title: String,
+        status: String,
+        buttonTitle: String,
+        busy: Bool,
+        action: @escaping () -> Void
+    ) -> some View {
+        HStack {
+            VStack(
+                alignment: .leading,
+                spacing: 2
+            ) {
+                Text(title)
+                    .font(
+                        .caption
+                            .weight(.medium)
+                    )
+
+                Text(status)
+                    .font(.caption2)
+                    .foregroundStyle(
+                        .secondary
+                    )
+                    .lineLimit(3)
+            }
+
+            Spacer()
+
+            Button(
+                buttonTitle,
+                action: action
+            )
+            .controlSize(.small)
+            .disabled(busy)
         }
     }
 
