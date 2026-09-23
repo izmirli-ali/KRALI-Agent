@@ -1302,10 +1302,7 @@ actor AgentLocalIntelligence {
 
                     if
                         raw.localizedCaseInsensitiveContains(
-                            "\"reason\": \"kısa gerekçe\""
-                        ) ||
-                        raw.localizedCaseInsensitiveContains(
-                            "\"reason\":\"kısa gerekçe\""
+                            "kısa gerekçe"
                         )
                     {
                         templateEchoCount += 1
