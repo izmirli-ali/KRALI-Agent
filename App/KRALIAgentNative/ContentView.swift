@@ -207,6 +207,17 @@ struct ContentView: View {
 
                         if !engine.isViewingArchivedConversation,
                            engine.pendingTaskApproval == nil,
+                           let developerApproval =
+                            engine.pendingDeveloperToolApproval {
+                            developerToolApprovalCard(
+                                developerApproval
+                            )
+                            .id(developerApproval.id)
+                        }
+
+                        if !engine.isViewingArchivedConversation,
+                           engine.pendingTaskApproval == nil,
+                           engine.pendingDeveloperToolApproval == nil,
                            let fileAction =
                             engine.pendingFileAction {
                             fileActionApprovalCard(
@@ -295,7 +306,8 @@ struct ContentView: View {
                     prompt: $prompt,
                     isLocked:
                         engine.busy ||
-                        engine.pendingTaskApproval != nil,
+                        engine.pendingTaskApproval != nil ||
+                        engine.pendingDeveloperToolApproval != nil,
                     onSend: { text, source in
                         engine.send(
                             text,
@@ -647,6 +659,149 @@ struct ContentView: View {
                     ) {
                         engine
                             .cancelPendingTaskApproval()
+                    }
+                    .buttonStyle(.bordered)
+                    .controlSize(.small)
+                }
+            }
+
+            Spacer(minLength: 20)
+        }
+        .padding(13)
+        .background(
+            Color.orange.opacity(0.07)
+        )
+        .overlay(
+            RoundedRectangle(
+                cornerRadius: 14,
+                style: .continuous
+            )
+            .stroke(
+                Color.orange.opacity(0.28),
+                lineWidth: 1
+            )
+        )
+        .clipShape(
+            RoundedRectangle(
+                cornerRadius: 14,
+                style: .continuous
+            )
+        )
+    }
+
+    private func developerToolApprovalCard(
+        _ approval: PendingDeveloperToolApproval
+    ) -> some View {
+        HStack(
+            alignment: .top,
+            spacing: 11
+        ) {
+            ZStack {
+                Circle()
+                    .fill(
+                        Color.orange.opacity(
+                            0.14
+                        )
+                    )
+                    .frame(
+                        width: 30,
+                        height: 30
+                    )
+
+                Image(
+                    systemName:
+                        "hammer.circle.fill"
+                )
+                .font(.caption)
+                .foregroundStyle(
+                    Color.orange
+                )
+            }
+
+            VStack(
+                alignment: .leading,
+                spacing: 9
+            ) {
+                Text("Developer aracı için onayın gerekiyor")
+                    .font(
+                        .system(
+                            size: 14,
+                            weight: .semibold
+                        )
+                    )
+
+                Text(approval.title)
+                    .font(.callout.weight(.medium))
+
+                if let target =
+                    approval.targetSummary,
+                   !target.isEmpty {
+                    VStack(
+                        alignment: .leading,
+                        spacing: 3
+                    ) {
+                        Text("İzin verilen tek adım")
+                            .font(
+                                .caption2
+                                    .weight(
+                                        .semibold
+                                    )
+                            )
+                            .foregroundStyle(
+                                .secondary
+                            )
+
+                        Text(target)
+                            .font(
+                                .caption
+                                    .monospaced()
+                            )
+                            .textSelection(
+                                .enabled
+                            )
+                    }
+                    .padding(8)
+                    .frame(
+                        maxWidth: .infinity,
+                        alignment: .leading
+                    )
+                    .background(
+                        Color.orange
+                            .opacity(0.06)
+                    )
+                    .clipShape(
+                        RoundedRectangle(
+                            cornerRadius: 8
+                        )
+                    )
+                }
+
+                Text(approval.reason)
+                    .font(.caption)
+                    .foregroundStyle(.secondary)
+
+                Text(
+                    "İşlem henüz uygulanmadı. Bu onay yalnız gösterilen developer adımına geçerlidir; sonraki fiziksel veya sistem etkili adım yeniden onay ister."
+                )
+                .font(.caption2)
+                .foregroundStyle(.secondary)
+
+                HStack(spacing: 8) {
+                    Button("Onaylıyorum") {
+                        engine
+                            .approvePendingDeveloperToolApproval()
+                    }
+                    .buttonStyle(
+                        .borderedProminent
+                    )
+                    .controlSize(.small)
+
+                    Button(
+                        "İptal",
+                        role: .cancel
+                    ) {
+                        engine
+                            .cancelPendingDeveloperToolApproval()
                     }
                     .buttonStyle(.bordered)
                     .controlSize(.small)

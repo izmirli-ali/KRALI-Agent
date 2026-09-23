@@ -31,6 +31,8 @@ final class AgentEngine: ObservableObject {
     @Published var indexedFolders: [FolderRecord] = []
     @Published var pendingFileAction: PendingFileAction?
     @Published var pendingTaskApproval: PendingTaskApproval?
+    @Published var pendingDeveloperToolApproval:
+        PendingDeveloperToolApproval?
     @Published var lastUndoAction: UndoFileAction?
     @Published var fileSearchResults: [FileRecord] = []
     @Published var folderSearchResults: [FolderRecord] = []
@@ -115,6 +117,8 @@ final class AgentEngine: ObservableObject {
     private let desktopControlStore = DesktopControlProbeStore()
     private let textFileWriter = AgentTextFileWriter()
     private let developerBridge = AgentDeveloperBridge()
+    private let developerToolSafetyPolicy =
+        AgentDeveloperToolSafetyPolicy()
     private let learningQueueStore = AgentLearningQueueStore()
     private let debugRecoveryCenter = AgentDebugRecoveryCenter()
     private let localIntelligence = AgentLocalIntelligence()
@@ -133,6 +137,10 @@ final class AgentEngine: ObservableObject {
     private var inspectorStateForwarder: AnyCancellable?
     private var lastDecision: AgentDecision?
     private var activeLearningJobID: UUID?
+    private var pendingDeveloperLearningJob:
+        AgentLearningJob?
+    private var pendingDeveloperLearningJobBriefURL:
+        URL?
     private var currentOutcomeFailureIsTransient = false
     private var currentTaskInput = ""
     private var approvedRuntimeStepIndexes = Set<Int>()
@@ -5586,8 +5594,8 @@ final class AgentEngine: ObservableObject {
         guard !inspectorState.trainingLabBusy else { return }
 
         inspectorState.trainingLabBusy = true
-        inspectorState.trainingLabStatus = "KRALİ kendi temel yeterlilik testlerini çalıştırıyor…"
-        log("Training Lab başladı")
+        inspectorState.trainingLabStatus = "Simülasyon tabanlı temel yeterlilik testleri çalışıyor • fiziksel eylem uygulanmaz."
+        log("Training Lab başladı • simulation-only")
 
         Task {
             await Task.yield()
@@ -5687,8 +5695,8 @@ final class AgentEngine: ObservableObject {
 
         inspectorState.arenaBusy = true
         inspectorState.arenaStatus =
-            "KRALİ açık-dünya görevlerini planner + reviewer ile test ediyor…"
-        log("KRALİ Arena başladı")
+            "Planner + reviewer simülasyonu çalışıyor • fiziksel eylem uygulanmaz."
+        log("KRALİ Arena başladı • simulation-only")
 
         Task {
             let monitor = Task { @MainActor [weak self] in
@@ -5948,6 +5956,43 @@ final class AgentEngine: ObservableObject {
     }
 
     func runDesktopControlProbe() {
+        guard
+            !inspectorState.desktopControlBusy,
+            pendingDeveloperToolApproval == nil
+        else {
+            return
+        }
+
+        guard
+            developerToolSafetyPolicy
+                .requiresApproval(
+                    .desktopControlProbe
+                )
+        else {
+            executeDesktopControlProbe()
+            return
+        }
+
+        pendingDeveloperToolApproval =
+            PendingDeveloperToolApproval(
+                action:
+                    .desktopControlProbe,
+                title:
+                    "Desktop Control Probe",
+                reason:
+                    "Bu test Notlar uygulamasını gerçekten açacak veya öne getirecek ve foreground durumunu doğrulayacak.",
+                targetSummary:
+                    "Notes • com.apple.Notes • /System/Applications/Notes.app"
+            )
+
+        inspectorState.desktopControlStatus =
+            "Onay bekleniyor • Notlar henüz açılmadı."
+        log(
+            "Developer Tool approval gate: Desktop Control Probe"
+        )
+    }
+
+    private func executeDesktopControlProbe() {
         guard !inspectorState.desktopControlBusy else { return }
 
         inspectorState.desktopControlBusy = true
@@ -6031,7 +6076,10 @@ final class AgentEngine: ObservableObject {
     }
 
     private func startNextLearningJobIfNeeded() {
-        guard !inspectorState.developerAgentBusy else {
+        guard
+            !inspectorState.developerAgentBusy,
+            pendingDeveloperToolApproval == nil
+        else {
             return
         }
 
@@ -6131,7 +6179,8 @@ final class AgentEngine: ObservableObject {
 
     func runDeveloperAgent(
         learningJob: AgentLearningJob? = nil,
-        learningJobBriefURL: URL? = nil
+        learningJobBriefURL: URL? = nil,
+        approvedSystemEffect: String? = nil
     ) {
         guard !inspectorState.developerAgentBusy else {
             if let learningJob {
@@ -6277,7 +6326,9 @@ final class AgentEngine: ObservableObject {
             let status =
                 await developerBridge.run(
                     learningJobBriefURL:
-                        learningJobBriefURL
+                        learningJobBriefURL,
+                    approvedSystemEffect:
+                        approvedSystemEffect
                 )
 
             monitor.cancel()
@@ -6286,6 +6337,68 @@ final class AgentEngine: ObservableObject {
                 status
             inspectorState.developerAgentBusy =
                 false
+
+            if status.state ==
+                "system_action_approval_required" {
+                let request =
+                    developerSystemEffectRequest(
+                        from:
+                            status.message
+                    )
+
+                pauseActiveLearningJobForDeveloperApproval(
+                    DeveloperAgentStatus(
+                        state:
+                            status.state,
+                        message:
+                            request.reason,
+                        branch:
+                            status.branch,
+                        worktree:
+                            status.worktree,
+                        appVersion:
+                            status.appVersion,
+                        updatedAt:
+                            status.updatedAt,
+                        runID:
+                            status.runID
+                    )
+                )
+
+                pendingDeveloperLearningJob =
+                    learningJob
+                pendingDeveloperLearningJobBriefURL =
+                    learningJobBriefURL
+
+                if developerToolSafetyPolicy
+                    .requiresApproval(
+                        .developerSystemEffects
+                    ) {
+                    pendingDeveloperToolApproval =
+                        PendingDeveloperToolApproval(
+                            action:
+                                .developerSystemEffects,
+                            title:
+                                "Developer Agent sistem işlemi",
+                            reason:
+                                request.reason,
+                            targetSummary:
+                                developerSystemEffectTargetSummary(
+                                    request.token
+                                ),
+                            approvalToken:
+                                request.token
+                        )
+                }
+
+                log(
+                    "Developer Tool approval gate: " +
+                    request.token +
+                    " • " +
+                    request.reason
+                )
+                return
+            }
 
             finishActiveLearningJob(
                 with: status
@@ -6385,6 +6498,292 @@ final class AgentEngine: ObservableObject {
 
             startNextLearningJobIfNeeded()
         }
+    }
+
+    private func developerSystemEffectRequest(
+        from raw: String
+    ) -> (
+        token: String,
+        reason: String
+    ) {
+        if let separatorRange =
+            raw.range(
+                of: "@@"
+            ) {
+            let token =
+                String(
+                    raw[..<separatorRange.lowerBound]
+                )
+                .trimmingCharacters(
+                    in: .whitespacesAndNewlines
+                )
+            let reason =
+                String(
+                    raw[separatorRange.upperBound...]
+                )
+                .trimmingCharacters(
+                    in: .whitespacesAndNewlines
+                )
+
+            if !token.isEmpty {
+                return (
+                    token,
+                    reason.isEmpty
+                        ? "Developer Agent sistem etkisi oluşturan bir adım çalıştırmak istiyor."
+                        : reason
+                )
+            }
+        }
+
+        return (
+            "developer-system-effect",
+            raw.trimmingCharacters(
+                in: .whitespacesAndNewlines
+            ).isEmpty
+                ? "Developer Agent sistem etkisi oluşturan bir adım çalıştırmak istiyor."
+                : raw
+        )
+    }
+
+    private func developerSystemEffectTargetSummary(
+        _ token: String
+    ) -> String {
+        if token.hasPrefix(
+            "ollama-model-pull:"
+        ) {
+            let model =
+                String(
+                    token.dropFirst(
+                        "ollama-model-pull:".count
+                    )
+                )
+
+            return
+                "Ollama modeli • " +
+                model
+        }
+
+        switch token {
+        case "brew-install-node22":
+            return "Homebrew • Node.js 22 kurulumu"
+        case "brew-upgrade-ollama":
+            return "Homebrew • Ollama güncellemesi + servis yeniden başlatma"
+        case "brew-install-ollama":
+            return "Homebrew • Ollama kurulumu"
+        case "ollama-service-start":
+            return "Yerel servis • Ollama serve"
+        case "cline-repair-global":
+            return "Cline CLI • doctor fix / global npm onarımı"
+        case "cline-auth-terminal":
+            return "Terminal • Cline/OpenAI kimlik doğrulama akışı"
+        case "cline-sdk-local-install":
+            return "KRALİ Developer çalışma alanı • @cline/sdk kurulumu"
+        default:
+            return "Developer sistem adımı • " + token
+        }
+    }
+
+    func approvePendingDeveloperToolApproval() {
+        guard let approval =
+            pendingDeveloperToolApproval
+        else {
+            return
+        }
+
+        appendConversationMessage(
+            ChatMessage(
+                role: .user,
+                text:
+                    "Onaylıyorum: " +
+                    approval.title
+            )
+        )
+
+        pendingDeveloperToolApproval = nil
+
+        switch approval.action {
+        case .desktopControlProbe:
+            executeDesktopControlProbe()
+
+        case .developerSystemEffects:
+            let learningJob =
+                pendingDeveloperLearningJob
+            let briefURL =
+                pendingDeveloperLearningJobBriefURL
+
+            pendingDeveloperLearningJob = nil
+            pendingDeveloperLearningJobBriefURL = nil
+
+            resumeActiveLearningJobAfterDeveloperApproval()
+
+            runDeveloperAgent(
+                learningJob:
+                    learningJob,
+                learningJobBriefURL:
+                    briefURL,
+                approvedSystemEffect:
+                    approval.approvalToken
+            )
+        }
+
+        log(
+            "Developer Tool approval kullanıcı tarafından onaylandı • " +
+            approval.action.rawValue
+        )
+    }
+
+    func cancelPendingDeveloperToolApproval() {
+        guard let approval =
+            pendingDeveloperToolApproval
+        else {
+            return
+        }
+
+        appendConversationMessage(
+            ChatMessage(
+                role: .user,
+                text:
+                    "İptal: " +
+                    approval.title
+            )
+        )
+
+        pendingDeveloperToolApproval = nil
+
+        switch approval.action {
+        case .desktopControlProbe:
+            inspectorState.desktopControlStatus =
+                "İptal edildi • fiziksel uygulama açma testi çalıştırılmadı."
+
+        case .developerSystemEffects:
+            requeueActiveLearningJobAfterDeveloperApprovalRejection(
+                approval.reason
+            )
+            pendingDeveloperLearningJob = nil
+            pendingDeveloperLearningJobBriefURL = nil
+
+            let rejectedStatus =
+                DeveloperAgentStatus(
+                    state:
+                        "system_action_rejected",
+                    message:
+                        "Kullanıcı sistem etkisi oluşturan Developer Agent adımını onaylamadı. Öğrenme işi capability failure sayılmadan sırada tutuluyor.",
+                    branch: nil,
+                    worktree: nil,
+                    appVersion:
+                        currentAppVersionString,
+                    updatedAt:
+                        Date()
+                )
+
+            inspectorState.developerAgentStatus =
+                rejectedStatus
+            developerBridge.writeStatus(
+                rejectedStatus
+            )
+        }
+
+        postAssistantMessage(
+            "İşlemi iptal ettim. Developer aracının fiziksel/sistem etkisi oluşturan adımı uygulanmadı."
+        )
+
+        log(
+            "Developer Tool approval kullanıcı tarafından reddedildi • " +
+            approval.action.rawValue
+        )
+    }
+
+    private func pauseActiveLearningJobForDeveloperApproval(
+        _ status: DeveloperAgentStatus
+    ) {
+        guard
+            let activeLearningJobID,
+            let index =
+                inspectorState.learningQueueJobs
+                    .firstIndex(
+                        where: {
+                            $0.id ==
+                                activeLearningJobID
+                        }
+                    )
+        else {
+            return
+        }
+
+        inspectorState.learningQueueJobs[index]
+            .state = .queued
+        inspectorState.learningQueueJobs[index]
+            .updatedAt = Date()
+        inspectorState.learningQueueJobs[index]
+            .lastStatus =
+                "Sistem işlemi için kullanıcı onayı bekleniyor: " +
+                status.message
+
+        learningQueueStore.save(
+            inspectorState.learningQueueJobs
+        )
+    }
+
+    private func resumeActiveLearningJobAfterDeveloperApproval() {
+        guard
+            let activeLearningJobID,
+            let index =
+                inspectorState.learningQueueJobs
+                    .firstIndex(
+                        where: {
+                            $0.id ==
+                                activeLearningJobID
+                        }
+                    )
+        else {
+            return
+        }
+
+        inspectorState.learningQueueJobs[index]
+            .state = .running
+        inspectorState.learningQueueJobs[index]
+            .updatedAt = Date()
+        inspectorState.learningQueueJobs[index]
+            .lastStatus =
+                "Kullanıcı sistem işlemini onayladı; Developer Agent devam ediyor."
+
+        learningQueueStore.save(
+            inspectorState.learningQueueJobs
+        )
+    }
+
+    private func requeueActiveLearningJobAfterDeveloperApprovalRejection(
+        _ reason: String
+    ) {
+        guard
+            let activeLearningJobID,
+            let index =
+                inspectorState.learningQueueJobs
+                    .firstIndex(
+                        where: {
+                            $0.id ==
+                                activeLearningJobID
+                        }
+                    )
+        else {
+            self.activeLearningJobID = nil
+            return
+        }
+
+        inspectorState.learningQueueJobs[index]
+            .state = .queued
+        inspectorState.learningQueueJobs[index]
+            .updatedAt = Date()
+        inspectorState.learningQueueJobs[index]
+            .lastStatus =
+                "Kullanıcı sistem işlemini onaylamadı; fiziksel adım uygulanmadı ve öğrenme işi capability failure sayılmadan sırada tutuluyor: " +
+                reason
+
+        learningQueueStore.save(
+            inspectorState.learningQueueJobs
+        )
+
+        self.activeLearningJobID = nil
     }
 
     private func updateRunningLearningJob(

@@ -163,12 +163,18 @@ struct DeveloperAgentStatus: Hashable {
             "recovered_candidate_build_failed",
             "candidate_recovery_failed",
             "candidate_repair_failed",
+            "system_action_approval_required",
+            "system_action_rejected",
             "failed"
         ].contains(state)
     }
 
     var learningStageTitle: String {
         switch state {
+        case "system_action_approval_required":
+            return "Sistem işlemi için onay bekliyor"
+        case "system_action_rejected":
+            return "Sistem işlemi kullanıcı tarafından reddedildi"
         case "learning":
             return "Öğreniyor"
         case "running":
@@ -714,6 +720,35 @@ struct AgentDebugRecoveryCenter {
     }
 }
 
+enum AgentDeveloperToolOperation:
+    String,
+    Hashable {
+    case trainingLab
+    case arena
+    case liveResearchEval
+    case screenPerceptionProbe
+    case desktopControlProbe
+    case developerSystemEffects
+}
+
+struct AgentDeveloperToolSafetyPolicy {
+    func requiresApproval(
+        _ operation: AgentDeveloperToolOperation
+    ) -> Bool {
+        switch operation {
+        case .desktopControlProbe,
+             .developerSystemEffects:
+            return true
+
+        case .trainingLab,
+             .arena,
+             .liveResearchEval,
+             .screenPerceptionProbe:
+            return false
+        }
+    }
+}
+
 struct AgentDeveloperBridge {
     private let fileManager = FileManager.default
 
@@ -931,7 +966,8 @@ struct AgentDeveloperBridge {
     }
 
     func run(
-        learningJobBriefURL: URL? = nil
+        learningJobBriefURL: URL? = nil,
+        approvedSystemEffect: String? = nil
     ) async -> DeveloperAgentStatus {
         guard fileManager.fileExists(
             atPath: scriptURL.path
@@ -959,17 +995,24 @@ struct AgentDeveloperBridge {
                 scriptPath
             ]
 
+            var environment =
+                ProcessInfo.processInfo
+                    .environment
+
+            environment[
+                "KRALI_APPROVED_SYSTEM_EFFECT"
+            ] =
+                approvedSystemEffect ?? ""
+
             if let learningJobBriefURL {
-                var environment =
-                    ProcessInfo.processInfo
-                        .environment
                 environment[
                     "KRALI_LEARNING_JOB_FILE"
                 ] =
                     learningJobBriefURL.path
-                process.environment =
-                    environment
             }
+
+            process.environment =
+                environment
 
             process.standardOutput = pipe
             process.standardError = pipe

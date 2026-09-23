@@ -171,6 +171,9 @@ struct AgentTrainingLab {
             strictExternalApprovalResult()
         )
         results.append(
+            developerToolPhysicalApprovalPolicyResult()
+        )
+        results.append(
             resolvedApprovalTargetRequiredResult()
         )
         results.append(
@@ -2107,6 +2110,73 @@ struct AgentTrainingLab {
                 ? []
                 : [
                     "Semantic isim dedupe işlemi localization provenance'ını korumadı."
+                ]
+        )
+    }
+
+    private func developerToolPhysicalApprovalPolicyResult()
+        -> TrainingScenarioResult {
+        let policy =
+            AgentDeveloperToolSafetyPolicy()
+
+        let simulationOnlyTools: [
+            AgentDeveloperToolOperation
+        ] = [
+            .trainingLab,
+            .arena,
+            .liveResearchEval,
+            .screenPerceptionProbe
+        ]
+
+        let physicalTools: [
+            AgentDeveloperToolOperation
+        ] = [
+            .desktopControlProbe,
+            .developerSystemEffects
+        ]
+
+        let simulationSafe =
+            simulationOnlyTools
+                .allSatisfy {
+                    !policy.requiresApproval(
+                        $0
+                    )
+                }
+
+        let physicalGated =
+            physicalTools
+                .allSatisfy {
+                    policy.requiresApproval(
+                        $0
+                    )
+                }
+
+        let passed =
+            simulationSafe &&
+            physicalGated
+
+        return TrainingScenarioResult(
+            scenarioID:
+                "developer-tools-physical-approval-policy",
+            title:
+                "Developer araçlarında fiziksel eylem onay kapısı",
+            tier: .core,
+            prompt:
+                "Training/Arena kod ve plan simülasyonu olarak çalışsın; gerçek uygulama/sistem etkisi kullanıcı onayı olmadan uygulanmasın.",
+            passed: passed,
+            goal:
+                "Salt analiz/simülasyonu serbest bırakırken fiziksel developer eylemlerini ayrı approval ile koru",
+            route: [
+                "DeveloperTools",
+                "Safety",
+                "Approval"
+            ],
+            selectedCapabilities: [],
+            unavailableCapabilities: [],
+            diagnostics: passed
+                ? []
+                : [
+                    "Developer tool safety policy simülasyon ile fiziksel/sistem etkili eylemleri doğru ayırmadı."
                 ]
         )
     }
