@@ -1,8 +1,8 @@
 {
-  "createdAt" : "2026-09-22T20:37:20Z",
-  "expandedCandidateCount" : 256,
+  "createdAt" : "2026-09-23T05:57:45Z",
+  "expandedCandidateCount" : 257,
   "installedCandidateCount" : 226,
-  "nestedCandidateCount" : 55,
+  "nestedCandidateCount" : 56,
   "queries" : [
     "Notlar"
   ],
@@ -15,6 +15,32 @@
       "query" : "Notlar",
       "topCandidates" : [
         {
+          "aliasProvenance" : [
+            {
+              "source" : "bundle.localizedInfoDictionary",
+              "values" : [
+                "Software Update"
+              ]
+            },
+            {
+              "source" : "finder.displayName",
+              "values" : [
+                "Software Update"
+              ]
+            },
+            {
+              "source" : "path.basename",
+              "values" : [
+                "Software Update"
+              ]
+            },
+            {
+              "source" : "url.localizedName",
+              "values" : [
+                "Software Update"
+              ]
+            }
+          ],
           "aliases" : [
             "Software Update"
           ],
@@ -24,6 +50,32 @@
           "score" : 0.5714285714285714
         },
         {
+          "aliasProvenance" : [
+            {
+              "source" : "bundle.localizedInfoDictionary",
+              "values" : [
+                "Notes"
+              ]
+            },
+            {
+              "source" : "finder.displayName",
+              "values" : [
+                "Notes"
+              ]
+            },
+            {
+              "source" : "path.basename",
+              "values" : [
+                "Notes"
+              ]
+            },
+            {
+              "source" : "url.localizedName",
+              "values" : [
+                "Notes"
+              ]
+            }
+          ],
           "aliases" : [
             "Notes"
           ],
@@ -33,6 +85,32 @@
           "score" : 0.5
         },
         {
+          "aliasProvenance" : [
+            {
+              "source" : "bundle.localizedInfoDictionary",
+              "values" : [
+                "Digital Color Meter"
+              ]
+            },
+            {
+              "source" : "finder.displayName",
+              "values" : [
+                "Digital Color Meter"
+              ]
+            },
+            {
+              "source" : "path.basename",
+              "values" : [
+                "Digital Color Meter"
+              ]
+            },
+            {
+              "source" : "url.localizedName",
+              "values" : [
+                "Digital Color Meter"
+              ]
+            }
+          ],
           "aliases" : [
             "Digital Color Meter"
           ],
@@ -42,6 +120,32 @@
           "score" : 0.5
         },
         {
+          "aliasProvenance" : [
+            {
+              "source" : "bundle.localizedInfoDictionary",
+              "values" : [
+                "Installer"
+              ]
+            },
+            {
+              "source" : "finder.displayName",
+              "values" : [
+                "Installer"
+              ]
+            },
+            {
+              "source" : "path.basename",
+              "values" : [
+                "Installer"
+              ]
+            },
+            {
+              "source" : "url.localizedName",
+              "values" : [
+                "Installer"
+              ]
+            }
+          ],
           "aliases" : [
             "Installer"
           ],
@@ -51,6 +155,26 @@
           "score" : 0.4444444444444444
         },
         {
+          "aliasProvenance" : [
+            {
+              "source" : "finder.displayName",
+              "values" : [
+                "ZXP Installer"
+              ]
+            },
+            {
+              "source" : "path.basename",
+              "values" : [
+                "ZXP Installer"
+              ]
+            },
+            {
+              "source" : "url.localizedName",
+              "values" : [
+                "ZXP Installer"
+              ]
+            }
+          ],
           "aliases" : [
             "ZXP Installer"
           ],
