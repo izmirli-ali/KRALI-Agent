@@ -49,3 +49,26 @@ Başarılıysa aday branch GitHub'a gönderilir. ChatGPT Mentor'a **“Developer
 - Açık capability gap için düşük riskli bir entegrasyon hazırlamak gerektiğinde
 
 Tüm diagnostic'ler yeşilse Developer Agent'ın sırf değişiklik yapmak için kodu kurcalamaması temel kuraldır.
+
+
+## Cursor Architect Bridge (v0.10.26)
+
+Cursor CLI, yerel Developer Agent'ın yerine geçen mutation provider değildir. Yalnızca belirli teşhis başarısızlıklarında ikinci görüş veren **read-only architect** katmanıdır.
+
+Tetiklenen durumlar:
+- `local_agent_iteration_limit`
+- `local_agent_root_cause_inconclusive`
+- `local_agent_strategy_escalation_inconclusive`
+- `local_agent_tool_protocol_failed`
+
+Güvenlik sözleşmesi:
+- Cursor `--mode=ask` ile çağrılır.
+- Geçici workspace sandbox modu `workspace_readonly` olur.
+- `Write(**)`, `Shell(*)`, `WebFetch(*)` ve `Mcp(*:*)` açıkça deny edilir.
+- Explicit `CURSOR_API_KEY` / `CURSOR_AUTH_TOKEN` ortam değişkenleri bridge tarafından kaldırılır; yalnız kullanıcının `agent login` oturumu kullanılır.
+- Cursor kod değiştirmez, candidate üretmez, branch/commit/push yapmaz.
+- Aynı VERSION + gap + failure evidence fingerprint için hazır diagnosis tekrar kullanılır; kanıt değiştiyse eski teşhis körlemesine yeniden kullanılmaz.
+- Diagnosis `~/Library/Application Support/KRALI Agent/Mentor/cursor-architect-latest.json` altında saklanır ve Mentor Sync ile repo tarafındaki `Mentor/cursor-architect-latest.json` dosyasına taşınır.
+- Sonraki Developer Agent turunda diagnosis yalnız advisory/hypothesis olarak prompt'a eklenir. Mutation öncesi exact source ve runtime evidence bağımsız olarak yeniden doğrulanmalıdır.
+
+Cursor CLI yoksa, login hazır değilse veya ücretsiz kullanım limiti doluysa KRALİ'nin yerel Qwen/Devstral yolu değişmeden devam eder.
