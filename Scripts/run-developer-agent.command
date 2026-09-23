@@ -2008,6 +2008,7 @@ if [ "$PROVIDER" = "ollama" ] &&
     KRALI_LOCAL_AGENT_MAX_STRUCTURED_ACTIONS="$([ "$LEARNING_PATH" = "primitivePatch" ] && echo 6 || echo 8)" \
     KRALI_LOCAL_AGENT_MAX_INSPECTIONS="$([ "$LEARNING_PATH" = "primitivePatch" ] && echo 4 || echo 6)" \
     KRALI_LOCAL_AGENT_MAX_ITERATIONS="$([ "$LEARNING_PATH" = "primitivePatch" ] && echo 10 || echo 16)" \
+    KRALI_LOCAL_AGENT_MAX_IMPLEMENTATION_REJECTION_GRACE="$([ "$LEARNING_PATH" = "primitivePatch" ] && echo 4 || echo 2)" \
     KRALI_LOCAL_AGENT_TIMEOUT_MS="$([ "$LEARNING_PATH" = "primitivePatch" ] && echo 300000 || echo 300000)" \
     KRALI_LOCAL_AGENT_REQUEST_TIMEOUT_MS="$([ "$LEARNING_PATH" = "primitivePatch" ] && echo 45000 || echo 60000)" \
     KRALI_LOCAL_AGENT_STRUCTURED_TIMEOUT_MS="$([ "$LEARNING_PATH" = "primitivePatch" ] && echo 120000 || echo 60000)" \
@@ -2162,7 +2163,23 @@ if [ "$CLINE_EXIT" -ne 0 ]; then
         fi
     fi
 
-    PRE_CURSOR_DIRTY="$(git -C "$WORKTREE" status --porcelain --untracked-files=all 2>/dev/null || true)"
+    PRE_CURSOR_DIRTY_RAW="$(git -C "$WORKTREE" status --porcelain --untracked-files=all 2>/dev/null || true)"
+    PRE_CURSOR_DIRTY="$(
+        printf '%s\n' "$PRE_CURSOR_DIRTY_RAW" |
+        /usr/bin/awk '
+            {
+                path = substr($0, 4)
+                if (
+                    path == ".krali-developer-agent-prompt.txt" ||
+                    path == ".build-check" ||
+                    index(path, ".build-check/") == 1
+                ) {
+                    next
+                }
+                print
+            }
+        '
+    )"
     CURSOR_ARCHITECT_READY=0
 
     CURSOR_ARCHITECT_ELIGIBLE=0
@@ -2230,6 +2247,30 @@ NODE
     elif [ "$CURSOR_ARCHITECT_CACHED" -eq 1 ] &&
          [ "$CURSOR_ARCHITECT_ELIGIBLE" -eq 1 ]; then
         echo "🧭 Aynı sürüm/gap için mevcut Cursor Architect diagnosis yeniden kullanılacak; ücretsiz kota tekrar tüketilmiyor." | tee -a "$LOG"
+    elif [ "$CURSOR_ARCHITECT_ELIGIBLE" -eq 1 ]; then
+        CURSOR_SKIP_REASONS=""
+
+        if [ "$CURSOR_ARCHITECT_ENABLED" != "1" ]; then
+            CURSOR_SKIP_REASONS="disabled"
+        fi
+
+        if [ -n "$PRE_CURSOR_DIRTY" ]; then
+            [ -n "$CURSOR_SKIP_REASONS" ] && CURSOR_SKIP_REASONS="$CURSOR_SKIP_REASONS,"
+            CURSOR_SKIP_REASONS="${CURSOR_SKIP_REASONS}candidate-dirty"
+        fi
+
+        if [ ! -x "$CURSOR_AGENT_BIN" ]; then
+            [ -n "$CURSOR_SKIP_REASONS" ] && CURSOR_SKIP_REASONS="$CURSOR_SKIP_REASONS,"
+            CURSOR_SKIP_REASONS="${CURSOR_SKIP_REASONS}cli-missing"
+        fi
+
+        [ -z "$CURSOR_SKIP_REASONS" ] && CURSOR_SKIP_REASONS="unknown-gate"
+
+        echo "ℹ️ Cursor Architect atlandı • reasons=$CURSOR_SKIP_REASONS" | tee -a "$LOG"
+
+        if [ -n "$PRE_CURSOR_DIRTY" ]; then
+            echo "ℹ️ Cursor öncesi gerçek candidate dirty paths: $(printf '%s' "$PRE_CURSOR_DIRTY" | /usr/bin/tr '\n' ';' | /usr/bin/cut -c1-500)" | tee -a "$LOG"
+        fi
     fi
 
     # Session prompt/build cache are orchestration artifacts, not source candidates.
