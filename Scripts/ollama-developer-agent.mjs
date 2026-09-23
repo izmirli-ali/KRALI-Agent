@@ -1038,43 +1038,58 @@ function restoreDeveloperTaskGraph(snapshot) {
     ])
   );
 
-  const allowedStates = new Set([
-    "pending",
-    "ready",
-    "running",
-    "verified",
-  ]);
-
   for (const node of developerTaskGraph.nodes) {
-    const saved = stateByID.get(node.id);
-    if (
-      saved &&
-      allowedStates.has(saved.state)
-    ) {
-      node.state = saved.state;
-      node.verifiedAt = saved.verifiedAt;
+    node.state = "pending";
+    node.verifiedAt = null;
+  }
+
+  const verified = new Set();
+  let progress = true;
+
+  while (progress) {
+    progress = false;
+
+    for (const node of developerTaskGraph.nodes) {
+      const saved = stateByID.get(node.id);
+
+      if (
+        node.state !== "verified" &&
+        saved?.state === "verified" &&
+        node.dependsOn.every((id) => verified.has(id))
+      ) {
+        node.state = "verified";
+        node.verifiedAt = saved.verifiedAt;
+        verified.add(node.id);
+        progress = true;
+      }
     }
   }
 
-  const runningNodes =
-    developerTaskGraph.nodes.filter(
-      (node) => node.state === "running"
+  const savedActiveID =
+    String(snapshot.activeID || "");
+  const savedActive =
+    developerTaskGraph.nodes.find(
+      (node) =>
+        node.id === savedActiveID &&
+        node.state !== "verified" &&
+        node.dependsOn.every((id) => verified.has(id))
     );
 
-  if (runningNodes.length > 1) {
-    for (const node of runningNodes.slice(1)) {
-      node.state = "ready";
-    }
+  if (savedActive) {
+    savedActive.state = "running";
+    developerTaskGraph.activeID =
+      savedActive.id;
+  } else {
+    developerTaskGraph.activeID = null;
   }
 
-  developerTaskGraph.activeID =
-    runningNodes[0]?.id || null;
   developerTaskGraph.completed =
     developerTaskGraph.nodes.every(
       (node) => node.state === "verified"
     );
 
   refreshDeveloperTaskGraph();
+  syncDeveloperTaskGraphSystemPrompt();
   return true;
 }
 
@@ -1118,6 +1133,8 @@ function maybeAdvanceDeveloperTaskGraph(
         developerTaskGraphSummary()
     );
 
+    syncDeveloperTaskGraphSystemPrompt();
+
     if (result && typeof result === "object") {
       result.task_graph = {
         verified_subtask: completedID,
@@ -1153,6 +1170,8 @@ function maybeAdvanceDeveloperTaskGraph(
       next.title +
       ")"
   );
+
+  syncDeveloperTaskGraphSystemPrompt();
 
   if (result && typeof result === "object") {
     result.task_graph = {
@@ -2146,6 +2165,19 @@ const messages = [
   },
   { role: "user", content: prompt },
 ];
+
+function syncDeveloperTaskGraphSystemPrompt() {
+  if (!messages[0]) return;
+
+  const context =
+    developerTaskGraphPromptContext();
+
+  messages[0].content =
+    systemPrompt +
+    (context
+      ? "\n\n" + context
+      : "");
+}
 
 let sawToolCall = false;
 let sawMutatingTool = false;
