@@ -7,53 +7,273 @@ struct ContentView: View {
     @State private var prompt = ""
     @State private var developerToolsExpanded = false
     @State private var inspectorVisible = false
+    @State private var compactSidebarVisible = false
     @State private var inspectorDeveloperMode = false
     @StateObject private var updater = UpdateController()
 
     var body: some View {
-        HStack(spacing: 0) {
-            ConversationSidebarView()
-                .frame(
-                    minWidth: 200,
-                    idealWidth: 228,
-                    maxWidth: 238
-                )
+        GeometryReader { geometry in
+            let width = geometry.size.width
+            let compactSidebar =
+                usesCompactSidebar(width)
+            let overlayInspector =
+                usesOverlayInspector(width)
 
-            Divider()
+            ZStack {
+                HStack(spacing: 0) {
+                    if !compactSidebar {
+                        ConversationSidebarView()
+                            .frame(
+                                width:
+                                    inlineSidebarWidth(
+                                        width
+                                    )
+                            )
 
-            VStack(spacing: 0) {
-                topBar
-                Divider()
-                chatPane
-            }
-            .frame(minWidth: 480)
+                        Divider()
+                    }
 
-            if inspectorVisible {
-                Divider()
-
-                sidePane
+                    VStack(spacing: 0) {
+                        topBar(
+                            compactSidebar:
+                                compactSidebar
+                        )
+                        Divider()
+                        chatPane(
+                            horizontalPadding:
+                                width < 820
+                                    ? 16
+                                    : 28
+                        )
+                    }
                     .frame(
-                        minWidth: 280,
-                        idealWidth: 340,
-                        maxWidth: 390
+                        minWidth: 0,
+                        maxWidth: .infinity
                     )
+
+                    if inspectorVisible &&
+                       !overlayInspector {
+                        Divider()
+
+                        sidePane
+                            .frame(
+                                width:
+                                    inlineInspectorWidth(
+                                        width
+                                    )
+                            )
+                            .transition(
+                                .move(edge: .trailing)
+                                    .combined(
+                                        with: .opacity
+                                    )
+                            )
+                    }
+                }
+
+                if (
+                    compactSidebar &&
+                    compactSidebarVisible
+                ) || (
+                    overlayInspector &&
+                    inspectorVisible
+                ) {
+                    Color.black
+                        .opacity(0.18)
+                        .ignoresSafeArea()
+                        .contentShape(
+                            Rectangle()
+                        )
+                        .onTapGesture {
+                            compactSidebarVisible =
+                                false
+
+                            if overlayInspector {
+                                inspectorVisible =
+                                    false
+                            }
+                        }
+                        .transition(.opacity)
+                        .zIndex(10)
+                }
+
+                if compactSidebar &&
+                   compactSidebarVisible {
+                    HStack(spacing: 0) {
+                        ConversationSidebarView()
+                            .frame(
+                                width:
+                                    overlaySidebarWidth(
+                                        width
+                                    )
+                            )
+                            .background(
+                                Color(
+                                    nsColor:
+                                        .windowBackgroundColor
+                                )
+                            )
+                            .shadow(
+                                color:
+                                    Color.black
+                                        .opacity(0.22),
+                                radius: 18,
+                                x: 6,
+                                y: 0
+                            )
+
+                        Spacer(minLength: 0)
+                    }
+                    .transition(
+                        .move(edge: .leading)
+                            .combined(
+                                with: .opacity
+                            )
+                    )
+                    .zIndex(20)
+                }
+
+                if overlayInspector &&
+                   inspectorVisible {
+                    HStack(spacing: 0) {
+                        Spacer(minLength: 0)
+
+                        sidePane
+                            .frame(
+                                width:
+                                    overlayInspectorWidth(
+                                        width
+                                    )
+                            )
+                            .background(
+                                Color(
+                                    nsColor:
+                                        .windowBackgroundColor
+                                )
+                            )
+                            .shadow(
+                                color:
+                                    Color.black
+                                        .opacity(0.24),
+                                radius: 18,
+                                x: -6,
+                                y: 0
+                            )
+                    }
                     .transition(
                         .move(edge: .trailing)
-                            .combined(with: .opacity)
+                            .combined(
+                                with: .opacity
+                            )
                     )
+                    .zIndex(20)
+                }
             }
+            .onChange(
+                of: compactSidebar
+            ) { _, isCompact in
+                if !isCompact {
+                    compactSidebarVisible =
+                        false
+                }
+            }
+            .background(
+                Color(
+                    nsColor:
+                        .windowBackgroundColor
+                )
+            )
+            .animation(
+                .easeInOut(duration: 0.18),
+                value: inspectorVisible
+            )
+            .animation(
+                .easeInOut(duration: 0.18),
+                value: compactSidebarVisible
+            )
         }
-        .background(
-            Color(nsColor: .windowBackgroundColor)
-        )
-        .animation(
-            .easeInOut(duration: 0.18),
-            value: inspectorVisible
+    }
+
+    private func usesCompactSidebar(
+        _ width: CGFloat
+    ) -> Bool {
+        width < 780
+    }
+
+    private func usesOverlayInspector(
+        _ width: CGFloat
+    ) -> Bool {
+        width < 1120
+    }
+
+    private func inlineSidebarWidth(
+        _ width: CGFloat
+    ) -> CGFloat {
+        width < 920
+            ? 186
+            : 220
+    }
+
+    private func overlaySidebarWidth(
+        _ width: CGFloat
+    ) -> CGFloat {
+        min(
+            300,
+            max(
+                226,
+                width * 0.38
+            )
         )
     }
 
-    private var topBar: some View {
+    private func inlineInspectorWidth(
+        _ width: CGFloat
+    ) -> CGFloat {
+        min(
+            360,
+            max(
+                300,
+                width * 0.28
+            )
+        )
+    }
+
+    private func overlayInspectorWidth(
+        _ width: CGFloat
+    ) -> CGFloat {
+        min(
+            360,
+            max(
+                286,
+                width * 0.48
+            )
+        )
+    }
+
+    private func topBar(
+        compactSidebar: Bool
+    ) -> some View {
         HStack(spacing: 10) {
+            if compactSidebar {
+                Button {
+                    compactSidebarVisible
+                        .toggle()
+
+                    if compactSidebarVisible {
+                        inspectorVisible =
+                            false
+                    }
+                } label: {
+                    Image(
+                        systemName:
+                            "sidebar.left"
+                    )
+                }
+                .buttonStyle(.bordered)
+                .controlSize(.small)
+                .help("Sohbet geçmişini aç/kapat")
+            }
+
             VStack(
                 alignment: .leading,
                 spacing: 2
@@ -70,8 +290,9 @@ struct ContentView: View {
                     .foregroundStyle(.secondary)
                     .lineLimit(1)
             }
+            .layoutPriority(1)
 
-            Spacer()
+            Spacer(minLength: 8)
 
             if updater.updateAvailable {
                 Button("Güncelle") {
@@ -145,6 +366,11 @@ struct ContentView: View {
                     engine.loadDiagnosticsIfNeeded()
                 }
                 inspectorVisible.toggle()
+
+                if inspectorVisible {
+                    compactSidebarVisible =
+                        false
+                }
             } label: {
                 Image(
                     systemName: "sidebar.right"
@@ -178,7 +404,9 @@ struct ContentView: View {
             : "Hazır • v\(updater.currentVersion)"
     }
 
-    private var chatPane: some View {
+    private func chatPane(
+        horizontalPadding: CGFloat
+    ) -> some View {
         VStack(spacing: 0) {
             if engine.isViewingArchivedConversation {
                 archiveBanner
@@ -236,7 +464,10 @@ struct ContentView: View {
                         maxWidth: 860,
                         alignment: .leading
                     )
-                    .padding(.horizontal, 28)
+                    .padding(
+                        .horizontal,
+                        horizontalPadding
+                    )
                     .padding(.vertical, 24)
                     .frame(
                         maxWidth: .infinity,
@@ -1145,7 +1376,10 @@ struct ContentView: View {
                             )
                             .font(.caption2)
                             .foregroundStyle(.secondary)
-                            .lineLimit(3)
+                            .fixedSize(
+                                horizontal: false,
+                                vertical: true
+                            )
                         }
 
                         Spacer()
@@ -1157,7 +1391,10 @@ struct ContentView: View {
                         Text(engine.currentPlan)
                             .font(.caption)
                             .foregroundStyle(.secondary)
-                            .lineLimit(3)
+                            .fixedSize(
+                                horizontal: false,
+                                vertical: true
+                            )
                     }
 
                     if !engine.selectedCapabilities.isEmpty {
@@ -1302,7 +1539,10 @@ struct ContentView: View {
                                 Text(incident.summary)
                                     .font(.caption2)
                                     .foregroundStyle(.secondary)
-                                    .lineLimit(3)
+                                    .fixedSize(
+                                        horizontal: false,
+                                        vertical: true
+                                    )
                             }
 
                             Spacer()
@@ -1317,7 +1557,10 @@ struct ContentView: View {
                             Text(incident.recoveryPlan)
                                 .font(.caption2)
                                 .foregroundStyle(.secondary)
-                                .lineLimit(3)
+                                .fixedSize(
+                                    horizontal: false,
+                                    vertical: true
+                                )
                         }
 
                         if let evidence = incident.evidence,
@@ -1325,7 +1568,10 @@ struct ContentView: View {
                             Text("Kanıt: " + evidence)
                                 .font(.caption2.monospaced())
                                 .foregroundStyle(.secondary)
-                                .lineLimit(2)
+                                .fixedSize(
+                                    horizontal: false,
+                                    vertical: true
+                                )
                         }
                     }
                     .padding(11)
@@ -1524,7 +1770,10 @@ struct ContentView: View {
                                     Text(engine.inspectorState.developerAgentStatus.message)
                                         .font(.caption2)
                                         .foregroundStyle(.secondary)
-                                        .lineLimit(3)
+                                        .fixedSize(
+                                            horizontal: false,
+                                            vertical: true
+                                        )
 
                                     if let timing =
                                         engine.inspectorState.developerAgentStatus
