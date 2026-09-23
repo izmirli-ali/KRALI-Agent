@@ -26,3 +26,12 @@ controller_probe_ok|qwen2.5-coder:14b-instruct|10737ms
 🧠 Model rolleri: root-cause=qwen2.5-coder:14b-instruct • mutation=devstral-small-2:24b • controller=qwen2.5-coder:14b-instruct
 KRALI_LOCAL_STAGE local_agent_starting • Training Result Analyzer (developer.task.training-result-analyzer) native Ollama agent başlatılıyor: devstral-small-2:24b
 KRALI_LOCAL_STAGE local_agent_running • Training Result Analyzer (developer.task.training-result-analyzer) yerel model çalışıyor • adım 1/10
+KRALI_LOCAL_STAGE local_agent_tool • Training Result Analyzer (developer.task.training-result-analyzer) araç çalışıyor: list_files
+KRALI_LOCAL_STAGE local_agent_running • Training Result Analyzer (developer.task.training-result-analyzer) yerel model çalışıyor • adım 2/10
+KRALI_LOCAL_STAGE local_agent_request_retry • Training Result Analyzer (developer.task.training-result-analyzer) model isteği zaman aşımına uğradı; mevcut context korunarak retry 1/2
+KRALI_LOCAL_STAGE local_agent_running • Training Result Analyzer (developer.task.training-result-analyzer) yerel model çalışıyor • adım 3/10
+KRALI_LOCAL_STAGE local_agent_request_retry • Training Result Analyzer (developer.task.training-result-analyzer) model isteği zaman aşımına uğradı; mevcut context korunarak retry 2/2
+KRALI_LOCAL_STAGE local_agent_running • Training Result Analyzer (developer.task.training-result-analyzer) yerel model çalışıyor • adım 4/10
+Ollama native agent model isteği art arda zaman aşımına uğradı.
+Deleted branch krali-dev-agent/20260923-215517 (was 89c48e0).
+❌ Native yerel Developer Agent durdu: Ollama native agent model isteği art arda zaman aşımına uğradı.
