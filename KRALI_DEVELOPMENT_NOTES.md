@@ -454,3 +454,16 @@ Target runtime:
 - Supabase RLS şeması authenticated owner modeli + explicit Data API grant/revoke ile sıkılaştırıldı.
 - Supabase client config modern publishable-key modeline hazırlandı; live project henüz seçilmedi/bağlanmadı.
 - VERSION 0.10.29 / build 202.
+
+
+## v0.10.30 progress
+
+- Mentor run 20260923-221839 proved remote-first routing itself works: Cloudflare proxy started, heavy local Ollama preparation was skipped, but first real model request returned HTTP 400.
+- Root cause: v0.10.29 proxy sent GLM-4.7-Flash through /ai/run with a traditional flattened tool schema while the current Workers AI model/API path is OpenAI chat-completions compatible.
+- Proxy transport moved to `/ai/v1/chat/completions`.
+- KRALİ's existing OpenAI-style tool definitions are preserved instead of flattened.
+- Multi-turn tool calls now preserve/repair `tool_call_id` across assistant/tool messages.
+- Structured controller keeps `response_format: { type: "json_schema", json_schema: ... }` for Llama 3.3 JSON Mode.
+- Cloudflare provider errors are logged in sanitized form without token/account-secret leakage.
+- No changes to approval authority, worktree isolation, mutation scopes, build-check, main access, or Keychain secret storage.
+- VERSION 0.10.30 / build 203.
