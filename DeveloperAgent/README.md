@@ -60,6 +60,7 @@ Tetiklenen durumlar:
 - `local_agent_root_cause_inconclusive`
 - `local_agent_strategy_escalation_inconclusive`
 - `local_agent_tool_protocol_failed`
+- `local_agent_completion_gate_failed`
 
 Güvenlik sözleşmesi:
 - Cursor `--mode=ask` ile çağrılır.
@@ -72,3 +73,16 @@ Güvenlik sözleşmesi:
 - Sonraki Developer Agent turunda diagnosis yalnız advisory/hypothesis olarak prompt'a eklenir. Mutation öncesi exact source ve runtime evidence bağımsız olarak yeniden doğrulanmalıdır.
 
 Cursor CLI yoksa, login hazır değilse veya ücretsiz kullanım limiti doluysa KRALİ'nin yerel Qwen/Devstral yolu değişmeden devam eder.
+
+
+## Kontrollü Developer Tasks (v0.10.27)
+
+KRALİ artık runtime capability gap dışında, ChatGPT Lead/Architect tarafından hazırlanmış düşük riskli geliştirme görev kartlarını da aynı izole worktree hattında çalıştırabilir.
+
+Görev kartları `DeveloperAgent/Tasks/*.json` altında `developerTask` envelope kullanır. Çalıştırma:
+
+```bash
+/bin/zsh Scripts/run-developer-task.command DeveloperAgent/Tasks/training-result-analyzer-v1.json
+```
+
+Bu yol main erişimi vermez, mevcut system-effect approval gate'lerini atlamaz ve görev kartının fiziksel işlem yapmasına otomatik izin vermez. İlk görev Training Result Analyzer'dır.
