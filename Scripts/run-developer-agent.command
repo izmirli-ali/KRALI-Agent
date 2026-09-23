@@ -17,6 +17,7 @@ SKILL_CANDIDATE_DIR="$SKILL_DIR/Candidates"
 SKILL_LIBRARY_FILE="$SKILL_DIR/skill-library.json"
 LEARNING_JOB_FILE="${KRALI_LEARNING_JOB_FILE:-}"
 APPROVED_SYSTEM_EFFECT="${KRALI_APPROVED_SYSTEM_EFFECT:-}"
+APPROVED_SYSTEM_EFFECT_USED=0
 
 export PATH="/opt/homebrew/bin:/usr/local/bin:$HOME/.npm-global/bin:/usr/bin:/bin:/usr/sbin:/sbin:$PATH"
 
@@ -41,7 +42,9 @@ require_system_effect_approval() {
     local effect_key="$1"
     local reason="$2"
 
-    if [ "$APPROVED_SYSTEM_EFFECT" = "$effect_key" ]; then
+    if [ "$APPROVED_SYSTEM_EFFECT" = "$effect_key" ] &&
+       [ "$APPROVED_SYSTEM_EFFECT_USED" -eq 0 ]; then
+        APPROVED_SYSTEM_EFFECT_USED=1
         return 0
     fi
 
@@ -219,6 +222,7 @@ prepare_sdk_fallback() {
     fi
 
     if [ ! -d "$SDK_HOST/node_modules/@cline/sdk" ]; then
+        require_system_effect_approval "cline-sdk-local-install" "Cline SDK paketi KRALİ'nin yerel Developer çalışma alanına indirilecek."
         echo "Cline SDK kuruluyor: @cline/sdk" | tee -a "$LOG"
         if ! "$NPM_BIN" --prefix "$SDK_HOST" install @cline/sdk@latest >>"$LOG" 2>&1; then
             return 1
