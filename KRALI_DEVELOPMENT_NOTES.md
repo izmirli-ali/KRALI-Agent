@@ -364,3 +364,13 @@ Target runtime:
 - `developer-tools-physical-approval-policy` Training regression'ı eklendi.
 - Mevcut semantic task Strict Approval ve desktop.app localization/resolver zincirine dokunulmadı.
 - VERSION 0.10.22 / build 195.
+
+
+## v0.10.23 progress
+
+- Assistant UI polish sürümü; agent karar mantığı, resolver, provider ve Strict Approval semantiğine dokunulmadı.
+- Aktif sohbetin altında kullanıcı dostu durum şeridi eklendi: hazır, çalışıyor, onay bekliyor, doğrulandı, kısmi ve dikkat durumları.
+- Task ve Developer approval kartları fiziksel/sistem etkisini daha açık anlatacak şekilde sadeleştirildi; işlem uygulanmadan önceki güvenli durum görünür hale getirildi.
+- Inspector `Özet / Developer` olarak iki görünüme ayrıldı. Normal kullanımda teknik gürültü azaltıldı; debug, bağlam, learning queue ve geliştirici araçları Developer görünümünde tutuldu.
+- Inspector özetine Training/Core/North Star sayılarını ve bilinen açık sayısını gösteren Sistem Sağlığı kartı eklendi.
+- VERSION 0.10.23 / build 196.
