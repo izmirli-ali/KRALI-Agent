@@ -1434,6 +1434,8 @@ final class AgentEngine: ObservableObject {
                             completedStepIndexes:
                                 result
                                     .completedStepIndexes,
+                            approvedStepIndexes:
+                                approvedRuntimeStepIndexes,
                             capabilities:
                                 capabilityRegistry.all
                         )
