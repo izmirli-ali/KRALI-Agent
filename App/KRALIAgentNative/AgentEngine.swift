@@ -2895,18 +2895,20 @@ final class AgentEngine: ObservableObject {
                             )
 
                     let verified =
-                        result
-                            .launchOrActivateSucceeded &&
-                        result
-                            .frontmostVerified
+                        result.frontmostVerified
 
                     inspectorState.desktopControlStatus =
                         result
                             .resolvedApplicationName +
                         (
                             verified
-                                ? " açıldı/öne geldi • görsel ön plan doğrulandı"
-                                : " açıldı fakat gerçek ön plan doğrulaması başarısız"
+                                ? " önde doğrulandı • " +
+                                  result.verificationSource
+                                : (
+                                    result.launchOrActivateSucceeded
+                                        ? " aktivasyon istendi fakat ön plan doğrulanamadı"
+                                        : " aktivasyon başarısız ve ön plan doğrulanamadı"
+                                  )
                         )
 
                     desktopControlStore
@@ -2918,6 +2920,26 @@ final class AgentEngine: ObservableObject {
                             String(
                                 result
                                     .launchOrActivateSucceeded
+                            ) +
+                            "|workspace=" +
+                            String(
+                                result
+                                    .workspaceFrontmostVerified
+                            ) +
+                            "|ax=" +
+                            String(
+                                result
+                                    .accessibilityFrontmostVerified
+                            ) +
+                            "|screenKit=" +
+                            String(
+                                result
+                                    .screenKitFrontmostVerified
+                            ) +
+                            "|screenPerception=" +
+                            String(
+                                result
+                                    .screenPerceptionFrontmostVerified
                             ) +
                             "|frontmost=" +
                             String(
@@ -2932,6 +2954,31 @@ final class AgentEngine: ObservableObject {
                     let appEvidence =
                         result
                             .resolvedApplicationName +
+                        " • activate=" +
+                        String(
+                            result
+                                .launchOrActivateSucceeded
+                        ) +
+                        " • workspace=" +
+                        String(
+                            result
+                                .workspaceFrontmostVerified
+                        ) +
+                        " • ax=" +
+                        String(
+                            result
+                                .accessibilityFrontmostVerified
+                        ) +
+                        " • screenKit=" +
+                        String(
+                            result
+                                .screenKitFrontmostVerified
+                        ) +
+                        " • screenPerception=" +
+                        String(
+                            result
+                                .screenPerceptionFrontmostVerified
+                        ) +
                         " • foreground=" +
                         String(
                             result
