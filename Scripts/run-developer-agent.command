@@ -45,7 +45,7 @@ require_system_effect_approval() {
         return 0
     fi
 
-    write_status "system_action_approval_required|${effect_key}::${reason}"
+    write_status "system_action_approval_required|${effect_key}@@${reason}"
     echo "⛔ Sistem etkisi kullanıcı onayı bekliyor: $reason" | tee -a "$LOG"
     exit 42
 }
