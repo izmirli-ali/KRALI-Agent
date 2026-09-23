@@ -427,3 +427,16 @@ Target runtime:
 - Cloud geçişi fail-open değil: credential/bağlantı eklenene kadar hiçbir runtime state buluta taşınmıyor; local Mac authoritative executor olarak kalıyor.
 - Hedef dağılım: Mac=approval/execution, Supabase=control plane/state, GitHub=source/CI, Cursor=read-only architect; ileride kendi sunucusu aynı backend sözleşmesini devralabilecek.
 - VERSION 0.10.27 / build 200.
+
+
+## v0.10.28 progress
+
+- Kontrollü KRALİ developer task'ları artık Terminal zorunluluğu olmadan sohbetten başlatılabilir.
+- Explicit generic komut: `geliştirici görevi: <task adı veya task id>`.
+- Task resolver `DeveloperAgent/Tasks/*.json` içinden filename, capabilityID veya capabilityName ile eşleşir; Training Result Analyzer'a özel hard-code yoktur.
+- Sohbetten başlatılan task `AgentEngine → AgentDeveloperBridge → run-developer-agent.command` zincirini kullanır.
+- `KRALI_DEV_TASK_FILE` Engine/Bridge üzerinden taşınır; task mutation scope runner içinde yeniden okunup native mutation tool katmanına export edilir.
+- Developer Agent sistem etkisi isterse task descriptor approval beklerken korunur; kullanıcı onayından sonra aynı task ve aynı scope ile devam edilir.
+- Böylece Ollama service start/model install gibi sistem etkileri KRALİ sohbetinde Developer Tool approval kartı üretir.
+- Terminal `run-developer-task.command` yolu fallback/manual kullanım için korunmuştur.
+- VERSION 0.10.28 / build 201.

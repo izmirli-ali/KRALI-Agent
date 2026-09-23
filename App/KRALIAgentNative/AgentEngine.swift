@@ -141,6 +141,8 @@ final class AgentEngine: ObservableObject {
         AgentLearningJob?
     private var pendingDeveloperLearningJobBriefURL:
         URL?
+    private var pendingDeveloperTask:
+        AgentDeveloperTaskDescriptor?
     private var currentOutcomeFailureIsTransient = false
     private var currentTaskInput = ""
     private var approvedRuntimeStepIndexes = Set<Int>()
@@ -541,6 +543,132 @@ final class AgentEngine: ObservableObject {
         )
     }
 
+    private func developerTaskRequest(
+        from raw: String
+    ) -> String? {
+        let trimmed =
+            raw.trimmingCharacters(
+                in:
+                    .whitespacesAndNewlines
+            )
+        let lower =
+            trimmed.lowercased(
+                with:
+                    Locale(
+                        identifier:
+                            "tr_TR"
+                    )
+            )
+
+        let prefixes = [
+            "geliştirici görevi:",
+            "gelistirici gorevi:",
+            "developer task:"
+        ]
+
+        for prefix in prefixes {
+            guard
+                lower.hasPrefix(prefix)
+            else {
+                continue
+            }
+
+            let index =
+                trimmed.index(
+                    trimmed.startIndex,
+                    offsetBy:
+                        prefix.count
+                )
+            let query =
+                String(
+                    trimmed[index...]
+                )
+                .trimmingCharacters(
+                    in:
+                        .whitespacesAndNewlines
+                )
+
+            return query.isEmpty
+                ? nil
+                : query
+        }
+
+        return nil
+    }
+
+    private func handleDeveloperTaskChatCommand(
+        _ text: String
+    ) -> Bool {
+        guard
+            let request =
+                developerTaskRequest(
+                    from: text
+                )
+        else {
+            return false
+        }
+
+        let liveStatus =
+            developerBridge
+                .readStatus()
+                .freshForApp(
+                    currentAppVersionString
+                )
+
+        guard
+            !inspectorState
+                .developerAgentBusy,
+            !liveStatus
+                .isLearningActive
+        else {
+            postAssistantMessage(
+                "Developer Agent zaten aktif. Mevcut görev tamamlanmadan yeni geliştirici görevi başlatılmadı."
+            )
+            return true
+        }
+
+        guard
+            let task =
+                developerBridge
+                    .resolveDeveloperTask(
+                        request
+                    )
+        else {
+            postAssistantMessage(
+                "Bu isimde kontrollü bir geliştirici görev kartı bulamadım: " +
+                request +
+                ". Görev kartı DeveloperAgent/Tasks altında olmalı."
+            )
+            return true
+        }
+
+        currentGoal =
+            "Geliştirici görevi: " +
+            task.title
+        currentPlan =
+            "İzole worktree → izinli scope içinde kodla → git diff → build-check → review"
+        activeRoute = [
+            "Core",
+            "Developer"
+        ]
+        verificationState =
+            .checking
+        verificationSummary =
+            task.title +
+            " geliştirici görevi başlatılıyor."
+
+        postAssistantMessage(
+            task.title +
+            " görevini kontrollü Developer Agent'a verdim. Main'e doğrudan yazmayacak; task kartındaki mutation scope uygulanacak. Sistem etkisi gerekirse burada ayrıca onay isteyeceğim."
+        )
+
+        runDeveloperAgent(
+            developerTask:
+                task
+        )
+        return true
+    }
+
     func send(
         _ raw: String,
         source: ChatInputSource = .text
@@ -606,6 +734,12 @@ final class AgentEngine: ObservableObject {
                 text: text
             )
         )
+
+        if handleDeveloperTaskChatCommand(
+            text
+        ) {
+            return
+        }
 
         let decision = brain.analyze(
             text,
@@ -6227,6 +6361,7 @@ final class AgentEngine: ObservableObject {
     func runDeveloperAgent(
         learningJob: AgentLearningJob? = nil,
         learningJobBriefURL: URL? = nil,
+        developerTask: AgentDeveloperTaskDescriptor? = nil,
         approvedSystemEffect: String? = nil
     ) {
         guard !inspectorState.developerAgentBusy else {
@@ -6279,7 +6414,11 @@ final class AgentEngine: ObservableObject {
         inspectorState.developerAgentBusy = true
 
         let initialMessage: String
-        if let learningJob {
+        if let developerTask {
+            initialMessage =
+                developerTask.title +
+                " • kontrollü developer görevi başlatılıyor"
+        } else if let learningJob {
             let pathTitle =
                 learningJob.learningPath?
                     .title ??
@@ -6310,9 +6449,14 @@ final class AgentEngine: ObservableObject {
         )
 
         log(
-            learningJob == nil
-                ? "Developer Agent başlatıldı"
-                : "Developer Agent Learning Queue job'u başlatıldı"
+            developerTask != nil
+                ? "Developer Agent kontrollü task başlatıldı • " +
+                    (developerTask?.id ?? "unknown")
+                : (
+                    learningJob == nil
+                        ? "Developer Agent başlatıldı"
+                        : "Developer Agent Learning Queue job'u başlatıldı"
+                  )
         )
 
         Task {
@@ -6374,6 +6518,8 @@ final class AgentEngine: ObservableObject {
                 await developerBridge.run(
                     learningJobBriefURL:
                         learningJobBriefURL,
+                    developerTaskURL:
+                        developerTask?.url,
                     approvedSystemEffect:
                         approvedSystemEffect
                 )
@@ -6416,6 +6562,8 @@ final class AgentEngine: ObservableObject {
                     learningJob
                 pendingDeveloperLearningJobBriefURL =
                     learningJobBriefURL
+                pendingDeveloperTask =
+                    developerTask
 
                 if developerToolSafetyPolicy
                     .requiresApproval(
@@ -6454,6 +6602,12 @@ final class AgentEngine: ObservableObject {
             switch status.state {
             case "ready_for_review",
                  "recovered_candidate_ready":
+                if let developerTask {
+                    postAssistantMessage(
+                        developerTask.title +
+                        " geliştirici görevi tamamlandı ve candidate incelemeye hazır. Mentor Sync sonrası review edilebilir."
+                    )
+                }
                 resolveDebugIncident(
                     summary:
                         "Developer Agent recovery/öğrenme adayını build doğrulamasından geçirdi."
@@ -6657,9 +6811,12 @@ final class AgentEngine: ObservableObject {
                 pendingDeveloperLearningJob
             let briefURL =
                 pendingDeveloperLearningJobBriefURL
+            let developerTask =
+                pendingDeveloperTask
 
             pendingDeveloperLearningJob = nil
             pendingDeveloperLearningJobBriefURL = nil
+            pendingDeveloperTask = nil
 
             resumeActiveLearningJobAfterDeveloperApproval()
 
@@ -6668,6 +6825,8 @@ final class AgentEngine: ObservableObject {
                     learningJob,
                 learningJobBriefURL:
                     briefURL,
+                developerTask:
+                    developerTask,
                 approvedSystemEffect:
                     approval.approvalToken
             )
@@ -6703,18 +6862,24 @@ final class AgentEngine: ObservableObject {
                 "İptal edildi • fiziksel uygulama açma testi çalıştırılmadı."
 
         case .developerSystemEffects:
+            let rejectedDeveloperTask =
+                pendingDeveloperTask
+
             requeueActiveLearningJobAfterDeveloperApprovalRejection(
                 approval.reason
             )
             pendingDeveloperLearningJob = nil
             pendingDeveloperLearningJobBriefURL = nil
+            pendingDeveloperTask = nil
 
             let rejectedStatus =
                 DeveloperAgentStatus(
                     state:
                         "system_action_rejected",
                     message:
-                        "Kullanıcı sistem etkisi oluşturan Developer Agent adımını onaylamadı. Öğrenme işi capability failure sayılmadan sırada tutuluyor.",
+                        rejectedDeveloperTask == nil
+                            ? "Kullanıcı sistem etkisi oluşturan Developer Agent adımını onaylamadı. Öğrenme işi capability failure sayılmadan sırada tutuluyor."
+                            : "Kullanıcı sistem etkisi oluşturan Developer Agent adımını onaylamadı. Kontrollü geliştirici görevi herhangi bir fiziksel/sistem işlemi uygulanmadan durduruldu.",
                     branch: nil,
                     worktree: nil,
                     appVersion:

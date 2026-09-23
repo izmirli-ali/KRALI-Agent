@@ -759,6 +759,12 @@ struct AgentDeveloperToolSafetyPolicy {
     }
 }
 
+struct AgentDeveloperTaskDescriptor: Hashable {
+    let id: String
+    let title: String
+    let url: URL
+}
+
 struct AgentDeveloperBridge {
     private let fileManager = FileManager.default
 
@@ -784,6 +790,130 @@ struct AgentDeveloperBridge {
                 "Developer/KRALI-Agent/Scripts/recover-developer-candidate.command",
                 isDirectory: false
             )
+    }
+
+    var developerTasksDirectoryURL: URL {
+        fileManager.homeDirectoryForCurrentUser
+            .appendingPathComponent(
+                "Developer/KRALI-Agent/DeveloperAgent/Tasks",
+                isDirectory: true
+            )
+    }
+
+    func resolveDeveloperTask(
+        _ rawQuery: String
+    ) -> AgentDeveloperTaskDescriptor? {
+        let query = normalizedDeveloperTaskKey(
+            rawQuery
+        )
+
+        guard !query.isEmpty,
+              let urls = try? fileManager
+                .contentsOfDirectory(
+                    at:
+                        developerTasksDirectoryURL,
+                    includingPropertiesForKeys: nil,
+                    options: [
+                        .skipsHiddenFiles
+                    ]
+                )
+        else {
+            return nil
+        }
+
+        for url in urls
+            .filter({
+                $0.pathExtension.lowercased() ==
+                    "json"
+            })
+            .sorted(
+                by: {
+                    $0.lastPathComponent <
+                    $1.lastPathComponent
+                }
+            ) {
+            guard
+                let data = try? Data(
+                    contentsOf: url
+                ),
+                let object = try? JSONSerialization
+                    .jsonObject(
+                        with: data
+                    ) as? [String: Any],
+                let task =
+                    object["developerTask"]
+                        as? [String: Any]
+            else {
+                continue
+            }
+
+            let capabilityID =
+                String(
+                    describing:
+                        task["capabilityID"] ??
+                        ""
+                )
+            let title =
+                String(
+                    describing:
+                        task["capabilityName"] ??
+                        url.deletingPathExtension()
+                            .lastPathComponent
+                )
+            let fileID =
+                url.deletingPathExtension()
+                    .lastPathComponent
+
+            let aliases = [
+                fileID,
+                capabilityID,
+                capabilityID
+                    .split(separator: ".")
+                    .last
+                    .map(String.init) ??
+                    "",
+                title
+            ]
+            .map(normalizedDeveloperTaskKey)
+
+            if aliases.contains(query) {
+                return AgentDeveloperTaskDescriptor(
+                    id: fileID,
+                    title: title,
+                    url: url
+                )
+            }
+        }
+
+        return nil
+    }
+
+    private func normalizedDeveloperTaskKey(
+        _ value: String
+    ) -> String {
+        value
+            .folding(
+                options: [
+                    .caseInsensitive,
+                    .diacriticInsensitive
+                ],
+                locale:
+                    Locale(
+                        identifier:
+                            "tr_TR"
+                    )
+            )
+            .lowercased()
+            .components(
+                separatedBy:
+                    CharacterSet
+                        .alphanumerics
+                        .inverted
+            )
+            .filter {
+                !$0.isEmpty
+            }
+            .joined(separator: "-")
     }
 
     func readStatus() -> DeveloperAgentStatus {
@@ -977,6 +1107,7 @@ struct AgentDeveloperBridge {
 
     func run(
         learningJobBriefURL: URL? = nil,
+        developerTaskURL: URL? = nil,
         approvedSystemEffect: String? = nil
     ) async -> DeveloperAgentStatus {
         guard fileManager.fileExists(
@@ -1019,6 +1150,13 @@ struct AgentDeveloperBridge {
                     "KRALI_LEARNING_JOB_FILE"
                 ] =
                     learningJobBriefURL.path
+            }
+
+            if let developerTaskURL {
+                environment[
+                    "KRALI_DEV_TASK_FILE"
+                ] =
+                    developerTaskURL.path
             }
 
             process.environment =

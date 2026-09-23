@@ -23,6 +23,31 @@ CURSOR_ARCHITECT_ENABLED="${KRALI_CURSOR_ARCHITECT_ENABLED:-1}"
 CURSOR_AGENT_BIN="${KRALI_CURSOR_AGENT_BIN:-$HOME/.local/bin/agent}"
 CURSOR_ARCHITECT_RESULT="$LOCAL_MENTOR_DIR/cursor-architect-latest.json"
 
+if [ -n "$DEV_TASK_FILE" ] &&
+   [ -f "$DEV_TASK_FILE" ] &&
+   { [ -z "${KRALI_TASK_ALLOWED_SCOPE:-}" ] || [ -z "${KRALI_TASK_FORBIDDEN_SCOPE:-}" ]; }; then
+    TASK_SCOPE_EXPORTS="$(
+        /usr/bin/python3 - "$DEV_TASK_FILE" <<'PY'
+import json, shlex, sys
+with open(sys.argv[1], "r", encoding="utf-8") as f:
+    data = json.load(f)
+meta = data.get("taskMetadata") or {}
+allowed = meta.get("allowedScope") or []
+forbidden = meta.get("forbiddenScope") or []
+assert isinstance(allowed, list) and allowed
+assert isinstance(forbidden, list)
+print("KRALI_TASK_ALLOWED_SCOPE=" + shlex.quote(json.dumps(allowed, ensure_ascii=False)))
+print("KRALI_TASK_FORBIDDEN_SCOPE=" + shlex.quote(json.dumps(forbidden, ensure_ascii=False)))
+PY
+    )" || {
+        echo "❌ Developer task mutation scope okunamadı."
+        exit 16
+    }
+    eval "$TASK_SCOPE_EXPORTS"
+    export KRALI_TASK_ALLOWED_SCOPE
+    export KRALI_TASK_FORBIDDEN_SCOPE
+fi
+
 export PATH="/opt/homebrew/bin:/usr/local/bin:$HOME/.npm-global/bin:$HOME/.local/bin:/usr/bin:/bin:/usr/sbin:/sbin:$PATH"
 
 mkdir -p "$LOG_DIR" "$RUN_LOG_DIR" "$STATUS_DIR" "$SKILL_CANDIDATE_DIR"
