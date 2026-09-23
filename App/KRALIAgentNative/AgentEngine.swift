@@ -6179,7 +6179,8 @@ final class AgentEngine: ObservableObject {
 
     func runDeveloperAgent(
         learningJob: AgentLearningJob? = nil,
-        learningJobBriefURL: URL? = nil
+        learningJobBriefURL: URL? = nil,
+        allowSystemEffects: Bool = false
     ) {
         guard !inspectorState.developerAgentBusy else {
             if let learningJob {
@@ -6325,7 +6326,9 @@ final class AgentEngine: ObservableObject {
             let status =
                 await developerBridge.run(
                     learningJobBriefURL:
-                        learningJobBriefURL
+                        learningJobBriefURL,
+                    allowSystemEffects:
+                        allowSystemEffects
                 )
 
             monitor.cancel()
@@ -6334,6 +6337,42 @@ final class AgentEngine: ObservableObject {
                 status
             inspectorState.developerAgentBusy =
                 false
+
+            if status.state ==
+                "system_action_approval_required",
+               !allowSystemEffects {
+                pauseActiveLearningJobForDeveloperApproval(
+                    status
+                )
+
+                pendingDeveloperLearningJob =
+                    learningJob
+                pendingDeveloperLearningJobBriefURL =
+                    learningJobBriefURL
+
+                if developerToolSafetyPolicy
+                    .requiresApproval(
+                        .developerSystemEffects
+                    ) {
+                    pendingDeveloperToolApproval =
+                        PendingDeveloperToolApproval(
+                            action:
+                                .developerSystemEffects,
+                            title:
+                                "Developer Agent sistem işlemi",
+                            reason:
+                                status.message,
+                            targetSummary:
+                                "macOS sistem kurulumu / yerel servis / kimlik doğrulama"
+                        )
+                }
+
+                log(
+                    "Developer Tool approval gate: " +
+                    status.message
+                )
+                return
+            }
 
             finishActiveLearningJob(
                 with: status
