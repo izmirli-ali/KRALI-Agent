@@ -8021,6 +8021,15 @@ if (developerTaskGraph) {
         activeDeveloperSubtask()?.id || "none"
       )
   );
+} else if (
+  teacherPlanFile &&
+  fs.existsSync(teacherPlanFile)
+) {
+  stage(
+    "local_agent_task_graph_skipped",
+    gapLabel +
+      " Teacher plan DAG/scope güvenlik doğrulamasını geçmedi; mevcut tek-task akışı korunuyor"
+  );
 }
 
 stage(
