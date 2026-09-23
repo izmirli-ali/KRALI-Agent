@@ -1114,40 +1114,6 @@ actor AgentLocalIntelligence {
                 return nil
             }
 
-            let catalogCandidates =
-                Array(
-                    candidates.prefix(280)
-                )
-
-            let catalog =
-                catalogCandidates
-                    .map { candidate in
-                        let aliases =
-                            candidate.aliases
-                                .prefix(5)
-                                .joined(
-                                    separator: " | "
-                                )
-
-                        return (
-                            "[\(candidate.index)] " +
-                            candidate.name +
-                            " ; aliases=" +
-                            (
-                                aliases.isEmpty
-                                    ? "∅"
-                                    : aliases
-                            ) +
-                            " ; bundle=" +
-                            (
-                                candidate
-                                    .bundleIdentifier ??
-                                "∅"
-                            )
-                        )
-                    }
-                    .joined(separator: "\n")
-
             struct Selection:
                 Codable,
                 Sendable {
@@ -1165,144 +1131,376 @@ actor AgentLocalIntelligence {
                 let reason: String
             }
 
-            let selectionInstructions = """
-            Sen KRALİ'nin uygulama adı semantic resolver katmanısın.
-            Kullanıcının yazdığı uygulama adını yalnız verilen kurulu uygulama candidate listesi içinde çöz.
-            Candidate listesinde olmayan bir uygulama uydurma.
-            Seçim yalnız şu durumlarda kabul edilebilir:
-            - aynı uygulamanın farklı dildeki adı,
-            - işletim sistemi lokalizasyonundaki karşılığı,
-            - yerleşik ve açık bir alternatif adı.
-            Yalnız konu benzerliği, aynı kategori, aynı üretici veya benzer işlev yeterli değildir.
-            Emin değilsen equivalent=false ve selectedIndex=null döndür.
-            Uygulama adına özel ezber/sözlük üretme; verilen query ile candidate isimlerinin semantic eşdeğerliğini değerlendir.
-            JSON dışında hiçbir metin üretme.
-            """
+            func candidateLine(
+                _ candidate:
+                    AgentSemanticApplicationCandidate
+            ) -> String {
+                let aliases =
+                    candidate.aliases
+                        .prefix(4)
+                        .joined(separator: " | ")
 
-            let selectionPrompt = """
-            Kullanıcının uygulama adı:
-            \(trimmedQuery)
-
-            Kurulu uygulama candidate listesi:
-            \(catalog)
-
-            Yalnız şu JSON şemasını döndür:
-            {
-              "equivalent": true,
-              "selectedIndex": 0,
-              "confidence": 0.0,
-              "reason": "kısa gerekçe"
+                return (
+                    "[\(candidate.index)] " +
+                    candidate.name +
+                    " ; aliases=" +
+                    (
+                        aliases.isEmpty
+                            ? "∅"
+                            : aliases
+                    ) +
+                    " ; bundle=" +
+                    (
+                        candidate.bundleIdentifier ??
+                        "∅"
+                    )
+                )
             }
 
-            Kurallar:
-            - selectedIndex yalnız listede görünen köşeli parantez indekslerinden biri olabilir.
-            - Güven 0 ile 1 arasında olmalı.
-            - Kesin semantic/localized eşdeğerlik yoksa equivalent=false kullan.
-            """
-
-            do {
-                let selectionSession =
-                    LanguageModelSession(
-                        model: model,
-                        instructions:
-                            selectionInstructions
-                    )
-
-                let selectionResponse =
-                    try await selectionSession
-                        .respond(
-                            to: selectionPrompt
-                        )
-
-                let selectionRaw =
-                    selectionResponse.content
-                        .trimmingCharacters(
-                            in:
-                                .whitespacesAndNewlines
-                        )
-
+            func decodedSelection(
+                from raw: String,
+                allowedIndices: Set<Int>
+            ) -> Selection? {
                 guard
-                    let selectionJSON =
+                    let json =
                         extractJSONObject(
-                            from: selectionRaw
+                            from: raw
                         ),
-                    let selectionData =
-                        selectionJSON.data(
+                    let data =
+                        json.data(
                             using: .utf8
                         ),
                     let selection =
                         try? JSONDecoder()
                             .decode(
                                 Selection.self,
-                                from:
-                                    selectionData
+                                from: data
                             )
                 else {
                     return nil
                 }
 
                 guard
-                    selection.equivalent,
-                    selection.confidence >= 0.86,
-                    let selectedIndex =
-                        selection.selectedIndex,
-                    let selected =
-                        catalogCandidates.first(
-                            where: {
-                                $0.index ==
-                                    selectedIndex
-                            }
-                        )
+                    selection.confidence >= 0,
+                    selection.confidence <= 1
                 else {
-                    return AgentSemanticApplicationResolution(
-                        selectedIndex:
-                            selection
-                                .selectedIndex,
-                        selectionConfidence:
-                            selection
-                                .confidence,
-                        verificationConfidence:
-                            0,
-                        equivalent: false,
-                        reason:
-                            selection.reason
-                    )
+                    return nil
                 }
 
-                let verificationInstructions = """
-                Sen KRALİ'nin bağımsız semantic application verifier katmanısın.
-                Önceki seçimi doğru kabul etme.
-                Kullanıcı uygulama adı ile candidate'ın gerçekten aynı uygulama kavramını ifade edip etmediğini doğrula.
-                Farklı dillerde/lokalizasyonlarda aynı uygulama adı kabul edilebilir.
-                Sadece benzer işlev, aynı kategori, aynı üretici veya çağrışım eşdeğerlik değildir.
-                Şüphede equivalent=false döndür.
-                JSON dışında hiçbir metin üretme.
+                let normalizedReason =
+                    selection.reason
+                        .trimmingCharacters(
+                            in:
+                                .whitespacesAndNewlines
+                        )
+                        .lowercased()
+
+                let placeholders = Set([
+                    "kısa gerekçe",
+                    "gerekçe",
+                    "reason",
+                    "short reason",
+                    "brief reason",
+                    "placeholder"
+                ])
+
+                guard
+                    !normalizedReason.isEmpty,
+                    !placeholders.contains(
+                        normalizedReason
+                    )
+                else {
+                    return nil
+                }
+
+                if selection.equivalent {
+                    guard
+                        let index =
+                            selection.selectedIndex,
+                        allowedIndices
+                            .contains(index)
+                    else {
+                        return nil
+                    }
+                } else if
+                    selection.selectedIndex != nil
+                {
+                    return nil
+                }
+
+                return selection
+            }
+
+            func runSelection(
+                _ batch:
+                    [AgentSemanticApplicationCandidate],
+                role: String
+            ) async -> Selection? {
+                guard !batch.isEmpty else {
+                    return nil
+                }
+
+                let allowedIndices =
+                    Set(batch.map(\.index))
+                let catalog =
+                    batch
+                        .map(candidateLine)
+                        .joined(separator: "\n")
+
+                let instructions = """
+                Sen KRALİ'nin semantic application resolver katmanısın.
+                Kullanıcının verdiği uygulama adı ile yalnız verilen kurulu uygulama candidate'larını karşılaştır.
+                Amaç aynı uygulamanın farklı dildeki/lokalize adı veya yerleşik alternatif adını bulmaktır.
+                Benzer kategori, benzer işlev, aynı üretici veya çağrışım eşdeğerlik değildir.
+                Candidate listesinde olmayan indeks veya isim üretme.
+                Bir eşdeğerlik kanıtı yoksa equivalent=false ve selectedIndex=null döndür.
+                Çıktı yalnız JSON object olmalı.
+                Alanlar tam olarak şunlar olmalı:
+                equivalent: boolean
+                selectedIndex: listedeki gerçek integer indeks veya null
+                confidence: 0 ile 1 arasında hesaplanmış sayı
+                reason: girdiye özgü, boş olmayan kısa gerekçe
+                Placeholder, örnek değer, şema metni veya açıklama kopyalama.
                 """
 
-                let verificationPrompt = """
+                let prompt = """
+                Resolver aşaması:
+                \(role)
+
                 Kullanıcının uygulama adı:
                 \(trimmedQuery)
 
-                Doğrulanacak candidate:
-                İsim: \(selected.name)
-                Aliaslar: \(
-                    selected.aliases
-                        .prefix(8)
-                        .joined(separator: " | ")
-                )
-                Bundle ID: \(
-                    selected.bundleIdentifier ??
-                    "∅"
-                )
+                Kurulu uygulama candidate'ları:
+                \(catalog)
 
-                Yalnız şu JSON şemasını döndür:
-                {
-                  "equivalent": true,
-                  "confidence": 0.0,
-                  "reason": "kısa gerekçe"
-                }
+                Bu girdiye göre JSON alanlarının gerçek değerlerini üret.
+                Eşdeğer candidate varsa selectedIndex'i listedeki gerçek indekslerden seç.
+                Eşdeğer candidate yoksa equivalent=false, selectedIndex=null kullan.
                 """
 
+                do {
+                    let session =
+                        LanguageModelSession(
+                            model: model,
+                            instructions:
+                                instructions
+                        )
+
+                    let response =
+                        try await session
+                            .respond(to: prompt)
+
+                    let raw =
+                        response.content
+                            .trimmingCharacters(
+                                in:
+                                    .whitespacesAndNewlines
+                            )
+
+                    return decodedSelection(
+                        from: raw,
+                        allowedIndices:
+                            allowedIndices
+                    )
+                } catch {
+                    return nil
+                }
+            }
+
+            let batchSize = 32
+            var finalists:
+                [
+                    (
+                        candidate:
+                            AgentSemanticApplicationCandidate,
+                        confidence: Double,
+                        reason: String
+                    )
+                ] = []
+
+            var offset = 0
+
+            while offset < candidates.count {
+                let upper =
+                    min(
+                        offset + batchSize,
+                        candidates.count
+                    )
+                let batch =
+                    Array(
+                        candidates[offset..<upper]
+                    )
+
+                if let selection =
+                    await runSelection(
+                        batch,
+                        role:
+                            "batch_\(offset / batchSize + 1)"
+                    ),
+                   selection.equivalent,
+                   selection.confidence >= 0.68,
+                   let selectedIndex =
+                    selection.selectedIndex,
+                   let selected =
+                    batch.first(
+                        where: {
+                            $0.index ==
+                                selectedIndex
+                        }
+                    ) {
+                    finalists.append(
+                        (
+                            candidate: selected,
+                            confidence:
+                                selection.confidence,
+                            reason:
+                                selection.reason
+                        )
+                    )
+                }
+
+                offset = upper
+            }
+
+            let deduplicatedFinalists =
+                Dictionary(
+                    grouping: finalists,
+                    by: {
+                        $0.candidate.index
+                    }
+                )
+                .compactMap {
+                    $0.value.max(
+                        by: {
+                            $0.confidence <
+                                $1.confidence
+                        }
+                    )
+                }
+                .sorted {
+                    $0.confidence >
+                        $1.confidence
+                }
+
+            guard
+                !deduplicatedFinalists
+                    .isEmpty
+            else {
+                return AgentSemanticApplicationResolution(
+                    selectedIndex: nil,
+                    selectionConfidence: 0,
+                    verificationConfidence: 0,
+                    equivalent: false,
+                    reason:
+                        "semantic_scan_no_equivalent_candidate"
+                )
+            }
+
+            let finalCandidates =
+                deduplicatedFinalists
+                    .prefix(12)
+                    .map(\.candidate)
+
+            let finalSelection: Selection
+
+            if finalCandidates.count == 1,
+               let only =
+                deduplicatedFinalists.first {
+                finalSelection =
+                    Selection(
+                        equivalent: true,
+                        selectedIndex:
+                            only.candidate.index,
+                        confidence:
+                            only.confidence,
+                        reason:
+                            only.reason
+                    )
+            } else {
+                guard
+                    let resolved =
+                        await runSelection(
+                            Array(finalCandidates),
+                            role:
+                                "finalist_comparison"
+                        ),
+                    resolved.equivalent,
+                    resolved.confidence >= 0.82
+                else {
+                    return AgentSemanticApplicationResolution(
+                        selectedIndex: nil,
+                        selectionConfidence: 0,
+                        verificationConfidence: 0,
+                        equivalent: false,
+                        reason:
+                            "semantic_finalist_comparison_inconclusive"
+                    )
+                }
+
+                finalSelection = resolved
+            }
+
+            guard
+                let selectedIndex =
+                    finalSelection.selectedIndex,
+                let selected =
+                    candidates.first(
+                        where: {
+                            $0.index ==
+                                selectedIndex
+                        }
+                    ),
+                finalSelection.confidence >=
+                    0.82
+            else {
+                return AgentSemanticApplicationResolution(
+                    selectedIndex:
+                        finalSelection
+                            .selectedIndex,
+                    selectionConfidence:
+                        finalSelection.confidence,
+                    verificationConfidence: 0,
+                    equivalent: false,
+                    reason:
+                        "semantic_selection_below_threshold"
+                )
+            }
+
+            let verificationInstructions = """
+            Sen KRALİ'nin bağımsız semantic application verifier katmanısın.
+            Önceki seçimi doğru kabul etme.
+            Kullanıcının uygulama adı ile candidate'ın gerçekten aynı uygulama kavramını ifade edip etmediğini doğrula.
+            Farklı dillerde/lokalizasyonlarda aynı uygulama adı kabul edilebilir.
+            Sadece benzer işlev, aynı kategori, aynı üretici veya çağrışım eşdeğerlik değildir.
+            Şüphede equivalent=false döndür.
+            Çıktı yalnız JSON object olmalı.
+            Alanlar tam olarak şunlar olmalı:
+            equivalent: boolean
+            confidence: 0 ile 1 arasında hesaplanmış sayı
+            reason: girdiye özgü, boş olmayan kısa gerekçe
+            Placeholder, örnek değer veya şema metni kopyalama.
+            """
+
+            let verificationPrompt = """
+            Kullanıcının uygulama adı:
+            \(trimmedQuery)
+
+            Doğrulanacak candidate:
+            İsim: \(selected.name)
+            Aliaslar: \(
+                selected.aliases
+                    .prefix(8)
+                    .joined(separator: " | ")
+            )
+            Bundle ID: \(
+                selected.bundleIdentifier ??
+                "∅"
+            )
+
+            Bu iki adın gerçekten aynı uygulamayı ifade edip etmediğini bağımsız değerlendir ve JSON alanlarının gerçek değerlerini üret.
+            """
+
+            do {
                 let verificationSession =
                     LanguageModelSession(
                         model: model,
@@ -1313,7 +1511,8 @@ actor AgentLocalIntelligence {
                 let verificationResponse =
                     try await verificationSession
                         .respond(
-                            to: verificationPrompt
+                            to:
+                                verificationPrompt
                         )
 
                 let verificationRaw =
@@ -1342,11 +1541,48 @@ actor AgentLocalIntelligence {
                                     verificationData
                             )
                 else {
-                    return nil
+                    return AgentSemanticApplicationResolution(
+                        selectedIndex:
+                            selected.index,
+                        selectionConfidence:
+                            finalSelection
+                                .confidence,
+                        verificationConfidence: 0,
+                        equivalent: false,
+                        reason:
+                            "semantic_verifier_invalid_output"
+                    )
                 }
 
+                let verificationReason =
+                    verification.reason
+                        .trimmingCharacters(
+                            in:
+                                .whitespacesAndNewlines
+                        )
+                let normalizedVerificationReason =
+                    verificationReason
+                        .lowercased()
+
+                let verifierPlaceholder =
+                    verificationReason.isEmpty ||
+                    [
+                        "kısa gerekçe",
+                        "gerekçe",
+                        "reason",
+                        "short reason",
+                        "brief reason",
+                        "placeholder"
+                    ]
+                    .contains(
+                        normalizedVerificationReason
+                    )
+
                 let accepted =
+                    !verifierPlaceholder &&
                     verification.equivalent &&
+                    finalSelection.confidence >=
+                        0.82 &&
                     verification.confidence >=
                         0.86
 
@@ -1354,20 +1590,36 @@ actor AgentLocalIntelligence {
                     selectedIndex:
                         selected.index,
                     selectionConfidence:
-                        selection.confidence,
+                        finalSelection.confidence,
                     verificationConfidence:
                         verification.confidence,
                     equivalent:
                         accepted,
                     reason:
-                        (
-                            selection.reason +
-                            " | verifier: " +
-                            verification.reason
-                        )
+                        accepted
+                            ? (
+                                finalSelection.reason +
+                                " | verifier: " +
+                                verificationReason
+                            )
+                            : (
+                                verifierPlaceholder
+                                    ? "semantic_verifier_template_echo"
+                                    : "semantic_verifier_rejected: " +
+                                        verificationReason
+                            )
                 )
             } catch {
-                return nil
+                return AgentSemanticApplicationResolution(
+                    selectedIndex:
+                        selected.index,
+                    selectionConfidence:
+                        finalSelection.confidence,
+                    verificationConfidence: 0,
+                    equivalent: false,
+                    reason:
+                        "semantic_verifier_call_failed"
+                )
             }
         }
         #endif
