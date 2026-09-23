@@ -83,6 +83,22 @@ struct ApplicationResolutionQueryTrace:
         [ApplicationResolutionCandidateTrace]
 }
 
+struct ApplicationSemanticResolutionTrace:
+    Codable,
+    Hashable,
+    Sendable {
+    let attempted: Bool
+    let providerAvailable: Bool
+    let query: String
+    let selectedIndex: Int?
+    let selectedName: String?
+    let selectedBundleIdentifier: String?
+    let selectionConfidence: Double?
+    let verificationConfidence: Double?
+    let accepted: Bool
+    let reason: String
+}
+
 struct ApplicationResolutionTrace:
     Codable,
     Hashable,
@@ -97,6 +113,8 @@ struct ApplicationResolutionTrace:
     let expandedCandidateCount: Int
     let queryTraces:
         [ApplicationResolutionQueryTrace]
+    let semanticResolution:
+        ApplicationSemanticResolutionTrace?
 }
 
 enum DesktopControlError: LocalizedError {
@@ -126,6 +144,8 @@ actor AgentDesktopControl {
     private let screenPerception = AgentScreenPerception()
     private let languageResolver =
         AgentNaturalLanguageResolver()
+    private let localIntelligence =
+        AgentLocalIntelligence()
     private var cachedApplicationCandidates:
         [ApplicationCandidate]?
 
@@ -146,7 +166,7 @@ actor AgentDesktopControl {
         from userText: String
     ) async throws -> DesktopAppActionResult {
         guard let candidate =
-            resolveRequestedApplication(
+            await resolveRequestedApplication(
                 from: userText
             )
         else {
@@ -630,7 +650,7 @@ actor AgentDesktopControl {
 
     private func resolveRequestedApplication(
         from userText: String
-    ) -> ApplicationCandidate? {
+    ) async -> ApplicationCandidate? {
         let queries = applicationResolutionQueries(
             from: userText
         )
@@ -698,6 +718,15 @@ actor AgentDesktopControl {
             }
         }
 
+        let semantic =
+            await semanticApplicationCandidate(
+                query:
+                    queries.first ??
+                    userText,
+                candidates:
+                    expanded
+            )
+
         saveApplicationResolutionFailureTrace(
             requestedText: userText,
             queries: queries,
@@ -710,10 +739,120 @@ actor AgentDesktopControl {
             nestedCandidateCount:
                 nested.count,
             expandedCandidates:
-                expanded
+                expanded,
+            semanticResolution:
+                semantic.trace
         )
 
-        return nil
+        return semantic.candidate
+    }
+
+    private func semanticApplicationCandidate(
+        query: String,
+        candidates: [ApplicationCandidate]
+    ) async -> (
+        candidate: ApplicationCandidate?,
+        trace: ApplicationSemanticResolutionTrace
+    ) {
+        let availability =
+            await localIntelligence
+                .availability()
+
+        guard availability.isAvailable else {
+            return (
+                nil,
+                ApplicationSemanticResolutionTrace(
+                    attempted: false,
+                    providerAvailable: false,
+                    query: query,
+                    selectedIndex: nil,
+                    selectedName: nil,
+                    selectedBundleIdentifier: nil,
+                    selectionConfidence: nil,
+                    verificationConfidence: nil,
+                    accepted: false,
+                    reason: availability.title
+                )
+            )
+        }
+
+        let semanticCandidates =
+            candidates.enumerated()
+                .map { index, candidate in
+                    AgentSemanticApplicationCandidate(
+                        index: index,
+                        name: candidate.name,
+                        aliases:
+                            candidate.aliases
+                                .sorted(),
+                        bundleIdentifier:
+                            candidate.bundleIdentifier
+                    )
+                }
+
+        guard let resolution =
+            await localIntelligence
+                .resolveApplicationAlias(
+                    query: query,
+                    candidates:
+                        semanticCandidates
+                )
+        else {
+            return (
+                nil,
+                ApplicationSemanticResolutionTrace(
+                    attempted: true,
+                    providerAvailable: true,
+                    query: query,
+                    selectedIndex: nil,
+                    selectedName: nil,
+                    selectedBundleIdentifier: nil,
+                    selectionConfidence: nil,
+                    verificationConfidence: nil,
+                    accepted: false,
+                    reason:
+                        "Semantic resolver geçerli bir karar üretemedi."
+                )
+            )
+        }
+
+        let selected =
+            resolution.selectedIndex
+                .flatMap { index in
+                    candidates.indices
+                        .contains(index)
+                        ? candidates[index]
+                        : nil
+                }
+
+        let acceptedCandidate =
+            resolution.equivalent &&
+            resolution.confidence >= 0.86
+                ? selected
+                : nil
+
+        return (
+            acceptedCandidate,
+            ApplicationSemanticResolutionTrace(
+                attempted: true,
+                providerAvailable: true,
+                query: query,
+                selectedIndex:
+                    resolution.selectedIndex,
+                selectedName:
+                    selected?.name,
+                selectedBundleIdentifier:
+                    selected?.bundleIdentifier,
+                selectionConfidence:
+                    resolution.selectionConfidence,
+                verificationConfidence:
+                    resolution.verificationConfidence,
+                accepted:
+                    acceptedCandidate != nil,
+                reason:
+                    resolution.reason
+            )
+        )
     }
 
     private func applicationResolutionQueries(
@@ -991,7 +1130,9 @@ actor AgentDesktopControl {
         refreshedCandidateCount: Int,
         nestedCandidateCount: Int,
         expandedCandidates:
-            [ApplicationCandidate]
+            [ApplicationCandidate],
+        semanticResolution:
+            ApplicationSemanticResolutionTrace?
     ) {
         let queryTraces =
             queries.map { query in
@@ -1091,7 +1232,9 @@ actor AgentDesktopControl {
                 expandedCandidateCount:
                     expandedCandidates.count,
                 queryTraces:
-                    queryTraces
+                    queryTraces,
+                semanticResolution:
+                    semanticResolution
             )
 
         try? resolutionTraceStore.save(
