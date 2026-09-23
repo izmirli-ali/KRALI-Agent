@@ -114,6 +114,7 @@ struct DeveloperAgentStatus: Hashable {
             "skill_candidate_ready",
             "local_agent_candidate_handoff",
             "local_agent_completed",
+            "cursor_architect_running",
             "sdk_fallback_preparing",
             "sdk_fallback_running",
             "sdk_importing",
@@ -153,6 +154,7 @@ struct DeveloperAgentStatus: Hashable {
             "local_agent_tool_protocol_failed",
             "local_agent_iteration_limit",
             "local_agent_watchdog_timeout",
+            "cursor_architect_ready",
             "sdk_tool_protocol_failed",
             "no_change_unverified",
             "sdk_provider_failed",
@@ -277,6 +279,10 @@ struct DeveloperAgentStatus: Hashable {
             return "Native yerel agent adım sınırına ulaştı"
         case "local_agent_watchdog_timeout":
             return "Native yerel agent zaman aşımına uğradı"
+        case "cursor_architect_running":
+            return "Cursor ikinci görüşü alınıyor"
+        case "cursor_architect_ready":
+            return "Cursor Architect teşhisi hazır"
         case "sdk_tool_protocol_failed":
             return "Yerel model araç protokolü başarısız"
         case "no_change_unverified":
@@ -440,6 +446,7 @@ struct DeveloperAgentStatus: Hashable {
         case "sdk_session_ended",
              "sdk_session_completed",
              "local_agent_completed",
+             "cursor_architect_running",
              "verifying":
             return "1–3 dk"
 
