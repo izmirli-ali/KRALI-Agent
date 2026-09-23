@@ -14,52 +14,8 @@ function fail(message, code = 1) {
   process.exit(code);
 }
 
-if (process.argv.includes("--self-test")) {
-  const sample = {
-    type: "function",
-    function: {
-      name: "read_file",
-      description: "Read a file",
-      parameters: {
-        type: "object",
-        properties: { path: { type: "string" } },
-        required: ["path"],
-      },
-    },
-  };
-  const converted = toCloudflareTool(sample);
-  const ok =
-    converted.name === "read_file" &&
-    converted.parameters?.required?.[0] === "path" &&
-    chooseModel({ format: { type: "object" } }) === jsonModel &&
-    chooseModel({}) === mainModel;
-  process.stdout.write(ok ? "cloudflare_proxy_self_test_ok\n" : "cloudflare_proxy_self_test_failed\n");
-  process.exit(ok ? 0 : 2);
-}
-
-if (!accountID || !apiToken) {
-  fail("Cloudflare Workers AI account/token eksik.", 40);
-}
-if (!Number.isInteger(port) || port < 1024 || port > 65535) {
-  fail("Cloudflare proxy port geçersiz.", 41);
-}
-
 function chooseModel(body = {}) {
   return body.format ? jsonModel : mainModel;
-}
-
-function toCloudflareTool(tool = {}) {
-  const fn = tool?.function && typeof tool.function === "object"
-    ? tool.function
-    : tool;
-  return {
-    name: String(fn.name || ""),
-    description: String(fn.description || ""),
-    parameters:
-      fn.parameters && typeof fn.parameters === "object"
-        ? fn.parameters
-        : { type: "object", properties: {} },
-  };
 }
 
 function normalizeArguments(value) {
@@ -73,29 +29,149 @@ function normalizeArguments(value) {
   }
 }
 
-function toOllamaToolCall(item = {}) {
-  const fn = item?.function && typeof item.function === "object"
-    ? item.function
-    : item;
+function normalizeToolForOpenAI(tool = {}) {
+  if (
+    tool?.type === "function" &&
+    tool?.function &&
+    typeof tool.function === "object"
+  ) {
+    return {
+      type: "function",
+      function: {
+        name: String(tool.function.name || ""),
+        description: String(tool.function.description || ""),
+        parameters:
+          tool.function.parameters &&
+          typeof tool.function.parameters === "object"
+            ? tool.function.parameters
+            : { type: "object", properties: {} },
+      },
+    };
+  }
+
   return {
+    type: "function",
     function: {
-      name: String(fn.name || ""),
-      arguments: normalizeArguments(fn.arguments),
+      name: String(tool?.name || ""),
+      description: String(tool?.description || ""),
+      parameters:
+        tool?.parameters && typeof tool.parameters === "object"
+          ? tool.parameters
+          : { type: "object", properties: {} },
     },
   };
 }
 
-function ollamaResponse(body, model, result) {
-  const rawResponse = result?.response;
-  const content =
-    typeof rawResponse === "string"
-      ? rawResponse
-      : rawResponse == null
-        ? ""
-        : JSON.stringify(rawResponse);
+function normalizeMessagesForOpenAI(messages = []) {
+  const pending = [];
+  let generatedID = 0;
 
-  const toolCalls = Array.isArray(result?.tool_calls)
-    ? result.tool_calls.map(toOllamaToolCall)
+  return messages.map((message) => {
+    const role = String(message?.role || "user");
+
+    if (role === "assistant") {
+      const calls = Array.isArray(message?.tool_calls)
+        ? message.tool_calls.map((call) => {
+            const fn =
+              call?.function && typeof call.function === "object"
+                ? call.function
+                : call;
+            const id =
+              String(call?.id || "").trim() ||
+              "call_krali_" + (++generatedID);
+            const name = String(fn?.name || "");
+            pending.push({ id, name });
+            return {
+              id,
+              type: "function",
+              function: {
+                name,
+                arguments:
+                  typeof fn?.arguments === "string"
+                    ? fn.arguments
+                    : JSON.stringify(fn?.arguments || {}),
+              },
+            };
+          })
+        : [];
+
+      return {
+        role: "assistant",
+        content:
+          message?.content == null
+            ? (calls.length ? null : "")
+            : String(message.content),
+        ...(calls.length ? { tool_calls: calls } : {}),
+      };
+    }
+
+    if (role === "tool") {
+      const name = String(message?.name || message?.tool_name || "");
+      const explicitID = String(message?.tool_call_id || "").trim();
+      let toolCallID = explicitID;
+
+      if (!toolCallID) {
+        const index = pending.findIndex(
+          (item) => !name || item.name === name
+        );
+        if (index >= 0) {
+          toolCallID = pending[index].id;
+          pending.splice(index, 1);
+        }
+      }
+
+      if (!toolCallID) {
+        // A tool result without a matching assistant tool call is invalid
+        // in OpenAI Chat Completions. Preserve evidence as user context
+        // instead of emitting an invalid role=tool message.
+        return {
+          role: "user",
+          content:
+            "[KRALI tool result" +
+            (name ? " • " + name : "") +
+            "]\n" +
+            String(message?.content || ""),
+        };
+      }
+
+      return {
+        role: "tool",
+        tool_call_id: toolCallID,
+        content: String(message?.content || ""),
+      };
+    }
+
+    return {
+      role,
+      content: String(message?.content || ""),
+    };
+  });
+}
+
+function toOllamaToolCall(item = {}) {
+  const fn =
+    item?.function && typeof item.function === "object"
+      ? item.function
+      : item;
+
+  return {
+    id: String(item?.id || ""),
+    type: "function",
+    function: {
+      name: String(fn?.name || ""),
+      arguments: normalizeArguments(fn?.arguments),
+    },
+  };
+}
+
+function ollamaResponseFromChatCompletion(body, model, payload) {
+  const choice =
+    Array.isArray(payload?.choices) && payload.choices.length
+      ? payload.choices[0]
+      : null;
+  const message = choice?.message || {};
+  const toolCalls = Array.isArray(message?.tool_calls)
+    ? message.tool_calls.map(toOllamaToolCall)
     : [];
 
   return {
@@ -103,14 +179,98 @@ function ollamaResponse(body, model, result) {
     created_at: new Date().toISOString(),
     message: {
       role: "assistant",
-      content,
+      content:
+        typeof message?.content === "string"
+          ? message.content
+          : message?.content == null
+            ? ""
+            : JSON.stringify(message.content),
       ...(toolCalls.length ? { tool_calls: toolCalls } : {}),
     },
     done: true,
     provider: "cloudflare-workers-ai",
     remote_model: model,
-    usage: result?.usage || null,
+    usage: payload?.usage || null,
   };
+}
+
+function sanitizedProviderError(payload) {
+  const error = payload?.error;
+  if (typeof error === "string") return error.slice(0, 800);
+  if (error && typeof error === "object") {
+    return JSON.stringify({
+      type: error.type,
+      code: error.code,
+      message: error.message,
+    }).slice(0, 800);
+  }
+  if (Array.isArray(payload?.errors)) {
+    return JSON.stringify(
+      payload.errors.slice(0, 3).map((item) => ({
+        code: item?.code,
+        message: item?.message,
+      }))
+    ).slice(0, 800);
+  }
+  return "unknown_provider_error";
+}
+
+if (process.argv.includes("--self-test")) {
+  const sampleTool = {
+    type: "function",
+    function: {
+      name: "read_file",
+      description: "Read a file",
+      parameters: {
+        type: "object",
+        properties: { path: { type: "string" } },
+        required: ["path"],
+      },
+    },
+  };
+  const sampleMessages = normalizeMessagesForOpenAI([
+    {
+      role: "assistant",
+      content: "",
+      tool_calls: [
+        {
+          id: "call_test_1",
+          function: {
+            name: "read_file",
+            arguments: { path: "README.md" },
+          },
+        },
+      ],
+    },
+    {
+      role: "tool",
+      name: "read_file",
+      content: "{\"ok\":true}",
+    },
+  ]);
+  const tool = normalizeToolForOpenAI(sampleTool);
+  const ok =
+    tool.type === "function" &&
+    tool.function.name === "read_file" &&
+    tool.function.parameters?.required?.[0] === "path" &&
+    sampleMessages[0]?.tool_calls?.[0]?.id === "call_test_1" &&
+    sampleMessages[1]?.tool_call_id === "call_test_1" &&
+    chooseModel({ format: { type: "object" } }) === jsonModel &&
+    chooseModel({}) === mainModel;
+
+  process.stdout.write(
+    ok
+      ? "cloudflare_proxy_self_test_ok\n"
+      : "cloudflare_proxy_self_test_failed\n"
+  );
+  process.exit(ok ? 0 : 2);
+}
+
+if (!accountID || !apiToken) {
+  fail("Cloudflare Workers AI account/token eksik.", 40);
+}
+if (!Number.isInteger(port) || port < 1024 || port > 65535) {
+  fail("Cloudflare proxy port geçersiz.", 41);
 }
 
 async function cloudflareChat(body) {
@@ -123,12 +283,21 @@ async function cloudflareChat(body) {
   ) {
     return {
       status: 200,
-      payload: ollamaResponse(body, model, { response: "" }),
+      payload: {
+        model: String(body?.model || "cloudflare"),
+        message: { role: "assistant", content: "" },
+        done: true,
+        provider: "cloudflare-workers-ai",
+        remote_model: model,
+      },
     };
   }
 
   const requestBody = {
-    messages: Array.isArray(body?.messages) ? body.messages : [],
+    model,
+    messages: normalizeMessagesForOpenAI(
+      Array.isArray(body?.messages) ? body.messages : []
+    ),
     stream: false,
     temperature:
       Number.isFinite(Number(body?.options?.temperature))
@@ -137,12 +306,16 @@ async function cloudflareChat(body) {
   };
 
   if (Array.isArray(body?.tools) && body.tools.length) {
-    requestBody.tools = body.tools.map(toCloudflareTool);
+    requestBody.tools = body.tools.map(normalizeToolForOpenAI);
+    requestBody.tool_choice = "auto";
   }
 
   const predict = Number(body?.options?.num_predict);
   if (Number.isFinite(predict) && predict > 0) {
-    requestBody.max_tokens = Math.min(4096, Math.max(64, Math.trunc(predict)));
+    requestBody.max_completion_tokens = Math.min(
+      4096,
+      Math.max(64, Math.trunc(predict))
+    );
   }
 
   if (body?.format && typeof body.format === "object") {
@@ -159,8 +332,7 @@ async function cloudflareChat(body) {
     const response = await fetch(
       "https://api.cloudflare.com/client/v4/accounts/" +
         encodeURIComponent(accountID) +
-        "/ai/run/" +
-        model,
+        "/ai/v1/chat/completions",
       {
         method: "POST",
         headers: {
@@ -174,25 +346,48 @@ async function cloudflareChat(body) {
 
     const payload = await response.json().catch(() => ({}));
 
-    if (!response.ok || payload?.success === false) {
+    if (!response.ok) {
+      const safeError = sanitizedProviderError(payload);
+      process.stderr.write(
+        "cloudflare_provider_error|status=" +
+          response.status +
+          "|model=" +
+          model +
+          "|detail=" +
+          safeError +
+          "\n"
+      );
       return {
         status: response.status || 502,
         payload: {
           error: "Cloudflare Workers AI request failed",
           provider_status: response.status,
-          errors: Array.isArray(payload?.errors)
-            ? payload.errors.slice(0, 4)
-            : [],
+          detail: safeError,
         },
       };
     }
 
     return {
       status: 200,
-      payload: ollamaResponse(body, model, payload?.result || {}),
+      payload: ollamaResponseFromChatCompletion(
+        body,
+        model,
+        payload
+      ),
     };
   } catch (error) {
-    const timedOut = error instanceof Error && error.name === "AbortError";
+    const timedOut =
+      error instanceof Error &&
+      error.name === "AbortError";
+
+    process.stderr.write(
+      "cloudflare_provider_transport|" +
+        (timedOut ? "timeout" : "failed") +
+        "|model=" +
+        model +
+        "\n"
+    );
+
     return {
       status: timedOut ? 504 : 502,
       payload: {
@@ -218,7 +413,9 @@ function sendJSON(res, status, value) {
 
 const server = http.createServer(async (req, res) => {
   if (req.method === "GET" && req.url === "/api/version") {
-    sendJSON(res, 200, { version: "cloudflare-workers-ai-proxy-v1" });
+    sendJSON(res, 200, {
+      version: "cloudflare-workers-ai-proxy-v2",
+    });
     return;
   }
 
@@ -258,6 +455,7 @@ const server = http.createServer(async (req, res) => {
       sendJSON(res, 400, { error: "invalid_json" });
       return;
     }
+
     const result = await cloudflareChat(body);
     sendJSON(res, result.status, result.payload);
   });
@@ -271,6 +469,6 @@ server.listen(port, "127.0.0.1", () => {
       mainModel +
       "|json=" +
       jsonModel +
-      "\n"
+      "|transport=openai-chat-completions\n"
   );
 });
