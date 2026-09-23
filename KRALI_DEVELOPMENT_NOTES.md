@@ -335,3 +335,17 @@ Target runtime:
 - `ApplicationSemanticResolutionTrace` artık her isim adayı için provenance, intermediate verification stage/confidence, exact match count ve exact bundle ID listesini `variantDiagnostics` altında kaydeder.
 - Training Lab'e `semantic-localization-provenance-priority` regression senaryosu eklendi.
 - VERSION 0.10.20 / build 193.
+
+
+## v0.10.21 progress
+
+- Runtime capability gap çözümlemesi artık approval state-aware.
+- `resolveRuntimeFailures` yeni `approvedStepIndexes` bağlamını alır.
+- Henüz kullanıcı onayı verilmemiş `requiresApproval` step runtime failure sayılmaz ve Learning/Developer hattına yanlış eskalasyon üretmez.
+- Kullanıcı tarafından onaylanmış fakat tamamlanmamış/postcondition doğrulanmamış step artık gerçek runtime failure olarak değerlendirilir ve root capability gap'e eskale edilebilir.
+- AgentEngine normal semantic execution ve approval sonrası resume akışlarında `approvedRuntimeStepIndexes` bilgisini GapResolver'a taşır.
+- Runtime gap reason, approval gereken bir step gerçekten onaylandıysa bunu provenance olarak `kullanıcı onayı verildi` şeklinde kaydeder.
+- `runtime-provider-failure-escalation` regression testi hem unapproved/no-gap hem approved/failure-gap durumunu birlikte sınar.
+- `task-graph-external-commit-approval` testi mevcut Strict Approval politikasına güncellendi: mail.read, mail.draft ve mail.send onay ister; iç reasoning istemez.
+- Desktop app localization/resolver zincirine dokunulmadı.
+- VERSION 0.10.21 / build 194.
