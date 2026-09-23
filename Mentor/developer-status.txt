@@ -1,1 +1,1 @@
-local_agent_watchdog_timeout|Ollama native agent model isteği art arda zaman aşımına uğradı.|krali-dev-agent/20260923-215517|/Users/medusa/Developer/KRALI-Agent-Dev-20260923-215517|@meta|app=0.10.28|at=1790190046|run=20260923-215517
+local_agent_failed|Ollama native agent HTTP 400|krali-dev-agent/20260923-221839|/Users/medusa/Developer/KRALI-Agent-Dev-20260923-221839|@meta|app=0.10.29|at=1790191123|run=20260923-221839

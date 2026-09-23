@@ -1,37 +1,27 @@
 
 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
  KRALİ DEVELOPER AGENT
- 20260923-215517
+ 20260923-221839
 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 ⚠️ Global Node.js v26 Cline bağımlılıklarıyla uyumlu değil; izole Node 22 runtime hazırlanıyor.
 ✅ Developer Agent runtime: v22.23.2
-Ollama servisi başlatılıyor...
-Yerel architect model seçimi: devstral-small-2:24b • RAM≈24GB
-Yerel tool-call probe: devstral-small-2:24b
-tool_call_ok|devstral-small-2:24b
-✅ Yerel Developer AI hazır + tool-call doğrulandı: devstral-small-2:24b
+cloudflare_proxy_ready|127.0.0.1:15165|main=@cf/zai-org/glm-4.7-flash|json=@cf/meta/llama-3.3-70b-instruct-fp8-fast
+☁️ Remote-first Developer AI hazır: Cloudflare Workers AI • main=@cf/zai-org/glm-4.7-flash • json=@cf/meta/llama-3.3-70b-instruct-fp8-fast
+☁️ Yerel Ollama hazırlığı atlandı; Developer inference remote-first çalışacak.
 From https://github.com/izmirli-ali/KRALI-Agent
  * branch            main       -> FETCH_HEAD
 Already up to date.
 Kontrollü KRALİ Developer görevi bulundu; task kartı kullanılacak.
-Preparing worktree (new branch 'krali-dev-agent/20260923-215517')
-branch 'krali-dev-agent/20260923-215517' set up to track 'origin/main'.
-HEAD is now at 89c48e0 v0.10.28: run controlled developer tasks from chat
+Preparing worktree (new branch 'krali-dev-agent/20260923-221839')
+branch 'krali-dev-agent/20260923-221839' set up to track 'origin/main'.
+HEAD is now at ec7dda8 v0.10.29: remote-first developer compute and Supabase hardening
 Developer prompt mode: gap • 4720 bytes
-⚡ Structured controller cache adayı yeniden ısıtılıyor: qwen2.5-coder:14b-instruct • yaş=2851s
-🧪 Structured controller JSON probe: qwen2.5-coder:14b-instruct
-controller_probe_ok|qwen2.5-coder:14b-instruct|10737ms
-✅ Structured controller cache doğrulandı ve sıcak: qwen2.5-coder:14b-instruct
-🧭 Structured controller modeli: qwen2.5-coder:14b-instruct • ölçülmüş JSON karar modu
-🧠 Model rolleri: root-cause=qwen2.5-coder:14b-instruct • mutation=devstral-small-2:24b • controller=qwen2.5-coder:14b-instruct
-KRALI_LOCAL_STAGE local_agent_starting • Training Result Analyzer (developer.task.training-result-analyzer) native Ollama agent başlatılıyor: devstral-small-2:24b
+☁️ Structured controller remote: @cf/meta/llama-3.3-70b-instruct-fp8-fast
+♻️ Developer checkpoint bulundu; aynı gap teşhisi kaldığı yerden devam edecek: developer.task.training-result-analyzer-186d4d7a5089
+☁️ Model rolleri: remote main=@cf/zai-org/glm-4.7-flash • structured=@cf/meta/llama-3.3-70b-instruct-fp8-fast
+KRALI_LOCAL_STAGE local_agent_checkpoint_stale • Training Result Analyzer (developer.task.training-result-analyzer) checkpoint source provenance eski • recordedHead=89c48e0895e125caf631ced14f15e9f1cdf13446 • liveHead=ec7dda890a7970e4c962814b8a00bc7ac8ae24b7 • source hedefleri yeniden doğrulanacak
+KRALI_LOCAL_STAGE local_agent_starting • Training Result Analyzer (developer.task.training-result-analyzer) native Ollama agent başlatılıyor: cloudflare-main
 KRALI_LOCAL_STAGE local_agent_running • Training Result Analyzer (developer.task.training-result-analyzer) yerel model çalışıyor • adım 1/10
-KRALI_LOCAL_STAGE local_agent_tool • Training Result Analyzer (developer.task.training-result-analyzer) araç çalışıyor: list_files
-KRALI_LOCAL_STAGE local_agent_running • Training Result Analyzer (developer.task.training-result-analyzer) yerel model çalışıyor • adım 2/10
-KRALI_LOCAL_STAGE local_agent_request_retry • Training Result Analyzer (developer.task.training-result-analyzer) model isteği zaman aşımına uğradı; mevcut context korunarak retry 1/2
-KRALI_LOCAL_STAGE local_agent_running • Training Result Analyzer (developer.task.training-result-analyzer) yerel model çalışıyor • adım 3/10
-KRALI_LOCAL_STAGE local_agent_request_retry • Training Result Analyzer (developer.task.training-result-analyzer) model isteği zaman aşımına uğradı; mevcut context korunarak retry 2/2
-KRALI_LOCAL_STAGE local_agent_running • Training Result Analyzer (developer.task.training-result-analyzer) yerel model çalışıyor • adım 4/10
-Ollama native agent model isteği art arda zaman aşımına uğradı.
-Deleted branch krali-dev-agent/20260923-215517 (was 89c48e0).
-❌ Native yerel Developer Agent durdu: Ollama native agent model isteği art arda zaman aşımına uğradı.
+Ollama native agent HTTP 400
+Deleted branch krali-dev-agent/20260923-221839 (was ec7dda8).
+❌ Native yerel Developer Agent durdu: Ollama native agent HTTP 400
