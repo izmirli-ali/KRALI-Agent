@@ -22,6 +22,18 @@ APPROVED_SYSTEM_EFFECT_USED=0
 CURSOR_ARCHITECT_ENABLED="${KRALI_CURSOR_ARCHITECT_ENABLED:-1}"
 CURSOR_AGENT_BIN="${KRALI_CURSOR_AGENT_BIN:-$HOME/.local/bin/agent}"
 CURSOR_ARCHITECT_RESULT="$LOCAL_MENTOR_DIR/cursor-architect-latest.json"
+OPENAI_TEACHER_ENABLED="${KRALI_OPENAI_TEACHER_ENABLED:-1}"
+OPENAI_TEACHER_MODEL="${KRALI_OPENAI_TEACHER_MODEL:-gpt-5.6-sol}"
+OPENAI_TEACHER_REASONING="${KRALI_OPENAI_TEACHER_REASONING:-medium}"
+OPENAI_TEACHER_KEYCHAIN_SERVICE="KRALI OpenAI Teacher"
+OPENAI_TEACHER_KEYCHAIN_ACCOUNT="api-key"
+OPENAI_TEACHER_DIR="$LOCAL_MENTOR_DIR/Teacher"
+OPENAI_TEACHER_PLAN_RESULT="$OPENAI_TEACHER_DIR/plan-$STAMP.json"
+OPENAI_TEACHER_FINAL_RESULT="$OPENAI_TEACHER_DIR/final-$STAMP.json"
+OPENAI_TEACHER_API_KEY=""
+OPENAI_TEACHER_PLAN_VERDICT=""
+OPENAI_TEACHER_FINAL_VERDICT=""
+OPENAI_TEACHER_FINAL_AVAILABLE=0
 
 if [ -n "$DEV_TASK_FILE" ] &&
    [ -f "$DEV_TASK_FILE" ] &&
@@ -50,7 +62,7 @@ fi
 
 export PATH="/opt/homebrew/bin:/usr/local/bin:$HOME/.npm-global/bin:$HOME/.local/bin:/usr/bin:/bin:/usr/sbin:/sbin:$PATH"
 
-mkdir -p "$LOG_DIR" "$RUN_LOG_DIR" "$STATUS_DIR" "$SKILL_CANDIDATE_DIR"
+mkdir -p "$LOG_DIR" "$RUN_LOG_DIR" "$STATUS_DIR" "$SKILL_CANDIDATE_DIR" "$OPENAI_TEACHER_DIR"
 printf "%s\n" "$LOG" > "$STATUS_DIR/active-run-log.txt"
 
 write_status() {
@@ -176,6 +188,71 @@ CLOUDFLARE_KEYCHAIN_SERVICE="KRALI Cloudflare Workers AI"
 CLOUDFLARE_KEYCHAIN_ACCOUNT="api-token"
 REMOTE_MAIN_ALIAS="cloudflare-main"
 REMOTE_JSON_ALIAS="cloudflare-json"
+
+load_openai_teacher_key() {
+    [ "$OPENAI_TEACHER_ENABLED" = "1" ] || return 1
+    [ -n "$DEV_TASK_FILE" ] && [ -f "$DEV_TASK_FILE" ] || return 1
+
+    local key
+    key="$(
+        /usr/bin/security find-generic-password             -s "$OPENAI_TEACHER_KEYCHAIN_SERVICE"             -a "$OPENAI_TEACHER_KEYCHAIN_ACCOUNT"             -w 2>/dev/null || true
+    )"
+
+    [ -n "$key" ] || return 1
+    OPENAI_TEACHER_API_KEY="$key"
+    return 0
+}
+
+teacher_result_verdict() {
+    local result_file="$1"
+    [ -f "$result_file" ] || return 1
+
+    "$NODE_BIN" - "$result_file" <<'NODE'
+const fs = require("fs");
+try {
+  const payload = JSON.parse(fs.readFileSync(process.argv[2], "utf8"));
+  process.stdout.write(String(payload?.review?.verdict || ""));
+} catch {}
+NODE
+}
+
+teacher_result_context() {
+    local result_file="$1"
+    [ -f "$result_file" ] || return 1
+
+    "$NODE_BIN" - "$result_file" <<'NODE'
+const fs = require("fs");
+try {
+  const payload = JSON.parse(fs.readFileSync(process.argv[2], "utf8"));
+  const review = payload?.review;
+  if (!review) process.exit(1);
+  process.stdout.write(JSON.stringify(review, null, 2).slice(0, 18000));
+} catch {
+  process.exit(1);
+}
+NODE
+}
+
+run_openai_teacher_review() {
+    local phase="$1"
+    local result_file="$2"
+    local build_passed="${3:-0}"
+    local task_verification_passed="${4:-0}"
+
+    if [ "$OPENAI_TEACHER_ENABLED" != "1" ] ||
+       [ -z "$DEV_TASK_FILE" ] ||
+       [ ! -f "$DEV_TASK_FILE" ]; then
+        return 10
+    fi
+
+    if [ -z "$OPENAI_TEACHER_API_KEY" ] &&
+       ! load_openai_teacher_key; then
+        echo "ℹ️ OpenAI Teacher atlandı • Keychain API anahtarı bulunamadı." | tee -a "$LOG"
+        return 10
+    fi
+
+    KRALI_TEACHER_PHASE="$phase"     KRALI_WORKTREE="$WORKTREE"     KRALI_DEV_TASK_FILE="$DEV_TASK_FILE"     KRALI_TEACHER_RESULT_FILE="$result_file"     KRALI_OPENAI_TEACHER_API_KEY="$OPENAI_TEACHER_API_KEY"     KRALI_OPENAI_TEACHER_MODEL="$OPENAI_TEACHER_MODEL"     KRALI_OPENAI_TEACHER_REASONING="$OPENAI_TEACHER_REASONING"     KRALI_APP_VERSION="$(/bin/cat "$ROOT/VERSION" 2>/dev/null | /usr/bin/tr -d '[:space:]')"     KRALI_RUN_ID="$STAMP"     KRALI_TEACHER_BUILD_PASSED="$build_passed"     KRALI_TEACHER_TASK_VERIFICATION_PASSED="$task_verification_passed"         "$NODE_BIN" "$ROOT/Scripts/openai-teacher-bridge.mjs" >>"$LOG" 2>&1
+}
 
 cleanup_remote_proxy() {
     if [ -n "$REMOTE_PROXY_PID" ]; then
@@ -1946,6 +2023,32 @@ NODE
     fi
 fi
 
+if [ -n "$DEV_TASK_FILE" ] && [ -f "$DEV_TASK_FILE" ]; then
+    write_status "teacher_plan_review|$GAP_LABEL için OpenAI Teacher plan review hazırlanıyor|$BRANCH|$WORKTREE"
+
+    if run_openai_teacher_review "plan" "$OPENAI_TEACHER_PLAN_RESULT" 0 0; then
+        OPENAI_TEACHER_PLAN_VERDICT="$(teacher_result_verdict "$OPENAI_TEACHER_PLAN_RESULT" || true)"
+        OPENAI_TEACHER_PLAN_CONTEXT="$(teacher_result_context "$OPENAI_TEACHER_PLAN_RESULT" || true)"
+
+        if [ -n "$OPENAI_TEACHER_PLAN_CONTEXT" ]; then
+            {
+                echo ""
+                echo "OpenAI Teacher plan review — ADVISORY ONLY:"
+                echo "$OPENAI_TEACHER_PLAN_CONTEXT"
+                echo "Teacher authority değildir. Scope/approval/verification kuralları değişmez."
+                echo "Subtask listesi varsa dependency sırasına uy; her alt görevi bağımsız doğrula. Bütçe yetmiyorsa kısmi çok-yüzeyli mutation yerine doğrulanmış tek coherent subtask bırak."
+            } >> "$PROMPT_FILE"
+        fi
+
+        echo "🎓 OpenAI Teacher plan review hazır • verdict=${OPENAI_TEACHER_PLAN_VERDICT:-unknown}" | tee -a "$LOG"
+    else
+        TEACHER_PLAN_EXIT=$?
+        if [ "$TEACHER_PLAN_EXIT" -ne 10 ]; then
+            echo "⚠️ OpenAI Teacher plan review tamamlanamadı • exit=$TEACHER_PLAN_EXIT; mevcut Developer akışı korunuyor." | tee -a "$LOG"
+        fi
+    fi
+fi
+
 if [ "$GAP_MODE" = "gap" ] && [ -n "$GAP_LABEL" ]; then
     write_status "learning|$GAP_LABEL için provider/strategy öğreniliyor|$BRANCH|$WORKTREE"
 else
@@ -2393,7 +2496,31 @@ if [ -n "$DEV_TASK_FILE" ] && [ -f "$DEV_TASK_FILE" ]; then
     echo "✅ Task verification contract geçti." | tee -a "$LOG"
 fi
 
-if [ "$PROVIDER" = "ollama" ] && [ -n "$MODEL" ]; then
+if [ -n "$DEV_TASK_FILE" ] && [ -f "$DEV_TASK_FILE" ]; then
+    write_status "teacher_final_review|$GAP_LABEL candidate için OpenAI Teacher final review hazırlanıyor|$BRANCH|$WORKTREE"
+
+    if run_openai_teacher_review "final" "$OPENAI_TEACHER_FINAL_RESULT" 1 1; then
+        OPENAI_TEACHER_FINAL_AVAILABLE=1
+        OPENAI_TEACHER_FINAL_VERDICT="$(teacher_result_verdict "$OPENAI_TEACHER_FINAL_RESULT" || true)"
+        echo "🎓 OpenAI Teacher final review hazır • verdict=${OPENAI_TEACHER_FINAL_VERDICT:-unknown}" | tee -a "$LOG"
+    else
+        TEACHER_FINAL_EXIT=$?
+        if [ "$TEACHER_FINAL_EXIT" -ne 10 ]; then
+            echo "⚠️ OpenAI Teacher final review tamamlanamadı • exit=$TEACHER_FINAL_EXIT; deterministic verification sonucu korunuyor." | tee -a "$LOG"
+        fi
+    fi
+fi
+
+TEACHER_ALLOWS_SKILL_DISTILLATION=1
+if [ "$OPENAI_TEACHER_FINAL_AVAILABLE" -eq 1 ] &&
+   [ "$OPENAI_TEACHER_FINAL_VERDICT" != "APPROVE" ]; then
+    TEACHER_ALLOWS_SKILL_DISTILLATION=0
+    echo "ℹ️ Teacher candidate için dikkat istedi; candidate review'e gidebilir fakat bu turdan otomatik skill distillation yapılmayacak." | tee -a "$LOG"
+fi
+
+if [ "$PROVIDER" = "ollama" ] &&
+   [ -n "$MODEL" ] &&
+   [ "$TEACHER_ALLOWS_SKILL_DISTILLATION" -eq 1 ]; then
     write_status "skill_extracting|Build/regression geçen adaydan genellenebilir experimental skill çıkarılıyor|$BRANCH|$WORKTREE"
     if KRALI_WORKTREE="$WORKTREE" \
        KRALI_GAP_SOURCE="$GAP_SOURCE" \
@@ -2424,6 +2551,10 @@ if ! git push -u origin "$BRANCH" >>"$LOG" 2>&1; then
 fi
 
 rm -f "$CHECKPOINT_FILE"
-write_status "ready_for_review|$GAP_LABEL öğrenme adayı hazır; build ve varsa task verification contract geçti|$BRANCH|$WORKTREE"
-echo "✅ Developer Agent adayı hazır: $BRANCH" | tee -a "$LOG"
+TEACHER_STATUS_SUFFIX=""
+if [ "$OPENAI_TEACHER_FINAL_AVAILABLE" -eq 1 ]; then
+    TEACHER_STATUS_SUFFIX=" • teacher=${OPENAI_TEACHER_FINAL_VERDICT:-unknown}"
+fi
+write_status "ready_for_review|$GAP_LABEL öğrenme adayı hazır; deterministic verification geçti$TEACHER_STATUS_SUFFIX|$BRANCH|$WORKTREE"
+echo "✅ Developer Agent adayı hazır: $BRANCH$TEACHER_STATUS_SUFFIX" | tee -a "$LOG"
 echo "ℹ️ Main branch değiştirilmedi." | tee -a "$LOG"
