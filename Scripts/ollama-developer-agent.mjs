@@ -2447,10 +2447,6 @@ function resumeCheckpointContext() {
     ? checkpoint.evidence.slice(-10)
     : [];
 
-  if (evidence.length === 0) return;
-
-  checkpointEvidence = evidence;
-
   if (
     Number(checkpoint.version || 0) >= 8
   ) {
@@ -2458,6 +2454,10 @@ function resumeCheckpointContext() {
       checkpoint.developerTaskGraph
     );
   }
+
+  if (evidence.length === 0) return;
+
+  checkpointEvidence = evidence;
 
   if (
     Number(checkpoint.version || 0) >= 5
@@ -4875,6 +4875,13 @@ function currentCandidateBlockers() {
 function handoffStructuredCandidateIfReady(
   trigger
 ) {
+  if (
+    developerTaskGraph &&
+    !developerTaskGraphComplete()
+  ) {
+    return false;
+  }
+
   const status = candidateStatus();
 
   if (
