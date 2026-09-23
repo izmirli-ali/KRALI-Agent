@@ -14,17 +14,17 @@
     "risk": "low",
     "allowedScope": [
       "Scripts/training-result-analyzer.mjs",
-      "DeveloperAgent/Tests/**",
-      "DeveloperAgent/Tasks/**",
+      "DeveloperAgent/Tests/training-result-analyzer/**",
       "DeveloperAgent/README.md"
     ],
     "forbiddenScope": [
-      "AgentApproval*",
-      "AgentEngine.swift",
-      "AgentTaskGraph*",
-      "runtime execution permissions",
       "VERSION",
-      "signing/updater"
+      "Mentor/**",
+      ".github/**",
+      "App/KRALIAgentNative/AgentApproval*.swift",
+      "App/KRALIAgentNative/AgentEngine.swift",
+      "App/KRALIAgentNative/AgentTaskGraph*.swift",
+      "App/KRALIAgentNative.xcodeproj/**"
     ],
     "requiresPhysicalAction": false,
     "requiresMainAccess": false
