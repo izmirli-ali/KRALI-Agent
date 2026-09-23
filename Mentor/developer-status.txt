@@ -1,1 +1,1 @@
-recovered_candidate_ready|Kurtarılan öğrenme adayı build ve task verification contract geçti; incelemeye hazır|krali-dev-agent/20260924-000235|/Users/medusa/Developer/KRALI-Agent-Dev-20260924-000235|@meta|app=0.10.35|at=1790197547|run=20260924-000235
+local_agent_iteration_limit|Learning Suggestions Foundation (developer.task.learning-suggestions-foundation) native local agent iteration sınırına ulaştı.|krali-dev-agent/20260924-001234|/Users/medusa/Developer/KRALI-Agent-Dev-20260924-001234|@meta|app=0.10.36|at=1790198021|run=20260924-001234
