@@ -1,0 +1,79 @@
+#!/usr/bin/env node
+import fs from "node:fs";
+import path from "node:path";
+import { fileURLToPath } from "node:url";
+
+const root = path.resolve(
+  path.dirname(fileURLToPath(import.meta.url)),
+  ".."
+);
+
+function read(relative) {
+  return fs.readFileSync(
+    path.join(root, relative),
+    "utf8"
+  );
+}
+
+function assertContains(text, needle, label) {
+  if (!text.includes(needle)) {
+    throw new Error(
+      "Missing orchestration invariant: " +
+        label +
+        " • " +
+        needle
+    );
+  }
+}
+
+const agent = read(
+  "Scripts/ollama-developer-agent.mjs"
+);
+const runner = read(
+  "Scripts/run-developer-agent.command"
+);
+
+assertContains(
+  agent,
+  "taskMutationScopeDecision",
+  "target selection uses task mutation scope"
+);
+assertContains(
+  agent,
+  "local_agent_create_target_ready",
+  "create-only developer tasks supported"
+);
+assertContains(
+  agent,
+  "implementationTargetPaths.length > 0",
+  "read verification cannot treat empty target list as valid"
+);
+assertContains(
+  agent,
+  "maxImplementationRejectionGrace",
+  "rejected implementation inspection has separate grace budget"
+);
+assertContains(
+  runner,
+  "PRE_CURSOR_DIRTY_RAW",
+  "Cursor dirty detection distinguishes raw status"
+);
+assertContains(
+  runner,
+  '.krali-developer-agent-prompt.txt',
+  "Cursor dirty detection knows prompt artifact"
+);
+assertContains(
+  runner,
+  '.build-check/',
+  "Cursor dirty detection knows build-check artifact"
+);
+assertContains(
+  runner,
+  "Cursor Architect atlandı • reasons=",
+  "Cursor skip reason is observable"
+);
+
+process.stdout.write(
+  "developer_orchestration_policy_ok\n"
+);
