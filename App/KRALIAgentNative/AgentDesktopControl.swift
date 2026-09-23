@@ -99,6 +99,9 @@ struct ApplicationSemanticResolutionTrace:
     let stage: String?
     let evaluatedBatchCount: Int?
     let finalistCount: Int?
+    let generatedVariants: [String]?
+    let deterministicMatchCount: Int?
+    let selectedVariant: String?
     let reason: String
 }
 
@@ -775,33 +778,20 @@ actor AgentDesktopControl {
                     verificationConfidence: nil,
                     accepted: false,
                     stage: "provider_unavailable",
-                    evaluatedBatchCount: 0,
-                    finalistCount: 0,
+                    evaluatedBatchCount: nil,
+                    finalistCount: nil,
+                    generatedVariants: nil,
+                    deterministicMatchCount: nil,
+                    selectedVariant: nil,
                     reason: availability.title
                 )
             )
         }
 
-        let semanticCandidates =
-            candidates.enumerated()
-                .map { index, candidate in
-                    AgentSemanticApplicationCandidate(
-                        index: index,
-                        name: candidate.name,
-                        aliases:
-                            candidate.aliases
-                                .sorted(),
-                        bundleIdentifier:
-                            candidate.bundleIdentifier
-                    )
-                }
-
-        guard let resolution =
+        guard let variantPlan =
             await localIntelligence
-                .resolveApplicationAlias(
-                    query: query,
-                    candidates:
-                        semanticCandidates
+                .applicationNameVariants(
+                    query: query
                 )
         else {
             return (
@@ -816,56 +806,278 @@ actor AgentDesktopControl {
                     selectionConfidence: nil,
                     verificationConfidence: nil,
                     accepted: false,
-                    stage: "resolver_no_result",
-                    evaluatedBatchCount: 0,
-                    finalistCount: 0,
+                    stage: "variant_resolver_no_result",
+                    evaluatedBatchCount: nil,
+                    finalistCount: nil,
+                    generatedVariants: nil,
+                    deterministicMatchCount: 0,
+                    selectedVariant: nil,
                     reason:
-                        "Semantic resolver geçerli bir karar üretemedi."
+                        "Semantic variant resolver geçerli bir karar üretemedi."
                 )
             )
         }
 
-        let selected =
-            resolution.selectedIndex
-                .flatMap { index in
-                    candidates.indices
-                        .contains(index)
-                        ? candidates[index]
-                        : nil
+        guard
+            variantPlan.confidence >= 0.60,
+            !variantPlan.variants.isEmpty
+        else {
+            return (
+                nil,
+                ApplicationSemanticResolutionTrace(
+                    attempted: true,
+                    providerAvailable: true,
+                    query: query,
+                    selectedIndex: nil,
+                    selectedName: nil,
+                    selectedBundleIdentifier: nil,
+                    selectionConfidence:
+                        variantPlan.confidence,
+                    verificationConfidence: 0,
+                    accepted: false,
+                    stage: variantPlan.stage,
+                    evaluatedBatchCount: nil,
+                    finalistCount: nil,
+                    generatedVariants:
+                        variantPlan.variants,
+                    deterministicMatchCount: 0,
+                    selectedVariant: nil,
+                    reason: variantPlan.reason
+                )
+            )
+        }
+
+        struct DeterministicSemanticMatch {
+            let variant: String
+            let variantOrder: Int
+            let candidate: ApplicationCandidate
+            let score: Double
+        }
+
+        var matches:
+            [DeterministicSemanticMatch] = []
+
+        for (
+            variantOrder,
+            variant
+        ) in variantPlan.variants.enumerated() {
+            if let launchCandidate =
+                launchServicesApplicationCandidate(
+                    named: variant
+                ) {
+                matches.append(
+                    DeterministicSemanticMatch(
+                        variant: variant,
+                        variantOrder:
+                            variantOrder,
+                        candidate:
+                            launchCandidate,
+                        score: 1.0
+                    )
+                )
+            }
+
+            let ranked =
+                rankedApplicationCandidates(
+                    from: variant,
+                    candidates: candidates
+                )
+
+            if
+                applicationCandidateDecision(
+                    from: variant,
+                    ranked: ranked
+                ) == "accepted",
+                let best =
+                    ranked.first
+            {
+                matches.append(
+                    DeterministicSemanticMatch(
+                        variant: variant,
+                        variantOrder:
+                            variantOrder,
+                        candidate:
+                            best.candidate,
+                        score: best.score
+                    )
+                )
+            }
+        }
+
+        var bestByPath:
+            [String: DeterministicSemanticMatch] =
+                [:]
+
+        for match in matches {
+            let key =
+                match.candidate.url
+                    .standardizedFileURL.path
+
+            guard let existing =
+                bestByPath[key]
+            else {
+                bestByPath[key] = match
+                continue
+            }
+
+            if
+                match.score > existing.score ||
+                (
+                    match.score ==
+                        existing.score &&
+                    match.variantOrder <
+                        existing.variantOrder
+                )
+            {
+                bestByPath[key] = match
+            }
+        }
+
+        let deterministicMatches =
+            bestByPath.values
+                .sorted { left, right in
+                    if left.score ==
+                        right.score {
+                        return left.variantOrder <
+                            right.variantOrder
+                    }
+
+                    return left.score >
+                        right.score
                 }
 
-        let acceptedCandidate =
-            resolution.equivalent &&
-            resolution.confidence >= 0.86
-                ? selected
-                : nil
+        guard let chosen =
+            deterministicMatches.first
+        else {
+            return (
+                nil,
+                ApplicationSemanticResolutionTrace(
+                    attempted: true,
+                    providerAvailable: true,
+                    query: query,
+                    selectedIndex: nil,
+                    selectedName: nil,
+                    selectedBundleIdentifier: nil,
+                    selectionConfidence:
+                        variantPlan.confidence,
+                    verificationConfidence: 0,
+                    accepted: false,
+                    stage:
+                        "variants_no_deterministic_match",
+                    evaluatedBatchCount: nil,
+                    finalistCount: nil,
+                    generatedVariants:
+                        variantPlan.variants,
+                    deterministicMatchCount: 0,
+                    selectedVariant: nil,
+                    reason:
+                        variantPlan.reason
+                )
+            )
+        }
+
+        let selectedIndex =
+            candidates.firstIndex {
+                $0.url.standardizedFileURL.path ==
+                    chosen.candidate.url
+                        .standardizedFileURL.path
+            }
+
+        let verificationCandidate =
+            AgentSemanticApplicationCandidate(
+                index:
+                    selectedIndex ?? -1,
+                name:
+                    chosen.candidate.name,
+                aliases:
+                    chosen.candidate.aliases,
+                bundleIdentifier:
+                    chosen.candidate
+                        .bundleIdentifier
+            )
+
+        guard let verification =
+            await localIntelligence
+                .verifyApplicationAliasEquivalence(
+                    query: query,
+                    candidate:
+                        verificationCandidate
+                )
+        else {
+            return (
+                nil,
+                ApplicationSemanticResolutionTrace(
+                    attempted: true,
+                    providerAvailable: true,
+                    query: query,
+                    selectedIndex:
+                        selectedIndex,
+                    selectedName:
+                        chosen.candidate.name,
+                    selectedBundleIdentifier:
+                        chosen.candidate
+                            .bundleIdentifier,
+                    selectionConfidence:
+                        variantPlan.confidence,
+                    verificationConfidence: nil,
+                    accepted: false,
+                    stage:
+                        "semantic_verifier_no_result",
+                    evaluatedBatchCount: nil,
+                    finalistCount: nil,
+                    generatedVariants:
+                        variantPlan.variants,
+                    deterministicMatchCount:
+                        deterministicMatches.count,
+                    selectedVariant:
+                        chosen.variant,
+                    reason:
+                        "Semantic verifier geçerli bir karar üretemedi."
+                )
+            )
+        }
+
+        let accepted =
+            verification.equivalent &&
+            verification.confidence >= 0.86
 
         return (
-            acceptedCandidate,
+            accepted
+                ? chosen.candidate
+                : nil,
             ApplicationSemanticResolutionTrace(
                 attempted: true,
                 providerAvailable: true,
                 query: query,
                 selectedIndex:
-                    resolution.selectedIndex,
+                    selectedIndex,
                 selectedName:
-                    selected?.name,
+                    chosen.candidate.name,
                 selectedBundleIdentifier:
-                    selected?.bundleIdentifier,
+                    chosen.candidate
+                        .bundleIdentifier,
                 selectionConfidence:
-                    resolution.selectionConfidence,
+                    variantPlan.confidence,
                 verificationConfidence:
-                    resolution.verificationConfidence,
+                    verification.confidence,
                 accepted:
-                    acceptedCandidate != nil,
+                    accepted,
                 stage:
-                    resolution.stage,
-                evaluatedBatchCount:
-                    resolution.evaluatedBatchCount,
-                finalistCount:
-                    resolution.finalistCount,
+                    accepted
+                        ? "accepted"
+                        : verification.stage,
+                evaluatedBatchCount: nil,
+                finalistCount: nil,
+                generatedVariants:
+                    variantPlan.variants,
+                deterministicMatchCount:
+                    deterministicMatches.count,
+                selectedVariant:
+                    chosen.variant,
                 reason:
-                    resolution.reason
+                    variantPlan.reason +
+                    " | verifier: " +
+                    verification.reason
             )
         )
     }
