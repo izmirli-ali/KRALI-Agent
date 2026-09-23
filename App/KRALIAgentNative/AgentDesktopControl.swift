@@ -467,8 +467,8 @@ actor AgentDesktopControl {
                         activationSucceeded,
                     workspaceFrontmostVerified:
                         workspaceVerified,
-                    accessibilityFrontmostVerified:
-                        accessibilityVerified,
+                    accessibilityRecoveryAttempted:
+                        accessibilityRecoveryAttempted,
                     screenKitFrontmostVerified:
                         screenKitVerified,
                     screenPerceptionFrontmostVerified:
@@ -500,8 +500,8 @@ actor AgentDesktopControl {
                         activationSucceeded,
                     workspaceFrontmostVerified:
                         workspaceVerified,
-                    accessibilityFrontmostVerified:
-                        accessibilityVerified,
+                    accessibilityRecoveryAttempted:
+                        accessibilityRecoveryAttempted,
                     screenKitFrontmostVerified:
                         screenKitVerified,
                     screenPerceptionFrontmostVerified:
