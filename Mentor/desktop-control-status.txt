@@ -1,1 +1,1 @@
-runtime|app=Notes|activate=true|frontmost=true|source=activation recovery + AX raise + ScreenCaptureKit z-order
+success|activate=true|ax=true|screen=true
