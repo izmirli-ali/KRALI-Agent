@@ -6656,7 +6656,7 @@ final class AgentEngine: ObservableObject {
                 "İptal edildi • fiziksel uygulama açma testi çalıştırılmadı."
 
         case .developerSystemEffects:
-            failActiveLearningJobAfterDeveloperApprovalRejection(
+            requeueActiveLearningJobAfterDeveloperApprovalRejection(
                 approval.reason
             )
             pendingDeveloperLearningJob = nil
@@ -6667,7 +6667,7 @@ final class AgentEngine: ObservableObject {
                     state:
                         "system_action_rejected",
                     message:
-                        "Kullanıcı sistem etkisi oluşturan Developer Agent adımını onaylamadı.",
+                        "Kullanıcı sistem etkisi oluşturan Developer Agent adımını onaylamadı. Öğrenme işi capability failure sayılmadan sırada tutuluyor.",
                     branch: nil,
                     worktree: nil,
                     appVersion:
@@ -6681,8 +6681,6 @@ final class AgentEngine: ObservableObject {
             developerBridge.writeStatus(
                 rejectedStatus
             )
-
-            startNextLearningJobIfNeeded()
         }
 
         postAssistantMessage(
@@ -6754,7 +6752,7 @@ final class AgentEngine: ObservableObject {
         )
     }
 
-    private func failActiveLearningJobAfterDeveloperApprovalRejection(
+    private func requeueActiveLearningJobAfterDeveloperApprovalRejection(
         _ reason: String
     ) {
         guard
@@ -6773,12 +6771,12 @@ final class AgentEngine: ObservableObject {
         }
 
         inspectorState.learningQueueJobs[index]
-            .state = .failed
+            .state = .queued
         inspectorState.learningQueueJobs[index]
             .updatedAt = Date()
         inspectorState.learningQueueJobs[index]
             .lastStatus =
-                "Kullanıcı sistem işlemini onaylamadı: " +
+                "Kullanıcı sistem işlemini onaylamadı; fiziksel adım uygulanmadı ve öğrenme işi capability failure sayılmadan sırada tutuluyor: " +
                 reason
 
         learningQueueStore.save(
