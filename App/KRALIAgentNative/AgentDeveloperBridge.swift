@@ -57,8 +57,10 @@ struct DeveloperAgentStatus: Hashable {
     var isReadyForReview: Bool {
         state == "ready_for_review" ||
         state == "build_failed" ||
+        state == "task_verification_failed" ||
         state == "recovered_candidate_ready" ||
-        state == "recovered_candidate_build_failed"
+        state == "recovered_candidate_build_failed" ||
+        state == "recovered_candidate_verification_failed"
     }
 
     var isLearningActive: Bool {
