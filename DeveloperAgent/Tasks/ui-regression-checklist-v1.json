@@ -1,0 +1,30 @@
+{
+  "developerTask": {
+    "capabilityID": "developer.task.ui-regression-checklist",
+    "capabilityName": "UI Regression Checklist",
+    "kind": "developerTask",
+    "learningPath": "primitivePatch",
+    "reason": "v0.10.32 arayüz sadeleştirmesinin sonraki sürümlerde bozulmaması için düşük riskli, kaynak-kod odaklı kontrol seti gerekiyor.",
+    "researchGoal": "Responsive pencere, tek Inspector, sohbet silme ve mesaj kopyalama davranışlarını source-level regression kontrolleriyle belgele/doğrula.",
+    "candidateCapabilityIDs": [],
+    "developerBrief": "App kaynaklarını salt okunur incele; App/** altında hiçbir dosyayı değiştirme.\nDeveloperAgent/Tests/ui-regression/ altında v0.10.32 için bir checklist ve mümkünse dependency-free Node static check oluştur.\nKontroller en az şunları kapsasın: window minWidth <= 700; inspectorDeveloperMode/Özet-Developer picker ana sidePane'de yok; dar genişlikte overlay Inspector ve compact sidebar eşikleri mevcut; archived conversation delete API mevcut; sidebar destructive delete confirmation mevcut; messageBubble copy action mevcut.\nStatic check sadece source text/AST-benzeri basit doğrulama yapsın, Mac UI otomasyonu yapmasın.\nGerçek dosya silme, uygulama açma, shell/system mutation veya network işlemi yapma.\nTest sonucu PASS/FAIL ve kontrol edilen dosyaları raporla."
+  },
+  "taskMetadata": {
+    "owner": "ChatGPT Lead / KRALİ team",
+    "risk": "low",
+    "allowedScope": [
+      "DeveloperAgent/Tests/ui-regression/**",
+      "DeveloperAgent/README.md"
+    ],
+    "forbiddenScope": [
+      "App/**",
+      "Scripts/**",
+      "Cloud/**",
+      "VERSION",
+      "Mentor/**",
+      ".github/**"
+    ],
+    "requiresPhysicalAction": false,
+    "requiresMainAccess": false
+  }
+}
