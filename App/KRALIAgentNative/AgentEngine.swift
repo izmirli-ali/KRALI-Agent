@@ -6383,7 +6383,9 @@ final class AgentEngine: ObservableObject {
                             reason:
                                 request.reason,
                             targetSummary:
-                                request.token,
+                                developerSystemEffectTargetSummary(
+                                    request.token
+                                ),
                             approvalToken:
                                 request.token
                         )
@@ -6543,6 +6545,44 @@ final class AgentEngine: ObservableObject {
         )
     }
 
+    private func developerSystemEffectTargetSummary(
+        _ token: String
+    ) -> String {
+        if token.hasPrefix(
+            "ollama-model-pull:"
+        ) {
+            let model =
+                String(
+                    token.dropFirst(
+                        "ollama-model-pull:".count
+                    )
+                )
+
+            return
+                "Ollama modeli • " +
+                model
+        }
+
+        switch token {
+        case "brew-install-node22":
+            return "Homebrew • Node.js 22 kurulumu"
+        case "brew-upgrade-ollama":
+            return "Homebrew • Ollama güncellemesi + servis yeniden başlatma"
+        case "brew-install-ollama":
+            return "Homebrew • Ollama kurulumu"
+        case "ollama-service-start":
+            return "Yerel servis • Ollama serve"
+        case "cline-repair-global":
+            return "Cline CLI • doctor fix / global npm onarımı"
+        case "cline-auth-terminal":
+            return "Terminal • Cline/OpenAI kimlik doğrulama akışı"
+        case "cline-sdk-local-install":
+            return "KRALİ Developer çalışma alanı • @cline/sdk kurulumu"
+        default:
+            return "Developer sistem adımı • " + token
+        }
+    }
+
     func approvePendingDeveloperToolApproval() {
         guard let approval =
             pendingDeveloperToolApproval
@@ -6641,6 +6681,8 @@ final class AgentEngine: ObservableObject {
             developerBridge.writeStatus(
                 rejectedStatus
             )
+
+            startNextLearningJobIfNeeded()
         }
 
         postAssistantMessage(
