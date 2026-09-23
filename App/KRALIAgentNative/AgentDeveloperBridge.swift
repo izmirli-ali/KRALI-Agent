@@ -812,6 +812,7 @@ struct AgentDeveloperBridge {
         var appVersion: String?
         var updatedAt: Date?
         var runID: String?
+        var approvalActionID: String?
 
         if let metaIndex {
             for item in rawParts.dropFirst(
@@ -837,6 +838,15 @@ struct AgentDeveloperBridge {
                         String(
                             item.dropFirst(4)
                         )
+                } else if item.hasPrefix("approval=") {
+                    let value =
+                        String(
+                            item.dropFirst(9)
+                        )
+                    approvalActionID =
+                        value.isEmpty
+                        ? nil
+                        : value
                 }
             }
         }
@@ -858,7 +868,9 @@ struct AgentDeveloperBridge {
                 : nil,
             appVersion: appVersion,
             updatedAt: updatedAt,
-            runID: runID
+            runID: runID,
+            approvalActionID:
+                approvalActionID
         )
     }
 
@@ -897,7 +909,9 @@ struct AgentDeveloperBridge {
                     )
                 ),
             "run=" +
-                (status.runID ?? "")
+                (status.runID ?? ""),
+            "approval=" +
+                (status.approvalActionID ?? "")
         ]
         .joined(separator: "|")
 
