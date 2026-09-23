@@ -1,1 +1,1 @@
-recovered_candidate_ready|Kurtarılan öğrenme adayı build geçti ve incelemeye hazır|krali-dev-agent/20260923-233751|/Users/medusa/Developer/KRALI-Agent-Dev-20260923-233751|@meta|app=0.10.34|at=1790196196|run=20260923-233751
+local_agent_tool_protocol_failed|Implementation aşamasında ana model zaman aşımına uğradı ve structured controller güvenli devam kararı üretemedi.|krali-dev-agent/20260923-235630|/Users/medusa/Developer/KRALI-Agent-Dev-20260923-235630|@meta|app=0.10.35|at=1790197204|run=20260923-235630
