@@ -349,3 +349,18 @@ Target runtime:
 - `task-graph-external-commit-approval` testi mevcut Strict Approval politikasına güncellendi: mail.read, mail.draft ve mail.send onay ister; iç reasoning istemez.
 - Desktop app localization/resolver zincirine dokunulmadı.
 - VERSION 0.10.21 / build 194.
+
+
+## v0.10.22 progress
+
+- Developer Tools için fiziksel/sistem etkisi approval boundary eklendi.
+- Code-only developer işlemleri (izole branch/worktree, kaynak kod candidate, build/regression) kullanıcı onayı olmadan çalışabilir.
+- Sistem mutation ve foreground interaction işlemleri mevcut chat approval kartına bağlandı.
+- Desktop Control Probe artık Notes'u açmadan önce kullanıcı onayı ister.
+- Developer Agent scripti Node/Ollama/Cline kurulumu-güncellemesi, model indirme, Ollama servis başlatma ve auth Terminal açma gibi sistem etkili adımlardan önce durur.
+- Developer Agent sistem onayları tek-adımlıdır: her action ID yalnız bir kez tüketilir; sonraki sistem etkili işlem yeni onay ister.
+- Kullanıcı sistem adımını reddederse Learning Queue işi capability failure sayılmaz; queued durumda korunur.
+- Training/Arena planner-regression simülasyonları ve read-only Screen Perception/Live Research akışları otomatik kalır.
+- Yeni regression: developer-tool-approval-boundary.
+- Desktop app localization/resolver ve v0.10.21 approved runtime failure recovery davranışlarına dokunulmadı.
+- VERSION 0.10.22 / build 195.
