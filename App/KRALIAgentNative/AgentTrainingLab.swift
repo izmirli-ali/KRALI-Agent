@@ -177,6 +177,9 @@ struct AgentTrainingLab {
             desktopForegroundEvidenceFusionResult()
         )
         results.append(
+            desktopAXRecoveryIsNotProofResult()
+        )
+        results.append(
             resolvedApprovalTargetRequiredResult()
         )
         results.append(
@@ -2124,7 +2127,7 @@ struct AgentTrainingLab {
             DesktopForegroundVerificationEvidence(
                 activationSucceeded: true,
                 workspaceFrontmostVerified: false,
-                accessibilityFrontmostVerified: false,
+                accessibilityRecoveryAttempted: false,
                 screenKitFrontmostVerified: false,
                 screenPerceptionFrontmostVerified: false
             )
@@ -2133,16 +2136,16 @@ struct AgentTrainingLab {
             DesktopForegroundVerificationEvidence(
                 activationSucceeded: false,
                 workspaceFrontmostVerified: true,
-                accessibilityFrontmostVerified: false,
+                accessibilityRecoveryAttempted: false,
                 screenKitFrontmostVerified: false,
                 screenPerceptionFrontmostVerified: false
             )
 
-        let accessibilityEvidence =
+        let accessibilityRecoveryOnly =
             DesktopForegroundVerificationEvidence(
                 activationSucceeded: false,
                 workspaceFrontmostVerified: false,
-                accessibilityFrontmostVerified: true,
+                accessibilityRecoveryAttempted: true,
                 screenKitFrontmostVerified: false,
                 screenPerceptionFrontmostVerified: false
             )
@@ -2151,7 +2154,7 @@ struct AgentTrainingLab {
             DesktopForegroundVerificationEvidence(
                 activationSucceeded: false,
                 workspaceFrontmostVerified: false,
-                accessibilityFrontmostVerified: false,
+                accessibilityRecoveryAttempted: false,
                 screenKitFrontmostVerified: true,
                 screenPerceptionFrontmostVerified: false
             )
@@ -2160,7 +2163,7 @@ struct AgentTrainingLab {
             DesktopForegroundVerificationEvidence(
                 activationSucceeded: false,
                 workspaceFrontmostVerified: false,
-                accessibilityFrontmostVerified: false,
+                accessibilityRecoveryAttempted: false,
                 screenKitFrontmostVerified: false,
                 screenPerceptionFrontmostVerified: true
             )
@@ -2168,13 +2171,13 @@ struct AgentTrainingLab {
         let passed =
             !activationOnly.frontmostVerified &&
             workspaceEvidence.frontmostVerified &&
-            accessibilityEvidence.frontmostVerified &&
+            !accessibilityRecoveryOnly.frontmostVerified &&
             screenKitEvidence.frontmostVerified &&
             screenPerceptionEvidence.frontmostVerified &&
             workspaceEvidence.sourceSummary
                 .contains("NSWorkspace") &&
-            accessibilityEvidence.sourceSummary
-                .contains("AX") &&
+            accessibilityRecoveryOnly.sourceSummary ==
+                "unverified" &&
             screenKitEvidence.sourceSummary
                 .contains("ScreenCaptureKit") &&
             screenPerceptionEvidence.sourceSummary
@@ -2187,7 +2190,7 @@ struct AgentTrainingLab {
                 "Desktop foreground doğrulamasında çoklu kanıt birleştirme",
             tier: .core,
             prompt:
-                "Aktivasyon isteğini gerçek foreground postcondition'ından ayır; NSWorkspace, AX, ScreenCaptureKit veya structured Screen Perception kanıtlarından biri hedefi doğrulayabilsin.",
+                "Aktivasyon ve AX recovery denemesini gerçek foreground postcondition'ından ayır; yalnız bağımsız NSWorkspace, ScreenCaptureKit veya structured Screen Perception kanıtı hedefi doğrulayabilsin.",
             passed: passed,
             goal:
                 "Tek bir verifier kaçırdığında gerçek foreground kanıtını kaybetmeden false failure üretme",
@@ -2205,6 +2208,52 @@ struct AgentTrainingLab {
                 ? []
                 : [
                     "Desktop foreground evidence fusion aktivasyon ile postcondition'ı ayırmadı veya bağımsız verifier kanıtlarından birini kabul etmedi."
+                ]
+        )
+    }
+
+
+    private func desktopAXRecoveryIsNotProofResult()
+        -> TrainingScenarioResult {
+        let evidence =
+            DesktopForegroundVerificationEvidence(
+                activationSucceeded: true,
+                workspaceFrontmostVerified: false,
+                accessibilityRecoveryAttempted: true,
+                screenKitFrontmostVerified: false,
+                screenPerceptionFrontmostVerified: false
+            )
+
+        let passed =
+            !evidence.frontmostVerified &&
+            evidence.sourceSummary ==
+                "unverified"
+
+        return TrainingScenarioResult(
+            scenarioID:
+                "desktop-ax-recovery-is-not-proof",
+            title:
+                "AX recovery tek başına foreground kanıtı sayılmamalı",
+            tier: .core,
+            prompt:
+                "activate=true ve AX recovery uygulanmış olsa bile bağımsız observation yoksa desktop.app başarı üretmesin.",
+            passed: passed,
+            goal:
+                "KRALİ'nin kendi yazdığı AX frontmost state'ini bağımsız doğrulama sanıp false-positive üretmesini engelle",
+            route: [
+                "Desktop",
+                "Recovery",
+                "Verify",
+                "False Positive Guard"
+            ],
+            selectedCapabilities: [
+                "desktop.app"
+            ],
+            unavailableCapabilities: [],
+            diagnostics: passed
+                ? []
+                : [
+                    "AX recovery tek başına foreground postcondition PASS üretti."
                 ]
         )
     }
