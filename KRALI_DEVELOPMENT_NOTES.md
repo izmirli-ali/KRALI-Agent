@@ -387,3 +387,15 @@ Target runtime:
 - `desktop-foreground-evidence-fusion` fiziksel eylem yapmayan Training regression senaryosu eklendi.
 - Resolver, Strict Approval, UI ve provider selection mantığı değiştirilmedi.
 - VERSION 0.10.24 / build 197.
+
+
+## v0.10.25 progress
+
+- AX (Accessibility) artık bağımsız foreground doğrulama kaynağı değildir; yalnız uygulamayı öne getirmeye yönelik recovery/actuator adımıdır.
+- `DesktopForegroundVerificationEvidence.frontmostVerified` yalnız bağımsız observation kaynaklarından PASS üretir: NSWorkspace, ScreenCaptureKit veya structured Screen Perception.
+- `activate=true` veya AX recovery tek başına başarı sayılmaz.
+- Runtime/Mentor status `axRecovery=` olarak raporlar; AX artık `source=` listesine girmez.
+- `desktop-foreground-evidence-fusion` regression'ı yeni güven modeline güncellendi.
+- Yeni `desktop-ax-recovery-is-not-proof` regression'ı: activation=true + AX recovery=true olsa bile bağımsız observation yoksa foreground=false olmalı.
+- Resolver, Strict Approval, UI ve provider selection değiştirilmedi.
+- VERSION 0.10.25 / build 198.
