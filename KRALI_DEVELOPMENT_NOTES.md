@@ -483,3 +483,17 @@ Target runtime:
 - KRALİ candidate run 20260923-222642 was reviewed and preserved. It produced a build-passing analyzer candidate, but review found freshness/version semantics, previous-run unknown semantics, missing automated coverage, and markdown percentage issues; it is not merged.
 - New controlled KRALİ task: Training Result Analyzer Revision. It must recreate the analyzer from fresh main with six automated cases and the review corrections; App/UI/Cloud/core files are forbidden.
 - VERSION 0.10.31 / build 204.
+
+
+## v0.10.32 progress
+
+- Right Inspector simplified to a single readable view; separate Özet / Developer segmented mode removed.
+- Main Inspector now shows only current status, system health, active debug/recovery when relevant, active developer/learning state when relevant, and collapsed developer tools.
+- Context-memory/source/file-result duplication is no longer rendered in the main right panel; underlying data remains available to the agent.
+- Archived conversations now have an ellipsis menu + context menu with destructive delete; deletion is confirmed before removing the archive JSON and path containment is verified in ConversationStore.
+- If the currently viewed archived conversation is deleted, UI safely returns to the active conversation.
+- Chat messages support Copy through context menu; assistant messages also have a visible copy icon using NSPasteboard.
+- Conversation rhythm/readability improved: narrower content column, larger 15pt message typography, 4pt line spacing, calmer assistant header, less decorative avatar weight, and slightly larger vertical message spacing.
+- KRALİ parallel task added: UI Regression Checklist. It may only write under DeveloperAgent/Tests/ui-regression and must not mutate App/Cloud/Scripts/core files.
+- Training Result Analyzer Revision run 20260923-223910 reached Cloudflare write_file but then burned the remaining inspection budget and hit iteration limit; no candidate survived. Cursor fallback observability remains a follow-up orchestration task.
+- VERSION 0.10.32 / build 205.

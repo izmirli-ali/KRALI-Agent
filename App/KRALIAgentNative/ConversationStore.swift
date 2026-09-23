@@ -145,6 +145,40 @@ struct ConversationStore {
         loadMessages(at: segment.url)
     }
 
+    @discardableResult
+    func deleteArchive(
+        _ segment: ConversationArchiveSegment
+    ) -> Bool {
+        ensureDirectories()
+
+        let archiveRoot =
+            archiveURL
+                .standardizedFileURL
+                .resolvingSymlinksInPath()
+        let candidate =
+            segment.url
+                .standardizedFileURL
+                .resolvingSymlinksInPath()
+
+        guard
+            candidate.deletingLastPathComponent() ==
+                archiveRoot,
+            candidate.pathExtension
+                .lowercased() == "json"
+        else {
+            return false
+        }
+
+        do {
+            try fileManager.removeItem(
+                at: candidate
+            )
+            return true
+        } catch {
+            return false
+        }
+    }
+
     private func archivedSegmentURLs() -> [URL] {
         ensureDirectories()
 
