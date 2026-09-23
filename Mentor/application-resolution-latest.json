@@ -1,5 +1,5 @@
 {
-  "createdAt" : "2026-09-23T11:16:46Z",
+  "createdAt" : "2026-09-23T11:45:24Z",
   "expandedCandidateCount" : 257,
   "installedCandidateCount" : 226,
   "nestedCandidateCount" : 56,
@@ -189,22 +189,17 @@
   "refreshedCandidateCount" : 226,
   "requestedText" : "Notlar uygulamasını aç ve gerçekten ön planda olduğunu doğrula. Başka hiçbir işlem yapma.",
   "semanticResolution" : {
-    "accepted" : true,
+    "accepted" : false,
     "attempted" : true,
-    "deterministicMatchCount" : 1,
+    "deterministicMatchCount" : 0,
     "generatedVariants" : [
-      "Notlar",
-      "Kral"
+      "Notlar"
     ],
     "providerAvailable" : true,
     "query" : "Notlar",
-    "reason" : "Girdi, aynı uygulama kavramını ifade eden tekrarlı bir isimdir. Çeşitli yazım ve vurgu varyantları üretilmiştir. | verifier: İki uygulama adı aynı temel işlev ve kategoriye sahip ve belirgin bir benzerlik gösteriyor. Deterministik resolver, canonical ad eşdeğerliği ve uygulama kavramı tutarlılığı nedeniyle doğru bir şekilde aynı uygulamayı tanımladı.",
-    "selectedBundleIdentifier" : "com.aliihsancanuysal.kraliagent",
-    "selectedIndex" : 4,
-    "selectedName" : "KRALİ",
-    "selectedVariant" : "Kral",
+    "reason" : "Girdi, aynı uygulamanın yaygın kanonik adını ve işletim sistemi lokalizasyonunu doğrudan ifade eder.",
     "selectionConfidence" : 0.95,
-    "stage" : "accepted",
-    "verificationConfidence" : 0.98
+    "stage" : "variants_no_deterministic_match",
+    "verificationConfidence" : 0
   }
 }
