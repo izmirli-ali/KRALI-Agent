@@ -24,6 +24,16 @@ struct AgentSemanticApplicationVariantPlan:
     let reason: String
 }
 
+struct AgentSemanticApplicationLocalizationPlan:
+    Codable,
+    Hashable,
+    Sendable {
+    let canonicalNames: [String]
+    let confidence: Double
+    let stage: String
+    let reason: String
+}
+
 struct AgentSemanticApplicationVerification:
     Codable,
     Hashable,
@@ -1088,6 +1098,165 @@ actor AgentLocalIntelligence {
         }
 
         return String(raw[start...end])
+    }
+
+    func localizedApplicationCanonicalNames(
+        query: String
+    ) async -> AgentSemanticApplicationLocalizationPlan? {
+        #if canImport(FoundationModels)
+        if #available(macOS 26.0, *) {
+            let model =
+                SystemLanguageModel.default
+
+            guard model.isAvailable else {
+                return nil
+            }
+
+            let trimmedQuery =
+                query.trimmingCharacters(
+                    in: .whitespacesAndNewlines
+                )
+
+            guard !trimmedQuery.isEmpty else {
+                return nil
+            }
+
+            struct LocalizationResponse:
+                Codable,
+                Sendable {
+                let canonicalNames: [String]
+                let confidence: Double
+                let reason: String
+            }
+
+            let instructions = """
+            Sen KRALİ'nin uygulama adı lokalizasyon çeviri katmanısın.
+            Görevin kurulu uygulama seçmek DEĞİL.
+            Sana yalnız bir uygulama display-name / UI adı verilecek.
+            Eğer bu ad doğal dilde lokalize edilmiş bir isimse, aynı adın İngilizce kanonik UI/display-name karşılığını üret.
+            Kelime veya kısa isim zaten İngilizce/kanonik görünüyorsa onu koruyabilirsin.
+            Marka, ürün veya üretici tahmini yapma.
+            Benzer işlevdeki uygulamaları, kategori isimlerini veya çağrışımlı isimleri üretme.
+            Yalnız dilsel/localization eşdeğeri üret; bilmiyorsan kaynak adı dışında yeni isim üretme.
+            En fazla 4 kısa canonicalName üret.
+            Çıktı yalnız JSON object olmalı.
+            Alanlar:
+            canonicalNames: string dizisi
+            confidence: 0 ile 1 arasında çeviri güveni
+            reason: kısa dilsel gerekçe
+            """
+
+            let prompt = """
+            Lokalize uygulama display adı:
+            \(trimmedQuery)
+
+            Aynı display adının güvenli İngilizce kanonik karşılığını üret.
+            """
+
+            do {
+                let session =
+                    LanguageModelSession(
+                        model: model,
+                        instructions: instructions
+                    )
+
+                let response =
+                    try await session
+                        .respond(to: prompt)
+
+                let raw =
+                    response.content
+                        .trimmingCharacters(
+                            in: .whitespacesAndNewlines
+                        )
+
+                guard
+                    let json =
+                        extractJSONObject(
+                            from: raw
+                        ),
+                    let data =
+                        json.data(
+                            using: .utf8
+                        ),
+                    let decoded =
+                        try? JSONDecoder()
+                            .decode(
+                                LocalizationResponse.self,
+                                from: data
+                            ),
+                    decoded.confidence >= 0,
+                    decoded.confidence <= 1
+                else {
+                    return AgentSemanticApplicationLocalizationPlan(
+                        canonicalNames: [],
+                        confidence: 0,
+                        stage:
+                            "localization_invalid_output",
+                        reason:
+                            "application_localization_invalid_output"
+                    )
+                }
+
+                let names =
+                    decoded.canonicalNames
+                        .map {
+                            $0.trimmingCharacters(
+                                in:
+                                    .whitespacesAndNewlines
+                            )
+                        }
+                        .filter {
+                            !$0.isEmpty &&
+                            $0.count <= 80
+                        }
+
+                var seen = Set<String>()
+                let unique =
+                    names.filter {
+                        let key =
+                            languageResolver
+                                .normalized($0)
+
+                        guard
+                            !key.isEmpty,
+                            seen.insert(key)
+                                .inserted
+                        else {
+                            return false
+                        }
+
+                        return true
+                    }
+
+                return AgentSemanticApplicationLocalizationPlan(
+                    canonicalNames:
+                        Array(
+                            unique.prefix(4)
+                        ),
+                    confidence:
+                        decoded.confidence,
+                    stage:
+                        unique.isEmpty
+                            ? "localization_no_candidate"
+                            : "localization_generated",
+                    reason:
+                        decoded.reason
+                )
+            } catch {
+                return AgentSemanticApplicationLocalizationPlan(
+                    canonicalNames: [],
+                    confidence: 0,
+                    stage:
+                        "localization_call_failed",
+                    reason:
+                        "application_localization_call_failed"
+                )
+            }
+        }
+        #endif
+
+        return nil
     }
 
     func applicationNameVariants(

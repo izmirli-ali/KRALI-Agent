@@ -311,3 +311,15 @@ Target runtime:
 - KRALİ'nin kendi bundle'ına alakasız semantic sorgudan yönelme `self_target_blocked` guard ile reddedilir.
 - Training Lab'e `semantic-app-exact-alias-safety` ve `strict-external-action-approval` regression senaryoları eklendi.
 - VERSION 0.10.18 / build 191.
+
+
+## v0.10.19 progress
+
+- Strict Approval preflight artık hedef kimliği çözülmeden onay kartı üretmez. `desktop.app` için en az name + path gerekir; hedef çözülemezse görev dış işlem yapmadan güvenli şekilde durur.
+- AgentLocalIntelligence içine kurulu uygulama listesine bakmayan ayrı bir `localizedApplicationCanonicalNames` katmanı eklendi. Bu katman yalnız lokalize UI/display-name ifadesinin İngilizce kanonik dilsel karşılığını üretir; uygulama seçmez.
+- Generic variant resolver ile localization translator birbirinden bağımsız çalışır. Her ikisinin güvenli çıktıları birleştirilir; biri başarısız olsa diğeri resolution zincirini sürdürebilir.
+- Localization/variant çıktıları yine bağımsız semantic equivalence verifier (>=0.94), exact normalized installed alias eşleşmesi ve final candidate verifier (>=0.94) kapılarından geçer.
+- Candidate listesi localization modeline verilmez; modelin kurulu uygulamalar arasından tahmin/selection yapmasına izin verilmez.
+- Pending/approved/rejected task approval hedefi Mentor trace içinde `approvalAudit` olarak kaydedilir: capability, target summary, app name, bundle ID, path ve karar.
+- Training Lab'e `resolved-target-required-before-approval` regression senaryosu eklendi.
+- VERSION 0.10.19 / build 192.

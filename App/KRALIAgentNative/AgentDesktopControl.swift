@@ -896,39 +896,78 @@ actor AgentDesktopControl {
             )
         }
 
-        guard let variantPlan =
+        let variantPlan =
             await localIntelligence
                 .applicationNameVariants(
                     query: query
                 )
-        else {
-            return (
-                nil,
-                ApplicationSemanticResolutionTrace(
-                    attempted: true,
-                    providerAvailable: true,
-                    query: query,
-                    selectedIndex: nil,
-                    selectedName: nil,
-                    selectedBundleIdentifier: nil,
-                    selectionConfidence: nil,
-                    verificationConfidence: nil,
-                    accepted: false,
-                    stage: "variant_resolver_no_result",
-                    evaluatedBatchCount: nil,
-                    finalistCount: nil,
-                    generatedVariants: nil,
-                    deterministicMatchCount: 0,
-                    selectedVariant: nil,
-                    reason:
-                        "Semantic variant resolver geçerli bir karar üretemedi."
+
+        let localizationPlan =
+            await localIntelligence
+                .localizedApplicationCanonicalNames(
+                    query: query
                 )
-            )
+
+        var generatedVariants = [
+            query
+        ]
+
+        if let variantPlan,
+           variantPlan.confidence >= 0.60 {
+            generatedVariants +=
+                variantPlan.variants
         }
 
+        if let localizationPlan,
+           localizationPlan.confidence >= 0.72 {
+            generatedVariants +=
+                localizationPlan
+                    .canonicalNames
+        }
+
+        var seenGenerated = Set<String>()
+        generatedVariants =
+            generatedVariants.filter {
+                let key =
+                    languageResolver
+                        .normalized($0)
+
+                guard
+                    !key.isEmpty,
+                    seenGenerated.insert(key)
+                        .inserted
+                else {
+                    return false
+                }
+
+                return true
+            }
+
+        let semanticConfidence =
+            max(
+                variantPlan?
+                    .confidence ?? 0,
+                localizationPlan?
+                    .confidence ?? 0
+            )
+
+        let semanticReason =
+            [
+                variantPlan.map {
+                    "variant: " +
+                    $0.reason
+                },
+                localizationPlan.map {
+                    "localization: " +
+                    $0.reason
+                }
+            ]
+            .compactMap { $0 }
+            .joined(separator: " | ")
+
         guard
-            variantPlan.confidence >= 0.60,
-            !variantPlan.variants.isEmpty
+            semanticConfidence >= 0.60,
+            !generatedVariants.isEmpty
         else {
             return (
                 nil,
@@ -940,17 +979,21 @@ actor AgentDesktopControl {
                     selectedName: nil,
                     selectedBundleIdentifier: nil,
                     selectionConfidence:
-                        variantPlan.confidence,
+                        semanticConfidence,
                     verificationConfidence: 0,
                     accepted: false,
-                    stage: variantPlan.stage,
+                    stage:
+                        "semantic_name_generation_unavailable",
                     evaluatedBatchCount: nil,
                     finalistCount: nil,
                     generatedVariants:
-                        variantPlan.variants,
+                        generatedVariants,
                     deterministicMatchCount: 0,
                     selectedVariant: nil,
-                    reason: variantPlan.reason
+                    reason:
+                        semanticReason.isEmpty
+                            ? "semantic_name_generation_unavailable"
+                            : semanticReason
                 )
             )
         }
@@ -969,7 +1012,7 @@ actor AgentDesktopControl {
         var verifiedVariants: [String] = []
 
         for variant in
-            variantPlan.variants {
+            generatedVariants {
             let normalizedVariant =
                 languageResolver
                     .normalized(
@@ -1010,7 +1053,7 @@ actor AgentDesktopControl {
                     selectedName: nil,
                     selectedBundleIdentifier: nil,
                     selectionConfidence:
-                        variantPlan.confidence,
+                        semanticConfidence,
                     verificationConfidence: 0,
                     accepted: false,
                     stage:
@@ -1018,7 +1061,7 @@ actor AgentDesktopControl {
                     evaluatedBatchCount: nil,
                     finalistCount: nil,
                     generatedVariants:
-                        variantPlan.variants,
+                        generatedVariants,
                     deterministicMatchCount: 0,
                     selectedVariant: nil,
                     reason:
@@ -1121,7 +1164,7 @@ actor AgentDesktopControl {
                     selectedName: nil,
                     selectedBundleIdentifier: nil,
                     selectionConfidence:
-                        variantPlan.confidence,
+                        semanticConfidence,
                     verificationConfidence: 0,
                     accepted: false,
                     stage:
@@ -1129,11 +1172,11 @@ actor AgentDesktopControl {
                     evaluatedBatchCount: nil,
                     finalistCount: nil,
                     generatedVariants:
-                        variantPlan.variants,
+                        generatedVariants,
                     deterministicMatchCount: 0,
                     selectedVariant: nil,
                     reason:
-                        variantPlan.reason
+                        semanticReason
                 )
             )
         }
@@ -1169,7 +1212,7 @@ actor AgentDesktopControl {
                             chosen.candidate
                                 .bundleIdentifier,
                         selectionConfidence:
-                            variantPlan.confidence,
+                            semanticConfidence,
                         verificationConfidence: 0,
                         accepted: false,
                         stage:
@@ -1177,7 +1220,7 @@ actor AgentDesktopControl {
                         evaluatedBatchCount: nil,
                         finalistCount: nil,
                         generatedVariants:
-                            variantPlan.variants,
+                            generatedVariants,
                         deterministicMatchCount:
                             deterministicMatches.count,
                         selectedVariant:
@@ -1231,7 +1274,7 @@ actor AgentDesktopControl {
                         chosen.candidate
                             .bundleIdentifier,
                     selectionConfidence:
-                        variantPlan.confidence,
+                        semanticConfidence,
                     verificationConfidence: nil,
                     accepted: false,
                     stage:
@@ -1239,7 +1282,7 @@ actor AgentDesktopControl {
                     evaluatedBatchCount: nil,
                     finalistCount: nil,
                     generatedVariants:
-                        variantPlan.variants,
+                        generatedVariants,
                     deterministicMatchCount:
                         deterministicMatches.count,
                     selectedVariant:
@@ -1270,7 +1313,7 @@ actor AgentDesktopControl {
                     chosen.candidate
                         .bundleIdentifier,
                 selectionConfidence:
-                    variantPlan.confidence,
+                    semanticConfidence,
                 verificationConfidence:
                     verification.confidence,
                 accepted:
@@ -1282,13 +1325,13 @@ actor AgentDesktopControl {
                 evaluatedBatchCount: nil,
                 finalistCount: nil,
                 generatedVariants:
-                    variantPlan.variants,
+                    generatedVariants,
                 deterministicMatchCount:
                     deterministicMatches.count,
                 selectedVariant:
                     chosen.variant,
                 reason:
-                    variantPlan.reason +
+                    semanticReason +
                     " | verifier: " +
                     verification.reason
             )

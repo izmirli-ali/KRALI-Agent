@@ -138,6 +138,8 @@ final class AgentEngine: ObservableObject {
     private var approvedRuntimeStepIndexes = Set<Int>()
     private var approvedRuntimeApplicationTargets:
         [Int: DesktopApplicationApprovalTarget] = [:]
+    private var currentTaskApprovalAudit:
+        TaskApprovalAudit?
     private var runtimeStepEvidence: [Int: String] = [:]
     private var runtimeExecutedCapabilityIDs = Set<String>()
 
@@ -2382,13 +2384,6 @@ final class AgentEngine: ObservableObject {
                             target.bundleIdentifier
                         targetPath =
                             target.path
-                    } else {
-                        targetSummary =
-                            naturalLanguageResolver
-                                .applicationTargetDisplayPhrase(
-                                    from: userInput
-                                ) ??
-                            userInput
                     }
                 } else if
                     graphStep.capabilityID ==
@@ -2415,6 +2410,50 @@ final class AgentEngine: ObservableObject {
                             .path
                 }
 
+                if !taskOrchestrator
+                    .approvalTargetIsResolved(
+                        capabilityID:
+                            graphStep.capabilityID,
+                        targetSummary:
+                            targetSummary,
+                        targetName:
+                            targetName,
+                        targetPath:
+                            targetPath
+                    ) {
+                    let unresolvedTarget =
+                        naturalLanguageResolver
+                            .applicationTargetDisplayPhrase(
+                                from: userInput
+                            ) ??
+                        targetSummary ??
+                        userInput
+
+                    let failureMessage =
+                        "Hedefi güvenilir biçimde çözemedim: " +
+                        unresolvedTarget +
+                        ". Hiçbir dış işlem yapılmadı ve onay kartı oluşturulmadı."
+
+                    outputs.append(
+                        failureMessage
+                    )
+                    stepEvidence[
+                        stepIndex
+                    ] =
+                        failureMessage
+                    currentRuntimeTask?
+                        .state =
+                        .failed
+
+                    log(
+                        "Strict Approval preflight blokladı: çözümlenmemiş hedef • capability=" +
+                        graphStep.capabilityID +
+                        " • target=" +
+                        unresolvedTarget
+                    )
+                    break
+                }
+
                 let approvalMessage =
                     "Onay bekleniyor: " +
                     step.title +
@@ -2423,6 +2462,28 @@ final class AgentEngine: ObservableObject {
                     } ?? "") +
                     "\nNeden: " +
                     reason
+
+                currentTaskApprovalAudit =
+                    TaskApprovalAudit(
+                        stepIndex:
+                            stepIndex,
+                        title:
+                            step.title,
+                        capabilityID:
+                            step.capabilityID,
+                        targetSummary:
+                            targetSummary,
+                        targetName:
+                            targetName,
+                        targetBundleIdentifier:
+                            targetBundleIdentifier,
+                        targetPath:
+                            targetPath,
+                        decision:
+                            "pending",
+                        recordedAt:
+                            Date()
+                    )
 
                 if let taskID =
                     currentRuntimeTask?.id {
@@ -3197,6 +3258,29 @@ final class AgentEngine: ObservableObject {
                 )
         }
 
+        currentTaskApprovalAudit =
+            TaskApprovalAudit(
+                stepIndex:
+                    approval.stepIndex,
+                title:
+                    approval.title,
+                capabilityID:
+                    approval.capabilityID,
+                targetSummary:
+                    approval.targetSummary,
+                targetName:
+                    approval.targetName,
+                targetBundleIdentifier:
+                    approval
+                        .targetBundleIdentifier,
+                targetPath:
+                    approval.targetPath,
+                decision:
+                    "approved",
+                recordedAt:
+                    Date()
+            )
+
         pendingTaskApproval = nil
         currentRuntimeTask?.state =
             .running
@@ -3232,6 +3316,29 @@ final class AgentEngine: ObservableObject {
                     approval.title
             )
         )
+
+        currentTaskApprovalAudit =
+            TaskApprovalAudit(
+                stepIndex:
+                    approval.stepIndex,
+                title:
+                    approval.title,
+                capabilityID:
+                    approval.capabilityID,
+                targetSummary:
+                    approval.targetSummary,
+                targetName:
+                    approval.targetName,
+                targetBundleIdentifier:
+                    approval
+                        .targetBundleIdentifier,
+                targetPath:
+                    approval.targetPath,
+                decision:
+                    "rejected",
+                recordedAt:
+                    Date()
+            )
 
         pendingTaskApproval = nil
         currentRuntimeTask?.state =
@@ -4179,6 +4286,7 @@ final class AgentEngine: ObservableObject {
         pendingTaskApproval = nil
         approvedRuntimeStepIndexes = []
         approvedRuntimeApplicationTargets = [:]
+        currentTaskApprovalAudit = nil
         runtimeStepEvidence = [:]
         runtimeExecutedCapabilityIDs = []
         currentTaskInput = ""
@@ -5431,6 +5539,8 @@ final class AgentEngine: ObservableObject {
                     currentSemanticPlannerProvider,
                 taskGraph:
                     currentTaskGraph,
+                approvalAudit:
+                    currentTaskApprovalAudit,
                 runtimeTask:
                     currentRuntimeTask,
                 problemResolution:

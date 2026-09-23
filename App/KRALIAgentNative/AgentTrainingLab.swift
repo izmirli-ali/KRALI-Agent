@@ -168,6 +168,9 @@ struct AgentTrainingLab {
             strictExternalApprovalResult()
         )
         results.append(
+            resolvedApprovalTargetRequiredResult()
+        )
+        results.append(
             typoAppNameLanguageResult()
         )
         results.append(
@@ -2131,6 +2134,83 @@ struct AgentTrainingLab {
             ],
             unavailableCapabilities: [],
             diagnostics: diagnostics
+        )
+    }
+
+    private func resolvedApprovalTargetRequiredResult()
+        -> TrainingScenarioResult {
+        let unresolvedDesktop =
+            taskOrchestrator
+                .approvalTargetIsResolved(
+                    capabilityID:
+                        "desktop.app",
+                    targetSummary: nil,
+                    targetName: nil,
+                    targetPath: nil
+                )
+
+        let resolvedDesktop =
+            taskOrchestrator
+                .approvalTargetIsResolved(
+                    capabilityID:
+                        "desktop.app",
+                    targetSummary:
+                        "Example • com.example.app",
+                    targetName:
+                        "Example",
+                    targetPath:
+                        "/Applications/Example.app"
+                )
+
+        let unresolvedURL =
+            taskOrchestrator
+                .approvalTargetIsResolved(
+                    capabilityID:
+                        "system.open.url",
+                    targetSummary: nil
+                )
+
+        let resolvedURL =
+            taskOrchestrator
+                .approvalTargetIsResolved(
+                    capabilityID:
+                        "system.open.url",
+                    targetSummary:
+                        "https://example.com"
+                )
+
+        let passed =
+            !unresolvedDesktop &&
+            resolvedDesktop &&
+            !unresolvedURL &&
+            resolvedURL
+
+        return TrainingScenarioResult(
+            scenarioID:
+                "resolved-target-required-before-approval",
+            title:
+                "Onay kartından önce hedef çözümleme zorunluluğu",
+            tier: .core,
+            prompt:
+                "Hedef kimliği çözülmeden kullanıcıdan dış işlem onayı isteme",
+            passed: passed,
+            goal:
+                "Desktop/URL gibi hedefe bağlı dış işlemlerde onay kartını yalnız gerçek hedef çözüldüğünde göster",
+            route: [
+                "Core",
+                "Safety",
+                "Approval"
+            ],
+            selectedCapabilities: [
+                "desktop.app",
+                "system.open.url"
+            ],
+            unavailableCapabilities: [],
+            diagnostics: passed
+                ? []
+                : [
+                    "Hedef çözülmeden approval kartı oluşturulmasına izin veren safety regression oluştu."
+                ]
         )
     }
 

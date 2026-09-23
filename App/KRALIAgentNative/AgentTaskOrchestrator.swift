@@ -318,6 +318,40 @@ struct AgentTaskOrchestrator {
         return nil
     }
 
+    func approvalTargetIsResolved(
+        capabilityID: String,
+        targetSummary: String?,
+        targetName: String? = nil,
+        targetPath: String? = nil
+    ) -> Bool {
+        func present(
+            _ value: String?
+        ) -> Bool {
+            !(value?
+                .trimmingCharacters(
+                    in: .whitespacesAndNewlines
+                )
+                .isEmpty ?? true)
+        }
+
+        switch capabilityID {
+        case "desktop.app":
+            return
+                present(targetName) &&
+                present(targetPath)
+
+        case "system.open.url",
+             "browser.control",
+             "files.reveal":
+            return present(
+                targetSummary
+            )
+
+        default:
+            return true
+        }
+    }
+
     private func approvalTokens(
         _ value: String
     ) -> Set<String> {
