@@ -3,6 +3,8 @@ import AppKit
 
 struct ConversationSidebarView: View {
     @EnvironmentObject private var engine: AgentEngine
+    @State private var pendingDelete:
+        ConversationArchiveSegment?
 
     var body: some View {
         VStack(alignment: .leading, spacing: 0) {
@@ -101,6 +103,52 @@ struct ConversationSidebarView: View {
         .background(
             .ultraThinMaterial
         )
+        .confirmationDialog(
+            "Bu sohbet silinsin mi?",
+            isPresented:
+                Binding(
+                    get: {
+                        pendingDelete != nil
+                    },
+                    set: { value in
+                        if !value {
+                            pendingDelete = nil
+                        }
+                    }
+                ),
+            titleVisibility: .visible
+        ) {
+            Button(
+                "Sohbeti sil",
+                role: .destructive
+            ) {
+                guard
+                    let segment =
+                        pendingDelete
+                else {
+                    return
+                }
+
+                _ =
+                    engine
+                        .deleteConversationArchive(
+                            segment
+                        )
+                pendingDelete = nil
+            }
+
+            Button(
+                "Vazgeç",
+                role: .cancel
+            ) {
+                pendingDelete = nil
+            }
+        } message: {
+            if let segment =
+                pendingDelete {
+                Text(segment.title)
+            }
+        }
     }
 
     private var header: some View {
@@ -182,11 +230,8 @@ struct ConversationSidebarView: View {
                 Button(
                     role: .destructive
                 ) {
-                    _ =
-                        engine
-                            .deleteConversationArchive(
-                                segment
-                            )
+                    pendingDelete =
+                        segment
                 } label: {
                     Label(
                         "Sohbeti sil",
