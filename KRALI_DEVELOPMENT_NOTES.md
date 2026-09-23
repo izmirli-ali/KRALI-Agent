@@ -230,3 +230,15 @@ Target runtime:
 - Deterministic guard tam resolver trace'i parse ediyor; modellere yalnız küçük provenance özeti veriliyor, mutation context tekrar şişmiyor.
 - Native Ollama / SDK çıktısının ana Developer loguna ikinci kez eklenmesine neden olan çift log append kaldırıldı.
 - VERSION 0.10.12 / build 185.
+
+
+## v0.10.13 progress
+
+- Alias/localization provenance gap aktifken Developer Agent dependency traversal artık ilk birkaç wrapper fonksiyonunda kesilmiyor; üç hop / daha geniş scan budget ile producer kaynaklarını arıyor.
+- Discovery önce daha geniş dependency graph'ı tarıyor, sonra alias/localization producer sembollerini neighborhood'un başına taşıyor; global candidate limiti producer'lar görülmeden dolmuyor.
+- Root-cause verifier artık provenance upstream alias'ın hiç üretilmediğini kanıtladığında `bestApplicationCandidate`, decision/ranking/scoring, merge ve LaunchServices gibi downstream consumer katmanlarını causal mutation target olarak deterministic biçimde reddediyor.
+- Producer adayları provenance gap'te ek deterministic score alıyor; downstream consumer adayları aşağı itiliyor.
+- Root-cause ranking modeli timeout/abort ile sonuç üretmezse ve deterministic shortlist'te yeterince güçlü producer kanıtı varsa producer doğrudan verifier'a taşınıyor. Verifier PASS olmadan mutation yetkisi yine verilmiyor.
+- Ranking modeli downstream adaylar döndürse bile güçlü producer diagnosis verifier sırasının başına alınıyor.
+- Uygulama adına özel alias veya çeviri hard-code eklenmedi.
+- VERSION 0.10.13 / build 186.
