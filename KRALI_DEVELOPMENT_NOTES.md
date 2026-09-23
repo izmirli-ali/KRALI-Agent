@@ -519,3 +519,17 @@ Target runtime:
 - Existing updater already compares local HEAD against origin/main in addition to VERSION; this release bumps VERSION explicitly so installed v0.10.33 clients receive a clear update signal.
 - No approval, planner, runtime execution, or main-branch authority was expanded.
 - VERSION 0.10.34 / build 207.
+
+## v0.10.35 progress
+
+- Developer task verification contract added so build success alone can no longer mark a controlled developer candidate ready.
+- Task cards may define taskMetadata.verification with a shell-free command array, required exit code, required stdout markers, required artifacts, and bounded timeout.
+- New Scripts/developer-task-verifier.mjs executes verification inside the isolated worktree with a restricted environment, validates required evidence, and re-checks all resulting dirty paths against task allowed/forbidden mutation scope.
+- Normal Developer Agent completion and candidate recovery both enforce the same verification contract.
+- Verification failure preserves the candidate branch for review but reports task_verification_failed / recovered_candidate_verification_failed instead of ready.
+- UI Regression Checklist Revision V3 now requires: node static checker exit 0, stdout markers "Overall: PASS" + "Failed: 0", and static-check-results.json artifact.
+- V3 brief was tightened around actual Swift source forms: private/multiline/return-type functions, deterministic __dirname-based repo root, multiline NSPasteboard.setString, and target-file evidence.
+- CI validates verification contract schema and runs developer-task-verifier.mjs --self-test.
+- No approval, planner, runtime execution authority, or main-branch authority was expanded.
+- VERSION 0.10.35 / build 208.
+
