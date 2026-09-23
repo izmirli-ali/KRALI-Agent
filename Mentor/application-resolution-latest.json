@@ -1,7 +1,7 @@
 {
-  "createdAt" : "2026-09-23T07:22:42Z",
+  "createdAt" : "2026-09-23T08:11:38Z",
   "expandedCandidateCount" : 257,
-  "installedCandidateCount" : 228,
+  "installedCandidateCount" : 227,
   "nestedCandidateCount" : 56,
   "queries" : [
     "Notlar"
@@ -186,6 +186,15 @@
       ]
     }
   ],
-  "refreshedCandidateCount" : 228,
-  "requestedText" : "Notlar uygulamasını aç ve gerçekten ön planda olduğunu doğrula. Başka hiçbir işlem yapma."
+  "refreshedCandidateCount" : 227,
+  "requestedText" : "Notlar uygulamasını aç ve gerçekten ön planda olduğunu doğrula. Başka hiçbir işlem yapma.",
+  "semanticResolution" : {
+    "accepted" : false,
+    "attempted" : true,
+    "providerAvailable" : true,
+    "query" : "Notlar",
+    "reason" : "kısa gerekçe",
+    "selectionConfidence" : 0,
+    "verificationConfidence" : 0
+  }
 }
