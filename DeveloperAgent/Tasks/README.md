@@ -68,3 +68,18 @@ Kurallar:
 - Build PASS tek başına yeterli değildir. Verification contract tanımlıysa contract geçmeden candidate `ready_for_review` veya `recovered_candidate_ready` olamaz.
 - Verification başarısız candidate branch korunabilir fakat merge-ready sayılmaz.
 
+## OpenAI Teacher katmanı
+
+Controlled developer task çalışırken isteğe bağlı bir OpenAI Teacher katmanı kullanılabilir.
+
+- Teacher yalnız advisory review üretir; dosya yazma, shell, browser, MCP, merge veya approval yetkisi yoktur.
+- Plan checkpoint'inde görev kartını küçük, dependency-ordered ve bağımsız doğrulanabilir alt görevlere böler.
+- Final checkpoint'inde yalnız task scope içindeki candidate diff'i ve deterministic verification durumunu inceler.
+- Ham kullanıcı mesajı/sourceGoal Teacher paketine eklenmez. Hassas görünümlü diff satırları bridge tarafından redakte edilir.
+- Deterministic build/test sonucu Teacher görüşünden üstündür. Teacher REVISE/ESCALATE derse candidate insan review'una gidebilir fakat o turdan otomatik skill distillation yapılmaz.
+- Teacher API anahtarı repoda tutulmaz. Runner yalnız macOS Keychain'de service=`KRALI OpenAI Teacher`, account=`api-key` altında mevcutsa kullanır.
+- Varsayılan model `gpt-5.6-sol`; `KRALI_OPENAI_TEACHER_MODEL` ile değiştirilebilir.
+- Teacher unavailable olduğunda mevcut Developer Agent akışı bozulmadan devam eder.
+
+Bu ilk aşama task decomposition'ı advisory plan olarak prompt'a taşır. Alt görevlerin ayrı checkpoint/branch lifecycle ile otomatik sırayla yürütülmesi ayrı orchestration fazıdır.
+

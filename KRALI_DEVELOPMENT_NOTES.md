@@ -554,3 +554,19 @@ Target runtime:
 - Both phases use task verification contracts; Phase 1 also forbids raw task/chat/mail/web/file body persistence in suggestion memory.
 - VERSION 0.10.37 / build 210.
 
+## v0.10.38 progress
+
+- Added an optional advisory OpenAI Teacher layer for controlled Developer Agent tasks.
+- Teacher uses the OpenAI Responses API with strict Structured Outputs and no tools.
+- Default Teacher model is gpt-5.6-sol; model and reasoning effort are configurable by environment.
+- Plan checkpoint: Teacher reviews only compact task metadata and returns dependency-ordered verifiable subtasks, risks and reusable engineering lessons.
+- The plan review is appended to the Developer Agent prompt as advisory context; approval, mutation scope and verification rules remain authoritative.
+- Final checkpoint: Teacher reviews only task-scoped candidate diff/untracked files plus deterministic build/task-verification pass state.
+- Raw user sourceGoal/messages are excluded from the Teacher bundle. Potential credential/token/password lines in diffs are redacted before transmission.
+- Teacher has no mutation, shell, browser, MCP, merge or approval authority.
+- If final Teacher verdict is REVISE/ESCALATE, the candidate can still be preserved for human review after deterministic tests, but automatic skill distillation is skipped for that run.
+- API key is never stored in the repository; runner reads only from macOS Keychain service 'KRALI OpenAI Teacher', account 'api-key'. Missing key causes a graceful skip.
+- CI runs openai-teacher-bridge self-test in addition to script syntax/build validation.
+- This release provides advisory task decomposition. Persistent per-subtask checkpoint execution is the next orchestration phase.
+- VERSION 0.10.38 / build 211.
+
