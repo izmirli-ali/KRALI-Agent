@@ -7,6 +7,7 @@ LOG="$HOME/Library/Logs/KRALI-Developer-Agent-Recovery.log"
 STATUS_DIR="$(dirname "$STATUS")"
 NODE_BIN="${KRALI_NODE_BIN:-$(command -v node || true)}"
 REPAIR_MODEL="${KRALI_RECOVERY_MODEL:-}"
+DEV_TASK_FILE="${KRALI_DEV_TASK_FILE:-}"
 MAX_REPAIR_ATTEMPTS="${KRALI_CANDIDATE_REPAIR_ATTEMPTS:-2}"
 
 mkdir -p "$STATUS_DIR"
@@ -116,6 +117,32 @@ run_candidate_build() {
     return "$BUILD_EXIT"
 }
 
+run_task_verification() {
+    if [ -z "$DEV_TASK_FILE" ] || [ ! -f "$DEV_TASK_FILE" ]; then
+        return 0
+    fi
+
+    if [ -z "$NODE_BIN" ] || [ ! -x "$NODE_BIN" ]; then
+        echo "Task verification Node runtime bulunamadı." >>"$LOG"
+        return 28
+    fi
+
+    KRALI_DEV_TASK_FILE="$DEV_TASK_FILE" \
+    KRALI_WORKTREE="$WORKTREE" \
+        "$NODE_BIN" "$ROOT/Scripts/developer-task-verifier.mjs" >>"$LOG" 2>&1
+}
+
+persist_verification_changes() {
+    git -C "$WORKTREE" add -A >>"$LOG" 2>&1 || return 1
+
+    if git -C "$WORKTREE" diff --cached --quiet; then
+        return 0
+    fi
+
+    git -C "$WORKTREE" commit -m "Developer Agent task verification result $RUN_ID" >>"$LOG" 2>&1 || return 1
+    git -C "$WORKTREE" push origin "$BRANCH" >>"$LOG" 2>&1 || return 1
+}
+
 candidate_diff_context() {
     git -C "$WORKTREE" show --format= --no-ext-diff HEAD -- 2>/dev/null |
         /usr/bin/tail -n 220
@@ -200,9 +227,22 @@ EOF
 }
 
 if run_candidate_build; then
+    if ! run_task_verification; then
+        rm -f "$BUILD_LOG" "$REPAIR_PROMPT"
+        write_status "recovered_candidate_verification_failed|Kurtarılan candidate build geçti ancak görev kartı doğrulama sözleşmesi geçmedi; branch korundu|$BRANCH|$WORKTREE"
+        echo "Recovered candidate task verification failed: $BRANCH" >>"$LOG"
+        exit 27
+    fi
+
+    persist_verification_changes || {
+        rm -f "$BUILD_LOG" "$REPAIR_PROMPT"
+        write_status "candidate_recovery_failed|Task verification sonucu branch'e kaydedilemedi|$BRANCH|$WORKTREE"
+        exit 37
+    }
+
     rm -f "$BUILD_LOG" "$REPAIR_PROMPT"
-    write_status "recovered_candidate_ready|Kurtarılan öğrenme adayı build geçti ve incelemeye hazır|$BRANCH|$WORKTREE"
-    echo "Recovered candidate build passed: $BRANCH" >>"$LOG"
+    write_status "recovered_candidate_ready|Kurtarılan öğrenme adayı build ve task verification contract geçti; incelemeye hazır|$BRANCH|$WORKTREE"
+    echo "Recovered candidate build and task verification passed: $BRANCH" >>"$LOG"
     exit 0
 fi
 
@@ -233,9 +273,22 @@ while [ "$ATTEMPT" -le "$MAX_REPAIR_ATTEMPTS" ]; do
             }
         fi
 
+        if ! run_task_verification; then
+            rm -f "$BUILD_LOG" "$REPAIR_PROMPT"
+            write_status "recovered_candidate_verification_failed|Candidate repair sonrası build geçti ancak görev kartı doğrulama sözleşmesi geçmedi • tur=$ATTEMPT|$BRANCH|$WORKTREE"
+            echo "⚠️ Candidate repair build geçti ancak task verification başarısız." | tee -a "$LOG"
+            exit 27
+        fi
+
+        persist_verification_changes || {
+            rm -f "$BUILD_LOG" "$REPAIR_PROMPT"
+            write_status "candidate_repair_failed|Task verification sonucu branch'e kaydedilemedi|$BRANCH|$WORKTREE"
+            exit 37
+        }
+
         rm -f "$BUILD_LOG" "$REPAIR_PROMPT"
-        write_status "recovered_candidate_ready|Candidate repair sonrası build geçti; insan/evaluator incelemesine hazır • tur=$ATTEMPT|$BRANCH|$WORKTREE"
-        echo "✅ Candidate repair build geçti; main değiştirilmedi: $BRANCH" | tee -a "$LOG"
+        write_status "recovered_candidate_ready|Candidate repair sonrası build ve task verification contract geçti; insan/evaluator incelemesine hazır • tur=$ATTEMPT|$BRANCH|$WORKTREE"
+        echo "✅ Candidate repair build + task verification geçti; main değiştirilmedi: $BRANCH" | tee -a "$LOG"
         exit 0
     fi
 
