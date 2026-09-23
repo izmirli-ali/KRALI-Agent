@@ -598,6 +598,7 @@ prepare_ollama_runtime() {
         write_status "local_ai_starting|Yerel AI servisi başlatılıyor"
         echo "Ollama servisi başlatılıyor..." | tee -a "$LOG"
 
+        require_system_mutation_approval "start-ollama-service" "Ollama yerel servisi arka planda başlatılacak."
         /usr/bin/nohup "$OLLAMA_BIN" serve >>"$LOG_DIR/KRALI-Ollama.log" 2>&1 &
 
         OLLAMA_READY=0
