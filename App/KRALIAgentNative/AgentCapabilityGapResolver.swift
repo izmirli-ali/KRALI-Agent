@@ -307,6 +307,7 @@ struct AgentCapabilityGapResolver {
     func resolveRuntimeFailures(
         graph: AgentTaskGraph,
         completedStepIndexes: Set<Int>,
+        approvedStepIndexes: Set<Int> = [],
         capabilities: [AgentCapability]
     ) -> [CapabilityGapResolution] {
         let registry =
@@ -321,11 +322,18 @@ struct AgentCapabilityGapResolver {
         var results: [CapabilityGapResolution] = []
 
         for step in graph.steps {
+            let approvalSatisfied =
+                !step.requiresApproval ||
+                approvedStepIndexes
+                    .contains(
+                        step.index
+                    )
+
             guard
                 !completedStepIndexes.contains(
                     step.index
                 ),
-                !step.requiresApproval,
+                approvalSatisfied,
                 step.role != .reason,
                 step.role != .verify
             else {
@@ -455,11 +463,17 @@ struct AgentCapabilityGapResolver {
                             capabilities
                     )
 
+            let approvalContext =
+                step.requiresApproval
+                ? " • kullanıcı onayı verildi"
+                : ""
+
             let reason =
                 "Provider available olmasına rağmen runtime step tamamlanamadı veya postcondition doğrulanamadı: " +
                 step.capabilityID +
                 " • " +
-                step.operation
+                step.operation +
+                approvalContext
 
             let researchGoal =
                 "Mevcut " +
