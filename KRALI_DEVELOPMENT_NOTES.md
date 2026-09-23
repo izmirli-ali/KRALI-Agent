@@ -415,3 +415,15 @@ Target runtime:
 - CI, `cursor-architect-bridge.mjs --self-test` ile read-only güvenlik sözleşmesini doğrular.
 - Cursor bulunamaz, login hazır olmaz veya ücretsiz quota biterse yerel Qwen/Devstral yolu değişmeden devam eder.
 - VERSION 0.10.26 / build 199.
+
+
+## v0.10.27 progress
+
+- Cursor Architect escalation artık `local_agent_completion_gate_failed` durumunu da kapsıyor; yerel Developer Agent aktif gap için gerçek candidate üretemeden açıklamayla bitmeye çalışırsa read-only ikinci görüş alınabiliyor.
+- v0.10.26 Cursor diagnosis cache fingerprint çağrısındaki eksik argüman düzeltildi; aynı VERSION + gap + failure evidence için hazır teşhis gerçekten yeniden kullanılabiliyor.
+- KRALİ'nin geliştirme ekibinde kontrollü junior developer olarak görev alması için `developerTask` envelope ve `Scripts/run-developer-task.command` eklendi.
+- İlk KRALİ developer görevi: `Training Result Analyzer`. Core/North Star PASS/FAIL, stale version ve önceki koşuya göre regression/fix delta raporu üretecek; core runtime/approval/planner dosyalarına dokunması yasak.
+- Supabase geçişi için `Cloud/Supabase/control-plane-schema.sql` eklendi. Learning jobs, developer runs, training/scenario history, capability failures, skill library ve agent events için RLS-temelli standart Postgres şeması hazırlandı.
+- Cloud geçişi fail-open değil: credential/bağlantı eklenene kadar hiçbir runtime state buluta taşınmıyor; local Mac authoritative executor olarak kalıyor.
+- Hedef dağılım: Mac=approval/execution, Supabase=control plane/state, GitHub=source/CI, Cursor=read-only architect; ileride kendi sunucusu aynı backend sözleşmesini devralabilecek.
+- VERSION 0.10.27 / build 200.
