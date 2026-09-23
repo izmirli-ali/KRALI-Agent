@@ -1,0 +1,31 @@
+{
+  "developerTask": {
+    "capabilityID": "developer.task.training-result-analyzer-revision",
+    "capabilityName": "Training Result Analyzer Revision",
+    "kind": "developerTask",
+    "learningPath": "primitivePatch",
+    "reason": "İlk KRALİ candidate review'unda analyzer doğru yönde ilerledi ancak merge için eksikler bulundu.",
+    "researchGoal": "Training Result Analyzer'ı review bulgularına göre yeniden ve testli biçimde uygula.",
+    "candidateCapabilityIDs": [],
+    "developerBrief": "Amaç: Training Result Analyzer'ı merge-ready hale getir.\nFresh main'den çalış; önceki candidate branch'e güvenme.\nScripts/training-result-analyzer.mjs oluştur/güncelle.\ncurrentVersion regression-status.json içindeki currentAppVersion olmalı; trainingVersion training JSON appVersion olmalı.\nfreshness yalnız allCurrent boolean'ına bakmamalı; currentVersion ve trainingVersion eşleşmesini de doğrulamalı. Sürüm farklıysa stale.\nPrevious run yoksa fixedSincePrevious/newFailuresSincePrevious/unchangedFailures kesin boş liste gibi sunulmasın; comparisonAvailable=false ve delta alanları null/unknown semantiği kullansın.\nPrevious run varsa scenarioID bazında fixed/new/unchanged hesapla; sıralama değişikliği regression değildir.\nCore/North Star toplam ve PASS sayıları doğru raporlanmalı.\nMarkdown yüzdeleri gerçek yüzdeyi (passed/total*100).toFixed(1) ile üretmeli; zero total bölünmesini güvenli ele al.\nEn az altı otomatik test/fixture: stale version, fresh version, fixed failure, new failure, unchanged failure, previous missing.\nTestleri Node built-in assert/test ile çalıştır; yeni dependency ekleme.\nÇıktı stdout valid JSON olmalı; --markdown opsiyonel insan okunur özet verebilir.\nCore runtime/planner/approval/UI dosyalarına dokunma.\nİş sonunda test komutu + sonuç + git diff + build-check raporla."
+  },
+  "taskMetadata": {
+    "owner": "ChatGPT Lead / KRALİ team",
+    "risk": "low",
+    "allowedScope": [
+      "Scripts/training-result-analyzer.mjs",
+      "DeveloperAgent/Tests/training-result-analyzer/**",
+      "DeveloperAgent/README.md"
+    ],
+    "forbiddenScope": [
+      "VERSION",
+      "Mentor/**",
+      ".github/**",
+      "App/**",
+      "Cloud/**",
+      "Scripts/run-developer-agent.command"
+    ],
+    "requiresPhysicalAction": false,
+    "requiresMainAccess": false
+  }
+}
