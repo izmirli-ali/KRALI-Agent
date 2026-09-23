@@ -989,6 +989,23 @@ if (!gap) {
   process.exit(0);
 }
 
+const taskMetadata =
+  payload && payload.developerTask &&
+  payload.taskMetadata &&
+  typeof payload.taskMetadata === "object"
+    ? payload.taskMetadata
+    : null;
+
+const taskAllowedScope =
+  taskMetadata && Array.isArray(taskMetadata.allowedScope)
+    ? taskMetadata.allowedScope.map(String)
+    : [];
+
+const taskForbiddenScope =
+  taskMetadata && Array.isArray(taskMetadata.forbiddenScope)
+    ? taskMetadata.forbiddenScope.map(String)
+    : [];
+
 const candidates =
   Array.isArray(gap.candidateCapabilityIDs) &&
   gap.candidateCapabilityIDs.length > 0
@@ -1384,6 +1401,15 @@ const prompt = [
     : "Tekil diagnostic / Mentor kanıtı",
   "",
   "Developer Brief:", String(gap.developerBrief || ""),
+  "",
+  "Developer task mutation scope:",
+  taskMetadata
+    ? (
+        "ALLOW=" + JSON.stringify(taskAllowedScope) +
+        "\nDENY=" + JSON.stringify(taskForbiddenScope) +
+        "\nBu scope yalnız açıklama değil; mutation tool katmanı tarafından da enforce edilir."
+      )
+    : "Runtime capability gap için standart protected-path policy kullanılıyor.",
   "",
   "Güncel runtime kanıtı:",
   runtimeEvidence.length > 0
