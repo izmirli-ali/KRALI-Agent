@@ -1,5 +1,5 @@
 {
-  "createdAt" : "2026-09-23T11:45:24Z",
+  "createdAt" : "2026-09-23T11:59:31Z",
   "expandedCandidateCount" : 257,
   "installedCandidateCount" : 226,
   "nestedCandidateCount" : 56,
@@ -193,12 +193,16 @@
     "attempted" : true,
     "deterministicMatchCount" : 0,
     "generatedVariants" : [
-      "Notlar"
+      "Notlar",
+      "Notes",
+      "Note",
+      "Memorandum",
+      "Journal"
     ],
     "providerAvailable" : true,
     "query" : "Notlar",
-    "reason" : "Girdi, aynı uygulamanın yaygın kanonik adını ve işletim sistemi lokalizasyonunu doğrudan ifade eder.",
-    "selectionConfidence" : 0.95,
+    "reason" : "variant: Girdideki 'Notlar' ifadesi, aynı uygulamanın yaygın kanonik adı ve işletim sistemi lokalizasyonuyla birebir çevirisi olarak kabul edilir. | localization: Notlar ifadesi İngilizce'de 'Notes' olarak bilinen standart bir terimdir; diğer seçenekler benzer işlevlere sahip ancak farklı çağrışımlı terimlerdir.",
+    "selectionConfidence" : 1,
     "stage" : "variants_no_deterministic_match",
     "verificationConfidence" : 0
   }
