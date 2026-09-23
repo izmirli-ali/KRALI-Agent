@@ -975,6 +975,13 @@ function developerTaskGraphSummary() {
     .join(",");
 }
 
+function currentMutationGlobs() {
+  const active = activeDeveloperSubtask();
+  return active?.scope?.length
+    ? active.scope
+    : taskAllowedGlobs;
+}
+
 function developerTaskGraphPromptContext() {
   const node = activeDeveloperSubtask();
   if (!node) return "";
@@ -8331,9 +8338,9 @@ for (
                     ? "Target search is complete. Read one identified target path only: " +
                       implementationTargetPaths.join(", ")
                     : (
-                        taskAllowedGlobs.length > 0
-                          ? "No existing mutable target is required. Create or update only inside task allowedScope: " +
-                            taskAllowedGlobs.join(", ")
+                        currentMutationGlobs().length > 0
+                          ? "No existing mutable target is required. Create or update only inside active mutation scope: " +
+                            currentMutationGlobs().join(", ")
                           : "Target search is complete. Read the identified target source once, then mutate."
                       )
                 )
