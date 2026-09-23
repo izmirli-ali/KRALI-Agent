@@ -87,6 +87,7 @@ struct DeveloperAgentStatus: Hashable {
             "local_agent_verified_resume_controller",
             "local_agent_running",
             "local_agent_tool",
+            "task_verifying",
             "local_agent_structured_tool",
             "local_agent_structured_mutation",
             "local_agent_structured_failure",
