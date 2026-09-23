@@ -1,1 +1,1 @@
-recovered_candidate_ready|Kurtarılan öğrenme adayı build geçti ve incelemeye hazır|krali-dev-agent/20260923-222642|/Users/medusa/Developer/KRALI-Agent-Dev-20260923-222642|@meta|app=0.10.30|at=1790191746|run=20260923-222642
+local_agent_iteration_limit|Training Result Analyzer Revision (developer.task.training-result-analyzer-revision) native local agent iteration sınırına ulaştı.|krali-dev-agent/20260923-223910|/Users/medusa/Developer/KRALI-Agent-Dev-20260923-223910|@meta|app=0.10.31|at=1790192395|run=20260923-223910
