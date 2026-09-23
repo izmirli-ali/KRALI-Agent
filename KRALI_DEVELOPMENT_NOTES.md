@@ -242,3 +242,16 @@ Target runtime:
 - Ranking modeli downstream adaylar döndürse bile güçlü producer diagnosis verifier sırasının başına alınıyor.
 - Uygulama adına özel alias veya çeviri hard-code eklenmedi.
 - VERSION 0.10.13 / build 186.
+
+
+## v0.10.14 progress
+
+- Application resolver deterministic metadata/LaunchServices/fuzzy katmanları başarısız olduğunda yalnız son fallback olarak generic cross-language semantic application alias resolution devreye giriyor.
+- Semantic resolver Apple Foundation Models / SystemLanguageModel üzerinden yalnız kurulu candidate listesi içinde seçim yapabiliyor; listede olmayan uygulama üretemiyor.
+- Seçim iki aşamalı: semantic candidate selection + bağımsız semantic equivalence verifier. İki aşama da en az 0.86 güven vermeden candidate kabul edilmiyor.
+- Semantic eşdeğerlik yalnız çeviri/lokalizasyon/yerleşik alternatif ad için kabul ediliyor; kategori/işlev/üretici benzerliği yeterli sayılmıyor.
+- Uygulama adına özel sözlük veya hard-code eklenmedi.
+- Semantic fallback sonucu application-resolution Mentor trace'ine selection/verification confidence, selected candidate, provider availability ve accepted/rejected reason ile kaydediliyor.
+- Immutable Learning / Developer Agent resolver evidence sıkıştırması semanticResolution alanını da koruyor.
+- Semantic candidate kabul edilse bile mevcut gerçek foreground/ScreenCaptureKit doğrulaması değişmeden zorunlu kalıyor.
+- VERSION 0.10.14 / build 187.

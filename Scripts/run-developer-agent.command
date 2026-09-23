@@ -1205,6 +1205,58 @@ const resolverRuntimeEvidence =
                       : [],
                 }))
             : [],
+        semanticResolution:
+          boundResolutionTrace.semanticResolution &&
+          typeof boundResolutionTrace
+            .semanticResolution ===
+            "object"
+            ? {
+                attempted:
+                  boundResolutionTrace
+                    .semanticResolution
+                    .attempted === true,
+                providerAvailable:
+                  boundResolutionTrace
+                    .semanticResolution
+                    .providerAvailable === true,
+                query:
+                  String(
+                    boundResolutionTrace
+                      .semanticResolution
+                      .query || ""
+                  ),
+                selectedName:
+                  boundResolutionTrace
+                    .semanticResolution
+                    .selectedName || null,
+                selectedBundleIdentifier:
+                  boundResolutionTrace
+                    .semanticResolution
+                    .selectedBundleIdentifier || null,
+                selectionConfidence:
+                  Number(
+                    boundResolutionTrace
+                      .semanticResolution
+                      .selectionConfidence || 0
+                  ),
+                verificationConfidence:
+                  Number(
+                    boundResolutionTrace
+                      .semanticResolution
+                      .verificationConfidence || 0
+                  ),
+                accepted:
+                  boundResolutionTrace
+                    .semanticResolution
+                    .accepted === true,
+                reason:
+                  String(
+                    boundResolutionTrace
+                      .semanticResolution
+                      .reason || ""
+                  ).slice(0, 500),
+              }
+            : null,
       })
     : "";
 
