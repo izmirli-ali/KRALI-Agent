@@ -530,6 +530,38 @@ final class AgentEngine: ObservableObject {
             )
     }
 
+    @discardableResult
+    func deleteConversationArchive(
+        _ segment: ConversationArchiveSegment
+    ) -> Bool {
+        guard
+            conversationStore.deleteArchive(
+                segment
+            )
+        else {
+            log(
+                "Geçmiş sohbet silinemedi: " +
+                segment.title
+            )
+            return false
+        }
+
+        if selectedConversationArchiveID ==
+            segment.id {
+            selectedConversationArchiveID =
+                nil
+            archivedConversationPreview =
+                []
+        }
+
+        refreshConversationHistory()
+        log(
+            "Geçmiş sohbet silindi: " +
+            segment.title
+        )
+        return true
+    }
+
     private func refreshConversationHistory() {
         conversationHistory =
             conversationStore.archiveSegments()
