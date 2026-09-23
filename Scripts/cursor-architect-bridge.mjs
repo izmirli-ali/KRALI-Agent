@@ -16,6 +16,8 @@ const gapLabel = process.env.KRALI_GAP_LABEL || "Unknown capability gap";
 const runtimeHints = process.env.KRALI_RUNTIME_SOURCE_HINTS || "";
 const appVersion = process.env.KRALI_APP_VERSION || "unknown";
 const runID = process.env.KRALI_RUN_ID || "unknown";
+const diagnosticFingerprint =
+  process.env.KRALI_CURSOR_DIAGNOSTIC_FINGERPRINT || "";
 const timeoutMs = Number(
   process.env.KRALI_CURSOR_ARCHITECT_TIMEOUT_MS || "180000"
 );
@@ -291,6 +293,7 @@ child.on("close", (code, signal) => {
     mode: "architect-readonly",
     appVersion,
     runID,
+    diagnosticFingerprint,
     failureState,
     failureMessage,
     gapLabel,
