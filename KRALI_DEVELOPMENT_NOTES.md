@@ -543,3 +543,14 @@ Target runtime:
 - Learning Suggestions task is protected by the Developer task verification contract and a dedicated source-level policy self-test.
 - VERSION 0.10.36 / build 209.
 
+## v0.10.37 progress
+
+- Mentor run 20260924-001234 confirmed the Cursor project-config schema repair worked; Cursor progressed to the next gate and stopped only on interactive Workspace Trust.
+- Cursor Architect now uses the explicit --trust workspace flag while preserving mode=ask, sandbox=enabled, workspace_readonly, network deny, Read(**) allow and Write/Shell/WebFetch/MCP deny. --yolo is not used.
+- Cursor self-test now asserts the trust mode remains the narrow --trust flag.
+- Learning Suggestions Foundation first run consumed its 14-step budget mostly on read/search and produced no mutation, so the feature was split into smaller staged tasks.
+- Phase 1 Learning Suggestions Foundation now covers only compact suggestion persistence, auto-learning -> manual approval gating, userApproved queue semantics and explicit accept/defer/suppress engine methods.
+- Phase 2 Learning Suggestions Sidebar UI is a separate low-risk task that only renders approved core state in ConversationSidebarView.
+- Both phases use task verification contracts; Phase 1 also forbids raw task/chat/mail/web/file body persistence in suggestion memory.
+- VERSION 0.10.37 / build 210.
+
