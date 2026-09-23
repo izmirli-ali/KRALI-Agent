@@ -6180,7 +6180,7 @@ final class AgentEngine: ObservableObject {
     func runDeveloperAgent(
         learningJob: AgentLearningJob? = nil,
         learningJobBriefURL: URL? = nil,
-        allowSystemEffects: Bool = false
+        approvedSystemEffect: String? = nil
     ) {
         guard !inspectorState.developerAgentBusy else {
             if let learningJob {
@@ -6327,8 +6327,8 @@ final class AgentEngine: ObservableObject {
                 await developerBridge.run(
                     learningJobBriefURL:
                         learningJobBriefURL,
-                    allowSystemEffects:
-                        allowSystemEffects
+                    approvedSystemEffect:
+                        approvedSystemEffect
                 )
 
             monitor.cancel()
@@ -6339,10 +6339,30 @@ final class AgentEngine: ObservableObject {
                 false
 
             if status.state ==
-                "system_action_approval_required",
-               !allowSystemEffects {
+                "system_action_approval_required" {
+                let request =
+                    developerSystemEffectRequest(
+                        from:
+                            status.message
+                    )
+
                 pauseActiveLearningJobForDeveloperApproval(
-                    status
+                    DeveloperAgentStatus(
+                        state:
+                            status.state,
+                        message:
+                            request.reason,
+                        branch:
+                            status.branch,
+                        worktree:
+                            status.worktree,
+                        appVersion:
+                            status.appVersion,
+                        updatedAt:
+                            status.updatedAt,
+                        runID:
+                            status.runID
+                    )
                 )
 
                 pendingDeveloperLearningJob =
@@ -6361,15 +6381,19 @@ final class AgentEngine: ObservableObject {
                             title:
                                 "Developer Agent sistem işlemi",
                             reason:
-                                status.message,
+                                request.reason,
                             targetSummary:
-                                "macOS sistem kurulumu / yerel servis / kimlik doğrulama"
+                                request.token,
+                            approvalToken:
+                                request.token
                         )
                 }
 
                 log(
                     "Developer Tool approval gate: " +
-                    status.message
+                    request.token +
+                    " • " +
+                    request.reason
                 )
                 return
             }
@@ -6474,6 +6498,53 @@ final class AgentEngine: ObservableObject {
         }
     }
 
+    private func developerSystemEffectRequest(
+        from raw: String
+    ) -> (
+        token: String,
+        reason: String
+    ) {
+        let parts =
+            raw.split(
+                separator: ":",
+                maxSplits: 2,
+                omittingEmptySubsequences:
+                    false
+            )
+
+        if parts.count >= 3,
+           parts[1].isEmpty {
+            let token =
+                String(parts[0])
+                    .trimmingCharacters(
+                        in: .whitespacesAndNewlines
+                    )
+            let reason =
+                String(parts[2])
+                    .trimmingCharacters(
+                        in: .whitespacesAndNewlines
+                    )
+
+            if !token.isEmpty {
+                return (
+                    token,
+                    reason.isEmpty
+                        ? "Developer Agent sistem etkisi oluşturan bir adım çalıştırmak istiyor."
+                        : reason
+                )
+            }
+        }
+
+        return (
+            "developer-system-effect",
+            raw.trimmingCharacters(
+                in: .whitespacesAndNewlines
+            ).isEmpty
+                ? "Developer Agent sistem etkisi oluşturan bir adım çalıştırmak istiyor."
+                : raw
+        )
+    }
+
     func approvePendingDeveloperToolApproval() {
         guard let approval =
             pendingDeveloperToolApproval
@@ -6512,8 +6583,8 @@ final class AgentEngine: ObservableObject {
                     learningJob,
                 learningJobBriefURL:
                     briefURL,
-                allowSystemEffects:
-                    true
+                approvedSystemEffect:
+                    approval.approvalToken
             )
         }
 
