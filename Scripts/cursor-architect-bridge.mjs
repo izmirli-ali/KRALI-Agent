@@ -20,6 +20,49 @@ const timeoutMs = Number(
   process.env.KRALI_CURSOR_ARCHITECT_TIMEOUT_MS || "180000"
 );
 
+const sandbox = {
+  type: "workspace_readonly",
+  networkPolicy: {
+    default: "deny",
+    allow: [],
+    deny: []
+  }
+};
+
+const cliConfig = {
+  version: 1,
+  editor: { vimMode: false },
+  permissions: {
+    allow: ["Read(**)"],
+    deny: [
+      "Write(**)",
+      "Shell(*)",
+      "WebFetch(*)",
+      "Mcp(*:*)"
+    ]
+  }
+};
+
+if (process.argv.includes("--self-test")) {
+  const deny = new Set(cliConfig.permissions.deny);
+  const safe =
+    sandbox.type === "workspace_readonly" &&
+    sandbox.networkPolicy.default === "deny" &&
+    cliConfig.permissions.allow.includes("Read(**)") &&
+    deny.has("Write(**)") &&
+    deny.has("Shell(*)") &&
+    deny.has("WebFetch(*)") &&
+    deny.has("Mcp(*:*)");
+
+  if (!safe) {
+    process.stderr.write("cursor_architect_safety_failed\n");
+    process.exit(2);
+  }
+
+  process.stdout.write("cursor_architect_safety_ok\n");
+  process.exit(0);
+}
+
 function fail(message, code = 1) {
   process.stderr.write(message + "\n");
   process.exit(code);
@@ -99,29 +142,6 @@ function snapshot(file) {
 
 const previousSandbox = snapshot(sandboxPath);
 const previousCLI = snapshot(cliPath);
-
-const sandbox = {
-  type: "workspace_readonly",
-  networkPolicy: {
-    default: "deny",
-    allow: [],
-    deny: []
-  }
-};
-
-const cliConfig = {
-  version: 1,
-  editor: { vimMode: false },
-  permissions: {
-    allow: ["Read(**)"],
-    deny: [
-      "Write(**)",
-      "Shell(*)",
-      "WebFetch(*)",
-      "Mcp(*:*)"
-    ]
-  }
-};
 
 fs.writeFileSync(
   sandboxPath,
