@@ -1034,25 +1034,17 @@ actor AgentDesktopControl {
             variantOrder,
             variant
         ) in verifiedVariants.enumerated() {
-            let normalizedVariant =
-                languageResolver
-                    .normalized(
-                        variant
-                    )
-
             let exactMatches =
                 candidates.filter {
                     candidate in
 
-                    ([candidate.name] +
-                        candidate.aliases)
-                        .contains {
-                            languageResolver
-                                .normalized(
-                                    $0
-                                ) ==
-                                normalizedVariant
-                        }
+                    languageResolver
+                        .isExactApplicationAliasMatch(
+                            input: variant,
+                            aliases:
+                                [candidate.name] +
+                                candidate.aliases
+                        )
                 }
 
             guard exactMatches.count == 1,
