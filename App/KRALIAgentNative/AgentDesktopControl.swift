@@ -955,6 +955,56 @@ actor AgentDesktopControl {
             )
         }
 
+        let localizationPlan =
+            await localIntelligence
+                .localizedApplicationCanonicalNames(
+                    query: query
+                )
+
+        var generatedVariants =
+            variantPlan.variants
+
+        if let localizationPlan,
+           localizationPlan.confidence >= 0.72 {
+            generatedVariants +=
+                localizationPlan
+                    .canonicalNames
+        }
+
+        var seenGenerated = Set<String>()
+        generatedVariants =
+            generatedVariants.filter {
+                let key =
+                    languageResolver
+                        .normalized($0)
+
+                guard
+                    !key.isEmpty,
+                    seenGenerated.insert(key)
+                        .inserted
+                else {
+                    return false
+                }
+
+                return true
+            }
+
+        let semanticConfidence =
+            max(
+                variantPlan.confidence,
+                localizationPlan?
+                    .confidence ?? 0
+            )
+
+        let semanticReason =
+            variantPlan.reason +
+            (
+                localizationPlan.map {
+                    " | localization: " +
+                    $0.reason
+                } ?? ""
+            )
+
         struct DeterministicSemanticMatch {
             let variant: String
             let variantOrder: Int
@@ -969,7 +1019,7 @@ actor AgentDesktopControl {
         var verifiedVariants: [String] = []
 
         for variant in
-            variantPlan.variants {
+            generatedVariants {
             let normalizedVariant =
                 languageResolver
                     .normalized(
@@ -1010,7 +1060,7 @@ actor AgentDesktopControl {
                     selectedName: nil,
                     selectedBundleIdentifier: nil,
                     selectionConfidence:
-                        variantPlan.confidence,
+                        semanticConfidence,
                     verificationConfidence: 0,
                     accepted: false,
                     stage:
@@ -1018,7 +1068,7 @@ actor AgentDesktopControl {
                     evaluatedBatchCount: nil,
                     finalistCount: nil,
                     generatedVariants:
-                        variantPlan.variants,
+                        generatedVariants,
                     deterministicMatchCount: 0,
                     selectedVariant: nil,
                     reason:
@@ -1121,7 +1171,7 @@ actor AgentDesktopControl {
                     selectedName: nil,
                     selectedBundleIdentifier: nil,
                     selectionConfidence:
-                        variantPlan.confidence,
+                        semanticConfidence,
                     verificationConfidence: 0,
                     accepted: false,
                     stage:
@@ -1129,11 +1179,11 @@ actor AgentDesktopControl {
                     evaluatedBatchCount: nil,
                     finalistCount: nil,
                     generatedVariants:
-                        variantPlan.variants,
+                        generatedVariants,
                     deterministicMatchCount: 0,
                     selectedVariant: nil,
                     reason:
-                        variantPlan.reason
+                        semanticReason
                 )
             )
         }
@@ -1169,7 +1219,7 @@ actor AgentDesktopControl {
                             chosen.candidate
                                 .bundleIdentifier,
                         selectionConfidence:
-                            variantPlan.confidence,
+                            semanticConfidence,
                         verificationConfidence: 0,
                         accepted: false,
                         stage:
@@ -1177,7 +1227,7 @@ actor AgentDesktopControl {
                         evaluatedBatchCount: nil,
                         finalistCount: nil,
                         generatedVariants:
-                            variantPlan.variants,
+                            generatedVariants,
                         deterministicMatchCount:
                             deterministicMatches.count,
                         selectedVariant:
@@ -1231,7 +1281,7 @@ actor AgentDesktopControl {
                         chosen.candidate
                             .bundleIdentifier,
                     selectionConfidence:
-                        variantPlan.confidence,
+                        semanticConfidence,
                     verificationConfidence: nil,
                     accepted: false,
                     stage:
@@ -1239,7 +1289,7 @@ actor AgentDesktopControl {
                     evaluatedBatchCount: nil,
                     finalistCount: nil,
                     generatedVariants:
-                        variantPlan.variants,
+                        generatedVariants,
                     deterministicMatchCount:
                         deterministicMatches.count,
                     selectedVariant:
@@ -1270,7 +1320,7 @@ actor AgentDesktopControl {
                     chosen.candidate
                         .bundleIdentifier,
                 selectionConfidence:
-                    variantPlan.confidence,
+                    semanticConfidence,
                 verificationConfidence:
                     verification.confidence,
                 accepted:
@@ -1282,13 +1332,13 @@ actor AgentDesktopControl {
                 evaluatedBatchCount: nil,
                 finalistCount: nil,
                 generatedVariants:
-                    variantPlan.variants,
+                    generatedVariants,
                 deterministicMatchCount:
                     deterministicMatches.count,
                 selectedVariant:
                     chosen.variant,
                 reason:
-                    variantPlan.reason +
+                    semanticReason +
                     " | verifier: " +
                     verification.reason
             )
