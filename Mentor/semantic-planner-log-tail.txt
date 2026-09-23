@@ -1,17 +1,3 @@
-━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-KRALİ Semantic Planner Fallback
-status=9
-input=windows keyi ekli mi değil mi nasıl öğrenebiliriz?
-output:
-
-━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-KRALİ Semantic Planner Fallback
-status=9
-input=OpenAI hakkında internette araştırma yap ve son gelişmeleri kısaca anlat
-output:
-
-━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-KRALİ Semantic Planner Fallback
 status=9
 input=Masaüstündeki en son değiştirilen görsel dosyasının sadece adını söyle. Dosyayı açma veya değiştirme
 output:
@@ -118,3 +104,17 @@ duration=0.32s
 executable=/opt/homebrew/bin/cline
 input=Yeni açılan bir kahve markasını araştırıp görsel dilini analiz edelim ve Photoshop'ta örnek bir Instagram postu hazırlayalım.
 output:
+
+[2026-09-23T12:25:46Z] local.stage=ollama_check
+
+[2026-09-23T12:25:46Z] local.stage=service_start_requested
+
+[2026-09-23T12:25:46Z] local.stage=service_started attempt=1
+
+[2026-09-23T12:25:46Z] local.stage=service_ready
+
+[2026-09-23T12:25:46Z] local.models=devstral-small-2:24b,devstral:24b,qwen2.5-coder:14b-instruct
+
+[2026-09-23T12:25:46Z] local.stage=model_found model=devstral:24b
+
+[2026-09-23T12:25:46Z] local.stage=request_started model=devstral:24b
