@@ -263,156 +263,59 @@ struct AgentTaskOrchestrator {
         purpose: String = "",
         capability: AgentCapability?
     ) -> String? {
-        guard
-            capability?.risk ==
-                .external ||
-            capability?.risk ==
-                .reversibleWrite
-        else {
-            return nil
-        }
-
-        let actionCorpus = normalize(
-            [
-                title,
-                operation
-            ]
-            .joined(separator: " ")
-        )
-
-        // Safety invariant:
-        // If the step itself is mutating, approval is never waived by
-        // explanatory text such as "read-only" or "without approval".
-        // Negative user constraints must remove the mutating step earlier
-        // in mission normalization; this layer is the final safety gate.
-
-        let harmlessOpenTerms = [
-            "open app",
-            "uygulamayi ac",
-            "uygulamasini ac",
-            "uygulamayi one getir",
-            "focus app",
-            "open url",
-            "siteyi ac",
-            "sayfayi ac",
-            "go to"
-        ]
-
-        let operationCorpus =
-            normalize(operation)
-
-        if operationCorpus.contains(
-            "capability.contract"
-        ) ||
-           operationCorpus.contains(
-            "semantic.fallback"
-        ) {
-            return nil
-        }
-
-        let mutationTokens = Set([
-            "send", "gonder",
-            "submit", "publish",
-            "yayinla", "post",
-            "paylas", "delete",
-            "sil", "purchase",
-            "satinal", "confirm",
-            "onayla", "save",
-            "kaydet", "write",
-            "yaz", "create",
-            "olustur", "import",
-            "ekle", "add",
-            "insert", "yerlestir",
-            "move", "tasi",
-            "rename", "edit",
-            "duzenle", "change",
-            "degistir", "apply",
-            "uygula", "export",
-            "overwrite"
-        ])
-
-        let mutationPhrases = [
-            "ice aktar",
-            "yeniden adlandir",
-            "disa aktar",
-            "uzerine yaz"
-        ]
-
-        let actionTokens =
-            approvalTokens(
-                actionCorpus
-            )
-
-        let hasMutation =
-            !actionTokens
-                .intersection(
-                    mutationTokens
-                )
-                .isEmpty ||
-            mutationPhrases.contains(
-                where: {
-                    actionCorpus.contains($0)
-                }
-            )
-
-        if !hasMutation &&
-           harmlessOpenTerms.contains(
-            where: {
-                actionCorpus.contains($0)
-            }
-           ) {
-            return nil
-        }
-
-        guard hasMutation else {
+        guard let capability else {
             return nil
         }
 
         let capabilityID =
-            capability?.id ?? ""
+            capability.id
 
-        if capabilityID == "premiere.control" {
-            return "Premiere projesi/sequence üzerinde kalıcı değişiklik yapılacak."
+        // Strict Approval Mode:
+        // Read-only reasoning, local context, screen observation and static
+        // web research may proceed. Any capability that can move foreground,
+        // open a user-facing resource, interact with an app, communicate or
+        // write user data must stop before execution and ask in chat.
+        switch capabilityID {
+        case "desktop.app":
+            return "Bir uygulama açılacak veya öne getirilecek."
+
+        case "system.open.url":
+            return "Bir web adresi varsayılan uygulamada açılacak."
+
+        case "files.reveal":
+            return "Finder öne getirilecek ve bir dosya veya klasör gösterilecek."
+
+        case "desktop.control":
+            return "macOS arayüzünde mouse, klavye, menü veya alan etkileşimi yapılacak."
+
+        case "browser.control":
+            return "Tarayıcı arayüzünde kullanıcı etkileşimi yapılacak."
+
+        case "premiere.control":
+            return "Premiere içinde kullanıcı projesini etkileyebilecek bir işlem yapılacak."
+
+        case "photoshop.control":
+            return "Photoshop içinde kullanıcı belgesini etkileyebilecek bir işlem yapılacak."
+
+        case "mail.work":
+            return "Mail hesabı veya dış iletişim üzerinde bir işlem yapılacak."
+
+        case "files.write.text":
+            return "Dosya sistemine yeni bir metin dosyası yazılacak."
+
+        case "files.move.reversible":
+            return "Dosyanın konumu veya kimliği değiştirilecek."
+
+        default:
+            break
         }
 
-        if capabilityID == "photoshop.control" {
-            return "Photoshop belgesi üzerinde kalıcı değişiklik yapılacak."
+        if capability.risk ==
+            .reversibleWrite {
+            return "Dosya sistemi veya kullanıcı verisi üzerinde geri alınabilir bir değişiklik yapılacak."
         }
 
-        if capabilityID == "mail.work" {
-            return "Mail kutusunda veya dış iletişimde değişiklik yapılacak."
-        }
-
-        if capabilityID.hasPrefix("files.") {
-            if actionTokens.contains("delete") ||
-               actionTokens.contains("sil") {
-                return "Dosya silme işlemi geri dönüşü zor veya imkânsız olabilir."
-            }
-
-            if actionTokens.contains("move") ||
-               actionTokens.contains("tasi") ||
-               actionTokens.contains("rename") {
-                return "Dosyanın konumu veya kimliği değiştirilecek."
-            }
-
-            if actionTokens.contains("overwrite") ||
-               actionCorpus.contains("uzerine yaz") {
-                return "Mevcut dosyanın üzerine yazılacak."
-            }
-
-            return "Dosya sistemi üzerinde değişiklik yapılacak."
-        }
-
-        if actionTokens.contains("send") ||
-           actionTokens.contains("gonder") ||
-           actionTokens.contains("publish") ||
-           actionTokens.contains("yayinla") ||
-           actionTokens.contains("post") ||
-           actionTokens.contains("paylas") {
-            return "Dış dünyaya geri alınması zor bir gönderim/yayın işlemi yapılacak."
-        }
-
-        return "Dış uygulama veya kullanıcı verisi üzerinde kalıcı değişiklik yapılacak."
+        return nil
     }
 
     private func approvalTokens(
