@@ -6174,6 +6174,31 @@ final class AgentEngine: ObservableObject {
     }
 
     func runDesktopControlProbe() {
+        guard
+            !inspectorState.desktopControlBusy,
+            pendingTaskApproval == nil
+        else {
+            return
+        }
+
+        inspectorState.desktopControlStatus =
+            "Onay bekleniyor: Desktop Control Probe Notlar uygulamasını açıp öne getirecek."
+
+        requestDeveloperToolApproval(
+            title:
+                "Desktop Control Probe",
+            reason:
+                "Developer Tools testi gerçek bir uygulamayı açıp foreground durumunu değiştirecek.",
+            targetSummary:
+                "Notes • com.apple.Notes",
+            operation:
+                "developer.desktop-control-probe",
+            action:
+                .desktopControlProbe
+        )
+    }
+
+    private func executeDesktopControlProbe() {
         guard !inspectorState.desktopControlBusy else { return }
 
         inspectorState.desktopControlBusy = true
@@ -6357,7 +6382,8 @@ final class AgentEngine: ObservableObject {
 
     func runDeveloperAgent(
         learningJob: AgentLearningJob? = nil,
-        learningJobBriefURL: URL? = nil
+        learningJobBriefURL: URL? = nil,
+        allowSystemMutation: Bool = false
     ) {
         guard !inspectorState.developerAgentBusy else {
             if let learningJob {
@@ -6503,7 +6529,9 @@ final class AgentEngine: ObservableObject {
             let status =
                 await developerBridge.run(
                     learningJobBriefURL:
-                        learningJobBriefURL
+                        learningJobBriefURL,
+                    allowSystemMutation:
+                        allowSystemMutation
                 )
 
             monitor.cancel()
@@ -6512,6 +6540,37 @@ final class AgentEngine: ObservableObject {
                 status
             inspectorState.developerAgentBusy =
                 false
+
+            if status.state ==
+                "approval_required" &&
+               !allowSystemMutation {
+                updateRunningLearningJob(
+                    with: status
+                )
+
+                requestDeveloperToolApproval(
+                    title:
+                        "Developer Agent sistem işlemi",
+                    reason:
+                        status.message,
+                    targetSummary:
+                        "KRALİ Developer Agent • sistem etkili adım",
+                    operation:
+                        "developer.system-mutation",
+                    action:
+                        .developerSystemMutation(
+                            learningJob:
+                                learningJob,
+                            briefURL:
+                                learningJobBriefURL
+                        )
+                )
+
+                log(
+                    "Developer Agent sistem etkili adımdan önce kullanıcı onayında durdu"
+                )
+                return
+            }
 
             finishActiveLearningJob(
                 with: status
