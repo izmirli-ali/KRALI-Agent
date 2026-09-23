@@ -4,6 +4,8 @@ set -u
 ROOT="${KRALI_REPO_ROOT:-$HOME/Developer/KRALI-Agent}"
 TRACE_SOURCE="$HOME/Library/Application Support/KRALI Agent/Mentor/latest.json"
 HISTORY_SOURCE="$HOME/Library/Application Support/KRALI Agent/Mentor/History"
+# HISTORY_SOURCE is the durable local history. Mentor Sync never writes to
+# or deletes it, and individual History JSON files are not mirrored into git.
 TRAINING_SOURCE="$HOME/Library/Application Support/KRALI Agent/Mentor/training-latest.json"
 LIVE_EVAL_SOURCE="$HOME/Library/Application Support/KRALI Agent/Mentor/live-eval-latest.json"
 ARENA_SOURCE="$HOME/Library/Application Support/KRALI Agent/Mentor/arena-latest.json"
@@ -37,8 +39,8 @@ if [ -f "$DEVELOPER_STATUS_SOURCE" ]; then
 fi
 
 SEMANTIC_LOG_SOURCE="$HOME/Library/Logs/KRALI-Semantic-Planner.log"
+REGRESSION_STATUS_SCRIPT="$ROOT/Scripts/generate-mentor-regression-status.command"
 TRACE_DEST="$ROOT/Mentor/latest.json"
-HISTORY_DEST="$ROOT/Mentor/History"
 TRAINING_DEST="$ROOT/Mentor/training-latest.json"
 LIVE_EVAL_DEST="$ROOT/Mentor/live-eval-latest.json"
 ARENA_DEST="$ROOT/Mentor/arena-latest.json"
@@ -51,6 +53,7 @@ RESOLUTION_TRACE_DEST="$ROOT/Mentor/application-resolution-latest.json"
 DEVELOPER_STATUS_DEST="$ROOT/Mentor/developer-status.txt"
 DEVELOPER_LOG_DEST="$ROOT/Mentor/developer-log-tail.txt"
 SEMANTIC_LOG_DEST="$ROOT/Mentor/semantic-planner-log-tail.txt"
+REGRESSION_STATUS_DEST="$ROOT/Mentor/regression-status.json"
 
 echo ""
 echo "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
@@ -88,12 +91,8 @@ mkdir -p "$ROOT/Mentor"
 
 FILES=()
 
-if [ -d "$HISTORY_SOURCE" ]; then
-    mkdir -p "$HISTORY_DEST"
-    rm -f "$HISTORY_DEST"/*.json(N)
-    cp "$HISTORY_SOURCE"/*.json(N) "$HISTORY_DEST"/ 2>/dev/null || true
-    FILES+=("Mentor/History")
-fi
+# Local Mentor/History is intentionally not mirrored into the repository.
+# See Mentor/History/README.md for the repo-side retention policy.
 
 if [ -f "$TRACE_SOURCE" ]; then
     cp "$TRACE_SOURCE" "$TRACE_DEST"
@@ -158,6 +157,25 @@ fi
 if [ -f "$SEMANTIC_LOG_SOURCE" ]; then
     tail -n 120 "$SEMANTIC_LOG_SOURCE" > "$SEMANTIC_LOG_DEST"
     FILES+=("Mentor/semantic-planner-log-tail.txt")
+fi
+
+if [ -f "$REGRESSION_STATUS_SCRIPT" ]; then
+    REGRESSION_STATUS_TMP="$REGRESSION_STATUS_DEST.tmp.$"
+
+    if /bin/zsh "$REGRESSION_STATUS_SCRIPT" "$ROOT" > "$REGRESSION_STATUS_TMP"; then
+        /bin/mv -f "$REGRESSION_STATUS_TMP" "$REGRESSION_STATUS_DEST"
+        FILES+=("Mentor/regression-status.json")
+
+        if ! /usr/bin/grep -q '"allCurrent"[[:space:]]*:[[:space:]]*true' "$REGRESSION_STATUS_DEST"; then
+            echo ""
+            echo "⚠️  WARNING: Training Lab / Arena / Live Research Eval sonuçlarından en az biri güncel VERSION ile eşleşmiyor veya eksik."
+            echo "    Detay: Mentor/regression-status.json"
+        fi
+    else
+        /bin/rm -f "$REGRESSION_STATUS_TMP"
+        echo ""
+        echo "⚠️  WARNING: Mentor/regression-status.json üretilemedi; mevcut rapora dokunulmadan Mentor sync devam ediyor."
+    fi
 fi
 
 if [ -z "$(git status --porcelain -- ${FILES[@]})" ]; then
