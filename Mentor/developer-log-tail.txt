@@ -7,3 +7,46 @@
 ✅ Developer Agent runtime: v22.23.2
 Yerel architect model seçimi: devstral-small-2:24b • RAM≈24GB
 Yerel tool-call probe: devstral-small-2:24b
+tool_call_ok|devstral-small-2:24b
+✅ Yerel Developer AI hazır + tool-call doğrulandı: devstral-small-2:24b
+From https://github.com/izmirli-ali/KRALI-Agent
+ * branch            main       -> FETCH_HEAD
+Already up to date.
+Learning Queue job brief bulundu; mutable Mentor latest yerine immutable job kullanılacak.
+Preparing worktree (new branch 'krali-dev-agent/20260923-191032')
+branch 'krali-dev-agent/20260923-191032' set up to track 'origin/main'.
+HEAD is now at 1da29b5 Sync KRALI mentor diagnostics
+Developer prompt mode: gap • 7136 bytes
+🧪 Structured controller JSON probe: qwen2.5-coder:14b-instruct
+controller_probe_ok|qwen2.5-coder:14b-instruct|11034ms
+✅ Structured controller probe geçti: qwen2.5-coder:14b-instruct
+🧭 Structured controller modeli: qwen2.5-coder:14b-instruct • ölçülmüş JSON karar modu
+🧠 Model rolleri: root-cause=qwen2.5-coder:14b-instruct • mutation=devstral-small-2:24b • controller=qwen2.5-coder:14b-instruct
+KRALI_LOCAL_STAGE local_agent_starting • Uygulama kontrolü (desktop.app) native Ollama agent başlatılıyor: devstral-small-2:24b
+KRALI_LOCAL_STAGE local_agent_running • Uygulama kontrolü (desktop.app) yerel model çalışıyor • adım 1/10
+KRALI_LOCAL_STAGE local_agent_tool • Uygulama kontrolü (desktop.app) araç çalışıyor: list_files
+KRALI_LOCAL_STAGE local_agent_running • Uygulama kontrolü (desktop.app) yerel model çalışıyor • adım 2/10
+KRALI_LOCAL_STAGE local_agent_tool • Uygulama kontrolü (desktop.app) araç çalışıyor: read_file
+KRALI_LOCAL_STAGE local_agent_running • Uygulama kontrolü (desktop.app) yerel model çalışıyor • adım 3/10
+KRALI_LOCAL_STAGE local_agent_tool • Uygulama kontrolü (desktop.app) araç çalışıyor: read_file
+KRALI_LOCAL_STAGE local_agent_running • Uygulama kontrolü (desktop.app) yerel model çalışıyor • adım 4/10
+KRALI_LOCAL_STAGE local_agent_tool • Uygulama kontrolü (desktop.app) araç çalışıyor: search_codebase
+KRALI_LOCAL_STAGE local_agent_running • Uygulama kontrolü (desktop.app) yerel model çalışıyor • adım 5/10
+KRALI_LOCAL_STAGE local_agent_tool • Uygulama kontrolü (desktop.app) araç çalışıyor: search_codebase
+KRALI_LOCAL_STAGE local_agent_running • Uygulama kontrolü (desktop.app) yerel model çalışıyor • adım 6/10
+KRALI_LOCAL_STAGE local_agent_tool • Uygulama kontrolü (desktop.app) araç çalışıyor: search_codebase
+KRALI_LOCAL_STAGE local_agent_running • Uygulama kontrolü (desktop.app) yerel model çalışıyor • adım 7/10
+KRALI_LOCAL_STAGE local_agent_tool • Uygulama kontrolü (desktop.app) araç çalışıyor: search_codebase
+KRALI_LOCAL_STAGE local_agent_running • Uygulama kontrolü (desktop.app) yerel model çalışıyor • adım 8/10
+KRALI_LOCAL_STAGE local_agent_tool • Uygulama kontrolü (desktop.app) araç çalışıyor: search_codebase
+KRALI_LOCAL_STAGE local_agent_running • Uygulama kontrolü (desktop.app) yerel model çalışıyor • adım 9/10
+KRALI_LOCAL_STAGE local_agent_tool • Uygulama kontrolü (desktop.app) araç çalışıyor: list_files
+KRALI_LOCAL_STAGE local_agent_implementation_phase • Uygulama kontrolü (desktop.app) hedefli inspection kanıtı tamamlandı • implementation zorunlu • 4/4
+KRALI_LOCAL_STAGE local_agent_running • Uygulama kontrolü (desktop.app) yerel model çalışıyor • adım 10/10
+KRALI_LOCAL_STAGE local_agent_controller_preparing • Uygulama kontrolü (desktop.app) ana model belleği karar modeli için boşaltıldı • devstral-small-2:24b → qwen2.5-coder:14b-instruct
+KRALI_LOCAL_STAGE local_agent_controller_preparing • Uygulama kontrolü (desktop.app) structured controller girdisi hazır • mode=general • problem=n/a • chars=797 • decisionModel=qwen2.5-coder:14b-instruct • role=controller
+KRALI_LOCAL_STAGE local_agent_structured_tool • Uygulama kontrolü (desktop.app) yapılandırılmış devam aracı çalışıyor: search_codebase • trigger=completion_blocked • phase=implementation • controller=qwen2.5-coder:14b-instruct
+KRALI_LOCAL_STAGE local_agent_target_found • Uygulama kontrolü (desktop.app) hedef kaynak bulundu • paths=0 • targets=[]
+Uygulama kontrolü (desktop.app) native local agent iteration sınırına ulaştı.
+Deleted branch krali-dev-agent/20260923-191032 (was 1da29b5).
+❌ Native yerel Developer Agent durdu: Uygulama kontrolü (desktop.app) native local agent iteration sınırına ulaştı.

@@ -1,1 +1,1 @@
-local_tool_probe|Yerel model tool calling doğrulanıyor: devstral-small-2:24b|@meta|app=0.10.23|at=1790179834|run=20260923-191032
+local_agent_iteration_limit|Uygulama kontrolü (desktop.app) native local agent iteration sınırına ulaştı.|krali-dev-agent/20260923-191032|/Users/medusa/Developer/KRALI-Agent-Dev-20260923-191032|@meta|app=0.10.23|at=1790180010|run=20260923-191032
