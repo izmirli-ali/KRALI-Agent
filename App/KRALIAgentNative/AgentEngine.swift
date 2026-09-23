@@ -5956,6 +5956,43 @@ final class AgentEngine: ObservableObject {
     }
 
     func runDesktopControlProbe() {
+        guard
+            !inspectorState.desktopControlBusy,
+            pendingDeveloperToolApproval == nil
+        else {
+            return
+        }
+
+        guard
+            developerToolSafetyPolicy
+                .requiresApproval(
+                    .desktopControlProbe
+                )
+        else {
+            executeDesktopControlProbe()
+            return
+        }
+
+        pendingDeveloperToolApproval =
+            PendingDeveloperToolApproval(
+                action:
+                    .desktopControlProbe,
+                title:
+                    "Desktop Control Probe",
+                reason:
+                    "Bu test Notlar uygulamasını gerçekten açacak veya öne getirecek ve foreground durumunu doğrulayacak.",
+                targetSummary:
+                    "Notes • com.apple.Notes • /System/Applications/Notes.app"
+            )
+
+        inspectorState.desktopControlStatus =
+            "Onay bekleniyor • Notlar henüz açılmadı."
+        log(
+            "Developer Tool approval gate: Desktop Control Probe"
+        )
+    }
+
+    private func executeDesktopControlProbe() {
         guard !inspectorState.desktopControlBusy else { return }
 
         inspectorState.desktopControlBusy = true
