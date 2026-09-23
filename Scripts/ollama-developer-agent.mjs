@@ -458,6 +458,59 @@ function aliasLocalizationFailureEvidence() {
   };
 }
 
+function aliasProvenanceGapActive() {
+  const evidence =
+    aliasLocalizationFailureEvidence();
+
+  return (
+    evidence
+      ?.missingLocalizedAliasEvidence
+      ?.some(
+        (item) =>
+          item.hasProvenance &&
+          !item.anyProvenanceHasQuery &&
+          !item.anyFinalAliasHasQuery
+      ) === true
+  );
+}
+
+function isAliasProducerSymbol(
+  symbol
+) {
+  const value =
+    String(symbol || "");
+
+  if (
+    /trace|provenance|save|diagnostic/i.test(
+      value
+    )
+  ) {
+    return false;
+  }
+
+  if (
+    /score|rank|confidence|decision|match|bestApplicationCandidate/i.test(
+      value
+    )
+  ) {
+    return false;
+  }
+
+  return (
+    /alias|localiz|displayname|bundlename|finder/i.test(
+      value
+    )
+  );
+}
+
+function isAliasDownstreamConsumerSymbol(
+  symbol
+) {
+  return /^(bestApplicationCandidate|applicationCandidateDecision|rankedApplicationCandidates|bestAliasScore|isConfidentAliasMatch|mergedAliases|mergeCandidates|launchServicesApplicationCandidate)$/i.test(
+    String(symbol || "")
+  );
+}
+
 function deterministicRootCauseContradiction(
   target,
   diagnosis,
@@ -481,23 +534,16 @@ function deterministicRootCauseContradiction(
     .join(" ");
 
   const provenanceGap =
-    evidence
-      .missingLocalizedAliasEvidence
-      ?.some(
-        (item) =>
-          item.hasProvenance &&
-          !item.anyProvenanceHasQuery &&
-          !item.anyFinalAliasHasQuery
-      ) === true;
+    aliasProvenanceGapActive();
 
   if (
-    /^(mergedAliases|mergeCandidates)$/i.test(
+    provenanceGap &&
+    isAliasDownstreamConsumerSymbol(
       symbol
-    ) &&
-    provenanceGap
+    )
   ) {
     return (
-      "runtime alias provenance, istenen localized alias'ın hiçbir upstream kaynaktan üretilmediğini gösteriyor; yalnız merge/dedupe yapan aggregator eksik alias'ı yaratamayacağı için root cause olamaz"
+      "runtime alias provenance, istenen localized alias'ın hiçbir upstream metadata kaynağında üretilmediğini gösteriyor; seçim/skorlama/merge/LaunchServices gibi downstream consumer katmanları var olmayan alias'ı üretemeyeceği için causal mutation target olamaz"
     );
   }
 
@@ -5052,11 +5098,29 @@ function collectDependencyNeighborhood(
 ) {
   const aliasEvidence =
     aliasLocalizationFailureEvidence();
+  const provenanceGap =
+    aliasProvenanceGapActive();
   const maxDepth =
-    aliasEvidence ? 2 : 1;
+    provenanceGap
+      ? 3
+      : (
+          aliasEvidence
+            ? 2
+            : 1
+        );
   const maxRecords =
-    aliasEvidence ? 10 : 8;
-  const records = [primary];
+    provenanceGap
+      ? 16
+      : (
+          aliasEvidence
+            ? 10
+            : 8
+        );
+  const scanBudget =
+    provenanceGap
+      ? 32
+      : maxRecords;
+  const discovered = [primary];
   const seen = new Set([
     primary.id,
     primary.symbol,
@@ -5075,11 +5139,11 @@ function collectDependencyNeighborhood(
       String(symbol || "");
 
     if (
-      /alias|localiz|displayname|bundlename|finder/i.test(
+      isAliasProducerSymbol(
         value
       )
     ) {
-      return 40;
+      return 60;
     }
 
     if (
@@ -5103,7 +5167,7 @@ function collectDependencyNeighborhood(
 
   while (
     queue.length > 0 &&
-    records.length < maxRecords
+    discovered.length < scanBudget
   ) {
     const current =
       queue.shift();
@@ -5154,7 +5218,8 @@ function collectDependencyNeighborhood(
       const symbol of dependencies
     ) {
       if (
-        records.length >= maxRecords
+        discovered.length >=
+          scanBudget
       ) {
         break;
       }
@@ -5180,7 +5245,7 @@ function collectDependencyNeighborhood(
 
       seen.add(symbol);
       seen.add(evidence.id);
-      records.push(evidence);
+      discovered.push(evidence);
 
       if (
         current.depth + 1 <
@@ -5195,7 +5260,50 @@ function collectDependencyNeighborhood(
     }
   }
 
-  return records;
+  if (!provenanceGap) {
+    return discovered.slice(
+      0,
+      maxRecords
+    );
+  }
+
+  const rest =
+    discovered.slice(1);
+
+  const producers =
+    rest.filter(
+      (item) =>
+        isAliasProducerSymbol(
+          item?.symbol
+        )
+    );
+
+  const nonProducers =
+    rest
+      .filter(
+        (item) =>
+          !isAliasProducerSymbol(
+            item?.symbol
+          )
+      )
+      .sort(
+        (left, right) =>
+          dependencyPriority(
+            right?.symbol
+          ) -
+          dependencyPriority(
+            left?.symbol
+          )
+      );
+
+  return [
+    primary,
+    ...producers,
+    ...nonProducers,
+  ].slice(
+    0,
+    maxRecords
+  );
 }
 
 async function requestRootCauseDiagnosis(
@@ -5901,19 +6009,20 @@ function deterministicRootCauseScore(
 
     if (
       provenanceGap &&
-      /^(mergedAliases|mergeCandidates)$/i.test(
+      isAliasDownstreamConsumerSymbol(
         symbol
       )
     ) {
-      score -= 28;
+      score -= 36;
     }
 
     if (
-      /localizedBundleAliases/i.test(
+      provenanceGap &&
+      isAliasProducerSymbol(
         symbol
       )
     ) {
-      score += 18;
+      score += 28;
     }
 
     if (
