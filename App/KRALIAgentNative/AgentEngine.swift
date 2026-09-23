@@ -8,7 +8,8 @@ final class AgentEngine: ObservableObject {
         case desktopControlProbe
         case developerSystemMutation(
             learningJob: AgentLearningJob?,
-            briefURL: URL?
+            briefURL: URL?,
+            actionID: String
         )
     }
 
@@ -123,6 +124,8 @@ final class AgentEngine: ObservableObject {
     private let desktopControlStore = DesktopControlProbeStore()
     private let textFileWriter = AgentTextFileWriter()
     private let developerBridge = AgentDeveloperBridge()
+    private let developerToolApprovalPolicy =
+        AgentDeveloperToolApprovalPolicy()
     private let learningQueueStore = AgentLearningQueueStore()
     private let debugRecoveryCenter = AgentDebugRecoveryCenter()
     private let localIntelligence = AgentLocalIntelligence()
@@ -3487,15 +3490,16 @@ final class AgentEngine: ObservableObject {
 
         case let .developerSystemMutation(
             learningJob,
-            briefURL
+            briefURL,
+            actionID
         ):
             runDeveloperAgent(
                 learningJob:
                     learningJob,
                 learningJobBriefURL:
                     briefURL,
-                allowSystemMutation:
-                    true
+                approvedSystemActionID:
+                    actionID
             )
         }
 
@@ -3539,8 +3543,13 @@ final class AgentEngine: ObservableObject {
                     Date()
             )
 
-        if case .developerSystemMutation =
-            pendingDeveloperToolAction {
+        if case .some(
+            .developerSystemMutation(
+                _,
+                _,
+                _
+            )
+        ) = pendingDeveloperToolAction {
             requeueActiveLearningJobAfterApprovalDecline()
         }
 
@@ -4514,6 +4523,7 @@ final class AgentEngine: ObservableObject {
         currentTaskGraph = nil
         currentRuntimeTask = nil
         pendingTaskApproval = nil
+        pendingDeveloperToolAction = nil
         approvedRuntimeStepIndexes = []
         approvedRuntimeApplicationTargets = [:]
         currentTaskApprovalAudit = nil
@@ -6383,8 +6393,15 @@ final class AgentEngine: ObservableObject {
     func runDeveloperAgent(
         learningJob: AgentLearningJob? = nil,
         learningJobBriefURL: URL? = nil,
-        allowSystemMutation: Bool = false
+        approvedSystemActionID: String? = nil
     ) {
+        guard pendingTaskApproval == nil else {
+            log(
+                "Developer Agent bekliyor: önce mevcut kullanıcı onayı sonuçlanmalı"
+            )
+            return
+        }
+
         guard !inspectorState.developerAgentBusy else {
             if let learningJob {
                 log(
@@ -6530,8 +6547,8 @@ final class AgentEngine: ObservableObject {
                 await developerBridge.run(
                     learningJobBriefURL:
                         learningJobBriefURL,
-                    allowSystemMutation:
-                        allowSystemMutation
+                    approvedSystemActionID:
+                        approvedSystemActionID
                 )
 
             monitor.cancel()
@@ -6542,11 +6559,33 @@ final class AgentEngine: ObservableObject {
                 false
 
             if status.state ==
-                "approval_required" &&
-               !allowSystemMutation {
+                "approval_required" {
                 updateRunningLearningJob(
                     with: status
                 )
+
+                guard let actionID =
+                    status.approvalActionID,
+                    !actionID.isEmpty
+                else {
+                    finishActiveLearningJob(
+                        with:
+                            DeveloperAgentStatus(
+                                state:
+                                    "failed",
+                                message:
+                                    "Developer Agent sistem onayı istedi ancak action ID üretmedi.",
+                                branch:
+                                    status.branch,
+                                worktree:
+                                    status.worktree
+                            )
+                    )
+                    log(
+                        "Developer Agent approval_required action ID olmadan döndü; güvenli biçimde durduruldu"
+                    )
+                    return
+                }
 
                 requestDeveloperToolApproval(
                     title:
@@ -6554,20 +6593,25 @@ final class AgentEngine: ObservableObject {
                     reason:
                         status.message,
                     targetSummary:
-                        "KRALİ Developer Agent • sistem etkili adım",
+                        "KRALİ Developer Agent • " +
+                        actionID,
                     operation:
-                        "developer.system-mutation",
+                        "developer.system-mutation." +
+                        actionID,
                     action:
                         .developerSystemMutation(
                             learningJob:
                                 learningJob,
                             briefURL:
-                                learningJobBriefURL
+                                learningJobBriefURL,
+                            actionID:
+                                actionID
                         )
                 )
 
                 log(
-                    "Developer Agent sistem etkili adımdan önce kullanıcı onayında durdu"
+                    "Developer Agent sistem etkili adımdan önce kullanıcı onayında durdu • action=" +
+                    actionID
                 )
                 return
             }
