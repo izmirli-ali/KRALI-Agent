@@ -8,13 +8,12 @@ struct DesktopForegroundVerificationEvidence:
     Sendable {
     let activationSucceeded: Bool
     let workspaceFrontmostVerified: Bool
-    let accessibilityFrontmostVerified: Bool
+    let accessibilityRecoveryAttempted: Bool
     let screenKitFrontmostVerified: Bool
     let screenPerceptionFrontmostVerified: Bool
 
     var frontmostVerified: Bool {
         workspaceFrontmostVerified ||
-        accessibilityFrontmostVerified ||
         screenKitFrontmostVerified ||
         screenPerceptionFrontmostVerified
     }
@@ -24,10 +23,6 @@ struct DesktopForegroundVerificationEvidence:
 
         if workspaceFrontmostVerified {
             sources.append("NSWorkspace")
-        }
-
-        if accessibilityFrontmostVerified {
-            sources.append("AX")
         }
 
         if screenKitFrontmostVerified {
@@ -51,7 +46,7 @@ struct DesktopAppActionResult: Codable, Hashable, Sendable {
     let wasRunning: Bool
     let launchOrActivateSucceeded: Bool
     let workspaceFrontmostVerified: Bool
-    let accessibilityFrontmostVerified: Bool
+    let accessibilityRecoveryAttempted: Bool
     let screenKitFrontmostVerified: Bool
     let screenPerceptionFrontmostVerified: Bool
     let frontmostAfter: String?
@@ -360,8 +355,14 @@ actor AgentDesktopControl {
             )
 
         let activationSucceeded: Bool
+        var accessibilityRecoveryAttempted = false
 
         if let runningBefore {
+            accessibilityRecoveryAttempted =
+                accessibilityTrusted(
+                    promptIfNeeded: false
+                )
+
             activationSucceeded =
                 requestActivation(
                     runningBefore
@@ -398,10 +399,17 @@ actor AgentDesktopControl {
                 candidate
             )
 
-        var accessibilityVerified =
-            accessibilityFrontmost(
-                candidate
-            )
+        if !workspaceVerified,
+           accessibilityTrusted(
+                promptIfNeeded: false
+           ),
+           matchingRunningApplication(
+                named: candidate.name,
+                preferredBundleIdentifier:
+                    candidate.bundleIdentifier
+           ) != nil {
+            accessibilityRecoveryAttempted = true
+        }
 
         var screenKitVerified =
             await visuallyForeground(
@@ -418,8 +426,8 @@ actor AgentDesktopControl {
                     activationSucceeded,
                 workspaceFrontmostVerified:
                     workspaceVerified,
-                accessibilityFrontmostVerified:
-                    accessibilityVerified,
+                accessibilityRecoveryAttempted:
+                    accessibilityRecoveryAttempted,
                 screenKitFrontmostVerified:
                     screenKitVerified,
                 screenPerceptionFrontmostVerified:
@@ -442,10 +450,12 @@ actor AgentDesktopControl {
                 workspaceFrontmost(
                     candidate
                 )
-            accessibilityVerified =
-                accessibilityFrontmost(
-                    candidate
-                )
+            if accessibilityTrusted(
+                promptIfNeeded: false
+            ) {
+                accessibilityRecoveryAttempted = true
+            }
+
             screenKitVerified =
                 await visuallyForeground(
                     candidate
@@ -515,9 +525,9 @@ actor AgentDesktopControl {
             workspaceFrontmostVerified:
                 evidence
                     .workspaceFrontmostVerified,
-            accessibilityFrontmostVerified:
+            accessibilityRecoveryAttempted:
                 evidence
-                    .accessibilityFrontmostVerified,
+                    .accessibilityRecoveryAttempted,
             screenKitFrontmostVerified:
                 evidence
                     .screenKitFrontmostVerified,
@@ -2471,49 +2481,6 @@ actor AgentDesktopControl {
         return candidate.aliases
             .map(normalize)
             .contains(frontName)
-    }
-
-    private func accessibilityFrontmost(
-        _ candidate: ApplicationCandidate
-    ) -> Bool {
-        guard
-            accessibilityTrusted(
-                promptIfNeeded: false
-            ),
-            let running =
-                matchingRunningApplication(
-                    named: candidate.name,
-                    preferredBundleIdentifier:
-                        candidate.bundleIdentifier
-                )
-        else {
-            return false
-        }
-
-        let applicationElement =
-            AXUIElementCreateApplication(
-                running.processIdentifier
-            )
-
-        var rawValue: CFTypeRef?
-        let error =
-            AXUIElementCopyAttributeValue(
-                applicationElement,
-                kAXFrontmostAttribute
-                    as CFString,
-                &rawValue
-            )
-
-        guard error == .success else {
-            return false
-        }
-
-        if let value =
-            rawValue as? NSNumber {
-            return value.boolValue
-        }
-
-        return false
     }
 
     private func screenPerceptionVerifiesForeground(
