@@ -2861,11 +2861,13 @@ struct AgentTrainingLab {
 
         let passed =
             graph.approvalStepIndexes ==
-                [3] &&
+                [0, 2, 3] &&
             graph.steps[0]
+                .requiresApproval == true &&
+            graph.steps[1]
                 .requiresApproval == false &&
             graph.steps[2]
-                .requiresApproval == false &&
+                .requiresApproval == true &&
             graph.steps[3]
                 .requiresApproval == true &&
             graph.blockedCapabilityIDs ==
@@ -2875,13 +2877,13 @@ struct AgentTrainingLab {
             scenarioID:
                 "task-graph-external-commit-approval",
             title:
-                "External commit öncesi kullanıcı onayı",
+                "Mail dış etkileşimlerinde Strict Approval",
             tier: .core,
             prompt:
-                "Oku, analiz et, taslak oluştur; gönderimi onay kapısında durdur.",
+                "Mail hesabı üzerinde yapılan her dış adımı ayrı onay kapısında durdur.",
             passed: passed,
             goal:
-                "Hazırlık step'lerini commit step'inden ayır",
+                "Mail hesabına dokunan read/draft/send adımlarını kullanıcı onayına bağla; yalnız iç reasoning otomatik ilerlesin",
             route: [
                 "Core",
                 "Mail",
@@ -2896,7 +2898,7 @@ struct AgentTrainingLab {
             diagnostics: passed
                 ? []
                 : [
-                    "External commit approval gate yanlış step'e uygulandı."
+                    "Strict Approval mail.work adımlarının tamamına veya yalnız dış step'lere doğru uygulanmadı."
                 ]
         )
     }
@@ -3545,24 +3547,41 @@ struct AgentTrainingLab {
                     capabilityRegistry.all
             )
 
-        let gaps =
+        let unapprovedGaps =
             capabilityGapResolver
                 .resolveRuntimeFailures(
                     graph: graph,
                     completedStepIndexes: [0],
+                    approvedStepIndexes: [],
+                    capabilities:
+                        capabilityRegistry.all
+                )
+
+        let approvedGaps =
+            capabilityGapResolver
+                .resolveRuntimeFailures(
+                    graph: graph,
+                    completedStepIndexes: [0],
+                    approvedStepIndexes: [1],
                     capabilities:
                         capabilityRegistry.all
                 )
 
         let passed =
-            gaps.count == 1 &&
-            gaps.first?
+            unapprovedGaps.isEmpty &&
+            approvedGaps.count == 1 &&
+            approvedGaps.first?
                 .capabilityID ==
                 "desktop.app" &&
-            gaps.first?
+            approvedGaps.first?
                 .kind ==
                 .strategy &&
-            gaps.first?
+            approvedGaps.first?
+                .reason
+                .contains(
+                    "kullanıcı onayı verildi"
+                ) == true &&
+            approvedGaps.first?
                 .developerBrief
                 .contains(
                     "hard-code yazma"
@@ -3586,14 +3605,14 @@ struct AgentTrainingLab {
                 "Learn"
             ],
             selectedCapabilities:
-                gaps.map(
+                approvedGaps.map(
                     \.capabilityID
                 ),
             unavailableCapabilities: [],
             diagnostics: passed
                 ? []
                 : [
-                    "Runtime'da başarısız desktop.app provider'ı tek root gap olarak üretilmedi."
+                    "Onay bekleyen step yanlışlıkla failure sayıldı veya onay sonrası başarısız desktop.app tek root gap olarak üretilmedi."
                 ]
         )
     }
