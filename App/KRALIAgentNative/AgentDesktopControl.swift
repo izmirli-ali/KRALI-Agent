@@ -102,6 +102,18 @@ struct ApplicationResolutionQueryTrace:
         [ApplicationResolutionCandidateTrace]
 }
 
+struct ApplicationSemanticVariantTrace:
+    Codable,
+    Hashable,
+    Sendable {
+    let value: String
+    let source: String
+    let intermediateVerificationStage: String
+    let intermediateVerificationConfidence: Double?
+    let exactMatchCount: Int
+    let exactMatchBundleIdentifiers: [String]
+}
+
 struct ApplicationSemanticResolutionTrace:
     Codable,
     Hashable,
@@ -122,6 +134,8 @@ struct ApplicationSemanticResolutionTrace:
     let deterministicMatchCount: Int?
     let selectedVariant: String?
     let reason: String
+    var variantDiagnostics:
+        [ApplicationSemanticVariantTrace]? = nil
 }
 
 struct ApplicationResolutionTrace:
@@ -908,40 +922,40 @@ actor AgentDesktopControl {
                     query: query
                 )
 
-        var generatedVariants = [
-            query
-        ]
+        let localizationNames =
+            (
+                localizationPlan?
+                    .confidence ?? 0
+            ) >= 0.72
+            ? (
+                localizationPlan?
+                    .canonicalNames ?? []
+            )
+            : []
 
-        if let variantPlan,
-           variantPlan.confidence >= 0.60 {
-            generatedVariants +=
-                variantPlan.variants
-        }
+        let variantNames =
+            (
+                variantPlan?
+                    .confidence ?? 0
+            ) >= 0.60
+            ? (
+                variantPlan?
+                    .variants ?? []
+            )
+            : []
 
-        if let localizationPlan,
-           localizationPlan.confidence >= 0.72 {
-            generatedVariants +=
-                localizationPlan
-                    .canonicalNames
-        }
+        let nameCandidates =
+            languageResolver
+                .semanticApplicationNameCandidates(
+                    query: query,
+                    localizationNames:
+                        localizationNames,
+                    variantNames:
+                        variantNames
+                )
 
-        var seenGenerated = Set<String>()
-        generatedVariants =
-            generatedVariants.filter {
-                let key =
-                    languageResolver
-                        .normalized($0)
-
-                guard
-                    !key.isEmpty,
-                    seenGenerated.insert(key)
-                        .inserted
-                else {
-                    return false
-                }
-
-                return true
-            }
+        let generatedVariants =
+            nameCandidates.map(\.value)
 
         let semanticConfidence =
             max(
@@ -967,7 +981,7 @@ actor AgentDesktopControl {
 
         guard
             semanticConfidence >= 0.60,
-            !generatedVariants.isEmpty
+            !nameCandidates.isEmpty
         else {
             return (
                 nil,
@@ -1000,6 +1014,7 @@ actor AgentDesktopControl {
 
         struct DeterministicSemanticMatch {
             let variant: String
+            let source: String
             let variantOrder: Int
             let candidate: ApplicationCandidate
             let score: Double
@@ -1009,74 +1024,25 @@ actor AgentDesktopControl {
             languageResolver
                 .normalized(query)
 
-        var verifiedVariants: [String] = []
+        var matches:
+            [DeterministicSemanticMatch] = []
+        var variantDiagnostics:
+            [ApplicationSemanticVariantTrace] = []
 
-        for variant in
-            generatedVariants {
+        for (
+            variantOrder,
+            nameCandidate
+        ) in nameCandidates.enumerated() {
+            let variant =
+                nameCandidate.value
+            let source =
+                nameCandidate.source
             let normalizedVariant =
                 languageResolver
                     .normalized(
                         variant
                     )
 
-            if normalizedVariant ==
-                normalizedQuery {
-                verifiedVariants.append(
-                    variant
-                )
-                continue
-            }
-
-            if let verification =
-                await localIntelligence
-                    .verifyApplicationNameVariant(
-                        query: query,
-                        variant: variant
-                    ),
-               verification.equivalent,
-               verification.confidence >=
-                    0.94 {
-                verifiedVariants.append(
-                    variant
-                )
-            }
-        }
-
-        guard !verifiedVariants.isEmpty else {
-            return (
-                nil,
-                ApplicationSemanticResolutionTrace(
-                    attempted: true,
-                    providerAvailable: true,
-                    query: query,
-                    selectedIndex: nil,
-                    selectedName: nil,
-                    selectedBundleIdentifier: nil,
-                    selectionConfidence:
-                        semanticConfidence,
-                    verificationConfidence: 0,
-                    accepted: false,
-                    stage:
-                        "variant_verification_rejected",
-                    evaluatedBatchCount: nil,
-                    finalistCount: nil,
-                    generatedVariants:
-                        generatedVariants,
-                    deterministicMatchCount: 0,
-                    selectedVariant: nil,
-                    reason:
-                        "semantic_variants_failed_equivalence_gate"
-                )
-            )
-        }
-
-        var matches:
-            [DeterministicSemanticMatch] = []
-
-        for (
-            variantOrder,
-            variant
-        ) in verifiedVariants.enumerated() {
             let exactMatches =
                 candidates.filter {
                     candidate in
@@ -1090,8 +1056,78 @@ actor AgentDesktopControl {
                         )
                 }
 
-            guard exactMatches.count == 1,
-                  let exact =
+            var intermediateStage =
+                "not-run"
+            var intermediateConfidence:
+                Double?
+            var intermediateAccepted =
+                false
+
+            if normalizedVariant ==
+                normalizedQuery {
+                intermediateStage =
+                    "identity"
+                intermediateConfidence = 1
+                intermediateAccepted = true
+            } else if source ==
+                "localization" {
+                if exactMatches.count == 1 {
+                    intermediateStage =
+                        "deferred-to-final-candidate-verifier"
+                    intermediateAccepted = true
+                } else {
+                    intermediateStage =
+                        "localization-requires-unique-exact-match"
+                }
+            } else if
+                exactMatches.count == 1
+            {
+                if let verification =
+                    await localIntelligence
+                        .verifyApplicationNameVariant(
+                            query: query,
+                            variant: variant
+                        ) {
+                    intermediateStage =
+                        verification.stage
+                    intermediateConfidence =
+                        verification.confidence
+                    intermediateAccepted =
+                        verification.equivalent &&
+                        verification.confidence >=
+                            0.94
+                } else {
+                    intermediateStage =
+                        "variant-verifier-no-result"
+                }
+            } else {
+                intermediateStage =
+                    "variant-requires-unique-exact-match"
+            }
+
+            variantDiagnostics.append(
+                ApplicationSemanticVariantTrace(
+                    value: variant,
+                    source: source,
+                    intermediateVerificationStage:
+                        intermediateStage,
+                    intermediateVerificationConfidence:
+                        intermediateConfidence,
+                    exactMatchCount:
+                        exactMatches.count,
+                    exactMatchBundleIdentifiers:
+                        exactMatches
+                            .compactMap(
+                                \.bundleIdentifier
+                            )
+                            .sorted()
+                )
+            )
+
+            guard
+                intermediateAccepted,
+                exactMatches.count == 1,
+                let exact =
                     exactMatches.first
             else {
                 continue
@@ -1100,6 +1136,7 @@ actor AgentDesktopControl {
             matches.append(
                 DeterministicSemanticMatch(
                     variant: variant,
+                    source: source,
                     variantOrder:
                         variantOrder,
                     candidate:
@@ -1176,7 +1213,9 @@ actor AgentDesktopControl {
                     deterministicMatchCount: 0,
                     selectedVariant: nil,
                     reason:
-                        semanticReason
+                        semanticReason,
+                    variantDiagnostics:
+                        variantDiagnostics
                 )
             )
         }
@@ -1226,7 +1265,9 @@ actor AgentDesktopControl {
                         selectedVariant:
                             chosen.variant,
                         reason:
-                            "semantic_resolution_cannot_redirect_unrelated_query_to_running_agent"
+                            "semantic_resolution_cannot_redirect_unrelated_query_to_running_agent",
+                        variantDiagnostics:
+                            variantDiagnostics
                     )
                 )
             }
@@ -1288,7 +1329,9 @@ actor AgentDesktopControl {
                     selectedVariant:
                         chosen.variant,
                     reason:
-                        "Semantic verifier geçerli bir karar üretemedi."
+                        "Semantic verifier geçerli bir karar üretemedi.",
+                    variantDiagnostics:
+                        variantDiagnostics
                 )
             )
         }
@@ -1332,8 +1375,12 @@ actor AgentDesktopControl {
                     chosen.variant,
                 reason:
                     semanticReason +
+                    " | selectedSource: " +
+                    chosen.source +
                     " | verifier: " +
-                    verification.reason
+                    verification.reason,
+                variantDiagnostics:
+                    variantDiagnostics
             )
         )
     }

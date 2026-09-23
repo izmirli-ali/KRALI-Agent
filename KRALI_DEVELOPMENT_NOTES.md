@@ -323,3 +323,15 @@ Target runtime:
 - Pending/approved/rejected task approval hedefi Mentor trace içinde `approvalAudit` olarak kaydedilir: capability, target summary, app name, bundle ID, path ve karar.
 - Training Lab'e `resolved-target-required-before-approval` regression senaryosu eklendi.
 - VERSION 0.10.19 / build 192.
+
+
+## v0.10.20 progress
+
+- Semantic application resolution artık provenance-aware.
+- İsim adayları güvenlik sırasıyla birleştirilir: source query → localization → generic variant. Aynı canonical isim birden fazla kaynaktan gelirse localization provenance generic variant'a tercih edilir.
+- Localization kaynağından gelen bir isim kurulu uygulama kataloğunda tam olarak tek exact alias eşleşmesine sahipse redundant ara `verifyApplicationNameVariant` çağrısı yapılmaz; aday doğrudan mevcut final candidate verifier'a gider.
+- Bu optimizasyon güvenlik eşiğini düşürmez: localization adayı exact installed alias ile tekil eşleşmek zorunda ve final `verifyApplicationAliasEquivalence` yine confidence >= 0.94 gerektirir.
+- Generic variant kaynağındaki non-identity isimler mevcut ara equivalence verifier >= 0.94 kontrolünü korur.
+- `ApplicationSemanticResolutionTrace` artık her isim adayı için provenance, intermediate verification stage/confidence, exact match count ve exact bundle ID listesini `variantDiagnostics` altında kaydeder.
+- Training Lab'e `semantic-localization-provenance-priority` regression senaryosu eklendi.
+- VERSION 0.10.20 / build 193.
