@@ -3,12 +3,57 @@ import AppKit
 import ApplicationServices
 import ScreenCaptureKit
 
+struct DesktopForegroundVerificationEvidence:
+    Hashable,
+    Sendable {
+    let activationSucceeded: Bool
+    let workspaceFrontmostVerified: Bool
+    let accessibilityFrontmostVerified: Bool
+    let screenKitFrontmostVerified: Bool
+    let screenPerceptionFrontmostVerified: Bool
+
+    var frontmostVerified: Bool {
+        workspaceFrontmostVerified ||
+        accessibilityFrontmostVerified ||
+        screenKitFrontmostVerified ||
+        screenPerceptionFrontmostVerified
+    }
+
+    var sourceSummary: String {
+        var sources: [String] = []
+
+        if workspaceFrontmostVerified {
+            sources.append("NSWorkspace")
+        }
+
+        if accessibilityFrontmostVerified {
+            sources.append("AX")
+        }
+
+        if screenKitFrontmostVerified {
+            sources.append("ScreenCaptureKit")
+        }
+
+        if screenPerceptionFrontmostVerified {
+            sources.append("ScreenPerception")
+        }
+
+        return sources.isEmpty
+            ? "unverified"
+            : sources.joined(separator: " + ")
+    }
+}
+
 struct DesktopAppActionResult: Codable, Hashable, Sendable {
     let requestedText: String
     let resolvedApplicationName: String
     let resolvedApplicationURL: String?
     let wasRunning: Bool
     let launchOrActivateSucceeded: Bool
+    let workspaceFrontmostVerified: Bool
+    let accessibilityFrontmostVerified: Bool
+    let screenKitFrontmostVerified: Bool
+    let screenPerceptionFrontmostVerified: Bool
     let frontmostAfter: String?
     let frontmostVerified: Bool
     let verificationSource: String
@@ -314,16 +359,20 @@ actor AgentDesktopControl {
                     candidate.bundleIdentifier
             )
 
-        if let runningBefore {
-            requestActivation(
-                runningBefore
-            )
-        } else {
-            let launched = try await openApplication(
-                at: candidate.url
-            )
+        let activationSucceeded: Bool
 
-            guard launched else {
+        if let runningBefore {
+            activationSucceeded =
+                requestActivation(
+                    runningBefore
+                )
+        } else {
+            activationSucceeded =
+                try await openApplication(
+                    at: candidate.url
+                )
+
+            guard activationSucceeded else {
                 throw DesktopControlError
                     .launchFailed(candidate.name)
             }
@@ -336,62 +385,123 @@ actor AgentDesktopControl {
             )
         }
 
-        _ = await focusCandidate(
-            candidate,
-            maxAttempts: 14,
-            delayMilliseconds: 180
-        )
+        let focusVerified =
+            await focusCandidate(
+                candidate,
+                maxAttempts: 14,
+                delayMilliseconds: 180
+            )
 
-        var after =
-            NSWorkspace.shared.frontmostApplication?
-                .localizedName
+        var workspaceVerified =
+            focusVerified ||
+            workspaceFrontmost(
+                candidate
+            )
 
-        var frontmostVerified =
+        var accessibilityVerified =
+            accessibilityFrontmost(
+                candidate
+            )
+
+        var screenKitVerified =
             await visuallyForeground(
                 candidate
             )
 
-        var verificationSource =
-            frontmostVerified
-                ? "ScreenCaptureKit z-order"
-                : "unverified"
-
+        var screenPerceptionVerified =
+            false
         var fallbackScreenSummary: String?
 
-        if !frontmostVerified,
+        var evidence =
+            DesktopForegroundVerificationEvidence(
+                activationSucceeded:
+                    activationSucceeded,
+                workspaceFrontmostVerified:
+                    workspaceVerified,
+                accessibilityFrontmostVerified:
+                    accessibilityVerified,
+                screenKitFrontmostVerified:
+                    screenKitVerified,
+                screenPerceptionFrontmostVerified:
+                    screenPerceptionVerified
+            )
+
+        if !evidence.frontmostVerified,
            let running =
             matchingRunningApplication(
                 named: candidate.name,
                 preferredBundleIdentifier:
                     candidate.bundleIdentifier
            ) {
-            let recovered =
-                await recoverForeground(
-                    candidate,
-                    running: running
+            _ = await recoverForeground(
+                candidate,
+                running: running
+            )
+
+            workspaceVerified =
+                workspaceFrontmost(
+                    candidate
+                )
+            accessibilityVerified =
+                accessibilityFrontmost(
+                    candidate
+                )
+            screenKitVerified =
+                await visuallyForeground(
+                    candidate
                 )
 
-            if recovered {
-                frontmostVerified = true
-                verificationSource =
-                    "activation recovery + AX raise + ScreenCaptureKit z-order"
-                after =
-                    NSWorkspace.shared
-                        .frontmostApplication?
-                        .localizedName
-            }
+            evidence =
+                DesktopForegroundVerificationEvidence(
+                    activationSucceeded:
+                        activationSucceeded,
+                    workspaceFrontmostVerified:
+                        workspaceVerified,
+                    accessibilityFrontmostVerified:
+                        accessibilityVerified,
+                    screenKitFrontmostVerified:
+                        screenKitVerified,
+                    screenPerceptionFrontmostVerified:
+                        screenPerceptionVerified
+                )
         }
 
-        if !frontmostVerified {
+        if !evidence.frontmostVerified {
             let screenReport =
                 try? await screenPerception.observe(
                     goal:
-                        "\(candidate.name) uygulamasının görünür biçimde önde olduğunu yalnızca ekran kanıtından doğrula."
+                        "\(candidate.name) uygulamasının görünür biçimde önde olduğunu yalnızca structured ekran kanıtından doğrula."
                 )
 
             fallbackScreenSummary =
                 screenReport?.semanticSummary
+
+            if let screenReport {
+                screenPerceptionVerified =
+                    screenPerceptionVerifiesForeground(
+                        screenReport,
+                        candidate: candidate
+                    )
+            }
+
+            evidence =
+                DesktopForegroundVerificationEvidence(
+                    activationSucceeded:
+                        activationSucceeded,
+                    workspaceFrontmostVerified:
+                        workspaceVerified,
+                    accessibilityFrontmostVerified:
+                        accessibilityVerified,
+                    screenKitFrontmostVerified:
+                        screenKitVerified,
+                    screenPerceptionFrontmostVerified:
+                        screenPerceptionVerified
+                )
         }
+
+        let after =
+            NSWorkspace.shared.frontmostApplication?
+                .localizedName
 
         return DesktopAppActionResult(
             requestedText: requestedText,
@@ -401,12 +511,24 @@ actor AgentDesktopControl {
                 candidate.url.path,
             wasRunning: runningBefore != nil,
             launchOrActivateSucceeded:
-                frontmostVerified,
+                activationSucceeded,
+            workspaceFrontmostVerified:
+                evidence
+                    .workspaceFrontmostVerified,
+            accessibilityFrontmostVerified:
+                evidence
+                    .accessibilityFrontmostVerified,
+            screenKitFrontmostVerified:
+                evidence
+                    .screenKitFrontmostVerified,
+            screenPerceptionFrontmostVerified:
+                evidence
+                    .screenPerceptionFrontmostVerified,
             frontmostAfter: after,
             frontmostVerified:
-                frontmostVerified,
+                evidence.frontmostVerified,
             verificationSource:
-                verificationSource,
+                evidence.sourceSummary,
             screenSummary:
                 fallbackScreenSummary
         )
@@ -2294,34 +2416,11 @@ actor AgentDesktopControl {
         maxAttempts: Int,
         delayMilliseconds: Int
     ) async -> Bool {
-        let normalizedAliases =
-            Set(
-                candidate.aliases
-                    .map(normalize)
-                    .filter { !$0.isEmpty }
-            )
-
         for _ in 0..<maxAttempts {
-            if let front =
-                NSWorkspace.shared
-                    .frontmostApplication {
-                if let bundleID =
-                    candidate.bundleIdentifier,
-                   front.bundleIdentifier ==
-                    bundleID {
-                    return true
-                }
-
-                let frontName =
-                    normalize(
-                        front.localizedName ?? ""
-                    )
-
-                if normalizedAliases.contains(
-                    frontName
-                ) {
-                    return true
-                }
+            if workspaceFrontmost(
+                candidate
+            ) {
+                return true
             }
 
             if let running =
@@ -2330,7 +2429,7 @@ actor AgentDesktopControl {
                     preferredBundleIdentifier:
                         candidate.bundleIdentifier
                 ) {
-                requestActivation(
+                _ = requestActivation(
                     running
                 )
             }
@@ -2342,7 +2441,115 @@ actor AgentDesktopControl {
             )
         }
 
+        return workspaceFrontmost(
+            candidate
+        )
+    }
+
+    private func workspaceFrontmost(
+        _ candidate: ApplicationCandidate
+    ) -> Bool {
+        guard let front =
+            NSWorkspace.shared
+                .frontmostApplication
+        else {
+            return false
+        }
+
+        if let bundleID =
+            candidate.bundleIdentifier,
+           front.bundleIdentifier ==
+            bundleID {
+            return true
+        }
+
+        let frontName =
+            normalize(
+                front.localizedName ?? ""
+            )
+
+        return candidate.aliases
+            .map(normalize)
+            .contains(frontName)
+    }
+
+    private func accessibilityFrontmost(
+        _ candidate: ApplicationCandidate
+    ) -> Bool {
+        guard
+            accessibilityTrusted(
+                promptIfNeeded: false
+            ),
+            let running =
+                matchingRunningApplication(
+                    named: candidate.name,
+                    preferredBundleIdentifier:
+                        candidate.bundleIdentifier
+                )
+        else {
+            return false
+        }
+
+        let applicationElement =
+            AXUIElementCreateApplication(
+                running.processIdentifier
+            )
+
+        var rawValue: CFTypeRef?
+        let error =
+            AXUIElementCopyAttributeValue(
+                applicationElement,
+                kAXFrontmostAttribute
+                    as CFString,
+                &rawValue
+            )
+
+        guard error == .success else {
+            return false
+        }
+
+        if let value =
+            rawValue as? NSNumber {
+            return value.boolValue
+        }
+
         return false
+    }
+
+    private func screenPerceptionVerifiesForeground(
+        _ report: ScreenPerceptionReport,
+        candidate: ApplicationCandidate
+    ) -> Bool {
+        if workspaceFrontmost(
+            candidate
+        ) {
+            return true
+        }
+
+        let normalizedFrontmost =
+            normalize(
+                report.frontmostApplication ?? ""
+            )
+
+        guard
+            !normalizedFrontmost.isEmpty
+        else {
+            return false
+        }
+
+        let candidateNames =
+            Set(
+                (
+                    candidate.aliases +
+                    [candidate.name]
+                )
+                .map(normalize)
+                .filter { !$0.isEmpty }
+            )
+
+        return candidateNames.contains(
+            normalizedFrontmost
+        )
     }
 
     private func recoverForeground(
@@ -2382,10 +2589,11 @@ actor AgentDesktopControl {
         return false
     }
 
+    @discardableResult
     private func requestActivation(
         _ app: NSRunningApplication,
         aggressive: Bool = false
-    ) {
+    ) -> Bool {
         if app.isHidden {
             _ = app.unhide()
         }
@@ -2403,9 +2611,10 @@ actor AgentDesktopControl {
                 ]
                 : [.activateAllWindows]
 
-        _ = app.activate(
-            options: options
-        )
+        let activated =
+            app.activate(
+                options: options
+            )
 
         if accessibilityTrusted(
             promptIfNeeded: false
@@ -2414,6 +2623,8 @@ actor AgentDesktopControl {
                 for: app
             )
         }
+
+        return activated
     }
 
     private func raiseAccessibilityWindows(
