@@ -1,0 +1,36 @@
+{
+  "developerTask": {
+    "capabilityID": "developer.task.right-panel-browser",
+    "capabilityName": "Right Panel Browser",
+    "kind": "developerTask",
+    "learningPath": "primitivePatch",
+    "reason": "KRALİ'nin sağ açılır paneli durum/geliştirici içeriğiyle sınırlı. Kullanıcı sohbet ekranını koruyarak aynı panel içinde manuel web tarayıcısı kullanmak istiyor.",
+    "researchGoal": "Add a compact manual WKWebView browser mode to the existing right panel without turning KRALİ into a dashboard or changing approval/execution authority.",
+    "candidateCapabilityIDs": [],
+    "developerBrief": "Fresh main üzerinden çalış. Sağ açılır Inspector panelini tek panel olarak koru; üst bölümde sade Durum / Tarayıcı geçişi ekle. Ayrı developer paneli geri getirme. Tarayıcı modu mevcut sidePane içinde veya küçük ayrı BrowserPanelView ile WKWebView kullanmalı. Chat orta alanda açık kalmalı; geniş ekranda sağ panel inline, dar ekranda mevcut overlay davranışı korunmalı.
+İlk sürüm manuel browser olsun: adres/search alanı, geri, ileri, yenile, ana sayfa/boş sayfa ve yüklenme durumu. URL olmayan metni varsayılan olarak Google arama URL'sine dönüştürebilir. http/https dışında navigation başlatma. Popup/new-window taleplerini aynı webview içinde güvenli şekilde ele al veya reddet. Uygulama içi browser hiçbir KRALİ agent action'ına otomatik bağlanmasın; form gönderme, tıklama, site işlemi tamamen kullanıcı kontrolünde olsun. KRALİ'nin onay/physical-action güvenlik zincirini değiştirme.
+WebKit/AppKit/SwiftUI ile native uygula; yeni üçüncü taraf dependency ekleme. Browser görünümü açıldığında mevcut status/developer verileri kaybolmamalı; Durum sekmesine geri dönülebilmeli. Panel kapanıp açılınca mümkünse mevcut browser session/url korunmalı. Accessibility/help text ekle. Build-check zorunlu. Gereksiz App dosyalarına dokunma.",
+  },
+  "taskMetadata": {
+    "owner": "ChatGPT Lead / KRALİ team",
+    "risk": "medium",
+    "allowedScope": [
+      "App/KRALIAgentNative/ContentView.swift",
+      "App/KRALIAgentNative/BrowserPanelView.swift",
+      "App/KRALIAgentNative.xcodeproj/project.pbxproj"
+    ],
+    "forbiddenScope": [
+      "Scripts/**",
+      "Cloud/**",
+      "VERSION",
+      "Mentor/**",
+      ".github/**",
+      "App/KRALIAgentNative/AgentEngine.swift",
+      "App/KRALIAgentNative/AgentDesktopControl.swift",
+      "App/KRALIAgentNative/AgentTaskOrchestrator.swift",
+      "App/KRALIAgentNative/AgentPlanner.swift"
+    ],
+    "requiresPhysicalAction": false,
+    "requiresMainAccess": false
+  }
+}
