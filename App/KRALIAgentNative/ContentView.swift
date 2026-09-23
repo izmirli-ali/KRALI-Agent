@@ -7,6 +7,7 @@ struct ContentView: View {
     @State private var prompt = ""
     @State private var developerToolsExpanded = false
     @State private var inspectorVisible = false
+    @State private var inspectorDeveloperMode = false
     @StateObject private var updater = UpdateController()
 
     var body: some View {
@@ -289,6 +290,10 @@ struct ContentView: View {
                 .padding(14)
                 .background(.ultraThinMaterial)
             } else {
+                assistantStatusBar
+                    .padding(.horizontal, 18)
+                    .padding(.top, 10)
+
                 if engine.messages.count <= 3 {
                     quickActions
                         .padding(.horizontal, 18)
@@ -319,6 +324,200 @@ struct ContentView: View {
                 .padding(.vertical, 14)
                 .background(.ultraThinMaterial)
             }
+        }
+    }
+
+
+    private var assistantStatusBar: some View {
+        HStack(spacing: 9) {
+            ZStack {
+                Circle()
+                    .fill(
+                        assistantPhaseColor
+                            .opacity(0.12)
+                    )
+                    .frame(
+                        width: 28,
+                        height: 28
+                    )
+
+                if engine.busy {
+                    ProgressView()
+                        .controlSize(.mini)
+                } else {
+                    Image(
+                        systemName:
+                            assistantPhaseIcon
+                    )
+                    .font(.caption)
+                    .foregroundStyle(
+                        assistantPhaseColor
+                    )
+                }
+            }
+
+            VStack(
+                alignment: .leading,
+                spacing: 2
+            ) {
+                Text(assistantPhaseTitle)
+                    .font(
+                        .caption
+                            .weight(.semibold)
+                    )
+
+                Text(assistantPhaseDetail)
+                    .font(.caption2)
+                    .foregroundStyle(
+                        .secondary
+                    )
+                    .lineLimit(1)
+            }
+
+            Spacer()
+
+            if engine.pendingTaskApproval != nil ||
+               engine.pendingDeveloperToolApproval != nil ||
+               engine.pendingFileAction != nil {
+                Text("ONAY")
+                    .font(
+                        .caption2
+                            .weight(.bold)
+                    )
+                    .foregroundStyle(
+                        Color.orange
+                    )
+                    .padding(
+                        .horizontal,
+                        7
+                    )
+                    .padding(
+                        .vertical,
+                        3
+                    )
+                    .background(
+                        Color.orange
+                            .opacity(0.10)
+                    )
+                    .clipShape(
+                        Capsule()
+                    )
+            }
+        }
+        .padding(
+            .horizontal,
+            10
+        )
+        .padding(
+            .vertical,
+            8
+        )
+        .background(
+            Color(nsColor:
+                .controlBackgroundColor)
+                .opacity(0.78)
+        )
+        .clipShape(
+            RoundedRectangle(
+                cornerRadius: 10,
+                style: .continuous
+            )
+        )
+    }
+
+    private var assistantPhaseTitle: String {
+        if engine.pendingTaskApproval != nil ||
+           engine.pendingDeveloperToolApproval != nil ||
+           engine.pendingFileAction != nil {
+            return "Onayın bekleniyor"
+        }
+
+        if engine.busy {
+            return "KRALİ çalışıyor"
+        }
+
+        switch engine.verificationState {
+        case .checking:
+            return "Sonuç doğrulanıyor"
+        case .passed:
+            return "Görev doğrulandı"
+        case .partial:
+            return "Görev kısmen tamamlandı"
+        case .attention:
+            return "Dikkat gerekiyor"
+        case .skipped:
+            return "Doğrulama gerekmedi"
+        case .idle:
+            return "Hazır"
+        }
+    }
+
+    private var assistantPhaseDetail: String {
+        if let approval =
+            engine.pendingTaskApproval {
+            return approval.title
+        }
+
+        if let approval =
+            engine.pendingDeveloperToolApproval {
+            return approval.title
+        }
+
+        if let action =
+            engine.pendingFileAction {
+            return action.title
+        }
+
+        if engine.busy {
+            return engine.currentGoal
+        }
+
+        if engine.verificationSummary
+            .isEmpty {
+            return "Yeni bir görev verebilirsin."
+        }
+
+        return engine.verificationSummary
+    }
+
+    private var assistantPhaseIcon: String {
+        if engine.pendingTaskApproval != nil ||
+           engine.pendingDeveloperToolApproval != nil ||
+           engine.pendingFileAction != nil {
+            return "hand.raised.fill"
+        }
+
+        switch engine.verificationState {
+        case .checking:
+            return "magnifyingglass"
+        case .passed:
+            return "checkmark.circle.fill"
+        case .partial:
+            return "exclamationmark.circle.fill"
+        case .attention:
+            return "exclamationmark.triangle.fill"
+        case .skipped:
+            return "minus.circle"
+        case .idle:
+            return "sparkles"
+        }
+    }
+
+    private var assistantPhaseColor: Color {
+        if engine.pendingTaskApproval != nil ||
+           engine.pendingDeveloperToolApproval != nil ||
+           engine.pendingFileAction != nil {
+            return .orange
+        }
+
+        switch engine.verificationState {
+        case .passed:
+            return .green
+        case .partial,
+             .attention:
+            return .orange
+        default:
+            return .secondary
         }
     }
 
@@ -579,7 +778,7 @@ struct ContentView: View {
                 alignment: .leading,
                 spacing: 9
             ) {
-                Text("Onayın gerekiyor")
+                Text("Fiziksel işlem için onayın gerekiyor")
                     .font(
                         .system(
                             size: 14,
@@ -637,8 +836,21 @@ struct ContentView: View {
                     .font(.caption)
                     .foregroundStyle(.secondary)
 
+                Label(
+                    "Henüz hiçbir fiziksel işlem uygulanmadı",
+                    systemImage:
+                        "pause.circle.fill"
+                )
+                .font(
+                    .caption2
+                        .weight(.medium)
+                )
+                .foregroundStyle(
+                    Color.orange
+                )
+
                 Text(
-                    "İşlem henüz uygulanmadı. Bu onay yalnız bu adıma ve gösterilen hedefe geçerlidir; sonraki dış işlemler ayrıca onay ister."
+                    "Bu onay yalnız bu adıma ve gösterilen hedefe geçerlidir; sonraki dış işlemler ayrıca onay ister."
                 )
                 .font(.caption2)
                 .foregroundStyle(.secondary)
@@ -722,7 +934,7 @@ struct ContentView: View {
                 alignment: .leading,
                 spacing: 9
             ) {
-                Text("Developer aracı için onayın gerekiyor")
+                Text("Sistem etkisi için onayın gerekiyor")
                     .font(
                         .system(
                             size: 14,
@@ -780,8 +992,21 @@ struct ContentView: View {
                     .font(.caption)
                     .foregroundStyle(.secondary)
 
+                Label(
+                    "Mac üzerinde henüz sistem etkisi oluşturulmadı",
+                    systemImage:
+                        "pause.circle.fill"
+                )
+                .font(
+                    .caption2
+                        .weight(.medium)
+                )
+                .foregroundStyle(
+                    Color.orange
+                )
+
                 Text(
-                    "İşlem henüz uygulanmadı. Bu onay yalnız gösterilen developer adımına geçerlidir; sonraki fiziksel veya sistem etkili adım yeniden onay ister."
+                    "Bu onay yalnız gösterilen developer adımına geçerlidir; sonraki fiziksel veya sistem etkili adım yeniden onay ister."
                 )
                 .font(.caption2)
                 .foregroundStyle(.secondary)
@@ -880,6 +1105,19 @@ struct ContentView: View {
     private var sidePane: some View {
         ScrollView {
             VStack(alignment: .leading, spacing: 14) {
+                Picker(
+                    "Inspector görünümü",
+                    selection:
+                        $inspectorDeveloperMode
+                ) {
+                    Text("Özet")
+                        .tag(false)
+                    Text("Developer")
+                        .tag(true)
+                }
+                .pickerStyle(.segmented)
+                .labelsHidden()
+
                 sectionTitle("Durum")
 
                 VStack(alignment: .leading, spacing: 9) {
@@ -971,9 +1209,122 @@ struct ContentView: View {
                 .background(Color(nsColor: .controlBackgroundColor))
                 .clipShape(RoundedRectangle(cornerRadius: 11))
 
-                sectionTitle("Bağlam")
 
-                VStack(alignment: .leading, spacing: 8) {
+                if let report =
+                    engine.inspectorState
+                        .trainingLabReport {
+                    sectionTitle("Sistem sağlığı")
+
+                    VStack(
+                        alignment: .leading,
+                        spacing: 9
+                    ) {
+                        HStack {
+                            Label(
+                                "Training",
+                                systemImage:
+                                    "checklist"
+                            )
+                            .font(
+                                .caption
+                                    .weight(
+                                        .semibold
+                                    )
+                            )
+
+                            Spacer()
+
+                            Text(
+                                String(
+                                    report.passed
+                                ) +
+                                "/" +
+                                String(
+                                    report.total
+                                )
+                            )
+                            .font(
+                                .caption
+                                    .monospacedDigit()
+                                    .weight(
+                                        .semibold
+                                    )
+                            )
+                        }
+
+                        HStack(spacing: 8) {
+                            Text(
+                                "Core " +
+                                String(
+                                    report.corePassed
+                                ) +
+                                "/" +
+                                String(
+                                    report.coreTotal
+                                )
+                            )
+
+                            Text("•")
+
+                            Text(
+                                "North Star " +
+                                String(
+                                    report.northStarPassed
+                                ) +
+                                "/" +
+                                String(
+                                    report.northStarTotal
+                                )
+                            )
+
+                            Spacer()
+                        }
+                        .font(.caption2)
+                        .foregroundStyle(
+                            .secondary
+                        )
+
+                        if report.failed > 0 {
+                            Label(
+                                String(
+                                    report.failed
+                                ) +
+                                " bilinen açık",
+                                systemImage:
+                                    "exclamationmark.triangle"
+                            )
+                            .font(.caption2)
+                            .foregroundStyle(
+                                Color.orange
+                            )
+                        } else {
+                            Label(
+                                "Tüm regression testleri geçti",
+                                systemImage:
+                                    "checkmark.seal.fill"
+                            )
+                            .font(.caption2)
+                            .foregroundStyle(
+                                Color.green
+                            )
+                        }
+                    }
+                    .padding(11)
+                    .background(
+                        Color(nsColor:
+                            .controlBackgroundColor)
+                    )
+                    .clipShape(
+                        RoundedRectangle(
+                            cornerRadius: 11
+                        )
+                    )
+                }
+
+                if inspectorDeveloperMode {
+                    sectionTitle("Bağlam")
+
+                    VStack(alignment: .leading, spacing: 8) {
                     HStack {
                         Label(
                             engine.contextMemoryStatus,
@@ -1030,9 +1381,10 @@ struct ContentView: View {
                         }
                     }
                 }
-                .padding(11)
-                .background(Color(nsColor: .controlBackgroundColor))
-                .clipShape(RoundedRectangle(cornerRadius: 11))
+                    .padding(11)
+                    .background(Color(nsColor: .controlBackgroundColor))
+                    .clipShape(RoundedRectangle(cornerRadius: 11))
+                }
 
                 if !engine.webResearchResults.isEmpty {
                     sectionTitle("Kaynaklar")
@@ -1083,7 +1435,9 @@ struct ContentView: View {
                     .clipShape(RoundedRectangle(cornerRadius: 11))
                 }
 
-                if let incident = engine.inspectorState.debugIncident {
+                if inspectorDeveloperMode,
+                   let incident =
+                    engine.inspectorState.debugIncident {
                     sectionTitle("Hata Ayıklama")
 
                     VStack(alignment: .leading, spacing: 8) {
@@ -1162,9 +1516,12 @@ struct ContentView: View {
                     .clipShape(RoundedRectangle(cornerRadius: 11))
                 }
 
-                if !engine.capabilityLearningPlans.isEmpty ||
-                   !engine.inspectorState.activeLearningJobs.isEmpty ||
-                   engine.inspectorState.shouldShowPrimaryDeveloperStatus {
+                if inspectorDeveloperMode &&
+                   (
+                       !engine.capabilityLearningPlans.isEmpty ||
+                       !engine.inspectorState.activeLearningJobs.isEmpty ||
+                       engine.inspectorState.shouldShowPrimaryDeveloperStatus
+                   ) {
                     sectionTitle("Öğrenme")
 
                     VStack(alignment: .leading, spacing: 8) {
@@ -1509,10 +1866,12 @@ struct ContentView: View {
                     .controlSize(.small)
                 }
 
-                DisclosureGroup(
-                    "Geliştirici araçları",
-                    isExpanded: $developerToolsExpanded
-                ) {
+                if inspectorDeveloperMode {
+                    DisclosureGroup(
+                        "Geliştirici araçları",
+                        isExpanded:
+                            $developerToolsExpanded
+                    ) {
                     VStack(alignment: .leading, spacing: 10) {
                         Divider()
 
@@ -1644,10 +2003,11 @@ struct ContentView: View {
                     }
                     .padding(.top, 4)
                 }
-                .font(.caption.weight(.medium))
-                .padding(11)
-                .background(Color(nsColor: .controlBackgroundColor))
-                .clipShape(RoundedRectangle(cornerRadius: 11))
+                    .font(.caption.weight(.medium))
+                    .padding(11)
+                    .background(Color(nsColor: .controlBackgroundColor))
+                    .clipShape(RoundedRectangle(cornerRadius: 11))
+                }
             }
             .padding(14)
         }
