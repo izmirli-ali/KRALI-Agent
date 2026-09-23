@@ -8,7 +8,7 @@ struct KRALIAgentNativeApp: App {
         WindowGroup("KRALİ") {
             ContentView()
                 .environmentObject(engine)
-                .frame(minWidth: 1000, minHeight: 700)
+                .frame(minWidth: 680, minHeight: 620)
         }
         .windowStyle(.titleBar)
         .commands {
