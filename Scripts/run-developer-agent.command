@@ -180,7 +180,7 @@ REMOTE_JSON_ALIAS="cloudflare-json"
 cleanup_remote_proxy() {
     if [ -n "$REMOTE_PROXY_PID" ]; then
         /bin/kill "$REMOTE_PROXY_PID" >/dev/null 2>&1 || true
-        /usr/bin/wait "$REMOTE_PROXY_PID" >/dev/null 2>&1 || true
+        wait "$REMOTE_PROXY_PID" >/dev/null 2>&1 || true
         REMOTE_PROXY_PID=""
     fi
 }
@@ -452,8 +452,12 @@ use_cached_controller_model() {
     fi
 
     if [ -n "$cached_model" ] &&
+       [ "$cached_model" != "qwen2.5-coder:14b-instruct" ] &&
+       [ "$cached_model" != "devstral-small-2:24b" ] &&
+       [ "$cached_model" != "devstral:24b" ] &&
+       [ "$cached_model" != "qwen3-coder:30b" ] &&
        "$OLLAMA_BIN" show "$cached_model" >/dev/null 2>&1; then
-        echo "⚡ Structured controller cache adayı yeniden ısıtılıyor: $cached_model • yaş=${age}s" | tee -a "$LOG"
+        echo "⚡ Hafif structured controller cache adayı yeniden ısıtılıyor: $cached_model • yaş=${age}s" | tee -a "$LOG"
 
         if probe_controller_model "$cached_model"; then
             CONTROLLER_MODEL="$cached_model"
@@ -477,10 +481,10 @@ select_structured_controller_model() {
     fi
 
     local candidates=(
-        "qwen2.5-coder:14b-instruct"
-        "qwen3:8b"
         "qwen2.5-coder:7b-instruct"
+        "qwen3:8b"
         "$MODEL"
+        "qwen2.5-coder:14b-instruct"
     )
 
     local seen="|"
@@ -537,10 +541,14 @@ use_cached_tool_model() {
     fi
 
     if [ -n "$cached_model" ] &&
+       [ "$cached_model" != "devstral-small-2:24b" ] &&
+       [ "$cached_model" != "devstral:24b" ] &&
+       [ "$cached_model" != "qwen3-coder:30b" ] &&
+       [ "$cached_model" != "qwen2.5-coder:14b-instruct" ] &&
        "$OLLAMA_BIN" show "$cached_model" >/dev/null 2>&1; then
         MODEL="$cached_model"
         MODEL_PROBE_CACHED=1
-        echo "⚡ Tool-capable model cache kullanılıyor: $MODEL • yaş=${age}s" | tee -a "$LOG"
+        echo "⚡ Hafif tool-capable model cache kullanılıyor: $MODEL • yaş=${age}s" | tee -a "$LOG"
         return 0
     fi
 
