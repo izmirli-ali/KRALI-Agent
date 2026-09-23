@@ -1,5 +1,12 @@
 import Foundation
 
+struct ApplicationSemanticNameCandidate:
+    Hashable,
+    Sendable {
+    let value: String
+    let source: String
+}
+
 struct AgentNaturalLanguageResolver: Sendable {
     private let openVerbs = Set([
         "ac", "baslat", "calistir",
@@ -647,6 +654,49 @@ struct AgentNaturalLanguageResolver: Sendable {
         }
 
         return best
+    }
+
+    func semanticApplicationNameCandidates(
+        query: String,
+        localizationNames: [String],
+        variantNames: [String]
+    ) -> [ApplicationSemanticNameCandidate] {
+        let ordered =
+            [
+                ApplicationSemanticNameCandidate(
+                    value: query,
+                    source: "source"
+                )
+            ] +
+            localizationNames.map {
+                ApplicationSemanticNameCandidate(
+                    value: $0,
+                    source: "localization"
+                )
+            } +
+            variantNames.map {
+                ApplicationSemanticNameCandidate(
+                    value: $0,
+                    source: "variant"
+                )
+            }
+
+        var seen = Set<String>()
+
+        return ordered.filter {
+            let key =
+                normalized($0.value)
+
+            guard
+                !key.isEmpty,
+                seen.insert(key)
+                    .inserted
+            else {
+                return false
+            }
+
+            return true
+        }
     }
 
     func isExactApplicationAliasMatch(
