@@ -349,3 +349,17 @@ Target runtime:
 - `task-graph-external-commit-approval` testi mevcut Strict Approval politikasına güncellendi: mail.read, mail.draft ve mail.send onay ister; iç reasoning istemez.
 - Desktop app localization/resolver zincirine dokunulmadı.
 - VERSION 0.10.21 / build 194.
+
+
+## v0.10.22 progress
+
+- Developer Tools için fiziksel/sistem etkili eylemler ayrı approval boundary arkasına alındı.
+- Training Lab ve KRALİ Arena simulation-only olarak çalışır; gerçek desktop/provider execution yapmaz. UI durum metinleri bunu açıkça gösterir.
+- Desktop Control Probe artık Notlar uygulamasını doğrudan açmaz. Chat içinde `PendingDeveloperToolApproval` kartı oluşturur; onay verilmeden fiziksel probe başlamaz.
+- Developer Agent varsayılan olarak restricted system mode ile başlar. Kod okuma/değiştirme, worktree, build ve regression gibi developer-sandbox işlemleri çalışabilir.
+- Homebrew Node kurulumu, Ollama kurulum/güncelleme, Ollama servis başlatma, model indirme, Cline global onarım/kurulum ve Cline/OpenAI auth Terminal akışı onaysız çalışmaz.
+- Sistem etkileri blanket izin kullanmaz. Her fiziksel adım ayrı scoped token ile onaylanır; bir adımın onayı sonraki sistem adımına taşınmaz.
+- Sistem etkisi gerektiğinde Developer Agent job'u failed sayılmaz; güvenli biçimde approval bekler. Reddedilirse fiziksel işlem uygulanmadan job durdurulur.
+- `developer-tools-physical-approval-policy` Training regression'ı eklendi.
+- Mevcut semantic task Strict Approval ve desktop.app localization/resolver zincirine dokunulmadı.
+- VERSION 0.10.22 / build 195.
