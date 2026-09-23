@@ -1,0 +1,42 @@
+{
+  "developerTask": {
+    "capabilityID": "developer.task.ui-regression-checklist-revision-v3",
+    "capabilityName": "UI Regression Checklist Revision V3",
+    "kind": "developerTask",
+    "learningPath": "primitivePatch",
+    "reason": "Revision v2 candidate produced an untrustworthy PASS report because the static checker targeted incorrect source shapes and execution evidence was not required before declaring PASS.",
+    "researchGoal": "Create a source-level UI regression checker that validates the real Swift source forms and cannot report PASS unless the checker actually runs to completion with exit code 0.",
+    "candidateCapabilityIDs": [],
+    "developerBrief": "Fresh main üzerinden çalış. Önceki candidate dosyalarını source of truth kabul etme; review bulgularını uygula. DeveloperAgent/Tests/ui-regression/** altında dependency-free Node checker, checklist JSON ve README oluştur/güncelle. App/** yalnız SALT OKUNUR.
+Zorunlu source hedefleri: App/KRALIAgentNative/KRALIAgentNativeApp.swift, App/KRALIAgentNative/ContentView.swift, App/KRALIAgentNative/ConversationStore.swift, App/KRALIAgentNative/ConversationSidebarView.swift.
+Repo root script konumundan deterministik hesaplanmalı; process.cwd() bağımlılığına güvenme.
+Window minWidth: KRALIAgentNativeApp.swift içindeki .frame(minWidth: 680, ...) biçimini parse et; numeric value <= 700 ise PASS.
+Compact sidebar: ContentView.swift içindeki usesCompactSidebar(_:) fonksiyonunda width < 780 koşulunu doğrula.
+Overlay Inspector: usesOverlayInspector(_:) fonksiyonunda width < 1120 koşulunu doğrula.
+Inspector sadeleştirmesi: ana sidePane akışında inspectorDeveloperMode / Özet-Developer / Summary-Developer picker bulunmadığını doğrula.
+Archive delete API: ConversationStore.swift içinde func deleteArchive(...) bulunduğunu doğrula.
+Destructive delete confirmation: ConversationSidebarView.swift içinde confirmationDialog ve role: .destructive birlikteliğini doğrula.
+Message copy: ContentView.swift içinde messageBubble context/visible copy action, copyMessageText(...) ve NSPasteboard.general + setString(..., forType: .string) uygulamasını doğrula.
+Her check gerçek source kanıtı (dosya + line/snippet veya symbol) üretmeli. False-positive önlemek için genel tüm dosya regex taraması yerine hedef dosya/symbol bazlı kontrol kullan.
+KRİTİK: checklist.json önceden PASS yazılarak üretilmemeli. Önce static-check.js çalıştır. execute_command sonucu exitCode=0 ve stdout içinde tüm kontroller PASS değilse overall PASS yazma. Checker kendi output JSON'unu gerçek çalıştırma sonunda üretmeli.
+İş sonunda şu kanıtları raporla: exact test command, exit code, stdout summary, checked files, git diff, build-check. execute_command sonucu alınmadan görev tamamlandı deme. Yeni dependency, UI otomasyonu, network veya App mutation yapma.",
+  },
+  "taskMetadata": {
+    "owner": "ChatGPT Lead / KRALİ team",
+    "risk": "low",
+    "allowedScope": [
+      "DeveloperAgent/Tests/ui-regression/**",
+      "DeveloperAgent/README.md"
+    ],
+    "forbiddenScope": [
+      "App/**",
+      "Scripts/**",
+      "Cloud/**",
+      "VERSION",
+      "Mentor/**",
+      ".github/**"
+    ],
+    "requiresPhysicalAction": false,
+    "requiresMainAccess": false
+  }
+}
