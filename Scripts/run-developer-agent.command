@@ -1267,6 +1267,30 @@ const resolverRuntimeEvidence =
                       .semanticResolution
                       .finalistCount || 0
                   ),
+                generatedVariants:
+                  Array.isArray(
+                    boundResolutionTrace
+                      .semanticResolution
+                      .generatedVariants
+                  )
+                    ? boundResolutionTrace
+                        .semanticResolution
+                        .generatedVariants
+                        .slice(0, 8)
+                        .map((value) =>
+                          String(value)
+                        )
+                    : [],
+                deterministicMatchCount:
+                  Number(
+                    boundResolutionTrace
+                      .semanticResolution
+                      .deterministicMatchCount || 0
+                  ),
+                selectedVariant:
+                  boundResolutionTrace
+                    .semanticResolution
+                    .selectedVariant || null,
                 reason:
                   String(
                     boundResolutionTrace

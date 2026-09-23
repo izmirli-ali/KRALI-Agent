@@ -269,3 +269,19 @@ Target runtime:
 - Developer Agent immutable resolver evidence bu stage ve sayaçları da koruyor.
 - Uygulama adına özel sözlük/hard-code eklenmedi; foreground/ScreenCaptureKit gerçek doğrulaması değişmeden zorunlu.
 - VERSION 0.10.15 / build 188.
+
+
+## v0.10.16 progress
+
+- Semantic application çözümleme rolü ayrıldı: Apple Foundation Model artık kurulu uygulamalar arasından candidate seçmiyor; yalnız kullanıcıdaki uygulama adının aynı kavramı ifade eden güvenli dilsel/lokalize arama varyantlarını üretiyor.
+- Variant producer en fazla 8 isim üretir, özgün kullanıcı ifadesini korur ve anlam açık olduğunda İngilizce kanonik karşılığı da üretebilir; benzer kategori/işlev/üretici isimleri yasaktır.
+- Üretilen varyantlar LaunchServices + mevcut deterministic alias scoring/decision zincirinden geçirilir. Gerçek kurulu uygulama seçimi tamamen deterministic kalır.
+- Birden fazla deterministic eşleşme varsa candidate URL bazında tekilleştirilir; score ve variant sırasına göre deterministik seçim yapılır.
+- Seçilen gerçek candidate bağımsız semantic equivalence verifier'dan geçmeden kabul edilmez; verifier confidence >= 0.86 zorunludur.
+- Foreground/ScreenCaptureKit doğrulaması değişmeden zorunlu kalır.
+- Mentor semanticResolution trace artık generatedVariants, deterministicMatchCount ve selectedVariant alanlarını da taşır.
+- Developer Agent immutable resolver evidence aynı yeni alanları korur.
+- scan_no_match / cross-language semantic miss durumunda yalnız case/diacritic normalization yapan normalized() fonksiyonu deterministic olarak root-cause mutation target olmaktan çıkarıldı.
+- Developer Agent applicationNameVariants / semantic variant producer sembollerini alias producer sınıfında önceliklendirebilir.
+- Uygulama adına özel sözlük/hard-code eklenmedi.
+- VERSION 0.10.16 / build 189.

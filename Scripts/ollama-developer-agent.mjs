@@ -474,6 +474,50 @@ function aliasProvenanceGapActive() {
   );
 }
 
+function semanticResolutionEvidence() {
+  const trace =
+    runtimeDiagnosticTraceObject();
+
+  const semantic =
+    trace &&
+    trace.semanticResolution &&
+    typeof trace.semanticResolution ===
+      "object"
+      ? trace.semanticResolution
+      : null;
+
+  return semantic;
+}
+
+function semanticCrossLanguageMissActive() {
+  const semantic =
+    semanticResolutionEvidence();
+
+  if (
+    !semantic ||
+    semantic.attempted !== true ||
+    semantic.accepted === true
+  ) {
+    return false;
+  }
+
+  const stage =
+    String(
+      semantic.stage || ""
+    );
+
+  return [
+    "scan_no_match",
+    "selection_template_echo",
+    "finalist_inconclusive",
+    "variants_no_deterministic_match",
+    "variant_invalid_output",
+    "variant_template_echo",
+    "variant_call_failed",
+    "variant_resolver_no_result",
+  ].includes(stage);
+}
+
 function isAliasProducerSymbol(
   symbol
 ) {
@@ -497,7 +541,7 @@ function isAliasProducerSymbol(
   }
 
   return (
-    /alias|localiz|displayname|bundlename|finder/i.test(
+    /alias|localiz|displayname|bundlename|finder|applicationnamevariants|semantic.*application|variant/i.test(
       value
     )
   );
@@ -535,6 +579,15 @@ function deterministicRootCauseContradiction(
 
   const provenanceGap =
     aliasProvenanceGapActive();
+
+  if (
+    semanticCrossLanguageMissActive() &&
+    /^normalized$/i.test(symbol)
+  ) {
+    return (
+      "runtime trace normalizasyonun kullanıcı sorgusunu zaten kararlı biçimde ürettiğini, başarısızlığın ise cross-language semantic eşdeğerlik aşamasında oluştuğunu gösteriyor; yalnız yazım/case/diacritic normalizasyonu başka dildeki uygulama adını üretemeyeceği için normalized causal mutation target olamaz"
+    );
+  }
 
   if (
     provenanceGap &&
@@ -6005,6 +6058,13 @@ function deterministicRootCauseScore(
       )
     ) {
       score += 8;
+    }
+
+    if (
+      semanticCrossLanguageMissActive() &&
+      /^normalized$/i.test(symbol)
+    ) {
+      score -= 48;
     }
 
     if (
