@@ -185,6 +185,7 @@ delete env.CURSOR_AUTH_TOKEN;
 const args = [
   "--mode=ask",
   "--print",
+  "--trust",
   "--output-format",
   "text",
   "--sandbox",
