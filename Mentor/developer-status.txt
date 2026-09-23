@@ -1,1 +1,1 @@
-stale_diagnostics|Önceki no_change kararı bu sürüm için geçerli değil. Güncel Training, Live ve Arena diagnostic'leri gerekiyor.|||@meta|app=0.10.33|at=1790195320|run=
+recovered_candidate_ready|Kurtarılan öğrenme adayı build geçti ve incelemeye hazır|krali-dev-agent/20260923-233751|/Users/medusa/Developer/KRALI-Agent-Dev-20260923-233751|@meta|app=0.10.34|at=1790196196|run=20260923-233751
