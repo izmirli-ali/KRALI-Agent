@@ -24,6 +24,8 @@ const branchName = process.env.KRALI_BRANCH || "";
 const gapLabel = process.env.KRALI_GAP_LABEL || "Capability";
 const appVersion = process.env.KRALI_APP_VERSION || "unknown";
 const runID = process.env.KRALI_RUN_ID || "";
+const teacherPlanFile =
+  process.env.KRALI_TEACHER_PLAN_FILE || "";
 
 function parseStringArrayEnv(name) {
   try {
@@ -718,6 +720,454 @@ function matchesAnyGlob(value, patterns) {
   );
 }
 
+
+function normalizeScopeEntry(value) {
+  return String(value || "")
+    .trim()
+    .replace(/\\/g, "/")
+    .replace(/^\.\//, "");
+}
+
+function subtaskScopeWithinParent(entry) {
+  const normalized = normalizeScopeEntry(entry);
+
+  if (
+    !normalized ||
+    normalized.startsWith("/") ||
+    normalized.split("/").includes("..")
+  ) {
+    return false;
+  }
+
+  if (
+    taskForbiddenGlobs.length > 0 &&
+    matchesAnyGlob(normalized, taskForbiddenGlobs)
+  ) {
+    return false;
+  }
+
+  const hasWildcard = /[*?]/.test(normalized);
+
+  if (hasWildcard) {
+    return taskAllowedGlobs.includes(normalized);
+  }
+
+  return (
+    taskAllowedGlobs.length > 0 &&
+    matchesAnyGlob(normalized, taskAllowedGlobs)
+  );
+}
+
+function developerTaskGraphFingerprint(nodes) {
+  return crypto
+    .createHash("sha256")
+    .update(
+      JSON.stringify(
+        nodes.map((node) => ({
+          id: node.id,
+          title: node.title,
+          dependsOn: node.dependsOn,
+          scope: node.scope,
+          expectedResult: node.expectedResult,
+          verification: node.verification,
+        }))
+      )
+    )
+    .digest("hex");
+}
+
+function validateDeveloperTaskGraphNodes(rawNodes) {
+  if (!Array.isArray(rawNodes) || rawNodes.length === 0) {
+    return null;
+  }
+
+  const nodes = rawNodes.map((raw, index) => ({
+    id: String(raw?.id || "").trim(),
+    title: String(raw?.title || "").trim(),
+    dependsOn: Array.isArray(raw?.depends_on)
+      ? raw.depends_on
+          .map((value) => String(value || "").trim())
+          .filter(Boolean)
+      : [],
+    scope: Array.isArray(raw?.scope)
+      ? raw.scope
+          .map(normalizeScopeEntry)
+          .filter(Boolean)
+      : [],
+    expectedResult: String(
+      raw?.expected_result || ""
+    ).trim(),
+    verification: String(
+      raw?.verification || ""
+    ).trim(),
+    state: "pending",
+    order: index,
+    verifiedAt: null,
+  }));
+
+  if (
+    nodes.some(
+      (node) =>
+        !node.id ||
+        !node.title ||
+        !node.expectedResult ||
+        !node.verification ||
+        node.scope.length === 0
+    )
+  ) {
+    return null;
+  }
+
+  const ids = new Set(nodes.map((node) => node.id));
+  if (ids.size !== nodes.length) {
+    return null;
+  }
+
+  for (const node of nodes) {
+    if (
+      node.dependsOn.includes(node.id) ||
+      node.dependsOn.some((id) => !ids.has(id)) ||
+      node.scope.some(
+        (entry) => !subtaskScopeWithinParent(entry)
+      )
+    ) {
+      return null;
+    }
+  }
+
+  const visiting = new Set();
+  const visited = new Set();
+  const byID = new Map(
+    nodes.map((node) => [node.id, node])
+  );
+
+  function visit(id) {
+    if (visiting.has(id)) return false;
+    if (visited.has(id)) return true;
+
+    visiting.add(id);
+    const node = byID.get(id);
+
+    for (const dependency of node.dependsOn) {
+      if (!visit(dependency)) return false;
+    }
+
+    visiting.delete(id);
+    visited.add(id);
+    return true;
+  }
+
+  for (const node of nodes) {
+    if (!visit(node.id)) return null;
+  }
+
+  return nodes;
+}
+
+function loadDeveloperTaskGraph() {
+  if (!teacherPlanFile || !fs.existsSync(teacherPlanFile)) {
+    return null;
+  }
+
+  try {
+    const payload = JSON.parse(
+      fs.readFileSync(teacherPlanFile, "utf8")
+    );
+    const nodes = validateDeveloperTaskGraphNodes(
+      payload?.review?.subtasks
+    );
+
+    if (!nodes) return null;
+
+    return {
+      fingerprint:
+        developerTaskGraphFingerprint(nodes),
+      nodes,
+      activeID: null,
+      completed: false,
+    };
+  } catch {
+    return null;
+  }
+}
+
+let developerTaskGraph =
+  loadDeveloperTaskGraph();
+
+function refreshDeveloperTaskGraph() {
+  if (!developerTaskGraph) return null;
+
+  const verified = new Set(
+    developerTaskGraph.nodes
+      .filter((node) => node.state === "verified")
+      .map((node) => node.id)
+  );
+
+  for (const node of developerTaskGraph.nodes) {
+    if (
+      node.state === "pending" &&
+      node.dependsOn.every((id) => verified.has(id))
+    ) {
+      node.state = "ready";
+    }
+  }
+
+  const running = developerTaskGraph.nodes.find(
+    (node) => node.state === "running"
+  );
+
+  if (running) {
+    developerTaskGraph.activeID = running.id;
+    return running;
+  }
+
+  const next = developerTaskGraph.nodes
+    .filter((node) => node.state === "ready")
+    .sort((a, b) => a.order - b.order)[0];
+
+  if (next) {
+    next.state = "running";
+    developerTaskGraph.activeID = next.id;
+    return next;
+  }
+
+  developerTaskGraph.activeID = null;
+  developerTaskGraph.completed =
+    developerTaskGraph.nodes.every(
+      (node) => node.state === "verified"
+    );
+
+  return null;
+}
+
+function activeDeveloperSubtask() {
+  if (!developerTaskGraph) return null;
+
+  return (
+    developerTaskGraph.nodes.find(
+      (node) =>
+        node.id === developerTaskGraph.activeID &&
+        node.state === "running"
+    ) ||
+    refreshDeveloperTaskGraph()
+  );
+}
+
+function developerTaskGraphComplete() {
+  return (
+    !developerTaskGraph ||
+    developerTaskGraph.nodes.every(
+      (node) => node.state === "verified"
+    )
+  );
+}
+
+function developerTaskGraphSummary() {
+  if (!developerTaskGraph) return "";
+
+  return developerTaskGraph.nodes
+    .map(
+      (node) =>
+        node.id +
+        "=" +
+        node.state
+    )
+    .join(",");
+}
+
+function developerTaskGraphPromptContext() {
+  const node = activeDeveloperSubtask();
+  if (!node) return "";
+
+  return [
+    "KRALI Developer Task Graph ACTIVE.",
+    "Execute ONLY the active subtask below.",
+    "Active subtask: " + node.id + " • " + node.title,
+    "Depends on: " +
+      (node.dependsOn.length
+        ? node.dependsOn.join(", ")
+        : "none"),
+    "Mutation scope: " + node.scope.join(", "),
+    "Expected result: " + node.expectedResult,
+    "Verification intent: " + node.verification,
+    "Do not mutate files for later subtasks yet.",
+    "When this subtask has a real diff and build_check PASS, the deterministic orchestrator will advance the graph.",
+  ].join("\n");
+}
+
+function snapshotDeveloperTaskGraph() {
+  if (!developerTaskGraph) return null;
+
+  return {
+    fingerprint: developerTaskGraph.fingerprint,
+    activeID: developerTaskGraph.activeID,
+    completed: developerTaskGraph.completed,
+    nodes: developerTaskGraph.nodes.map((node) => ({
+      id: node.id,
+      state: node.state,
+      verifiedAt: node.verifiedAt,
+    })),
+  };
+}
+
+function restoreDeveloperTaskGraph(snapshot) {
+  if (
+    !developerTaskGraph ||
+    !snapshot ||
+    snapshot.fingerprint !==
+      developerTaskGraph.fingerprint ||
+    !Array.isArray(snapshot.nodes)
+  ) {
+    return false;
+  }
+
+  const stateByID = new Map(
+    snapshot.nodes.map((node) => [
+      String(node?.id || ""),
+      {
+        state: String(node?.state || ""),
+        verifiedAt: node?.verifiedAt || null,
+      },
+    ])
+  );
+
+  const allowedStates = new Set([
+    "pending",
+    "ready",
+    "running",
+    "verified",
+  ]);
+
+  for (const node of developerTaskGraph.nodes) {
+    const saved = stateByID.get(node.id);
+    if (
+      saved &&
+      allowedStates.has(saved.state)
+    ) {
+      node.state = saved.state;
+      node.verifiedAt = saved.verifiedAt;
+    }
+  }
+
+  const runningNodes =
+    developerTaskGraph.nodes.filter(
+      (node) => node.state === "running"
+    );
+
+  if (runningNodes.length > 1) {
+    for (const node of runningNodes.slice(1)) {
+      node.state = "ready";
+    }
+  }
+
+  developerTaskGraph.activeID =
+    runningNodes[0]?.id || null;
+  developerTaskGraph.completed =
+    developerTaskGraph.nodes.every(
+      (node) => node.state === "verified"
+    );
+
+  refreshDeveloperTaskGraph();
+  return true;
+}
+
+function maybeAdvanceDeveloperTaskGraph(
+  toolName,
+  result
+) {
+  if (
+    !developerTaskGraph ||
+    result?.ok !== true ||
+    !["git_diff", "build_check"].includes(toolName) ||
+    !sawMutatingTool ||
+    !sawGitDiff ||
+    !buildCheckPassed
+  ) {
+    return null;
+  }
+
+  const current = activeDeveloperSubtask();
+  if (!current) return null;
+
+  current.state = "verified";
+  current.verifiedAt = new Date().toISOString();
+
+  const completedID = current.id;
+  const completedTitle = current.title;
+
+  developerTaskGraph.activeID = null;
+  const next = refreshDeveloperTaskGraph();
+
+  if (!next) {
+    developerTaskGraph.completed =
+      developerTaskGraph.nodes.every(
+        (node) => node.state === "verified"
+      );
+
+    stage(
+      "local_agent_task_graph_completed",
+      gapLabel +
+        " developer task graph tamamlandı • " +
+        developerTaskGraphSummary()
+    );
+
+    if (result && typeof result === "object") {
+      result.task_graph = {
+        verified_subtask: completedID,
+        graph_complete: true,
+        summary: developerTaskGraphSummary(),
+      };
+    }
+
+    return null;
+  }
+
+  sawMutatingTool = false;
+  sawGitDiff = false;
+  buildCheckPassed = false;
+  completionRejections = 0;
+  inspectionToolCalls = 0;
+  implementationPhaseAnnounced = false;
+  implementationSearchCompleted = false;
+  implementationReadCompleted = false;
+  implementationTargetPaths = [];
+  lastStructuredOutcome = null;
+
+  stage(
+    "local_agent_task_graph_advanced",
+    gapLabel +
+      " subtask doğrulandı • " +
+      completedID +
+      " (" +
+      completedTitle +
+      ") → " +
+      next.id +
+      " (" +
+      next.title +
+      ")"
+  );
+
+  if (result && typeof result === "object") {
+    result.task_graph = {
+      verified_subtask: completedID,
+      graph_complete: false,
+      next_subtask: {
+        id: next.id,
+        title: next.title,
+        scope: next.scope,
+        expected_result: next.expectedResult,
+        verification: next.verification,
+      },
+      instruction:
+        "Continue with ONLY next_subtask. Do not modify later subtask scopes.",
+    };
+  }
+
+  return next;
+}
+
+refreshDeveloperTaskGraph();
+
 function taskMutationScopeDecision(relative) {
   const normalized = String(relative || "")
     .replace(/\\/g, "/")
@@ -758,6 +1208,24 @@ function taskMutationScopeDecision(relative) {
     };
   }
 
+  const activeSubtask =
+    activeDeveloperSubtask();
+
+  if (
+    activeSubtask &&
+    activeSubtask.scope.length > 0 &&
+    !matchesAnyGlob(
+      normalized,
+      activeSubtask.scope
+    )
+  ) {
+    return {
+      allowed: false,
+      reason: "outside_active_subtask_scope",
+      normalized,
+    };
+  }
+
   return {
     allowed: true,
     reason: "allowed",
@@ -784,6 +1252,20 @@ function assertMutablePath(relative) {
     throw new Error(
       "Developer task allowedScope dışında yazma reddedildi: " +
         decision.normalized
+    );
+  }
+
+  if (
+    decision.reason ===
+      "outside_active_subtask_scope"
+  ) {
+    const active =
+      activeDeveloperSubtask();
+    throw new Error(
+      "Developer task graph aktif subtask scope dışında yazma reddedildi: " +
+        decision.normalized +
+        " • active=" +
+        String(active?.id || "unknown")
     );
   }
 
@@ -1643,8 +2125,18 @@ const systemPrompt = [
   "Do not emit fake tool JSON in prose. Call tools through native function calling.",
 ].join("\n");
 
+const taskGraphContext =
+  developerTaskGraphPromptContext();
+
 const messages = [
-  { role: "system", content: systemPrompt },
+  {
+    role: "system",
+    content:
+      systemPrompt +
+      (taskGraphContext
+        ? "\n\n" + taskGraphContext
+        : ""),
+  },
   { role: "user", content: prompt },
 ];
 
@@ -1773,7 +2265,7 @@ function persistCheckpoint(reason = "progress") {
 
   const status = candidateStatus();
   const payload = {
-    version: 7,
+    version: 8,
     baseHead: currentBaseHead(),
     gapLabel,
     reason,
@@ -1815,6 +2307,8 @@ function persistCheckpoint(reason = "progress") {
     implementationSearchCompleted,
     implementationReadCompleted,
     implementationTargetPaths: implementationTargetPaths.slice(0, 8),
+    developerTaskGraph:
+      snapshotDeveloperTaskGraph(),
     evidence: checkpointEvidence.slice(-12),
     savedAt: new Date().toISOString(),
   };
@@ -1842,7 +2336,7 @@ function loadCheckpoint() {
 
     if (
       !payload ||
-      ![1, 2, 3, 4, 5, 6, 7].includes(Number(payload.version || 0))
+      ![1, 2, 3, 4, 5, 6, 7, 8].includes(Number(payload.version || 0))
     ) {
       return null;
     }
@@ -1949,6 +2443,14 @@ function resumeCheckpointContext() {
   if (evidence.length === 0) return;
 
   checkpointEvidence = evidence;
+
+  if (
+    Number(checkpoint.version || 0) >= 8
+  ) {
+    restoreDeveloperTaskGraph(
+      checkpoint.developerTaskGraph
+    );
+  }
 
   if (
     Number(checkpoint.version || 0) >= 5
@@ -2681,6 +3183,11 @@ function recordToolEvidence(name, result, args = {}) {
   if (name === "build_check") {
     buildCheckPassed = result?.ok === true;
   }
+
+  maybeAdvanceDeveloperTaskGraph(
+    name,
+    result
+  );
 
   persistCheckpoint(
     result?.ok ? "tool_completed:" + name : "tool_failed:" + name
@@ -4342,6 +4849,16 @@ function currentCandidateBlockers() {
   if (status.dirty && !buildCheckPassed) {
     blockers.push(
       "candidate build_check PASS almadı"
+    );
+  }
+
+  if (
+    developerTaskGraph &&
+    !developerTaskGraphComplete()
+  ) {
+    blockers.push(
+      "developer task graph tamamlanmadı • " +
+        developerTaskGraphSummary()
     );
   }
 
@@ -7437,6 +7954,19 @@ resumeCheckpointContext();
 
 await runRuntimeFailureBootstrapFastPath();
 await runVerifiedResumeFastPath();
+
+if (developerTaskGraph) {
+  stage(
+    "local_agent_task_graph_ready",
+    gapLabel +
+      " developer task graph hazır • nodes=" +
+      developerTaskGraph.nodes.length +
+      " • active=" +
+      String(
+        activeDeveloperSubtask()?.id || "none"
+      )
+  );
+}
 
 stage(
   "local_agent_starting",
