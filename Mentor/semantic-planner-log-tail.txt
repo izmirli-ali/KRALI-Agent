@@ -1,14 +1,3 @@
-
-━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-KRALİ Semantic Planner Fallback
-status=9
-input=ios 26.7 kullanıyorum şuan yeni güncelleme olarak 27.0'a geçiş yapayım mı sence?
-output:
-
-━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-KRALİ Semantic Planner Fallback
-status=9
-reason=uncaughtSignal
 duration=0.29s
 executable=/opt/homebrew/bin/cline
 input=Bir video kurgu iş akışında ilk kontrol etmem gereken 3 teknik unsuru kısaca söyle.
@@ -118,3 +107,14 @@ output:
 [2026-09-23T12:28:49Z] local.stage=model_found model=devstral:24b
 
 [2026-09-23T12:28:49Z] local.stage=request_started model=devstral:24b
+
+[2026-09-23T12:44:42Z] local.failure=request_exception error=The request timed out.
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+KRALİ Semantic Planner Fallback
+status=9
+reason=uncaughtSignal
+duration=0.23s
+executable=/opt/homebrew/bin/cline
+input=Yeni açılan bir kahve markasını araştırıp görsel dilini analiz edelim ve Photoshop'ta örnek bir Instagram postu hazırlayalım.
+output:
