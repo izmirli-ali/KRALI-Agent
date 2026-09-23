@@ -1,8 +1,7 @@
 {
-  "cacheCandidateCountBefore" : 257,
-  "createdAt" : "2026-09-23T06:52:36Z",
+  "createdAt" : "2026-09-23T07:22:42Z",
   "expandedCandidateCount" : 257,
-  "installedCandidateCount" : 257,
+  "installedCandidateCount" : 228,
   "nestedCandidateCount" : 56,
   "queries" : [
     "Notlar"
@@ -187,6 +186,6 @@
       ]
     }
   ],
-  "refreshedCandidateCount" : 227,
+  "refreshedCandidateCount" : 228,
   "requestedText" : "Notlar uygulamasını aç ve gerçekten ön planda olduğunu doğrula. Başka hiçbir işlem yapma."
 }
