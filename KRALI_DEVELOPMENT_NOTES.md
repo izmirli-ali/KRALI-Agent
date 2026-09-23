@@ -497,3 +497,16 @@ Target runtime:
 - KRALİ parallel task added: UI Regression Checklist. It may only write under DeveloperAgent/Tests/ui-regression and must not mutate App/Cloud/Scripts/core files.
 - Training Result Analyzer Revision run 20260923-223910 reached Cloudflare write_file but then burned the remaining inspection budget and hit iteration limit; no candidate survived. Cursor fallback observability remains a follow-up orchestration task.
 - VERSION 0.10.32 / build 205.
+
+
+## v0.10.33 progress
+
+- Mentor run 20260923-225254 exposed three Developer Agent orchestration defects.
+- Cursor Architect was eligible on local_agent_iteration_limit but PRE_CURSOR_DIRTY included the internal .krali-developer-agent-prompt.txt artifact, so the read-only fallback gate was silently false every run.
+- Cursor dirty detection now filters only KRALİ orchestration artifacts (.krali-developer-agent-prompt.txt and .build-check/**) while preserving real candidate dirtiness. Eligible Cursor skips now log explicit reasons: disabled / candidate-dirty / cli-missing / unknown-gate.
+- Implementation target selection now applies the same task allowedScope / forbiddenScope contract as the mutation tools. A forbidden/out-of-scope file can no longer become local_agent_target_verified.
+- Empty implementationTargetPaths is no longer treated as “any read path is valid.”
+- Create-only developer tasks are now first-class: when no existing mutable target exists but task allowedScope is defined, the agent enters local_agent_create_target_ready and mutation tools are exposed; assertMutablePath remains the final write guard.
+- Redundant read/search attempts rejected during implementation gain a small separate grace budget (primitivePatch: 4) instead of consuming the entire base iteration budget immediately.
+- New source-level CI invariant test: Scripts/developer-orchestration-policy-self-test.mjs.
+- VERSION 0.10.33 / build 206.

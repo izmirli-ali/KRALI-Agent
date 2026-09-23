@@ -78,6 +78,9 @@ const maxInspectionTools = Number(
 const maxIterations = Number(
   process.env.KRALI_LOCAL_AGENT_MAX_ITERATIONS || "16"
 );
+const maxImplementationRejectionGrace = Number(
+  process.env.KRALI_LOCAL_AGENT_MAX_IMPLEMENTATION_REJECTION_GRACE || "4"
+);
 const hardTimeoutMs = Number(
   process.env.KRALI_LOCAL_AGENT_TIMEOUT_MS || "420000"
 );
@@ -715,38 +718,79 @@ function matchesAnyGlob(value, patterns) {
   );
 }
 
-function assertMutablePath(relative) {
+function taskMutationScopeDecision(relative) {
   const normalized = String(relative || "")
     .replace(/\\/g, "/")
     .replace(/^\.\//, "");
 
   if (
+    !normalized ||
     normalized === "VERSION" ||
     normalized.startsWith("Mentor/") ||
     normalized.startsWith(".git/")
   ) {
-    throw new Error(
-      "Korunan proje alanına yazma reddedildi: " + normalized
-    );
+    return {
+      allowed: false,
+      reason: "protected",
+      normalized,
+    };
   }
 
   if (
     taskForbiddenGlobs.length > 0 &&
     matchesAnyGlob(normalized, taskForbiddenGlobs)
   ) {
-    throw new Error(
-      "Developer task forbiddenScope yazma reddedildi: " + normalized
-    );
+    return {
+      allowed: false,
+      reason: "forbidden_scope",
+      normalized,
+    };
   }
 
   if (
     taskAllowedGlobs.length > 0 &&
     !matchesAnyGlob(normalized, taskAllowedGlobs)
   ) {
+    return {
+      allowed: false,
+      reason: "outside_allowed_scope",
+      normalized,
+    };
+  }
+
+  return {
+    allowed: true,
+    reason: "allowed",
+    normalized,
+  };
+}
+
+function assertMutablePath(relative) {
+  const decision =
+    taskMutationScopeDecision(relative);
+
+  if (decision.allowed) {
+    return;
+  }
+
+  if (decision.reason === "forbidden_scope") {
     throw new Error(
-      "Developer task allowedScope dışında yazma reddedildi: " + normalized
+      "Developer task forbiddenScope yazma reddedildi: " +
+        decision.normalized
     );
   }
+
+  if (decision.reason === "outside_allowed_scope") {
+    throw new Error(
+      "Developer task allowedScope dışında yazma reddedildi: " +
+        decision.normalized
+    );
+  }
+
+  throw new Error(
+    "Korunan proje alanına yazma reddedildi: " +
+      decision.normalized
+  );
 }
 
 function truncate(value, limit = 16000) {
@@ -1635,6 +1679,7 @@ let verifiedMutationSource = "";
 let rootCauseMutationTargetVerified =
   !requireRootCauseGate;
 let strategyEscalationCount = 0;
+let implementationRejectionGraceUsed = 0;
 
 const inspectionToolNames = new Set([
   "list_files",
@@ -2465,13 +2510,10 @@ function restoreMutationSnapshot(snapshot) {
 
 function isEligibleImplementationTargetPath(value) {
   const normalized = normalizeRepoRelativePath(value);
+  const scopeDecision =
+    taskMutationScopeDecision(normalized);
 
-  if (
-    !normalized ||
-    normalized === "VERSION" ||
-    normalized.startsWith("Mentor/") ||
-    normalized.startsWith(".git/")
-  ) {
+  if (!scopeDecision.allowed) {
     return false;
   }
 
@@ -2511,7 +2553,6 @@ function recordToolEvidence(name, result, args = {}) {
 
       if (matches.length > 0) {
         implementationSearchCompleted = true;
-        implementationReadCompleted = false;
         implementationTargetPaths = [
           ...new Set(
             matches
@@ -2526,19 +2567,40 @@ function recordToolEvidence(name, result, args = {}) {
           ),
         ].slice(0, 8);
 
-        stage(
-          "local_agent_target_found",
-          gapLabel +
-            " hedef kaynak bulundu • paths=" +
-            implementationTargetPaths.length +
-            " • targets=" +
-            truncate(
-              JSON.stringify(
-                implementationTargetPaths
-              ),
-              1200
-            )
-        );
+        if (implementationTargetPaths.length > 0) {
+          implementationReadCompleted = false;
+          stage(
+            "local_agent_target_found",
+            gapLabel +
+              " izinli mutation hedefi bulundu • paths=" +
+              implementationTargetPaths.length +
+              " • targets=" +
+              truncate(
+                JSON.stringify(
+                  implementationTargetPaths
+                ),
+                1200
+              )
+          );
+        } else if (taskAllowedGlobs.length > 0) {
+          implementationReadCompleted = true;
+          stage(
+            "local_agent_create_target_ready",
+            gapLabel +
+              " mevcut izinli mutation hedefi bulunmadı • task allowedScope yeni dosya oluşturma contract'ı olarak kullanılacak • allow=" +
+              truncate(
+                JSON.stringify(taskAllowedGlobs),
+                1200
+              )
+          );
+        } else {
+          implementationReadCompleted = false;
+          stage(
+            "local_agent_target_not_found",
+            gapLabel +
+              " arama sonucu var ancak güvenli mutation hedefi yok"
+          );
+        }
       }
     }
 
@@ -2550,11 +2612,17 @@ function recordToolEvidence(name, result, args = {}) {
         result.path || args.path || ""
       );
 
+      const normalizedReadPath =
+        normalizeRepoRelativePath(readPath);
+
       if (
         implementationSearchCompleted &&
-        (
-          implementationTargetPaths.length === 0 ||
-          implementationTargetPaths.includes(readPath)
+        implementationTargetPaths.length > 0 &&
+        implementationTargetPaths.includes(
+          normalizedReadPath
+        ) &&
+        isEligibleImplementationTargetPath(
+          normalizedReadPath
         )
       ) {
         if (
@@ -2570,7 +2638,7 @@ function recordToolEvidence(name, result, args = {}) {
         } else {
           implementationReadCompleted = true;
           implementationTargetPaths = [
-            normalizeRepoRelativePath(readPath)
+            normalizedReadPath
           ];
           stage(
             "local_agent_target_verified",
@@ -7378,7 +7446,14 @@ stage(
     (resumedFromCheckpoint ? " • checkpoint resume" : "")
 );
 
-for (let iteration = 1; iteration <= maxIterations; iteration++) {
+for (
+  let iteration = 1;
+  iteration <=
+    maxIterations +
+      implementationRejectionGraceUsed;
+  iteration++
+) {
+  let rejectionGraceGrantedThisIteration = false;
   const elapsed = Date.now() - startedAt;
 
   if (elapsed >= hardTimeoutMs) {
@@ -7396,7 +7471,7 @@ for (let iteration = 1; iteration <= maxIterations; iteration++) {
       " yerel model çalışıyor • adım " +
       iteration +
       "/" +
-      maxIterations
+      (maxIterations + maxImplementationRejectionGrace)
   );
 
   let response;
@@ -7678,9 +7753,9 @@ for (let iteration = 1; iteration <= maxIterations; iteration++) {
           name === "read_file" &&
           implementationSearchCompleted &&
           !implementationReadCompleted &&
-          (
-            implementationTargetPaths.length === 0 ||
-            implementationTargetPaths.includes(requestedPath)
+          implementationTargetPaths.length > 0 &&
+          implementationTargetPaths.includes(
+            normalizeRepoRelativePath(requestedPath)
           )
         )
       );
@@ -7698,6 +7773,23 @@ for (let iteration = 1; iteration <= maxIterations; iteration++) {
           " tekrar/genel inspection reddedildi • implementation fazı aktif • " +
           name
       );
+      if (
+        !rejectionGraceGrantedThisIteration &&
+        implementationRejectionGraceUsed <
+          maxImplementationRejectionGrace
+      ) {
+        implementationRejectionGraceUsed += 1;
+        rejectionGraceGrantedThisIteration = true;
+        stage(
+          "local_agent_iteration_grace",
+          gapLabel +
+            " implementation inspection reddi ana iteration bütçesinden düşülmedi • grace=" +
+            implementationRejectionGraceUsed +
+            "/" +
+            maxImplementationRejectionGrace
+        );
+      }
+
       result = {
         ok: false,
         error:
@@ -7708,7 +7800,12 @@ for (let iteration = 1; iteration <= maxIterations; iteration++) {
                   implementationTargetPaths.length > 0
                     ? "Target search is complete. Read one identified target path only: " +
                       implementationTargetPaths.join(", ")
-                    : "Target search is complete. Read the identified target source once, then mutate."
+                    : (
+                        taskAllowedGlobs.length > 0
+                          ? "No existing mutable target is required. Create or update only inside task allowedScope: " +
+                            taskAllowedGlobs.join(", ")
+                          : "Target search is complete. Read the identified target source once, then mutate."
+                      )
                 )
               : "Broad discovery is disabled during implementation. Use one targeted search_codebase.",
       };

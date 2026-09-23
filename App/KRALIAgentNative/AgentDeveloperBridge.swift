@@ -94,7 +94,10 @@ struct DeveloperAgentStatus: Hashable {
             "local_agent_timeout_controller",
             "local_agent_controller_rejected",
             "local_agent_target_found",
+            "local_agent_target_not_found",
+            "local_agent_create_target_ready",
             "local_agent_target_verified",
+            "local_agent_iteration_grace",
             "local_agent_dependency_neighborhood_verified",
             "local_agent_root_cause_pool_ready",
             "local_agent_root_cause_pruned",
@@ -238,6 +241,16 @@ struct DeveloperAgentStatus: Hashable {
             return "Zaman aşımı sonrası controller devralıyor"
         case "local_agent_controller_rejected":
             return "Controller kararı güvenlik kontrolünde reddedildi"
+        case "local_agent_target_found":
+            return "İzinli değişiklik hedefi bulundu"
+        case "local_agent_target_not_found":
+            return "İzinli değişiklik hedefi aranıyor"
+        case "local_agent_create_target_ready":
+            return "Yeni dosya oluşturma scope'u hazır"
+        case "local_agent_target_verified":
+            return "Değişiklik hedefi doğrulandı"
+        case "local_agent_iteration_grace":
+            return "Gereksiz inspection ana bütçeden düşülmedi"
         case "local_agent_dependency_neighborhood_verified":
             return "Bağımlılık çevresi doğrulanıyor"
         case "local_agent_root_cause_analyzing":

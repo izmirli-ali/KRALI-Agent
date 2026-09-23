@@ -33,6 +33,7 @@ jobs:
           done
           node Scripts/cursor-architect-bridge.mjs --self-test
           node Scripts/cloudflare-ollama-proxy.mjs --self-test
+          node Scripts/developer-orchestration-policy-self-test.mjs
 
       - name: Validate KRALI developer task cards
         shell: bash
