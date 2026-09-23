@@ -2384,35 +2384,6 @@ final class AgentEngine: ObservableObject {
                             target.bundleIdentifier
                         targetPath =
                             target.path
-                    } else {
-                        let unresolvedTarget =
-                            naturalLanguageResolver
-                                .applicationTargetDisplayPhrase(
-                                    from: userInput
-                                ) ??
-                            userInput
-
-                        let failureMessage =
-                            "Uygulama hedefini güvenilir biçimde çözemedim: " +
-                            unresolvedTarget +
-                            ". Hiçbir işlem yapılmadı ve onay kartı oluşturulmadı."
-
-                        outputs.append(
-                            failureMessage
-                        )
-                        stepEvidence[
-                            stepIndex
-                        ] =
-                            failureMessage
-                        currentRuntimeTask?
-                            .state =
-                            .failed
-
-                        log(
-                            "Strict Approval preflight blokladı: desktop.app hedefi çözülemedi • " +
-                            unresolvedTarget
-                        )
-                        break
                     }
                 } else if
                     graphStep.capabilityID ==
@@ -2437,6 +2408,50 @@ final class AgentEngine: ObservableObject {
                     targetSummary =
                         selectedRootURL?
                             .path
+                }
+
+                if !taskOrchestrator
+                    .approvalTargetIsResolved(
+                        capabilityID:
+                            graphStep.capabilityID,
+                        targetSummary:
+                            targetSummary,
+                        targetName:
+                            targetName,
+                        targetPath:
+                            targetPath
+                    ) {
+                    let unresolvedTarget =
+                        naturalLanguageResolver
+                            .applicationTargetDisplayPhrase(
+                                from: userInput
+                            ) ??
+                        targetSummary ??
+                        userInput
+
+                    let failureMessage =
+                        "Hedefi güvenilir biçimde çözemedim: " +
+                        unresolvedTarget +
+                        ". Hiçbir dış işlem yapılmadı ve onay kartı oluşturulmadı."
+
+                    outputs.append(
+                        failureMessage
+                    )
+                    stepEvidence[
+                        stepIndex
+                    ] =
+                        failureMessage
+                    currentRuntimeTask?
+                        .state =
+                        .failed
+
+                    log(
+                        "Strict Approval preflight blokladı: çözümlenmemiş hedef • capability=" +
+                        graphStep.capabilityID +
+                        " • target=" +
+                        unresolvedTarget
+                    )
+                    break
                 }
 
                 let approvalMessage =
