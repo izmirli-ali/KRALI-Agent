@@ -21,3 +21,20 @@ cd ~/Developer/KRALI-Agent
 ```
 
 Bu komut mevcut Developer Agent güvenlik kurallarını ve worktree izolasyonunu kullanır. Yeni Homebrew/Ollama/model kurulumu gibi sistem etkileri gerekiyorsa onay kapısı atlanmaz.
+
+
+## Sohbetten görevlendirme
+
+v0.10.28 ile kontrollü task kartları doğrudan KRALİ sohbetinden başlatılabilir:
+
+```text
+geliştirici görevi: Training Result Analyzer
+```
+
+veya task dosya kimliğiyle:
+
+```text
+geliştirici görevi: training-result-analyzer-v1
+```
+
+KRALİ task kartını `DeveloperAgent/Tasks` içinden generic olarak çözer. Sistem etkisi gerekiyorsa Developer Tool approval kartı aynı sohbet içinde gösterilir ve onay sonrası aynı task/scope ile devam edilir.
