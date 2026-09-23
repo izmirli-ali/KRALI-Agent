@@ -31,6 +31,8 @@ final class AgentEngine: ObservableObject {
     @Published var indexedFolders: [FolderRecord] = []
     @Published var pendingFileAction: PendingFileAction?
     @Published var pendingTaskApproval: PendingTaskApproval?
+    @Published var pendingDeveloperToolApproval:
+        PendingDeveloperToolApproval?
     @Published var lastUndoAction: UndoFileAction?
     @Published var fileSearchResults: [FileRecord] = []
     @Published var folderSearchResults: [FolderRecord] = []
@@ -115,6 +117,8 @@ final class AgentEngine: ObservableObject {
     private let desktopControlStore = DesktopControlProbeStore()
     private let textFileWriter = AgentTextFileWriter()
     private let developerBridge = AgentDeveloperBridge()
+    private let developerToolSafetyPolicy =
+        AgentDeveloperToolSafetyPolicy()
     private let learningQueueStore = AgentLearningQueueStore()
     private let debugRecoveryCenter = AgentDebugRecoveryCenter()
     private let localIntelligence = AgentLocalIntelligence()
@@ -133,6 +137,10 @@ final class AgentEngine: ObservableObject {
     private var inspectorStateForwarder: AnyCancellable?
     private var lastDecision: AgentDecision?
     private var activeLearningJobID: UUID?
+    private var pendingDeveloperLearningJob:
+        AgentLearningJob?
+    private var pendingDeveloperLearningJobBriefURL:
+        URL?
     private var currentOutcomeFailureIsTransient = false
     private var currentTaskInput = ""
     private var approvedRuntimeStepIndexes = Set<Int>()
