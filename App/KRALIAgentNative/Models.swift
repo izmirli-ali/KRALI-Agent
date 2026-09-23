@@ -80,19 +80,22 @@ struct PendingDeveloperToolApproval:
     let title: String
     let reason: String
     let targetSummary: String?
+    let approvalToken: String?
 
     init(
         id: UUID = UUID(),
         action: DeveloperToolApprovalAction,
         title: String,
         reason: String,
-        targetSummary: String? = nil
+        targetSummary: String? = nil,
+        approvalToken: String? = nil
     ) {
         self.id = id
         self.action = action
         self.title = title
         self.reason = reason
         self.targetSummary = targetSummary
+        self.approvalToken = approvalToken
     }
 }
 
