@@ -32,6 +32,7 @@ jobs:
             node --check "$script"
           done
           node Scripts/cursor-architect-bridge.mjs --self-test
+          node Scripts/cloudflare-ollama-proxy.mjs --self-test
 
       - name: Validate KRALI developer task cards
         shell: bash

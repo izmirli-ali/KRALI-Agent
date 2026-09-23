@@ -150,7 +150,7 @@ alter table public.skills enable row level security;
 alter table public.skill_versions enable row level security;
 alter table public.agent_events enable row level security;
 
-do $$
+do $
 declare
   t text;
 begin
@@ -167,11 +167,20 @@ begin
   loop
     execute format('drop policy if exists owner_all on public.%I', t);
     execute format(
-      'create policy owner_all on public.%I for all using (auth.uid() = owner_id) with check (auth.uid() = owner_id)',
+      'create policy owner_all on public.%I for all to authenticated using ((select auth.uid()) = owner_id) with check ((select auth.uid()) = owner_id)',
+      t
+    );
+    execute format('revoke all on public.%I from anon', t);
+    execute format('grant select, insert, update, delete on public.%I to authenticated', t);
+    execute format(
+      'create index if not exists %I on public.%I(owner_id)',
+      t || '_owner_idx',
       t
     );
   end loop;
-end $$;
+end $;
+
+grant usage, select on all sequences in schema public to authenticated;
 
 -- updated_at helper for mutable records.
 create or replace function public.krali_touch_updated_at()

@@ -440,3 +440,17 @@ Target runtime:
 - Böylece Ollama service start/model install gibi sistem etkileri KRALİ sohbetinde Developer Tool approval kartı üretir.
 - Terminal `run-developer-task.command` yolu fallback/manual kullanım için korunmuştur.
 - VERSION 0.10.28 / build 201.
+
+
+## v0.10.29 progress
+
+- Developer Agent compute remote-first tasarıma geçti.
+- Cloudflare Workers AI için local Ollama-compatible proxy eklendi; mevcut safe tool/worktree/mutation controller mimarisi yeniden kullanılmaya devam ediyor.
+- Remote config mevcutsa Ollama servisi ve ağır local model hazırlığı tamamen atlanıyor.
+- Varsayılan remote main model: GLM-4.7-Flash; structured JSON controller: Llama 3.3 70B FP8 Fast.
+- Cloudflare token yalnız macOS Keychain'de saklanır; config dosyasında yalnız account ID ve model adları vardır.
+- Remote hazır değilse local fallback artık 24B/14B cache'i tercih etmiyor; Qwen 7B/8B sınıfı öncelikli.
+- local_agent_watchdog_timeout artık Cursor Architect ikinci görüşüne uygun failure state.
+- Supabase RLS şeması authenticated owner modeli + explicit Data API grant/revoke ile sıkılaştırıldı.
+- Supabase client config modern publishable-key modeline hazırlandı; live project henüz seçilmedi/bağlanmadı.
+- VERSION 0.10.29 / build 202.
