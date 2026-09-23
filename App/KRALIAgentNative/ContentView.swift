@@ -7,6 +7,7 @@ struct ContentView: View {
     @State private var prompt = ""
     @State private var developerToolsExpanded = false
     @State private var inspectorVisible = false
+    @State private var inspectorDeveloperMode = false
     @StateObject private var updater = UpdateController()
 
     var body: some View {
@@ -289,6 +290,10 @@ struct ContentView: View {
                 .padding(14)
                 .background(.ultraThinMaterial)
             } else {
+                assistantStatusBar
+                    .padding(.horizontal, 18)
+                    .padding(.top, 10)
+
                 if engine.messages.count <= 3 {
                     quickActions
                         .padding(.horizontal, 18)
@@ -319,6 +324,200 @@ struct ContentView: View {
                 .padding(.vertical, 14)
                 .background(.ultraThinMaterial)
             }
+        }
+    }
+
+
+    private var assistantStatusBar: some View {
+        HStack(spacing: 9) {
+            ZStack {
+                Circle()
+                    .fill(
+                        assistantPhaseColor
+                            .opacity(0.12)
+                    )
+                    .frame(
+                        width: 28,
+                        height: 28
+                    )
+
+                if engine.busy {
+                    ProgressView()
+                        .controlSize(.mini)
+                } else {
+                    Image(
+                        systemName:
+                            assistantPhaseIcon
+                    )
+                    .font(.caption)
+                    .foregroundStyle(
+                        assistantPhaseColor
+                    )
+                }
+            }
+
+            VStack(
+                alignment: .leading,
+                spacing: 2
+            ) {
+                Text(assistantPhaseTitle)
+                    .font(
+                        .caption
+                            .weight(.semibold)
+                    )
+
+                Text(assistantPhaseDetail)
+                    .font(.caption2)
+                    .foregroundStyle(
+                        .secondary
+                    )
+                    .lineLimit(1)
+            }
+
+            Spacer()
+
+            if engine.pendingTaskApproval != nil ||
+               engine.pendingDeveloperToolApproval != nil ||
+               engine.pendingFileAction != nil {
+                Text("ONAY")
+                    .font(
+                        .caption2
+                            .weight(.bold)
+                    )
+                    .foregroundStyle(
+                        Color.orange
+                    )
+                    .padding(
+                        .horizontal,
+                        7
+                    )
+                    .padding(
+                        .vertical,
+                        3
+                    )
+                    .background(
+                        Color.orange
+                            .opacity(0.10)
+                    )
+                    .clipShape(
+                        Capsule()
+                    )
+            }
+        }
+        .padding(
+            .horizontal,
+            10
+        )
+        .padding(
+            .vertical,
+            8
+        )
+        .background(
+            Color(nsColor:
+                .controlBackgroundColor)
+                .opacity(0.78)
+        )
+        .clipShape(
+            RoundedRectangle(
+                cornerRadius: 10,
+                style: .continuous
+            )
+        )
+    }
+
+    private var assistantPhaseTitle: String {
+        if engine.pendingTaskApproval != nil ||
+           engine.pendingDeveloperToolApproval != nil ||
+           engine.pendingFileAction != nil {
+            return "Onayın bekleniyor"
+        }
+
+        if engine.busy {
+            return "KRALİ çalışıyor"
+        }
+
+        switch engine.verificationState {
+        case .checking:
+            return "Sonuç doğrulanıyor"
+        case .passed:
+            return "Görev doğrulandı"
+        case .partial:
+            return "Görev kısmen tamamlandı"
+        case .attention:
+            return "Dikkat gerekiyor"
+        case .skipped:
+            return "Doğrulama gerekmedi"
+        case .idle:
+            return "Hazır"
+        }
+    }
+
+    private var assistantPhaseDetail: String {
+        if let approval =
+            engine.pendingTaskApproval {
+            return approval.title
+        }
+
+        if let approval =
+            engine.pendingDeveloperToolApproval {
+            return approval.title
+        }
+
+        if let action =
+            engine.pendingFileAction {
+            return action.title
+        }
+
+        if engine.busy {
+            return engine.currentGoal
+        }
+
+        if engine.verificationSummary
+            .isEmpty {
+            return "Yeni bir görev verebilirsin."
+        }
+
+        return engine.verificationSummary
+    }
+
+    private var assistantPhaseIcon: String {
+        if engine.pendingTaskApproval != nil ||
+           engine.pendingDeveloperToolApproval != nil ||
+           engine.pendingFileAction != nil {
+            return "hand.raised.fill"
+        }
+
+        switch engine.verificationState {
+        case .checking:
+            return "magnifyingglass"
+        case .passed:
+            return "checkmark.circle.fill"
+        case .partial:
+            return "exclamationmark.circle.fill"
+        case .attention:
+            return "exclamationmark.triangle.fill"
+        case .skipped:
+            return "minus.circle"
+        case .idle:
+            return "sparkles"
+        }
+    }
+
+    private var assistantPhaseColor: Color {
+        if engine.pendingTaskApproval != nil ||
+           engine.pendingDeveloperToolApproval != nil ||
+           engine.pendingFileAction != nil {
+            return .orange
+        }
+
+        switch engine.verificationState {
+        case .passed:
+            return .green
+        case .partial,
+             .attention:
+            return .orange
+        default:
+            return .secondary
         }
     }
 
@@ -579,7 +778,7 @@ struct ContentView: View {
                 alignment: .leading,
                 spacing: 9
             ) {
-                Text("Onayın gerekiyor")
+                Text("Fiziksel işlem için onayın gerekiyor")
                     .font(
                         .system(
                             size: 14,
@@ -637,8 +836,21 @@ struct ContentView: View {
                     .font(.caption)
                     .foregroundStyle(.secondary)
 
+                Label(
+                    "Henüz hiçbir fiziksel işlem uygulanmadı",
+                    systemImage:
+                        "pause.circle.fill"
+                )
+                .font(
+                    .caption2
+                        .weight(.medium)
+                )
+                .foregroundStyle(
+                    Color.orange
+                )
+
                 Text(
-                    "İşlem henüz uygulanmadı. Bu onay yalnız bu adıma ve gösterilen hedefe geçerlidir; sonraki dış işlemler ayrıca onay ister."
+                    "Bu onay yalnız bu adıma ve gösterilen hedefe geçerlidir; sonraki dış işlemler ayrıca onay ister."
                 )
                 .font(.caption2)
                 .foregroundStyle(.secondary)
@@ -722,7 +934,7 @@ struct ContentView: View {
                 alignment: .leading,
                 spacing: 9
             ) {
-                Text("Developer aracı için onayın gerekiyor")
+                Text("Sistem etkisi için onayın gerekiyor")
                     .font(
                         .system(
                             size: 14,
@@ -780,8 +992,21 @@ struct ContentView: View {
                     .font(.caption)
                     .foregroundStyle(.secondary)
 
+                Label(
+                    "Mac üzerinde henüz sistem etkisi oluşturulmadı",
+                    systemImage:
+                        "pause.circle.fill"
+                )
+                .font(
+                    .caption2
+                        .weight(.medium)
+                )
+                .foregroundStyle(
+                    Color.orange
+                )
+
                 Text(
-                    "İşlem henüz uygulanmadı. Bu onay yalnız gösterilen developer adımına geçerlidir; sonraki fiziksel veya sistem etkili adım yeniden onay ister."
+                    "Bu onay yalnız gösterilen developer adımına geçerlidir; sonraki fiziksel veya sistem etkili adım yeniden onay ister."
                 )
                 .font(.caption2)
                 .foregroundStyle(.secondary)
@@ -880,6 +1105,19 @@ struct ContentView: View {
     private var sidePane: some View {
         ScrollView {
             VStack(alignment: .leading, spacing: 14) {
+                Picker(
+                    "Inspector görünümü",
+                    selection:
+                        $inspectorDeveloperMode
+                ) {
+                    Text("Özet")
+                        .tag(false)
+                    Text("Developer")
+                        .tag(true)
+                }
+                .pickerStyle(.segmented)
+                .labelsHidden()
+
                 sectionTitle("Durum")
 
                 VStack(alignment: .leading, spacing: 9) {
@@ -971,68 +1209,12 @@ struct ContentView: View {
                 .background(Color(nsColor: .controlBackgroundColor))
                 .clipShape(RoundedRectangle(cornerRadius: 11))
 
-                sectionTitle("Bağlam")
 
-                VStack(alignment: .leading, spacing: 8) {
-                    HStack {
-                        Label(
-                            engine.contextMemoryStatus,
-                            systemImage: "brain"
-                        )
-                        .font(.caption)
-                        .foregroundStyle(.secondary)
+                systemHealthSection
 
-                        Spacer()
-
-                        Text("\(engine.contextMemoryEntries.count)")
-                            .font(.caption2.monospacedDigit())
-                            .foregroundStyle(.secondary)
-                    }
-
-                    let visibleContext =
-                        engine.activeContextMemories.isEmpty
-                            ? Array(engine.contextMemoryEntries.prefix(3))
-                            : Array(engine.activeContextMemories.prefix(3))
-
-                    if visibleContext.isEmpty {
-                        Text(
-                            "KRALİ tamamlanan görevlerden henüz yeniden kullanılabilir bir bağlam oluşturmadı."
-                        )
-                        .font(.caption2)
-                        .foregroundStyle(.secondary)
-                    } else {
-                        ForEach(visibleContext) { memory in
-                            VStack(alignment: .leading, spacing: 2) {
-                                HStack(spacing: 5) {
-                                    Image(
-                                        systemName: memory.kind == .userRule
-                                            ? "bookmark.fill"
-                                            : memory.kind == .research
-                                                ? "globe"
-                                                : "clock.arrow.circlepath"
-                                    )
-                                    .font(.caption2)
-                                    .foregroundStyle(.secondary)
-
-                                    Text(memory.title)
-                                        .font(.caption.weight(.medium))
-                                        .lineLimit(1)
-
-                                    Spacer()
-                                }
-
-                                Text(memoryPreview(memory.summary))
-                                    .font(.caption2)
-                                    .foregroundStyle(.secondary)
-                                    .lineSpacing(1.5)
-                                    .lineLimit(3)
-                            }
-                        }
-                    }
+                if inspectorDeveloperMode {
+                    contextInspectorSection
                 }
-                .padding(11)
-                .background(Color(nsColor: .controlBackgroundColor))
-                .clipShape(RoundedRectangle(cornerRadius: 11))
 
                 if !engine.webResearchResults.isEmpty {
                     sectionTitle("Kaynaklar")
@@ -1083,7 +1265,9 @@ struct ContentView: View {
                     .clipShape(RoundedRectangle(cornerRadius: 11))
                 }
 
-                if let incident = engine.inspectorState.debugIncident {
+                if inspectorDeveloperMode,
+                   let incident =
+                    engine.inspectorState.debugIncident {
                     sectionTitle("Hata Ayıklama")
 
                     VStack(alignment: .leading, spacing: 8) {
@@ -1162,9 +1346,12 @@ struct ContentView: View {
                     .clipShape(RoundedRectangle(cornerRadius: 11))
                 }
 
-                if !engine.capabilityLearningPlans.isEmpty ||
-                   !engine.inspectorState.activeLearningJobs.isEmpty ||
-                   engine.inspectorState.shouldShowPrimaryDeveloperStatus {
+                if inspectorDeveloperMode &&
+                   (
+                       !engine.capabilityLearningPlans.isEmpty ||
+                       !engine.inspectorState.activeLearningJobs.isEmpty ||
+                       engine.inspectorState.shouldShowPrimaryDeveloperStatus
+                   ) {
                     sectionTitle("Öğrenme")
 
                     VStack(alignment: .leading, spacing: 8) {
@@ -1509,147 +1696,392 @@ struct ContentView: View {
                     .controlSize(.small)
                 }
 
-                DisclosureGroup(
-                    "Geliştirici araçları",
-                    isExpanded: $developerToolsExpanded
-                ) {
-                    VStack(alignment: .leading, spacing: 10) {
-                        Divider()
-
-                        HStack {
-                            VStack(alignment: .leading, spacing: 2) {
-                                Text("Training Lab")
-                                    .font(.caption.weight(.medium))
-                                Text(engine.inspectorState.trainingLabStatus)
-                                    .font(.caption2)
-                                    .foregroundStyle(.secondary)
-                                    .lineLimit(2)
-                            }
-
-                            Spacer()
-
-                            Button("Çalıştır") {
-                                engine.runTrainingLab()
-                            }
-                            .controlSize(.small)
-                            .disabled(engine.inspectorState.trainingLabBusy)
-                        }
-
-                        HStack {
-                            VStack(alignment: .leading, spacing: 2) {
-                                Text("Live Research Eval")
-                                    .font(.caption.weight(.medium))
-                                Text(engine.inspectorState.liveResearchEvalStatus)
-                                    .font(.caption2)
-                                    .foregroundStyle(.secondary)
-                                    .lineLimit(2)
-                            }
-
-                            Spacer()
-
-                            Button("Çalıştır") {
-                                engine.runLiveResearchEval()
-                            }
-                            .controlSize(.small)
-                            .disabled(engine.inspectorState.liveResearchEvalBusy)
-                        }
-
-                        HStack {
-                            VStack(alignment: .leading, spacing: 2) {
-                                Text("KRALİ Arena")
-                                    .font(.caption.weight(.medium))
-                                Text(engine.inspectorState.arenaStatus)
-                                    .font(.caption2)
-                                    .foregroundStyle(.secondary)
-                                    .lineLimit(2)
-                            }
-
-                            Spacer()
-
-                            Button("Çalıştır") {
-                                engine.runArena()
-                            }
-                            .controlSize(.small)
-                            .disabled(engine.inspectorState.arenaBusy)
-                        }
-
-                        HStack {
-                            VStack(alignment: .leading, spacing: 2) {
-                                Text("Screen Perception Probe")
-                                    .font(.caption.weight(.medium))
-                                Text(engine.inspectorState.screenPerceptionStatus)
-                                    .font(.caption2)
-                                    .foregroundStyle(.secondary)
-                                    .lineLimit(3)
-                            }
-
-                            Spacer()
-
-                            Button("Test") {
-                                engine.runScreenPerceptionProbe()
-                            }
-                            .controlSize(.small)
-                            .disabled(engine.inspectorState.screenPerceptionBusy)
-                        }
-
-                        HStack {
-                            VStack(alignment: .leading, spacing: 2) {
-                                Text("Desktop Control Probe")
-                                    .font(.caption.weight(.medium))
-                                Text(engine.inspectorState.desktopControlStatus)
-                                    .font(.caption2)
-                                    .foregroundStyle(.secondary)
-                                    .lineLimit(3)
-                            }
-
-                            Spacer()
-
-                            Button("Test") {
-                                engine.runDesktopControlProbe()
-                            }
-                            .controlSize(.small)
-                            .disabled(engine.inspectorState.desktopControlBusy)
-                        }
-
-                        HStack {
-                            VStack(alignment: .leading, spacing: 2) {
-                                Text("Developer Agent")
-                                    .font(.caption.weight(.medium))
-                                Text(engine.inspectorState.developerAgentStatus.message)
-                                    .font(.caption2)
-                                    .foregroundStyle(.secondary)
-                                    .lineLimit(2)
-                            }
-
-                            Spacer()
-
-                            Button("Çalıştır") {
-                                engine.runDeveloperAgent()
-                            }
-                            .controlSize(.small)
-                            .disabled(engine.inspectorState.developerAgentBusy)
-                        }
-
-                        Text(
-                            "Bu butonlar yalnız geliştirici testi / tanısı içindir. Günlük KRALİ kullanımı doğal dil komutlarıyla yapılır; capability'ler için ayrı kullanıcı butonları gerekmez."
-                        )
-                        .font(.caption2)
-                        .foregroundStyle(.secondary)
-
-                        Text(
-                            "Mentor gönderimi üst çubuktaki Mentor düğmesinden yapılır."
-                        )
-                        .font(.caption2)
-                        .foregroundStyle(.secondary)
-                    }
-                    .padding(.top, 4)
+                if inspectorDeveloperMode {
+                    developerToolsSection
                 }
-                .font(.caption.weight(.medium))
-                .padding(11)
-                .background(Color(nsColor: .controlBackgroundColor))
-                .clipShape(RoundedRectangle(cornerRadius: 11))
             }
             .padding(14)
+        }
+    }
+
+
+    @ViewBuilder
+    private var systemHealthSection: some View {
+        if let report =
+            engine.inspectorState
+                .trainingLabReport {
+            sectionTitle("Sistem sağlığı")
+
+            VStack(
+                alignment: .leading,
+                spacing: 9
+            ) {
+                HStack {
+                    Label(
+                        "Training",
+                        systemImage:
+                            "checklist"
+                    )
+                    .font(
+                        .caption
+                            .weight(.semibold)
+                    )
+
+                    Spacer()
+
+                    Text(
+                        String(report.passed) +
+                        "/" +
+                        String(report.total)
+                    )
+                    .font(
+                        .caption
+                            .monospacedDigit()
+                            .weight(.semibold)
+                    )
+                }
+
+                HStack(spacing: 8) {
+                    Text(
+                        "Core " +
+                        String(
+                            report.corePassed
+                        ) +
+                        "/" +
+                        String(
+                            report.coreTotal
+                        )
+                    )
+
+                    Text("•")
+
+                    Text(
+                        "North Star " +
+                        String(
+                            report.northStarPassed
+                        ) +
+                        "/" +
+                        String(
+                            report.northStarTotal
+                        )
+                    )
+
+                    Spacer()
+                }
+                .font(.caption2)
+                .foregroundStyle(.secondary)
+
+                if report.failed > 0 {
+                    Label(
+                        String(report.failed) +
+                        " bilinen açık",
+                        systemImage:
+                            "exclamationmark.triangle"
+                    )
+                    .font(.caption2)
+                    .foregroundStyle(
+                        Color.orange
+                    )
+                } else {
+                    Label(
+                        "Tüm regression testleri geçti",
+                        systemImage:
+                            "checkmark.seal.fill"
+                    )
+                    .font(.caption2)
+                    .foregroundStyle(
+                        Color.green
+                    )
+                }
+            }
+            .padding(11)
+            .background(
+                Color(nsColor:
+                    .controlBackgroundColor)
+            )
+            .clipShape(
+                RoundedRectangle(
+                    cornerRadius: 11
+                )
+            )
+        }
+    }
+
+    private var contextInspectorSection: some View {
+        Group {
+            sectionTitle("Bağlam")
+
+            VStack(
+                alignment: .leading,
+                spacing: 8
+            ) {
+                HStack {
+                    Label(
+                        engine.contextMemoryStatus,
+                        systemImage: "brain"
+                    )
+                    .font(.caption)
+                    .foregroundStyle(.secondary)
+
+                    Spacer()
+
+                    Text(
+                        String(
+                            engine
+                                .contextMemoryEntries
+                                .count
+                        )
+                    )
+                    .font(
+                        .caption2
+                            .monospacedDigit()
+                    )
+                    .foregroundStyle(.secondary)
+                }
+
+                let visibleContext =
+                    engine
+                        .activeContextMemories
+                        .isEmpty
+                        ? Array(
+                            engine
+                                .contextMemoryEntries
+                                .prefix(3)
+                        )
+                        : Array(
+                            engine
+                                .activeContextMemories
+                                .prefix(3)
+                        )
+
+                if visibleContext.isEmpty {
+                    Text(
+                        "KRALİ tamamlanan görevlerden henüz yeniden kullanılabilir bir bağlam oluşturmadı."
+                    )
+                    .font(.caption2)
+                    .foregroundStyle(.secondary)
+                } else {
+                    ForEach(
+                        visibleContext
+                    ) { memory in
+                        VStack(
+                            alignment: .leading,
+                            spacing: 2
+                        ) {
+                            HStack(spacing: 5) {
+                                Image(
+                                    systemName:
+                                        memory.kind ==
+                                            .userRule
+                                        ? "bookmark.fill"
+                                        : memory.kind ==
+                                            .research
+                                            ? "globe"
+                                            : "clock.arrow.circlepath"
+                                )
+                                .font(.caption2)
+                                .foregroundStyle(
+                                    .secondary
+                                )
+
+                                Text(memory.title)
+                                    .font(
+                                        .caption
+                                            .weight(
+                                                .medium
+                                            )
+                                    )
+                                    .lineLimit(1)
+
+                                Spacer()
+                            }
+
+                            Text(
+                                memoryPreview(
+                                    memory.summary
+                                )
+                            )
+                            .font(.caption2)
+                            .foregroundStyle(
+                                .secondary
+                            )
+                            .lineSpacing(1.5)
+                            .lineLimit(3)
+                        }
+                    }
+                }
+            }
+            .padding(11)
+            .background(
+                Color(nsColor:
+                    .controlBackgroundColor)
+            )
+            .clipShape(
+                RoundedRectangle(
+                    cornerRadius: 11
+                )
+            )
+        }
+    }
+
+    private var developerToolsSection: some View {
+        DisclosureGroup(
+            "Geliştirici araçları",
+            isExpanded:
+                $developerToolsExpanded
+        ) {
+            VStack(
+                alignment: .leading,
+                spacing: 10
+            ) {
+                Divider()
+
+                developerToolRow(
+                    title: "Training Lab",
+                    status:
+                        engine.inspectorState
+                            .trainingLabStatus,
+                    buttonTitle: "Çalıştır",
+                    busy:
+                        engine.inspectorState
+                            .trainingLabBusy
+                ) {
+                    engine.runTrainingLab()
+                }
+
+                developerToolRow(
+                    title: "Live Research Eval",
+                    status:
+                        engine.inspectorState
+                            .liveResearchEvalStatus,
+                    buttonTitle: "Çalıştır",
+                    busy:
+                        engine.inspectorState
+                            .liveResearchEvalBusy
+                ) {
+                    engine.runLiveResearchEval()
+                }
+
+                developerToolRow(
+                    title: "KRALİ Arena",
+                    status:
+                        engine.inspectorState
+                            .arenaStatus,
+                    buttonTitle: "Çalıştır",
+                    busy:
+                        engine.inspectorState
+                            .arenaBusy
+                ) {
+                    engine.runArena()
+                }
+
+                developerToolRow(
+                    title:
+                        "Screen Perception Probe",
+                    status:
+                        engine.inspectorState
+                            .screenPerceptionStatus,
+                    buttonTitle: "Test",
+                    busy:
+                        engine.inspectorState
+                            .screenPerceptionBusy
+                ) {
+                    engine
+                        .runScreenPerceptionProbe()
+                }
+
+                developerToolRow(
+                    title:
+                        "Desktop Control Probe",
+                    status:
+                        engine.inspectorState
+                            .desktopControlStatus,
+                    buttonTitle: "Test",
+                    busy:
+                        engine.inspectorState
+                            .desktopControlBusy
+                ) {
+                    engine
+                        .runDesktopControlProbe()
+                }
+
+                developerToolRow(
+                    title: "Developer Agent",
+                    status:
+                        engine.inspectorState
+                            .developerAgentStatus
+                            .message,
+                    buttonTitle: "Çalıştır",
+                    busy:
+                        engine.inspectorState
+                            .developerAgentBusy
+                ) {
+                    engine.runDeveloperAgent()
+                }
+
+                Text(
+                    "Bu butonlar yalnız geliştirici testi / tanısı içindir. Günlük KRALİ kullanımı doğal dil komutlarıyla yapılır."
+                )
+                .font(.caption2)
+                .foregroundStyle(.secondary)
+
+                Text(
+                    "Fiziksel veya sistem etkili developer adımları yine chat onayı ister."
+                )
+                .font(.caption2)
+                .foregroundStyle(
+                    Color.orange
+                )
+            }
+            .padding(.top, 4)
+        }
+        .font(.caption.weight(.medium))
+        .padding(11)
+        .background(
+            Color(nsColor:
+                .controlBackgroundColor)
+        )
+        .clipShape(
+            RoundedRectangle(
+                cornerRadius: 11
+            )
+        )
+    }
+
+    private func developerToolRow(
+        title: String,
+        status: String,
+        buttonTitle: String,
+        busy: Bool,
+        action: @escaping () -> Void
+    ) -> some View {
+        HStack {
+            VStack(
+                alignment: .leading,
+                spacing: 2
+            ) {
+                Text(title)
+                    .font(
+                        .caption
+                            .weight(.medium)
+                    )
+
+                Text(status)
+                    .font(.caption2)
+                    .foregroundStyle(
+                        .secondary
+                    )
+                    .lineLimit(3)
+            }
+
+            Spacer()
+
+            Button(
+                buttonTitle,
+                action: action
+            )
+            .controlSize(.small)
+            .disabled(busy)
         }
     }
 
