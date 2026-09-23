@@ -8,6 +8,12 @@ Data/*
 Backups/*
 !Backups/.gitkeep
 
+# Mentor/History is kept locally on the user's Mac and is not mirrored
+# into git. Keep only repo policy placeholders here.
+Mentor/History/*.json
+!Mentor/History/.gitkeep
+!Mentor/History/README.md
+
 .build/
 
 # Generated KRALİ app icon rasters
