@@ -83,3 +83,18 @@ Controlled developer task çalışırken isteğe bağlı bir OpenAI Teacher katm
 
 Bu ilk aşama task decomposition'ı advisory plan olarak prompt'a taşır. Alt görevlerin ayrı checkpoint/branch lifecycle ile otomatik sırayla yürütülmesi ayrı orchestration fazıdır.
 
+## Developer Task Graph
+
+OpenAI Teacher plan review geçerli bir `subtasks` DAG üretirse native Developer Agent bunu deterministik bir execution graph olarak kullanır.
+
+- Her subtask benzersiz ID, dependency listesi, dar mutation scope, expected result ve verification intent taşır.
+- Subtask scope parent developer task `allowedScope` sınırını genişletemez; wildcard ancak parent scope ile birebir aynıysa kabul edilir.
+- Aktif subtask dışındaki mutation deterministik olarak reddedilir.
+- Aynı worktree/candidate üzerinde yalnız dependency'leri doğrulanmış node çalışır.
+- Gerçek mutation + diff inspection + `build_check PASS` olmadan node `verified` olamaz.
+- Node doğrulanınca state machine sıradaki ready dependency node'una geçer ve inspection/mutation gate'leri o node için sıfırlanır.
+- Tüm node'lar verified olmadan Developer Agent completion ve structured candidate handoff reddedilir.
+- Graph state Developer checkpoint schema v8 içinde saklanır; aynı graph fingerprint ile timeout sonrası devam edebilir.
+- Parent task'ın gerçek verification contract'ı graph tamamlandıktan sonra runner seviyesinde yine zorunludur.
+- Teacher planı yoksa veya DAG/scope doğrulaması geçmezse mevcut tek-task Developer Agent davranışı korunur.
+

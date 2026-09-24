@@ -2104,15 +2104,30 @@ if [ "$PROVIDER" = "ollama" ] &&
     KRALI_APP_VERSION="$(/bin/cat "$ROOT/VERSION" 2>/dev/null | /usr/bin/tr -d '[:space:]')" \
     KRALI_RUN_ID="$STAMP" \
     KRALI_CHECKPOINT_FILE="$CHECKPOINT_FILE" \
+    KRALI_TEACHER_PLAN_FILE="$OPENAI_TEACHER_PLAN_RESULT" \
     KRALI_RUNTIME_SOURCE_HINTS="$RUNTIME_SOURCE_HINTS" \
     KRALI_REQUIRE_ROOT_CAUSE_GATE="$([ "$GAP_MODE" = "gap" ] && echo 1 || echo 0)" \
     KRALI_REQUIRE_CHANGE="$([ "$GAP_MODE" = "gap" ] && echo 1 || echo 0)" \
     KRALI_LOCAL_AGENT_MAX_COMPLETION_REJECTIONS="$([ "$LEARNING_PATH" = "primitivePatch" ] && echo 2 || echo 3)" \
     KRALI_LOCAL_AGENT_MAX_STRUCTURED_ACTIONS="$([ "$LEARNING_PATH" = "primitivePatch" ] && echo 6 || echo 8)" \
     KRALI_LOCAL_AGENT_MAX_INSPECTIONS="$([ "$LEARNING_PATH" = "primitivePatch" ] && echo 4 || echo 6)" \
-    KRALI_LOCAL_AGENT_MAX_ITERATIONS="$([ "$LEARNING_PATH" = "primitivePatch" ] && echo 10 || echo 16)" \
+    KRALI_LOCAL_AGENT_MAX_ITERATIONS="$(
+        if [ -f "$OPENAI_TEACHER_PLAN_RESULT" ]; then
+            echo 32
+        elif [ "$LEARNING_PATH" = "primitivePatch" ]; then
+            echo 10
+        else
+            echo 16
+        fi
+    )" \
     KRALI_LOCAL_AGENT_MAX_IMPLEMENTATION_REJECTION_GRACE="$([ "$LEARNING_PATH" = "primitivePatch" ] && echo 4 || echo 2)" \
-    KRALI_LOCAL_AGENT_TIMEOUT_MS="$([ "$LEARNING_PATH" = "primitivePatch" ] && echo 300000 || echo 300000)" \
+    KRALI_LOCAL_AGENT_TIMEOUT_MS="$(
+        if [ -f "$OPENAI_TEACHER_PLAN_RESULT" ]; then
+            echo 720000
+        else
+            echo 300000
+        fi
+    )" \
     KRALI_LOCAL_AGENT_REQUEST_TIMEOUT_MS="$([ "$LEARNING_PATH" = "primitivePatch" ] && echo 45000 || echo 60000)" \
     KRALI_LOCAL_AGENT_STRUCTURED_TIMEOUT_MS="$([ "$LEARNING_PATH" = "primitivePatch" ] && echo 120000 || echo 60000)" \
     "$NODE_BIN" "$ROOT/Scripts/ollama-developer-agent.mjs" \

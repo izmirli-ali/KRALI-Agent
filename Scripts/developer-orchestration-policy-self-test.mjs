@@ -74,6 +74,27 @@ assertContains(
   "Cursor skip reason is observable"
 );
 
+assertContains(
+  agent,
+  "outside_active_subtask_scope",
+  "Teacher task graph narrows mutation scope per active subtask"
+);
+assertContains(
+  agent,
+  "developer task graph tamamlanmadı",
+  "completion gate requires all developer subtasks verified"
+);
+assertContains(
+  agent,
+  "local_agent_task_graph_advanced",
+  "verified developer subtask advances dependency graph"
+);
+assertContains(
+  runner,
+  "KRALI_TEACHER_PLAN_FILE",
+  "Teacher plan is passed into native Developer Agent"
+);
+
 process.stdout.write(
   "developer_orchestration_policy_ok\n"
 );
