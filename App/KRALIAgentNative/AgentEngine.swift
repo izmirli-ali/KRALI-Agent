@@ -6201,6 +6201,7 @@ final class AgentEngine: ObservableObject {
                 developerRepository: developerRepository,
                 developerMissionReason: developerMissionReason,
                 developerRunID: missionDeveloperRunID,
+                selfDiagnosis: currentSelfDiagnosisReport,
                 executionProfile: executionProfile,
                 semanticMission: currentSemanticMission,
                 semanticPlannerProvider:
