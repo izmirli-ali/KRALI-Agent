@@ -2288,66 +2288,9 @@ CLINE_RUN_STREAMED_TO_LOG=0
 
 CLINE_STARTED_AT="$(date +%s)"
 
-if [ "$PROVIDER" = "ollama" ] &&
-   [ "$LOCAL_AGENT_ENGINE" = "native-ollama" ]; then
-    CLINE_RUN_LOG="$LOG_DIR/KRALI-Developer-Agent-Local-$STAMP.log"
-    CLINE_RUN_STREAMED_TO_LOG=1
-    if [ "$REMOTE_PROVIDER_MODE" -eq 1 ]; then
-        write_status "remote_agent_starting|$GAP_LABEL Cloudflare Workers AI ile öğreniliyor|$BRANCH|$WORKTREE"
-        echo "☁️ Model rolleri: remote main=$KRALI_CF_MAIN_MODEL • structured=$KRALI_CF_JSON_MODEL" | tee -a "$LOG"
-    else
-        write_status "local_agent_starting|$GAP_LABEL native Ollama Developer Agent ile öğreniliyor|$BRANCH|$WORKTREE"
-        echo "🧠 Model rolleri: root-cause=$CONTROLLER_MODEL • mutation=$MODEL • controller=$CONTROLLER_MODEL" | tee -a "$LOG"
-    fi
-
-    KRALI_WORKTREE="$WORKTREE" \
-    KRALI_INFERENCE_MODE="$([ "$REMOTE_PROVIDER_MODE" -eq 1 ] && echo remote || echo local)" \
-    KRALI_PROMPT_FILE="$PROMPT_FILE" \
-    KRALI_DEV_MODEL="$MODEL" \
-    KRALI_ARCHITECT_MODEL="$MODEL" \
-    KRALI_ROOT_CAUSE_MODEL="$CONTROLLER_MODEL" \
-    KRALI_ARCHITECT_MUTATION_MODEL="$MODEL" \
-    KRALI_CONTROLLER_MODEL="$CONTROLLER_MODEL" \
-    KRALI_OLLAMA_BASE_URL="$OLLAMA_BASE_URL" \
-    KRALI_STATUS_FILE="$STATUS" \
-    KRALI_BRANCH="$BRANCH" \
-    KRALI_GAP_LABEL="$GAP_LABEL" \
-    KRALI_APP_VERSION="$(/bin/cat "$ROOT/VERSION" 2>/dev/null | /usr/bin/tr -d '[:space:]')" \
-    KRALI_RUN_ID="$STAMP" \
-    KRALI_CHECKPOINT_FILE="$CHECKPOINT_FILE" \
-    KRALI_DEV_TASK_FILE="$DEV_TASK_FILE" \
-    KRALI_LEARNING_PATH="$LEARNING_PATH" \
-    KRALI_SURFACE_GUARD_SCRIPT="$ROOT/Scripts/developer-candidate-surface-guard.mjs" \
-    KRALI_DEVELOPER_TASK_PLAN_FILE="$DEVELOPER_TASK_GRAPH_PLAN" \
-    KRALI_DEVELOPER_TASK_FALLBACK_PLAN_FILE="$BASELINE_TASK_PLAN_RESULT" \
-    KRALI_RUNTIME_SOURCE_HINTS="$RUNTIME_SOURCE_HINTS" \
-    KRALI_REQUIRE_ROOT_CAUSE_GATE="$([ "$GAP_MODE" = "gap" ] && echo 1 || echo 0)" \
-    KRALI_REQUIRE_CHANGE="$([ "$GAP_MODE" = "gap" ] && echo 1 || echo 0)" \
-    KRALI_LOCAL_AGENT_MAX_COMPLETION_REJECTIONS="$([ "$LEARNING_PATH" = "primitivePatch" ] && echo 2 || echo 3)" \
-    KRALI_LOCAL_AGENT_MAX_STRUCTURED_ACTIONS="$([ "$LEARNING_PATH" = "primitivePatch" ] && echo 6 || echo 8)" \
-    KRALI_LOCAL_AGENT_MAX_INSPECTIONS="$([ "$LEARNING_PATH" = "primitivePatch" ] && echo 4 || echo 6)" \
-    KRALI_LOCAL_AGENT_MAX_ITERATIONS="$(
-        if [ -n "$DEVELOPER_TASK_GRAPH_PLAN" ] && [ -f "$DEVELOPER_TASK_GRAPH_PLAN" ]; then
-            echo 32
-        elif [ "$LEARNING_PATH" = "primitivePatch" ]; then
-            echo 10
-        else
-            echo 16
-        fi
-    )" \
-    KRALI_LOCAL_AGENT_MAX_IMPLEMENTATION_REJECTION_GRACE="$([ "$LEARNING_PATH" = "primitivePatch" ] && echo 4 || echo 2)" \
-    KRALI_LOCAL_AGENT_TIMEOUT_MS="$(
-        if [ -n "$DEVELOPER_TASK_GRAPH_PLAN" ] && [ -f "$DEVELOPER_TASK_GRAPH_PLAN" ]; then
-            echo 720000
-        else
-            echo 300000
-        fi
-    )" \
-    KRALI_LOCAL_AGENT_REQUEST_TIMEOUT_MS="$([ "$LEARNING_PATH" = "primitivePatch" ] && echo 45000 || echo 60000)" \
-    KRALI_LOCAL_AGENT_STRUCTURED_TIMEOUT_MS="$([ "$LEARNING_PATH" = "primitivePatch" ] && echo 120000 || echo 60000)" \
-    "$NODE_BIN" "$ROOT/Scripts/ollama-developer-agent.mjs" \
-        > >(tee "$CLINE_RUN_LOG" >>"$LOG") \
-        2> >(tee -a "$CLINE_RUN_LOG" >>"$LOG" >&2)
+run_native_developer_agent_once() {
+    rm -f "$CLINE_RUN_LOG"
+    run_native_developer_agent_once
     CLINE_EXIT=$?
 elif [ "$USE_SDK_FALLBACK" -eq 1 ]; then
     CLINE_RUN_STREAMED_TO_LOG=1
