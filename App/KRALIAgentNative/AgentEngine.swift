@@ -2397,7 +2397,10 @@ final class AgentEngine: ObservableObject {
         ids += mission.requiredCapabilityIDs
         ids += mission.steps.map(\.capabilityID)
 
-        let resolved = capabilityRegistry.resolve(ids: ids)
+        let resolved = capabilityRegistry.resolve(
+            ids: ids,
+            profile: executionProfile
+        )
 
         return resolved.isEmpty ? fallback : resolved
     }
