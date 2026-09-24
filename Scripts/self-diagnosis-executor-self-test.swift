@@ -370,7 +370,9 @@ struct SelfDiagnosisExecutorSelfTest {
             let sourceID =
                 package.evidence.first(
                     where: {
-                        $0.kind == "source"
+                        $0.kind == "source" &&
+                        $0.path ==
+                            "App/ResearchPlanner.swift"
                     }
                 )?.id,
             let failureID =
