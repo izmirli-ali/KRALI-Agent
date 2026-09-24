@@ -1,1 +1,1 @@
-recovered_candidate_build_failed|Candidate repair sınırı doldu; branch korundu ve main değiştirilmedi|krali-dev-agent/20260924-085107|/Users/medusa/Developer/KRALI-Agent-Dev-20260924-085107|@meta|app=0.10.39|at=1790230074|run=20260924-085107
+local_agent_failed|Ollama native agent HTTP 429|krali-dev-agent/20260924-093138|/Users/medusa/Developer/KRALI-Agent-Dev-20260924-093138|@meta|app=0.10.40|at=1790231502|run=20260924-093138
