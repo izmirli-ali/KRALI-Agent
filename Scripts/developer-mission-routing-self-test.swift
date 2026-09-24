@@ -30,6 +30,21 @@ struct DeveloperMissionRoutingSelfTest {
         expect(exactMission.owner == .developer && exactMission.phase == .diagnosis, "exact mission with constraints")
         expect(router.classify("Bu problemi kendi kodunda teşhis et. Filesystem yetkini genişletme ve approval mekanizmasını bypass etme.").owner == .developer, "prohibited filesystem authority")
 
+        let fullMissionRegression = router.classify(
+            """
+            SELF-DEVELOPMENT MISSION: Daha önce research.web available iken browser.control unavailable olduğu için araştırma başarısız oldu.
+            Kendi mimarini ve kodunu incele, root cause'u kanıtla, alternatifleri değerlendir ve gerekiyorsa capability'ni geliştir.
+            Main branch'i değiştirme. Remote push yapma. Otomatik merge yapma.
+            Filesystem yetkini genişletme. Approval sistemini bypass etme.
+            Root cause kanıtlanmadıysa kod yazma.
+            """
+        )
+        expect(
+            fullMissionRegression.owner == .developer &&
+            fullMissionRegression.phase == .diagnosis,
+            "full self-development mission with safety constraints"
+        )
+
         let ownCode = router.classify(
             "Neden research.web browser.control'a bağımlı kaldı? Kendi kodunu inceleyip problemi teşhis et."
         )
