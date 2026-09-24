@@ -1,5 +1,18 @@
 import Foundation
 
+enum AgentCapabilityRisk {
+    case reasoning
+}
+
+struct AgentCapability {
+    let id: String
+    let name: String
+    let summary: String
+    let risk: AgentCapabilityRisk
+    let isAvailable: Bool
+    let requiresWorkspace: Bool
+}
+
 @main
 struct DevelopmentResearchQualitySelfTest {
     static func check(
