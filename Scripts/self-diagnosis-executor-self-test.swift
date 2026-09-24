@@ -180,6 +180,13 @@ struct SelfDiagnosisExecutorSelfTest {
             )
         )
 
+        write(
+            "IgnoredSecrets/\n",
+            to: root.appendingPathComponent(
+                ".gitignore"
+            )
+        )
+
         _ = run(["add", "."], root: root)
         _ = run(
             [
@@ -192,6 +199,21 @@ struct SelfDiagnosisExecutorSelfTest {
         let head = run(
             ["rev-parse", "HEAD"],
             root: root
+        )
+
+        // Ignored local data may contain the same diagnosis terms but is not
+        // part of the stamped source revision and must never become evidence.
+        write(
+            """
+            {
+              "research.web": "SECRET_TOKEN",
+              "browser.control": "do not collect me",
+              "dependency": "local-only"
+            }
+            """,
+            to: root.appendingPathComponent(
+                "IgnoredSecrets/config.json"
+            )
         )
 
         let repository =
@@ -234,6 +256,16 @@ struct SelfDiagnosisExecutorSelfTest {
                 }
             ),
             "historical mentor evidence discovered"
+        )
+        expect(
+            !package.evidence.contains(
+                where: {
+                    $0.path.contains(
+                        "IgnoredSecrets"
+                    )
+                }
+            ),
+            "ignored local files excluded from evidence"
         )
 
         guard
