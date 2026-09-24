@@ -1165,6 +1165,12 @@ struct AgentSelfDiagnosisExecutor {
                 }
             }
 
+            score += causalArchitectureBonus(
+                relativePath: relative,
+                corpus: corpus,
+                terms: terms
+            )
+
             if score > 0 {
                 candidates.append(
                     RankedFile(
@@ -1187,6 +1193,71 @@ struct AgentSelfDiagnosisExecutor {
             }
             return $0.score > $1.score
         }
+    }
+
+    private func causalArchitectureBonus(
+        relativePath: String,
+        corpus: String,
+        terms: [String]
+    ) -> Int {
+        let normalizedTerms =
+            Set(
+                terms.map {
+                    normalized($0)
+                }
+            )
+
+        let diagnosisIsCausal =
+            normalizedTerms.contains("planner") ||
+            normalizedTerms.contains("dependency") ||
+            normalizedTerms.contains("graph") ||
+            normalizedTerms.contains("research.web") ||
+            normalizedTerms.contains("browser.control")
+
+        guard diagnosisIsCausal else {
+            return 0
+        }
+
+        let path = normalized(relativePath)
+        var bonus = 0
+
+        if path.contains("agentoutcomeplanner") {
+            bonus += 42
+        }
+        if path.contains("agentcapabilitygapresolver") {
+            bonus += 30
+        }
+        if path.contains("agentplanner") {
+            bonus += 24
+        }
+        if path.contains("agentwebresearch") {
+            bonus += 18
+        }
+
+        let causalSignatures = [
+            ("retrievepublicinformation", 18),
+            ("preferredcapabilityids", 14),
+            ("acceptablecapabilityids", 12),
+            ("executablenow", 14),
+            ("dependson", 18),
+            ("instrumental", 10),
+            ("research.web", 8),
+            ("browser.control", 8),
+            ("unavailable", 6),
+            ("fallback", 6)
+        ]
+
+        for (signature, weight) in causalSignatures
+            where corpus.contains(signature) {
+            bonus += weight
+        }
+
+        if corpus.contains("research.web") &&
+           corpus.contains("browser.control") {
+            bonus += 20
+        }
+
+        return bonus
     }
 
     private func historicalMentorEvidence(
@@ -1408,6 +1479,20 @@ struct AgentSelfDiagnosisExecutor {
         var bestIndex = 0
         var bestScore = -1
 
+        let weightedAnchors = [
+            "research.web",
+            "browser.control",
+            "dependson",
+            "dependency",
+            "retrievepublicinformation",
+            "preferredcapabilityids",
+            "acceptablecapabilityids",
+            "executablenow",
+            "unavailable",
+            "outcome",
+            "fallback"
+        ]
+
         for (index, line) in lines.enumerated() {
             let corpus = normalized(line)
             var score = 0
@@ -1418,6 +1503,11 @@ struct AgentSelfDiagnosisExecutor {
                 ) {
                     score += 1
                 }
+            }
+
+            for anchor in weightedAnchors
+                where corpus.contains(anchor) {
+                score += 4
             }
 
             if score > bestScore {
