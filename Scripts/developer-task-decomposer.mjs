@@ -150,7 +150,63 @@ const schema = {
   },
 };
 
-function repairScopeToParent(requestedScope, task) {
+function affinityTokens(value) {
+  return String(value || "")
+    .replace(/([a-z0-9])([A-Z])/g, "$1 $2")
+    .toLowerCase()
+    .split(/[^a-z0-9]+/)
+    .filter((token) => token.length >= 3);
+}
+
+function affinityClampParentMatches(
+  matches,
+  descriptor
+) {
+  if (!Array.isArray(matches) || matches.length <= 1) {
+    return matches;
+  }
+
+  const descriptorTokens =
+    new Set(affinityTokens(descriptor));
+
+  if (descriptorTokens.size === 0) {
+    return matches;
+  }
+
+  const scored = matches.map((parentScope) => {
+    const pathTokens =
+      affinityTokens(parentScope);
+    const score =
+      pathTokens.filter((token) =>
+        descriptorTokens.has(token)
+      ).length;
+
+    return {
+      parentScope,
+      score,
+    };
+  });
+
+  const maxScore =
+    Math.max(
+      0,
+      ...scored.map((item) => item.score)
+    );
+
+  if (maxScore <= 0) {
+    return matches;
+  }
+
+  return scored
+    .filter((item) => item.score === maxScore)
+    .map((item) => item.parentScope);
+}
+
+function repairScopeToParent(
+  requestedScope,
+  task,
+  descriptor = ""
+) {
   const requested = Array.isArray(requestedScope)
     ? requestedScope.map(normalizeScope).filter(Boolean)
     : [];
@@ -209,17 +265,25 @@ function repairScopeToParent(requestedScope, task) {
       return globToRegExp(scope).test(parentScope);
     });
 
-    if (safeMatches.length === 0) {
+    const affinityMatches =
+      affinityClampParentMatches(
+        safeMatches,
+        descriptor
+      );
+
+    if (affinityMatches.length === 0) {
       return {
         ok: false,
         reason: "scope-outside-parent:" + scope,
       };
     }
 
-    repaired.push(...safeMatches);
+    repaired.push(...affinityMatches);
     repairs.push({
       requested: scope,
-      clampedTo: safeMatches,
+      clampedTo: affinityMatches,
+      affinityApplied:
+        affinityMatches.length < safeMatches.length,
     });
   }
 
@@ -246,7 +310,13 @@ function validatePlan(plan, task) {
   for (const [order, raw] of plan.subtasks.entries()) {
     const repairedScope = repairScopeToParent(
       raw?.scope,
-      task
+      task,
+      [
+        raw?.id,
+        raw?.title,
+        raw?.expected_result,
+        raw?.verification,
+      ].join(" ")
     );
 
     if (!repairedScope.ok) {
@@ -431,7 +501,7 @@ function selfTest() {
     subtasks: [
       {
         id: "app",
-        title: "App",
+        title: "Test app file",
         depends_on: [],
         scope: ["App/**"],
         expected_result: "bounded app change",
@@ -446,6 +516,7 @@ function selfTest() {
     validatePlan(repairable, task).ok === true,
     validatePlan(repairable, task).scopeRepairs.length === 1,
     validatePlan(repairable, task).nodes[0].scope.includes("App/Test.swift"),
+    validatePlan(repairable, task).nodes[0].scope.length === 1,
     globToRegExp("App/**").test("App/Foo.swift"),
     !globToRegExp("App/**").test("Mentor/Foo.swift"),
     parseJSONContent('prefix {"summary":"x","subtasks":[]} suffix')
@@ -501,6 +572,7 @@ const systemPrompt = [
   "Every subtask must require a real code/file mutation. Do NOT create a verification-only final node; parent task verification runs after the graph.",
   "Prefer 2-5 subtasks for multi-surface work. Use one subtask only when the task is truly atomic.",
   "Subtask scope must be a strict subset of the parent allowedScope. Never add paths not permitted by parent allowedScope and never include forbiddenScope.",
+  "For scope values, copy exact path entries from parent allowedScope whenever possible. Do not invent broader directory wildcards such as App/** or Scripts/**.",
   "Preserve existing APIs unless the task explicitly requires breaking/replacing them. For primitivePatch work, prefer surgical extension over rewrites.",
   "Order dependencies so data/model foundations precede wiring and wiring precedes UI.",
   "Verification is a short intent description for that node; deterministic build_check is still mandatory after every node.",
