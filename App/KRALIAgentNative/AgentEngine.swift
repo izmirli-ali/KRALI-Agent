@@ -124,6 +124,7 @@ final class AgentEngine: ObservableObject {
     private let developerBridge = AgentDeveloperBridge()
     private let missionRouter = AgentMissionRouter()
     private let developerRepositoryResolver = AgentDeveloperRepositoryResolver()
+    private let selfDiagnosisExecutor = AgentSelfDiagnosisExecutor()
     private let developerToolSafetyPolicy =
         AgentDeveloperToolSafetyPolicy()
     private let learningQueueStore = AgentLearningQueueStore()
@@ -762,12 +763,63 @@ final class AgentEngine: ObservableObject {
         }
 
         developerRepository = repository
+
+        // Developer diagnosis gets its own context firewall. User-authored
+        // safety rules may remain relevant, but unrelated prior task/research
+        // summaries must not influence repository diagnosis.
+        activeContextMemories = activeContextMemories.filter {
+            $0.kind == .userRule
+        }
+        contextMemoryStatus = activeContextMemories.isEmpty
+            ? "Developer diagnosis: önceki görev bağlamları izole edildi."
+            : "Developer diagnosis: yalnız kullanıcı kuralları bağlamda tutuldu."
+
         currentGoal = "KRALİ self-development diagnosis"
-        currentPlan = "Read-only diagnosis → evidence → proposal → registered bounded task required"
+        currentPlan = "Read-only repository discovery → source evidence → root cause → alternatives → development proposal → stop"
         verificationState = .checking
-        verificationSummary = "Diagnosis/proposal phase; mutation authority has not been granted."
-        postAssistantMessage("Bu hedef Developer Mission olarak yönlendirildi. Kaynak hedefi kullanıcı workspace'i değil, doğrulanmış KRALİ deposu. İlk aşama yalnız read-only diagnosis/proposal: Observed Failure, Evidence, Root Cause, Relevant Architecture, Alternatives, Selected Strategy, Scope ve Verification Contract. Dinamik mutation task kartı oluşturulmadı; doğrulanmış root cause ve kullanıcı onaylı, bounded registered task olmadan Developer Agent kod değiştirmeye başlamaz.")
-        recordMentorTrace(input: text, source: source, goal: currentGoal, plan: currentPlan, route: activeRoute, capabilities: [], learningPlans: [], verification: AgentVerificationResult(state: .checking, summary: verificationSummary, fallback: "Registered bounded task required before mutation."), intelligenceProvider: nil, finalResponse: messages.last?.text ?? "")
+        verificationSummary = "Read-only self-diagnosis is running; mutation authority has not been granted."
+
+        let diagnosis = selfDiagnosisExecutor.diagnose(
+            request: text,
+            repository: repository,
+            runningVersion: currentAppVersionString
+        )
+
+        let reply = diagnosis.rendered
+        verificationState = diagnosis.evidence.isEmpty
+            ? .attention
+            : .passed
+        verificationSummary = diagnosis.evidence.isEmpty
+            ? "Self-diagnosis stopped because bounded source evidence was insufficient."
+            : "Read-only self-diagnosis completed with repository evidence; no mutation started."
+
+        log(
+            "Self-diagnosis tamamlandı • confidence=" +
+            diagnosis.confidence +
+            " • evidence=" +
+            String(diagnosis.evidence.count) +
+            " • target=" +
+            diagnosis.targetRevision
+        )
+
+        postAssistantMessage(reply)
+        recordMentorTrace(
+            input: text,
+            source: source,
+            goal: currentGoal,
+            plan: currentPlan,
+            route: activeRoute,
+            capabilities: [],
+            learningPlans: [],
+            verification:
+                AgentVerificationResult(
+                    state: verificationState,
+                    summary: verificationSummary,
+                    fallback: "Bounded registered task + explicit user review required before mutation."
+                ),
+            intelligenceProvider: nil,
+            finalResponse: reply
+        )
         return true
     }
 
