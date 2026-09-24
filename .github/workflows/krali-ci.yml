@@ -12,6 +12,8 @@ jobs:
     steps:
       - name: Checkout
         uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
 
       - name: Validate shell scripts
         shell: bash
@@ -62,6 +64,17 @@ jobs:
             Scripts/development-research-profile-self-test.swift \
             -o /tmp/krali-development-research-profile-self-test
           /tmp/krali-development-research-profile-self-test
+
+      - name: Validate read-only self-diagnosis executor
+        shell: bash
+        run: |
+          set -euo pipefail
+          swiftc \
+            App/KRALIAgentNative/AgentMissionRouter.swift \
+            App/KRALIAgentNative/AgentSelfDiagnosisExecutor.swift \
+            Scripts/self-diagnosis-executor-self-test.swift \
+            -o /tmp/krali-self-diagnosis-self-test
+          /tmp/krali-self-diagnosis-self-test "$GITHUB_WORKSPACE"
 
       - name: Validate KRALI developer task cards
         shell: bash
