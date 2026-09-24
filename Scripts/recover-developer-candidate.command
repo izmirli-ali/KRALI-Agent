@@ -74,6 +74,12 @@ echo "=== $(date) ===" >>"$LOG"
 echo "Recovering $BRANCH at $WORKTREE" >>"$LOG"
 
 CURRENT_BRANCH="$(git -C "$WORKTREE" branch --show-current 2>/dev/null || true)"
+RECOVERY_BASE_COMMIT="$(git -C "$WORKTREE" rev-parse HEAD 2>/dev/null || true)"
+if [ -z "$RECOVERY_BASE_COMMIT" ]; then
+    write_status "candidate_recovery_failed|Candidate base commit çözülemedi; otomatik kurtarma durduruldu|$BRANCH|$WORKTREE"
+    exit 31
+fi
+
 if [ "$CURRENT_BRANCH" != "$BRANCH" ]; then
     echo "Branch uyuşmazlığı: current=$CURRENT_BRANCH expected=$BRANCH" >>"$LOG"
     write_status "candidate_recovery_failed|Candidate worktree branch eşleşmedi; otomatik kurtarma durduruldu|$BRANCH|$WORKTREE"
@@ -115,7 +121,7 @@ run_candidate_build() {
     if [ -n "$NODE_BIN" ] &&
        [ -x "$NODE_BIN" ] &&
        [ -f "$ROOT/Scripts/developer-candidate-surface-guard.mjs" ]; then
-        SURFACE_GUARD_ARGS=(--root "$WORKTREE")
+        SURFACE_GUARD_ARGS=(--root "$WORKTREE" --base "$RECOVERY_BASE_COMMIT")
         if [ -n "$DEV_TASK_FILE" ] && [ -f "$DEV_TASK_FILE" ]; then
             SURFACE_GUARD_ARGS+=(--task "$DEV_TASK_FILE")
         fi
@@ -239,6 +245,7 @@ EOF
     KRALI_CHECKPOINT_FILE="" \
     KRALI_DEV_TASK_FILE="$DEV_TASK_FILE" \
     KRALI_LEARNING_PATH="$LEARNING_PATH" \
+    KRALI_SURFACE_GUARD_BASE="$RECOVERY_BASE_COMMIT" \
     KRALI_REQUIRE_CHANGE="1" \
     KRALI_LOCAL_AGENT_MAX_COMPLETION_REJECTIONS="2" \
     KRALI_LOCAL_AGENT_MAX_STRUCTURED_ACTIONS="5" \
