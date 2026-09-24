@@ -10,6 +10,8 @@ REPAIR_MODEL="${KRALI_RECOVERY_MODEL:-}"
 DEV_TASK_FILE="${KRALI_DEV_TASK_FILE:-}"
 LEARNING_PATH="${KRALI_LEARNING_PATH:-integration}"
 MAX_REPAIR_ATTEMPTS="${KRALI_CANDIDATE_REPAIR_ATTEMPTS:-2}"
+RECOVERY_GRAPH_PLAN="${KRALI_DEVELOPER_TASK_PLAN_FILE:-}"
+RECOVERY_CHECKPOINT_FILE="${KRALI_CHECKPOINT_FILE:-}"
 SURFACE_GUARD_FAILED=0
 
 mkdir -p "$STATUS_DIR"
@@ -85,6 +87,24 @@ if [ "$CURRENT_BRANCH" != "$BRANCH" ]; then
     write_status "candidate_recovery_failed|Candidate worktree branch eşleşmedi; otomatik kurtarma durduruldu|$BRANCH|$WORKTREE"
     exit 31
 fi
+
+# Recovery is a continuation of the failed active graph node, never a broader
+# parent-scope repair path. Missing or stale provenance is an escalation.
+RECOVERY_CONTEXT=""
+if [ -n "$NODE_BIN" ] && [ -x "$NODE_BIN" ]; then
+    RECOVERY_CONTEXT="$(
+        "$NODE_BIN" "$ROOT/Scripts/developer-active-node-recovery-contract.mjs" \
+            --plan "$RECOVERY_GRAPH_PLAN" \
+            --checkpoint "$RECOVERY_CHECKPOINT_FILE" \
+            --worktree "$WORKTREE" 2>>"$LOG"
+    )" || true
+fi
+if [ -z "$RECOVERY_CONTEXT" ]; then
+    write_status "recovery_active_node_unproven|Recovery active graph node kanıtlanamadı; parent scope repair reddedildi|$BRANCH|$WORKTREE"
+    echo "⛔ Recovery active-node contract yok veya stale; geniş parent-scope repair yapılmadı." | tee -a "$LOG"
+    exit 38
+fi
+echo "Recovery active-node contract: $RECOVERY_CONTEXT" >>"$LOG"
 
 git -C "$WORKTREE" add -A >>"$LOG" 2>&1 || {
     write_status "candidate_recovery_failed|Candidate değişiklikleri stage edilemedi|$BRANCH|$WORKTREE"
@@ -207,6 +227,9 @@ Build geçmeyen mevcut Developer Agent candidate'ını aynı izole worktree içi
 Orijinal capability gap'i sıfırdan çözmeye çalışma; önce mevcut candidate'ın build hatasını düzelt.
 Bu repair turu: $ATTEMPT / $MAX_REPAIR_ATTEMPTS
 
+Aktif graph recovery context (değiştirilemez):
+$RECOVERY_CONTEXT
+
 Güvenlik sözleşmesi:
 - Main branch'e dokunma, push/merge yapma.
 - VERSION, signing, updater, Mentor JSON veya kullanıcı credential dosyalarını değiştirme.
@@ -216,6 +239,8 @@ Güvenlik sözleşmesi:
 - Hata özetinde candidate_surface_regression / primitive_patch_* varsa önce kaldırılan mevcut type/API yüzeyini geri yükle; büyük rewrite'ı cilalamaya çalışma.
 - Primitive patch görevinde mevcut store/type/function sözleşmesini koru ve yalnız gerekli alan/davranışı cerrahi olarak genişlet.
 - Minimum generic değişiklik yap.
+- Yalnız aktif node scope içindeki dosyalara yaz. Compiler hatası başka node dosyası isterse recovery_requires_outside_active_node_scope ile dur; parent scope'a genişleme yok.
+- Semantic verification ve build verification geçmeden graph node tamamlandı deme; sonraki node'u başlatma.
 - Değişiklikten sonra git_diff ve build_check kullan.
 - Gerçek build PASS olmadan tamamlandı deme.
 
@@ -244,10 +269,12 @@ EOF
     KRALI_GAP_LABEL="Candidate build repair" \
     KRALI_APP_VERSION="$(/bin/cat "$ROOT/VERSION" 2>/dev/null | /usr/bin/tr -d '[:space:]')" \
     KRALI_RUN_ID="$RUN_ID-repair-$ATTEMPT" \
-    KRALI_CHECKPOINT_FILE="" \
+    KRALI_CHECKPOINT_FILE="$RECOVERY_CHECKPOINT_FILE" \
     KRALI_DEV_TASK_FILE="$DEV_TASK_FILE" \
     KRALI_LEARNING_PATH="$LEARNING_PATH" \
     KRALI_SURFACE_GUARD_BASE="$RECOVERY_BASE_COMMIT" \
+    KRALI_DEVELOPER_TASK_PLAN_FILE="$RECOVERY_GRAPH_PLAN" \
+    KRALI_DEVELOPER_TASK_FALLBACK_PLAN_FILE="$RECOVERY_GRAPH_PLAN" \
     KRALI_REQUIRE_CHANGE="1" \
     KRALI_LOCAL_AGENT_MAX_COMPLETION_REJECTIONS="2" \
     KRALI_LOCAL_AGENT_MAX_STRUCTURED_ACTIONS="5" \
@@ -264,26 +291,10 @@ EOF
 }
 
 if run_candidate_build; then
-    if ! run_task_verification; then
-        rm -f "$BUILD_LOG" "$REPAIR_PROMPT"
-        write_status "recovered_candidate_verification_failed|Kurtarılan candidate build geçti ancak görev kartı doğrulama sözleşmesi geçmedi; branch korundu|$BRANCH|$WORKTREE"
-        echo "Recovered candidate task verification failed: $BRANCH" >>"$LOG"
-        exit 27
-    fi
-
-    persist_verification_changes || {
-        rm -f "$BUILD_LOG" "$REPAIR_PROMPT"
-        write_status "candidate_recovery_failed|Task verification sonucu branch'e kaydedilemedi|$BRANCH|$WORKTREE"
-        exit 37
-    }
-
-    rm -f "$BUILD_LOG" "$REPAIR_PROMPT"
-    write_status "recovered_candidate_ready|Kurtarılan öğrenme adayı build ve task verification contract geçti; incelemeye hazır|$BRANCH|$WORKTREE"
-    echo "Recovered candidate build and task verification passed: $BRANCH" >>"$LOG"
-    exit 0
+    echo "ℹ️ Candidate build geçti; yine de active-node semantic/graph coordinator üzerinden devam zorunlu." | tee -a "$LOG"
+else
+    echo "⚠️ İlk candidate build başarısız; bounded active-node repair değerlendiriliyor." | tee -a "$LOG"
 fi
-
-echo "⚠️ İlk candidate build başarısız; bounded repair değerlendiriliyor." | tee -a "$LOG"
 
 ATTEMPT=1
 while [ "$ATTEMPT" -le "$MAX_REPAIR_ATTEMPTS" ]; do
