@@ -167,10 +167,10 @@ struct SelfDiagnosisExecutorSelfTest {
               "goal": "research",
               "plan": "browser.control -> research.web",
               "verificationState": "attention",
-              "verificationSummary": "browser.control unavailable",
+              "verificationSummary": "browser.control unavailable blocked research.web",
               "taskGraph": [
-                {"capabilityID":"browser.control","available":false},
-                {"capabilityID":"research.web","available":true}
+                {"index":0,"capabilityID":"browser.control","available":false,"dependsOn":[]},
+                {"index":1,"capabilityID":"research.web","available":true,"dependsOn":[0]}
               ],
               "researchEvidence": []
             }
