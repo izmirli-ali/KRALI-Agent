@@ -30,7 +30,8 @@ actor AgentWebSourceReader {
     func read(
         _ sources: [WebResearchResult],
         query: String,
-        limit: Int = 4
+        limit: Int = 4,
+        allowSnippetFallback: Bool = true
     ) async -> [WebSourceEvidence] {
         let plan = queryPlanner.plan(query)
         let requiredCoverage = plan.isEntityResearch
@@ -77,7 +78,9 @@ actor AgentWebSourceReader {
             if let item = await readSource(
                 source,
                 plan: plan,
-                requiredCoverage: requiredCoverage
+                requiredCoverage: requiredCoverage,
+                allowSnippetFallback:
+                    allowSnippetFallback
             ) {
                 evidence.append(item)
                 seenDomains[source.domain, default: 0] += 1
@@ -95,7 +98,8 @@ actor AgentWebSourceReader {
     private func readSource(
         _ source: WebResearchResult,
         plan: ResearchQueryPlan,
-        requiredCoverage: Int
+        requiredCoverage: Int,
+        allowSnippetFallback: Bool
     ) async -> WebSourceEvidence? {
         let pageText: String?
 
@@ -111,7 +115,10 @@ actor AgentWebSourceReader {
                 let http = response as? HTTPURLResponse,
                 (200..<400).contains(http.statusCode)
             else {
-                if !source.evidenceEligible {
+                guard
+                    allowSnippetFallback,
+                    source.evidenceEligible
+                else {
                     return nil
                 }
 
@@ -144,7 +151,8 @@ actor AgentWebSourceReader {
         }
 
         let candidateParts: [String]
-        if source.evidenceEligible {
+        if allowSnippetFallback &&
+           source.evidenceEligible {
             candidateParts = [
                 source.title,
                 source.snippet ?? "",
@@ -178,6 +186,10 @@ actor AgentWebSourceReader {
                 plan: plan
             )
         else {
+            guard allowSnippetFallback else {
+                return nil
+            }
+
             return fallbackEvidence(
                 source,
                 plan: plan,

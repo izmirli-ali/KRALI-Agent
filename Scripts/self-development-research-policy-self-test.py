@@ -5,6 +5,7 @@ root = Path(__file__).resolve().parents[1]
 router = (root / "App/KRALIAgentNative/AgentMissionRouter.swift").read_text()
 engine = (root / "App/KRALIAgentNative/AgentEngine.swift").read_text()
 intel = (root / "App/KRALIAgentNative/AgentLocalIntelligence.swift").read_text()
+quality = (root / "App/KRALIAgentNative/AgentDevelopmentResearch.swift").read_text()
 
 assert "case research" in router
 assert "researchScore >= 2" in router
@@ -15,9 +16,9 @@ assert "performWebResearch(" in engine
 assert "allowInteractiveEscalation:" in engine
 assert "synthesizeSelfDevelopmentResearch" in engine
 assert '"research.web"' in engine
-assert "Mutation Started: NO" in intel
+assert "Mutation Started: " in quality
 assert "repositoryEvidence" in intel
-assert "researchEvidence" in intel
+assert "evidenceRecords" in intel
 
 # Research and diagnosis must remain separate paths.
 research_pos = engine.index("executeSelfDevelopmentResearchMission")
@@ -31,3 +32,17 @@ assert "diagnosticCount: 1" in intel
 assert "sourceExcerptCharacters: 380" in intel
 
 print("self_development_research_policy_ok")
+
+reader = (root / "App/KRALIAgentNative/AgentWebSourceReader.swift").read_text()
+quality = (root / "App/KRALIAgentNative/AgentDevelopmentResearch.swift").read_text()
+
+assert "allowSnippetFallback: Bool = true" in reader
+assert "allowSnippetEvidence:" in engine
+assert "allowSnippetEvidence:" in engine and "false" in engine
+assert "developmentPlan(text)" in engine
+assert "AgentDevelopmentResearchVerifier" in quality
+assert "qualifiesForTechnicalCoverage" in quality
+assert "mutationStarted" in quality
+assert "evidenceIDs" in quality
+assert "repositoryEvidenceIDs" in quality
+print("development_research_quality_policy_ok")

@@ -109,6 +109,12 @@ final class AgentEngine: ObservableObject {
     private let skillLibraryStore = AgentSkillLibraryStore()
     private let webResearchService = AgentWebResearchService()
     private let webSourceReader = AgentWebSourceReader()
+    private let researchQueryPlanner =
+        AgentResearchQueryPlanner()
+    private let developmentResearchSourceClassifier =
+        AgentDevelopmentResearchSourceClassifier()
+    private let developmentResearchVerifier =
+        AgentDevelopmentResearchVerifier()
     private let mentorTraceStore = MentorTraceStore()
     private let trainingLab = AgentTrainingLab()
     private let trainingLabStore = TrainingLabStore()
@@ -1043,123 +1049,440 @@ final class AgentEngine: ObservableObject {
                 $0.kind == "source"
             }
 
-        let researchQueries =
-            selfDevelopmentResearchQueries(
-                from: text
-            )
+        let researchPlan =
+            researchQueryPlanner
+                .developmentPlan(text)
 
-        var combinedEvidence:
-            [WebSourceEvidence] = []
-        var combinedResults:
-            [WebResearchResult] = []
-        var seenEvidence = Set<String>()
-        var seenResults = Set<String>()
-        var researchSummaries: [String] = []
+        guard
+            !researchPlan.facets.isEmpty
+        else {
+            let reply =
+                """
+                Self-development research için anlamlı araştırma facet'i çıkarılamadı.
 
-        for query in
-            researchQueries.prefix(2) {
-            let summary =
-                await performWebResearch(
-                    query: query,
-                    allowInteractiveEscalation:
-                        false
+                Mutation Started: NO
+                """
+
+            let verification =
+                AgentVerificationResult(
+                    state: .attention,
+                    summary:
+                        "Mission-derived development research plan contains no usable facets.",
+                    fallback:
+                        "Clarify the external approaches/topics to compare; do not start mutation."
                 )
 
-            researchSummaries.append(
-                summary
+            verificationState =
+                verification.state
+            verificationSummary =
+                verification.summary
+
+            recordMentorTrace(
+                input: text,
+                source: source,
+                goal: currentGoal,
+                plan: currentPlan,
+                route: activeRoute,
+                capabilities:
+                    capabilityRegistry.resolve(
+                        ids: [
+                            "core.reasoning",
+                            "context.local",
+                            "research.web"
+                        ],
+                        profile:
+                            executionProfile
+                    ),
+                learningPlans: [],
+                verification:
+                    verification,
+                intelligenceProvider: nil,
+                finalResponse:
+                    reply
             )
 
-            for item in webResearchEvidence {
-                let key =
-                    item.source.url
-                        .absoluteString
-                if seenEvidence
-                    .insert(key)
-                    .inserted {
-                    combinedEvidence
-                        .append(item)
+            postAssistantMessage(reply)
+            busy = false
+            return
+        }
+
+        var sourceAssessments:
+            [AgentDevelopmentResearchSourceAssessment] = []
+        var evidenceCandidates: [
+            (
+                facetID: String,
+                evidence: WebSourceEvidence,
+                assessment:
+                    AgentDevelopmentResearchSourceAssessment
+            )
+        ] = []
+
+        var resultByURL:
+            [String: WebResearchResult] = [:]
+        var seenAssessmentKeys =
+            Set<String>()
+        var seenEvidenceKeys =
+            Set<String>()
+        var coveredFacets =
+            Set<String>()
+
+        researchLoop:
+        for facet in
+            researchPlan.facets.prefix(8) {
+            var facetHasQualifyingEvidence =
+                false
+
+            for query in
+                facet.queries.prefix(2) {
+                _ =
+                    await performWebResearch(
+                        query: query,
+                        allowInteractiveEscalation:
+                            false,
+                        allowSnippetEvidence:
+                            false,
+                        developmentFacet:
+                            facet
+                    )
+
+                for result in
+                    webResearchResults {
+                    let assessment =
+                        developmentResearchSourceClassifier
+                            .assess(
+                                result,
+                                facet: facet
+                            )
+
+                    guard
+                        assessment.tier != .d
+                    else {
+                        continue
+                    }
+
+                    let key =
+                        facet.id +
+                        "|" +
+                        assessment.sourceURL
+
+                    if seenAssessmentKeys
+                        .insert(key)
+                        .inserted {
+                        sourceAssessments
+                            .append(
+                                assessment
+                            )
+                    }
+
+                    resultByURL[
+                        assessment.sourceURL
+                    ] = result
+                }
+
+                for item in
+                    webResearchEvidence {
+                    let assessment =
+                        developmentResearchSourceClassifier
+                            .assess(
+                                item.source,
+                                facet: facet
+                            )
+
+                    guard
+                        assessment.tier != .d
+                    else {
+                        continue
+                    }
+
+                    let sourceKey =
+                        facet.id +
+                        "|" +
+                        assessment.sourceURL
+
+                    if seenAssessmentKeys
+                        .insert(sourceKey)
+                        .inserted {
+                        sourceAssessments
+                            .append(
+                                assessment
+                            )
+                    }
+
+                    resultByURL[
+                        assessment.sourceURL
+                    ] =
+                        item.source
+
+                    let evidenceKey =
+                        facet.id +
+                        "|" +
+                        assessment.sourceURL
+
+                    if seenEvidenceKeys
+                        .insert(evidenceKey)
+                        .inserted {
+                        evidenceCandidates
+                            .append(
+                                (
+                                    facetID:
+                                        facet.id,
+                                    evidence:
+                                        item,
+                                    assessment:
+                                        assessment
+                                )
+                            )
+                    }
+
+                    if assessment
+                        .qualifiesForTechnicalCoverage {
+                        facetHasQualifyingEvidence =
+                            true
+                    }
+                }
+
+                if facetHasQualifyingEvidence {
+                    break
                 }
             }
 
-            for item in webResearchResults {
-                let key =
-                    item.url
-                        .absoluteString
-                if seenResults
-                    .insert(key)
-                    .inserted {
-                    combinedResults
-                        .append(item)
-                }
+            if facetHasQualifyingEvidence {
+                coveredFacets.insert(
+                    facet.id
+                )
+            }
+
+            let uniqueHighQuality =
+                Dictionary(
+                    sourceAssessments
+                        .filter {
+                            $0.qualifiesForTechnicalCoverage
+                        }
+                        .map {
+                            ($0.sourceURL, $0)
+                        },
+                    uniquingKeysWith: {
+                        left,
+                        right in
+                        left.qualityScore >=
+                        right.qualityScore
+                        ? left
+                        : right
+                    }
+                )
+                .values
+
+            let origins =
+                Set(
+                    uniqueHighQuality
+                        .map(\.origin)
+                )
+
+            if coveredFacets.count >=
+                    researchPlan
+                        .requiredApproachCount,
+               uniqueHighQuality.count >=
+                    researchPlan
+                        .minimumHighQualitySourceCount,
+               origins.count >=
+                    researchPlan
+                        .minimumIndependentOriginCount {
+                break researchLoop
             }
         }
 
-        webResearchEvidence =
+        sourceAssessments.sort {
+            if $0.tier.rank ==
+                $1.tier.rank {
+                return $0.qualityScore >
+                    $1.qualityScore
+            }
+
+            return $0.tier.rank >
+                $1.tier.rank
+        }
+
+        evidenceCandidates.sort {
+            if $0.assessment.tier.rank ==
+                $1.assessment.tier.rank {
+                return $0.assessment
+                    .qualityScore >
+                    $1.assessment
+                    .qualityScore
+            }
+
+            return $0.assessment
+                .tier.rank >
+                $1.assessment
+                .tier.rank
+        }
+
+        let evidenceRecords =
             Array(
-                combinedEvidence
-                    .prefix(10)
+                evidenceCandidates
+                    .prefix(16)
             )
+            .enumerated()
+            .map {
+                index,
+                item in
+
+                AgentDevelopmentResearchEvidenceRecord(
+                    id:
+                        "W" +
+                        String(index + 1),
+                    facetID:
+                        item.facetID,
+                    sourceURL:
+                        item.assessment
+                            .sourceURL,
+                    sourceTitle:
+                        item.assessment
+                            .sourceTitle,
+                    domain:
+                        item.assessment
+                            .domain,
+                    kind:
+                        item.assessment
+                            .kind,
+                    tier:
+                        item.assessment
+                            .tier,
+                    excerpt:
+                        String(
+                            item.evidence
+                                .excerpt
+                                .prefix(800)
+                        )
+                )
+            }
+
+        let uniqueResultURLs =
+            sourceAssessments
+                .map(\.sourceURL)
+
+        var resultSeen =
+            Set<String>()
         webResearchResults =
-            Array(
-                combinedResults
-                    .prefix(12)
-            )
+            uniqueResultURLs
+                .compactMap { url in
+                    guard
+                        resultSeen
+                            .insert(url)
+                            .inserted
+                    else {
+                        return nil
+                    }
 
-        let distinctDomains =
-            Set(
-                webResearchResults
-                    .map(\.domain)
-            )
+                    return resultByURL[url]
+                }
+                .prefix(12)
+                .map { $0 }
 
-        let hasUsefulResearch =
-            !webResearchResults.isEmpty &&
-            distinctDomains.count >= 2
+        var mentorEvidenceSeen =
+            Set<String>()
+        webResearchEvidence =
+            evidenceCandidates
+                .compactMap { item in
+                    let url =
+                        item.evidence
+                            .source
+                            .url
+                            .absoluteString
+                    guard
+                        mentorEvidenceSeen
+                            .insert(url)
+                            .inserted
+                    else {
+                        return nil
+                    }
+                    return item.evidence
+                }
+                .prefix(12)
+                .map { $0 }
 
         let synthesis =
             await localIntelligence
                 .synthesizeSelfDevelopmentResearch(
                     userInput: text,
+                    plan:
+                        researchPlan,
                     repositoryEvidence:
                         repositoryEvidence,
-                    researchEvidence:
-                        webResearchEvidence,
-                    researchSources:
-                        webResearchResults,
+                    evidenceRecords:
+                        evidenceRecords,
+                    sourceAssessments:
+                        sourceAssessments,
                     prohibitedCapabilityIDs:
                         evidencePackage
                             .prohibitedCapabilityIDs
                 )
 
+        let executedCapabilities:
+            Set<String> = [
+                "core.reasoning",
+                "context.local",
+                "research.web"
+            ]
+
+        let qualityVerification =
+            developmentResearchVerifier
+                .verify(
+                    plan:
+                        researchPlan,
+                    sources:
+                        sourceAssessments,
+                    evidence:
+                        evidenceRecords,
+                    repositoryEvidenceIDs:
+                        Set(
+                            repositoryEvidence
+                                .map(\.id)
+                        ),
+                    synthesis:
+                        synthesis,
+                    executedCapabilityIDs:
+                        executedCapabilities
+                )
+
         let verification:
             AgentVerificationResult
 
-        if hasUsefulResearch,
-           synthesis != nil {
+        switch qualityVerification.state {
+        case .passed:
             verification =
                 AgentVerificationResult(
                     state: .passed,
                     summary:
-                        "Self-development research combined current repository evidence with multiple public web sources and stopped at proposal stage.",
+                        qualityVerification
+                            .summary,
                     fallback:
-                        "A separate bounded Developer task and human review are required before any code mutation."
+                        qualityVerification
+                            .fallback
                 )
-        } else if !webResearchResults.isEmpty {
+
+        case .partial:
             verification =
                 AgentVerificationResult(
                     state: .partial,
                     summary:
-                        "Web research produced sources, but the final architecture comparison could not be fully synthesized.",
+                        qualityVerification
+                            .summary,
                     fallback:
-                        "Retain the collected evidence and retry bounded synthesis without starting mutation."
+                        qualityVerification
+                            .fallback
                 )
-        } else {
+
+        case .attention:
             verification =
                 AgentVerificationResult(
                     state: .attention,
                     summary:
-                        "Self-development research could not collect a usable multi-source web evidence set.",
+                        qualityVerification
+                            .summary,
                     fallback:
-                        "Retry research.web with narrower research queries; do not escalate to computer control."
+                        qualityVerification
+                            .fallback
                 )
         }
 
@@ -1182,44 +1505,76 @@ final class AgentEngine: ObservableObject {
         let fallbackReport =
             """
             A. Current KRALİ Architecture
-            Read-only repository evidence collected from \(repositoryEvidence.count) relevant source snippets.
+            Read-only repository evidence collected from \(repositoryEvidence.count) current-source snippets.
 
             B. Research Sources
-            \(webResearchResults.enumerated().map { "\($0.offset + 1). \($0.element.title) — \($0.element.domain)" }.joined(separator: "\n"))
+            \(sourceAssessments.prefix(12).map { "[Tier \($0.tier.rawValue)] \($0.sourceTitle) — \($0.domain)" }.joined(separator: "\n"))
 
             F. Biggest Current Gap
-            Final research synthesis was not available; no architectural mutation is justified from an incomplete comparison.
+            Structured, evidence-ID-bound comparison could not be completed to the mission-derived verification contract.
+
+            K. Verification Plan
+            \(qualityVerification.summary)
 
             L. Mutation Recommended
-            NO
+            Mutation Recommended: NO
 
             M. Mutation Started
-            NO
+            Mutation Started: NO
 
             N. Recommended Next Step
-            Retry bounded read-only synthesis using the retained repository and web evidence.
+            \(qualityVerification.fallback ?? "Collect stronger Tier A/B page-derived evidence for uncovered facets.")
             """
 
         let reply =
-            synthesis ??
+            synthesis?
+                .formattedFinalReport(
+                    sources:
+                        sourceAssessments
+                ) ??
             fallbackReport
 
         currentReflectionSummary =
-            "Self-development research completed with \(webResearchResults.count) public sources and \(repositoryEvidence.count) repository evidence snippets."
-        currentAlternatives = []
+            "Development research • facets=" +
+            String(
+                researchPlan.facets.count
+            ) +
+            " • requiredApproaches=" +
+            String(
+                researchPlan
+                    .requiredApproachCount
+            ) +
+            " • pageEvidence=" +
+            String(
+                evidenceRecords.count
+            ) +
+            " • verification=" +
+            verification.state.rawValue
+
+        currentAlternatives =
+            synthesis?
+                .approaches
+                .map {
+                    $0.decision.rawValue +
+                    ": " +
+                    $0.title
+                } ??
+            []
 
         intelligenceProviderStatus =
             synthesis == nil
-            ? "Self-development research synthesis unavailable"
-            : "Apple Foundation Models / Self-Development Research"
+            ? "Structured self-development research synthesis unavailable"
+            : "Apple Foundation Models / Evidence-Bound Development Research"
 
         activeRoute = [
             "Core",
             "Developer",
-            "Research",
+            "Research Plan",
+            "Source Quality",
+            "Page Evidence",
             "Repository",
-            "Web",
             "Compare",
+            "Research Verify",
             "Proposal",
             "Stop"
         ]
@@ -1238,7 +1593,7 @@ final class AgentEngine: ObservableObject {
             intelligenceProvider:
                 synthesis == nil
                 ? nil
-                : "Apple Foundation Models / Self-Development Research",
+                : "Apple Foundation Models / Evidence-Bound Development Research",
             finalResponse:
                 reply
         )
@@ -1248,89 +1603,24 @@ final class AgentEngine: ObservableObject {
         )
 
         log(
-            "Self-development research tamamlandı • sources=" +
+            "Self-development research tamamlandı • facets=" +
             String(
-                webResearchResults.count
+                researchPlan.facets.count
             ) +
-            " • evidence=" +
+            " • sources=" +
             String(
-                webResearchEvidence.count
+                sourceAssessments.count
             ) +
+            " • pageEvidence=" +
+            String(
+                evidenceRecords.count
+            ) +
+            " • verification=" +
+            verification.state.rawValue +
             " • mutation=no"
         )
 
         busy = false
-    }
-
-    private func selfDevelopmentResearchQueries(
-        from input: String
-    ) -> [String] {
-        let prohibited =
-            AgentExecutionProfile
-                .computerControlCapabilityIDs
-                .map {
-                    $0.lowercased()
-                }
-
-        let stopWords =
-            Set([
-                "krali", "kralı", "test", "amac", "amaç",
-                "gorev", "görev", "icin", "için", "ve",
-                "veya", "ile", "bir", "bu", "su", "şu",
-                "olarak", "yap", "yapma", "kullan", "kullanma",
-                "once", "önce", "sonra", "mevcut", "kendi",
-                "sistem", "sistemi", "mimari", "mimarini",
-                "mimarisini", "kod", "kaynak", "read", "only",
-                "mutation", "started", "recommended", "no",
-                "browser", "control", "desktop", "app", "workflow",
-                "system", "open", "url", "perception", "screen"
-            ])
-
-        let words =
-            input
-                .folding(
-                    options: [
-                        .caseInsensitive,
-                        .diacriticInsensitive
-                    ],
-                    locale:
-                        Locale(
-                            identifier: "tr_TR"
-                        )
-                )
-                .lowercased()
-                .components(
-                    separatedBy:
-                        CharacterSet
-                            .alphanumerics
-                            .inverted
-                )
-                .filter {
-                    $0.count >= 3 &&
-                    !stopWords.contains($0) &&
-                    !prohibited.contains($0)
-                }
-
-        var seen = Set<String>()
-        let topic =
-            words
-                .filter {
-                    seen.insert($0).inserted
-                }
-                .prefix(28)
-                .joined(separator: " ")
-
-        let base =
-            topic.isEmpty
-            ? "AI agent self improvement learning memory skills evaluation"
-            : topic
-
-        return [
-            base +
-                " autonomous agents self improvement academic paper official documentation",
-            base +
-                " agent architecture memory reflection skill library evaluation open source GitHub"
-        ]
     }
 
     private func executeSelfDiagnosisMission(
@@ -6420,7 +6710,10 @@ final class AgentEngine: ObservableObject {
 
     private func performWebResearch(
         query: String,
-        allowInteractiveEscalation: Bool = true
+        allowInteractiveEscalation: Bool = true,
+        allowSnippetEvidence: Bool = true,
+        developmentFacet:
+            AgentDevelopmentResearchFacet? = nil
     ) async -> String {
         webResearchStatus = "Web araştırılıyor…"
         log("Web Research başladı")
@@ -6428,13 +6721,20 @@ final class AgentEngine: ObservableObject {
         do {
             let report = try await webResearchService.search(
                 query,
-                limit: 5
+                limit:
+                    developmentFacet == nil
+                    ? 5
+                    : 8,
+                developmentFacet:
+                    developmentFacet
             )
 
             let evidence = await webSourceReader.read(
                 report.results,
                 query: query,
-                limit: 4
+                limit: 4,
+                allowSnippetFallback:
+                    allowSnippetEvidence
             )
 
             webResearchEvidence = evidence

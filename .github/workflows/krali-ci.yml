@@ -82,6 +82,15 @@ jobs:
           /tmp/krali-research-core-outcome-self-test
 
           swiftc \
+            App/KRALIAgentNative/AgentExecutionProfile.swift \
+            App/KRALIAgentNative/AgentResearchQueryPlanner.swift \
+            App/KRALIAgentNative/AgentWebResearch.swift \
+            App/KRALIAgentNative/AgentDevelopmentResearch.swift \
+            Scripts/development-research-quality-self-test.swift \
+            -o /tmp/krali-development-research-quality-self-test
+          /tmp/krali-development-research-quality-self-test
+
+          swiftc \
             App/KRALIAgentNative/AgentMissionRouter.swift \
             App/KRALIAgentNative/AgentSelfDiagnosisExecutor.swift \
             Scripts/self-diagnosis-executor-self-test.swift \
