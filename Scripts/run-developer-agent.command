@@ -2481,6 +2481,10 @@ NODE
                 echo "⚠️ Candidate build geçti ancak task verification contract geçmedi; branch korundu." | tee -a "$LOG"
                 exit 27
                 ;;
+            recovered_candidate_surface_regression)
+                echo "⛔ Candidate destructive/API-surface guard geçmedi; branch korundu ve main değiştirilmedi." | tee -a "$LOG"
+                exit 30
+                ;;
             candidate_recovery_failed)
                 echo "❌ Candidate recovery başarısız oldu." | tee -a "$LOG"
                 exit 24
