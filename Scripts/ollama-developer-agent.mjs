@@ -2,6 +2,9 @@ import fs from "node:fs";
 import path from "node:path";
 import { spawnSync } from "node:child_process";
 import crypto from "node:crypto";
+import { validateSemanticVerificationContract, runSemanticVerification } from "./developer-node-semantic-verifier.mjs";
+import { createNodeExecutionState, nodeExecutionStateMatches, compactNodeExecutionState } from "./developer-node-execution-state.mjs";
+import { canAdvanceNode } from "./developer-orchestration-policy.mjs";
 
 const worktree = process.env.KRALI_WORKTREE || "";
 const promptFile = process.env.KRALI_PROMPT_FILE || "";
@@ -935,7 +938,7 @@ function developerTaskGraphFingerprint(nodes) {
           dependsOn: node.dependsOn,
           scope: node.scope,
           expectedResult: node.expectedResult,
-          verification: node.verification,
+          verificationContract: node.verificationContract,
         }))
       )
     )
@@ -957,7 +960,7 @@ function validateDeveloperTaskGraphNodes(rawNodes) {
           raw?.id,
           raw?.title,
           raw?.expected_result,
-          raw?.verification,
+          JSON.stringify(raw?.verification_contract || {}),
         ].join(" ")
       );
 
@@ -978,9 +981,8 @@ function validateDeveloperTaskGraphNodes(rawNodes) {
       expectedResult: String(
         raw?.expected_result || ""
       ).trim(),
-      verification: String(
-        raw?.verification || ""
-      ).trim(),
+      verificationContract:
+        raw?.verification_contract,
       state: "pending",
       order: index,
       verifiedAt: null,
@@ -993,7 +995,10 @@ function validateDeveloperTaskGraphNodes(rawNodes) {
         !node.id ||
         !node.title ||
         !node.expectedResult ||
-        !node.verification ||
+        !validateSemanticVerificationContract(
+          node.verificationContract,
+          { scope: node.scope }
+        ).ok ||
         node.scope.length === 0
     )
   ) {
@@ -1046,6 +1051,8 @@ function validateDeveloperTaskGraphNodes(rawNodes) {
   return nodes;
 }
 
+let developerTaskGraphLoadError = "";
+
 function loadDeveloperTaskGraph() {
   const candidates = [
     developerTaskPlanFile,
@@ -1063,7 +1070,11 @@ function loadDeveloperTaskGraph() {
         payload?.review?.subtasks
       );
 
-      if (!nodes) continue;
+      if (!nodes) {
+        developerTaskGraphLoadError =
+          "developer task graph semantic verification contract invalid: " + candidate;
+        continue;
+      }
 
       return {
         fingerprint:
@@ -1073,7 +1084,10 @@ function loadDeveloperTaskGraph() {
         completed: false,
         sourceFile: candidate,
       };
-    } catch {}
+    } catch {
+      developerTaskGraphLoadError =
+        "developer task graph unreadable: " + candidate;
+    }
   }
 
   return null;
@@ -1081,6 +1095,18 @@ function loadDeveloperTaskGraph() {
 
 let developerTaskGraph =
   loadDeveloperTaskGraph();
+
+if (
+  !developerTaskGraph &&
+  developerTaskGraphLoadError &&
+  (developerTaskPlanFile || fallbackDeveloperTaskPlanFile)
+) {
+  fail(
+    developerTaskGraphLoadError,
+    31,
+    "local_agent_semantic_contract_invalid"
+  );
+}
 
 function refreshDeveloperTaskGraph() {
   if (!developerTaskGraph) return null;
@@ -1184,9 +1210,9 @@ function developerTaskGraphPromptContext() {
         : "none"),
     "Mutation scope: " + node.scope.join(", "),
     "Expected result: " + node.expectedResult,
-    "Verification intent: " + node.verification,
+    "Deterministic semantic verification: " + JSON.stringify(node.verificationContract),
     "Do not mutate files for later subtasks yet.",
-    "When this subtask has a real diff and build_check PASS, the deterministic orchestrator will advance the graph.",
+    "The deterministic orchestrator advances only after semantic verification, git diff, and build_check all pass for this exact candidate.",
   ].join("\n");
 }
 
@@ -1285,19 +1311,20 @@ function maybeAdvanceDeveloperTaskGraph(
   toolName,
   result
 ) {
+  const current = activeDeveloperSubtask();
+  const candidateFingerprint = candidateIdentity();
   if (
     !developerTaskGraph ||
     result?.ok !== true ||
     !["git_diff", "build_check"].includes(toolName) ||
     !sawMutatingTool ||
     !sawGitDiff ||
-    !buildCheckPassed
+    !buildCheckPassed ||
+    !current ||
+    !canAdvanceNode({ diffVerified: sawGitDiff, semanticEvidence: semanticVerificationEvidence, buildVerified: buildCheckPassed, graphFingerprint: developerTaskGraph?.fingerprint, nodeID: current?.id, candidateFingerprint })
   ) {
     return null;
   }
-
-  const current = activeDeveloperSubtask();
-  if (!current) return null;
 
   current.state = "verified";
   current.verifiedAt = new Date().toISOString();
@@ -1337,6 +1364,7 @@ function maybeAdvanceDeveloperTaskGraph(
   sawMutatingTool = false;
   sawGitDiff = false;
   buildCheckPassed = false;
+  semanticVerificationEvidence = null;
   completionRejections = 0;
   inspectionToolCalls = 0;
   implementationPhaseAnnounced = false;
@@ -1344,6 +1372,7 @@ function maybeAdvanceDeveloperTaskGraph(
   implementationReadCompleted = false;
   implementationTargetPaths = [];
   lastStructuredOutcome = null;
+  activateNodeExecutionState(next, "graph-advanced");
 
   stage(
     "local_agent_task_graph_advanced",
@@ -1378,6 +1407,42 @@ function maybeAdvanceDeveloperTaskGraph(
   }
 
   return next;
+}
+
+function verifyActiveNodeSemantically(trigger) {
+  if (!developerTaskGraph || !sawMutatingTool || !sawGitDiff) {
+    return { ok: true, skipped: true };
+  }
+
+  const node = activeDeveloperSubtask();
+  if (!node) return { ok: false, reason: "active-node-missing" };
+  const candidateFingerprint = candidateIdentity();
+  const result = runSemanticVerification(node.verificationContract, {
+    root: worktree,
+    scope: node.scope,
+  });
+
+  if (!result.ok) {
+    semanticVerificationEvidence = null;
+    stage(
+      "local_agent_semantic_verification_failed",
+      gapLabel + " semantic node verification failed • node=" + node.id + " • reason=" + result.reason + " • trigger=" + trigger
+    );
+    return result;
+  }
+
+  semanticVerificationEvidence = {
+    graphFingerprint: developerTaskGraph.fingerprint,
+    nodeID: node.id,
+    candidateFingerprint,
+    verifiedAt: new Date().toISOString(),
+    trigger,
+  };
+  stage(
+    "local_agent_semantic_verified",
+    gapLabel + " semantic node verification passed • node=" + node.id + " • trigger=" + trigger
+  );
+  return result;
 }
 
 refreshDeveloperTaskGraph();
@@ -2440,6 +2505,7 @@ let sawToolCall = false;
 let sawMutatingTool = false;
 let sawGitDiff = false;
 let buildCheckPassed = false;
+let semanticVerificationEvidence = null;
 let completionRejections = 0;
 let structuredActions = 0;
 let inspectionToolCalls = 0;
@@ -2468,6 +2534,71 @@ let rootCauseMutationTargetVerified =
   !requireRootCauseGate;
 let strategyEscalationCount = 0;
 let implementationRejectionGraceUsed = 0;
+let nodeExecutionState = null;
+
+function activateNodeExecutionState(node, reason = "node-activated") {
+  if (!developerTaskGraph || !node) {
+    nodeExecutionState = null;
+    return;
+  }
+
+  checkpointEvidence = [];
+  implementationSearchCompleted = false;
+  implementationReadCompleted = false;
+  implementationTargetPaths = [];
+  verifiedMutationSource = "";
+  rootCauseMutationTargetVerified = !requireRootCauseGate;
+  rootCauseDiagnosis = null;
+  rootCauseNeighborhood = [];
+  rootCausePrimaryID = "";
+  runtimeBootstrapTarget = null;
+  lastStructuredOutcome = null;
+  lastStructuredDecisionFailure = "";
+  lastMutationSnapshot = null;
+  lastMutationFingerprint = "";
+  lastAppliedMutationDecision = null;
+  lastFailedReplaceMutation = null;
+  failedMutationFingerprints.clear();
+  failedDiffFingerprints.clear();
+  mutationControllerTimeoutCount = 0;
+  strategyEscalationCount = 0;
+  implementationRejectionGraceUsed = 0;
+  semanticVerificationEvidence = null;
+  buildCheckPassed = false;
+
+  nodeExecutionState = createNodeExecutionState({
+    graphFingerprint: developerTaskGraph.fingerprint,
+    nodeID: node.id,
+    candidateFingerprint: candidateIdentity(),
+  });
+  stage(
+    "local_agent_node_evidence_activated",
+    gapLabel + " node execution evidence activated • activeNode=" + node.id + " • reason=" + reason
+  );
+}
+
+function captureNodeExecutionState() {
+  const node = activeDeveloperSubtask();
+  if (!developerTaskGraph || !node) return null;
+  if (!nodeExecutionStateMatches(nodeExecutionState, {
+    graphFingerprint: developerTaskGraph.fingerprint,
+    nodeID: node.id,
+  })) {
+    activateNodeExecutionState(node, "ownership-repair");
+  }
+  nodeExecutionState.candidateFingerprint = candidateIdentity();
+  nodeExecutionState.searchEvidence = checkpointEvidence.filter((item) => item.tool === "search_codebase").map((item) => ({ tool: item.tool, args: String(item.args || "").slice(0, 600) })).slice(-8);
+  nodeExecutionState.readEvidence = checkpointEvidence.filter((item) => item.tool === "read_file").map((item) => ({ tool: item.tool, path: String(item?.args?.path || ""), range: [item?.args?.start_line ?? null, item?.args?.end_line ?? null] })).slice(-8);
+  nodeExecutionState.implementationTargetPaths = implementationTargetPaths.slice(0, 8);
+  nodeExecutionState.createTargetPaths = exactCreatableMutationPaths().slice(0, 8);
+  nodeExecutionState.verifiedMutationSourceFingerprint = verifiedMutationSource ? crypto.createHash("sha256").update(verifiedMutationSource).digest("hex") : "";
+  nodeExecutionState.semanticVerificationEvidence = semanticVerificationEvidence;
+  nodeExecutionState.buildVerificationEvidence = buildCheckPassed ? { candidateFingerprint: candidateIdentity(), verifiedAt: new Date().toISOString() } : null;
+  nodeExecutionState.failedMutationFingerprints = [...failedMutationFingerprints].slice(-12);
+  nodeExecutionState.failedDiffFingerprints = [...failedDiffFingerprints].slice(-12);
+  nodeExecutionState.retry = { controllerTimeouts: mutationControllerTimeoutCount, strategyEscalations: strategyEscalationCount, implementationGrace: implementationRejectionGraceUsed, stopReason: lastStructuredDecisionFailure || "" };
+  return compactNodeExecutionState(nodeExecutionState);
+}
 
 const inspectionToolNames = new Set([
   "list_files",
@@ -2633,7 +2764,7 @@ function persistCheckpoint(reason = "progress") {
 
   const status = candidateStatus();
   const payload = {
-    version: 8,
+    version: 10,
     baseHead: currentBaseHead(),
     gapLabel,
     reason,
@@ -2670,6 +2801,8 @@ function persistCheckpoint(reason = "progress") {
     sawMutatingTool,
     sawGitDiff,
     buildCheckPassed,
+    semanticVerificationEvidence,
+    nodeExecutionState: captureNodeExecutionState(),
     candidateDirty: Boolean(status?.ok && status?.dirty),
     candidateIdentity: candidateIdentity(),
     implementationSearchCompleted,
@@ -2704,7 +2837,7 @@ function loadCheckpoint() {
 
     if (
       !payload ||
-      ![1, 2, 3, 4, 5, 6, 7, 8].includes(Number(payload.version || 0))
+      ![1, 2, 3, 4, 5, 6, 7, 8, 9, 10].includes(Number(payload.version || 0))
     ) {
       return null;
     }
@@ -2784,6 +2917,7 @@ function resumeCheckpointContext() {
     sawMutatingTool = false;
     sawGitDiff = false;
     buildCheckPassed = false;
+    semanticVerificationEvidence = null;
     inspectionToolCalls = maxInspectionTools;
     implementationPhaseAnnounced = true;
 
@@ -2814,6 +2948,48 @@ function resumeCheckpointContext() {
     restoreDeveloperTaskGraph(
       checkpoint.developerTaskGraph
     );
+  }
+
+  const activeCheckpointNode = activeDeveloperSubtask();
+  if (developerTaskGraph && activeCheckpointNode) {
+    const savedNodeState = checkpoint.nodeExecutionState;
+    const liveCandidateFingerprint = candidateIdentity();
+    const ownershipMatches =
+      Number(checkpoint.version || 0) >= 10 &&
+      nodeExecutionStateMatches(savedNodeState, {
+        graphFingerprint: developerTaskGraph.fingerprint,
+        nodeID: activeCheckpointNode.id,
+      }) &&
+      savedNodeState.candidateFingerprint === liveCandidateFingerprint;
+
+    if (!ownershipMatches) {
+      activateNodeExecutionState(
+        activeCheckpointNode,
+        "checkpoint-ownership-mismatch"
+      );
+      stage(
+        "local_agent_node_evidence_invalidated",
+        gapLabel + " checkpoint node evidence rejected • activeNode=" + activeCheckpointNode.id + " • graph/node/candidate identity must match"
+      );
+      return;
+    }
+
+    nodeExecutionState = savedNodeState;
+  }
+
+  if (Number(checkpoint.version || 0) >= 10) {
+    const savedSemantic = checkpoint.semanticVerificationEvidence;
+    const active = activeDeveloperSubtask();
+    const currentIdentity = candidateIdentity();
+    if (
+      savedSemantic &&
+      active &&
+      savedSemantic.graphFingerprint === developerTaskGraph?.fingerprint &&
+      savedSemantic.nodeID === active.id &&
+      savedSemantic.candidateFingerprint === currentIdentity
+    ) {
+      semanticVerificationEvidence = savedSemantic;
+    }
   }
 
   if (evidence.length === 0) return;
@@ -3579,15 +3755,43 @@ function recordToolEvidence(name, result, args = {}) {
     sawMutatingTool = true;
     sawGitDiff = false;
     buildCheckPassed = false;
+    semanticVerificationEvidence = null;
     completionRejections = 0;
   }
 
   if (name === "git_diff" && result?.ok) {
     sawGitDiff = true;
+    const semanticResult = verifyActiveNodeSemantically("git_diff");
+    if (!semanticResult.ok) {
+      result.semantic_verification = {
+        ok: false,
+        reason: semanticResult.reason,
+      };
+    }
   }
 
   if (name === "build_check") {
-    buildCheckPassed = result?.ok === true;
+    const active = activeDeveloperSubtask();
+    const semanticCurrent =
+      !developerTaskGraph ||
+      (
+        semanticVerificationEvidence &&
+        active &&
+        semanticVerificationEvidence.graphFingerprint === developerTaskGraph.fingerprint &&
+        semanticVerificationEvidence.nodeID === active.id &&
+        semanticVerificationEvidence.candidateFingerprint === candidateIdentity()
+      );
+    buildCheckPassed = result?.ok === true && semanticCurrent;
+    if (result?.ok === true && !semanticCurrent) {
+      result.semantic_verification = {
+        ok: false,
+        reason: "semantic-verification-required-before-build",
+      };
+      stage(
+        "local_agent_semantic_verification_required",
+        gapLabel + " build PASS graph için sayılmadı; aktif node semantic verification önce geçmeli"
+      );
+    }
   }
 
   maybeAdvanceDeveloperTaskGraph(
@@ -8656,6 +8860,13 @@ function requestMoreWork(reasons) {
       "Bir sonraki cevabın düz metin final değil, gerekli tool çağrıları olmalı.",
     ].join("\n"),
   });
+}
+
+if (developerTaskGraph) {
+  activateNodeExecutionState(
+    activeDeveloperSubtask(),
+    "initial-node-activation"
+  );
 }
 
 resumeCheckpointContext();

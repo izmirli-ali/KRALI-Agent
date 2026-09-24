@@ -46,6 +46,11 @@ final class AgentEngine: ObservableObject {
     @Published var currentAlternatives: [String] = []
     @Published var currentSemanticMission: AgentSemanticMission?
     @Published var currentSemanticPlannerProvider: String?
+    @Published var missionOwner: AgentMissionOwner = .runtime
+    @Published var missionPhase: AgentMissionPhase = .runtime
+    @Published var developerRepository: AgentDeveloperRepository?
+    @Published var developerMissionReason: String?
+    @Published var executionProfile: AgentExecutionProfile = .developmentResearchMode
     @Published var currentTaskGraph: AgentTaskGraph?
     @Published var currentRuntimeTask: AgentRuntimeTask?
     @Published var taskGraphStatus = "Henüz görev grafiği yok."
@@ -117,6 +122,8 @@ final class AgentEngine: ObservableObject {
     private let desktopControlStore = DesktopControlProbeStore()
     private let textFileWriter = AgentTextFileWriter()
     private let developerBridge = AgentDeveloperBridge()
+    private let missionRouter = AgentMissionRouter()
+    private let developerRepositoryResolver = AgentDeveloperRepositoryResolver()
     private let developerToolSafetyPolicy =
         AgentDeveloperToolSafetyPolicy()
     private let learningQueueStore = AgentLearningQueueStore()
@@ -145,6 +152,9 @@ final class AgentEngine: ObservableObject {
         AgentDeveloperTaskDescriptor?
     private var currentOutcomeFailureIsTransient = false
     private var currentTaskInput = ""
+    // Only set by the mission that actually starts a Developer Agent run.
+    // Never reuse inspector status from an earlier mission as trace ownership.
+    private var missionDeveloperRunID: String?
     private var approvedRuntimeStepIndexes = Set<Int>()
     private var approvedRuntimeApplicationTargets:
         [Int: DesktopApplicationApprovalTarget] = [:]
@@ -158,6 +168,15 @@ final class AgentEngine: ObservableObject {
             forInfoDictionaryKey:
                 "CFBundleShortVersionString"
         ) as? String ?? "unknown"
+    }
+
+    /// The active runtime capability surface after execution-profile policy.
+    /// Paused computer-control capabilities are excluded from planning,
+    /// normalization, fallback selection, execution and gap generation.
+    private func runtimeCapabilities() -> [AgentCapability] {
+        capabilityRegistry.availableCapabilities(
+            for: executionProfile
+        )
     }
 
     init() {
@@ -701,6 +720,57 @@ final class AgentEngine: ObservableObject {
         return true
     }
 
+    /// Dynamic self-development goals intentionally stop at diagnosis.  The
+    /// existing runner accepts only registered task cards with predeclared
+    /// mutation scope, so this bridge cannot create mutation authority.
+    private func handleSelfDevelopmentMission(
+        _ text: String,
+        source: ChatInputSource
+    ) -> Bool {
+        let routing = missionRouter.classify(text)
+        missionOwner = routing.owner
+        missionPhase = routing.phase
+        developerMissionReason = routing.reason
+
+        guard routing.owner != .runtime else { return false }
+
+        currentTaskGraph = nil
+        currentRuntimeTask = nil
+        selectedCapabilities = []
+        capabilityLearningPlans = []
+        executionSteps = []
+        activeRoute = routing.owner == .developer ? ["Core", "Developer", "Diagnosis"] : ["Core", "Stop"]
+
+        if routing.owner == .stop {
+            currentGoal = "Self-development authority escalation"
+            currentPlan = "Stop → explicit user review"
+            verificationState = .attention
+            verificationSummary = routing.reason
+            postAssistantMessage("Bu self-development isteği korunan yetki içeriyor. KRALİ kendi kendine izin, merge, secret veya filesystem yetkisi veremez; normal runtime görevi de başlatılmadı.")
+            recordMentorTrace(input: text, source: source, goal: currentGoal, plan: currentPlan, route: activeRoute, capabilities: [], learningPlans: [], verification: AgentVerificationResult(state: .attention, summary: routing.reason, fallback: "Explicit user review is required."), intelligenceProvider: nil, finalResponse: messages.last?.text ?? "")
+            return true
+        }
+
+        guard let repository = developerRepositoryResolver.resolve(userWorkspace: selectedRootURL) else {
+            currentGoal = "KRALİ self-development diagnosis"
+            currentPlan = "Stop → approved KRALİ repository identity required"
+            verificationState = .attention
+            verificationSummary = "Developer repository identity could not be resolved safely."
+            postAssistantMessage("Bu hedef Developer Mission olarak sınıflandı; ancak KRALİ kaynak deposu güvenle doğrulanamadı. Kullanıcı çalışma alanı developer kaynağı olarak kullanılmadı ve mutation başlatılmadı.")
+            recordMentorTrace(input: text, source: source, goal: currentGoal, plan: currentPlan, route: activeRoute, capabilities: [], learningPlans: [], verification: AgentVerificationResult(state: .attention, summary: verificationSummary, fallback: "Configure an approved KRALİ repository."), intelligenceProvider: nil, finalResponse: messages.last?.text ?? "")
+            return true
+        }
+
+        developerRepository = repository
+        currentGoal = "KRALİ self-development diagnosis"
+        currentPlan = "Read-only diagnosis → evidence → proposal → registered bounded task required"
+        verificationState = .checking
+        verificationSummary = "Diagnosis/proposal phase; mutation authority has not been granted."
+        postAssistantMessage("Bu hedef Developer Mission olarak yönlendirildi. Kaynak hedefi kullanıcı workspace'i değil, doğrulanmış KRALİ deposu. İlk aşama yalnız read-only diagnosis/proposal: Observed Failure, Evidence, Root Cause, Relevant Architecture, Alternatives, Selected Strategy, Scope ve Verification Contract. Dinamik mutation task kartı oluşturulmadı; doğrulanmış root cause ve kullanıcı onaylı, bounded registered task olmadan Developer Agent kod değiştirmeye başlamaz.")
+        recordMentorTrace(input: text, source: source, goal: currentGoal, plan: currentPlan, route: activeRoute, capabilities: [], learningPlans: [], verification: AgentVerificationResult(state: .checking, summary: verificationSummary, fallback: "Registered bounded task required before mutation."), intelligenceProvider: nil, finalResponse: messages.last?.text ?? "")
+        return true
+    }
+
     func send(
         _ raw: String,
         source: ChatInputSource = .text
@@ -719,6 +789,7 @@ final class AgentEngine: ObservableObject {
 
         resetTransientTaskStateForNewInput()
         currentTaskInput = text
+        missionDeveloperRunID = nil
 
         let recalledContextMemories =
             contextMemoryStore.relevant(
@@ -773,6 +844,13 @@ final class AgentEngine: ObservableObject {
             return
         }
 
+        if handleSelfDevelopmentMission(
+            text,
+            source: source
+        ) {
+            return
+        }
+
         let decision = brain.analyze(
             text,
             context: brainContext()
@@ -784,6 +862,80 @@ final class AgentEngine: ObservableObject {
             context: brainContext()
         )
 
+        let requestedActionCapabilityIDs =
+            goalProfile.requiredCapabilityIDs
+                .subtracting(
+                    Set([
+                        "core.reasoning",
+                        "context.local"
+                    ])
+                )
+        let pausedRequestedCapabilityIDs =
+            requestedActionCapabilityIDs
+                .filter {
+                    executionProfile.isPaused($0)
+                }
+                .sorted()
+        let runnableRequestedCapabilityIDs =
+            requestedActionCapabilityIDs
+                .filter {
+                    !executionProfile.isPaused($0)
+                }
+
+        // An explicitly computer-control-only goal must not be converted into
+        // a fake capability gap or an unsafe workaround while the profile is
+        // intentionally paused. Mixed goals (for example public research plus
+        // an optional browser path) continue with the non-paused capability
+        // surface so research can proceed without the computer-control node.
+        if !pausedRequestedCapabilityIDs.isEmpty &&
+           runnableRequestedCapabilityIDs.isEmpty {
+            currentGoal = goalProfile.summary
+            currentPlan =
+                "Development / Research Mode → paused capability"
+            currentTaskGraph = nil
+            currentRuntimeTask = nil
+            selectedCapabilities = []
+            capabilityLearningPlans = []
+            currentCapabilityGaps = []
+            executionSteps = []
+            verificationState = .attention
+            verificationSummary =
+                "İstenen bilgisayar-kontrol capability'si Development / Research Mode'da geçici olarak duraklatıldı."
+            fallbackPlan = nil
+            activeRoute = [
+                "Core",
+                "ExecutionProfile",
+                "Paused"
+            ]
+
+            let reply =
+                "Bu işlem Development / Research Mode açıkken geçici olarak duraklatıldı. " +
+                "Bilgisayar kontrolü uygulanmadı ve bu durum yeni bir capability eksikliği olarak öğrenme kuyruğuna eklenmedi. " +
+                "Duraklatılan capability: " +
+                pausedRequestedCapabilityIDs.joined(separator: ", ")
+
+            postAssistantMessage(reply)
+            recordMentorTrace(
+                input: text,
+                source: source,
+                goal: currentGoal,
+                plan: currentPlan,
+                route: activeRoute,
+                capabilities: [],
+                learningPlans: [],
+                verification:
+                    AgentVerificationResult(
+                        state: .attention,
+                        summary: verificationSummary,
+                        fallback:
+                            "Bilgisayar kontrolünü yeniden etkinleştiren bir execution profile seçilene kadar bu eylem uygulanmaz."
+                    ),
+                intelligenceProvider: nil,
+                finalResponse: reply
+            )
+            return
+        }
+
         currentGoal = goalProfile.summary
         currentPlan = decision.selectedPlan
         currentAlternatives = decision.alternatives
@@ -793,12 +945,13 @@ final class AgentEngine: ObservableObject {
             for: text,
             decision: decision,
             context: brainContext(),
-            goal: goalProfile
+            goal: goalProfile,
+            profile: executionProfile
         )
         selectedCapabilities = capabilities
 
         let webResearchAvailable =
-            capabilityRegistry.all.first(
+            capabilityRegistry.availableCapabilities(for: executionProfile).first(
                 where: { $0.id == "research.web" }
             )?.isAvailable == true
 
@@ -834,7 +987,7 @@ final class AgentEngine: ObservableObject {
                             .candidateCapabilityIDs(
                                 for: step,
                                 availableCapabilities:
-                                    capabilityRegistry.all
+                                    runtimeCapabilities()
                             )
                             .isEmpty
                     }
@@ -896,7 +1049,7 @@ final class AgentEngine: ObservableObject {
             problemSolver.solve(
                 graph: deterministicGraph,
                 capabilities:
-                    capabilityRegistry.all,
+                    runtimeCapabilities(),
                 observations:
                     problemSolverObservations()
             )
@@ -1008,7 +1161,7 @@ final class AgentEngine: ObservableObject {
                 await localIntelligence.planMission(
                     userInput: text,
                     contextMemory: executionContextMemories,
-                    capabilities: capabilityRegistry.all,
+                    capabilities: runtimeCapabilities(),
                     hasWorkspace: selectedRootURL != nil
                 ),
                localMission.normalizedConfidence >= 0.45,
@@ -1039,7 +1192,7 @@ final class AgentEngine: ObservableObject {
                 await subscriptionIntelligence.planMission(
                     userInput: text,
                     contextMemory: executionContextMemories,
-                    capabilities: capabilityRegistry.all,
+                    capabilities: runtimeCapabilities(),
                     hasWorkspace: selectedRootURL != nil
                 ),
                 subscriptionMission.mission
@@ -1100,7 +1253,7 @@ final class AgentEngine: ObservableObject {
                         rawMission,
                         userInput: text,
                         capabilities:
-                            capabilityRegistry.all
+                            runtimeCapabilities()
                     )
 
                 semanticMission = mission
@@ -1121,7 +1274,7 @@ final class AgentEngine: ObservableObject {
                 taskOrchestrator.compile(
                     mission: mission,
                     capabilities:
-                        capabilityRegistry.all
+                        runtimeCapabilities()
                 )
 
             currentTaskGraph =
@@ -1136,7 +1289,7 @@ final class AgentEngine: ObservableObject {
                 problemSolver.solve(
                     graph: compiledTaskGraph,
                     capabilities:
-                        capabilityRegistry.all,
+                        runtimeCapabilities(),
                     observations:
                         problemSolverObservations()
                 )
@@ -1156,7 +1309,7 @@ final class AgentEngine: ObservableObject {
                 outcomePlanner.resolve(
                     contract: outcomeContract,
                     capabilities:
-                        capabilityRegistry.all
+                        runtimeCapabilities()
                 )
             currentOutcomeResolution =
                 outcomeResolution
@@ -1186,7 +1339,7 @@ final class AgentEngine: ObservableObject {
                                 .candidateCapabilityIDs(
                                     for: step,
                                     availableCapabilities:
-                                        capabilityRegistry.all
+                                        runtimeCapabilities()
                                 )
                                 .isEmpty
                         }
@@ -1237,7 +1390,7 @@ final class AgentEngine: ObservableObject {
                     graph:
                         compiledTaskGraph,
                     capabilities:
-                        capabilityRegistry.all
+                        runtimeCapabilities()
                 )
                 .filter {
                     !outcomeSuppressedLearningIDs
@@ -1611,7 +1764,7 @@ final class AgentEngine: ObservableObject {
                             approvedStepIndexes:
                                 approvedRuntimeStepIndexes,
                             capabilities:
-                                capabilityRegistry.all
+                                runtimeCapabilities()
                         )
 
                 let suppressedRuntimeIDs =
@@ -2318,7 +2471,10 @@ final class AgentEngine: ObservableObject {
         ids += mission.requiredCapabilityIDs
         ids += mission.steps.map(\.capabilityID)
 
-        let resolved = capabilityRegistry.resolve(ids: ids)
+        let resolved = capabilityRegistry.resolve(
+            ids: ids,
+            profile: executionProfile
+        )
 
         return resolved.isEmpty ? fallback : resolved
     }
@@ -2431,7 +2587,7 @@ final class AgentEngine: ObservableObject {
             taskOrchestrator.compile(
                 mission: mission,
                 capabilities:
-                    capabilityRegistry.all
+                    runtimeCapabilities()
             )
 
         if currentRuntimeTask?.objective ==
@@ -3617,7 +3773,7 @@ final class AgentEngine: ObservableObject {
                         approvedStepIndexes:
                             approvedRuntimeStepIndexes,
                         capabilities:
-                            capabilityRegistry.all
+                            runtimeCapabilities()
                     )
 
             for gap in runtimeGaps
@@ -3816,7 +3972,7 @@ final class AgentEngine: ObservableObject {
                 dependencyEvidence:
                     dependencyEvidence,
                 capabilities:
-                    capabilityRegistry.all
+                    runtimeCapabilities()
             )
 
         currentProblemResolution =
@@ -4427,7 +4583,7 @@ final class AgentEngine: ObservableObject {
                     "core.reasoning"
 
                 let capability =
-                    capabilityRegistry.all
+                    runtimeCapabilities()
                         .first {
                             $0.id ==
                                 capabilityID
@@ -5562,7 +5718,7 @@ final class AgentEngine: ObservableObject {
 
     private func queueInteractiveAccessCapability() {
         guard
-            let browser = capabilityRegistry.all.first(
+            let browser = runtimeCapabilities().first(
                 where: { $0.id == "browser.control" }
             ),
             !browser.isAvailable
@@ -5759,6 +5915,12 @@ final class AgentEngine: ObservableObject {
                 goal: goal,
                 plan: plan,
                 route: route,
+                missionOwner: missionOwner,
+                missionPhase: missionPhase,
+                developerRepository: developerRepository,
+                developerMissionReason: developerMissionReason,
+                developerRunID: missionDeveloperRunID,
+                executionProfile: executionProfile,
                 semanticMission: currentSemanticMission,
                 semanticPlannerProvider:
                     currentSemanticPlannerProvider,

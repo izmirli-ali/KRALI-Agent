@@ -42,6 +42,26 @@ jobs:
           node Scripts/provider-failover-self-test.mjs
           node Scripts/local-execution-profile-self-test.mjs
           node Scripts/scope-mutation-contract-self-test.mjs
+          node Scripts/developer-semantic-node-verification-self-test.mjs
+          node Scripts/developer-node-execution-state-self-test.mjs
+          node Scripts/developer-active-node-recovery-contract-self-test.mjs
+          node Scripts/developer-behavioral-orchestration-harness.mjs
+
+      - name: Validate Swift mission and execution-profile policies
+        shell: bash
+        run: |
+          set -euo pipefail
+          swiftc \
+            App/KRALIAgentNative/AgentMissionRouter.swift \
+            Scripts/developer-mission-routing-self-test.swift \
+            -o /tmp/krali-mission-router-self-test
+          /tmp/krali-mission-router-self-test "$GITHUB_WORKSPACE"
+
+          swiftc \
+            App/KRALIAgentNative/AgentExecutionProfile.swift \
+            Scripts/development-research-profile-self-test.swift \
+            -o /tmp/krali-development-research-profile-self-test
+          /tmp/krali-development-research-profile-self-test
 
       - name: Validate KRALI developer task cards
         shell: bash

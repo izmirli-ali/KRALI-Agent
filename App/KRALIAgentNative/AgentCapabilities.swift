@@ -195,7 +195,8 @@ struct AgentCapabilityRegistry {
         for rawText: String,
         decision: AgentDecision,
         context: AgentContextSnapshot,
-        goal: AgentGoalProfile
+        goal: AgentGoalProfile,
+        profile: AgentExecutionProfile = .full
     ) -> [AgentCapability] {
         let text = normalize(rawText)
         var ids = ["core.reasoning", "context.local"]
@@ -272,17 +273,32 @@ struct AgentCapabilityRegistry {
         return ids.compactMap { id in
             guard !seen.contains(id) else { return nil }
             seen.insert(id)
-            return all.first { $0.id == id }
+            guard !profile.isPaused(id) else { return nil }
+            return all.first { $0.id == id }.map(profile.applies)
         }
+    }
+
+    func availableCapabilities(for profile: AgentExecutionProfile) -> [AgentCapability] {
+        all
+            .filter { !profile.isPaused($0.id) }
+            .map(profile.applies)
     }
 
     func resolve(
         ids: [String]
     ) -> [AgentCapability] {
+        resolve(ids: ids, profile: .full)
+    }
+
+    func resolve(
+        ids: [String],
+        profile: AgentExecutionProfile
+    ) -> [AgentCapability] {
         var seen = Set<String>()
 
         return ids.compactMap { id in
             guard !seen.contains(id),
+                  !profile.isPaused(id),
                   let capability = all.first(
                     where: { $0.id == id }
                   ) else {
@@ -290,7 +306,7 @@ struct AgentCapabilityRegistry {
             }
 
             seen.insert(id)
-            return capability
+            return profile.applies(to: capability)
         }
     }
 

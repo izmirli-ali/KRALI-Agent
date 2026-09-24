@@ -80,8 +80,18 @@ requireText(
 );
 requireText(
   agent,
-  "version: 8",
+  "version: 10",
   "checkpoint schema includes graph state"
+);
+requireText(
+  agent,
+  "semanticVerificationEvidence",
+  "node completion requires fingerprint-bound semantic evidence"
+);
+requireText(
+  agent,
+  "activateNodeExecutionState",
+  "node transitions reset execution-sensitive evidence"
 );
 requireText(
   runner,

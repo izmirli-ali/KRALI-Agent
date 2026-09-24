@@ -201,7 +201,17 @@ const reviewSchema = {
             items: { type: "string" }
           },
           expected_result: { type: "string" },
-          verification: { type: "string" }
+          verification_contract: {
+            type: "object",
+            properties: {
+              type: { type: "string", enum: ["command", "source"] },
+              command: { type: "string" },
+              expectedOutput: { type: "string" },
+              assertions: { type: "array" }
+            },
+            required: ["type"],
+            additionalProperties: false
+          }
         },
         required: [
           "id",
@@ -209,7 +219,7 @@ const reviewSchema = {
           "depends_on",
           "scope",
           "expected_result",
-          "verification"
+          "verification_contract"
         ],
         additionalProperties: false
       }
@@ -377,7 +387,7 @@ const systemPrompt = [
   "You are advisory only. You have no tools and no authority to mutate files, run shell commands, approve external actions, merge branches, or bypass human approval.",
   "Review only the compact controlled-task package supplied by the orchestrator.",
   "Do not request the full repository or raw user messages.",
-  "For plan phase: KRALI may already provide a baselinePlan. Review that plan as a senior architect. Preserve good decomposition, revise only where dependencies/scope/verification are weak, and return the complete improved subtask graph. If no baselinePlan exists, create one.",
+  "For plan phase: KRALI may already provide a baselinePlan. Review that plan as a senior architect. Preserve good decomposition, revise only where dependencies/scope/verification are weak, and return the complete improved subtask graph. Every node must use verification_contract, either scoped source assertions or a scoped node command; prose verification is invalid. If no baselinePlan exists, create one.",
   "For final phase: review the candidate diff for correctness, regressions, scope discipline, backward compatibility, safety, and whether tests actually prove the requested behavior.",
   "Do not provide hidden chain-of-thought. Return only the required structured review.",
   "Generalized lessons must describe reusable engineering principles, never copy raw task content."

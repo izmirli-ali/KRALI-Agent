@@ -1,6 +1,7 @@
 #!/usr/bin/env node
 import fs from "node:fs";
 import path from "node:path";
+import { validateSemanticVerificationContract } from "./developer-node-semantic-verifier.mjs";
 
 const taskFile = process.env.KRALI_DEV_TASK_FILE || "";
 const resultFile = process.env.KRALI_TASK_DECOMPOSER_RESULT_FILE || "";
@@ -128,7 +129,7 @@ const schema = {
           "depends_on",
           "scope",
           "expected_result",
-          "verification",
+          "verification_contract",
         ],
         properties: {
           id: { type: "string" },
@@ -143,7 +144,17 @@ const schema = {
             items: { type: "string" },
           },
           expected_result: { type: "string" },
-          verification: { type: "string" },
+          verification_contract: {
+            type: "object",
+            additionalProperties: false,
+            required: ["type"],
+            properties: {
+              type: { type: "string", enum: ["command", "source"] },
+              command: { type: "string" },
+              expectedOutput: { type: "string" },
+              assertions: { type: "array" },
+            },
+          },
         },
       },
     },
@@ -315,7 +326,7 @@ function validatePlan(plan, task) {
         raw?.id,
         raw?.title,
         raw?.expected_result,
-        raw?.verification,
+        JSON.stringify(raw?.verification_contract || {}),
       ].join(" ")
     );
 
@@ -343,7 +354,7 @@ function validatePlan(plan, task) {
         : [],
       scope: repairedScope.scope,
       expected_result: String(raw?.expected_result || "").trim(),
-      verification: String(raw?.verification || "").trim(),
+      verification_contract: raw?.verification_contract,
       order,
     });
   }
@@ -354,7 +365,10 @@ function validatePlan(plan, task) {
         !node.id ||
         !node.title ||
         !node.expected_result ||
-        !node.verification ||
+        !validateSemanticVerificationContract(
+          node.verification_contract,
+          { scope: node.scope }
+        ).ok ||
         node.scope.length === 0
     )
   ) {
@@ -478,7 +492,10 @@ function selfTest() {
         depends_on: [],
         scope: ["App/Test.swift"],
         expected_result: "store exists",
-        verification: "build_check",
+        verification_contract: {
+          type: "source",
+          assertions: [{ path: "App/Test.swift", contains: "store" }],
+        },
       },
       {
         id: "verify",
@@ -486,7 +503,11 @@ function selfTest() {
         depends_on: ["store"],
         scope: ["Scripts/example-self-test.mjs"],
         expected_result: "policy test exists",
-        verification: "node self-test",
+        verification_contract: {
+          type: "command",
+          command: "node Scripts/example-self-test.mjs",
+          expectedOutput: "example_ok",
+        },
       },
     ],
   };
@@ -500,7 +521,10 @@ function selfTest() {
         depends_on: [],
         scope: ["Mentor/latest.json"],
         expected_result: "bad",
-        verification: "bad",
+        verification_contract: {
+          type: "source",
+          assertions: [{ path: "Mentor/latest.json", contains: "bad" }],
+        },
       },
     ],
   };
@@ -514,7 +538,10 @@ function selfTest() {
         depends_on: [],
         scope: ["App/**"],
         expected_result: "bounded app change",
-        verification: "build_check",
+        verification_contract: {
+          type: "source",
+          assertions: [{ path: "App/Test.swift", contains: "bounded" }],
+        },
       },
     ],
   };
@@ -577,14 +604,14 @@ if (task.allowedScope.length === 0) {
 const systemPrompt = [
   "You are KRALI Developer Task Decomposer.",
   "You plan only; you do not write code, use tools, approve actions, merge branches, or change task authority.",
-  "Split the controlled developer task into the smallest dependency-ordered implementation subtasks that can each be independently build-checked.",
+  "Split the controlled developer task into the smallest dependency-ordered implementation subtasks that can each be semantically verified and independently build-checked.",
   "Every subtask must require a real code/file mutation. Do NOT create a verification-only final node; parent task verification runs after the graph.",
   "Prefer 2-5 subtasks for multi-surface work. Use one subtask only when the task is truly atomic.",
   "Subtask scope must be a strict subset of the parent allowedScope. Never add paths not permitted by parent allowedScope and never include forbiddenScope.",
   "For scope values, copy exact path entries from parent allowedScope whenever possible. Do not invent broader directory wildcards such as App/** or Scripts/**.",
   "Preserve existing APIs unless the task explicitly requires breaking/replacing them. For primitivePatch work, prefer surgical extension over rewrites.",
   "Order dependencies so data/model foundations precede wiring and wiring precedes UI.",
-  "Verification is a short intent description for that node; deterministic build_check is still mandatory after every node.",
+  "Every node MUST include verification_contract. It is deterministic, not prose: either {type:'source', assertions:[{path,contains:'exact required text'}]} or {type:'command',command:'node Scripts/test.mjs',expectedOutput:'marker'}. Source assertion paths and command scripts must be inside that node scope. Deterministic build_check is still mandatory after every node.",
   "Do not include raw user data. Return only JSON matching the schema.",
 ].join("\n");
 
@@ -675,7 +702,7 @@ const artifact = {
       depends_on: node.depends_on,
       scope: node.scope,
       expected_result: node.expected_result,
-      verification: node.verification,
+      verification_contract: node.verification_contract,
     })),
     scope_repairs: validated.scopeRepairs,
     findings: [],
