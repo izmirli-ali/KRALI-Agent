@@ -170,7 +170,8 @@ CLINE_BIN="$(command -v cline || true)"
 PROVIDER="${KRALI_DEV_PROVIDER:-ollama}"
 MODEL="${KRALI_DEV_MODEL:-}"
 LOCAL_AGENT_ENGINE="${KRALI_LOCAL_AGENT_ENGINE:-native-ollama}"
-OLLAMA_BASE_URL="${KRALI_OLLAMA_BASE_URL:-http://127.0.0.1:11434}"
+LOCAL_OLLAMA_BASE_URL="${KRALI_LOCAL_OLLAMA_BASE_URL:-${KRALI_OLLAMA_BASE_URL:-http://127.0.0.1:11434}}"
+OLLAMA_BASE_URL="$LOCAL_OLLAMA_BASE_URL"
 CLINE_SETTINGS="${CLINE_PROVIDER_SETTINGS_PATH:-$HOME/.cline/data/settings/providers.json}"
 USE_SDK_FALLBACK=0
 SDK_HOST="$STATUS_DIR/cline-sdk-host"
@@ -191,6 +192,13 @@ CLOUDFLARE_KEYCHAIN_SERVICE="KRALI Cloudflare Workers AI"
 CLOUDFLARE_KEYCHAIN_ACCOUNT="api-token"
 REMOTE_MAIN_ALIAS="cloudflare-main"
 REMOTE_JSON_ALIAS="cloudflare-json"
+REMOTE_CIRCUIT_OPEN=0
+REMOTE_CIRCUIT_REASON=""
+PROVIDER_FAILOVER_BLOCKED=0
+LOCAL_FALLBACK_READY=0
+LOCAL_FALLBACK_MODEL=""
+LOCAL_FALLBACK_CONTROLLER_MODEL=""
+LOCAL_FALLBACK_REASON=""
 
 load_openai_teacher_key() {
     [ "$OPENAI_TEACHER_ENABLED" = "1" ] || return 1
@@ -878,6 +886,129 @@ prepare_ollama_runtime() {
 
     write_status "local_ai_ready|Ücretsiz yerel Developer AI hazır ve tool-call doğrulandı: $MODEL"
     echo "✅ Yerel Developer AI hazır + tool-call doğrulandı: $MODEL" | tee -a "$LOG"
+    return 0
+}
+
+probe_existing_local_tool_model() {
+    local candidate="$1"
+
+    KRALI_OLLAMA_BASE_URL="$LOCAL_OLLAMA_BASE_URL" \
+    KRALI_DEV_MODEL="$candidate" \
+        "$NODE_BIN" "$ROOT/Scripts/ollama-tool-probe.mjs" >>"$LOG" 2>&1
+}
+
+probe_existing_local_controller_model() {
+    local candidate="$1"
+
+    KRALI_OLLAMA_BASE_URL="$LOCAL_OLLAMA_BASE_URL" \
+    KRALI_CONTROLLER_PROBE_MODEL="$candidate" \
+    KRALI_CONTROLLER_PROBE_TIMEOUT_MS="$CONTROLLER_PROBE_TIMEOUT_MS" \
+        "$NODE_BIN" "$ROOT/Scripts/ollama-controller-probe.mjs" >>"$LOG" 2>&1
+}
+
+prepare_existing_local_fallback() {
+    if [ "$LOCAL_FALLBACK_READY" -eq 1 ]; then
+        return 0
+    fi
+
+    LOCAL_FALLBACK_REASON=""
+    local local_ollama
+    local_ollama="$(command -v ollama || true)"
+
+    if [ -z "$local_ollama" ]; then
+        LOCAL_FALLBACK_REASON="ollama-missing"
+        return 1
+    fi
+
+    if ! /usr/bin/curl -fsS "$LOCAL_OLLAMA_BASE_URL/api/tags" >/dev/null 2>&1; then
+        LOCAL_FALLBACK_REASON="ollama-service-not-running"
+        return 1
+    fi
+
+    local tool_candidates=(
+        "qwen2.5-coder:7b-instruct"
+        "qwen3:8b"
+        "qwen2.5-coder:14b-instruct"
+        "devstral-small-2:24b"
+        "devstral:24b"
+        "qwen3-coder:30b"
+    )
+
+    local candidate
+    for candidate in "${tool_candidates[@]}"; do
+        if "$local_ollama" show "$candidate" >/dev/null 2>&1 &&
+           probe_existing_local_tool_model "$candidate"; then
+            LOCAL_FALLBACK_MODEL="$candidate"
+            break
+        fi
+    done
+
+    if [ -z "$LOCAL_FALLBACK_MODEL" ]; then
+        LOCAL_FALLBACK_REASON="no-installed-tool-capable-model"
+        return 1
+    fi
+
+    local controller_candidates=(
+        "qwen2.5-coder:7b-instruct"
+        "qwen3:8b"
+        "$LOCAL_FALLBACK_MODEL"
+    )
+    local seen="|"
+
+    for candidate in "${controller_candidates[@]}"; do
+        [ -n "$candidate" ] || continue
+        if [[ "$seen" == *"|$candidate|"* ]]; then
+            continue
+        fi
+        seen="${seen}$candidate|"
+
+        if "$local_ollama" show "$candidate" >/dev/null 2>&1 &&
+           probe_existing_local_controller_model "$candidate"; then
+            LOCAL_FALLBACK_CONTROLLER_MODEL="$candidate"
+            break
+        fi
+    done
+
+    if [ -z "$LOCAL_FALLBACK_CONTROLLER_MODEL" ]; then
+        LOCAL_FALLBACK_REASON="no-installed-structured-controller-model"
+        return 1
+    fi
+
+    LOCAL_FALLBACK_READY=1
+    LOCAL_FALLBACK_REASON=""
+    echo "✅ Side-effect-free local fallback hazır • main=$LOCAL_FALLBACK_MODEL • controller=$LOCAL_FALLBACK_CONTROLLER_MODEL" | tee -a "$LOG"
+    return 0
+}
+
+activate_local_fallback() {
+    local reason="$1"
+
+    if [ "$REMOTE_CIRCUIT_OPEN" -eq 1 ] &&
+       [ "$LOCAL_FALLBACK_READY" -eq 1 ]; then
+        return 0
+    fi
+
+    REMOTE_CIRCUIT_OPEN=1
+    REMOTE_CIRCUIT_REASON="$reason"
+
+    echo "⚡ Remote provider circuit breaker açıldı • reason=$reason" | tee -a "$LOG"
+
+    if ! prepare_existing_local_fallback; then
+        PROVIDER_FAILOVER_BLOCKED=1
+        write_status "provider_failover_unavailable|Cloudflare devre dışı • local fallback hazır değil: $LOCAL_FALLBACK_REASON • otomatik install/start/pull yapılmadı|$BRANCH|$WORKTREE"
+        echo "⛔ Local fallback kullanılamıyor: $LOCAL_FALLBACK_REASON • otomatik sistem değişikliği yapılmadı." | tee -a "$LOG"
+        return 1
+    fi
+
+    cleanup_remote_proxy
+    OLLAMA_BASE_URL="$LOCAL_OLLAMA_BASE_URL"
+    MODEL="$LOCAL_FALLBACK_MODEL"
+    CONTROLLER_MODEL="$LOCAL_FALLBACK_CONTROLLER_MODEL"
+    REMOTE_PROVIDER_MODE=0
+    REMOTE_PROVIDER_NAME="local-ollama-fallback"
+
+    write_status "local_fallback_active|Cloudflare circuit breaker sonrası mevcut local Ollama aktif • main=$MODEL • controller=$CONTROLLER_MODEL|$BRANCH|$WORKTREE"
+    echo "🛟 Local fallback aktif • main=$MODEL • controller=$CONTROLLER_MODEL" | tee -a "$LOG"
     return 0
 }
 
