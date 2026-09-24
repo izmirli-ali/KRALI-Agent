@@ -1,1 +1,1 @@
-local_agent_running|Learning Suggestions Foundation (developer.task.learning-suggestions-foundation) yerel model çalışıyor • adım 4/14|krali-dev-agent/20260924-100755|/Users/medusa/Developer/KRALI-Agent-Dev-20260924-100755|@meta|app=0.10.41|at=1790233992|run=20260924-100755
+local_agent_watchdog_timeout|Learning Suggestions Foundation (developer.task.learning-suggestions-foundation) native local agent toplam zaman sınırına ulaştı.|krali-dev-agent/20260924-100755|/Users/medusa/Developer/KRALI-Agent-Dev-20260924-100755|@meta|app=0.10.41|at=1790234307|run=20260924-100755
