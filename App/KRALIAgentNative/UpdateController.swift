@@ -9,6 +9,7 @@ final class UpdateController: ObservableObject {
     @Published var isChecking = false
     @Published var isLaunchingUpdate = false
     @Published var statusText = "KRALİ aktif"
+    @Published var updateChannel: String?
 
     private let rootURL = FileManager.default.homeDirectoryForCurrentUser
         .appendingPathComponent("Developer/KRALI-Agent", isDirectory: true)
@@ -39,61 +40,147 @@ final class UpdateController: ObservableObject {
         statusText = "Güncelleme kontrol ediliyor…"
 
         let root = rootURL
+        let installedVersion = currentVersion
+        let installedSourceRevision = currentSourceRevision()
 
         Task {
             do {
                 let result = try await Task.detached(priority: .userInitiated) {
-                    try Self.run(
+                    let branch = try Self.run(
                         executable: "/usr/bin/git",
-                        arguments: ["-C", root.path, "fetch", "origin", "main"]
-                    )
-
-                    let local = try Self.run(
-                        executable: "/usr/bin/git",
-                        arguments: ["-C", root.path, "rev-parse", "HEAD"]
-                    ).trimmingCharacters(in: .whitespacesAndNewlines)
-
-                    let remote = try Self.run(
-                        executable: "/usr/bin/git",
-                        arguments: ["-C", root.path, "rev-parse", "origin/main"]
-                    ).trimmingCharacters(in: .whitespacesAndNewlines)
-
-                    let remoteVersion = try Self.run(
-                        executable: "/usr/bin/git",
-                        arguments: ["-C", root.path, "show", "origin/main:VERSION"]
+                        arguments: ["-C", root.path, "branch", "--show-current"]
                     )
                     .trimmingCharacters(in: .whitespacesAndNewlines)
 
+                    let upstream = (
+                        try? Self.run(
+                            executable: "/usr/bin/git",
+                            arguments: [
+                                "-C", root.path,
+                                "rev-parse",
+                                "--abbrev-ref",
+                                "--symbolic-full-name",
+                                "@{u}"
+                            ]
+                        )
+                        .trimmingCharacters(in: .whitespacesAndNewlines)
+                    )
+
+                    let upstreamRef: String
+                    if let upstream, !upstream.isEmpty {
+                        upstreamRef = upstream
+                    } else if !branch.isEmpty {
+                        upstreamRef = "origin/" + branch
+                    } else {
+                        upstreamRef = "origin/main"
+                    }
+
+                    let remoteBranch =
+                        upstreamRef.hasPrefix("origin/")
+                        ? String(upstreamRef.dropFirst("origin/".count))
+                        : branch
+
+                    if !remoteBranch.isEmpty {
+                        _ = try Self.run(
+                            executable: "/usr/bin/git",
+                            arguments: [
+                                "-C", root.path,
+                                "fetch", "origin", remoteBranch
+                            ]
+                        )
+                    }
+
+                    let remoteVersion = try Self.run(
+                        executable: "/usr/bin/git",
+                        arguments: [
+                            "-C", root.path,
+                            "show", upstreamRef + ":VERSION"
+                        ]
+                    )
+                    .trimmingCharacters(in: .whitespacesAndNewlines)
+
+                    let versionIsNewer =
+                        Self.isVersion(
+                            remoteVersion,
+                            newerThan: installedVersion
+                        )
+
+                    var relevantCodeIsNewer = false
+
+                    if let installedSourceRevision,
+                       !installedSourceRevision.isEmpty,
+                       !installedSourceRevision.hasSuffix("-dirty") {
+                        let sourceExists = Self.runStatus(
+                            executable: "/usr/bin/git",
+                            arguments: [
+                                "-C", root.path,
+                                "cat-file", "-e",
+                                installedSourceRevision + "^{commit}"
+                            ]
+                        ) == 0
+
+                        let remoteDescendsFromSource =
+                            sourceExists &&
+                            Self.runStatus(
+                                executable: "/usr/bin/git",
+                                arguments: [
+                                    "-C", root.path,
+                                    "merge-base",
+                                    "--is-ancestor",
+                                    installedSourceRevision,
+                                    upstreamRef
+                                ]
+                            ) == 0
+
+                        if remoteDescendsFromSource {
+                            let diffStatus = Self.runStatus(
+                                executable: "/usr/bin/git",
+                                arguments: [
+                                    "-C", root.path,
+                                    "diff", "--quiet",
+                                    installedSourceRevision,
+                                    upstreamRef,
+                                    "--",
+                                    "App",
+                                    "Scripts",
+                                    "VERSION"
+                                ]
+                            )
+
+                            relevantCodeIsNewer =
+                                diffStatus == 1
+                        }
+                    }
+
                     return (
-                        localDiffersFromRemote: local != remote,
-                        remoteVersion: remoteVersion
+                        upstreamRef: upstreamRef,
+                        remoteVersion: remoteVersion,
+                        versionIsNewer: versionIsNewer,
+                        relevantCodeIsNewer: relevantCodeIsNewer
                     )
                 }.value
 
                 remoteVersion = result.remoteVersion
-
-                let installedVersionDiffers =
-                    !result.remoteVersion.isEmpty &&
-                    result.remoteVersion != currentVersion
+                updateChannel = result.upstreamRef
 
                 updateAvailable =
-                    result.localDiffersFromRemote ||
-                    installedVersionDiffers
+                    result.versionIsNewer ||
+                    result.relevantCodeIsNewer
 
-                if let failure = readFailureMarker(),
+                if updateAvailable,
+                   let failure = readFailureMarker(),
                    failure.version == result.remoteVersion {
-                    updateAvailable = true
                     statusText =
                         "v\(failure.version) kurulamadı • " +
                         failure.message
                 } else if updateAvailable {
-                    if let remoteVersion, !remoteVersion.isEmpty {
-                        statusText = "v\(remoteVersion) hazır"
-                    } else {
-                        statusText = "Güncelleme hazır"
-                    }
+                    statusText =
+                        "v\(result.remoteVersion) hazır • " +
+                        result.upstreamRef
                 } else {
-                    statusText = "v\(currentVersion) • Güncel"
+                    statusText =
+                        "v\(currentVersion) • Güncel • " +
+                        result.upstreamRef
                 }
             } catch {
                 updateAvailable = false
@@ -146,6 +233,51 @@ final class UpdateController: ObservableObject {
         }
     }
 
+    private func currentSourceRevision() -> String? {
+        guard let url = Bundle.main.url(
+            forResource: "KRALISourceRevision",
+            withExtension: "txt"
+        ),
+        let raw = try? String(
+            contentsOf: url,
+            encoding: .utf8
+        )
+        else {
+            return nil
+        }
+
+        let value = raw.trimmingCharacters(
+            in: .whitespacesAndNewlines
+        )
+
+        return value.isEmpty ? nil : value
+    }
+
+    nonisolated private static func isVersion(
+        _ candidate: String,
+        newerThan current: String
+    ) -> Bool {
+        let lhs = candidate
+            .split(separator: ".")
+            .map { Int($0) ?? 0 }
+        let rhs = current
+            .split(separator: ".")
+            .map { Int($0) ?? 0 }
+
+        let count = max(lhs.count, rhs.count)
+
+        for index in 0..<count {
+            let a = index < lhs.count ? lhs[index] : 0
+            let b = index < rhs.count ? rhs[index] : 0
+
+            if a != b {
+                return a > b
+            }
+        }
+
+        return false
+    }
+
     private func readFailureMarker()
         -> (version: String, message: String)? {
         guard
@@ -183,28 +315,65 @@ final class UpdateController: ObservableObject {
         arguments: [String]
     ) throws -> String {
         let process = Process()
-        let pipe = Pipe()
+        let outputPipe = Pipe()
+        let errorPipe = Pipe()
 
         process.executableURL = URL(fileURLWithPath: executable)
         process.arguments = arguments
-        process.standardOutput = pipe
-        process.standardError = pipe
+        process.standardOutput = outputPipe
+        process.standardError = errorPipe
 
         try process.run()
+
+        let outputData =
+            outputPipe.fileHandleForReading
+                .readDataToEndOfFile()
+        let errorData =
+            errorPipe.fileHandleForReading
+                .readDataToEndOfFile()
+
         process.waitUntilExit()
 
-        let data = pipe.fileHandleForReading.readDataToEndOfFile()
-        let output = String(data: data, encoding: .utf8) ?? ""
+        let output =
+            String(data: outputData, encoding: .utf8) ?? ""
+        let errorOutput =
+            String(data: errorData, encoding: .utf8) ?? ""
 
         guard process.terminationStatus == 0 else {
             throw NSError(
                 domain: "KRALIUpdater",
                 code: Int(process.terminationStatus),
-                userInfo: [NSLocalizedDescriptionKey: output]
+                userInfo: [
+                    NSLocalizedDescriptionKey:
+                        errorOutput.isEmpty
+                        ? output
+                        : errorOutput
+                ]
             )
         }
 
         return output
+    }
+
+    nonisolated private static func runStatus(
+        executable: String,
+        arguments: [String]
+    ) -> Int32 {
+        let process = Process()
+        process.executableURL = URL(
+            fileURLWithPath: executable
+        )
+        process.arguments = arguments
+        process.standardOutput = FileHandle.nullDevice
+        process.standardError = FileHandle.nullDevice
+
+        do {
+            try process.run()
+            process.waitUntilExit()
+            return process.terminationStatus
+        } catch {
+            return -1
+        }
     }
 
     nonisolated private static func shellQuote(_ value: String) -> String {
