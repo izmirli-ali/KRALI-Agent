@@ -132,3 +132,17 @@ Developer Agent remote-first çalışırken Cloudflare Workers AI quota/429 veya
 - Remote circuit breaker aynı run içinde tekrar remote provider'a dönmez. Sonraki yeni run remote-first provider'ı yeniden deneyebilir.
 - Local fallback endpoint varsayılan olarak `http://127.0.0.1:11434` kullanır ve `KRALI_LOCAL_OLLAMA_BASE_URL` ile ayrıca değiştirilebilir.
 
+## Local Execution Profile
+
+When Cloudflare failover activates an already-installed local Ollama model, KRALİ now uses a dedicated slow-model execution profile instead of remote inference budgets.
+
+- Local baseline decomposition uses compact task context, an 800-token planning budget and up to 210 seconds for a structured plan.
+- The decomposer timeout clamp allows up to 300 seconds for explicitly configured local profiles.
+- Local fallback controller selection tries known lightweight controllers first, then up to four already-installed models ordered by model size, and only then falls back to the coding model.
+- No model is installed or downloaded during this selection.
+- Local coding requests receive a 180-second base timeout; implementation requests may use up to 240 seconds and structured continuation up to 240 seconds.
+- Single-task local fallback watchdog is 15 minutes; Developer Task Graph local fallback watchdog is 25 minutes.
+- Local fallback reduces redundant inspection budget and allows only one request-timeout retry before escalation/continuation.
+- The local coding model is kept warm for 15 minutes and receives an 8K context cap to avoid repeated model reload/context expansion overhead.
+- The local system prompt explicitly prefers checkpoint evidence and immediate minimal mutation once required source evidence is satisfied.
+

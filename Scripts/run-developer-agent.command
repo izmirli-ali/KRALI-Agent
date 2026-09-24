@@ -906,6 +906,25 @@ probe_existing_local_controller_model() {
         "$NODE_BIN" "$ROOT/Scripts/ollama-controller-probe.mjs" >>"$LOG" 2>&1
 }
 
+list_existing_local_models_by_size() {
+    /usr/bin/curl -fsS "$LOCAL_OLLAMA_BASE_URL/api/tags" 2>/dev/null |
+    "$NODE_BIN" -e '
+let s="";
+process.stdin.on("data",d=>s+=d);
+process.stdin.on("end",()=>{
+  try {
+    const payload=JSON.parse(s);
+    const models=Array.isArray(payload.models)?payload.models:[];
+    const names=models
+      .filter(x=>x&&typeof x.name==="string")
+      .filter(x=>!/embed|embedding|nomic|bge|mxbai/i.test(x.name))
+      .sort((a,b)=>(Number(a.size)||0)-(Number(b.size)||0))
+      .map(x=>x.name);
+    process.stdout.write(names.join("\n"));
+  } catch {}
+});'
+}
+
 prepare_existing_local_fallback() {
     if [ "$LOCAL_FALLBACK_READY" -eq 1 ]; then
         return 0
@@ -951,7 +970,6 @@ prepare_existing_local_fallback() {
     local controller_candidates=(
         "qwen2.5-coder:7b-instruct"
         "qwen3:8b"
-        "$LOCAL_FALLBACK_MODEL"
     )
     local seen="|"
 
@@ -968,6 +986,43 @@ prepare_existing_local_fallback() {
             break
         fi
     done
+
+    if [ -z "$LOCAL_FALLBACK_CONTROLLER_MODEL" ]; then
+        local dynamic_controller_checks=0
+
+        while IFS= read -r candidate; do
+            [ -n "$candidate" ] || continue
+
+            if [ "$candidate" = "$LOCAL_FALLBACK_MODEL" ]; then
+                continue
+            fi
+
+            if [[ "$seen" == *"|$candidate|"* ]]; then
+                continue
+            fi
+            seen="${seen}$candidate|"
+
+            dynamic_controller_checks="$(( dynamic_controller_checks + 1 ))"
+
+            if "$local_ollama" show "$candidate" >/dev/null 2>&1 &&
+               probe_existing_local_controller_model "$candidate"; then
+                LOCAL_FALLBACK_CONTROLLER_MODEL="$candidate"
+                echo "⚡ Installed-model controller seçildi: $candidate" | tee -a "$LOG"
+                break
+            fi
+
+            if [ "$dynamic_controller_checks" -ge 4 ]; then
+                break
+            fi
+        done < <(list_existing_local_models_by_size)
+    fi
+
+    if [ -z "$LOCAL_FALLBACK_CONTROLLER_MODEL" ] &&
+       "$local_ollama" show "$LOCAL_FALLBACK_MODEL" >/dev/null 2>&1 &&
+       probe_existing_local_controller_model "$LOCAL_FALLBACK_MODEL"; then
+        LOCAL_FALLBACK_CONTROLLER_MODEL="$LOCAL_FALLBACK_MODEL"
+        echo "ℹ️ Hafif structured controller bulunamadı; coding modeli controller fallback olarak kullanılacak: $LOCAL_FALLBACK_MODEL" | tee -a "$LOG"
+    fi
 
     if [ -z "$LOCAL_FALLBACK_CONTROLLER_MODEL" ]; then
         LOCAL_FALLBACK_REASON="no-installed-structured-controller-model"
@@ -2158,10 +2213,21 @@ NODE
 fi
 
 run_baseline_decomposer_once() {
+    local decomposer_timeout_ms="70000"
+    local decomposer_compact="0"
+
+    if [ "$REMOTE_PROVIDER_NAME" = "local-ollama-fallback" ]; then
+        decomposer_timeout_ms="210000"
+        decomposer_compact="1"
+        echo "⚙️ Local decomposer profile • compact=1 • timeout=${decomposer_timeout_ms}ms • controller=$CONTROLLER_MODEL" | tee -a "$LOG"
+    fi
+
     KRALI_DEV_TASK_FILE="$DEV_TASK_FILE" \
     KRALI_TASK_DECOMPOSER_RESULT_FILE="$BASELINE_TASK_PLAN_RESULT" \
     KRALI_OLLAMA_BASE_URL="$OLLAMA_BASE_URL" \
     KRALI_DECOMPOSER_MODEL="$CONTROLLER_MODEL" \
+    KRALI_TASK_DECOMPOSER_TIMEOUT_MS="$decomposer_timeout_ms" \
+    KRALI_TASK_DECOMPOSER_COMPACT="$decomposer_compact" \
     KRALI_APP_VERSION="$(/bin/cat "$ROOT/VERSION" 2>/dev/null | /usr/bin/tr -d '[:space:]')" \
     KRALI_RUN_ID="$STAMP" \
         "$NODE_BIN" "$ROOT/Scripts/developer-task-decomposer.mjs" >>"$LOG" 2>&1
@@ -2294,6 +2360,54 @@ CLINE_RUN_STREAMED_TO_LOG=0
 CLINE_STARTED_AT="$(date +%s)"
 
 run_native_developer_agent_once() {
+    local agent_profile="default"
+    local agent_max_inspections="$([ "$LEARNING_PATH" = "primitivePatch" ] && echo 4 || echo 6)"
+    local agent_max_iterations="$(
+        if [ -n "$DEVELOPER_TASK_GRAPH_PLAN" ] && [ -f "$DEVELOPER_TASK_GRAPH_PLAN" ]; then
+            echo 32
+        elif [ "$LEARNING_PATH" = "primitivePatch" ]; then
+            echo 10
+        else
+            echo 16
+        fi
+    )"
+    local agent_hard_timeout_ms="$(
+        if [ -n "$DEVELOPER_TASK_GRAPH_PLAN" ] && [ -f "$DEVELOPER_TASK_GRAPH_PLAN" ]; then
+            echo 720000
+        else
+            echo 300000
+        fi
+    )"
+    local agent_request_timeout_ms="$([ "$LEARNING_PATH" = "primitivePatch" ] && echo 45000 || echo 60000)"
+    local agent_structured_timeout_ms="$([ "$LEARNING_PATH" = "primitivePatch" ] && echo 120000 || echo 60000)"
+    local agent_request_timeout_retries="2"
+
+    if [ "$REMOTE_PROVIDER_NAME" = "local-ollama-fallback" ]; then
+        agent_profile="local-fallback"
+        agent_max_inspections="$([ "$LEARNING_PATH" = "primitivePatch" ] && echo 3 || echo 4)"
+        agent_max_iterations="$(
+            if [ -n "$DEVELOPER_TASK_GRAPH_PLAN" ] && [ -f "$DEVELOPER_TASK_GRAPH_PLAN" ]; then
+                echo 32
+            elif [ "$LEARNING_PATH" = "primitivePatch" ]; then
+                echo 12
+            else
+                echo 18
+            fi
+        )"
+        agent_hard_timeout_ms="$(
+            if [ -n "$DEVELOPER_TASK_GRAPH_PLAN" ] && [ -f "$DEVELOPER_TASK_GRAPH_PLAN" ]; then
+                echo 1500000
+            else
+                echo 900000
+            fi
+        )"
+        agent_request_timeout_ms="180000"
+        agent_structured_timeout_ms="240000"
+        agent_request_timeout_retries="1"
+
+        echo "⚙️ Local execution profile • inspections=$agent_max_inspections • iterations=$agent_max_iterations • request=${agent_request_timeout_ms}ms • structured=${agent_structured_timeout_ms}ms • total=${agent_hard_timeout_ms}ms" | tee -a "$LOG"
+    fi
+
     KRALI_WORKTREE="$WORKTREE" \
     KRALI_INFERENCE_MODE="$([ "$REMOTE_PROVIDER_MODE" -eq 1 ] && echo remote || echo local)" \
     KRALI_PROMPT_FILE="$PROMPT_FILE" \
@@ -2319,26 +2433,14 @@ run_native_developer_agent_once() {
     KRALI_REQUIRE_CHANGE="$([ "$GAP_MODE" = "gap" ] && echo 1 || echo 0)" \
     KRALI_LOCAL_AGENT_MAX_COMPLETION_REJECTIONS="$([ "$LEARNING_PATH" = "primitivePatch" ] && echo 2 || echo 3)" \
     KRALI_LOCAL_AGENT_MAX_STRUCTURED_ACTIONS="$([ "$LEARNING_PATH" = "primitivePatch" ] && echo 6 || echo 8)" \
-    KRALI_LOCAL_AGENT_MAX_INSPECTIONS="$([ "$LEARNING_PATH" = "primitivePatch" ] && echo 4 || echo 6)" \
-    KRALI_LOCAL_AGENT_MAX_ITERATIONS="$(
-        if [ -n "$DEVELOPER_TASK_GRAPH_PLAN" ] && [ -f "$DEVELOPER_TASK_GRAPH_PLAN" ]; then
-            echo 32
-        elif [ "$LEARNING_PATH" = "primitivePatch" ]; then
-            echo 10
-        else
-            echo 16
-        fi
-    )" \
+    KRALI_LOCAL_AGENT_MAX_INSPECTIONS="$agent_max_inspections" \
+    KRALI_LOCAL_AGENT_MAX_ITERATIONS="$agent_max_iterations" \
     KRALI_LOCAL_AGENT_MAX_IMPLEMENTATION_REJECTION_GRACE="$([ "$LEARNING_PATH" = "primitivePatch" ] && echo 4 || echo 2)" \
-    KRALI_LOCAL_AGENT_TIMEOUT_MS="$(
-        if [ -n "$DEVELOPER_TASK_GRAPH_PLAN" ] && [ -f "$DEVELOPER_TASK_GRAPH_PLAN" ]; then
-            echo 720000
-        else
-            echo 300000
-        fi
-    )" \
-    KRALI_LOCAL_AGENT_REQUEST_TIMEOUT_MS="$([ "$LEARNING_PATH" = "primitivePatch" ] && echo 45000 || echo 60000)" \
-    KRALI_LOCAL_AGENT_STRUCTURED_TIMEOUT_MS="$([ "$LEARNING_PATH" = "primitivePatch" ] && echo 120000 || echo 60000)" \
+    KRALI_LOCAL_AGENT_TIMEOUT_MS="$agent_hard_timeout_ms" \
+    KRALI_LOCAL_AGENT_REQUEST_TIMEOUT_MS="$agent_request_timeout_ms" \
+    KRALI_LOCAL_AGENT_STRUCTURED_TIMEOUT_MS="$agent_structured_timeout_ms" \
+    KRALI_LOCAL_AGENT_REQUEST_TIMEOUT_RETRIES="$agent_request_timeout_retries" \
+    KRALI_LOCAL_AGENT_PROFILE="$agent_profile" \
         "$NODE_BIN" "$ROOT/Scripts/ollama-developer-agent.mjs" \
             > >(tee -a "$CLINE_RUN_LOG" >>"$LOG") \
             2> >(tee -a "$CLINE_RUN_LOG" >>"$LOG" >&2)

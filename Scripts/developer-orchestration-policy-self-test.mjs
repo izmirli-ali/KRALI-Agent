@@ -154,6 +154,22 @@ assertContains(
   "provider-unavailable candidate recovery does not repeatedly call failed AI providers"
 );
 
+assertContains(
+  runner,
+  'agent_profile="local-fallback"',
+  "local provider failover receives a dedicated execution budget"
+);
+assertContains(
+  runner,
+  'decomposer_timeout_ms="210000"',
+  "local fallback decomposer receives slow-model timeout budget"
+);
+assertContains(
+  agent,
+  "LOCAL FALLBACK PERFORMANCE PROFILE",
+  "local fallback prompt discourages redundant inspections"
+);
+
 process.stdout.write(
   "developer_orchestration_policy_ok\n"
 );

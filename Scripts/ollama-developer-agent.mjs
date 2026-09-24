@@ -107,6 +107,10 @@ const structuredRequestTimeoutMs = Number(
 const maxRequestTimeoutRetries = Number(
   process.env.KRALI_LOCAL_AGENT_REQUEST_TIMEOUT_RETRIES || "2"
 );
+const executionProfile =
+  process.env.KRALI_LOCAL_AGENT_PROFILE || "default";
+const localFallbackProfile =
+  executionProfile === "local-fallback";
 const startedAt = Date.now();
 
 function fail(message, code = 20, state = "local_agent_failed") {
@@ -2233,7 +2237,10 @@ const systemPrompt = [
   "If a source change is required, use replace_text, write_file, or apply_patch instead of returning prose.",
   "A changed candidate may finish only after git_diff inspection and a successful build_check.",
   "Do not emit fake tool JSON in prose. Call tools through native function calling.",
-].join("\n");
+  localFallbackProfile
+    ? "LOCAL FALLBACK PERFORMANCE PROFILE: avoid redundant search/list calls. After the required targeted evidence is collected, mutate the smallest valid scope immediately; use checkpoint evidence instead of re-reading already verified files."
+    : "",
+].filter(Boolean).join("\n");
 
 const taskGraphContext =
   developerTaskGraphPromptContext();
@@ -2868,6 +2875,18 @@ function resumeCheckpointContext() {
 
 function effectiveRequestTimeoutMs() {
   const phase = developmentPhase();
+
+  if (localFallbackProfile) {
+    if (phase === "implementation") {
+      return Math.max(requestTimeoutMs, 240000);
+    }
+
+    if (phase === "verification") {
+      return Math.max(requestTimeoutMs, 180000);
+    }
+
+    return Math.max(requestTimeoutMs, 180000);
+  }
 
   if (phase === "implementation") {
     return Math.max(requestTimeoutMs, 120000);
@@ -8196,8 +8215,10 @@ for (
         stream: false,
         messages,
         tools: toolsForCurrentPhase(),
+        keep_alive: localFallbackProfile ? "15m" : undefined,
         options: {
           temperature: 0.1,
+          num_ctx: localFallbackProfile ? 8192 : undefined,
         },
       }),
     });
