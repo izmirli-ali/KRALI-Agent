@@ -382,6 +382,84 @@ struct AgentSelfDiagnosisExecutor {
             )
         }
 
+        let historicalVersions =
+            requestedHistoricalVersions(
+                from: userInput,
+                currentVersion: appVersion
+            )
+
+        for historicalVersion in
+            historicalVersions.prefix(2) {
+            guard let revision =
+                historicalRevision(
+                    for: historicalVersion,
+                    root: root
+                )
+            else {
+                warnings.append(
+                    "Historical source revision for v\(historicalVersion) could not be resolved from Git history."
+                )
+                continue
+            }
+
+            let historicalCandidates =
+                rankedHistoricalFiles(
+                    root: root,
+                    revision: revision,
+                    terms: terms
+                )
+
+            if historicalCandidates.isEmpty {
+                warnings.append(
+                    "Historical revision \(String(revision.prefix(12))) for v\(historicalVersion) had no relevant readable source evidence."
+                )
+            }
+
+            for candidate in
+                historicalCandidates.prefix(5) {
+                let snippet =
+                    bestSnippet(
+                        content: candidate.content,
+                        terms: terms
+                    )
+
+                guard
+                    !snippet.excerpt.isEmpty
+                else {
+                    continue
+                }
+
+                evidence.append(
+                    AgentSelfDiagnosisEvidence(
+                        id:
+                            "E\(evidence.count + 1)",
+                        kind:
+                            "historical_source",
+                        path:
+                            "git:" +
+                            String(
+                                revision.prefix(12)
+                            ) +
+                            ":" +
+                            candidate.relativePath,
+                        lineStart:
+                            snippet.lineStart,
+                        lineEnd:
+                            snippet.lineEnd,
+                        excerpt:
+                            "historicalVersion=v" +
+                            historicalVersion +
+                            "\nsourceRevision=" +
+                            revision +
+                            "\n" +
+                            snippet.excerpt,
+                        matchedTerms:
+                            candidate.matchedTerms
+                    )
+                )
+            }
+        }
+
         let sourceCandidates = rankedRepositoryFiles(
             root: root,
             terms: terms
@@ -432,7 +510,10 @@ struct AgentSelfDiagnosisExecutor {
         }
 
         if !evidence.contains(
-            where: { $0.kind == "source" }
+            where: {
+                $0.kind == "source" ||
+                $0.kind == "historical_source"
+            }
         ) {
             warnings.append(
                 "No relevant source-code evidence was discovered."
@@ -594,7 +675,8 @@ struct AgentSelfDiagnosisExecutor {
                 architectureInspected:
                     package.evidence
                         .filter {
-                            $0.kind == "source"
+                            $0.kind == "source" ||
+                            $0.kind == "historical_source"
                         }
                         .map(\.path),
                 evidence: package.evidence,
@@ -641,7 +723,8 @@ struct AgentSelfDiagnosisExecutor {
 
         let hasSourceEvidence =
             citedEvidence.contains {
-                $0.kind == "source"
+                $0.kind == "source" ||
+                $0.kind == "historical_source"
             }
 
         let hasFailureEvidence =
@@ -659,7 +742,10 @@ struct AgentSelfDiagnosisExecutor {
 
         let supportingSourceEvidence =
             citedEvidence.filter {
-                $0.kind == "source" &&
+                (
+                    $0.kind == "source" ||
+                    $0.kind == "historical_source"
+                ) &&
                 evidenceSupportsRootCause(
                     $0,
                     claim: causalClaimContext
@@ -872,10 +958,11 @@ struct AgentSelfDiagnosisExecutor {
                 excerptText.contains($0)
             }.count
 
-        if evidence.kind == "source" {
-            // Source code is responsible for proving the mechanism itself
-            // (for example, a dependency edge). Historical failure evidence
-            // separately proves that the mechanism actually blocked the run.
+        if evidence.kind == "source" ||
+           evidence.kind == "historical_source" {
+            // Current or historical source code proves the mechanism itself
+            // (for example, a dependency edge). Failure evidence separately
+            // proves that the mechanism actually blocked the run.
             return causalOverlapCount >= 1
         }
 
@@ -1043,6 +1130,279 @@ struct AgentSelfDiagnosisExecutor {
         let excerpt: String
         let score: Int
         let matchedTerms: [String]
+    }
+
+    private func requestedHistoricalVersions(
+        from input: String,
+        currentVersion: String
+    ) -> [String] {
+        let pattern =
+            #"\bv?([0-9]+\.[0-9]+\.[0-9]+)\b"#
+
+        guard
+            let regex =
+                try? NSRegularExpression(
+                    pattern: pattern
+                )
+        else {
+            return []
+        }
+
+        let range =
+            NSRange(
+                input.startIndex..<input.endIndex,
+                in: input
+            )
+
+        var versions: [String] = []
+        var seen = Set<String>()
+
+        for match in regex.matches(
+            in: input,
+            range: range
+        ) {
+            guard
+                match.numberOfRanges > 1,
+                let versionRange =
+                    Range(
+                        match.range(at: 1),
+                        in: input
+                    )
+            else {
+                continue
+            }
+
+            let version =
+                String(
+                    input[versionRange]
+                )
+
+            guard
+                version != currentVersion,
+                seen.insert(version).inserted
+            else {
+                continue
+            }
+
+            versions.append(version)
+        }
+
+        return versions
+    }
+
+    private func historicalRevision(
+        for version: String,
+        root: URL
+    ) -> String? {
+        let projectPath =
+            "App/KRALIAgentNative.xcodeproj/project.pbxproj"
+
+        guard
+            let rawLog =
+                git(
+                    [
+                        "log",
+                        "--all",
+                        "--format=%H",
+                        "--",
+                        projectPath
+                    ],
+                    root: root
+                )
+        else {
+            return nil
+        }
+
+        for revision in rawLog
+            .split(whereSeparator: {
+                $0.isWhitespace
+            })
+            .prefix(300)
+            .map(String.init) {
+            guard
+                let project =
+                    git(
+                        [
+                            "show",
+                            revision +
+                            ":" +
+                            projectPath
+                        ],
+                        root: root
+                    )
+            else {
+                continue
+            }
+
+            if project.contains(
+                "MARKETING_VERSION = " +
+                version +
+                ";"
+            ) {
+                return revision
+            }
+        }
+
+        return nil
+    }
+
+    private func rankedHistoricalFiles(
+        root: URL,
+        revision: String,
+        terms: [String]
+    ) -> [RankedFile] {
+        guard
+            let tracked =
+                git(
+                    [
+                        "ls-tree",
+                        "-r",
+                        "--name-only",
+                        revision,
+                        "--",
+                        "App",
+                        "Scripts"
+                    ],
+                    root: root
+                )
+        else {
+            return []
+        }
+
+        let trackedPaths =
+            tracked
+                .split(whereSeparator: {
+                    $0.isNewline
+                })
+                .map(String.init)
+
+        var candidates: [RankedFile] = []
+        var inspectedCount = 0
+
+        for relative in trackedPaths {
+            if inspectedCount >= 900 {
+                break
+            }
+
+            guard
+                !excludedPathPrefixes
+                    .contains(where: {
+                        relative.hasPrefix($0)
+                    }),
+                !relative.hasPrefix("Mentor/"),
+                allowedExtensions.contains(
+                    URL(
+                        fileURLWithPath:
+                            relative
+                    )
+                    .pathExtension
+                    .lowercased()
+                )
+            else {
+                continue
+            }
+
+            inspectedCount += 1
+
+            guard
+                let raw =
+                    git(
+                        [
+                            "show",
+                            revision +
+                            ":" +
+                            relative
+                        ],
+                        root: root
+                    ),
+                raw.utf8.count <= 550_000
+            else {
+                continue
+            }
+
+            let content =
+                String(
+                    raw.prefix(220_000)
+                )
+            let corpus =
+                normalized(content)
+            let pathCorpus =
+                normalized(relative)
+
+            var score = 0
+            var matched: [String] = []
+
+            for term in terms {
+                let normalizedTerm =
+                    normalized(term)
+
+                guard
+                    !normalizedTerm.isEmpty
+                else {
+                    continue
+                }
+
+                let pathHit =
+                    pathCorpus.contains(
+                        normalizedTerm
+                    )
+                let contentHits =
+                    occurrenceCount(
+                        normalizedTerm,
+                        in: corpus,
+                        limit: 8
+                    )
+
+                if pathHit ||
+                   contentHits > 0 {
+                    matched.append(term)
+                    score +=
+                        pathHit ? 9 : 0
+                    score +=
+                        min(
+                            contentHits,
+                            8
+                        ) * 2
+                }
+            }
+
+            score =
+                min(score, 120) +
+                causalArchitectureBonus(
+                    relativePath:
+                        relative,
+                    corpus:
+                        corpus,
+                    terms:
+                        terms
+                )
+
+            if score > 0 {
+                candidates.append(
+                    RankedFile(
+                        relativePath:
+                            relative,
+                        content:
+                            content,
+                        score:
+                            score,
+                        matchedTerms:
+                            Array(
+                                matched.prefix(12)
+                            )
+                    )
+                )
+            }
+        }
+
+        return candidates.sorted {
+            if $0.score == $1.score {
+                return $0.relativePath <
+                    $1.relativePath
+            }
+
+            return $0.score > $1.score
+        }
     }
 
     private func rankedRepositoryFiles(

@@ -2207,8 +2207,9 @@ actor AgentLocalIntelligence {
             - Yalnız verilen evidence üzerinde neden-sonuç analizi yap.
             - Root cause'u kanıtsız tahmin etme. Yetersiz kanıtta confidence LOW ve architecturalRootCause UNKNOWN kullan.
             - rootCauseEvidenceIDs yalnız verilen gerçek E-id değerlerinden oluşmalı.
-            - Root cause için en az bir source kanıtı ve bir failure kanıtı kullan.
-            - mission_input tek başına root cause kanıtı değildir; mümkünse diagnostic_history ile source evidence bağla.
+            - Root cause için en az bir source veya historical_source kanıtı ve bir failure kanıtı kullan.
+            - Hata geçmiş bir sürüme aitse historical_source, bugünkü source'tan daha doğrudan provenance sağlar; eski davranışı bugünkü koddan varsayma.
+            - mission_input tek başına root cause kanıtı değildir; mümkünse diagnostic_history ile source/historical_source evidence bağla.
             - Kullanıcı yeni capability istiyor diye yeni capability varsayma; önce mevcut mimarinin yeterli olup olmadığını değerlendir.
             - Proximate cause ile architectural root cause'u ayır.
             - Evidence yeterliyse en az iki uygulanabilir ve genellenebilir çözüm alternatifi üret.
@@ -2247,9 +2248,17 @@ actor AgentLocalIntelligence {
             ]
 
             let sourceIdentity = evidencePackage.sourceIdentity
-            let sourceEvidence = evidencePackage.evidence.filter {
-                $0.kind == "source"
-            }
+            let historicalSourceEvidence =
+                evidencePackage.evidence.filter {
+                    $0.kind == "historical_source"
+                }
+            let currentSourceEvidence =
+                evidencePackage.evidence.filter {
+                    $0.kind == "source"
+                }
+            let sourceEvidence =
+                historicalSourceEvidence +
+                currentSourceEvidence
             let diagnosticEvidence = evidencePackage.evidence.filter {
                 $0.kind == "diagnostic_history"
             }
