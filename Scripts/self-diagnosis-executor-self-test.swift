@@ -335,7 +335,7 @@ struct SelfDiagnosisExecutorSelfTest {
                 existingArchitecture:
                     "Planner -> graph -> runtime",
                 selectedStrategy:
-                    "Improve dependency feasibility",
+                    "Filter invalid dependency before execution",
                 expectedBehavior:
                     "Public research proceeds without unnecessary computer control.",
                 allowedScope: [
