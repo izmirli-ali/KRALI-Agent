@@ -4,6 +4,7 @@ import { spawnSync } from "node:child_process";
 import crypto from "node:crypto";
 import { validateSemanticVerificationContract, runSemanticVerification } from "./developer-node-semantic-verifier.mjs";
 import { createNodeExecutionState, nodeExecutionStateMatches, compactNodeExecutionState } from "./developer-node-execution-state.mjs";
+import { canAdvanceNode } from "./developer-orchestration-policy.mjs";
 
 const worktree = process.env.KRALI_WORKTREE || "";
 const promptFile = process.env.KRALI_PROMPT_FILE || "";
@@ -1320,10 +1321,7 @@ function maybeAdvanceDeveloperTaskGraph(
     !sawGitDiff ||
     !buildCheckPassed ||
     !current ||
-    !semanticVerificationEvidence ||
-    semanticVerificationEvidence.graphFingerprint !== developerTaskGraph.fingerprint ||
-    semanticVerificationEvidence.nodeID !== current.id ||
-    semanticVerificationEvidence.candidateFingerprint !== candidateFingerprint
+    !canAdvanceNode({ diffVerified: sawGitDiff, semanticEvidence: semanticVerificationEvidence, buildVerified: buildCheckPassed, graphFingerprint: developerTaskGraph?.fingerprint, nodeID: current?.id, candidateFingerprint })
   ) {
     return null;
   }

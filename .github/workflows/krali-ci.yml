@@ -42,6 +42,10 @@ jobs:
           node Scripts/provider-failover-self-test.mjs
           node Scripts/local-execution-profile-self-test.mjs
           node Scripts/scope-mutation-contract-self-test.mjs
+          node Scripts/developer-semantic-node-verification-self-test.mjs
+          node Scripts/developer-node-execution-state-self-test.mjs
+          node Scripts/developer-active-node-recovery-contract-self-test.mjs
+          node Scripts/developer-behavioral-orchestration-harness.mjs
 
       - name: Validate KRALI developer task cards
         shell: bash
