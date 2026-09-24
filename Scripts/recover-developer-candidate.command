@@ -8,7 +8,9 @@ STATUS_DIR="$(dirname "$STATUS")"
 NODE_BIN="${KRALI_NODE_BIN:-$(command -v node || true)}"
 REPAIR_MODEL="${KRALI_RECOVERY_MODEL:-}"
 DEV_TASK_FILE="${KRALI_DEV_TASK_FILE:-}"
+LEARNING_PATH="${KRALI_LEARNING_PATH:-integration}"
 MAX_REPAIR_ATTEMPTS="${KRALI_CANDIDATE_REPAIR_ATTEMPTS:-2}"
+SURFACE_GUARD_FAILED=0
 
 mkdir -p "$STATUS_DIR"
 mkdir -p "$(dirname "$LOG")"
@@ -108,8 +110,28 @@ REPAIR_PROMPT="$STATUS_DIR/candidate-repair-$RUN_ID.txt"
 
 run_candidate_build() {
     rm -f "$BUILD_LOG"
+    SURFACE_GUARD_FAILED=0
 
-    /bin/zsh "$WORKTREE/Scripts/build-check.command" "$WORKTREE" >"$BUILD_LOG" 2>&1
+    if [ -n "$NODE_BIN" ] &&
+       [ -x "$NODE_BIN" ] &&
+       [ -f "$ROOT/Scripts/developer-candidate-surface-guard.mjs" ]; then
+        KRALI_LEARNING_PATH="$LEARNING_PATH" \
+        KRALI_DEV_TASK_FILE="$DEV_TASK_FILE" \
+            "$NODE_BIN" "$ROOT/Scripts/developer-candidate-surface-guard.mjs" \
+                --root "$WORKTREE" \
+                ${DEV_TASK_FILE:+--task "$DEV_TASK_FILE"} >"$BUILD_LOG" 2>&1
+        GUARD_EXIT=$?
+
+        if [ "$GUARD_EXIT" -ne 0 ]; then
+            SURFACE_GUARD_FAILED=1
+            /bin/cat "$BUILD_LOG" >>"$LOG" 2>/dev/null || true
+            echo "⛔ Candidate surface guard reddetti; destructive/API-surface regression repair gerekli." | tee -a "$LOG"
+            rm -rf "$WORKTREE/.build-check"
+            return "$GUARD_EXIT"
+        fi
+    fi
+
+    /bin/zsh "$WORKTREE/Scripts/build-check.command" "$WORKTREE" >>"$BUILD_LOG" 2>&1
     BUILD_EXIT=$?
 
     /bin/cat "$BUILD_LOG" >>"$LOG" 2>/dev/null || true
@@ -150,7 +172,7 @@ candidate_diff_context() {
 
 build_error_context() {
     /bin/cat "$BUILD_LOG" 2>/dev/null |
-        /usr/bin/grep -Eai 'error:|fatal error:|SwiftCompile.*failed|BUILD FAILED|failed' |
+        /usr/bin/grep -Eai 'candidate_surface_regression|primitive_patch_|api_surface|error:|fatal error:|SwiftCompile.*failed|BUILD FAILED|failed' |
         /usr/bin/tail -n 80
 }
 
@@ -211,6 +233,8 @@ EOF
     KRALI_APP_VERSION="$(/bin/cat "$ROOT/VERSION" 2>/dev/null | /usr/bin/tr -d '[:space:]')" \
     KRALI_RUN_ID="$RUN_ID-repair-$ATTEMPT" \
     KRALI_CHECKPOINT_FILE="" \
+    KRALI_DEV_TASK_FILE="$DEV_TASK_FILE" \
+    KRALI_LEARNING_PATH="$LEARNING_PATH" \
     KRALI_REQUIRE_CHANGE="1" \
     KRALI_LOCAL_AGENT_MAX_COMPLETION_REJECTIONS="2" \
     KRALI_LOCAL_AGENT_MAX_STRUCTURED_ACTIONS="5" \
@@ -306,6 +330,11 @@ while [ "$ATTEMPT" -le "$MAX_REPAIR_ATTEMPTS" ]; do
 done
 
 rm -f "$BUILD_LOG" "$REPAIR_PROMPT"
+if [ "$SURFACE_GUARD_FAILED" -eq 1 ]; then
+    write_status "recovered_candidate_surface_regression|Candidate destructive/API-surface guard geçmedi; branch korundu ve main değiştirilmedi|$BRANCH|$WORKTREE"
+    echo "Recovered candidate surface regression remains; branch preserved: $BRANCH" >>"$LOG"
+    exit 30
+fi
 write_status "recovered_candidate_build_failed|Candidate repair sınırı doldu; branch korundu ve main değiştirilmedi|$BRANCH|$WORKTREE"
 echo "Recovered candidate repair limit reached; branch preserved: $BRANCH" >>"$LOG"
 exit 21
