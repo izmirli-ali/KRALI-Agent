@@ -392,7 +392,7 @@ struct AgentSelfDiagnosisExecutor {
 
             evidence.append(
                 AgentSelfDiagnosisEvidence(
-                    id: "E\\(evidence.count + 1)",
+                    id: "E\(evidence.count + 1)",
                     kind: "source",
                     path: candidate.relativePath,
                     lineStart: snippet.lineStart,
@@ -412,7 +412,7 @@ struct AgentSelfDiagnosisExecutor {
         for historical in historyEvidence.prefix(4) {
             evidence.append(
                 AgentSelfDiagnosisEvidence(
-                    id: "E\\(evidence.count + 1)",
+                    id: "E\(evidence.count + 1)",
                     kind: "diagnostic_history",
                     path: historical.path,
                     lineStart: nil,
