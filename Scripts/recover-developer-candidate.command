@@ -213,6 +213,8 @@ Güvenlik sözleşmesi:
 - Tek uygulama/marka adına hard-code ekleme.
 - Compiler/build hatasını susturmak için capability davranışını kaldırma veya doğrulamayı gevşetme.
 - Mevcut candidate yanlış bir yaklaşım ise onu düzelt veya geri al; build geçirmek tek başına yeterli amaç değildir.
+- Hata özetinde candidate_surface_regression / primitive_patch_* varsa önce kaldırılan mevcut type/API yüzeyini geri yükle; büyük rewrite'ı cilalamaya çalışma.
+- Primitive patch görevinde mevcut store/type/function sözleşmesini koru ve yalnız gerekli alan/davranışı cerrahi olarak genişlet.
 - Minimum generic değişiklik yap.
 - Değişiklikten sonra git_diff ve build_check kullan.
 - Gerçek build PASS olmadan tamamlandı deme.
