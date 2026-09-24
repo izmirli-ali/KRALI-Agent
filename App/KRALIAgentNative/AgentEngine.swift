@@ -1140,7 +1140,9 @@ final class AgentEngine: ObservableObject {
                         allowInteractiveEscalation:
                             false,
                         allowSnippetEvidence:
-                            false
+                            false,
+                        developmentFacet:
+                            facet
                     )
 
                 for result in
@@ -6709,7 +6711,9 @@ final class AgentEngine: ObservableObject {
     private func performWebResearch(
         query: String,
         allowInteractiveEscalation: Bool = true,
-        allowSnippetEvidence: Bool = true
+        allowSnippetEvidence: Bool = true,
+        developmentFacet:
+            AgentDevelopmentResearchFacet? = nil
     ) async -> String {
         webResearchStatus = "Web araştırılıyor…"
         log("Web Research başladı")
@@ -6717,7 +6721,12 @@ final class AgentEngine: ObservableObject {
         do {
             let report = try await webResearchService.search(
                 query,
-                limit: 5
+                limit:
+                    developmentFacet == nil
+                    ? 5
+                    : 8,
+                developmentFacet:
+                    developmentFacet
             )
 
             let evidence = await webSourceReader.read(
