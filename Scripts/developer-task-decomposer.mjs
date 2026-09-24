@@ -460,6 +460,15 @@ function selfTest() {
     forbiddenScope: ["Mentor/**"],
   };
 
+  const concreteTask = {
+    allowedScope: [
+      "App/Test.swift",
+      "App/Other.swift",
+      "Scripts/example-self-test.mjs",
+    ],
+    forbiddenScope: ["Mentor/**"],
+  };
+
   const good = {
     summary: "split",
     subtasks: [
@@ -513,10 +522,10 @@ function selfTest() {
   const checks = [
     validatePlan(good, task).ok === true,
     validatePlan(bad, task).ok === false,
-    validatePlan(repairable, task).ok === true,
-    validatePlan(repairable, task).scopeRepairs.length === 1,
-    validatePlan(repairable, task).nodes[0].scope.includes("App/Test.swift"),
-    validatePlan(repairable, task).nodes[0].scope.length === 1,
+    validatePlan(repairable, concreteTask).ok === true,
+    validatePlan(repairable, concreteTask).scopeRepairs.length === 1,
+    validatePlan(repairable, concreteTask).nodes[0].scope.includes("App/Test.swift"),
+    validatePlan(repairable, concreteTask).nodes[0].scope.length === 1,
     globToRegExp("App/**").test("App/Foo.swift"),
     !globToRegExp("App/**").test("Mentor/Foo.swift"),
     parseJSONContent('prefix {"summary":"x","subtasks":[]} suffix')
