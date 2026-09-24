@@ -15,7 +15,7 @@ assert "performWebResearch(" in engine
 assert "allowInteractiveEscalation:" in engine
 assert "synthesizeSelfDevelopmentResearch" in engine
 assert '"research.web"' in engine
-assert '"Mutation Started' in intel
+assert "Mutation Started: NO" in intel
 assert "repositoryEvidence" in intel
 assert "researchEvidence" in intel
 
