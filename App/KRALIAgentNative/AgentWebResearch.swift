@@ -79,6 +79,8 @@ actor AgentWebResearchService {
 
     private let session: URLSession
     private let queryPlanner = AgentResearchQueryPlanner()
+    private let developmentSourceClassifier =
+        AgentDevelopmentResearchSourceClassifier()
 
     init() {
         let configuration = URLSessionConfiguration.ephemeral
@@ -95,7 +97,9 @@ actor AgentWebResearchService {
 
     func search(
         _ rawQuery: String,
-        limit: Int = 5
+        limit: Int = 5,
+        developmentFacet:
+            AgentDevelopmentResearchFacet? = nil
     ) async throws -> WebResearchReport {
         let query = rawQuery.trimmingCharacters(
             in: .whitespacesAndNewlines
@@ -108,12 +112,17 @@ actor AgentWebResearchService {
         let safeLimit = max(2, min(limit, 8))
         let queryPlan = queryPlanner.plan(query)
         let variants = queryPlan.variants
-        let requiredCoverage = queryPlan.isEntityResearch
-            ? 1
-            : min(
-                2,
-                max(1, queryPlan.conceptGroups.count)
+        let requiredCoverage =
+            developmentFacet == nil
+            ? (
+                queryPlan.isEntityResearch
+                ? 1
+                : min(
+                    2,
+                    max(1, queryPlan.conceptGroups.count)
+                )
             )
+            : 1
 
         let minimumVariantsToSearch = queryPlan.isEntityResearch
             ? min(4, variants.count)
@@ -138,7 +147,9 @@ actor AgentWebResearchService {
                 conceptGroups: queryPlan.conceptGroups,
                 mandatoryConceptGroups: queryPlan.mandatoryConceptGroups,
                 preferredDomains: queryPlan.preferredDomains,
-                entityTerms: queryPlan.entityTerms
+                entityTerms: queryPlan.entityTerms,
+                developmentFacet:
+                    developmentFacet
             )
 
             if evaluation.mandatorySatisfied {
@@ -175,6 +186,8 @@ actor AgentWebResearchService {
                         mandatoryConceptGroups: queryPlan.mandatoryConceptGroups,
                         preferredDomains: queryPlan.preferredDomains,
                         entityTerms: queryPlan.entityTerms,
+                        developmentFacet:
+                            developmentFacet,
                         limit: safeLimit * 2
                     )
 
@@ -354,6 +367,8 @@ actor AgentWebResearchService {
         mandatoryConceptGroups: [[String]],
         preferredDomains: [String],
         entityTerms: [String],
+        developmentFacet:
+            AgentDevelopmentResearchFacet?,
         limit: Int
     ) -> [ScoredResult] {
         let raw: [WebResearchResult]
@@ -420,7 +435,9 @@ actor AgentWebResearchService {
                 conceptGroups: conceptGroups,
                 mandatoryConceptGroups: mandatoryConceptGroups,
                 preferredDomains: preferredDomains,
-                entityTerms: entityTerms
+                entityTerms: entityTerms,
+                developmentFacet:
+                    developmentFacet
             )
 
             guard evaluation.mandatorySatisfied else {
@@ -591,7 +608,9 @@ actor AgentWebResearchService {
         conceptGroups: [[String]],
         mandatoryConceptGroups: [[String]],
         preferredDomains: [String],
-        entityTerms: [String]
+        entityTerms: [String],
+        developmentFacet:
+            AgentDevelopmentResearchFacet? = nil
     ) -> (score: Int, coverage: Int, mandatorySatisfied: Bool) {
         let title = normalize(result.title)
         let domain = normalize(result.domain)
@@ -667,6 +686,32 @@ actor AgentWebResearchService {
 
         if title.count >= 20 {
             score += 1
+        }
+
+        if let developmentFacet {
+            let quality =
+                developmentSourceClassifier
+                    .assess(
+                        result,
+                        facet:
+                            developmentFacet
+                    )
+
+            if quality
+                .qualifiesForTechnicalCoverage {
+                score += 12
+            }
+
+            switch quality.tier {
+            case .a:
+                score += 10
+            case .b:
+                score += 6
+            case .c:
+                score += 1
+            case .d:
+                score -= 18
+            }
         }
 
         return (score, coverage, mandatorySatisfied)
