@@ -2212,7 +2212,9 @@ actor AgentLocalIntelligence {
             - Kullanıcı yeni capability istiyor diye yeni capability varsayma; önce mevcut mimarinin yeterli olup olmadığını değerlendir.
             - Proximate cause ile architectural root cause'u ayır.
             - Evidence yeterliyse en az iki uygulanabilir ve genellenebilir çözüm alternatifi üret.
+            - Root cause için seçtiğin source evidence, iddianın nedensel mekanizmasını gerçekten göstermeli; yalnız aynı kelimelerin geçmesi yeterli değildir.
             - Development proposal mutation emri değildir.
+            - PROHIBITED CAPABILITIES listesinde bulunan capability'leri çözüm, fallback, verification veya benchmark adımı olarak önerme.
             - Tek siteye veya tek senaryoya hard-code çözüm üretme.
             """
 
@@ -2327,6 +2329,13 @@ actor AgentLocalIntelligence {
 
                 QUERY TERMS
                 \(evidencePackage.queryTerms.prefix(budget.queryTermCount).joined(separator: ", "))
+
+                PROHIBITED CAPABILITIES
+                \(
+                    evidencePackage.prohibitedCapabilityIDs.isEmpty
+                    ? "none"
+                    : evidencePackage.prohibitedCapabilityIDs.joined(separator: ", ")
+                )
 
                 READ-ONLY EVIDENCE
                 \(compactEvidence)
