@@ -287,10 +287,18 @@ struct AgentCapabilityRegistry {
     func resolve(
         ids: [String]
     ) -> [AgentCapability] {
+        resolve(ids: ids, profile: .full)
+    }
+
+    func resolve(
+        ids: [String],
+        profile: AgentExecutionProfile
+    ) -> [AgentCapability] {
         var seen = Set<String>()
 
         return ids.compactMap { id in
             guard !seen.contains(id),
+                  !profile.isPaused(id),
                   let capability = all.first(
                     where: { $0.id == id }
                   ) else {
@@ -298,7 +306,7 @@ struct AgentCapabilityRegistry {
             }
 
             seen.insert(id)
-            return capability
+            return profile.applies(to: capability)
         }
     }
 
