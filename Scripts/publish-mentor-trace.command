@@ -64,7 +64,7 @@ echo "1/5  Diagnostics branch hazırlanıyor..."
 BASE_REF="HEAD"
 
 if git -C "$ROOT" ls-remote --exit-code --heads origin "refs/heads/$SYNC_BRANCH" >/dev/null 2>&1; then
-    if ! git -C "$ROOT" fetch origin "$SYNC_BRANCH:refs/remotes/origin/$SYNC_BRANCH"; then
+    if ! git -C "$ROOT" fetch origin "${SYNC_BRANCH}:refs/remotes/origin/${SYNC_BRANCH}"; then
         echo "❌ Diagnostics branch fetch başarısız."
         exit 12
     fi
