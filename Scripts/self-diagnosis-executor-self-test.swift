@@ -335,15 +335,21 @@ struct SelfDiagnosisExecutorSelfTest {
                 "causal architecture outranks noisy generic source"
             )
         }
-        expect(
+        let outcomePlannerExcerpt =
             sourceEvidence.first(
                 where: {
                     $0.path ==
                         "App/AgentOutcomePlanner.swift"
                 }
-            )?.excerpt.contains(
+            )?.excerpt ?? ""
+
+        expect(
+            outcomePlannerExcerpt.contains(
                 "research.web"
-            ) == true,
+            ) &&
+            outcomePlannerExcerpt.contains(
+                "retrievePublicInformation"
+            ),
             "causal snippet contains public research mechanism"
         )
         expect(
