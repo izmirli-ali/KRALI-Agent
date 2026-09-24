@@ -2173,11 +2173,16 @@ if [ -n "$DEV_TASK_FILE" ] && [ -f "$DEV_TASK_FILE" ]; then
     DECOMPOSER_EXIT=0
     run_baseline_decomposer_once || DECOMPOSER_EXIT=$?
 
-    if [ "$DECOMPOSER_EXIT" -eq 29 ] &&
+    if { [ "$DECOMPOSER_EXIT" -eq 29 ] || [ "$DECOMPOSER_EXIT" -eq 28 ]; } &&
        [ "$REMOTE_PROVIDER_MODE" -eq 1 ]; then
-        echo "⚡ Cloudflare structured controller quota/429 verdi; aynı run içinde local circuit-breaker fallback deneniyor." | tee -a "$LOG"
+        if [ "$DECOMPOSER_EXIT" -eq 29 ]; then
+            DECOMPOSER_FAILOVER_REASON="cloudflare-json-quota"
+        else
+            DECOMPOSER_FAILOVER_REASON="cloudflare-json-timeout"
+        fi
+        echo "⚡ Cloudflare structured controller quota/timeout verdi; aynı run içinde local circuit-breaker fallback deneniyor." | tee -a "$LOG"
 
-        if activate_local_fallback "cloudflare-json-quota"; then
+        if activate_local_fallback "$DECOMPOSER_FAILOVER_REASON"; then
             write_status "task_decomposing_local_fallback|$GAP_LABEL baseline decomposer mevcut local controller ile yeniden deneniyor|$BRANCH|$WORKTREE"
             rm -f "$BASELINE_TASK_PLAN_RESULT"
             DECOMPOSER_EXIT=0
@@ -2399,10 +2404,15 @@ if [ "$CLINE_EXIT" -ne 0 ] &&
    [ "$PROVIDER" = "ollama" ] &&
    [ "$LOCAL_AGENT_ENGINE" = "native-ollama" ] &&
    [ "$REMOTE_PROVIDER_MODE" -eq 1 ] &&
-   /usr/bin/grep -Eqi 'HTTP 429|status=429|daily free allocation|used up your daily|quota' "$CLINE_RUN_LOG" 2>/dev/null; then
-    echo "⚡ Cloudflare coding provider quota/429 verdi; remote circuit breaker açılıyor." | tee -a "$LOG"
+   /usr/bin/grep -Eqi 'HTTP 429|status=429|daily free allocation|used up your daily|quota|cloudflare_provider_transport\|timeout' "$CLINE_RUN_LOG" 2>/dev/null; then
+    if /usr/bin/grep -Eqi 'HTTP 429|status=429|daily free allocation|used up your daily|quota' "$CLINE_RUN_LOG" 2>/dev/null; then
+        AGENT_FAILOVER_REASON="cloudflare-main-quota"
+    else
+        AGENT_FAILOVER_REASON="cloudflare-main-timeout"
+    fi
+    echo "⚡ Cloudflare coding provider quota/timeout verdi; remote circuit breaker açılıyor." | tee -a "$LOG"
 
-    if activate_local_fallback "cloudflare-main-quota"; then
+    if activate_local_fallback "$AGENT_FAILOVER_REASON"; then
         write_status "local_fallback_retrying|$GAP_LABEL aynı worktree/checkpoint üzerinde local modelle devam ediyor|$BRANCH|$WORKTREE"
         echo "🛟 Aynı candidate/checkpoint local modelle yeniden başlatılıyor; yeni branch oluşturulmayacak." | tee -a "$LOG"
 
