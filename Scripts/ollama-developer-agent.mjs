@@ -28,6 +28,10 @@ const developerTaskPlanFile =
   process.env.KRALI_DEVELOPER_TASK_PLAN_FILE ||
   process.env.KRALI_TEACHER_PLAN_FILE ||
   "";
+const fallbackDeveloperTaskPlanFile =
+  process.env.KRALI_DEVELOPER_TASK_FALLBACK_PLAN_FILE || "";
+const surfaceGuardBase =
+  process.env.KRALI_SURFACE_GUARD_BASE || "";
 const devTaskFile =
   process.env.KRALI_DEV_TASK_FILE || "";
 const learningPath =
@@ -871,30 +875,36 @@ function validateDeveloperTaskGraphNodes(rawNodes) {
 }
 
 function loadDeveloperTaskGraph() {
-  if (!developerTaskPlanFile || !fs.existsSync(developerTaskPlanFile)) {
-    return null;
+  const candidates = [
+    developerTaskPlanFile,
+    fallbackDeveloperTaskPlanFile,
+  ].filter(Boolean);
+
+  for (const candidate of [...new Set(candidates)]) {
+    if (!fs.existsSync(candidate)) continue;
+
+    try {
+      const payload = JSON.parse(
+        fs.readFileSync(candidate, "utf8")
+      );
+      const nodes = validateDeveloperTaskGraphNodes(
+        payload?.review?.subtasks
+      );
+
+      if (!nodes) continue;
+
+      return {
+        fingerprint:
+          developerTaskGraphFingerprint(nodes),
+        nodes,
+        activeID: null,
+        completed: false,
+        sourceFile: candidate,
+      };
+    } catch {}
   }
 
-  try {
-    const payload = JSON.parse(
-      fs.readFileSync(developerTaskPlanFile, "utf8")
-    );
-    const nodes = validateDeveloperTaskGraphNodes(
-      payload?.review?.subtasks
-    );
-
-    if (!nodes) return null;
-
-    return {
-      fingerprint:
-        developerTaskGraphFingerprint(nodes),
-      nodes,
-      activeID: null,
-      completed: false,
-    };
-  } catch {
-    return null;
-  }
+  return null;
 }
 
 let developerTaskGraph =
@@ -1962,6 +1972,13 @@ function executeTool(name, args = {}) {
           guardArgs.push(
             "--task",
             devTaskFile
+          );
+        }
+
+        if (surfaceGuardBase) {
+          guardArgs.push(
+            "--base",
+            surfaceGuardBase
           );
         }
 
