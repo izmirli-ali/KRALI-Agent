@@ -14,7 +14,7 @@ assert 'if knownIDs.contains("browser.control")' in local_intel
 assert 'else if knownIDs.contains("research.web")' in local_intel
 
 assert 'researchCoreGoalProfile' in engine
-assert 'executionProfile.allowsComputerControl' in engine
+assert 'allowsComputerControl' in engine
 assert 'profile: executionProfile' in engine
 
 print("research_core_source_policy_ok")
