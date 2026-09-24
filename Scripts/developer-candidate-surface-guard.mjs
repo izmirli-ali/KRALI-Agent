@@ -13,6 +13,10 @@ const root = path.resolve(
 );
 const taskFile =
   argValue("--task") || process.env.KRALI_DEV_TASK_FILE || "";
+const baseRef =
+  argValue("--base") ||
+  process.env.KRALI_SURFACE_GUARD_BASE ||
+  "HEAD";
 
 function runGit(args) {
   return spawnSync("git", ["-C", root, ...args], {
@@ -176,7 +180,7 @@ function changedExistingFiles() {
     "diff",
     "--name-only",
     "--diff-filter=M",
-    "HEAD",
+    baseRef,
     "--",
   ]);
 
@@ -192,7 +196,7 @@ function numstat(file) {
   const result = runGit([
     "diff",
     "--numstat",
-    "HEAD",
+    baseRef,
     "--",
     file,
   ]);
@@ -215,7 +219,7 @@ function numstat(file) {
 }
 
 function sourceAtHead(file) {
-  const result = runGit(["show", "HEAD:" + file]);
+  const result = runGit(["show", baseRef + ":" + file]);
   return result.status === 0 ? String(result.stdout || "") : null;
 }
 
