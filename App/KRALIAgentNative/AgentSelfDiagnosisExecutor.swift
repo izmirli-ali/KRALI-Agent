@@ -108,11 +108,11 @@ struct AgentSelfDiagnosisReport: Codable, Hashable {
                 let range: String
                 if let start = item.lineStart,
                    let end = item.lineEnd {
-                    range = ":(start)-(end)"
+                    range = ":\(start)-\(end)"
                 } else {
                     range = ""
                 }
-                return "- [(item.id)] (item.path)(range)"
+                return "- [\(item.id)] \(item.path)\(range)"
             }
             .joined(separator: "\n")
 
@@ -126,13 +126,13 @@ struct AgentSelfDiagnosisReport: Codable, Hashable {
                     ? "belirtilmedi"
                     : item.risks.joined(separator: "; ")
                 return """
-                (index + 1). (item.title)
-                   - Avantaj: (advantages)
-                   - Risk: (risks)
-                   - Mimari etki: (item.architecturalImpact)
-                   - Genellenebilirlik: (item.generalizability)
-                   - Değişiklik büyüklüğü: (item.changeSize)
-                   - Test edilebilirlik: (item.testability)
+                \(index + 1). \(item.title)
+                   - Avantaj: \(advantages)
+                   - Risk: \(risks)
+                   - Mimari etki: \(item.architecturalImpact)
+                   - Genellenebilirlik: \(item.generalizability)
+                   - Değişiklik büyüklüğü: \(item.changeSize)
+                   - Test edilebilirlik: \(item.testability)
                 """
             }
             .joined(separator: "\n")
@@ -140,17 +140,17 @@ struct AgentSelfDiagnosisReport: Codable, Hashable {
         let proposalText: String
         if let proposal = developmentProposal {
             proposalText = """
-            Problem: (proposal.problem)
-            Evidence: (proposal.evidence.joined(separator: ", "))
-            Root Cause: (proposal.rootCause)
-            Existing Architecture: (proposal.existingArchitecture)
-            Selected Strategy: (proposal.selectedStrategy)
-            Expected Behavior: (proposal.expectedBehavior)
-            Allowed Scope: (proposal.allowedScope.joined(separator: ", "))
-            Risks: (proposal.risks.joined(separator: "; "))
-            Verification Contract: (proposal.verificationContract.joined(separator: "; "))
-            Behavioral Benchmark: (proposal.behavioralBenchmark.joined(separator: "; "))
-            Rollback Condition: (proposal.rollbackCondition)
+            Problem: \(proposal.problem)
+            Evidence: \(proposal.evidence.joined(separator: ", "))
+            Root Cause: \(proposal.rootCause)
+            Existing Architecture: \(proposal.existingArchitecture)
+            Selected Strategy: \(proposal.selectedStrategy)
+            Expected Behavior: \(proposal.expectedBehavior)
+            Allowed Scope: \(proposal.allowedScope.joined(separator: ", "))
+            Risks: \(proposal.risks.joined(separator: "; "))
+            Verification Contract: \(proposal.verificationContract.joined(separator: "; "))
+            Behavioral Benchmark: \(proposal.behavioralBenchmark.joined(separator: "; "))
+            Rollback Condition: \(proposal.rollbackCondition)
             """
         } else {
             proposalText =
@@ -171,47 +171,47 @@ struct AgentSelfDiagnosisReport: Codable, Hashable {
 
         return """
         **A. Failure Reconstruction**
-        (failureReconstruction)
+        \(failureReconstruction)
 
         **B. Root Cause**
-        Proximate Cause: (proximateCause)
+        Proximate Cause: \(proximateCause)
 
-        Architectural Root Cause: (architecturalRootCause)
+        Architectural Root Cause: \(architecturalRootCause)
 
-        Confidence: (confidence.rawValue)
-        Evidence IDs: (rootCauseEvidenceIDs.joined(separator: ", "))
+        Confidence: \(confidence.rawValue)
+        Evidence IDs: \(rootCauseEvidenceIDs.joined(separator: ", "))
 
         **C. Repository / Architecture Inspected**
-        Repo: (sourceIdentity.repositoryPath)
-        Repo HEAD: (sourceIdentity.repositoryHeadSHA ?? "unknown")
-        App source revision: (sourceIdentity.appSourceRevision ?? "unknown")
-        Exact revision match: (sourceIdentity.exactRevisionMatch ? "yes" : "no")
-        Working tree clean: (sourceIdentity.workingTreeClean ? "yes" : "no")
-        Architecture: (inspected)
+        Repo: \(sourceIdentity.repositoryPath)
+        Repo HEAD: \(sourceIdentity.repositoryHeadSHA ?? "unknown")
+        App source revision: \(sourceIdentity.appSourceRevision ?? "unknown")
+        Exact revision match: \(sourceIdentity.exactRevisionMatch ? "yes" : "no")
+        Working tree clean: \(sourceIdentity.workingTreeClean ? "yes" : "no")
+        Architecture: \(inspected)
 
         **D. Evidence**
-        (evidenceText.isEmpty ? "Kanıt toplanamadı." : evidenceText)
+        \(evidenceText.isEmpty ? "Kanıt toplanamadı." : evidenceText)
 
         **E. Existing Capability Assessment**
-        (assessment)
+        \(assessment)
 
         **F. Alternatives**
-        (alternativesText.isEmpty ? "Evidence-bound alternatif üretilemedi." : alternativesText)
+        \(alternativesText.isEmpty ? "Evidence-bound alternatif üretilemedi." : alternativesText)
 
         **G. Decision**
-        (decision)
+        \(decision)
 
         **H. Development Proposal**
-        (proposalText)
+        \(proposalText)
 
         **I. Mutation Started?**
         no
 
         **J. Stop Reason**
-        (stopReason)
+        \(stopReason)
 
         **K. Remaining Limitations**
-        (limitations)
+        \(limitations)
         """
     }
 }
@@ -392,7 +392,7 @@ struct AgentSelfDiagnosisExecutor {
 
             evidence.append(
                 AgentSelfDiagnosisEvidence(
-                    id: "E(evidence.count + 1)",
+                    id: "E\\(evidence.count + 1)",
                     kind: "source",
                     path: candidate.relativePath,
                     lineStart: snippet.lineStart,
@@ -412,7 +412,7 @@ struct AgentSelfDiagnosisExecutor {
         for historical in historyEvidence.prefix(4) {
             evidence.append(
                 AgentSelfDiagnosisEvidence(
-                    id: "E(evidence.count + 1)",
+                    id: "E\\(evidence.count + 1)",
                     kind: "diagnostic_history",
                     path: historical.path,
                     lineStart: nil,
