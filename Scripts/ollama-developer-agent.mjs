@@ -24,8 +24,20 @@ const branchName = process.env.KRALI_BRANCH || "";
 const gapLabel = process.env.KRALI_GAP_LABEL || "Capability";
 const appVersion = process.env.KRALI_APP_VERSION || "unknown";
 const runID = process.env.KRALI_RUN_ID || "";
-const teacherPlanFile =
-  process.env.KRALI_TEACHER_PLAN_FILE || "";
+const developerTaskPlanFile =
+  process.env.KRALI_DEVELOPER_TASK_PLAN_FILE ||
+  process.env.KRALI_TEACHER_PLAN_FILE ||
+  "";
+const fallbackDeveloperTaskPlanFile =
+  process.env.KRALI_DEVELOPER_TASK_FALLBACK_PLAN_FILE || "";
+const surfaceGuardBase =
+  process.env.KRALI_SURFACE_GUARD_BASE || "";
+const trustedSurfaceGuardScript =
+  process.env.KRALI_SURFACE_GUARD_SCRIPT || "";
+const devTaskFile =
+  process.env.KRALI_DEV_TASK_FILE || "";
+const learningPath =
+  process.env.KRALI_LEARNING_PATH || "integration";
 
 function parseStringArrayEnv(name) {
   try {
@@ -865,30 +877,36 @@ function validateDeveloperTaskGraphNodes(rawNodes) {
 }
 
 function loadDeveloperTaskGraph() {
-  if (!teacherPlanFile || !fs.existsSync(teacherPlanFile)) {
-    return null;
+  const candidates = [
+    developerTaskPlanFile,
+    fallbackDeveloperTaskPlanFile,
+  ].filter(Boolean);
+
+  for (const candidate of [...new Set(candidates)]) {
+    if (!fs.existsSync(candidate)) continue;
+
+    try {
+      const payload = JSON.parse(
+        fs.readFileSync(candidate, "utf8")
+      );
+      const nodes = validateDeveloperTaskGraphNodes(
+        payload?.review?.subtasks
+      );
+
+      if (!nodes) continue;
+
+      return {
+        fingerprint:
+          developerTaskGraphFingerprint(nodes),
+        nodes,
+        activeID: null,
+        completed: false,
+        sourceFile: candidate,
+      };
+    } catch {}
   }
 
-  try {
-    const payload = JSON.parse(
-      fs.readFileSync(teacherPlanFile, "utf8")
-    );
-    const nodes = validateDeveloperTaskGraphNodes(
-      payload?.review?.subtasks
-    );
-
-    if (!nodes) return null;
-
-    return {
-      fingerprint:
-        developerTaskGraphFingerprint(nodes),
-      nodes,
-      activeID: null,
-      completed: false,
-    };
-  } catch {
-    return null;
-  }
+  return null;
 }
 
 let developerTaskGraph =
@@ -1939,6 +1957,72 @@ function executeTool(name, args = {}) {
     }
 
     case "build_check": {
+      const surfaceGuard =
+        trustedSurfaceGuardScript ||
+        path.join(
+          root,
+          "Scripts",
+          "developer-candidate-surface-guard.mjs"
+        );
+
+      if (fs.existsSync(surfaceGuard)) {
+        const guardArgs = [
+          surfaceGuard,
+          "--root",
+          root,
+        ];
+
+        if (devTaskFile) {
+          guardArgs.push(
+            "--task",
+            devTaskFile
+          );
+        }
+
+        if (surfaceGuardBase) {
+          guardArgs.push(
+            "--base",
+            surfaceGuardBase
+          );
+        }
+
+        const guard = spawnSync(
+          process.execPath,
+          guardArgs,
+          {
+            cwd: root,
+            encoding: "utf8",
+            timeout: 30000,
+            maxBuffer: 4 * 1024 * 1024,
+            env: {
+              ...process.env,
+              KRALI_LEARNING_PATH: learningPath,
+            },
+          }
+        );
+
+        if (guard.status !== 0) {
+          const guardOutput =
+            String(guard.stdout || guard.stderr || "")
+              .trim()
+              .slice(0, 12000);
+
+          stage(
+            "local_agent_candidate_surface_regression",
+            gapLabel +
+              " candidate API/type surface guard tarafından reddedildi • " +
+              guardOutput.slice(0, 1800)
+          );
+
+          return {
+            ok: false,
+            exit_code: guard.status ?? 30,
+            error: "candidate_surface_regression",
+            output: guardOutput,
+          };
+        }
+      }
+
       const script = path.join(root, "Scripts", "build-check.command");
 
       if (!fs.existsSync(script)) {
@@ -8011,10 +8095,21 @@ await runRuntimeFailureBootstrapFastPath();
 await runVerifiedResumeFastPath();
 
 if (developerTaskGraph) {
+  const graphSource =
+    developerTaskGraph.sourceFile ===
+      fallbackDeveloperTaskPlanFile
+      ? "baseline-fallback"
+      : developerTaskGraph.sourceFile ===
+          developerTaskPlanFile
+        ? "selected"
+        : "unknown";
+
   stage(
     "local_agent_task_graph_ready",
     gapLabel +
-      " developer task graph hazır • nodes=" +
+      " developer task graph hazır • source=" +
+      graphSource +
+      " • nodes=" +
       developerTaskGraph.nodes.length +
       " • active=" +
       String(
@@ -8022,13 +8117,19 @@ if (developerTaskGraph) {
       )
   );
 } else if (
-  teacherPlanFile &&
-  fs.existsSync(teacherPlanFile)
+  (
+    developerTaskPlanFile &&
+    fs.existsSync(developerTaskPlanFile)
+  ) ||
+  (
+    fallbackDeveloperTaskPlanFile &&
+    fs.existsSync(fallbackDeveloperTaskPlanFile)
+  )
 ) {
   stage(
     "local_agent_task_graph_skipped",
     gapLabel +
-      " Teacher plan DAG/scope güvenlik doğrulamasını geçmedi; mevcut tek-task akışı korunuyor"
+      " Developer task plan DAG/scope güvenlik doğrulamasını geçmedi; mevcut tek-task akışı korunuyor"
   );
 }
 

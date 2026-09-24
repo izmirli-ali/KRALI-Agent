@@ -8,6 +8,8 @@ const phase = process.env.KRALI_TEACHER_PHASE || "plan";
 const worktree = process.env.KRALI_WORKTREE || "";
 const taskFile = process.env.KRALI_DEV_TASK_FILE || "";
 const resultFile = process.env.KRALI_TEACHER_RESULT_FILE || "";
+const baselinePlanFile =
+  process.env.KRALI_TEACHER_BASELINE_PLAN_FILE || "";
 const apiKey = process.env.KRALI_OPENAI_TEACHER_API_KEY || "";
 const model = process.env.KRALI_OPENAI_TEACHER_MODEL || "gpt-5.6-sol";
 const appVersion = process.env.KRALI_APP_VERSION || "unknown";
@@ -352,11 +354,19 @@ const taskMetadata =
     ? payload.taskMetadata
     : {};
 
+const baselinePlan =
+  phase === "plan" &&
+  baselinePlanFile &&
+  fs.existsSync(baselinePlanFile)
+    ? readJSON(baselinePlanFile)?.review || null
+    : null;
+
 const bundle = {
   appVersion,
   runID,
   phase,
   task,
+  baselinePlan,
   candidate: phase === "final"
     ? collectCandidate(taskMetadata)
     : null
@@ -367,7 +377,7 @@ const systemPrompt = [
   "You are advisory only. You have no tools and no authority to mutate files, run shell commands, approve external actions, merge branches, or bypass human approval.",
   "Review only the compact controlled-task package supplied by the orchestrator.",
   "Do not request the full repository or raw user messages.",
-  "For plan phase: decompose the task into the smallest dependency-ordered independently verifiable subtasks. Prefer narrow scopes and deterministic verification.",
+  "For plan phase: KRALI may already provide a baselinePlan. Review that plan as a senior architect. Preserve good decomposition, revise only where dependencies/scope/verification are weak, and return the complete improved subtask graph. If no baselinePlan exists, create one.",
   "For final phase: review the candidate diff for correctness, regressions, scope discipline, backward compatibility, safety, and whether tests actually prove the requested behavior.",
   "Do not provide hidden chain-of-thought. Return only the required structured review.",
   "Generalized lessons must describe reusable engineering principles, never copy raw task content."

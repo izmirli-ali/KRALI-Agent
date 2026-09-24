@@ -77,7 +77,7 @@ assertContains(
 assertContains(
   agent,
   "outside_active_subtask_scope",
-  "Teacher task graph narrows mutation scope per active subtask"
+  "Developer task graph narrows mutation scope per active subtask"
 );
 assertContains(
   agent,
@@ -91,8 +91,46 @@ assertContains(
 );
 assertContains(
   runner,
-  "KRALI_TEACHER_PLAN_FILE",
-  "Teacher plan is passed into native Developer Agent"
+  "KRALI_DEVELOPER_TASK_PLAN_FILE",
+  "Selected baseline/Teacher-reviewed plan is passed into native Developer Agent"
+);
+assertContains(
+  runner,
+  "developer-task-decomposer.mjs",
+  "controlled tasks receive KRALI baseline decomposition"
+);
+assertContains(
+  runner,
+  "KRALI_TEACHER_BASELINE_PLAN_FILE",
+  "OpenAI Teacher reviews KRALI baseline graph"
+);
+assertContains(
+  agent,
+  "developer-candidate-surface-guard.mjs",
+  "native build_check enforces destructive surface guard"
+);
+assertContains(
+  runner,
+  'KRALI_SURFACE_GUARD_SCRIPT="$ROOT/Scripts/developer-candidate-surface-guard.mjs"',
+  "native agent receives trusted main-repo surface guard path"
+);
+assertContains(
+  runner,
+  'KRALI_DEVELOPER_TASK_FALLBACK_PLAN_FILE="$BASELINE_TASK_PLAN_RESULT"',
+  "invalid Teacher graph falls back to KRALI baseline graph"
+);
+const recovery = read(
+  "Scripts/recover-developer-candidate.command"
+);
+assertContains(
+  recovery,
+  "RECOVERY_BASE_COMMIT",
+  "recovery surface guard compares against stable pre-candidate base"
+);
+assertContains(
+  recovery,
+  "KRALI_SURFACE_GUARD_BASE",
+  "repair agent inherits stable surface-guard base"
 );
 
 process.stdout.write(

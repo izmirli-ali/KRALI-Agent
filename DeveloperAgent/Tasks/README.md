@@ -98,3 +98,24 @@ OpenAI Teacher plan review geçerli bir `subtasks` DAG üretirse native Develope
 - Parent task'ın gerçek verification contract'ı graph tamamlandıktan sonra runner seviyesinde yine zorunludur.
 - Teacher planı yoksa veya DAG/scope doğrulaması geçmezse mevcut tek-task Developer Agent davranışı korunur.
 
+## Baseline Task Decomposer
+
+Controlled developer tasks no longer depend on OpenAI Teacher to obtain a task graph.
+
+1. KRALİ first runs `Scripts/developer-task-decomposer.mjs` against the existing structured controller model (remote `cloudflare-json` or the configured local controller).
+2. The decomposer returns a bounded DAG of 1–6 implementation subtasks. Every subtask has dependencies, a mutation scope, expected result and verification intent.
+3. Subtask scope cannot widen the parent task `allowedScope`, cannot enter `forbiddenScope`, and cycles/unknown dependencies are rejected.
+4. If OpenAI Teacher is configured, Teacher receives KRALİ's baseline graph and acts as a senior reviewer/refiner. Teacher is not the source of task authority.
+5. If the Teacher-reviewed graph is invalid, native Developer Agent falls back to the valid KRALİ baseline graph.
+6. If no valid graph can be produced, the existing single-task safety path remains available instead of inventing an unsafe plan.
+
+## Candidate Surface Guard
+
+`Scripts/developer-candidate-surface-guard.mjs` protects existing code/API surface before build.
+
+- For `primitivePatch` tasks, large destructive rewrites, removal of named Swift types, or material API/function surface drops are rejected before `build_check`.
+- The guard compares the candidate against the stable pre-candidate base commit, including recovery/repair runs.
+- New files are not treated as destructive rewrites; the guard focuses on modified existing code files.
+- An explicit registered task may opt into destructive change only with `taskMetadata.allowDestructiveChange=true`; this is not inferred by the model.
+- A failed guard produces `candidate_surface_regression`. Recovery may repair the candidate, but main is never changed automatically.
+

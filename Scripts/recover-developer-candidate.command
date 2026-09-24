@@ -8,7 +8,9 @@ STATUS_DIR="$(dirname "$STATUS")"
 NODE_BIN="${KRALI_NODE_BIN:-$(command -v node || true)}"
 REPAIR_MODEL="${KRALI_RECOVERY_MODEL:-}"
 DEV_TASK_FILE="${KRALI_DEV_TASK_FILE:-}"
+LEARNING_PATH="${KRALI_LEARNING_PATH:-integration}"
 MAX_REPAIR_ATTEMPTS="${KRALI_CANDIDATE_REPAIR_ATTEMPTS:-2}"
+SURFACE_GUARD_FAILED=0
 
 mkdir -p "$STATUS_DIR"
 mkdir -p "$(dirname "$LOG")"
@@ -72,6 +74,12 @@ echo "=== $(date) ===" >>"$LOG"
 echo "Recovering $BRANCH at $WORKTREE" >>"$LOG"
 
 CURRENT_BRANCH="$(git -C "$WORKTREE" branch --show-current 2>/dev/null || true)"
+RECOVERY_BASE_COMMIT="$(git -C "$WORKTREE" rev-parse HEAD 2>/dev/null || true)"
+if [ -z "$RECOVERY_BASE_COMMIT" ]; then
+    write_status "candidate_recovery_failed|Candidate base commit çözülemedi; otomatik kurtarma durduruldu|$BRANCH|$WORKTREE"
+    exit 31
+fi
+
 if [ "$CURRENT_BRANCH" != "$BRANCH" ]; then
     echo "Branch uyuşmazlığı: current=$CURRENT_BRANCH expected=$BRANCH" >>"$LOG"
     write_status "candidate_recovery_failed|Candidate worktree branch eşleşmedi; otomatik kurtarma durduruldu|$BRANCH|$WORKTREE"
@@ -108,8 +116,32 @@ REPAIR_PROMPT="$STATUS_DIR/candidate-repair-$RUN_ID.txt"
 
 run_candidate_build() {
     rm -f "$BUILD_LOG"
+    SURFACE_GUARD_FAILED=0
 
-    /bin/zsh "$WORKTREE/Scripts/build-check.command" "$WORKTREE" >"$BUILD_LOG" 2>&1
+    if [ -n "$NODE_BIN" ] &&
+       [ -x "$NODE_BIN" ] &&
+       [ -f "$ROOT/Scripts/developer-candidate-surface-guard.mjs" ]; then
+        SURFACE_GUARD_ARGS=(--root "$WORKTREE" --base "$RECOVERY_BASE_COMMIT")
+        if [ -n "$DEV_TASK_FILE" ] && [ -f "$DEV_TASK_FILE" ]; then
+            SURFACE_GUARD_ARGS+=(--task "$DEV_TASK_FILE")
+        fi
+
+        KRALI_LEARNING_PATH="$LEARNING_PATH" \
+        KRALI_DEV_TASK_FILE="$DEV_TASK_FILE" \
+            "$NODE_BIN" "$ROOT/Scripts/developer-candidate-surface-guard.mjs" \
+                "${SURFACE_GUARD_ARGS[@]}" >"$BUILD_LOG" 2>&1
+        GUARD_EXIT=$?
+
+        if [ "$GUARD_EXIT" -ne 0 ]; then
+            SURFACE_GUARD_FAILED=1
+            /bin/cat "$BUILD_LOG" >>"$LOG" 2>/dev/null || true
+            echo "⛔ Candidate surface guard reddetti; destructive/API-surface regression repair gerekli." | tee -a "$LOG"
+            rm -rf "$WORKTREE/.build-check"
+            return "$GUARD_EXIT"
+        fi
+    fi
+
+    /bin/zsh "$WORKTREE/Scripts/build-check.command" "$WORKTREE" >>"$BUILD_LOG" 2>&1
     BUILD_EXIT=$?
 
     /bin/cat "$BUILD_LOG" >>"$LOG" 2>/dev/null || true
@@ -150,7 +182,7 @@ candidate_diff_context() {
 
 build_error_context() {
     /bin/cat "$BUILD_LOG" 2>/dev/null |
-        /usr/bin/grep -Eai 'error:|fatal error:|SwiftCompile.*failed|BUILD FAILED|failed' |
+        /usr/bin/grep -Eai 'candidate_surface_regression|primitive_patch_|api_surface|error:|fatal error:|SwiftCompile.*failed|BUILD FAILED|failed' |
         /usr/bin/tail -n 80
 }
 
@@ -181,6 +213,8 @@ Güvenlik sözleşmesi:
 - Tek uygulama/marka adına hard-code ekleme.
 - Compiler/build hatasını susturmak için capability davranışını kaldırma veya doğrulamayı gevşetme.
 - Mevcut candidate yanlış bir yaklaşım ise onu düzelt veya geri al; build geçirmek tek başına yeterli amaç değildir.
+- Hata özetinde candidate_surface_regression / primitive_patch_* varsa önce kaldırılan mevcut type/API yüzeyini geri yükle; büyük rewrite'ı cilalamaya çalışma.
+- Primitive patch görevinde mevcut store/type/function sözleşmesini koru ve yalnız gerekli alan/davranışı cerrahi olarak genişlet.
 - Minimum generic değişiklik yap.
 - Değişiklikten sonra git_diff ve build_check kullan.
 - Gerçek build PASS olmadan tamamlandı deme.
@@ -211,6 +245,9 @@ EOF
     KRALI_APP_VERSION="$(/bin/cat "$ROOT/VERSION" 2>/dev/null | /usr/bin/tr -d '[:space:]')" \
     KRALI_RUN_ID="$RUN_ID-repair-$ATTEMPT" \
     KRALI_CHECKPOINT_FILE="" \
+    KRALI_DEV_TASK_FILE="$DEV_TASK_FILE" \
+    KRALI_LEARNING_PATH="$LEARNING_PATH" \
+    KRALI_SURFACE_GUARD_BASE="$RECOVERY_BASE_COMMIT" \
     KRALI_REQUIRE_CHANGE="1" \
     KRALI_LOCAL_AGENT_MAX_COMPLETION_REJECTIONS="2" \
     KRALI_LOCAL_AGENT_MAX_STRUCTURED_ACTIONS="5" \
@@ -306,6 +343,11 @@ while [ "$ATTEMPT" -le "$MAX_REPAIR_ATTEMPTS" ]; do
 done
 
 rm -f "$BUILD_LOG" "$REPAIR_PROMPT"
+if [ "$SURFACE_GUARD_FAILED" -eq 1 ]; then
+    write_status "recovered_candidate_surface_regression|Candidate destructive/API-surface guard geçmedi; branch korundu ve main değiştirilmedi|$BRANCH|$WORKTREE"
+    echo "Recovered candidate surface regression remains; branch preserved: $BRANCH" >>"$LOG"
+    exit 30
+fi
 write_status "recovered_candidate_build_failed|Candidate repair sınırı doldu; branch korundu ve main değiştirilmedi|$BRANCH|$WORKTREE"
 echo "Recovered candidate repair limit reached; branch preserved: $BRANCH" >>"$LOG"
 exit 21

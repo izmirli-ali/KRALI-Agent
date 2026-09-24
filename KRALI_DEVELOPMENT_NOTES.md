@@ -585,3 +585,17 @@ Target runtime:
 - Added dedicated Developer Task Graph CI self-test and orchestration invariant checks.
 - VERSION 0.10.39 / build 212.
 
+## v0.10.40 progress
+
+- Learning Suggestions v0.10.39 real run showed OpenAI Teacher was skipped because no Teacher API key existed; consequently no Teacher graph was produced and the old single-task path rewrote AgentLearningQueue.swift destructively (+66 / -620), breaking the existing queue/store API.
+- Added KRALİ Baseline Developer Task Decomposer. Controlled tasks are decomposed before OpenAI Teacher using the already configured structured controller model.
+- Baseline decomposition is strict JSON, bounded to 1–6 implementation subtasks, validates dependency DAGs and prevents subtask scopes from widening parent allowedScope or entering forbiddenScope.
+- OpenAI Teacher now reviews/refines the KRALİ baseline graph instead of being the graph's sole source.
+- Native Developer Agent receives a selected plan plus the baseline as fallback; an invalid Teacher-reviewed plan cannot eliminate a valid baseline graph.
+- Added Candidate Surface Guard. Primitive-patch candidates are blocked before build when they perform large destructive rewrites, remove existing named types, or materially collapse existing API/function surface.
+- Recovery captures the pre-candidate base commit before committing/pushing a candidate and uses that stable base through all bounded repair attempts, so the surface guard cannot be blinded by recovery commits.
+- Repair Agent receives candidate_surface_regression evidence and is instructed to restore removed API/type surface rather than polish a destructive rewrite.
+- Added recovered_candidate_surface_regression terminal/review state and planning activity states in AgentDeveloperBridge.
+- CI now self-tests baseline task decomposition and destructive candidate surface protection.
+- VERSION 0.10.40 / build 213.
+

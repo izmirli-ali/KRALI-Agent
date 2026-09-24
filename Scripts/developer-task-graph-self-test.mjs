@@ -36,7 +36,7 @@ const runner = read(
 requireText(
   agent,
   "validateDeveloperTaskGraphNodes",
-  "teacher subtasks are validated"
+  "developer subtasks are validated"
 );
 requireText(
   agent,
@@ -75,18 +75,28 @@ requireText(
 );
 requireText(
   runner,
-  'KRALI_TEACHER_PLAN_FILE="$OPENAI_TEACHER_PLAN_RESULT"',
-  "runner passes teacher plan file"
+  'KRALI_DEVELOPER_TASK_PLAN_FILE="$DEVELOPER_TASK_GRAPH_PLAN"',
+  "runner passes selected developer task plan"
+);
+requireText(
+  runner,
+  "developer-task-decomposer.mjs",
+  "KRALI baseline decomposer runs before Teacher"
+);
+requireText(
+  runner,
+  'DEVELOPER_TASK_GRAPH_PLAN="$BASELINE_TASK_PLAN_RESULT"',
+  "baseline graph works without Teacher"
 );
 requireText(
   runner,
   "echo 32",
-  "teacher graph receives expanded bounded iteration budget"
+  "developer graph receives expanded bounded iteration budget"
 );
 requireText(
   runner,
   "echo 720000",
-  "teacher graph receives expanded bounded watchdog"
+  "developer graph receives expanded bounded watchdog"
 );
 
 process.stdout.write(
