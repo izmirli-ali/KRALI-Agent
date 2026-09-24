@@ -1,50 +1,81 @@
 
 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
  KRALİ DEVELOPER AGENT
- 20260924-100755
+ 20260924-105527
 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 ⚠️ Global Node.js v26 Cline bağımlılıklarıyla uyumlu değil; izole Node 22 runtime hazırlanıyor.
 ✅ Developer Agent runtime: v22.23.2
-cloudflare_proxy_ready|127.0.0.1:28888|main=@cf/zai-org/glm-4.7-flash|json=@cf/meta/llama-3.3-70b-instruct-fp8-fast|transport=openai-chat-completions
+cloudflare_proxy_ready|127.0.0.1:30035|main=@cf/zai-org/glm-4.7-flash|json=@cf/meta/llama-3.3-70b-instruct-fp8-fast|transport=openai-chat-completions
 ☁️ Remote-first Developer AI hazır: Cloudflare Workers AI • main=@cf/zai-org/glm-4.7-flash • json=@cf/meta/llama-3.3-70b-instruct-fp8-fast
 ☁️ Yerel Ollama hazırlığı atlandı; Developer inference remote-first çalışacak.
 From https://github.com/izmirli-ali/KRALI-Agent
  * branch            main       -> FETCH_HEAD
 Already up to date.
 Kontrollü KRALİ Developer görevi bulundu; task kartı kullanılacak.
-Preparing worktree (new branch 'krali-dev-agent/20260924-100755')
-branch 'krali-dev-agent/20260924-100755' set up to track 'origin/main'.
-HEAD is now at 5154a5d v0.10.41: add Cloudflare-to-local provider resilience
+Preparing worktree (new branch 'krali-dev-agent/20260924-105527')
+branch 'krali-dev-agent/20260924-105527' set up to track 'origin/main'.
+HEAD is now at 9274ef9 v0.10.42: tune local fallback execution
 Developer prompt mode: gap • 6215 bytes
 ☁️ Structured controller remote: @cf/meta/llama-3.3-70b-instruct-fp8-fast
-cloudflare_provider_error|status=429|model=@cf/meta/llama-3.3-70b-instruct-fp8-fast|detail=[{"code":4006,"message":"AiError: AiError: you have used up your daily free allocation of 10,000 neurons, please upgrade to Cloudflare's Workers Paid plan if you would like to continue usage. (d037b32e-7358-4742-b224-9fb4bbdbb695)"}]
+♻️ Developer checkpoint bulundu; aynı gap teşhisi kaldığı yerden devam edecek: developer.task.learning-suggestions-foundation-4261e771ca64
+cloudflare_provider_error|status=429|model=@cf/meta/llama-3.3-70b-instruct-fp8-fast|detail=[{"code":4006,"message":"AiError: AiError: you have used up your daily free allocation of 10,000 neurons, please upgrade to Cloudflare's Workers Paid plan if you would like to continue usage. (ad925d37-cc3b-467e-8398-8148ca9a3f85)"}]
 developer_task_decomposer_failed|http-429
 ⚡ Cloudflare structured controller quota/timeout verdi; aynı run içinde local circuit-breaker fallback deneniyor.
 ⚡ Remote provider circuit breaker açıldı • reason=cloudflare-json-quota
 KRALI local tool probe: native tool_call görülmedi • text={"name": "krali_tool_probe", "arguments": {}}
 tool_call_ok|devstral-small-2:24b
-controller_probe_ok|devstral-small-2:24b|17443ms
-✅ Side-effect-free local fallback hazır • main=devstral-small-2:24b • controller=devstral-small-2:24b
-🛟 Local fallback aktif • main=devstral-small-2:24b • controller=devstral-small-2:24b
-developer_task_decomposer_failed|transport-timeout
+controller_probe_ok|qwen2.5-coder:14b-instruct|10933ms
+⚡ Installed-model controller seçildi: qwen2.5-coder:14b-instruct
+✅ Side-effect-free local fallback hazır • main=devstral-small-2:24b • controller=qwen2.5-coder:14b-instruct
+🛟 Local fallback aktif • main=devstral-small-2:24b • controller=qwen2.5-coder:14b-instruct
+⚙️ Local decomposer profile • compact=1 • timeout=210000ms • controller=qwen2.5-coder:14b-instruct
+developer_task_decomposer_failed|plan-validation:scope-outside-parent:App/KRALIAgentNative/**
 ⚠️ KRALİ baseline task decomposition üretilemedi; mevcut tek-task güvenli akış korunuyor.
 ℹ️ OpenAI Teacher atlandı • Keychain API anahtarı bulunamadı.
-🧠 Model rolleri: root-cause=devstral-small-2:24b • mutation=devstral-small-2:24b • controller=devstral-small-2:24b
+🧠 Model rolleri: root-cause=qwen2.5-coder:14b-instruct • mutation=devstral-small-2:24b • controller=qwen2.5-coder:14b-instruct
+⚙️ Local execution profile • inspections=3 • iterations=12 • request=180000ms • structured=240000ms • total=900000ms
+KRALI_LOCAL_STAGE local_agent_checkpoint_stale • Learning Suggestions Foundation (developer.task.learning-suggestions-foundation) checkpoint source provenance eski • recordedHead=5154a5d22dc4e4b80c011dd74f075000a0f643d6 • liveHead=9274ef90da404b96208a129d546954fb5848837c • source hedefleri yeniden doğrulanacak
 KRALI_LOCAL_STAGE local_agent_starting • Learning Suggestions Foundation (developer.task.learning-suggestions-foundation) native Ollama agent başlatılıyor: devstral-small-2:24b
-KRALI_LOCAL_STAGE local_agent_running • Learning Suggestions Foundation (developer.task.learning-suggestions-foundation) yerel model çalışıyor • adım 1/14
+KRALI_LOCAL_STAGE local_agent_running • Learning Suggestions Foundation (developer.task.learning-suggestions-foundation) yerel model çalışıyor • adım 1/16
 KRALI_LOCAL_STAGE local_agent_tool • Learning Suggestions Foundation (developer.task.learning-suggestions-foundation) araç çalışıyor: search_codebase
-KRALI_LOCAL_STAGE local_agent_running • Learning Suggestions Foundation (developer.task.learning-suggestions-foundation) yerel model çalışıyor • adım 2/14
-KRALI_LOCAL_STAGE local_agent_tool • Learning Suggestions Foundation (developer.task.learning-suggestions-foundation) araç çalışıyor: list_files
-KRALI_LOCAL_STAGE local_agent_running • Learning Suggestions Foundation (developer.task.learning-suggestions-foundation) yerel model çalışıyor • adım 3/14
+KRALI_LOCAL_STAGE local_agent_create_target_ready • Learning Suggestions Foundation (developer.task.learning-suggestions-foundation) mevcut izinli mutation hedefi bulunmadı • task allowedScope yeni dosya oluşturma contract'ı olarak kullanılacak • allow=["App/KRALIAgentNative/AgentEngine.swift","App/KRALIAgentNative/AgentLearningQueue.swift","App/KRALIAgentNative/AgentLearningStore.swift","App/KRALIAgentNative/AgentLearningSuggestionStore.swift","App/KRALIAgentNative.xcodeproj/project.pbxproj","Scripts/learning-suggestion-policy-self-test.mjs"]
 KRALI_LOCAL_STAGE local_agent_tool • Learning Suggestions Foundation (developer.task.learning-suggestions-foundation) araç çalışıyor: search_codebase
-KRALI_LOCAL_STAGE local_agent_running • Learning Suggestions Foundation (developer.task.learning-suggestions-foundation) yerel model çalışıyor • adım 4/14
-KRALI_LOCAL_STAGE local_agent_tool • Learning Suggestions Foundation (developer.task.learning-suggestions-foundation) araç çalışıyor: read_file
-KRALI_LOCAL_STAGE local_agent_implementation_phase • Learning Suggestions Foundation (developer.task.learning-suggestions-foundation) hedefli inspection kanıtı tamamlandı • implementation zorunlu • 4/4
-KRALI_LOCAL_STAGE local_agent_running • Learning Suggestions Foundation (developer.task.learning-suggestions-foundation) yerel model çalışıyor • adım 5/14
-KRALI_LOCAL_STAGE local_agent_request_retry • Learning Suggestions Foundation (developer.task.learning-suggestions-foundation) model isteği zaman aşımına uğradı; mevcut context korunarak retry 1/2
-Learning Suggestions Foundation (developer.task.learning-suggestions-foundation) native local agent toplam zaman sınırına ulaştı.
+KRALI_LOCAL_STAGE local_agent_implementation_required • Learning Suggestions Foundation (developer.task.learning-suggestions-foundation) tekrar/genel inspection reddedildi • implementation fazı aktif • search_codebase
+KRALI_LOCAL_STAGE local_agent_iteration_grace • Learning Suggestions Foundation (developer.task.learning-suggestions-foundation) implementation inspection reddi ana iteration bütçesinden düşülmedi • grace=1/4
+KRALI_LOCAL_STAGE local_agent_tool • Learning Suggestions Foundation (developer.task.learning-suggestions-foundation) araç çalışıyor: search_codebase
+KRALI_LOCAL_STAGE local_agent_implementation_required • Learning Suggestions Foundation (developer.task.learning-suggestions-foundation) tekrar/genel inspection reddedildi • implementation fazı aktif • search_codebase
+KRALI_LOCAL_STAGE local_agent_tool • Learning Suggestions Foundation (developer.task.learning-suggestions-foundation) araç çalışıyor: search_codebase
+KRALI_LOCAL_STAGE local_agent_implementation_required • Learning Suggestions Foundation (developer.task.learning-suggestions-foundation) tekrar/genel inspection reddedildi • implementation fazı aktif • search_codebase
+KRALI_LOCAL_STAGE local_agent_running • Learning Suggestions Foundation (developer.task.learning-suggestions-foundation) yerel model çalışıyor • adım 2/16
+KRALI_LOCAL_STAGE local_agent_controller_preparing • Learning Suggestions Foundation (developer.task.learning-suggestions-foundation) ana model belleği karar modeli için boşaltıldı • devstral-small-2:24b → qwen2.5-coder:14b-instruct
+KRALI_LOCAL_STAGE local_agent_controller_preparing • Learning Suggestions Foundation (developer.task.learning-suggestions-foundation) structured controller girdisi hazır • mode=general • problem=n/a • chars=868 • decisionModel=qwen2.5-coder:14b-instruct • role=controller
+KRALI_LOCAL_STAGE local_agent_replace_anchor_rejected • Learning Suggestions Foundation (developer.task.learning-suggestions-foundation) replace_text anchor doğrulanmadı • length=90 • occurrences=0 • copiedFromVerifiedRead=false • meaningfulChange=true • differsFromPreviousFailed=true • decisionModel=qwen2.5-coder:14b-instruct
+KRALI_LOCAL_STAGE local_agent_controller_preparing • Learning Suggestions Foundation (developer.task.learning-suggestions-foundation) ana model bellekte değil; karar modeli korunuyor • decisionModel=qwen2.5-coder:14b-instruct
+KRALI_LOCAL_STAGE local_agent_controller_preparing • Learning Suggestions Foundation (developer.task.learning-suggestions-foundation) structured controller girdisi hazır • mode=general • problem=n/a • chars=868 • decisionModel=qwen2.5-coder:14b-instruct • role=controller
+KRALI_LOCAL_STAGE local_agent_replace_anchor_rejected • Learning Suggestions Foundation (developer.task.learning-suggestions-foundation) replace_text anchor doğrulanmadı • length=83 • occurrences=0 • copiedFromVerifiedRead=false • meaningfulChange=true • differsFromPreviousFailed=true • decisionModel=qwen2.5-coder:14b-instruct
+KRALI_LOCAL_STAGE local_agent_controller_preparing • Learning Suggestions Foundation (developer.task.learning-suggestions-foundation) ana model bellekte değil; karar modeli korunuyor • decisionModel=qwen2.5-coder:14b-instruct
+KRALI_LOCAL_STAGE local_agent_controller_preparing • Learning Suggestions Foundation (developer.task.learning-suggestions-foundation) structured controller girdisi hazır • mode=general • problem=n/a • chars=868 • decisionModel=qwen2.5-coder:14b-instruct • role=controller
+KRALI_LOCAL_STAGE local_agent_replace_anchor_rejected • Learning Suggestions Foundation (developer.task.learning-suggestions-foundation) replace_text anchor doğrulanmadı • length=89 • occurrences=0 • copiedFromVerifiedRead=false • meaningfulChange=true • differsFromPreviousFailed=true • decisionModel=qwen2.5-coder:14b-instruct
+KRALI_LOCAL_STAGE local_agent_controller_rejected • Learning Suggestions Foundation (developer.task.learning-suggestions-foundation) structured controller kararı reddedildi • replace_text anchor doğrulanmadı • length=89 • occurrences=0 • copiedFromVerifiedRead=false • meaningfulChange=true • differsFromPreviousFailed=true • controller=qwen2.5-coder:14b-instruct
+KRALI_LOCAL_STAGE local_agent_completion_rejected • Learning Suggestions Foundation (developer.task.learning-suggestions-foundation) tamamlanma reddedildi • aktif capability gap için gerçek candidate değişikliği yok • deneme=1/2
+KRALI_LOCAL_STAGE local_agent_running • Learning Suggestions Foundation (developer.task.learning-suggestions-foundation) yerel model çalışıyor • adım 3/16
+KRALI_LOCAL_STAGE local_agent_timeout_controller • Learning Suggestions Foundation (developer.task.learning-suggestions-foundation) implementation isteği zaman aşımına uğradı • doğrulanmış source evidence ile structured controller devralıyor • controller=qwen2.5-coder:14b-instruct
+KRALI_LOCAL_STAGE local_agent_controller_preparing • Learning Suggestions Foundation (developer.task.learning-suggestions-foundation) ana model belleği karar modeli için boşaltıldı • devstral-small-2:24b → qwen2.5-coder:14b-instruct
+KRALI_LOCAL_STAGE local_agent_controller_preparing • Learning Suggestions Foundation (developer.task.learning-suggestions-foundation) structured controller girdisi hazır • mode=general • problem=n/a • chars=868 • decisionModel=qwen2.5-coder:14b-instruct • role=controller
+KRALI_LOCAL_STAGE local_agent_controller_compact_retry • Learning Suggestions Foundation (developer.task.learning-suggestions-foundation) ilk mutation karar isteği zaman aşımına uğradı • ultra-kompakt retry • decisionModel=qwen2.5-coder:14b-instruct
+KRALI_LOCAL_STAGE local_agent_controller_preparing • Learning Suggestions Foundation (developer.task.learning-suggestions-foundation) ana model bellekte değil; karar modeli korunuyor • decisionModel=qwen2.5-coder:14b-instruct
+KRALI_LOCAL_STAGE local_agent_controller_preparing • Learning Suggestions Foundation (developer.task.learning-suggestions-foundation) structured controller girdisi hazır • mode=general • problem=n/a • chars=868 • decisionModel=qwen2.5-coder:14b-instruct • role=controller
+KRALI_LOCAL_STAGE local_agent_replace_anchor_rejected • Learning Suggestions Foundation (developer.task.learning-suggestions-foundation) replace_text anchor doğrulanmadı • length=99 • occurrences=0 • copiedFromVerifiedRead=false • meaningfulChange=true • differsFromPreviousFailed=true • decisionModel=qwen2.5-coder:14b-instruct
+KRALI_LOCAL_STAGE local_agent_controller_preparing • Learning Suggestions Foundation (developer.task.learning-suggestions-foundation) ana model bellekte değil; karar modeli korunuyor • decisionModel=qwen2.5-coder:14b-instruct
+KRALI_LOCAL_STAGE local_agent_controller_preparing • Learning Suggestions Foundation (developer.task.learning-suggestions-foundation) structured controller girdisi hazır • mode=general • problem=n/a • chars=868 • decisionModel=qwen2.5-coder:14b-instruct • role=controller
+KRALI_LOCAL_STAGE local_agent_replace_anchor_rejected • Learning Suggestions Foundation (developer.task.learning-suggestions-foundation) replace_text anchor doğrulanmadı • length=80 • occurrences=0 • copiedFromVerifiedRead=false • meaningfulChange=true • differsFromPreviousFailed=true • decisionModel=qwen2.5-coder:14b-instruct
+KRALI_LOCAL_STAGE local_agent_controller_preparing • Learning Suggestions Foundation (developer.task.learning-suggestions-foundation) ana model bellekte değil; karar modeli korunuyor • decisionModel=qwen2.5-coder:14b-instruct
+KRALI_LOCAL_STAGE local_agent_controller_preparing • Learning Suggestions Foundation (developer.task.learning-suggestions-foundation) structured controller girdisi hazır • mode=general • problem=n/a • chars=868 • decisionModel=qwen2.5-coder:14b-instruct • role=controller
+KRALI_LOCAL_STAGE local_agent_replace_anchor_rejected • Learning Suggestions Foundation (developer.task.learning-suggestions-foundation) replace_text anchor doğrulanmadı • length=80 • occurrences=0 • copiedFromVerifiedRead=false • meaningfulChange=true • differsFromPreviousFailed=true • decisionModel=qwen2.5-coder:14b-instruct
+KRALI_LOCAL_STAGE local_agent_controller_rejected • Learning Suggestions Foundation (developer.task.learning-suggestions-foundation) structured controller kararı reddedildi • replace_text anchor doğrulanmadı • length=80 • occurrences=0 • copiedFromVerifiedRead=false • meaningfulChange=true • differsFromPreviousFailed=true • controller=qwen2.5-coder:14b-instruct
+Implementation aşamasında ana model zaman aşımına uğradı ve structured controller güvenli devam kararı üretemedi.
 🧭 Cursor Architect devreye giriyor • mode=ask • workspace_readonly • tek danışma
-Cursor Architect zaman aşımına uğradı.
-⚠️ Cursor Architect diagnosis tamamlanamadı (exit 44); yerel KRALİ yolu korunuyor.
-Deleted branch krali-dev-agent/20260924-100755 (was 5154a5d).
-❌ Native yerel Developer Agent durdu: Learning Suggestions Foundation (developer.task.learning-suggestions-foundation) native local agent toplam zaman sınırına ulaştı.
+cursor_architect_ok|local_agent_tool_protocol_failed is an implementation-timeout + structured-controller dead-end, not a missing diagnosis of the product gap: Phase-1 Learning Suggestions is still unimplemented on disk (no suggestion store/self-test; gap completion still auto-enqueues/starts learning). Queue API is currently intact and must be surgically gated—not rewritten.
+✅ Cursor Architect read-only diagnosis hazır: /Users/medusa/Library/Application Support/KRALI Agent/Mentor/cursor-architect-latest.json
+Deleted branch krali-dev-agent/20260924-105527 (was 9274ef9).
+🧭 Yerel agent durdu; Cursor Architect yalnız teşhis üretti. Kod değişikliği uygulanmadı.
