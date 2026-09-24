@@ -459,6 +459,10 @@ struct ContentView: View {
                            !engine.isViewingArchivedConversation {
                             thinkingRow
                         }
+
+                        Color.clear
+                            .frame(height: 1)
+                            .id("chat-bottom-anchor")
                     }
                     .frame(
                         maxWidth: 820,
@@ -474,25 +478,36 @@ struct ContentView: View {
                         alignment: .center
                     )
                 }
+                .onAppear {
+                    DispatchQueue.main.async {
+                        proxy.scrollTo(
+                            "chat-bottom-anchor",
+                            anchor: .bottom
+                        )
+                    }
+                }
+                .onChange(
+                    of:
+                        engine
+                            .selectedConversationArchiveID
+                ) { _, _ in
+                    DispatchQueue.main.async {
+                        proxy.scrollTo(
+                            "chat-bottom-anchor",
+                            anchor: .bottom
+                        )
+                    }
+                }
                 .onChange(
                     of: engine
                         .visibleConversationMessages
                         .count
                 ) { _, _ in
-                    guard
-                        let last =
-                            engine
-                                .visibleConversationMessages
-                                .last
-                    else {
-                        return
-                    }
-
                     withAnimation(
                         .easeOut(duration: 0.18)
                     ) {
                         proxy.scrollTo(
-                            last.id,
+                            "chat-bottom-anchor",
                             anchor: .bottom
                         )
                     }

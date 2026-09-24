@@ -55,6 +55,7 @@ jobs:
           python3 Scripts/mentor-sync-refspec-self-test.py
           python3 Scripts/visible-build-label-self-test.py
           python3 Scripts/research-core-source-policy-self-test.py
+          python3 Scripts/chat-initial-scroll-bottom-self-test.py
 
       - name: Validate Swift mission and execution-profile policies
         shell: bash
