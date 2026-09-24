@@ -799,11 +799,21 @@ final class AgentEngine: ObservableObject {
         currentSelfDiagnosisReport = nil
         activeRoute =
             routing.owner == .developer
-            ? [
-                "Core",
-                "Developer",
-                "Diagnosis"
-            ]
+            ? (
+                routing.phase == .research
+                ? [
+                    "Core",
+                    "Developer",
+                    "Research",
+                    "Compare",
+                    "Proposal"
+                ]
+                : [
+                    "Core",
+                    "Developer",
+                    "Diagnosis"
+                ]
+            )
             : [
                 "Core",
                 "Stop"
@@ -891,6 +901,38 @@ final class AgentEngine: ObservableObject {
         }
 
         developerRepository = repository
+
+        if routing.phase == .research {
+            currentGoal =
+                "KRALİ self-development research"
+            currentPlan =
+                "Exact source revision → read-only repository evidence → research.web → compare → development proposal → stop"
+            verificationState =
+                .checking
+            verificationSummary =
+                "Read-only self-development research is collecting repository and web evidence. Mutation authority has not been granted."
+            activeContextMemories = []
+            contextMemoryStatus =
+                "Self-development research context firewall aktif; önceki kullanıcı görevleri bu tura taşınmadı."
+
+            busy = true
+
+            log(
+                "Self-development research başladı • repo=" +
+                repository.path
+            )
+
+            Task {
+                await executeSelfDevelopmentResearchMission(
+                    text,
+                    source: source,
+                    repository: repository
+                )
+            }
+
+            return true
+        }
+
         currentGoal =
             "KRALİ self-development diagnosis"
         currentPlan =
@@ -901,7 +943,7 @@ final class AgentEngine: ObservableObject {
             "Read-only self-diagnosis is collecting source and historical evidence. Mutation authority has not been granted."
         activeContextMemories = []
         contextMemoryStatus =
-            "Developer diagnosis context firewall aktif; önceki kullanıcı görevleri bu tura taşınmadı."
+            "Developer context firewall aktif; önceki kullanıcı görevleri bu tura taşınmadı."
 
         busy = true
 
@@ -919,6 +961,374 @@ final class AgentEngine: ObservableObject {
         }
 
         return true
+    }
+
+    private func executeSelfDevelopmentResearchMission(
+        _ text: String,
+        source: ChatInputSource,
+        repository: AgentDeveloperRepository
+    ) async {
+        let appVersion =
+            currentAppVersionString
+        let appSourceRevision =
+            currentAppSourceRevision
+        let repositoryPath =
+            repository.path
+
+        let evidencePackage =
+            await Task.detached(
+                priority: .utility
+            ) {
+                AgentSelfDiagnosisExecutor()
+                    .collect(
+                        userInput: text,
+                        repository:
+                            AgentDeveloperRepository(
+                                path:
+                                    repositoryPath
+                            ),
+                        appVersion:
+                            appVersion,
+                        appSourceRevision:
+                            appSourceRevision
+                    )
+            }
+            .value
+
+        guard
+            evidencePackage
+                .canDiagnoseCurrentSource
+        else {
+            let reply =
+                "Self-development research durdu: çalışan uygulama ile repository source revision birebir eşleşmiyor. Mutation başlatılmadı."
+
+            let verification =
+                AgentVerificationResult(
+                    state: .attention,
+                    summary:
+                        "Exact source identity is required before self-development research.",
+                    fallback:
+                        "Update KRALİ to the exact develop revision and retry."
+                )
+
+            verificationState =
+                verification.state
+            verificationSummary =
+                verification.summary
+
+            recordMentorTrace(
+                input: text,
+                source: source,
+                goal: currentGoal,
+                plan: currentPlan,
+                route: activeRoute,
+                capabilities: [],
+                learningPlans: [],
+                verification:
+                    verification,
+                intelligenceProvider: nil,
+                finalResponse:
+                    reply
+            )
+
+            postAssistantMessage(
+                reply
+            )
+            busy = false
+            return
+        }
+
+        let repositoryEvidence =
+            evidencePackage.evidence.filter {
+                $0.kind == "source"
+            }
+
+        let researchQueries =
+            selfDevelopmentResearchQueries(
+                from: text
+            )
+
+        var combinedEvidence:
+            [WebSourceEvidence] = []
+        var combinedResults:
+            [WebResearchResult] = []
+        var seenEvidence = Set<String>()
+        var seenResults = Set<String>()
+        var researchSummaries: [String] = []
+
+        for query in
+            researchQueries.prefix(2) {
+            let summary =
+                await performWebResearch(
+                    query: query,
+                    allowInteractiveEscalation:
+                        false
+                )
+
+            researchSummaries.append(
+                summary
+            )
+
+            for item in webResearchEvidence {
+                let key =
+                    item.source.url
+                        .absoluteString
+                if seenEvidence
+                    .insert(key)
+                    .inserted {
+                    combinedEvidence
+                        .append(item)
+                }
+            }
+
+            for item in webResearchResults {
+                let key =
+                    item.url
+                        .absoluteString
+                if seenResults
+                    .insert(key)
+                    .inserted {
+                    combinedResults
+                        .append(item)
+                }
+            }
+        }
+
+        webResearchEvidence =
+            Array(
+                combinedEvidence
+                    .prefix(10)
+            )
+        webResearchResults =
+            Array(
+                combinedResults
+                    .prefix(12)
+            )
+
+        let distinctDomains =
+            Set(
+                webResearchResults
+                    .map(\.domain)
+            )
+
+        let hasUsefulResearch =
+            !webResearchResults.isEmpty &&
+            distinctDomains.count >= 2
+
+        let synthesis =
+            await localIntelligence
+                .synthesizeSelfDevelopmentResearch(
+                    userInput: text,
+                    repositoryEvidence:
+                        repositoryEvidence,
+                    researchEvidence:
+                        webResearchEvidence,
+                    researchSources:
+                        webResearchResults,
+                    prohibitedCapabilityIDs:
+                        evidencePackage
+                            .prohibitedCapabilityIDs
+                )
+
+        let verification:
+            AgentVerificationResult
+
+        if hasUsefulResearch,
+           synthesis != nil {
+            verification =
+                AgentVerificationResult(
+                    state: .passed,
+                    summary:
+                        "Self-development research combined current repository evidence with multiple public web sources and stopped at proposal stage.",
+                    fallback:
+                        "A separate bounded Developer task and human review are required before any code mutation."
+                )
+        } else if !webResearchResults.isEmpty {
+            verification =
+                AgentVerificationResult(
+                    state: .partial,
+                    summary:
+                        "Web research produced sources, but the final architecture comparison could not be fully synthesized.",
+                    fallback:
+                        "Retain the collected evidence and retry bounded synthesis without starting mutation."
+                )
+        } else {
+            verification =
+                AgentVerificationResult(
+                    state: .attention,
+                    summary:
+                        "Self-development research could not collect a usable multi-source web evidence set.",
+                    fallback:
+                        "Retry research.web with narrower research queries; do not escalate to computer control."
+                )
+        }
+
+        verificationState =
+            verification.state
+        verificationSummary =
+            verification.summary
+
+        let capabilities =
+            capabilityRegistry.resolve(
+                ids: [
+                    "core.reasoning",
+                    "context.local",
+                    "research.web"
+                ],
+                profile:
+                    executionProfile
+            )
+
+        let fallbackReport =
+            """
+            A. Current KRALİ Architecture
+            Read-only repository evidence collected from \(repositoryEvidence.count) relevant source snippets.
+
+            B. Research Sources
+            \(webResearchResults.enumerated().map { "\($0.offset + 1). \($0.element.title) — \($0.element.domain)" }.joined(separator: "\n"))
+
+            F. Biggest Current Gap
+            Final research synthesis was not available; no architectural mutation is justified from an incomplete comparison.
+
+            L. Mutation Recommended
+            NO
+
+            M. Mutation Started
+            NO
+
+            N. Recommended Next Step
+            Retry bounded read-only synthesis using the retained repository and web evidence.
+            """
+
+        let reply =
+            synthesis ??
+            fallbackReport
+
+        currentReflectionSummary =
+            "Self-development research completed with \(webResearchResults.count) public sources and \(repositoryEvidence.count) repository evidence snippets."
+        currentAlternatives = []
+
+        intelligenceProviderStatus =
+            synthesis == nil
+            ? "Self-development research synthesis unavailable"
+            : "Apple Foundation Models / Self-Development Research"
+
+        activeRoute = [
+            "Core",
+            "Developer",
+            "Research",
+            "Repository",
+            "Web",
+            "Compare",
+            "Proposal",
+            "Stop"
+        ]
+
+        recordMentorTrace(
+            input: text,
+            source: source,
+            goal: currentGoal,
+            plan: currentPlan,
+            route: activeRoute,
+            capabilities:
+                capabilities,
+            learningPlans: [],
+            verification:
+                verification,
+            intelligenceProvider:
+                synthesis == nil
+                ? nil
+                : "Apple Foundation Models / Self-Development Research",
+            finalResponse:
+                reply
+        )
+
+        postAssistantMessage(
+            reply
+        )
+
+        log(
+            "Self-development research tamamlandı • sources=" +
+            String(
+                webResearchResults.count
+            ) +
+            " • evidence=" +
+            String(
+                webResearchEvidence.count
+            ) +
+            " • mutation=no"
+        )
+
+        busy = false
+    }
+
+    private func selfDevelopmentResearchQueries(
+        from input: String
+    ) -> [String] {
+        let prohibited =
+            AgentExecutionProfile
+                .computerControlCapabilityIDs
+                .map {
+                    $0.lowercased()
+                }
+
+        let stopWords =
+            Set([
+                "krali", "kralı", "test", "amac", "amaç",
+                "gorev", "görev", "icin", "için", "ve",
+                "veya", "ile", "bir", "bu", "su", "şu",
+                "olarak", "yap", "yapma", "kullan", "kullanma",
+                "once", "önce", "sonra", "mevcut", "kendi",
+                "sistem", "sistemi", "mimari", "mimarini",
+                "mimarisini", "kod", "kaynak", "read", "only",
+                "mutation", "started", "recommended", "no"
+            ])
+
+        let words =
+            input
+                .folding(
+                    options: [
+                        .caseInsensitive,
+                        .diacriticInsensitive
+                    ],
+                    locale:
+                        Locale(
+                            identifier: "tr_TR"
+                        )
+                )
+                .lowercased()
+                .components(
+                    separatedBy:
+                        CharacterSet
+                            .alphanumerics
+                            .inverted
+                )
+                .filter {
+                    $0.count >= 3 &&
+                    !stopWords.contains($0) &&
+                    !prohibited.contains($0)
+                }
+
+        var seen = Set<String>()
+        let topic =
+            words
+                .filter {
+                    seen.insert($0).inserted
+                }
+                .prefix(28)
+                .joined(separator: " ")
+
+        let base =
+            topic.isEmpty
+            ? "AI agent self improvement learning memory skills evaluation"
+            : topic
+
+        return [
+            base +
+                " autonomous agents self improvement academic paper official documentation",
+            base +
+                " agent architecture memory reflection skill library evaluation open source GitHub"
+        ]
     }
 
     private func executeSelfDiagnosisMission(
@@ -1121,7 +1531,7 @@ final class AgentEngine: ObservableObject {
             executionContextMemories = []
             activeContextMemories = []
             contextMemoryStatus =
-                "Developer diagnosis context firewall aktif; önceki kullanıcı görevleri bu tura taşınmadı."
+                "Developer context firewall aktif; önceki kullanıcı görevleri bu tura taşınmadı."
             log(
                 "Developer context firewall: conversational task memory isolated"
             )
