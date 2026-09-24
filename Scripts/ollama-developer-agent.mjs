@@ -2314,6 +2314,68 @@ const mutationToolNames = new Set([
   "apply_patch",
 ]);
 
+function exactScopedMutationPaths({
+  existing = null,
+} = {}) {
+  const output = [];
+
+  for (const rawScope of currentMutationGlobs()) {
+    const normalized =
+      normalizeRepoRelativePath(rawScope);
+
+    if (
+      !normalized ||
+      /[*?]/.test(normalized) ||
+      !isEligibleImplementationTargetPath(
+        normalized
+      )
+    ) {
+      continue;
+    }
+
+    let exists = false;
+    try {
+      const { absolute } =
+        safeRelativePath(normalized);
+      exists =
+        fs.existsSync(absolute) &&
+        fs.statSync(absolute).isFile();
+    } catch {
+      continue;
+    }
+
+    if (
+      existing === true &&
+      !exists
+    ) {
+      continue;
+    }
+
+    if (
+      existing === false &&
+      exists
+    ) {
+      continue;
+    }
+
+    output.push(normalized);
+  }
+
+  return [...new Set(output)];
+}
+
+function exactCreatableMutationPaths() {
+  return exactScopedMutationPaths({
+    existing: false,
+  });
+}
+
+function exactExistingMutationPaths() {
+  return exactScopedMutationPaths({
+    existing: true,
+  });
+}
+
 function developmentPhase() {
   if (sawMutatingTool) return "verification";
 
@@ -2374,6 +2436,16 @@ function toolsForCurrentPhase() {
         !rootCauseMutationTargetVerified
       ) {
         return false;
+      }
+
+      const createTargets =
+        exactCreatableMutationPaths();
+
+      if (
+        implementationTargetPaths.length === 0 &&
+        createTargets.length > 0
+      ) {
+        return name === "write_file";
       }
 
       return mutationToolNames.has(name);
@@ -3226,24 +3298,50 @@ function recordToolEvidence(name, result, args = {}) {
                 1200
               )
           );
-        } else if (taskAllowedGlobs.length > 0) {
-          implementationReadCompleted = true;
-          stage(
-            "local_agent_create_target_ready",
-            gapLabel +
-              " mevcut izinli mutation hedefi bulunmadı • task allowedScope yeni dosya oluşturma contract'ı olarak kullanılacak • allow=" +
-              truncate(
-                JSON.stringify(taskAllowedGlobs),
-                1200
-              )
-          );
         } else {
-          implementationReadCompleted = false;
-          stage(
-            "local_agent_target_not_found",
-            gapLabel +
-              " arama sonucu var ancak güvenli mutation hedefi yok"
-          );
+          const existingScopeTargets =
+            exactExistingMutationPaths();
+          const createTargets =
+            exactCreatableMutationPaths();
+
+          if (existingScopeTargets.length > 0) {
+            implementationTargetPaths =
+              existingScopeTargets.slice(0, 8);
+            implementationReadCompleted = false;
+
+            stage(
+              "local_agent_scope_target_fallback",
+              gapLabel +
+                " search eşleşmesi mutation hedefi vermedi; active scope içindeki mevcut dosya doğrulanacak • targets=" +
+                truncate(
+                  JSON.stringify(
+                    implementationTargetPaths
+                  ),
+                  1200
+                )
+            );
+          } else if (createTargets.length > 0) {
+            implementationReadCompleted = true;
+
+            stage(
+              "local_agent_create_target_ready",
+              gapLabel +
+                " active scope yalnız yeni dosya hedefi içeriyor • write_file contract aktif • targets=" +
+                truncate(
+                  JSON.stringify(
+                    createTargets
+                  ),
+                  1200
+                )
+            );
+          } else {
+            implementationReadCompleted = false;
+            stage(
+              "local_agent_target_not_found",
+              gapLabel +
+                " arama sonucu var ancak güvenli mutation hedefi yok"
+            );
+          }
         }
       }
     }
@@ -3584,6 +3682,8 @@ function compactControllerEvidence(
     implementationReadCompleted,
     implementationTargetPaths:
       implementationTargetPaths.slice(0, 8),
+    implementationCreateTargetPaths:
+      exactCreatableMutationPaths().slice(0, 8),
     failedMutationFingerprints:
       [...failedMutationFingerprints]
         .slice(-6)
@@ -4156,12 +4256,29 @@ async function requestStructuredToolDecision(
     initialMutation ||
     exactReplaceFailure
   ) {
-    const replaceContract = toolContracts.find(
-      (tool) => tool.name === "replace_text"
-    );
+    const createTargets =
+      exactCreatableMutationPaths();
 
-    if (replaceContract) {
-      toolContracts = [replaceContract];
+    if (
+      initialMutation &&
+      implementationTargetPaths.length === 0 &&
+      createTargets.length > 0
+    ) {
+      const writeContract = toolContracts.find(
+        (tool) => tool.name === "write_file"
+      );
+
+      if (writeContract) {
+        toolContracts = [writeContract];
+      }
+    } else {
+      const replaceContract = toolContracts.find(
+        (tool) => tool.name === "replace_text"
+      );
+
+      if (replaceContract) {
+        toolContracts = [replaceContract];
+      }
     }
   }
 
@@ -4312,6 +4429,7 @@ async function requestStructuredToolDecision(
           "Respect the supplied development phase and available tool contracts.",
           "During inspection, select the minimum real inspection tool needed.",
           "During implementation, obey the supplied tool contracts exactly. If only mutation tools are supplied, choose a minimal mutation tool now; do not answer with prose.",
+          "If controllerEvidence.implementationCreateTargetPaths is non-empty and write_file is the only supplied mutation tool, choose exactly one path from that list; never invent another create path.",
           "lastVerifiedRead.content contains only exact source characters copied from disk; it never contains truncation markers or synthetic suffixes. For replace_text, copy old_text exactly from this source window; never invent or extend beyond the visible source.",
           "A replace_text old_text must be a sufficiently long unique source block, preferably at least 3 complete lines. Never use a short identifier fragment, partial token, prefix completion, or typo-like replacement.",
           "new_text must be a meaningful logic change, not merely completion of a truncated identifier that already exists in source.",
