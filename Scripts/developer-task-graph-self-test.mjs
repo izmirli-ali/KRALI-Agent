@@ -45,6 +45,16 @@ requireText(
 );
 requireText(
   agent,
+  "repairSubtaskScopeEntries",
+  "executor repairs broad planner scope to the parent contract before validation"
+);
+requireText(
+  agent,
+  "scopeRepairs=",
+  "scope repair count is observable in Mentor status"
+);
+requireText(
+  agent,
   "outside_active_subtask_scope",
   "active subtask mutation scope enforced"
 );
