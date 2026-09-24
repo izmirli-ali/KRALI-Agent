@@ -2181,10 +2181,10 @@ actor AgentLocalIntelligence {
 
             let prompt = """
             Kullanıcı self-development isteği:
-            (String(userInput.prefix(9000)))
+            \(String(userInput.prefix(9000)))
 
             Read-only evidence package:
-            (String(packageJSON.prefix(30000)))
+            \(String(packageJSON.prefix(30000)))
 
             Şu JSON şemasını eksiksiz döndür:
             {
