@@ -7683,37 +7683,49 @@ final class AgentEngine: ObservableObject {
         }
 
         inspectorState.mentorSyncBusy = true
-        inspectorState.mentorTraceStatus = "Mentor kaydı private GitHub'a aktarılıyor…"
+        inspectorState.mentorTraceStatus = "Mentor diagnostics GitHub'a aktarılıyor…"
 
         Task {
             let result = await Task.detached(
                 priority: .utility
             ) {
                 let process = Process()
-                let pipe = Pipe()
+                let outputPipe = Pipe()
+                let errorPipe = Pipe()
 
                 process.executableURL = URL(
                     fileURLWithPath: "/bin/zsh"
                 )
                 process.arguments = [scriptPath]
-                process.standardOutput = pipe
-                process.standardError = pipe
+                process.standardOutput = outputPipe
+                process.standardError = errorPipe
 
                 do {
                     try process.run()
+
+                    let outputData =
+                        outputPipe.fileHandleForReading
+                            .readDataToEndOfFile()
+                    let errorData =
+                        errorPipe.fileHandleForReading
+                            .readDataToEndOfFile()
+
                     process.waitUntilExit()
 
-                    let data = pipe.fileHandleForReading
-                        .readDataToEndOfFile()
-
                     let output = String(
-                        data: data,
+                        data: outputData,
+                        encoding: .utf8
+                    ) ?? ""
+                    let errorOutput = String(
+                        data: errorData,
                         encoding: .utf8
                     ) ?? ""
 
                     return (
                         Int(process.terminationStatus),
-                        output
+                        errorOutput.isEmpty
+                            ? output
+                            : output + "\n" + errorOutput
                     )
                 } catch {
                     return (
@@ -7728,7 +7740,7 @@ final class AgentEngine: ObservableObject {
 
             if result.0 == 0 {
                 inspectorState.mentorTraceStatus =
-                    "Mentor kaydı GitHub'a aktarıldı • bana “mentor kaydına bak” diyebilirsin."
+                    "Mentor diagnostics GitHub'a aktarıldı • kaynak branch değiştirilmedi."
                 log("Mentor trace GitHub'a senkronlandı")
             } else {
                 let compact = result.1

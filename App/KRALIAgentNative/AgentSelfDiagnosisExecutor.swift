@@ -879,24 +879,41 @@ struct AgentSelfDiagnosisExecutor {
         root: URL,
         terms: [String]
     ) -> [HistoricalEvidence] {
-        guard let rawLog = git(
-            [
-                "log",
-                "-n", "18",
-                "--format=%H",
-                "--",
-                "Mentor/latest.json"
-            ],
-            root: root
-        ) else {
-            return []
+        var commits: [String] = []
+
+        let refs = [
+            "refs/remotes/origin/mentor/diagnostics",
+            "HEAD"
+        ]
+
+        for ref in refs {
+            guard let rawLog = git(
+                [
+                    "log",
+                    "-n", "18",
+                    "--format=%H",
+                    ref,
+                    "--",
+                    "Mentor/latest.json"
+                ],
+                root: root
+            ) else {
+                continue
+            }
+
+            for commit in rawLog
+                .split(whereSeparator: {
+                    $0.isWhitespace
+                })
+                .map(String.init)
+            where !commits.contains(commit) {
+                commits.append(commit)
+            }
         }
 
-        let commits = rawLog
-            .split(whereSeparator: {
-                $0.isWhitespace
-            })
-            .map(String.init)
+        guard !commits.isEmpty else {
+            return []
+        }
 
         var matches: [HistoricalEvidence] = []
 
