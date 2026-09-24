@@ -300,10 +300,20 @@ struct AgentSelfDiagnosisExecutor {
             guard isInspectableSource(path) else { continue }
 
             let line = normalize(String(parts[3]))
+            let compactPath = compactConcept(path)
             var score = 1
 
-            for term in boundedTerms where line.contains(normalize(term)) {
-                score += term.contains(".") ? 4 : 1
+            for term in boundedTerms {
+                let normalizedTerm = normalize(term)
+                if line.contains(normalizedTerm) {
+                    score += term.contains(".") ? 4 : 1
+                }
+
+                let compactTerm = compactConcept(term)
+                if compactTerm.count >= 5 &&
+                   compactPath.contains(compactTerm) {
+                    score += 8
+                }
             }
 
             if line.contains("research.web") { score += 6 }
@@ -549,6 +559,16 @@ struct AgentSelfDiagnosisExecutor {
         }
 
         return count
+    }
+
+    private func compactConcept(_ value: String) -> String {
+        normalize(value)
+            .unicodeScalars
+            .filter {
+                CharacterSet.alphanumerics.contains($0)
+            }
+            .map(String.init)
+            .joined()
     }
 
     private func normalize(_ value: String) -> String {
