@@ -8673,6 +8673,18 @@ if (developerTaskGraph) {
         ? "selected"
         : "unknown";
 
+  const graphScopeRepairCount =
+    developerTaskGraph.nodes.reduce(
+      (total, node) =>
+        total +
+        (
+          Array.isArray(node.scopeRepairs)
+            ? node.scopeRepairs.length
+            : 0
+        ),
+      0
+    );
+
   stage(
     "local_agent_task_graph_ready",
     gapLabel +
@@ -8680,6 +8692,8 @@ if (developerTaskGraph) {
       graphSource +
       " • nodes=" +
       developerTaskGraph.nodes.length +
+      " • scopeRepairs=" +
+      graphScopeRepairCount +
       " • active=" +
       String(
         activeDeveloperSubtask()?.id || "none"
