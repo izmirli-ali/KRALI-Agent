@@ -226,6 +226,9 @@ struct SelfDiagnosisExecutorSelfTest {
             """
             Kendi research.web mimarini incele.
             browser.control unavailable iken public araştırma neden task graph dependency nedeniyle durdu?
+            Bu görev için kullanma:
+            - system.open.url
+            - perception.screen
             Root cause evidence üret.
             """
 
@@ -239,6 +242,15 @@ struct SelfDiagnosisExecutorSelfTest {
         expect(
             package.sourceIdentity.isExact,
             "exact source identity"
+        )
+        expect(
+            package.prohibitedCapabilityIDs.contains(
+                "system.open.url"
+            ) &&
+            package.prohibitedCapabilityIDs.contains(
+                "perception.screen"
+            ),
+            "mission capability prohibitions parsed"
         )
         expect(
             package.evidence.contains(
@@ -449,6 +461,142 @@ struct SelfDiagnosisExecutorSelfTest {
         expect(
             invalidReport.developmentProposal == nil,
             "invalid evidence cannot produce mutation proposal"
+        )
+
+        let unrelatedSourceID =
+            package.evidence.first(
+                where: {
+                    $0.kind == "source" &&
+                    !$0.excerpt.contains(
+                        "dependency"
+                    )
+                }
+            )?.id
+
+        if let unrelatedSourceID {
+            let weakSupportOutput =
+                AgentSelfDiagnosisModelOutput(
+                    failureReconstruction:
+                        output.failureReconstruction,
+                    proximateCause:
+                        output.proximateCause,
+                    architecturalRootCause:
+                        output.architecturalRootCause,
+                    rootCauseEvidenceIDs: [
+                        unrelatedSourceID,
+                        failureID
+                    ],
+                    confidence:
+                        .high,
+                    architectureInspected:
+                        output.architectureInspected,
+                    capabilityAssessment:
+                        output.capabilityAssessment,
+                    alternatives:
+                        output.alternatives,
+                    decision:
+                        output.decision,
+                    developmentProposal:
+                        proposal,
+                    remainingLimitations: []
+                )
+
+            let weakSupportReport =
+                executor.assembleReport(
+                    package: package,
+                    modelOutput:
+                        weakSupportOutput
+                )
+
+            expect(
+                !weakSupportReport.evidenceBound,
+                "unrelated source evidence cannot bind root cause"
+            )
+        }
+
+        let prohibitedProposal =
+            AgentSelfDiagnosisProposal(
+                problem:
+                    proposal.problem,
+                evidence:
+                    proposal.evidence,
+                rootCause:
+                    proposal.rootCause,
+                existingArchitecture:
+                    proposal.existingArchitecture,
+                selectedStrategy:
+                    "Use safe fallback",
+                expectedBehavior:
+                    "Use system.open.url with perception.screen as fallback.",
+                allowedScope:
+                    proposal.allowedScope,
+                risks:
+                    proposal.risks,
+                verificationContract: [
+                    "system.open.url succeeds"
+                ],
+                behavioralBenchmark:
+                    proposal.behavioralBenchmark,
+                rollbackCondition:
+                    proposal.rollbackCondition
+            )
+
+        let prohibitedOutput =
+            AgentSelfDiagnosisModelOutput(
+                failureReconstruction:
+                    output.failureReconstruction,
+                proximateCause:
+                    output.proximateCause,
+                architecturalRootCause:
+                    output.architecturalRootCause,
+                rootCauseEvidenceIDs:
+                    output.rootCauseEvidenceIDs,
+                confidence:
+                    .high,
+                architectureInspected:
+                    output.architectureInspected,
+                capabilityAssessment:
+                    output.capabilityAssessment,
+                alternatives: [
+                    AgentSelfDiagnosisAlternative(
+                        title:
+                            "Use safe fallback",
+                        advantages: [
+                            "simple"
+                        ],
+                        risks: [],
+                        architecturalImpact:
+                            "system.open.url + perception.screen",
+                        generalizability:
+                            "public research",
+                        changeSize:
+                            "small",
+                        testability:
+                            "behavioral"
+                    ),
+                    output.alternatives[1]
+                ],
+                decision:
+                    output.decision,
+                developmentProposal:
+                    prohibitedProposal,
+                remainingLimitations: []
+            )
+
+        let prohibitedReport =
+            executor.assembleReport(
+                package: package,
+                modelOutput:
+                    prohibitedOutput
+            )
+
+        expect(
+            !prohibitedReport.evidenceBound,
+            "prohibited capability cannot appear in selected strategy or proposal"
+        )
+        expect(
+            prohibitedReport.developmentProposal == nil,
+            "constraint-violating proposal suppressed"
         )
 
         write(
