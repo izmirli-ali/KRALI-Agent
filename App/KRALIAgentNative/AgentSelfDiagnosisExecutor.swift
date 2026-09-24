@@ -533,7 +533,8 @@ struct AgentSelfDiagnosisExecutor {
 
     func assembleReport(
         package: AgentSelfDiagnosisEvidencePackage,
-        modelOutput: AgentSelfDiagnosisModelOutput?
+        modelOutput: AgentSelfDiagnosisModelOutput?,
+        reasoningFailure: String? = nil
     ) -> AgentSelfDiagnosisReport {
         guard package.canDiagnoseCurrentSource else {
             return AgentSelfDiagnosisReport(
@@ -563,12 +564,20 @@ struct AgentSelfDiagnosisExecutor {
         }
 
         guard let modelOutput else {
+            let failure =
+                reasoningFailure?
+                    .trimmingCharacters(
+                        in: .whitespacesAndNewlines
+                    )
+
             return AgentSelfDiagnosisReport(
                 sourceIdentity: package.sourceIdentity,
                 failureReconstruction:
                     "Repository evidence was collected successfully, but the local reasoning provider did not produce a structured diagnosis.",
                 proximateCause:
-                    "Reasoning provider unavailable or structured output invalid.",
+                    failure?.isEmpty == false
+                    ? "Reasoning provider failed: " + failure!
+                    : "Reasoning provider unavailable or structured output invalid.",
                 architecturalRootCause:
                     "UNKNOWN — evidence was not converted into a validated root-cause claim.",
                 rootCauseEvidenceIDs: [],
@@ -591,7 +600,9 @@ struct AgentSelfDiagnosisExecutor {
                 remainingLimitations:
                     package.warnings +
                     [
-                        "Structured self-diagnosis reasoning output is unavailable."
+                        failure?.isEmpty == false
+                        ? "Structured self-diagnosis reasoning failure: " + failure!
+                        : "Structured self-diagnosis reasoning output is unavailable."
                     ],
                 evidenceBound: false
             )
