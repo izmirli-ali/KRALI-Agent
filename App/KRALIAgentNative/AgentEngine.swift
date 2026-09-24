@@ -173,6 +173,48 @@ final class AgentEngine: ObservableObject {
         ) as? String ?? "unknown"
     }
 
+    private var currentAppSourceRevision: String? {
+        if let value =
+            Bundle.main.object(
+                forInfoDictionaryKey:
+                    "KRALISourceRevision"
+            ) as? String {
+            let trimmed =
+                value.trimmingCharacters(
+                    in:
+                        .whitespacesAndNewlines
+                )
+            if !trimmed.isEmpty {
+                return trimmed
+            }
+        }
+
+        guard
+            let url = Bundle.main.url(
+                forResource:
+                    "KRALISourceRevision",
+                withExtension:
+                    "txt"
+            ),
+            let raw = try? String(
+                contentsOf: url,
+                encoding: .utf8
+            )
+        else {
+            return nil
+        }
+
+        let trimmed =
+            raw.trimmingCharacters(
+                in:
+                    .whitespacesAndNewlines
+            )
+
+        return trimmed.isEmpty
+            ? nil
+            : trimmed
+    }
+
     /// The active runtime capability surface after execution-profile policy.
     /// Paused computer-control capabilities are excluded from planning,
     /// normalization, fallback selection, execution and gap generation.
@@ -880,10 +922,7 @@ final class AgentEngine: ObservableObject {
         let appVersion =
             currentAppVersionString
         let appSourceRevision =
-            Bundle.main.object(
-                forInfoDictionaryKey:
-                    "KRALISourceRevision"
-            ) as? String
+            currentAppSourceRevision
 
         let repositoryPath =
             repository.path
