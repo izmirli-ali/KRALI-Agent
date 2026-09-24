@@ -862,6 +862,80 @@ final class AgentEngine: ObservableObject {
             context: brainContext()
         )
 
+        let requestedActionCapabilityIDs =
+            goalProfile.requiredCapabilityIDs
+                .subtracting(
+                    Set([
+                        "core.reasoning",
+                        "context.local"
+                    ])
+                )
+        let pausedRequestedCapabilityIDs =
+            requestedActionCapabilityIDs
+                .filter {
+                    executionProfile.isPaused($0)
+                }
+                .sorted()
+        let runnableRequestedCapabilityIDs =
+            requestedActionCapabilityIDs
+                .filter {
+                    !executionProfile.isPaused($0)
+                }
+
+        // An explicitly computer-control-only goal must not be converted into
+        // a fake capability gap or an unsafe workaround while the profile is
+        // intentionally paused. Mixed goals (for example public research plus
+        // an optional browser path) continue with the non-paused capability
+        // surface so research can proceed without the computer-control node.
+        if !pausedRequestedCapabilityIDs.isEmpty &&
+           runnableRequestedCapabilityIDs.isEmpty {
+            currentGoal = goalProfile.summary
+            currentPlan =
+                "Development / Research Mode → paused capability"
+            currentTaskGraph = nil
+            currentRuntimeTask = nil
+            selectedCapabilities = []
+            capabilityLearningPlans = []
+            currentCapabilityGaps = []
+            executionSteps = []
+            verificationState = .attention
+            verificationSummary =
+                "İstenen bilgisayar-kontrol capability'si Development / Research Mode'da geçici olarak duraklatıldı."
+            fallbackPlan = nil
+            activeRoute = [
+                "Core",
+                "ExecutionProfile",
+                "Paused"
+            ]
+
+            let reply =
+                "Bu işlem Development / Research Mode açıkken geçici olarak duraklatıldı. " +
+                "Bilgisayar kontrolü uygulanmadı ve bu durum yeni bir capability eksikliği olarak öğrenme kuyruğuna eklenmedi. " +
+                "Duraklatılan capability: " +
+                pausedRequestedCapabilityIDs.joined(separator: ", ")
+
+            postAssistantMessage(reply)
+            recordMentorTrace(
+                input: text,
+                source: source,
+                goal: currentGoal,
+                plan: currentPlan,
+                route: activeRoute,
+                capabilities: [],
+                learningPlans: [],
+                verification:
+                    AgentVerificationResult(
+                        state: .attention,
+                        summary: verificationSummary,
+                        fallback:
+                            "Bilgisayar kontrolünü yeniden etkinleştiren bir execution profile seçilene kadar bu eylem uygulanmaz."
+                    ),
+                intelligenceProvider: nil,
+                finalResponse: reply
+            )
+            return
+        }
+
         currentGoal = goalProfile.summary
         currentPlan = decision.selectedPlan
         currentAlternatives = decision.alternatives
