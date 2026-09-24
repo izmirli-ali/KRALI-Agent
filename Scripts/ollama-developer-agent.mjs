@@ -774,6 +774,156 @@ function subtaskScopeWithinParent(entry) {
   );
 }
 
+function subtaskScopeAffinityTokens(value) {
+  return String(value || "")
+    .replace(/([a-z0-9])([A-Z])/g, "$1 $2")
+    .toLowerCase()
+    .split(/[^a-z0-9]+/)
+    .filter((token) => token.length >= 3);
+}
+
+function affinityNarrowScopeMatches(
+  matches,
+  descriptor
+) {
+  if (!Array.isArray(matches) || matches.length <= 1) {
+    return matches;
+  }
+
+  const descriptorTokens =
+    new Set(
+      subtaskScopeAffinityTokens(
+        descriptor
+      )
+    );
+
+  if (descriptorTokens.size === 0) {
+    return matches;
+  }
+
+  const scored = matches.map((scope) => {
+    const score =
+      subtaskScopeAffinityTokens(scope)
+        .filter((token) =>
+          descriptorTokens.has(token)
+        ).length;
+
+    return {
+      scope,
+      score,
+    };
+  });
+
+  const maxScore =
+    Math.max(
+      0,
+      ...scored.map((item) => item.score)
+    );
+
+  if (maxScore <= 0) {
+    return matches;
+  }
+
+  return scored
+    .filter((item) => item.score === maxScore)
+    .map((item) => item.scope);
+}
+
+function repairSubtaskScopeEntries(
+  requestedScope,
+  descriptor = ""
+) {
+  const requested =
+    Array.isArray(requestedScope)
+      ? requestedScope
+          .map(normalizeScopeEntry)
+          .filter(Boolean)
+      : [];
+
+  const repaired = [];
+  const repairs = [];
+
+  for (const scope of requested) {
+    if (
+      !scope ||
+      scope.startsWith("/") ||
+      scope.split("/").includes("..") ||
+      (
+        taskForbiddenGlobs.length > 0 &&
+        matchesAnyGlob(
+          scope,
+          taskForbiddenGlobs
+        )
+      )
+    ) {
+      return null;
+    }
+
+    const wildcard =
+      /[*?]/.test(scope);
+
+    if (!wildcard) {
+      if (subtaskScopeWithinParent(scope)) {
+        repaired.push(scope);
+        continue;
+      }
+
+      return null;
+    }
+
+    if (
+      taskAllowedGlobs.includes(scope)
+    ) {
+      repaired.push(scope);
+      continue;
+    }
+
+    const concreteMatches =
+      taskAllowedGlobs.filter((parentScope) => {
+        if (
+          !parentScope ||
+          /[*?]/.test(parentScope)
+        ) {
+          return false;
+        }
+
+        if (
+          taskForbiddenGlobs.length > 0 &&
+          matchesAnyGlob(
+            parentScope,
+            taskForbiddenGlobs
+          )
+        ) {
+          return false;
+        }
+
+        return globToRegExp(scope)
+          .test(parentScope);
+      });
+
+    const narrowed =
+      affinityNarrowScopeMatches(
+        concreteMatches,
+        descriptor
+      );
+
+    if (narrowed.length === 0) {
+      return null;
+    }
+
+    repaired.push(...narrowed);
+    repairs.push({
+      requested: scope,
+      clampedTo: narrowed,
+    });
+  }
+
+  return {
+    scope: [...new Set(repaired)],
+    repairs,
+  };
+}
+
 function developerTaskGraphFingerprint(nodes) {
   return crypto
     .createHash("sha256")
@@ -797,29 +947,45 @@ function validateDeveloperTaskGraphNodes(rawNodes) {
     return null;
   }
 
-  const nodes = rawNodes.map((raw, index) => ({
-    id: String(raw?.id || "").trim(),
-    title: String(raw?.title || "").trim(),
-    dependsOn: Array.isArray(raw?.depends_on)
-      ? raw.depends_on
-          .map((value) => String(value || "").trim())
-          .filter(Boolean)
-      : [],
-    scope: Array.isArray(raw?.scope)
-      ? raw.scope
-          .map(normalizeScopeEntry)
-          .filter(Boolean)
-      : [],
-    expectedResult: String(
-      raw?.expected_result || ""
-    ).trim(),
-    verification: String(
-      raw?.verification || ""
-    ).trim(),
-    state: "pending",
-    order: index,
-    verifiedAt: null,
-  }));
+  const nodes = [];
+
+  for (const [index, raw] of rawNodes.entries()) {
+    const repairedScope =
+      repairSubtaskScopeEntries(
+        raw?.scope,
+        [
+          raw?.id,
+          raw?.title,
+          raw?.expected_result,
+          raw?.verification,
+        ].join(" ")
+      );
+
+    if (!repairedScope) {
+      return null;
+    }
+
+    nodes.push({
+      id: String(raw?.id || "").trim(),
+      title: String(raw?.title || "").trim(),
+      dependsOn: Array.isArray(raw?.depends_on)
+        ? raw.depends_on
+            .map((value) => String(value || "").trim())
+            .filter(Boolean)
+        : [],
+      scope: repairedScope.scope,
+      scopeRepairs: repairedScope.repairs,
+      expectedResult: String(
+        raw?.expected_result || ""
+      ).trim(),
+      verification: String(
+        raw?.verification || ""
+      ).trim(),
+      state: "pending",
+      order: index,
+      verifiedAt: null,
+    });
+  }
 
   if (
     nodes.some(
@@ -2314,6 +2480,68 @@ const mutationToolNames = new Set([
   "apply_patch",
 ]);
 
+function exactScopedMutationPaths({
+  existing = null,
+} = {}) {
+  const output = [];
+
+  for (const rawScope of currentMutationGlobs()) {
+    const normalized =
+      normalizeRepoRelativePath(rawScope);
+
+    if (
+      !normalized ||
+      /[*?]/.test(normalized) ||
+      !isEligibleImplementationTargetPath(
+        normalized
+      )
+    ) {
+      continue;
+    }
+
+    let exists = false;
+    try {
+      const { absolute } =
+        safeRelativePath(normalized);
+      exists =
+        fs.existsSync(absolute) &&
+        fs.statSync(absolute).isFile();
+    } catch {
+      continue;
+    }
+
+    if (
+      existing === true &&
+      !exists
+    ) {
+      continue;
+    }
+
+    if (
+      existing === false &&
+      exists
+    ) {
+      continue;
+    }
+
+    output.push(normalized);
+  }
+
+  return [...new Set(output)];
+}
+
+function exactCreatableMutationPaths() {
+  return exactScopedMutationPaths({
+    existing: false,
+  });
+}
+
+function exactExistingMutationPaths() {
+  return exactScopedMutationPaths({
+    existing: true,
+  });
+}
+
 function developmentPhase() {
   if (sawMutatingTool) return "verification";
 
@@ -2374,6 +2602,16 @@ function toolsForCurrentPhase() {
         !rootCauseMutationTargetVerified
       ) {
         return false;
+      }
+
+      const createTargets =
+        exactCreatableMutationPaths();
+
+      if (
+        implementationTargetPaths.length === 0 &&
+        createTargets.length > 0
+      ) {
+        return name === "write_file";
       }
 
       return mutationToolNames.has(name);
@@ -3226,24 +3464,50 @@ function recordToolEvidence(name, result, args = {}) {
                 1200
               )
           );
-        } else if (taskAllowedGlobs.length > 0) {
-          implementationReadCompleted = true;
-          stage(
-            "local_agent_create_target_ready",
-            gapLabel +
-              " mevcut izinli mutation hedefi bulunmadı • task allowedScope yeni dosya oluşturma contract'ı olarak kullanılacak • allow=" +
-              truncate(
-                JSON.stringify(taskAllowedGlobs),
-                1200
-              )
-          );
         } else {
-          implementationReadCompleted = false;
-          stage(
-            "local_agent_target_not_found",
-            gapLabel +
-              " arama sonucu var ancak güvenli mutation hedefi yok"
-          );
+          const existingScopeTargets =
+            exactExistingMutationPaths();
+          const createTargets =
+            exactCreatableMutationPaths();
+
+          if (existingScopeTargets.length > 0) {
+            implementationTargetPaths =
+              existingScopeTargets.slice(0, 8);
+            implementationReadCompleted = false;
+
+            stage(
+              "local_agent_scope_target_fallback",
+              gapLabel +
+                " search eşleşmesi mutation hedefi vermedi; active scope içindeki mevcut dosya doğrulanacak • targets=" +
+                truncate(
+                  JSON.stringify(
+                    implementationTargetPaths
+                  ),
+                  1200
+                )
+            );
+          } else if (createTargets.length > 0) {
+            implementationReadCompleted = true;
+
+            stage(
+              "local_agent_create_target_ready",
+              gapLabel +
+                " active scope yalnız yeni dosya hedefi içeriyor • write_file contract aktif • targets=" +
+                truncate(
+                  JSON.stringify(
+                    createTargets
+                  ),
+                  1200
+                )
+            );
+          } else {
+            implementationReadCompleted = false;
+            stage(
+              "local_agent_target_not_found",
+              gapLabel +
+                " arama sonucu var ancak güvenli mutation hedefi yok"
+            );
+          }
         }
       }
     }
@@ -3584,6 +3848,8 @@ function compactControllerEvidence(
     implementationReadCompleted,
     implementationTargetPaths:
       implementationTargetPaths.slice(0, 8),
+    implementationCreateTargetPaths:
+      exactCreatableMutationPaths().slice(0, 8),
     failedMutationFingerprints:
       [...failedMutationFingerprints]
         .slice(-6)
@@ -3793,10 +4059,260 @@ async function prepareDecisionModel(
   }
 }
 
+function checkpointReadEvidenceForPath(
+  targetPath
+) {
+  const normalized =
+    normalizeRepoRelativePath(targetPath);
+
+  return [...checkpointEvidence]
+    .reverse()
+    .find((item) => {
+      if (!item || item.tool !== "read_file") {
+        return false;
+      }
+
+      const parsedResult =
+        parseCheckpointJSON(
+          item.result,
+          {}
+        );
+      const parsedArgs =
+        parseCheckpointJSON(
+          item.args,
+          {}
+        );
+      const readPath =
+        normalizeRepoRelativePath(
+          String(
+            parsedResult?.path ||
+            parsedArgs?.path ||
+            ""
+          )
+        );
+
+      return readPath === normalized;
+    }) || null;
+}
+
+function checkpointSearchLineForPath(
+  targetPath
+) {
+  const normalized =
+    normalizeRepoRelativePath(targetPath);
+
+  for (
+    const item of
+      [...checkpointEvidence].reverse()
+  ) {
+    if (!item || item.tool !== "search_codebase") {
+      continue;
+    }
+
+    const parsedResult =
+      parseCheckpointJSON(
+        item.result,
+        {}
+      );
+    const matches =
+      Array.isArray(parsedResult?.matches)
+        ? parsedResult.matches
+        : [];
+
+    for (const raw of matches) {
+      const value = String(raw || "");
+      const match =
+        value.match(
+          /^(.+?):(\d+):(.*)$/
+        );
+
+      if (!match) continue;
+
+      if (
+        normalizeRepoRelativePath(
+          match[1]
+        ) === normalized
+      ) {
+        return Number(match[2]);
+      }
+    }
+  }
+
+  return null;
+}
+
+function verifiedReadMutationOldText(
+  targetPath
+) {
+  const readEvidence =
+    checkpointReadEvidenceForPath(
+      targetPath
+    );
+
+  if (!readEvidence) {
+    return "";
+  }
+
+  const parsedResult =
+    parseCheckpointJSON(
+      readEvidence.result,
+      {}
+    );
+  const startLine =
+    Number(parsedResult?.start_line || 0);
+  const endLine =
+    Number(parsedResult?.end_line || 0);
+  const rawContent =
+    String(parsedResult?.content || "");
+
+  if (
+    !rawContent ||
+    startLine < 1 ||
+    endLine < startLine
+  ) {
+    return "";
+  }
+
+  const exactReadSource =
+    rawContent
+      .split("\n")
+      .map((line) =>
+        line.replace(
+          /^\s*\d+\s*\|\s?/,
+          ""
+        )
+      )
+      .join("\n");
+
+  try {
+    const { absolute } =
+      safeRelativePath(targetPath);
+    const source =
+      fs.readFileSync(
+        absolute,
+        "utf8"
+      );
+    const sourceLines =
+      source.split("\n");
+    const liveReadSlice =
+      sourceLines
+        .slice(
+          startLine - 1,
+          endLine
+        )
+        .join("\n");
+
+    if (liveReadSlice !== exactReadSource) {
+      stage(
+        "local_agent_verified_mutation_packet_stale",
+        gapLabel +
+          " verified read source değişmiş • path=" +
+          targetPath
+      );
+      return "";
+    }
+
+    const searchLine =
+      checkpointSearchLineForPath(
+        targetPath
+      );
+
+    const tryWindow = (
+      fromLine,
+      toLine
+    ) => {
+      const start =
+        Math.max(
+          startLine,
+          fromLine
+        );
+      const end =
+        Math.min(
+          endLine,
+          toLine
+        );
+
+      if (end < start) return "";
+
+      const candidate =
+        sourceLines
+          .slice(
+            start - 1,
+            end
+          )
+          .join("\n");
+
+      if (
+        candidate.length < 80 ||
+        candidate.length > 3600
+      ) {
+        return "";
+      }
+
+      const occurrences =
+        source.split(candidate).length - 1;
+
+      return occurrences === 1
+        ? candidate
+        : "";
+    };
+
+    if (
+      Number.isFinite(searchLine) &&
+      searchLine >= startLine &&
+      searchLine <= endLine
+    ) {
+      for (const radius of [4, 8, 12, 18]) {
+        const candidate =
+          tryWindow(
+            searchLine - radius,
+            searchLine + radius
+          );
+
+        if (candidate) {
+          stage(
+            "local_agent_verified_mutation_packet_ready",
+            gapLabel +
+              " exact read/search packet hazır • path=" +
+              targetPath +
+              " • line=" +
+              searchLine +
+              " • chars=" +
+              candidate.length
+          );
+          return candidate;
+        }
+      }
+    }
+
+    if (
+      exactReadSource.length >= 80 &&
+      exactReadSource.length <= 3600 &&
+      source.split(
+        exactReadSource
+      ).length - 1 === 1
+    ) {
+      stage(
+        "local_agent_verified_mutation_packet_ready",
+        gapLabel +
+          " exact read packet hazır • path=" +
+          targetPath +
+          " • range=" +
+          startLine +
+          "-" +
+          endLine +
+          " • chars=" +
+          exactReadSource.length
+      );
+      return exactReadSource;
+    }
+  } catch {}
+
+  return "";
+}
+
 function verifiedInitialMutationOldText() {
   if (
-    !rootCauseMutationTargetVerified ||
-    !verifiedMutationSource ||
     implementationTargetPaths.length !== 1
   ) {
     return "";
@@ -3816,27 +4332,43 @@ function verifiedInitialMutationOldText() {
         "utf8"
       );
 
-    const occurrences =
-      source.split(
-        verifiedMutationSource
-      ).length - 1;
+    if (
+      rootCauseMutationTargetVerified &&
+      verifiedMutationSource
+    ) {
+      const occurrences =
+        source.split(
+          verifiedMutationSource
+        ).length - 1;
 
-    if (occurrences !== 1) {
+      if (occurrences === 1) {
+        return verifiedMutationSource;
+      }
+
       stage(
         "local_agent_verified_anchor_inconclusive",
         gapLabel +
-          " verified source exact anchor benzersiz değil • occurrences=" +
+          " root-cause verified source exact anchor benzersiz değil • occurrences=" +
           occurrences +
           " • path=" +
           targetPath
       );
-      return "";
     }
 
-    return verifiedMutationSource;
-  } catch {
-    return "";
-  }
+    if (
+      implementationReadCompleted &&
+      (
+        !requireRootCauseGate ||
+        rootCauseMutationTargetVerified
+      )
+    ) {
+      return verifiedReadMutationOldText(
+        targetPath
+      );
+    }
+  } catch {}
+
+  return "";
 }
 
 async function requestStructuredToolDecision(
@@ -3890,12 +4422,29 @@ async function requestStructuredToolDecision(
     initialMutation ||
     exactReplaceFailure
   ) {
-    const replaceContract = toolContracts.find(
-      (tool) => tool.name === "replace_text"
-    );
+    const createTargets =
+      exactCreatableMutationPaths();
 
-    if (replaceContract) {
-      toolContracts = [replaceContract];
+    if (
+      initialMutation &&
+      implementationTargetPaths.length === 0 &&
+      createTargets.length > 0
+    ) {
+      const writeContract = toolContracts.find(
+        (tool) => tool.name === "write_file"
+      );
+
+      if (writeContract) {
+        toolContracts = [writeContract];
+      }
+    } else {
+      const replaceContract = toolContracts.find(
+        (tool) => tool.name === "replace_text"
+      );
+
+      if (replaceContract) {
+        toolContracts = [replaceContract];
+      }
     }
   }
 
@@ -3961,7 +4510,7 @@ async function requestStructuredToolDecision(
     !fixedInitialOldText
   ) {
     return rejectStructuredDecision(
-      "verified mutation source exact anchor üretilemedi"
+      "verified mutation packet exact anchor üretilemedi"
     );
   }
 
@@ -4024,7 +4573,7 @@ async function requestStructuredToolDecision(
         : [
             "You are KRALI Exact Mutation Architect.",
             "Return JSON matching the supplied schema and nothing else.",
-            "The target path, tool, and exact old_text are already fixed by KRALI.",
+            "The target path, tool, and exact old_text are already fixed by KRALI from a verified mutation packet.",
             "Return only the corrected new_text replacement for fixed_old_text.",
             "Do not choose, shorten, expand, or invent an old_text anchor.",
             "new_text must replace the complete verified function/source definition and remain syntactically complete.",
@@ -4046,6 +4595,7 @@ async function requestStructuredToolDecision(
           "Respect the supplied development phase and available tool contracts.",
           "During inspection, select the minimum real inspection tool needed.",
           "During implementation, obey the supplied tool contracts exactly. If only mutation tools are supplied, choose a minimal mutation tool now; do not answer with prose.",
+          "If controllerEvidence.implementationCreateTargetPaths is non-empty and write_file is the only supplied mutation tool, choose exactly one path from that list; never invent another create path.",
           "lastVerifiedRead.content contains only exact source characters copied from disk; it never contains truncation markers or synthetic suffixes. For replace_text, copy old_text exactly from this source window; never invent or extend beyond the visible source.",
           "A replace_text old_text must be a sufficiently long unique source block, preferably at least 3 complete lines. Never use a short identifier fragment, partial token, prefix completion, or typo-like replacement.",
           "new_text must be a meaningful logic change, not merely completion of a truncated identifier that already exists in source.",
@@ -8123,6 +8673,18 @@ if (developerTaskGraph) {
         ? "selected"
         : "unknown";
 
+  const graphScopeRepairCount =
+    developerTaskGraph.nodes.reduce(
+      (total, node) =>
+        total +
+        (
+          Array.isArray(node.scopeRepairs)
+            ? node.scopeRepairs.length
+            : 0
+        ),
+      0
+    );
+
   stage(
     "local_agent_task_graph_ready",
     gapLabel +
@@ -8130,6 +8692,8 @@ if (developerTaskGraph) {
       graphSource +
       " • nodes=" +
       developerTaskGraph.nodes.length +
+      " • scopeRepairs=" +
+      graphScopeRepairCount +
       " • active=" +
       String(
         activeDeveloperSubtask()?.id || "none"

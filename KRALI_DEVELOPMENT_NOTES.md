@@ -625,3 +625,15 @@ Target runtime:
 - Added dedicated local execution profile CI self-test and orchestration invariants.
 - VERSION 0.10.42 / build 215.
 
+## v0.10.43 progress
+
+- v0.10.42 real run proved local controller selection and extended timeout profiles work, but baseline Task Graph was rejected because the planner emitted App/KRALIAgentNative/** while the task card authorized only concrete files.
+- Added deterministic parent-scope repair in the task decomposer. Broad planner wildcards are intersected with concrete parent allowedScope entries and narrowed by task/path affinity; authority never widens.
+- Added the same repair layer in native Task Graph loading so Teacher-reviewed or other plan artifacts cannot bypass the parent contract and safe repair does not depend on one planner implementation.
+- Task Graph Mentor status now reports scopeRepairs count.
+- Added generic verified mutation packets for non-runtime capability tasks. The packet is derived from exact successful read/search evidence, checked against current live source, and requires a unique exact anchor.
+- Structured replace mutation receives fixed path + fixed old_text and can only produce new_text. Invented or stale anchors remain rejected.
+- Create-only scoped targets are handled separately with deterministic write_file contracts; existing scoped files are read before replace mutation.
+- Added scope-mutation contract CI self-test and expanded Task Graph invariants.
+- VERSION 0.10.43 / build 216.
+

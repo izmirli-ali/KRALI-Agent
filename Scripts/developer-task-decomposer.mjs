@@ -150,6 +150,150 @@ const schema = {
   },
 };
 
+function affinityTokens(value) {
+  return String(value || "")
+    .replace(/([a-z0-9])([A-Z])/g, "$1 $2")
+    .toLowerCase()
+    .split(/[^a-z0-9]+/)
+    .filter((token) => token.length >= 3);
+}
+
+function affinityClampParentMatches(
+  matches,
+  descriptor
+) {
+  if (!Array.isArray(matches) || matches.length <= 1) {
+    return matches;
+  }
+
+  const descriptorTokens =
+    new Set(affinityTokens(descriptor));
+
+  if (descriptorTokens.size === 0) {
+    return matches;
+  }
+
+  const scored = matches.map((parentScope) => {
+    const pathTokens =
+      affinityTokens(parentScope);
+    const score =
+      pathTokens.filter((token) =>
+        descriptorTokens.has(token)
+      ).length;
+
+    return {
+      parentScope,
+      score,
+    };
+  });
+
+  const maxScore =
+    Math.max(
+      0,
+      ...scored.map((item) => item.score)
+    );
+
+  if (maxScore <= 0) {
+    return matches;
+  }
+
+  return scored
+    .filter((item) => item.score === maxScore)
+    .map((item) => item.parentScope);
+}
+
+function repairScopeToParent(
+  requestedScope,
+  task,
+  descriptor = ""
+) {
+  const requested = Array.isArray(requestedScope)
+    ? requestedScope.map(normalizeScope).filter(Boolean)
+    : [];
+
+  const repaired = [];
+  const repairs = [];
+
+  for (const scope of requested) {
+    if (
+      !scope ||
+      scope.startsWith("/") ||
+      scope.split("/").includes("..") ||
+      matchesAnyGlob(scope, task.forbiddenScope)
+    ) {
+      return {
+        ok: false,
+        reason: "scope-forbidden:" + scope,
+      };
+    }
+
+    const wildcard = /[*?]/.test(scope);
+
+    if (!wildcard) {
+      if (
+        task.allowedScope.includes(scope) ||
+        matchesAnyGlob(scope, task.allowedScope)
+      ) {
+        repaired.push(scope);
+        continue;
+      }
+
+      return {
+        ok: false,
+        reason: "scope-outside-parent:" + scope,
+      };
+    }
+
+    if (task.allowedScope.includes(scope)) {
+      repaired.push(scope);
+      continue;
+    }
+
+    const safeMatches = task.allowedScope.filter((parentScope) => {
+      if (!parentScope) return false;
+
+      if (matchesAnyGlob(parentScope, task.forbiddenScope)) {
+        return false;
+      }
+
+      const parentWildcard = /[*?]/.test(parentScope);
+
+      if (parentWildcard) {
+        return parentScope === scope;
+      }
+
+      return globToRegExp(scope).test(parentScope);
+    });
+
+    const affinityMatches =
+      affinityClampParentMatches(
+        safeMatches,
+        descriptor
+      );
+
+    if (affinityMatches.length === 0) {
+      return {
+        ok: false,
+        reason: "scope-outside-parent:" + scope,
+      };
+    }
+
+    repaired.push(...affinityMatches);
+    repairs.push({
+      requested: scope,
+      clampedTo: affinityMatches,
+      affinityApplied:
+        affinityMatches.length < safeMatches.length,
+    });
+  }
+
+  return {
+    ok: true,
+    scope: [...new Set(repaired)],
+    repairs,
+  };
+}
+
 function validatePlan(plan, task) {
   if (
     !plan ||
@@ -160,23 +304,49 @@ function validatePlan(plan, task) {
     return { ok: false, reason: "subtasks-invalid" };
   }
 
-  const nodes = plan.subtasks.map((raw, order) => ({
-    id: String(raw?.id || "").trim(),
-    title: String(raw?.title || "").trim(),
-    depends_on: Array.isArray(raw?.depends_on)
-      ? raw.depends_on
-          .map((value) => String(value || "").trim())
-          .filter(Boolean)
-      : [],
-    scope: Array.isArray(raw?.scope)
-      ? raw.scope
-          .map(normalizeScope)
-          .filter(Boolean)
-      : [],
-    expected_result: String(raw?.expected_result || "").trim(),
-    verification: String(raw?.verification || "").trim(),
-    order,
-  }));
+  const scopeRepairs = [];
+  const nodes = [];
+
+  for (const [order, raw] of plan.subtasks.entries()) {
+    const repairedScope = repairScopeToParent(
+      raw?.scope,
+      task,
+      [
+        raw?.id,
+        raw?.title,
+        raw?.expected_result,
+        raw?.verification,
+      ].join(" ")
+    );
+
+    if (!repairedScope.ok) {
+      return {
+        ok: false,
+        reason: repairedScope.reason,
+      };
+    }
+
+    scopeRepairs.push(
+      ...repairedScope.repairs.map((repair) => ({
+        nodeID: String(raw?.id || "").trim(),
+        ...repair,
+      }))
+    );
+
+    nodes.push({
+      id: String(raw?.id || "").trim(),
+      title: String(raw?.title || "").trim(),
+      depends_on: Array.isArray(raw?.depends_on)
+        ? raw.depends_on
+            .map((value) => String(value || "").trim())
+            .filter(Boolean)
+        : [],
+      scope: repairedScope.scope,
+      expected_result: String(raw?.expected_result || "").trim(),
+      verification: String(raw?.verification || "").trim(),
+      order,
+    });
+  }
 
   if (
     nodes.some(
@@ -214,10 +384,9 @@ function validatePlan(plan, task) {
         return { ok: false, reason: "scope-forbidden" };
       }
 
-      const wildcard = /[*?]/.test(scope);
-      const withinParent = wildcard
-        ? task.allowedScope.includes(scope)
-        : matchesAnyGlob(scope, task.allowedScope);
+      const withinParent =
+        task.allowedScope.includes(scope) ||
+        matchesAnyGlob(scope, task.allowedScope);
 
       if (!withinParent) {
         return {
@@ -254,7 +423,11 @@ function validatePlan(plan, task) {
     }
   }
 
-  return { ok: true, nodes };
+  return {
+    ok: true,
+    nodes,
+    scopeRepairs,
+  };
 }
 
 function extractContent(payload) {
@@ -282,6 +455,15 @@ function selfTest() {
   const task = {
     allowedScope: [
       "App/**",
+      "Scripts/example-self-test.mjs",
+    ],
+    forbiddenScope: ["Mentor/**"],
+  };
+
+  const concreteTask = {
+    allowedScope: [
+      "App/Test.swift",
+      "App/Other.swift",
       "Scripts/example-self-test.mjs",
     ],
     forbiddenScope: ["Mentor/**"],
@@ -323,9 +505,27 @@ function selfTest() {
     ],
   };
 
+  const repairable = {
+    summary: "repairable",
+    subtasks: [
+      {
+        id: "app",
+        title: "Test app file",
+        depends_on: [],
+        scope: ["App/**"],
+        expected_result: "bounded app change",
+        verification: "build_check",
+      },
+    ],
+  };
+
   const checks = [
     validatePlan(good, task).ok === true,
     validatePlan(bad, task).ok === false,
+    validatePlan(repairable, concreteTask).ok === true,
+    validatePlan(repairable, concreteTask).scopeRepairs.length === 1,
+    validatePlan(repairable, concreteTask).nodes[0].scope.includes("App/Test.swift"),
+    validatePlan(repairable, concreteTask).nodes[0].scope.length === 1,
     globToRegExp("App/**").test("App/Foo.swift"),
     !globToRegExp("App/**").test("Mentor/Foo.swift"),
     parseJSONContent('prefix {"summary":"x","subtasks":[]} suffix')
@@ -339,7 +539,8 @@ function selfTest() {
   process.stdout.write(
     "developer_task_decomposer_self_test_ok\n" +
     "planner_authority=advisory_graph_only\n" +
-    "scope_widening=forbidden\n"
+    "scope_widening=forbidden\n" +
+    "scope_clamp=parent_contract_only\n"
   );
 }
 
@@ -380,6 +581,7 @@ const systemPrompt = [
   "Every subtask must require a real code/file mutation. Do NOT create a verification-only final node; parent task verification runs after the graph.",
   "Prefer 2-5 subtasks for multi-surface work. Use one subtask only when the task is truly atomic.",
   "Subtask scope must be a strict subset of the parent allowedScope. Never add paths not permitted by parent allowedScope and never include forbiddenScope.",
+  "For scope values, copy exact path entries from parent allowedScope whenever possible. Do not invent broader directory wildcards such as App/** or Scripts/**.",
   "Preserve existing APIs unless the task explicitly requires breaking/replacing them. For primitivePatch work, prefer surgical extension over rewrites.",
   "Order dependencies so data/model foundations precede wiring and wiring precedes UI.",
   "Verification is a short intent description for that node; deterministic build_check is still mandatory after every node.",
@@ -475,6 +677,7 @@ const artifact = {
       expected_result: node.expected_result,
       verification: node.verification,
     })),
+    scope_repairs: validated.scopeRepairs,
     findings: [],
     generalized_lessons: [],
   },
@@ -497,5 +700,7 @@ fs.writeFileSync(
 process.stdout.write(
   "developer_task_decomposer_ok|nodes=" +
     validated.nodes.length +
+    "|scope_repairs=" +
+    validated.scopeRepairs.length +
     "\n"
 );
