@@ -544,7 +544,7 @@ struct AgentDevelopmentResearchVerifier {
                 $0.tier == .b
             }
 
-        let origins =
+        let origins: Set<String> =
             Set(
                 highQuality.map(\.origin)
             )
@@ -557,9 +557,9 @@ struct AgentDevelopmentResearchVerifier {
                     }
             )
 
-        let qualifyingEvidenceIDs =
+        let qualifyingEvidenceIDs: Set<String> =
             Set(
-                evidence.compactMap { item in
+                evidence.compactMap { item -> String? in
                     guard
                         item.tier == .a ||
                         item.tier == .b
@@ -570,9 +570,9 @@ struct AgentDevelopmentResearchVerifier {
                 }
             )
 
-        let coveredFacetIDs =
+        let coveredFacetIDs: Set<String> =
             Set(
-                evidence.compactMap { item in
+                evidence.compactMap { item -> String? in
                     qualifyingEvidenceIDs
                         .contains(item.id)
                     ? item.facetID
