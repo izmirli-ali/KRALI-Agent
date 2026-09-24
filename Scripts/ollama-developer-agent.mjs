@@ -32,6 +32,8 @@ const fallbackDeveloperTaskPlanFile =
   process.env.KRALI_DEVELOPER_TASK_FALLBACK_PLAN_FILE || "";
 const surfaceGuardBase =
   process.env.KRALI_SURFACE_GUARD_BASE || "";
+const trustedSurfaceGuardScript =
+  process.env.KRALI_SURFACE_GUARD_SCRIPT || "";
 const devTaskFile =
   process.env.KRALI_DEV_TASK_FILE || "";
 const learningPath =
@@ -1955,11 +1957,13 @@ function executeTool(name, args = {}) {
     }
 
     case "build_check": {
-      const surfaceGuard = path.join(
-        root,
-        "Scripts",
-        "developer-candidate-surface-guard.mjs"
-      );
+      const surfaceGuard =
+        trustedSurfaceGuardScript ||
+        path.join(
+          root,
+          "Scripts",
+          "developer-candidate-surface-guard.mjs"
+        );
 
       if (fs.existsSync(surfaceGuard)) {
         const guardArgs = [
