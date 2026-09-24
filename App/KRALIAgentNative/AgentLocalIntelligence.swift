@@ -2196,28 +2196,6 @@ actor AgentLocalIntelligence {
                 return nil
             }
 
-            let compactEvidence = evidencePackage.evidence
-                .prefix(12)
-                .map { item in
-                    let range: String
-                    if let start = item.lineStart,
-                       let end = item.lineEnd {
-                        range = ":\(start)-\(end)"
-                    } else {
-                        range = ""
-                    }
-
-                    return """
-                    [\(item.id)] kind=\(item.kind) path=\(item.path)\(range)
-                    matched=\(item.matchedTerms.prefix(8).joined(separator: ","))
-                    excerpt:
-                    \(String(item.excerpt.prefix(1100)))
-                    """
-                }
-                .joined(separator: "\n\n")
-
-            let sourceIdentity = evidencePackage.sourceIdentity
-
             let instructions = """
             Sen KRALİ'nin kendi kaynak kodunu teşhis eden read-only developer reasoning katmanısın.
 
@@ -2238,52 +2216,139 @@ actor AgentLocalIntelligence {
             - Tek siteye veya tek senaryoya hard-code çözüm üretme.
             """
 
-            let prompt = """
-            SELF-DIAGNOSIS GOAL
-            \(String(userInput.prefix(2200)))
+            struct PromptBudget {
+                let goalCharacters: Int
+                let sourceCount: Int
+                let diagnosticCount: Int
+                let sourceExcerptCharacters: Int
+                let diagnosticExcerptCharacters: Int
+                let queryTermCount: Int
+            }
 
-            EXACT SOURCE IDENTITY
-            repositoryPath=\(sourceIdentity.repositoryPath)
-            repositoryHead=\(sourceIdentity.repositoryHeadSHA ?? "unknown")
-            appSourceRevision=\(sourceIdentity.appSourceRevision ?? "unknown")
-            repositoryVersion=\(sourceIdentity.repositoryVersion ?? "unknown")
-            appVersion=\(sourceIdentity.appVersion)
-            exactRevisionMatch=\(sourceIdentity.exactRevisionMatch)
-            exactVersionMatch=\(sourceIdentity.exactVersionMatch)
-            workingTreeClean=\(sourceIdentity.workingTreeClean)
+            let budgets = [
+                PromptBudget(
+                    goalCharacters: 1100,
+                    sourceCount: 6,
+                    diagnosticCount: 2,
+                    sourceExcerptCharacters: 520,
+                    diagnosticExcerptCharacters: 700,
+                    queryTermCount: 16
+                ),
+                PromptBudget(
+                    goalCharacters: 650,
+                    sourceCount: 4,
+                    diagnosticCount: 1,
+                    sourceExcerptCharacters: 320,
+                    diagnosticExcerptCharacters: 420,
+                    queryTermCount: 10
+                )
+            ]
 
-            QUERY TERMS
-            \(evidencePackage.queryTerms.prefix(24).joined(separator: ", "))
+            let sourceIdentity = evidencePackage.sourceIdentity
+            let sourceEvidence = evidencePackage.evidence.filter {
+                $0.kind == "source"
+            }
+            let diagnosticEvidence = evidencePackage.evidence.filter {
+                $0.kind == "diagnostic_history"
+            }
+            let missionEvidence = evidencePackage.evidence.filter {
+                $0.kind == "mission_input"
+            }
 
-            READ-ONLY EVIDENCE
-            \(compactEvidence)
+            func evidenceText(
+                budget: PromptBudget
+            ) -> String {
+                var selected: [AgentSelfDiagnosisEvidence] = []
 
-            Beklenen değerlendirme:
-            - failureReconstruction: kanıta dayalı başarısızlık zinciri
-            - proximateCause: en yakın teknik neden
-            - architecturalRootCause: temel mimari neden veya UNKNOWN
-            - rootCauseEvidenceIDs: gerçek E-id listesi
-            - confidence: yalnız HIGH, MEDIUM veya LOW
-            - architectureInspected: ilgili dosya/mimari alanlar
-            - capabilityAssessment: mevcut capability'lerin kanıtlı değerlendirmesi
-            - alternatives: evidence yeterliyse en az iki çözüm
-            - decision: NO CHANGE, IMPROVE, MERGE veya CREATE ile kısa gerekçe
-            - developmentProposal: gelecekteki bounded task için taslak
-            - remainingLimitations: doğrulanmamış noktalar
-            """
-
-            do {
-                let session = LanguageModelSession(
-                    model: model,
-                    instructions: instructions
+                selected.append(
+                    contentsOf:
+                        sourceEvidence.prefix(
+                            budget.sourceCount
+                        )
                 )
 
-                let response = try await session.respond(
-                    to: prompt,
-                    generating: SelfDiagnosisGeneratedOutput.self
+                selected.append(
+                    contentsOf:
+                        diagnosticEvidence.prefix(
+                            budget.diagnosticCount
+                        )
                 )
-                let generated = response.content
 
+                if diagnosticEvidence.isEmpty,
+                   let mission = missionEvidence.first {
+                    selected.append(mission)
+                }
+
+                return selected.map { item in
+                    let range: String
+                    if let start = item.lineStart,
+                       let end = item.lineEnd {
+                        range = ":\(start)-\(end)"
+                    } else {
+                        range = ""
+                    }
+
+                    let excerptLimit =
+                        item.kind == "diagnostic_history"
+                        ? budget.diagnosticExcerptCharacters
+                        : budget.sourceExcerptCharacters
+
+                    return """
+                    [\(item.id)] kind=\(item.kind) path=\(item.path)\(range)
+                    matched=\(item.matchedTerms.prefix(6).joined(separator: ","))
+                    excerpt:
+                    \(String(item.excerpt.prefix(excerptLimit)))
+                    """
+                }
+                .joined(separator: "\n\n")
+            }
+
+            func prompt(
+                budget: PromptBudget
+            ) -> String {
+                let compactEvidence =
+                    evidenceText(
+                        budget: budget
+                    )
+
+                return """
+                SELF-DIAGNOSIS GOAL
+                \(String(userInput.prefix(budget.goalCharacters)))
+
+                EXACT SOURCE IDENTITY
+                repositoryPath=\(sourceIdentity.repositoryPath)
+                repositoryHead=\(sourceIdentity.repositoryHeadSHA ?? "unknown")
+                appSourceRevision=\(sourceIdentity.appSourceRevision ?? "unknown")
+                repositoryVersion=\(sourceIdentity.repositoryVersion ?? "unknown")
+                appVersion=\(sourceIdentity.appVersion)
+                exactRevisionMatch=\(sourceIdentity.exactRevisionMatch)
+                exactVersionMatch=\(sourceIdentity.exactVersionMatch)
+                workingTreeClean=\(sourceIdentity.workingTreeClean)
+
+                QUERY TERMS
+                \(evidencePackage.queryTerms.prefix(budget.queryTermCount).joined(separator: ", "))
+
+                READ-ONLY EVIDENCE
+                \(compactEvidence)
+
+                Beklenen değerlendirme:
+                - failureReconstruction: kanıta dayalı başarısızlık zinciri
+                - proximateCause: en yakın teknik neden
+                - architecturalRootCause: temel mimari neden veya UNKNOWN
+                - rootCauseEvidenceIDs: gerçek E-id listesi
+                - confidence: yalnız HIGH, MEDIUM veya LOW
+                - architectureInspected: ilgili dosya/mimari alanlar
+                - capabilityAssessment: mevcut capability'lerin kanıtlı değerlendirmesi
+                - alternatives: evidence yeterliyse en az iki çözüm
+                - decision: NO CHANGE, IMPROVE, MERGE veya CREATE ile kısa gerekçe
+                - developmentProposal: gelecekteki bounded task için taslak
+                - remainingLimitations: doğrulanmamış noktalar
+                """
+            }
+
+            func convert(
+                _ generated: SelfDiagnosisGeneratedOutput
+            ) -> AgentSelfDiagnosisModelOutput? {
                 guard let confidence =
                     AgentSelfDiagnosisConfidence(
                         rawValue:
@@ -2383,13 +2448,51 @@ actor AgentLocalIntelligence {
                 }
 
                 return output
-            } catch {
-                lastSelfDiagnosisReasoningFailure =
-                    "Guided self-diagnosis generation failed: " +
-                    String(describing: error)
-                        .prefix(900)
-                return nil
             }
+
+            var failures: [String] = []
+
+            for (index, budget) in budgets.enumerated() {
+                do {
+                    let session = LanguageModelSession(
+                        model: model,
+                        instructions: instructions
+                    )
+
+                    let response = try await session.respond(
+                        to: prompt(
+                            budget: budget
+                        ),
+                        generating:
+                            SelfDiagnosisGeneratedOutput.self
+                    )
+
+                    if let output =
+                        convert(response.content) {
+                        return output
+                    }
+
+                    failures.append(
+                        lastSelfDiagnosisReasoningFailure ??
+                        "Guided generation output validation failed."
+                    )
+                } catch {
+                    let detail =
+                        String(describing: error)
+
+                    failures.append(
+                        "attempt \(index + 1): " +
+                        String(detail.prefix(700))
+                    )
+                }
+            }
+
+            lastSelfDiagnosisReasoningFailure =
+                "Guided self-diagnosis exhausted bounded context attempts: " +
+                failures.joined(separator: " | ")
+                    .prefix(1400)
+
+            return nil
         }
         #endif
 
