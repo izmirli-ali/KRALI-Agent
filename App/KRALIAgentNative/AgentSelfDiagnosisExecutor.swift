@@ -652,13 +652,17 @@ struct AgentSelfDiagnosisExecutor {
 
         let rootCauseClaim =
             modelOutput.architecturalRootCause
+        let causalClaimContext =
+            modelOutput.proximateCause +
+            "\n" +
+            rootCauseClaim
 
         let supportingSourceEvidence =
             citedEvidence.filter {
                 $0.kind == "source" &&
                 evidenceSupportsRootCause(
                     $0,
-                    claim: rootCauseClaim
+                    claim: causalClaimContext
                 )
             }
 
@@ -670,7 +674,7 @@ struct AgentSelfDiagnosisExecutor {
                 ) &&
                 evidenceSupportsRootCause(
                     $0,
-                    claim: rootCauseClaim
+                    claim: causalClaimContext
                 )
             }
 
