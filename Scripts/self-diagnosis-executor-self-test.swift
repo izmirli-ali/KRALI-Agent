@@ -161,6 +161,41 @@ struct SelfDiagnosisExecutorSelfTest {
 
         write(
             """
+            struct AgentOutcomePlanner {
+                func strategies(availableCapabilityIDs: Set<String>) {
+                    let kind = "retrievePublicInformation"
+                    let preferredCapabilityIDs = ["research.web"]
+                    let acceptableCapabilityIDs = [
+                        "research.web",
+                        "browser.control"
+                    ]
+                    let executableNow =
+                        availableCapabilityIDs.contains("research.web")
+                    _ = kind
+                    _ = preferredCapabilityIDs
+                    _ = acceptableCapabilityIDs
+                    _ = executableNow
+                }
+            }
+            """,
+            to: root.appendingPathComponent(
+                "App/AgentOutcomePlanner.swift"
+            )
+        )
+
+        write(
+            String(
+                repeating:
+                    "research browser planner semantic mission task graph capability evidence verification source runtime\n",
+                count: 120
+            ),
+            to: root.appendingPathComponent(
+                "App/AgentEngine.swift"
+            )
+        )
+
+        write(
+            """
             struct ResearchNotes {
                 let primary = "research.web"
                 let optionalUI = "browser.control"
@@ -273,6 +308,44 @@ struct SelfDiagnosisExecutorSelfTest {
             ),
             "source evidence discovered"
         )
+        let sourceEvidence =
+            package.evidence.filter {
+                $0.kind == "source"
+            }
+        let outcomePlannerIndex =
+            sourceEvidence.firstIndex {
+                $0.path ==
+                    "App/AgentOutcomePlanner.swift"
+            }
+        let noisyEngineIndex =
+            sourceEvidence.firstIndex {
+                $0.path ==
+                    "App/AgentEngine.swift"
+            }
+
+        expect(
+            outcomePlannerIndex != nil,
+            "causal outcome planner evidence discovered"
+        )
+        if let outcomePlannerIndex,
+           let noisyEngineIndex {
+            expect(
+                outcomePlannerIndex <
+                    noisyEngineIndex,
+                "causal architecture outranks noisy generic source"
+            )
+        }
+        expect(
+            sourceEvidence.first(
+                where: {
+                    $0.path ==
+                        "App/AgentOutcomePlanner.swift"
+                }
+            )?.excerpt.contains(
+                "research.web"
+            ) == true,
+            "causal snippet contains public research mechanism"
+        )
         expect(
             package.evidence.contains(
                 where: {
@@ -297,7 +370,9 @@ struct SelfDiagnosisExecutorSelfTest {
             let sourceID =
                 package.evidence.first(
                     where: {
-                        $0.kind == "source"
+                        $0.kind == "source" &&
+                        $0.path ==
+                            "App/ResearchPlanner.swift"
                     }
                 )?.id,
             let failureID =
