@@ -82,6 +82,7 @@ struct MentorTrace: Codable {
     let developerRepository: String?
     let developerMissionReason: String?
     let developerRunID: String?
+    let selfDiagnosis: AgentSelfDiagnosisReport?
     let executionProfile: String
     let pausedCapabilities: [String]
     let semanticMission: AgentSemanticMission?
@@ -137,6 +138,7 @@ struct MentorTraceStore {
         developerRepository: AgentDeveloperRepository? = nil,
         developerMissionReason: String? = nil,
         developerRunID: String? = nil,
+        selfDiagnosis: AgentSelfDiagnosisReport? = nil,
         executionProfile: AgentExecutionProfile = .full,
         semanticMission: AgentSemanticMission?,
         semanticPlannerProvider: String?,
@@ -192,6 +194,7 @@ struct MentorTraceStore {
             developerRepository: developerRepository?.path,
             developerMissionReason: developerMissionReason,
             developerRunID: developerRunID,
+            selfDiagnosis: selfDiagnosis,
             executionProfile: executionProfile.rawValue,
             pausedCapabilities: executionProfile.pausedCapabilityIDs.sorted(),
             semanticMission: semanticMission,
