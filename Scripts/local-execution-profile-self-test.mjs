@@ -83,17 +83,24 @@ requireText(
   "coding model remains final structured-controller fallback"
 );
 
+const controllerBlockIndex = runner.indexOf(
+  "local controller_candidates=("
+);
 const knownLightIndex = runner.indexOf(
-  '"qwen2.5-coder:7b-instruct"'
+  '"qwen2.5-coder:7b-instruct"',
+  controllerBlockIndex
 );
 const dynamicIndex = runner.indexOf(
-  "list_existing_local_models_by_size"
+  "done < <(list_existing_local_models_by_size)",
+  controllerBlockIndex
 );
 const codingFallbackIndex = runner.indexOf(
-  'probe_existing_local_controller_model "$LOCAL_FALLBACK_MODEL"'
+  'probe_existing_local_controller_model "$LOCAL_FALLBACK_MODEL"',
+  controllerBlockIndex
 );
 
 if (
+  controllerBlockIndex < 0 ||
   knownLightIndex < 0 ||
   dynamicIndex < 0 ||
   codingFallbackIndex < 0 ||
