@@ -58,6 +58,7 @@ final class AgentEngine: ObservableObject {
     @Published var currentOutcomeResolution: AgentOutcomeResolution?
     @Published var currentOutcomeAttempts: [AgentOutcomeStrategyAttempt] = []
     @Published var currentReflectionSummary: String?
+    @Published var currentSelfDiagnosisReport: AgentSelfDiagnosisReport?
     @Published var currentCapabilityGaps: [CapabilityGapResolution] = []
     @Published var executionSteps: [AgentExecutionStep] = []
     @Published var verificationState: AgentVerificationState = .idle
@@ -124,6 +125,8 @@ final class AgentEngine: ObservableObject {
     private let developerBridge = AgentDeveloperBridge()
     private let missionRouter = AgentMissionRouter()
     private let developerRepositoryResolver = AgentDeveloperRepositoryResolver()
+    private let developerContextFirewall = AgentDeveloperContextFirewall()
+    private let selfDiagnosisExecutor = AgentSelfDiagnosisExecutor()
     private let developerToolSafetyPolicy =
         AgentDeveloperToolSafetyPolicy()
     private let learningQueueStore = AgentLearningQueueStore()
@@ -168,6 +171,48 @@ final class AgentEngine: ObservableObject {
             forInfoDictionaryKey:
                 "CFBundleShortVersionString"
         ) as? String ?? "unknown"
+    }
+
+    private var currentAppSourceRevision: String? {
+        if let value =
+            Bundle.main.object(
+                forInfoDictionaryKey:
+                    "KRALISourceRevision"
+            ) as? String {
+            let trimmed =
+                value.trimmingCharacters(
+                    in:
+                        .whitespacesAndNewlines
+                )
+            if !trimmed.isEmpty {
+                return trimmed
+            }
+        }
+
+        guard
+            let url = Bundle.main.url(
+                forResource:
+                    "KRALISourceRevision",
+                withExtension:
+                    "txt"
+            ),
+            let raw = try? String(
+                contentsOf: url,
+                encoding: .utf8
+            )
+        else {
+            return nil
+        }
+
+        let trimmed =
+            raw.trimmingCharacters(
+                in:
+                    .whitespacesAndNewlines
+            )
+
+        return trimmed.isEmpty
+            ? nil
+            : trimmed
     }
 
     /// The active runtime capability surface after execution-profile policy.
@@ -727,48 +772,290 @@ final class AgentEngine: ObservableObject {
         _ text: String,
         source: ChatInputSource
     ) -> Bool {
-        let routing = missionRouter.classify(text)
+        let routing =
+            missionRouter.classify(text)
         missionOwner = routing.owner
         missionPhase = routing.phase
-        developerMissionReason = routing.reason
+        developerMissionReason =
+            routing.reason
 
-        guard routing.owner != .runtime else { return false }
+        guard routing.owner != .runtime else {
+            return false
+        }
 
         currentTaskGraph = nil
         currentRuntimeTask = nil
         selectedCapabilities = []
         capabilityLearningPlans = []
+        currentCapabilityGaps = []
         executionSteps = []
-        activeRoute = routing.owner == .developer ? ["Core", "Developer", "Diagnosis"] : ["Core", "Stop"]
+        currentSelfDiagnosisReport = nil
+        activeRoute =
+            routing.owner == .developer
+            ? [
+                "Core",
+                "Developer",
+                "Diagnosis"
+            ]
+            : [
+                "Core",
+                "Stop"
+            ]
 
         if routing.owner == .stop {
-            currentGoal = "Self-development authority escalation"
-            currentPlan = "Stop → explicit user review"
-            verificationState = .attention
-            verificationSummary = routing.reason
-            postAssistantMessage("Bu self-development isteği korunan yetki içeriyor. KRALİ kendi kendine izin, merge, secret veya filesystem yetkisi veremez; normal runtime görevi de başlatılmadı.")
-            recordMentorTrace(input: text, source: source, goal: currentGoal, plan: currentPlan, route: activeRoute, capabilities: [], learningPlans: [], verification: AgentVerificationResult(state: .attention, summary: routing.reason, fallback: "Explicit user review is required."), intelligenceProvider: nil, finalResponse: messages.last?.text ?? "")
+            currentGoal =
+                "Self-development authority escalation"
+            currentPlan =
+                "Stop → explicit user review"
+            verificationState =
+                .attention
+            verificationSummary =
+                routing.reason
+
+            let reply =
+                "Bu self-development isteği korunan yetki içeriyor. KRALİ kendi kendine izin, merge, secret veya filesystem yetkisi veremez; normal runtime görevi de başlatılmadı."
+
+            postAssistantMessage(reply)
+
+            recordMentorTrace(
+                input: text,
+                source: source,
+                goal: currentGoal,
+                plan: currentPlan,
+                route: activeRoute,
+                capabilities: [],
+                learningPlans: [],
+                verification:
+                    AgentVerificationResult(
+                        state: .attention,
+                        summary:
+                            routing.reason,
+                        fallback:
+                            "Explicit user review is required."
+                    ),
+                intelligenceProvider: nil,
+                finalResponse: reply
+            )
             return true
         }
 
-        guard let repository = developerRepositoryResolver.resolve(userWorkspace: selectedRootURL) else {
-            currentGoal = "KRALİ self-development diagnosis"
-            currentPlan = "Stop → approved KRALİ repository identity required"
-            verificationState = .attention
-            verificationSummary = "Developer repository identity could not be resolved safely."
-            postAssistantMessage("Bu hedef Developer Mission olarak sınıflandı; ancak KRALİ kaynak deposu güvenle doğrulanamadı. Kullanıcı çalışma alanı developer kaynağı olarak kullanılmadı ve mutation başlatılmadı.")
-            recordMentorTrace(input: text, source: source, goal: currentGoal, plan: currentPlan, route: activeRoute, capabilities: [], learningPlans: [], verification: AgentVerificationResult(state: .attention, summary: verificationSummary, fallback: "Configure an approved KRALİ repository."), intelligenceProvider: nil, finalResponse: messages.last?.text ?? "")
+        guard
+            let repository =
+                developerRepositoryResolver
+                    .resolve(
+                        userWorkspace:
+                            selectedRootURL
+                    )
+        else {
+            currentGoal =
+                "KRALİ self-development diagnosis"
+            currentPlan =
+                "Stop → approved KRALİ repository identity required"
+            verificationState =
+                .attention
+            verificationSummary =
+                "Developer repository identity could not be resolved safely."
+
+            let reply =
+                "Bu hedef Developer Mission olarak sınıflandı; ancak KRALİ kaynak deposu güvenle doğrulanamadı. Kullanıcı çalışma alanı developer kaynağı olarak kullanılmadı ve mutation başlatılmadı."
+
+            postAssistantMessage(reply)
+
+            recordMentorTrace(
+                input: text,
+                source: source,
+                goal: currentGoal,
+                plan: currentPlan,
+                route: activeRoute,
+                capabilities: [],
+                learningPlans: [],
+                verification:
+                    AgentVerificationResult(
+                        state: .attention,
+                        summary:
+                            verificationSummary,
+                        fallback:
+                            "Configure an approved KRALİ repository."
+                    ),
+                intelligenceProvider: nil,
+                finalResponse: reply
+            )
             return true
         }
 
         developerRepository = repository
-        currentGoal = "KRALİ self-development diagnosis"
-        currentPlan = "Read-only diagnosis → evidence → proposal → registered bounded task required"
-        verificationState = .checking
-        verificationSummary = "Diagnosis/proposal phase; mutation authority has not been granted."
-        postAssistantMessage("Bu hedef Developer Mission olarak yönlendirildi. Kaynak hedefi kullanıcı workspace'i değil, doğrulanmış KRALİ deposu. İlk aşama yalnız read-only diagnosis/proposal: Observed Failure, Evidence, Root Cause, Relevant Architecture, Alternatives, Selected Strategy, Scope ve Verification Contract. Dinamik mutation task kartı oluşturulmadı; doğrulanmış root cause ve kullanıcı onaylı, bounded registered task olmadan Developer Agent kod değiştirmeye başlamaz.")
-        recordMentorTrace(input: text, source: source, goal: currentGoal, plan: currentPlan, route: activeRoute, capabilities: [], learningPlans: [], verification: AgentVerificationResult(state: .checking, summary: verificationSummary, fallback: "Registered bounded task required before mutation."), intelligenceProvider: nil, finalResponse: messages.last?.text ?? "")
+        currentGoal =
+            "KRALİ self-development diagnosis"
+        currentPlan =
+            "Exact source revision → read-only repository evidence → root cause → alternatives → development proposal → stop"
+        verificationState =
+            .checking
+        verificationSummary =
+            "Read-only self-diagnosis is collecting source and historical evidence. Mutation authority has not been granted."
+        activeContextMemories = []
+        contextMemoryStatus =
+            "Developer diagnosis context firewall aktif; önceki kullanıcı görevleri bu tura taşınmadı."
+
+        busy = true
+
+        log(
+            "Self-diagnosis başladı • repo=" +
+            repository.path
+        )
+
+        Task {
+            await executeSelfDiagnosisMission(
+                text,
+                source: source,
+                repository: repository
+            )
+        }
+
         return true
+    }
+
+    private func executeSelfDiagnosisMission(
+        _ text: String,
+        source: ChatInputSource,
+        repository: AgentDeveloperRepository
+    ) async {
+        let appVersion =
+            currentAppVersionString
+        let appSourceRevision =
+            currentAppSourceRevision
+
+        let repositoryPath =
+            repository.path
+
+        let evidencePackage =
+            await Task.detached(
+                priority: .utility
+            ) {
+                AgentSelfDiagnosisExecutor()
+                    .collect(
+                        userInput: text,
+                        repository:
+                            AgentDeveloperRepository(
+                                path:
+                                    repositoryPath
+                            ),
+                        appVersion:
+                            appVersion,
+                        appSourceRevision:
+                            appSourceRevision
+                    )
+            }
+            .value
+
+        let modelOutput:
+            AgentSelfDiagnosisModelOutput?
+
+        if evidencePackage
+            .canDiagnoseCurrentSource {
+            modelOutput =
+                await localIntelligence
+                    .diagnoseSelfDevelopment(
+                        userInput: text,
+                        evidencePackage:
+                            evidencePackage
+                    )
+        } else {
+            modelOutput = nil
+        }
+
+        let report =
+            selfDiagnosisExecutor
+                .assembleReport(
+                    package:
+                        evidencePackage,
+                    modelOutput:
+                        modelOutput
+                )
+
+        currentSelfDiagnosisReport =
+            report
+        currentReflectionSummary =
+            report.architecturalRootCause
+        currentAlternatives =
+            report.alternatives
+                .map(\.title)
+
+        let verification:
+            AgentVerificationResult
+
+        if report.evidenceBound {
+            verification =
+                AgentVerificationResult(
+                    state: .passed,
+                    summary:
+                        "Read-only self-diagnosis produced an evidence-bound root cause. No mutation was started.",
+                    fallback:
+                        "A bounded registered task and explicit human review are still required before code changes."
+                )
+        } else {
+            verification =
+                AgentVerificationResult(
+                    state: .attention,
+                    summary:
+                        "Self-diagnosis stopped without an evidence-bound root cause.",
+                    fallback:
+                        report.stopReason
+                )
+        }
+
+        verificationState =
+            verification.state
+        verificationSummary =
+            verification.summary
+
+        let reasoningCapabilities =
+            capabilityRegistry.resolve(
+                ids: [
+                    "core.reasoning",
+                    "context.local"
+                ],
+                profile:
+                    executionProfile
+            )
+
+        let provider =
+            modelOutput == nil
+            ? nil
+            : "Apple Foundation Models / Self Diagnosis"
+
+        intelligenceProviderStatus =
+            provider ??
+            "Self-diagnosis reasoning provider unavailable"
+
+        let reply =
+            report.formattedFinalReport()
+
+        recordMentorTrace(
+            input: text,
+            source: source,
+            goal: currentGoal,
+            plan: currentPlan,
+            route: activeRoute,
+            capabilities:
+                reasoningCapabilities,
+            learningPlans: [],
+            verification:
+                verification,
+            intelligenceProvider:
+                provider,
+            finalResponse:
+                reply
+        )
+
+        postAssistantMessage(reply)
+
+        log(
+            report.evidenceBound
+            ? "Self-diagnosis tamamlandı • evidence-bound root cause"
+            : "Self-diagnosis durdu • evidence binding başarısız"
+        )
+
+        busy = false
     }
 
     func send(
@@ -791,44 +1078,76 @@ final class AgentEngine: ObservableObject {
         currentTaskInput = text
         missionDeveloperRunID = nil
 
-        let recalledContextMemories =
-            contextMemoryStore.relevant(
-                to: text,
-                from: contextMemoryEntries,
-                limit: 4
-            )
+        let preliminaryRouting =
+            missionRouter.classify(text)
+        let isolateDeveloperContext =
+            developerContextFirewall
+                .shouldIsolate(
+                    routing:
+                        preliminaryRouting
+                )
 
-        let executionContextMemories =
-            contextMemoryStore.executionContext(
-                to: text,
-                from: recalledContextMemories,
-                limit: 4
-            )
+        let recalledContextMemories:
+            [AgentContextMemoryEntry]
+        let executionContextMemories:
+            [AgentContextMemoryEntry]
 
-        // Only execution-safe context is allowed to influence routing,
-        // planning and verification. Broader recall may still exist in the
-        // persistent store but must not poison an unrelated new task.
-        activeContextMemories =
-            executionContextMemories
-
-        if !executionContextMemories.isEmpty {
+        if isolateDeveloperContext {
+            recalledContextMemories = []
+            executionContextMemories = []
+            activeContextMemories = []
             contextMemoryStatus =
-                "\(executionContextMemories.count) güvenli bağlam kaydı bu tura taşındı."
+                "Developer diagnosis context firewall aktif; önceki kullanıcı görevleri bu tura taşınmadı."
             log(
-                "Bağlam hafızası: " +
-                executionContextMemories
-                    .map(\.title)
-                    .joined(separator: " • ")
-            )
-        } else if !recalledContextMemories.isEmpty {
-            contextMemoryStatus =
-                "Önceki görev bağlamları bulundu ancak yeni hedef bağımsız olduğu için izole edildi."
-            log(
-                "Bağlam firewall: önceki görev bağlamları bu tura taşınmadı"
+                "Developer context firewall: conversational task memory isolated"
             )
         } else {
-            contextMemoryStatus =
-                "Bu tur için ilgili önceki bağlam bulunmadı."
+            recalledContextMemories =
+                contextMemoryStore.relevant(
+                    to: text,
+                    from: contextMemoryEntries,
+                    limit: 4
+                )
+
+            executionContextMemories =
+                contextMemoryStore
+                    .executionContext(
+                        to: text,
+                        from:
+                            recalledContextMemories,
+                        limit: 4
+                    )
+
+            // Only execution-safe context is allowed to influence routing,
+            // planning and verification. Broader recall may still exist in
+            // the persistent store but must not poison an unrelated task.
+            activeContextMemories =
+                executionContextMemories
+
+            if !executionContextMemories
+                .isEmpty {
+                contextMemoryStatus =
+                    "\(executionContextMemories.count) güvenli bağlam kaydı bu tura taşındı."
+                log(
+                    "Bağlam hafızası: " +
+                    executionContextMemories
+                        .map(\.title)
+                        .joined(
+                            separator: " • "
+                        )
+                )
+            } else if
+                !recalledContextMemories
+                    .isEmpty {
+                contextMemoryStatus =
+                    "Önceki görev bağlamları bulundu ancak yeni hedef bağımsız olduğu için izole edildi."
+                log(
+                    "Bağlam firewall: önceki görev bağlamları bu tura taşınmadı"
+                )
+            } else {
+                contextMemoryStatus =
+                    "Bu tur için ilgili önceki bağlam bulunmadı."
+            }
         }
 
         appendConversationMessage(
@@ -4676,6 +4995,7 @@ final class AgentEngine: ObservableObject {
         currentOutcomeResolution = nil
         currentOutcomeAttempts = []
         currentReflectionSummary = nil
+        currentSelfDiagnosisReport = nil
         currentCapabilityGaps = []
         currentOutcomeFailureIsTransient = false
         activeRoute = ["Core"]
@@ -5920,6 +6240,7 @@ final class AgentEngine: ObservableObject {
                 developerRepository: developerRepository,
                 developerMissionReason: developerMissionReason,
                 developerRunID: missionDeveloperRunID,
+                selfDiagnosis: currentSelfDiagnosisReport,
                 executionProfile: executionProfile,
                 semanticMission: currentSemanticMission,
                 semanticPlannerProvider:

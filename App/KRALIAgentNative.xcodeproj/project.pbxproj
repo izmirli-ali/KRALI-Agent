@@ -54,6 +54,7 @@
 		A10000000000000000000045 /* AgentOutcomePlanner.swift in Sources */ = {isa = PBXBuildFile; fileRef = B10000000000000000000045 /* AgentOutcomePlanner.swift */; };
 		A10000000000000000000046 /* AgentMissionRouter.swift in Sources */ = {isa = PBXBuildFile; fileRef = B10000000000000000000046 /* AgentMissionRouter.swift */; };
 		A10000000000000000000047 /* AgentExecutionProfile.swift in Sources */ = {isa = PBXBuildFile; fileRef = B10000000000000000000047 /* AgentExecutionProfile.swift */; };
+		A10000000000000000000048 /* AgentSelfDiagnosisExecutor.swift in Sources */ = {isa = PBXBuildFile; fileRef = B10000000000000000000048 /* AgentSelfDiagnosisExecutor.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
@@ -105,6 +106,7 @@
 		B10000000000000000000045 /* AgentOutcomePlanner.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AgentOutcomePlanner.swift; sourceTree = "<group>"; };
 		B10000000000000000000046 /* AgentMissionRouter.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AgentMissionRouter.swift; sourceTree = "<group>"; };
 		B10000000000000000000047 /* AgentExecutionProfile.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AgentExecutionProfile.swift; sourceTree = "<group>"; };
+		B10000000000000000000048 /* AgentSelfDiagnosisExecutor.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AgentSelfDiagnosisExecutor.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -176,6 +178,7 @@
 				B10000000000000000000045 /* AgentOutcomePlanner.swift */,
 				B10000000000000000000046 /* AgentMissionRouter.swift */,
 				B10000000000000000000047 /* AgentExecutionProfile.swift */,
+				B10000000000000000000048 /* AgentSelfDiagnosisExecutor.swift */,
 			);
 			path = KRALIAgentNative;
 			sourceTree = "<group>";
@@ -198,6 +201,7 @@
 				C10000000000000000000002 /* Sources */,
 				C10000000000000000000001 /* Frameworks */,
 				C10000000000000000000003 /* Resources */,
+				C10000000000000000000004 /* Stamp Source Revision */,
 			);
 			buildRules = (
 			);
@@ -253,6 +257,22 @@
 		};
 /* End PBXResourcesBuildPhase section */
 
+/* Begin PBXShellScriptBuildPhase section */
+		C10000000000000000000004 /* Stamp Source Revision */ = {
+			isa = PBXShellScriptBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			inputPaths = (
+			);
+			outputPaths = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+			shellPath = /bin/sh;
+			shellScript = "set -eu\nREPO=\"$SRCROOT/..\"\nREV=\"$(/usr/bin/git -C \"$REPO\" rev-parse HEAD 2>/dev/null || true)\"\nif [ -n \"$REV\" ]; then\n  TRACKED_DIRTY=\"$(/usr/bin/git -C \"$REPO\" status --porcelain --untracked-files=no 2>/dev/null || true)\"\n  UNTRACKED_SOURCE=\"$(/usr/bin/git -C \"$REPO\" ls-files --others --exclude-standard -- App/KRALIAgentNative 2>/dev/null || true)\"\n  if [ -n \"$TRACKED_DIRTY$UNTRACKED_SOURCE\" ]; then\n    REV=\"${REV}-dirty\"\n  fi\n  REV_FILE=\"$TARGET_BUILD_DIR/$UNLOCALIZED_RESOURCES_FOLDER_PATH/KRALISourceRevision.txt\"\n  /bin/mkdir -p \"$(/usr/bin/dirname \"$REV_FILE\")\"\n  /usr/bin/printf '%s\\n' \"$REV\" > \"$REV_FILE\"\nfi\n";
+		};
+/* End PBXShellScriptBuildPhase section */
+
 /* Begin PBXSourcesBuildPhase section */
 		C10000000000000000000002 /* Sources */ = {
 			isa = PBXSourcesBuildPhase;
@@ -304,6 +324,7 @@
 				A10000000000000000000045 /* AgentOutcomePlanner.swift in Sources */,
 				A10000000000000000000046 /* AgentMissionRouter.swift in Sources */,
 				A10000000000000000000047 /* AgentExecutionProfile.swift in Sources */,
+				A10000000000000000000048 /* AgentSelfDiagnosisExecutor.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -341,7 +362,7 @@
 				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
 				CODE_SIGN_STYLE = Automatic;
 				COMBINE_HIDPI_IMAGES = YES;
-				CURRENT_PROJECT_VERSION = 222;
+				CURRENT_PROJECT_VERSION = 223;
 				DEVELOPMENT_TEAM = 65244UMFCK;
 				ENABLE_HARDENED_RUNTIME = NO;
 				ENABLE_PREVIEWS = YES;
@@ -357,7 +378,7 @@
 					"@executable_path/../Frameworks",
 				);
 				MACOSX_DEPLOYMENT_TARGET = 14.0;
-				MARKETING_VERSION = 0.11.1;
+				MARKETING_VERSION = 0.11.2;
 				PRODUCT_BUNDLE_IDENTIFIER = com.aliihsancanuysal.kraliagent;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				SDKROOT = macosx;
@@ -373,7 +394,7 @@
 				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
 				CODE_SIGN_STYLE = Automatic;
 				COMBINE_HIDPI_IMAGES = YES;
-				CURRENT_PROJECT_VERSION = 222;
+				CURRENT_PROJECT_VERSION = 223;
 				DEVELOPMENT_TEAM = 65244UMFCK;
 				ENABLE_HARDENED_RUNTIME = NO;
 				GENERATE_INFOPLIST_FILE = YES;
@@ -388,7 +409,7 @@
 					"@executable_path/../Frameworks",
 				);
 				MACOSX_DEPLOYMENT_TARGET = 14.0;
-				MARKETING_VERSION = 0.11.1;
+				MARKETING_VERSION = 0.11.2;
 				PRODUCT_BUNDLE_IDENTIFIER = com.aliihsancanuysal.kraliagent;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				SDKROOT = macosx;

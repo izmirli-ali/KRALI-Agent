@@ -21,3 +21,4 @@ App/KRALIAgentNative/Assets.xcassets/AppIcon.appiconset/*.png
 
 # Local build verification cache
 .build-check/
+.ci-build/

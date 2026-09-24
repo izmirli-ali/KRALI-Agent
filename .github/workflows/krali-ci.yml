@@ -63,6 +63,13 @@ jobs:
             -o /tmp/krali-development-research-profile-self-test
           /tmp/krali-development-research-profile-self-test
 
+          swiftc \
+            App/KRALIAgentNative/AgentMissionRouter.swift \
+            App/KRALIAgentNative/AgentSelfDiagnosisExecutor.swift \
+            Scripts/self-diagnosis-executor-self-test.swift \
+            -o /tmp/krali-self-diagnosis-executor-self-test
+          /tmp/krali-self-diagnosis-executor-self-test
+
       - name: Validate KRALI developer task cards
         shell: bash
         run: |
@@ -114,3 +121,10 @@ jobs:
             CODE_SIGNING_ALLOWED=NO \
             CODE_SIGNING_REQUIRED=NO \
             build
+
+          EXPECTED_REVISION="$(git rev-parse HEAD)"
+          REVISION_FILE=".ci-build/Build/Products/Debug/KRALIAgentNative.app/Contents/Resources/KRALISourceRevision.txt"
+          test -f "$REVISION_FILE"
+          ACTUAL_REVISION="$(tr -d '\\r\\n' < "$REVISION_FILE")"
+          test "$ACTUAL_REVISION" = "$EXPECTED_REVISION"
+          echo "Source revision stamp verified: $ACTUAL_REVISION"
