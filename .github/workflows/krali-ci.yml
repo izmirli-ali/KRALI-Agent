@@ -47,6 +47,12 @@ jobs:
           node Scripts/developer-active-node-recovery-contract-self-test.mjs
           node Scripts/developer-behavioral-orchestration-harness.mjs
 
+      - name: Validate Mentor sync freshness policy
+        shell: bash
+        run: |
+          set -euo pipefail
+          python3 Scripts/mentor-sync-freshness-self-test.py
+
       - name: Validate Swift mission and execution-profile policies
         shell: bash
         run: |
