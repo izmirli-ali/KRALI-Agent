@@ -613,3 +613,15 @@ Target runtime:
 - Added provider failover states to AgentDeveloperBridge and a dedicated CI self-test covering quota, timeout, checkpoint preservation, circuit breaker behavior and no-side-effect local probing.
 - VERSION 0.10.41 / build 214.
 
+## v0.10.42 progress
+
+- v0.10.41 real run proved Cloudflare quota failover works: the per-run circuit breaker opened, existing local Ollama was discovered without installation, and devstral-small-2:24b passed tool + structured probes.
+- The same run exposed the next bottleneck: local baseline decomposition timed out under the remote 70-second budget, then single-task Devstral reached implementation phase but a 120-second implementation request and 5-minute total watchdog expired before mutation.
+- Added a dedicated local-fallback execution profile rather than reusing remote latency assumptions.
+- Local task decomposition now uses compact task metadata (shorter brief/reason/research context), 800 output tokens, 5K context and a 210-second timeout.
+- Local controller selection now prefers known lightweight installed models, then dynamically inspects up to four already-installed models ordered by size, and uses the 24B coding model only as the final structured-controller fallback.
+- Local native Developer Agent uses fewer allowed inspections, longer 180–240 second request budgets, one timeout retry, a 15-minute single-task watchdog and a 25-minute Task Graph watchdog.
+- Local coding inference uses 15-minute keep-alive and an 8K context cap; system guidance explicitly avoids repeated search/list/read work after required evidence exists.
+- Added dedicated local execution profile CI self-test and orchestration invariants.
+- VERSION 0.10.42 / build 215.
+
