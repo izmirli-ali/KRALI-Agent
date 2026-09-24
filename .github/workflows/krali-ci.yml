@@ -37,6 +37,8 @@ jobs:
           node Scripts/developer-task-verifier.mjs --self-test
           node Scripts/openai-teacher-bridge.mjs --self-test
           node Scripts/developer-task-graph-self-test.mjs
+          node Scripts/developer-task-decomposer.mjs --self-test
+          node Scripts/developer-candidate-surface-guard.mjs --self-test
 
       - name: Validate KRALI developer task cards
         shell: bash
