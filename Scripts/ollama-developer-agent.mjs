@@ -3793,10 +3793,260 @@ async function prepareDecisionModel(
   }
 }
 
+function checkpointReadEvidenceForPath(
+  targetPath
+) {
+  const normalized =
+    normalizeRepoRelativePath(targetPath);
+
+  return [...checkpointEvidence]
+    .reverse()
+    .find((item) => {
+      if (!item || item.tool !== "read_file") {
+        return false;
+      }
+
+      const parsedResult =
+        parseCheckpointJSON(
+          item.result,
+          {}
+        );
+      const parsedArgs =
+        parseCheckpointJSON(
+          item.args,
+          {}
+        );
+      const readPath =
+        normalizeRepoRelativePath(
+          String(
+            parsedResult?.path ||
+            parsedArgs?.path ||
+            ""
+          )
+        );
+
+      return readPath === normalized;
+    }) || null;
+}
+
+function checkpointSearchLineForPath(
+  targetPath
+) {
+  const normalized =
+    normalizeRepoRelativePath(targetPath);
+
+  for (
+    const item of
+      [...checkpointEvidence].reverse()
+  ) {
+    if (!item || item.tool !== "search_codebase") {
+      continue;
+    }
+
+    const parsedResult =
+      parseCheckpointJSON(
+        item.result,
+        {}
+      );
+    const matches =
+      Array.isArray(parsedResult?.matches)
+        ? parsedResult.matches
+        : [];
+
+    for (const raw of matches) {
+      const value = String(raw || "");
+      const match =
+        value.match(
+          /^(.+?):(\d+):(.*)$/
+        );
+
+      if (!match) continue;
+
+      if (
+        normalizeRepoRelativePath(
+          match[1]
+        ) === normalized
+      ) {
+        return Number(match[2]);
+      }
+    }
+  }
+
+  return null;
+}
+
+function verifiedReadMutationOldText(
+  targetPath
+) {
+  const readEvidence =
+    checkpointReadEvidenceForPath(
+      targetPath
+    );
+
+  if (!readEvidence) {
+    return "";
+  }
+
+  const parsedResult =
+    parseCheckpointJSON(
+      readEvidence.result,
+      {}
+    );
+  const startLine =
+    Number(parsedResult?.start_line || 0);
+  const endLine =
+    Number(parsedResult?.end_line || 0);
+  const rawContent =
+    String(parsedResult?.content || "");
+
+  if (
+    !rawContent ||
+    startLine < 1 ||
+    endLine < startLine
+  ) {
+    return "";
+  }
+
+  const exactReadSource =
+    rawContent
+      .split("\n")
+      .map((line) =>
+        line.replace(
+          /^\s*\d+\s*\|\s?/,
+          ""
+        )
+      )
+      .join("\n");
+
+  try {
+    const { absolute } =
+      safeRelativePath(targetPath);
+    const source =
+      fs.readFileSync(
+        absolute,
+        "utf8"
+      );
+    const sourceLines =
+      source.split("\n");
+    const liveReadSlice =
+      sourceLines
+        .slice(
+          startLine - 1,
+          endLine
+        )
+        .join("\n");
+
+    if (liveReadSlice !== exactReadSource) {
+      stage(
+        "local_agent_verified_mutation_packet_stale",
+        gapLabel +
+          " verified read source değişmiş • path=" +
+          targetPath
+      );
+      return "";
+    }
+
+    const searchLine =
+      checkpointSearchLineForPath(
+        targetPath
+      );
+
+    const tryWindow = (
+      fromLine,
+      toLine
+    ) => {
+      const start =
+        Math.max(
+          startLine,
+          fromLine
+        );
+      const end =
+        Math.min(
+          endLine,
+          toLine
+        );
+
+      if (end < start) return "";
+
+      const candidate =
+        sourceLines
+          .slice(
+            start - 1,
+            end
+          )
+          .join("\n");
+
+      if (
+        candidate.length < 80 ||
+        candidate.length > 3600
+      ) {
+        return "";
+      }
+
+      const occurrences =
+        source.split(candidate).length - 1;
+
+      return occurrences === 1
+        ? candidate
+        : "";
+    };
+
+    if (
+      Number.isFinite(searchLine) &&
+      searchLine >= startLine &&
+      searchLine <= endLine
+    ) {
+      for (const radius of [4, 8, 12, 18]) {
+        const candidate =
+          tryWindow(
+            searchLine - radius,
+            searchLine + radius
+          );
+
+        if (candidate) {
+          stage(
+            "local_agent_verified_mutation_packet_ready",
+            gapLabel +
+              " exact read/search packet hazır • path=" +
+              targetPath +
+              " • line=" +
+              searchLine +
+              " • chars=" +
+              candidate.length
+          );
+          return candidate;
+        }
+      }
+    }
+
+    if (
+      exactReadSource.length >= 80 &&
+      exactReadSource.length <= 3600 &&
+      source.split(
+        exactReadSource
+      ).length - 1 === 1
+    ) {
+      stage(
+        "local_agent_verified_mutation_packet_ready",
+        gapLabel +
+          " exact read packet hazır • path=" +
+          targetPath +
+          " • range=" +
+          startLine +
+          "-" +
+          endLine +
+          " • chars=" +
+          exactReadSource.length
+      );
+      return exactReadSource;
+    }
+  } catch {}
+
+  return "";
+}
+
 function verifiedInitialMutationOldText() {
   if (
-    !rootCauseMutationTargetVerified ||
-    !verifiedMutationSource ||
     implementationTargetPaths.length !== 1
   ) {
     return "";
@@ -3816,27 +4066,43 @@ function verifiedInitialMutationOldText() {
         "utf8"
       );
 
-    const occurrences =
-      source.split(
-        verifiedMutationSource
-      ).length - 1;
+    if (
+      rootCauseMutationTargetVerified &&
+      verifiedMutationSource
+    ) {
+      const occurrences =
+        source.split(
+          verifiedMutationSource
+        ).length - 1;
 
-    if (occurrences !== 1) {
+      if (occurrences === 1) {
+        return verifiedMutationSource;
+      }
+
       stage(
         "local_agent_verified_anchor_inconclusive",
         gapLabel +
-          " verified source exact anchor benzersiz değil • occurrences=" +
+          " root-cause verified source exact anchor benzersiz değil • occurrences=" +
           occurrences +
           " • path=" +
           targetPath
       );
-      return "";
     }
 
-    return verifiedMutationSource;
-  } catch {
-    return "";
-  }
+    if (
+      implementationReadCompleted &&
+      (
+        !requireRootCauseGate ||
+        rootCauseMutationTargetVerified
+      )
+    ) {
+      return verifiedReadMutationOldText(
+        targetPath
+      );
+    }
+  } catch {}
+
+  return "";
 }
 
 async function requestStructuredToolDecision(
@@ -3961,7 +4227,7 @@ async function requestStructuredToolDecision(
     !fixedInitialOldText
   ) {
     return rejectStructuredDecision(
-      "verified mutation source exact anchor üretilemedi"
+      "verified mutation packet exact anchor üretilemedi"
     );
   }
 
@@ -4024,7 +4290,7 @@ async function requestStructuredToolDecision(
         : [
             "You are KRALI Exact Mutation Architect.",
             "Return JSON matching the supplied schema and nothing else.",
-            "The target path, tool, and exact old_text are already fixed by KRALI.",
+            "The target path, tool, and exact old_text are already fixed by KRALI from a verified mutation packet.",
             "Return only the corrected new_text replacement for fixed_old_text.",
             "Do not choose, shorten, expand, or invent an old_text anchor.",
             "new_text must replace the complete verified function/source definition and remain syntactically complete.",
