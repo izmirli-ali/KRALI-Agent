@@ -654,50 +654,31 @@ struct AgentSelfDiagnosisExecutor {
         root: URL,
         terms: [String]
     ) -> [RankedFile] {
-        guard let enumerator =
-            fileManager.enumerator(
-                at: root,
-                includingPropertiesForKeys: [
-                    .isRegularFileKey,
-                    .isSymbolicLinkKey,
-                    .fileSizeKey
-                ],
-                options: [
-                    .skipsHiddenFiles,
-                    .skipsPackageDescendants
-                ]
-            )
-        else {
+        // Diagnose only committed/tracked source. Ignored or untracked local
+        // files may contain credentials or machine-specific data and are not
+        // part of the source revision stamped into the running app.
+        guard let tracked = git(
+            ["ls-files"],
+            root: root
+        ) else {
             return []
         }
+
+        let trackedPaths = tracked
+            .split(whereSeparator: {
+                $0.isNewline
+            })
+            .map(String.init)
 
         var candidates: [RankedFile] = []
         var inspectedCount = 0
 
-        while let url = enumerator.nextObject() as? URL {
+        for relative in trackedPaths {
             if inspectedCount >= 1200 {
                 break
             }
 
-            let standardized =
-                url.standardizedFileURL
-                    .resolvingSymlinksInPath()
-
             guard
-                standardized.path == root.path ||
-                standardized.path.hasPrefix(
-                    root.path + "/"
-                )
-            else {
-                continue
-            }
-
-            guard
-                let relative =
-                    relativePath(
-                        standardized,
-                        root: root
-                    ),
                 !excludedPathPrefixes
                     .contains(where: {
                         relative.hasPrefix($0)
@@ -709,7 +690,27 @@ struct AgentSelfDiagnosisExecutor {
                 continue
             }
 
-            let values = try? standardized.resourceValues(
+            let url = root
+                .appendingPathComponent(
+                    relative,
+                    isDirectory: false
+                )
+                .standardizedFileURL
+                .resolvingSymlinksInPath()
+
+            guard
+                url.path.hasPrefix(
+                    root.path + "/"
+                ),
+                allowedExtensions.contains(
+                    url.pathExtension
+                        .lowercased()
+                )
+            else {
+                continue
+            }
+
+            let values = try? url.resourceValues(
                 forKeys: [
                     .isRegularFileKey,
                     .isSymbolicLinkKey,
@@ -720,11 +721,7 @@ struct AgentSelfDiagnosisExecutor {
             guard
                 values?.isRegularFile == true,
                 values?.isSymbolicLink != true,
-                (values?.fileSize ?? 0) <= 550_000,
-                allowedExtensions.contains(
-                    standardized.pathExtension
-                        .lowercased()
-                )
+                (values?.fileSize ?? 0) <= 550_000
             else {
                 continue
             }
@@ -732,7 +729,7 @@ struct AgentSelfDiagnosisExecutor {
             inspectedCount += 1
 
             guard let raw = try? String(
-                contentsOf: standardized,
+                contentsOf: url,
                 encoding: .utf8
             ) else {
                 continue
