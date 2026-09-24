@@ -442,8 +442,89 @@ struct AgentSelfDiagnosisExecutor {
             )
         }
 
+        // Re-check identity after collection so a concurrent checkout,
+        // commit or file edit cannot produce a mixed-revision evidence package.
+        let finalHead = git(
+            ["rev-parse", "HEAD"],
+            root: root
+        )?.trimmedNonEmpty
+
+        let finalBranch = git(
+            ["branch", "--show-current"],
+            root: root
+        )?.trimmedNonEmpty
+
+        let finalStatus = git(
+            ["status", "--porcelain"],
+            root: root
+        )
+
+        let finalVersion = (
+            try? String(
+                contentsOf: versionURL,
+                encoding: .utf8
+            )
+        )?
+        .trimmingCharacters(
+            in: .whitespacesAndNewlines
+        )
+        .nilIfEmpty
+
+        let finalClean =
+            finalStatus?
+                .trimmingCharacters(
+                    in: .whitespacesAndNewlines
+                )
+                .isEmpty == true
+
+        if finalHead != head {
+            warnings.append(
+                "Developer repository HEAD changed during diagnosis; collected evidence is not accepted as a single revision."
+            )
+        }
+
+        if !finalClean {
+            warnings.append(
+                "Developer repository became dirty during diagnosis; collected evidence is not accepted."
+            )
+        }
+
+        if finalVersion != repositoryVersion {
+            warnings.append(
+                "Developer repository VERSION changed during diagnosis."
+            )
+        }
+
+        let finalIdentity =
+            AgentSelfDiagnosisSourceIdentity(
+                repositoryPath: root.path,
+                repositoryHeadSHA: finalHead,
+                repositoryBranch: finalBranch,
+                repositoryVersion: finalVersion,
+                appVersion: appVersion,
+                appSourceRevision:
+                    normalizedBundleRevision,
+                workingTreeClean:
+                    finalClean &&
+                    finalHead == head &&
+                    finalVersion ==
+                        repositoryVersion,
+                exactRevisionMatch:
+                    finalHead != nil &&
+                    normalizedBundleRevision != nil &&
+                    finalHead ==
+                        normalizedBundleRevision &&
+                    finalHead == head,
+                exactVersionMatch:
+                    finalVersion != nil &&
+                    finalVersion == appVersion &&
+                    finalVersion ==
+                        repositoryVersion
+            )
+
         return AgentSelfDiagnosisEvidencePackage(
-            sourceIdentity: identity,
+            sourceIdentity:
+                finalIdentity,
             queryTerms: terms,
             evidence: evidence,
             warnings: warnings
