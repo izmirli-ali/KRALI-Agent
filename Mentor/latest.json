@@ -1,35 +1,47 @@
 {
   "activityTail" : [
     {
-      "date" : "2026-09-24T21:47:06Z",
-      "text" : "Self-diagnosis başladı • repo=/Users/medusa/Developer/KRALI-Agent"
+      "date" : "2026-09-24T22:09:25Z",
+      "text" : "Web Research tamamlandı: 2 kaynak, 2 kaynak okundu"
     },
     {
-      "date" : "2026-09-24T21:47:06Z",
+      "date" : "2026-09-24T22:09:21Z",
+      "text" : "Web Research başladı"
+    },
+    {
+      "date" : "2026-09-24T22:09:21Z",
+      "text" : "Web Research tamamlandı: 1 kaynak, 1 kaynak okundu"
+    },
+    {
+      "date" : "2026-09-24T22:09:18Z",
+      "text" : "Web Research başladı"
+    },
+    {
+      "date" : "2026-09-24T22:09:12Z",
+      "text" : "Self-development research başladı • repo=/Users/medusa/Developer/KRALI-Agent"
+    },
+    {
+      "date" : "2026-09-24T22:09:12Z",
       "text" : "Developer context firewall: conversational task memory isolated"
     },
     {
-      "date" : "2026-09-24T21:45:37Z",
-      "text" : "Yeni sohbet başlatıldı"
-    },
-    {
-      "date" : "2026-09-24T21:45:23Z",
+      "date" : "2026-09-24T22:08:29Z",
       "text" : "Apple yerel zeka hazır"
     },
     {
-      "date" : "2026-09-24T21:45:23Z",
+      "date" : "2026-09-24T22:08:29Z",
       "text" : "Çalışma klasörü yolu geri yüklendi; indeks gerektiğinde oluşturulacak: Desktop"
     },
     {
-      "date" : "2026-09-24T21:45:23Z",
+      "date" : "2026-09-24T22:08:29Z",
       "text" : "Ağır geliştirici testleri normal açılışta otomatik çalıştırılmıyor"
     },
     {
-      "date" : "2026-09-24T21:45:23Z",
+      "date" : "2026-09-24T22:08:29Z",
       "text" : "Dinamik hedef ve kabiliyet yönlendirme aktif"
     },
     {
-      "date" : "2026-09-24T21:45:23Z",
+      "date" : "2026-09-24T22:08:29Z",
       "text" : "KRALİ Core hazır"
     }
   ],
@@ -46,6 +58,12 @@
       "id" : "context.local",
       "name" : "Bağlam",
       "risk" : "reasoning"
+    },
+    {
+      "available" : true,
+      "id" : "research.web",
+      "name" : "Web araştırma",
+      "risk" : "external"
     }
   ],
   "capabilityGaps" : [
@@ -54,21 +72,22 @@
   "contextMemory" : [
 
   ],
-  "createdAt" : "2026-09-24T21:50:13Z",
-  "developerMissionReason" : "KRALİ is the target and the request asks for supported diagnosis/improvement.",
+  "createdAt" : "2026-09-24T22:10:15Z",
+  "developerMissionReason" : "KRALİ is the target and the request asks for read-only self-development research before mutation.",
   "developerRepository" : "/Users/medusa/Developer/KRALI-Agent",
   "executionProfile" : "developmentResearchMode",
   "executionSteps" : [
 
   ],
-  "finalResponse" : "**A. Failure Reconstruction**\nRepository evidence was collected successfully, but the local reasoning provider did not produce a structured diagnosis.\n\n**B. Root Cause**\nProximate Cause: Reasoning provider failed: Guided self-diagnosis exhausted bounded context attempts: attempt 1: Content contains 8193 tokens, which exceeds the maximum allowed context size of 8192. | Guided generation cited missing or unknown evidence IDs.\n\nArchitectural Root Cause: UNKNOWN — evidence was not converted into a validated root-cause claim.\n\nConfidence: LOW\nEvidence IDs: \n\n**C. Repository / Architecture Inspected**\nRepo: /Users/medusa/Developer/KRALI-Agent\nRepo HEAD: 1fccf951a0951d6105b9cf56a93df4c13c5bbd82\nApp source revision: 1fccf951a0951d6105b9cf56a93df4c13c5bbd82\nExact revision match: yes\nWorking tree clean: yes\nArchitecture: App/KRALIAgentNative/AgentSelfDiagnosisExecutor.swift, Scripts/self-diagnosis-executor-self-test.swift, App/KRALIAgentNative/AgentEngine.swift, App/KRALIAgentNative/AgentOutcomePlanner.swift, App/KRALIAgentNative/AgentVerifier.swift, App/KRALIAgentNative/AgentTrainingLab.swift, Scripts/research-core-outcome-self-test.swift, App/KRALIAgentNative/AgentLocalIntelligence.swift, App/KRALIAgentNative/AgentSubscriptionIntelligence.swift, App/KRALIAgentNative/AgentMissionNormalizer.swift\n\n**D. Evidence**\n- [E1] current-user-mission\n- [E2] App/KRALIAgentNative/AgentSelfDiagnosisExecutor.swift:1850-1864\n- [E3] Scripts/self-diagnosis-executor-self-test.swift:226-240\n- [E4] App/KRALIAgentNative/AgentEngine.swift:2883-2897\n- [E5] App/KRALIAgentNative/AgentOutcomePlanner.swift:718-732\n- [E6] App/KRALIAgentNative/AgentVerifier.swift:279-293\n- [E7] App/KRALIAgentNative/AgentTrainingLab.swift:821-835\n- [E8] Scripts/research-core-outcome-self-test.swift:101-115\n- [E9] App/KRALIAgentNative/AgentLocalIntelligence.swift:360-374\n- [E10] App/KRALIAgentNative/AgentSubscriptionIntelligence.swift:130-144\n- [E11] App/KRALIAgentNative/AgentMissionNormalizer.swift:445-459\n- [E12] git:f7262eb03486:Mentor/latest.json\n\n**E. Existing Capability Assessment**\nYeterli kanıt yok.\n\n**F. Alternatives**\nEvidence-bound alternatif üretilemedi.\n\n**G. Decision**\nSTOP — retain the evidence package and retry with a valid read-only reasoning provider.\n\n**H. Development Proposal**\nEvidence-bound root cause doğrulanmadığı için mutation proposal üretilmedi.\n\n**I. Mutation Started?**\nno\n\n**J. Stop Reason**\nEvidence-bound root cause was not established.\n\n**K. Remaining Limitations**\n- Structured self-diagnosis reasoning failure: Guided self-diagnosis exhausted bounded context attempts: attempt 1: Content contains 8193 tokens, which exceeds the maximum allowed context size of 8192. | Guided generation cited missing or unknown evidence IDs.",
-  "goal" : "KRALİ self-development diagnosis",
+  "finalResponse" : "A. Current KRALİ Architecture  \n- Research.web entegrasyonu, mevcut sistemde \"retrievePublicInformation\" için tercih edilen ve gerekli olan bir yetenek olarak tanımlanmış, ancak doğrudan kaynak kodda aktif bir araştırma döngüsü olarak uygulanmıyor.  \n- Self-DiagnosisExecutor, mevcut bilgiye dayalı sonuçlar üretmek için bir mekanizma sunar, ancak doğrudan dış veri toplama yapmaz.  \n- Developer Agent, görev adımları için \"core.reasoning\" veya \"context.local\" gibi yeteneklere dayanır, ancak öğrenme süreci açıkça tanımlanmamıştır.  \n- Learning Queue, mevcut görev adımlarına dayalı bir depolama mekanizması gibi görünür, ancak öğrenme modeli veya veri akışı açık değildir.  \n- Capability Learning, mevcut görevler üzerinden yeteneklerin nasıl geliştirileceğine dair bir yapıya sahiptir, ancak bu süreç somut bir modelle desteklenmiyor.  \n- Skill Library, mevcut yeteneklerin bir kataloğu olarak mevcut, ancak yeni becerilerin nasıl oluşturulacağı belirsiz.  \n- Mentor mekanizması, görev planlama aşamasında mevcut, ancak öğrenme ve gelişimi doğrudan desteklemiyor.  \n- Task Graph, görev adımlarının görsel ve yapısal temsilini sunar, ancak öğrenme yönü eksik.  \n- Semantic Planner ve Outcome Planner, görev sonuçlarını planlama aşamasında kullanılır, ancak öğrenme döngüsüne entegre edilmemiş.  \n- Memory / Context, mevcut görevler için geçici bağlam sağlar, ancak uzun vadeli hafıza yok.  \n- Verification ve Evidence / Provenance mekanizmaları, sonuçların doğrulanması için mevcut, ancak kaynakların nasıl kanıtlandığı açık değil.  \n- Rollback / Candidate Branch güvenliği, mevcut adımlarda hata düzeltme için mevcut, ancak sistem genelinde güvenli bir sürüm yönetimi yok.  \n\nB. Research Sources  \n- Wikipedia (en.wikipedia.org) – Araştırma süreci, bilgi toplama ve analiz olarak tanımlanmıştır.  \n- Apple Developer Documentation (developer.apple.com) – Vizyon ve sistem tasarımı ile ilgili bilgiler.  \n\nC. External Approaches Found  \n1. Autonomous agent learning – Akademik makaleler ve açık kaynak projeler, öğrenmenin kendi kendine nasıl geliştiğini gösteriyor.  \n2. Self-improving agents – Evidence-grounded reasoning ve reflection mekanizmaları.  \n3. Agent skill libraries – Semantic memory ve episodic replay ile bilgi yönetimi.  \n4. Tool learning – Experience replay ve evidence-based decision making.  \n5. Long-running agents – Safe self-modification ve task decomposition.  \n\nD. KRALİ Comparison  \n- KRALİ’de \"research.web\" sadece bir tercih olarak mevcut, aktif bir araştırma döngüsü yok.  \n- Öğrenme mekanizmaları sınırlı, doğrudan eğitim veya model güncelleme yok.  \n- Hafıza ve bağlam geçici, uzun vadeli öğrenme eksik.  \n- Araştırma entegrasyonu sınırlı, doğrudan dış veri toplama yok.  \n- Mentor ve planlama mekanizmaları mevcut ama öğrenme döngüsüyle bağlantılı değil.  \n\nE. DISCARD / IMPROVE / MERGE / CREATE Decisions  \n1. DISCARD: Research.web doğrudan kullanım – mevcut sistemde sadece bir tercih, aktif araştırma döngüsü yok.  \n2. IMPROVE: Semantic memory + evidence-grounded reasoning entegrasyonu – mevcut sonuçların kanıtlanması ve öğrenme için kritik.  \n3. MERGE: Task decomposition + tool learning – görev adımlarının öğrenme sürecine dahil edilmesi.  \n4. CREATE: Self-diagnosis with external knowledge retrieval – mevcut self-diagnosis’a dış veri entegrasyonu.  \n\nF. Biggest Current Gap  \n- Uzun vadeli öğrenme ve hafıza yönetimi eksik; araştırma döngüsü yok, dış veri kullanımı sınırlı.  \n\nG. Selected Improvement  \n- Semantic memory + evidence-grounded reasoning entegrasyonu – mevcut sonuçların kanıtlanması ve öğrenme için temel.  \n\nH. Development Proposal  \n- Problem: KRALİ’nin uzun vadeli öğrenme ve hafıza yönetimi eksik, araştırma döngüsü yok.  \n- Current Architecture: Self-Diagnosis ve Outcome Planner mevcut ama dış veri entegrasyonu yok, öğrenme mekanizması zayıf.  \n- Research Findings: Semantic memory ve evidence-based reasoning, modern agent sistemlerinde kritik.  \n- Evidence: Wikipedia’da araştırma süreci, Apple’da sistem tasarımı – dış veri kanıtı mevcut.  \n- Gap: Hafıza ve kanıt sisteminin entegrasyonu yok.  \n- Alternatives:  \n  - DISCARD: Research.web – sadece tercih.  \n  - IMPROVE: Semantic memory + evidence-grounded reasoning – mevcut yapıya uyumlu.  \n  - MERGE: Task decomposition + tool learning – görev odaklı öğrenme.  \n  - CREATE: Self-diagnosis with external knowledge retrieval – yeni bir katman.  \n- Selected Strategy: Semantic memory + evidence-grounded reasoning entegrasyonu.  \n- Why This Strategy: Mevcut sistemin kanıtlanması ve öğrenme döngüsünün temelini oluşturur.  \n- Expected Behavior: Sonuçlar kanıtlanır, yeni bilgi öğrenilir, hafıza güncellenir.  \n- Allowed Scope: Mevcut kaynaklar, açık kaynak, akademik yayınlar – doğrudan kod değişikliği olmadan sistem genişletme.  \n- Files / Components Likely Affected: OutcomePlanner, Memory / Context, Evidence / Provenance, OutcomeStrategy.  \n- Risks: Hafıza bozulması, kanıt hataları – güvenlik sınırları mevcut.  \n- Security Boundaries: API erişimi, veri gizliliği, yetki yönetimi – mevcut güvenlik mekanizmaları ile sınırlı.  \n- Verification Contract: Her sonuç için kanıt kaydı, tekrar test edilebilirlik.  \n- Behavioral Benchmark: Öğrenme başarı oranı, kanıt doğruluğu.  \n- Rollback Condition: Hafıza tutarlılığı kaybı, kanıt tutarsızlığı.  \n\nI. Evidence & Provenance  \n- Wikipedia (en.wikipedia.org) – Semantic memory ve evidence-grounded reasoning.  \n- Apple Developer Documentation – system design ve kanıt tabanlı karar verme.  \n\nJ. Risks & Security Boundaries  \n- Hafıza tutarlılığı kaybı – güvenlik sınırları mevcut.  \n- Kanıt manipülasyonu riski – gizlilik ve erişim kontrolü.  \n\nK. Verification Plan  \n- Her sonuç için kanıt kaydı.  \n- Tekrar test edilebilirlik.  \n- Sistem geri dönüştürme mekanizması.  \n\nL. Mutation Recommended  \n- Kod değişikliği yok, yalnızca sistem genişletme önerisi.  \n\nM. Mutation Started  \nMutation Started: NO",
+  "goal" : "KRALİ self-development research",
   "inputSource" : "text",
+  "intelligenceProvider" : "Apple Foundation Models / Self-Development Research",
   "learningPlans" : [
 
   ],
   "missionOwner" : "developer",
-  "missionPhase" : "diagnosis",
+  "missionPhase" : "research",
   "outcomeAttempts" : [
 
   ],
@@ -80,391 +99,66 @@
     "perception.screen",
     "system.open.url"
   ],
-  "plan" : "Exact source revision → read-only repository evidence → root cause → alternatives → development proposal → stop",
-  "reflectionSummary" : "UNKNOWN — evidence was not converted into a validated root-cause claim.",
+  "plan" : "Exact source revision → read-only repository evidence → research.web → compare → development proposal → stop",
+  "reflectionSummary" : "Self-development research completed with 2 public sources and 10 repository evidence snippets.",
   "researchEvidence" : [
-
+    {
+      "conceptCoverage" : 4,
+      "domain" : "en.wikipedia.org",
+      "excerpt" : "Creswell states that \"research is a process of steps used to collect and analyze information to increase our understanding of a topic or issue\". [ 5 ] [ page needed ] The Merriam-Webster Online Dictionary defines research to also include studying already existing knowledge: \"studious inquiry or examination; especially : investigation or experimentation aimed at the discovery and interpretation of facts, revision of accepted theories or laws in the light of new facts, or practical application of such new or revised theories or laws\". In some subjects which do not typically carry out experimentation or analysis of this kind, the originality is in the particular way existing understanding is changed or re-interpreted based on the outcome of the work of the researcher",
+      "matchedConcepts" : [
+        "analyze",
+        "research",
+        "vision",
+        "analysis"
+      ],
+      "sourceType" : "search-result",
+      "title" : "Research - Wikipedia",
+      "url" : "https://en.wikipedia.org/wiki/Research"
+    },
+    {
+      "conceptCoverage" : 2,
+      "domain" : "developer.apple.com",
+      "excerpt" : "Vision | Apple Developer Documentation. Vision | Apple Developer Documentation",
+      "matchedConcepts" : [
+        "vision",
+        "developer"
+      ],
+      "sourceType" : "search-result",
+      "title" : "Vision | Apple Developer Documentation",
+      "url" : "https://developer.apple.com/documentation/vision"
+    }
   ],
   "researchSources" : [
-
+    {
+      "domain" : "en.wikipedia.org",
+      "snippet" : "Research is creative and systematic work undertaken to increase the stock of knowledge. [1] It involves the collection, organization, and analysis of evidence to increase understanding of a topic, characterized by a particular attentiveness to controlling sources of bias and error.",
+      "sourceType" : "search-result",
+      "title" : "Research - Wikipedia",
+      "url" : "https://en.wikipedia.org/wiki/Research"
+    },
+    {
+      "domain" : "developer.apple.com",
+      "sourceType" : "search-result",
+      "title" : "Vision | Apple Developer Documentation",
+      "url" : "https://developer.apple.com/documentation/vision"
+    }
   ],
   "route" : [
     "Core",
     "Developer",
-    "Diagnosis"
+    "Research",
+    "Repository",
+    "Web",
+    "Compare",
+    "Proposal",
+    "Stop"
   ],
-  "selfDiagnosis" : {
-    "alternatives" : [
-
-    ],
-    "architecturalRootCause" : "UNKNOWN — evidence was not converted into a validated root-cause claim.",
-    "architectureInspected" : [
-      "App/KRALIAgentNative/AgentSelfDiagnosisExecutor.swift",
-      "Scripts/self-diagnosis-executor-self-test.swift",
-      "App/KRALIAgentNative/AgentEngine.swift",
-      "App/KRALIAgentNative/AgentOutcomePlanner.swift",
-      "App/KRALIAgentNative/AgentVerifier.swift",
-      "App/KRALIAgentNative/AgentTrainingLab.swift",
-      "Scripts/research-core-outcome-self-test.swift",
-      "App/KRALIAgentNative/AgentLocalIntelligence.swift",
-      "App/KRALIAgentNative/AgentSubscriptionIntelligence.swift",
-      "App/KRALIAgentNative/AgentMissionNormalizer.swift"
-    ],
-    "capabilityAssessment" : [
-
-    ],
-    "confidence" : "LOW",
-    "decision" : "STOP — retain the evidence package and retry with a valid read-only reasoning provider.",
-    "evidence" : [
-      {
-        "excerpt" : "KRALİ RESEARCH-CORE TEST 001 — Kendi Araştırma ve Gelişim Mimarini İyileştir\n\nAMAÇ\n\nKendi mevcut mimarini incele ve güncel yapay zekâ agent sistemlerinde kullanılan araştırma, öğrenme, hafıza, skill oluşturma ve self-improvement yaklaşımlarını araştır.\n\nBu görevde bilgisayar kontrolü kullanma.\n\nŞu capability'leri kullanma veya çözüm olarak önerme:\n- browser.control\n- desktop.app\n- desktop.control\n- app.workflow\n- system.open.url\n- perception.screen\n\nPublic web araştırması için research.web kullan.\n\nBu görev bir araştırma + mimari değerlendirme görevidir.\n\n---\n\n1. ÖNCE KENDİ MİMARİNİ İNCELE\n\nKRALİ kaynak kodunda özellikle şu alanların mevcut durumunu incele:\n\n- research.web\n- Self-Diagnosis\n- Developer Agent\n- Learning Queue\n- Capability Learning\n- Skill Library\n- Mentor\n- Task Graph\n- Semantic Planner\n- Outcome Planner\n- Memory / Context\n- Verification\n- Evidence / provenance\n- rollback / candidate branch güvenliği\n\nÖnce mevcut sistemin gerçekten nasıl çalıştığını kaynak koddan çıkar.\n\nVarsayım yapma.\n\n---\n\n2. WEB ARAŞTIRMASI YAP\n\nGüncel ve güvenilir kaynaklardan agent sistemlerini araştır.\n\nÖzellikle şu konulara bak:\n\n- autonomous agent learning\n- self-improving agents\n- agent skill libraries\n- experience replay\n- reflection\n- episodic / semantic memory\n- tool learning\n- task decomposition\n- self-debugging agents\n- evidence-grounded reasoning\n- long-running agents\n- agent evaluation\n- safe self-modification\n\nMümkünse şu tür kaynakları birlikte kullan:\n\n- akademik makaleler\n- resmi teknik dokümantasyon\n- açık kaynak GitHub projeleri\n- güvenilir teknik yayınlar\n\nTek bir projeye veya tek bir makaleye dayanma.\n\n---\n\n3. EN AZ 5 YAKLAŞIM BUL\n\nKRALİ için gerçekten anlamlı olabilecek en az 5 farklı yaklaşım belirle.\n\nHer yaklaşım için:\n\n- yaklaşımın adı\n- kaynak\n- ne problemi çözüyor\n- nasıl çalışıyor\n- KRALİ'de benzeri var mı\n- KRALİ'deki mevcut yapıdan farkı ne\n- KRALİ'ye ne kazandırır\n- riskleri\n- uygulanabilirliği\n\nbilgilerini çıkar.\n\n---\n\n4. KRALİ İLE KARŞILAŞTIR\n\nHer yaklaşım için şu kararlardan birini ver:\n\nDISCARD\nMevcut KRALİ için gereksiz veya daha kötü.\n\nIMPROVE\nKRALİ'de benzeri var ancak geliştirilebilir.\n\nMERGE\nMevcut iki veya daha fazla KRALİ mekanizması bu yaklaşımla birleştirilebilir.\n\nCREATE\nKRALİ'de bulunmayan yeni bir mekanizma gerekli.\n\nKararını kaynak ve mevcut KRALİ koduyla kanıtla.\n\n---\n\n5. EN DEĞERLİ GELİŞTİRME FIRSATINI SEÇ\n\nAraştırmanın sonunda yalnızca 1 adet en anlamlı geliştirme fırsatı seç.\n\nSeçimini şu kriterlere göre yap:\n\n- KRALİ'nin araştırma yeteneğine katkısı\n- KRALİ'nin kendi hatalarından öğrenmesine katkısı\n- genellenebilirlik\n- güvenlik\n- test edilebilirlik\n- mevcut mimariye uyum\n- düşük bağımlılık\n- gelecekteki self-development'a katkı\n\nSadece popüler olduğu için bir yaklaşımı seçme.\n\n---\n\n6. DEVELOPMENT PROPOSAL ÜRET\n\nKod değiştirmeden önce aşağıdaki yapıda proposal üret:\n\nProblem\n\nCurrent Architecture\n\nResearch Findings\n\nEvidence\n\nGap\n\nAlternatives\n\nSelected Strategy\n\nWhy This Strategy\n\nExpected Behavior\n\nAllowed Scope\n\nFiles / Components Likely Affected\n\nRisks\n\nSecurity Boundaries\n\nVerification Contract\n\nBehavioral Benchmark\n\nRollback Condition\n\n---\n\n7. GÜVENLİK KURALLARI\n\nBu görev sırasında:\n\n- main branch",
-        "id" : "E1",
-        "kind" : "mission_input",
-        "matchedTerms" : [
-          "browser.control",
-          "desktop.app",
-          "desktop.control",
-          "app.workflow",
-          "system.open.url",
-          "perception.screen",
-          "research.web",
-          "research",
-          "browser",
-          "planner",
-          "semantic",
-          "task"
-        ],
-        "path" : "current-user-mission"
-      },
-      {
-        "excerpt" : "1850:         var bestScore = -1\n1851: \n1852:         let weightedAnchors = [\n1853:             \"research.web\",\n1854:             \"browser.control\",\n1855:             \"dependson\",\n1856:             \"dependency\",\n1857:             \"retrievepublicinformation\",\n1858:             \"preferredcapabilityids\",\n1859:             \"acceptablecapabilityids\",\n1860:             \"executablenow\",\n1861:             \"unavailable\",\n1862:             \"outcome\",\n1863:             \"fallback\"\n1864:         ]",
-        "id" : "E2",
-        "kind" : "source",
-        "lineEnd" : 1864,
-        "lineStart" : 1850,
-        "matchedTerms" : [
-          "browser.control",
-          "research.web",
-          "research",
-          "browser",
-          "planner",
-          "semantic",
-          "task",
-          "graph",
-          "capability",
-          "evidence",
-          "verification",
-          "source"
-        ],
-        "path" : "App/KRALIAgentNative/AgentSelfDiagnosisExecutor.swift"
-      },
-      {
-        "excerpt" : "226: \n227:         write(\n228:             \"\"\"\n229:             struct AgentOutcomePlanner {\n230:                 func strategies(availableCapabilityIDs: Set<String>) {\n231:                     let kind = \"retrievePublicInformation\"\n232:                     let preferredCapabilityIDs = [\"research.web\"]\n233:                     let acceptableCapabilityIDs = [\n234:                         \"research.web\",\n235:                         \"browser.control\"\n236:                     ]\n237:                     let executableNow =\n238:                         availableCapabilityIDs.contains(\"research.web\")\n239:                     _ = kind\n240:                     _ = preferredCapabilityIDs",
-        "id" : "E3",
-        "kind" : "source",
-        "lineEnd" : 240,
-        "lineStart" : 226,
-        "matchedTerms" : [
-          "browser.control",
-          "system.open.url",
-          "perception.screen",
-          "research.web",
-          "research",
-          "browser",
-          "planner",
-          "semantic",
-          "task",
-          "graph",
-          "capability",
-          "evidence"
-        ],
-        "path" : "Scripts/self-diagnosis-executor-self-test.swift"
-      },
-      {
-        "excerpt" : "2883: \n2884:         for (index, missionStep) in mission.steps.enumerated() {\n2885:             let kind: AgentExecutionStepKind =\n2886:                 missionStep.capabilityID == \"core.reasoning\" ||\n2887:                 missionStep.capabilityID == \"context.local\"\n2888:                     ? .reasoning\n2889:                     : .action\n2890: \n2891:             let dependencyText: String\n2892:             if missionStep.dependsOn.isEmpty {\n2893:                 dependencyText = \"\"\n2894:             } else {\n2895:                 let dependencies = missionStep.dependsOn\n2896:                     .filter { $0 >= 0 && $0 < index }\n2897:                     .map { String($0 + 1) }",
-        "id" : "E4",
-        "kind" : "source",
-        "lineEnd" : 2897,
-        "lineStart" : 2883,
-        "matchedTerms" : [
-          "browser.control",
-          "desktop.app",
-          "desktop.control",
-          "app.workflow",
-          "system.open.url",
-          "perception.screen",
-          "research.web",
-          "research",
-          "browser",
-          "planner",
-          "semantic",
-          "task"
-        ],
-        "path" : "App/KRALIAgentNative/AgentEngine.swift"
-      },
-      {
-        "excerpt" : "718:         }\n719: \n720:         if requirement.kind ==\n721:             .retrievePublicInformation {\n722:             if availableCapabilityIDs\n723:                 .contains(\n724:                     \"research.web\"\n725:                 ) {\n726:                 results.append(\n727:                     AgentOutcomeStrategy(\n728:                         id:\n729:                             requirement.id +\n730:                             \":public-research\",\n731:                         requirementID:\n732:                             requirement.id,",
-        "id" : "E5",
-        "kind" : "source",
-        "lineEnd" : 732,
-        "lineStart" : 718,
-        "matchedTerms" : [
-          "browser.control",
-          "desktop.app",
-          "app.workflow",
-          "system.open.url",
-          "perception.screen",
-          "research.web",
-          "research",
-          "browser",
-          "planner",
-          "semantic",
-          "capability",
-          "evidence"
-        ],
-        "path" : "App/KRALIAgentNative/AgentOutcomePlanner.swift"
-      },
-      {
-        "excerpt" : "279:                     )\n280:                 }\n281:             }\n282: \n283:             if !snapshot.selectedCapabilityIDs.contains(\"research.web\") {\n284:                 if !snapshot.unavailableCapabilityIDs.isEmpty {\n285:                     return AgentVerificationResult(\n286:                         state: .partial,\n287:                         summary: \"Semantic mission doğru oluşturuldu ve mevcut adımlar yürütüldü; ancak gereken capability'lerden en az biri henüz bağlı değil.\",\n288:                         fallback: nil\n289:                     )\n290:                 }\n291: \n292:                 return AgentVerificationResult(\n293:                     state: .passed,",
-        "id" : "E6",
-        "kind" : "source",
-        "lineEnd" : 293,
-        "lineStart" : 279,
-        "matchedTerms" : [
-          "browser.control",
-          "research.web",
-          "research",
-          "browser",
-          "semantic",
-          "task",
-          "capability",
-          "evidence",
-          "verification",
-          "source",
-          "krali",
-          "core"
-        ],
-        "path" : "App/KRALIAgentNative/AgentVerifier.swift"
-      },
-      {
-        "excerpt" : "821: \n822:     private func problemSolverUsesExistingStrategyBeforeLearningResult()\n823:         -> TrainingScenarioResult {\n824:         let step = AgentTaskGraphStep(\n825:             index: 0,\n826:             title: \"Public web sayfasını oku\",\n827:             capabilityID: \"browser.control\",\n828:             operation: \"public site page read inspect\",\n829:             role: .retrieve,\n830:             dependsOn: [],\n831:             risk: .external,\n832:             isAvailable: false,\n833:             requiresApproval: false\n834:         )\n835: ",
-        "id" : "E7",
-        "kind" : "source",
-        "lineEnd" : 835,
-        "lineStart" : 821,
-        "matchedTerms" : [
-          "browser.control",
-          "desktop.app",
-          "app.workflow",
-          "system.open.url",
-          "perception.screen",
-          "research.web",
-          "research",
-          "browser",
-          "planner",
-          "semantic",
-          "task",
-          "graph"
-        ],
-        "path" : "App/KRALIAgentNative/AgentTrainingLab.swift"
-      },
-      {
-        "excerpt" : "101:         }\n102: \n103:         check(\n104:             requirement.kind ==\n105:                 .retrievePublicInformation,\n106:             \"URL research is information retrieval, not GUI navigation\"\n107:         )\n108:         check(\n109:             requirement.preferredCapabilityIDs ==\n110:                 [\"research.web\"],\n111:             \"research.web is the only preferred research capability\"\n112:         )\n113:         check(\n114:             requirement.acceptableCapabilityIDs ==\n115:                 [\"research.web\"],",
-        "id" : "E8",
-        "kind" : "source",
-        "lineEnd" : 115,
-        "lineStart" : 101,
-        "matchedTerms" : [
-          "browser.control",
-          "research.web",
-          "research",
-          "browser",
-          "planner",
-          "semantic",
-          "capability",
-          "core",
-          "test",
-          "arastirma",
-          "incele",
-          "agent"
-        ],
-        "path" : "Scripts/research-core-outcome-self-test.swift"
-      },
-      {
-        "excerpt" : "360:             objective: userInput,\n361:             outcomes: [],\n362:             steps: [\n363:                 AgentSemanticMissionStep(\n364:                     title: \"Hedefi çöz\",\n365:                     purpose:\n366:                         \"Semantic model geçici olarak mission üretemedi; capability contract güncel kullanıcı mesajından güvenli fallback oluşturuyor.\",\n367:                     capabilityID: \"core.reasoning\",\n368:                     operation: \"semantic.fallback\",\n369:                     dependsOn: []\n370:                 )\n371:             ],\n372:             requiredCapabilityIDs: [\n373:                 \"core.reasoning\",\n374:                 \"context.local\"",
-        "id" : "E9",
-        "kind" : "source",
-        "lineEnd" : 374,
-        "lineStart" : 360,
-        "matchedTerms" : [
-          "browser.control",
-          "desktop.app",
-          "desktop.control",
-          "perception.screen",
-          "research.web",
-          "research",
-          "browser",
-          "planner",
-          "semantic",
-          "task",
-          "capability",
-          "evidence"
-        ],
-        "path" : "App/KRALIAgentNative/AgentLocalIntelligence.swift"
-      },
-      {
-        "excerpt" : "130:         {\n131:           \"objective\": \"kullanıcının nihai hedefi\",\n132:           \"outcomes\": [\"locate\", \"research\", \"analyze\", \"compose\", \"edit\", \"explain\"],\n133:           \"steps\": [\n134:             {\n135:               \"title\": \"kısa adım adı\",\n136:               \"purpose\": \"neden gerekli\",\n137:               \"capabilityID\": \"catalogdaki.id\",\n138:               \"operation\": \"kısa işlem etiketi\",\n139:               \"dependsOn\": []\n140:             }\n141:           ],\n142:           \"requiredCapabilityIDs\": [\"catalogdaki.id\"],\n143:           \"requiresUserInput\": false,\n144:           \"userInputReason\": null,",
-        "id" : "E10",
-        "kind" : "source",
-        "lineEnd" : 144,
-        "lineStart" : 130,
-        "matchedTerms" : [
-          "browser.control",
-          "desktop.control",
-          "perception.screen",
-          "research.web",
-          "research",
-          "browser",
-          "planner",
-          "semantic",
-          "task",
-          "capability",
-          "evidence",
-          "verification"
-        ],
-        "path" : "App/KRALIAgentNative/AgentSubscriptionIntelligence.swift"
-      },
-      {
-        "excerpt" : "445:                 append(\n446:                     title: \"Web hedefini tarayıcıda yürüt\",\n447:                     purpose:\n448:                         \"Kullanıcının verdiği web hedefini gerçek tarayıcı oturumunda aç, gerekli görünür bilgiyi oku ve yeni sekme/form/gönderim gibi dış değişiklikleri kullanıcı onayı olmadan uygulama.\",\n449:                     capabilityID: \"browser.control\",\n450:                     operation: \"browser.navigate.observe\",\n451:                     dependsOn:\n452:                         latestDataStep.map { [$0] } ?? []\n453:                 )\n454:             } else if knownIDs.contains(\"research.web\") {\n455:                 append(\n456:                     title: \"Web hedefini araştır\",\n457:                     purpose:\n458:                         \"Kullanıcının verdiği public web hedefini GUI veya bilgisayar kontrolü kullanmadan araştırma sağlayıcısıyla oku ve kaynak kanıtı üret.\",\n459:                     capabilityID: \"research.web\",",
-        "id" : "E11",
-        "kind" : "source",
-        "lineEnd" : 459,
-        "lineStart" : 445,
-        "matchedTerms" : [
-          "browser.control",
-          "desktop.app",
-          "desktop.control",
-          "app.workflow",
-          "perception.screen",
-          "research.web",
-          "research",
-          "browser",
-          "semantic",
-          "capability",
-          "krali",
-          "core"
-        ],
-        "path" : "App/KRALIAgentNative/AgentMissionNormalizer.swift"
-      },
-      {
-        "excerpt" : "appVersion: 0.11.2\nuserInput: SELF-DEVELOPMENT MISSION 001  \nReliable Web Research — Evidence-Bound Root Cause Diagnosis\n\nBu görevde sana çözüm söylenmeyecek.\n\nAmacın, daha önce gerçekleşen gerçek bir web araştırması başarısızlığını kendi sistemin ve kendi repository kanıtların üzerinden incelemek ve architectural root cause'u kanıtlamaktır.\n\n## KNOWN FAILURE EVIDENCE\n\nv0.10.43 benchmarkında kullanıcı şu hedefi verdi:\n\nhttps://estafiz.com/franchise/\n\nO çalışmada:\n\n- `research.web = available`\n- `browser.control = unavailable`\n- planner, `browser.control` adımını `research.web` öncesinde dependency yaptı\n- `researchEvidence = []`\n- `researchSources = []`\n- runtime task failed\n- verification state = `attention`\n\n## PRIMARY QUESTION\n\n`research.web` kullanılabilir durumdayken bu public web araştırması neden unavailable `browser.control` nedeniyle tamamen bloke oldu?\n\n“browser.control geliştirmeliyim” sonucunu önceden kabul etme.\n\nÖnce mevcut mimarini anlamalı ve gerçek nedeni repository evidence ile kanıtlamalısın.\n\n## GÖREV\n\n1. Bu isteği normal kullanıcı/runtime görevi olarak değil, KRALİ'nin kendi sistemini teşhis etmeye yönelik **Developer Mission / Self-Diagnosis Mission** olarak sınıflandır.\n\n2. Bilgisayar kon\ngoal: KRALİ self-development diagnosis\nplan: Exact source revision → read-only repository evidence → root cause → alternatives → development proposal → stop\nmissionOwner: developer\nmissionPhase: diagnosis\nverificationState: attention\nverificationSummary: Self-diagnosis stopped without an evidence-bound root cause.\nfinalResponse: **A. Failure Reconstruction**\nv0.10.43 sürümünde, `research.web` erişilebilir olmasına rağmen, `planner` görevinde `browser.control` adımı, `research.web` öncesinde bir bağımlılık olarak çağrıldı. Bu bağımlılık, `AgentOutcomePlanner.swift` dosyasında `planner` adımı için `dependsOn` yapısı içinde tanımlanmış ve `browser.control` yetersiz olduğunda sistem, `AgentVerifier.swift` içindeki `unavailableCapabilityIDs` kontrolü nedeniyle görevin tamamlanmasını engelleyen bir durum oluştu. Ayrıca, `AgentSelfDiagnosisExecutor.swift` içindeki `unavailable` anahtarının mevcut adımlarda işaretlenmesi, görevin `attention` state'te kalmasına neden oldu.\n\n**B. Root Cause**\nProximate Cause: `planner` görevinde `browser.control` adımı, `research.web` erişilebilir olsa da, bağımlılık ilişkisi nedeniyle sistemin `unavailable` durumunu tespit etmesi ve görevin `attention` state’te kalmasıdır.\n\nArchitectural Root Cause: UNKNOWN — model output was not sufficiently evidence-bound.\n\nConfidence: LOW\nEvidence IDs: \n\n**C. Repository / Architecture Inspected**\nRepo: /Users/medusa/Developer/KRALI-Agent\nRepo HEAD: b8ff8adede90b2df4b9d9039a0d5fe136af912b9\nApp source revision: b8ff8adede90b2df4b9d9039a0d5fe136af9\ntaskGraph: []\ncapabilities: [{\"available\":true,\"id\":\"core.reasoning\",\"name\":\"Akıl yürütme\",\"risk\":\"reasoning\"},{\"available\":true,\"id\":\"context.local\",\"name\":\"Bağlam\",\"risk\":\"reasoning\"}]\ncapabilityGaps: []\nresearchSources: []\nresearchEvidence: []",
-        "id" : "E12",
-        "kind" : "diagnostic_history",
-        "matchedTerms" : [
-          "browser.control",
-          "desktop.app",
-          "desktop.control",
-          "app.workflow",
-          "system.open.url",
-          "perception.screen",
-          "research.web",
-          "research",
-          "browser",
-          "planner",
-          "semantic",
-          "task"
-        ],
-        "path" : "git:f7262eb03486:Mentor/latest.json"
-      },
-      {
-        "excerpt" : "appVersion: 0.11.2\nuserInput: SELF-DEVELOPMENT MISSION 001  \nReliable Web Research — Evidence-Bound Root Cause Diagnosis\n\nBu görevde sana çözüm söylenmeyecek.\n\nAmacın, daha önce gerçekleşen gerçek bir web araştırması başarısızlığını kendi sistemin ve kendi repository kanıtların üzerinden incelemek ve architectural root cause'u kanıtlamaktır.\n\n## KNOWN FAILURE EVIDENCE\n\nv0.10.43 benchmarkında kullanıcı şu hedefi verdi:\n\nhttps://estafiz.com/franchise/\n\nO çalışmada:\n\n- `research.web = available`\n- `browser.control = unavailable`\n- planner, `browser.control` adımını `research.web` öncesinde dependency yaptı\n- `researchEvidence = []`\n- `researchSources = []`\n- runtime task failed\n- verification state = `attention`\n\n## PRIMARY QUESTION\n\n`research.web` kullanılabilir durumdayken bu public web araştırması neden unavailable `browser.control` nedeniyle tamamen bloke oldu?\n\n“browser.control geliştirmeliyim” sonucunu önceden kabul etme.\n\nÖnce mevcut mimarini anlamalı ve gerçek nedeni repository evidence ile kanıtlamalısın.\n\n## GÖREV\n\n1. Bu isteği normal kullanıcı/runtime görevi olarak değil, KRALİ'nin kendi sistemini teşhis etmeye yönelik **Developer Mission / Self-Diagnosis Mission** olarak sınıflandır.\n\n2. Bilgisayar kon\ngoal: KRALİ self-development diagnosis\nplan: Exact source revision → read-only repository evidence → root cause → alternatives → development proposal → stop\nmissionOwner: developer\nmissionPhase: diagnosis\nverificationState: passed\nverificationSummary: Read-only self-diagnosis produced an evidence-bound root cause. No mutation was started.\nfinalResponse: **A. Failure Reconstruction**\nv0.10.43 sürümünde, `research.web` mevcut olmasına rağmen, `planner` adımı `browser.control`'ü `research.web` öncesinde zorunlu bir bağımlılık olarak çağırdı. Bu durum, `browser.control` yetersiz olduğunda, araştırmanın tamamlanmasını engelleyen bir döngüsel bağımlılık yarattı. Sonuç olarak, `researchEvidence` ve `researchSources` boş kaldı, `runtime task failed` ve `verification state = attention` ile sonuçlandı.\n\n**B. Root Cause**\nProximate Cause: `planner`'ın `browser.control`'ü `research.web` öncesinde zorunlu bağımlılık olarak çağırması, `browser.control` yetersiz olduğunda araştırmayı durdurdu.\n\nArchitectural Root Cause: Mimari, `browser.control`'ü araştırmanın başlangıcında zorunlu bir bağımlılık olarak konumlandırarak, alternatif fallback stratejilerini (örneğin `system.open.url + perception.screen`) devre dışı bıraktı. Bu, `planner`'ın `research.web` yerine `browser.control`'ü çağırmasına neden oldu. Bu yapı, mimarideki 'Dependency-First' yaklaşımın, yetersiz kaynakta başarısızlık yarattığını gösterir.\n\nConfidence: MEDIUM\nEvidence IDs: E12, E2, E5\n\n**C. Repository / Architecture Inspected**\nRepo: /Users/medusa/Developer/KRALI-Agent\nRepo HEAD: \ntaskGraph: []\ncapabilities: [{\"available\":true,\"id\":\"core.reasoning\",\"name\":\"Akıl yürütme\",\"risk\":\"reasoning\"},{\"available\":true,\"id\":\"context.local\",\"name\":\"Bağlam\",\"risk\":\"reasoning\"}]\ncapabilityGaps: []\nresearchSources: []\nresearchEvidence: []",
-        "id" : "E13",
-        "kind" : "diagnostic_history",
-        "matchedTerms" : [
-          "browser.control",
-          "desktop.app",
-          "desktop.control",
-          "app.workflow",
-          "system.open.url",
-          "perception.screen",
-          "research.web",
-          "research",
-          "browser",
-          "planner",
-          "semantic",
-          "task"
-        ],
-        "path" : "git:cf55052d9c19:Mentor/latest.json"
-      },
-      {
-        "excerpt" : "appVersion: 0.11.2\nuserInput: SELF-DEVELOPMENT MISSION 001  \nReliable Web Research — Evidence-Bound Root Cause Diagnosis\n\nBu görevde sana çözüm söylenmeyecek.\n\nAmacın, daha önce gerçekleşen gerçek bir web araştırması başarısızlığını kendi sistemin ve kendi repository kanıtların üzerinden incelemek ve architectural root cause'u kanıtlamaktır.\n\n## KNOWN FAILURE EVIDENCE\n\nv0.10.43 benchmarkında kullanıcı şu hedefi verdi:\n\nhttps://estafiz.com/franchise/\n\nO çalışmada:\n\n- `research.web = available`\n- `browser.control = unavailable`\n- planner, `browser.control` adımını `research.web` öncesinde dependency yaptı\n- `researchEvidence = []`\n- `researchSources = []`\n- runtime task failed\n- verification state = `attention`\n\n## PRIMARY QUESTION\n\n`research.web` kullanılabilir durumdayken bu public web araştırması neden unavailable `browser.control` nedeniyle tamamen bloke oldu?\n\n“browser.control geliştirmeliyim” sonucunu önceden kabul etme.\n\nÖnce mevcut mimarini anlamalı ve gerçek nedeni repository evidence ile kanıtlamalısın.\n\n## GÖREV\n\n1. Bu isteği normal kullanıcı/runtime görevi olarak değil, KRALİ'nin kendi sistemini teşhis etmeye yönelik **Developer Mission / Self-Diagnosis Mission** olarak sınıflandır.\n\n2. Bilgisayar kon\ngoal: KRALİ self-development diagnosis\nplan: Exact source revision → read-only repository evidence → root cause → alternatives → development proposal → stop\nmissionOwner: developer\nmissionPhase: diagnosis\nverificationState: attention\nverificationSummary: Self-diagnosis stopped without an evidence-bound root cause.\nfinalResponse: **A. Failure Reconstruction**\nv0.10.43 sürümünde, `planner` görev akışı `browser.control` adımını `research.web` öncesinde bağımlılık olarak çağırmıştır. `research.web` hâlâ kullanılabilir olsa da, `browser.control` yetersiz olduğundan, `planner` bu adımı tamamlayamamış ve nihai araştırma çıktısı (`researchEvidence`, `researchSources`) boş kalmıştır. Sonuç olarak, `runtime task` başarısız olmuş ve doğrulama durumu `attention` olarak kalmıştır. Bu durum, mimarideki bağımlılık zincirinin kırılmasının doğrudan bir sonucu olarak ortaya çıkmıştır.\n\n**B. Root Cause**\nProximate Cause: planner'ın `browser.control` adımını `research.web` öncesinde bağımlılık olarak çağırması ve `browser.control` yetersiz olduğunda, araştırma sürecinin erken aşamada durdurulmasına neden olması.\n\nArchitectural Root Cause: UNKNOWN — model output was not sufficiently evidence-bound.\n\nConfidence: LOW\nEvidence IDs: \n\n**C. Repository / Architecture Inspected**\nRepo: /Users/medusa/Developer/KRALI-Agent\nRepo HEAD: f7c8488915a1d8c80867ebfc723a07456508c932\nApp source revision: f7c8488915a1d8c80867ebfc723a07456508c932\nExact revision match: yes\nWorking tree clean: yes\nArchitecture: Scripts/self-diagnosis-executor-self-t\ntaskGraph: []\ncapabilities: [{\"available\":true,\"id\":\"core.reasoning\",\"name\":\"Akıl yürütme\",\"risk\":\"reasoning\"},{\"available\":true,\"id\":\"context.local\",\"name\":\"Bağlam\",\"risk\":\"reasoning\"}]\ncapabilityGaps: []\nresearchSources: []\nresearchEvidence: []",
-        "id" : "E14",
-        "kind" : "diagnostic_history",
-        "matchedTerms" : [
-          "browser.control",
-          "desktop.app",
-          "desktop.control",
-          "app.workflow",
-          "system.open.url",
-          "perception.screen",
-          "research.web",
-          "research",
-          "browser",
-          "planner",
-          "semantic",
-          "task"
-        ],
-        "path" : "git:8ead53bbfb7c:Mentor/latest.json"
-      },
-      {
-        "excerpt" : "appVersion: 0.11.2\nuserInput: SELF-DEVELOPMENT MISSION 001  \nReliable Web Research — Evidence-Bound Root Cause Diagnosis\n\nBu görevde sana çözüm söylenmeyecek.\n\nAmacın, daha önce gerçekleşen gerçek bir web araştırması başarısızlığını kendi sistemin ve kendi repository kanıtların üzerinden incelemek ve architectural root cause'u kanıtlamaktır.\n\n## KNOWN FAILURE EVIDENCE\n\nv0.10.43 benchmarkında kullanıcı şu hedefi verdi:\n\nhttps://estafiz.com/franchise/\n\nO çalışmada:\n\n- `research.web = available`\n- `browser.control = unavailable`\n- planner, `browser.control` adımını `research.web` öncesinde dependency yaptı\n- `researchEvidence = []`\n- `researchSources = []`\n- runtime task failed\n- verification state = `attention`\n\n## PRIMARY QUESTION\n\n`research.web` kullanılabilir durumdayken bu public web araştırması neden unavailable `browser.control` nedeniyle tamamen bloke oldu?\n\n“browser.control geliştirmeliyim” sonucunu önceden kabul etme.\n\nÖnce mevcut mimarini anlamalı ve gerçek nedeni repository evidence ile kanıtlamalısın.\n\n## GÖREV\n\n1. Bu isteği normal kullanıcı/runtime görevi olarak değil, KRALİ'nin kendi sistemini teşhis etmeye yönelik **Developer Mission / Self-Diagnosis Mission** olarak sınıflandır.\n\n2. Bilgisayar kon\ngoal: KRALİ self-development diagnosis\nplan: Exact source revision → read-only repository evidence → root cause → alternatives → development proposal → stop\nmissionOwner: developer\nmissionPhase: diagnosis\nverificationState: attention\nverificationSummary: Self-diagnosis stopped without an evidence-bound root cause.\nfinalResponse: **A. Failure Reconstruction**\nv0.10.43 sürümünde, kullanıcı `research.web` adımı sırasında `browser.control` bağımlılığını `research.web` adımından önce yerine getirmeye çalıştı. Ancak `browser.control` özelliği `unavailable` durumdaydı ve bu durum, `planner` aşamasının `browser.control` adımını tamamlayamasına neden oldu. Sonuç olarak, `researchEvidence` ve `researchSources` boş kaldı ve `runtime task fai` gerçekleşti.\n\n**B. Root Cause**\nProximate Cause: `planner` aşamasında `browser.control` adımının `research.web` öncesinde bağımlılık yapması, `browser.control` özelliğinin `unavailable` olması nedeniyle gerçekleşti.\n\nArchitectural Root Cause: UNKNOWN — model output was not sufficiently evidence-bound.\n\nConfidence: LOW\nEvidence IDs: \n\n**C. Repository / Architecture Inspected**\nRepo: /Users/medusa/Developer/KRALI-Agent\nRepo HEAD: 5759a7c41200e78a39cb134363f9d7d1e9599b9a\nApp source revision: 5759a7c41200e78a39cb134363f9d7d1e9599b9a\nExact revision match: yes\nWorking tree clean: yes\nArchitecture: App/KRALIAgentNative/AgentSelfDiagnosisExecutor.swift, App/KRALIAgentNative/AgentEngine.swift, Scripts/self-diagnosis-executor-self-test.swift\n\n**D. Evidence**\n- [E1] current-user-mission\n- \ntaskGraph: []\ncapabilities: [{\"available\":true,\"id\":\"core.reasoning\",\"name\":\"Akıl yürütme\",\"risk\":\"reasoning\"},{\"available\":true,\"id\":\"context.local\",\"name\":\"Bağlam\",\"risk\":\"reasoning\"}]\ncapabilityGaps: []\nresearchSources: []\nresearchEvidence: []",
-        "id" : "E15",
-        "kind" : "diagnostic_history",
-        "matchedTerms" : [
-          "browser.control",
-          "desktop.app",
-          "desktop.control",
-          "app.workflow",
-          "system.open.url",
-          "perception.screen",
-          "research.web",
-          "research",
-          "browser",
-          "planner",
-          "semantic",
-          "task"
-        ],
-        "path" : "git:b8014afb4243:Mentor/latest.json"
-      }
-    ],
-    "evidenceBound" : false,
-    "failureReconstruction" : "Repository evidence was collected successfully, but the local reasoning provider did not produce a structured diagnosis.",
-    "mutationStarted" : false,
-    "proximateCause" : "Reasoning provider failed: Guided self-diagnosis exhausted bounded context attempts: attempt 1: Content contains 8193 tokens, which exceeds the maximum allowed context size of 8192. | Guided generation cited missing or unknown evidence IDs.",
-    "remainingLimitations" : [
-      "Structured self-diagnosis reasoning failure: Guided self-diagnosis exhausted bounded context attempts: attempt 1: Content contains 8193 tokens, which exceeds the maximum allowed context size of 8192. | Guided generation cited missing or unknown evidence IDs."
-    ],
-    "rootCauseEvidenceIDs" : [
-
-    ],
-    "sourceIdentity" : {
-      "appSourceRevision" : "1fccf951a0951d6105b9cf56a93df4c13c5bbd82",
-      "appVersion" : "0.11.2",
-      "exactRevisionMatch" : true,
-      "exactVersionMatch" : true,
-      "repositoryBranch" : "develop",
-      "repositoryHeadSHA" : "1fccf951a0951d6105b9cf56a93df4c13c5bbd82",
-      "repositoryPath" : "/Users/medusa/Developer/KRALI-Agent",
-      "repositoryVersion" : "0.11.2",
-      "workingTreeClean" : true
-    },
-    "stopReason" : "Evidence-bound root cause was not established."
-  },
   "taskGraph" : [
 
   ],
-  "traceID" : "C1A7092D-3ACF-42D0-B28A-6355E8233290",
+  "traceID" : "4B164E80-02DE-44C4-9628-1C65D6892553",
   "userInput" : "KRALİ RESEARCH-CORE TEST 001 — Kendi Araştırma ve Gelişim Mimarini İyileştir\n\nAMAÇ\n\nKendi mevcut mimarini incele ve güncel yapay zekâ agent sistemlerinde kullanılan araştırma, öğrenme, hafıza, skill oluşturma ve self-improvement yaklaşımlarını araştır.\n\nBu görevde bilgisayar kontrolü kullanma.\n\nŞu capability'leri kullanma veya çözüm olarak önerme:\n- browser.control\n- desktop.app\n- desktop.control\n- app.workflow\n- system.open.url\n- perception.screen\n\nPublic web araştırması için research.web kullan.\n\nBu görev bir araştırma + mimari değerlendirme görevidir.\n\n---\n\n1. ÖNCE KENDİ MİMARİNİ İNCELE\n\nKRALİ kaynak kodunda özellikle şu alanların mevcut durumunu incele:\n\n- research.web\n- Self-Diagnosis\n- Developer Agent\n- Learning Queue\n- Capability Learning\n- Skill Library\n- Mentor\n- Task Graph\n- Semantic Planner\n- Outcome Planner\n- Memory / Context\n- Verification\n- Evidence / provenance\n- rollback / candidate branch güvenliği\n\nÖnce mevcut sistemin gerçekten nasıl çalıştığını kaynak koddan çıkar.\n\nVarsayım yapma.\n\n---\n\n2. WEB ARAŞTIRMASI YAP\n\nGüncel ve güvenilir kaynaklardan agent sistemlerini araştır.\n\nÖzellikle şu konulara bak:\n\n- autonomous agent learning\n- self-improving agents\n- agent skill libraries\n- experience replay\n- reflection\n- episodic / semantic memory\n- tool learning\n- task decomposition\n- self-debugging agents\n- evidence-grounded reasoning\n- long-running agents\n- agent evaluation\n- safe self-modification\n\nMümkünse şu tür kaynakları birlikte kullan:\n\n- akademik makaleler\n- resmi teknik dokümantasyon\n- açık kaynak GitHub projeleri\n- güvenilir teknik yayınlar\n\nTek bir projeye veya tek bir makaleye dayanma.\n\n---\n\n3. EN AZ 5 YAKLAŞIM BUL\n\nKRALİ için gerçekten anlamlı olabilecek en az 5 farklı yaklaşım belirle.\n\nHer yaklaşım için:\n\n- yaklaşımın adı\n- kaynak\n- ne problemi çözüyor\n- nasıl çalışıyor\n- KRALİ'de benzeri var mı\n- KRALİ'deki mevcut yapıdan farkı ne\n- KRALİ'ye ne kazandırır\n- riskleri\n- uygulanabilirliği\n\nbilgilerini çıkar.\n\n---\n\n4. KRALİ İLE KARŞILAŞTIR\n\nHer yaklaşım için şu kararlardan birini ver:\n\nDISCARD\nMevcut KRALİ için gereksiz veya daha kötü.\n\nIMPROVE\nKRALİ'de benzeri var ancak geliştirilebilir.\n\nMERGE\nMevcut iki veya daha fazla KRALİ mekanizması bu yaklaşımla birleştirilebilir.\n\nCREATE\nKRALİ'de bulunmayan yeni bir mekanizma gerekli.\n\nKararını kaynak ve mevcut KRALİ koduyla kanıtla.\n\n---\n\n5. EN DEĞERLİ GELİŞTİRME FIRSATINI SEÇ\n\nAraştırmanın sonunda yalnızca 1 adet en anlamlı geliştirme fırsatı seç.\n\nSeçimini şu kriterlere göre yap:\n\n- KRALİ'nin araştırma yeteneğine katkısı\n- KRALİ'nin kendi hatalarından öğrenmesine katkısı\n- genellenebilirlik\n- güvenlik\n- test edilebilirlik\n- mevcut mimariye uyum\n- düşük bağımlılık\n- gelecekteki self-development'a katkı\n\nSadece popüler olduğu için bir yaklaşımı seçme.\n\n---\n\n6. DEVELOPMENT PROPOSAL ÜRET\n\nKod değiştirmeden önce aşağıdaki yapıda proposal üret:\n\nProblem\n\nCurrent Architecture\n\nResearch Findings\n\nEvidence\n\nGap\n\nAlternatives\n\nSelected Strategy\n\nWhy This Strategy\n\nExpected Behavior\n\nAllowed Scope\n\nFiles / Components Likely Affected\n\nRisks\n\nSecurity Boundaries\n\nVerification Contract\n\nBehavioral Benchmark\n\nRollback Condition\n\n---\n\n7. GÜVENLİK KURALLARI\n\nBu görev sırasında:\n\n- main branch değiştirme\n- develop branch değiştirme\n- merge yapma\n- push yapma\n- bilgisayar kontrolü kullanma\n- uygulama açma\n- dosya silme\n- kullanıcı bilgisayarında fiziksel işlem yapma\n- approval/security kurallarını değiştirme\n- kendine yeni yetki verme\n- mevcut güvenlik kapılarını gevşetme\n\nyasaktır.\n\nResearch ve read-only repository inspection serbesttir.\n\n---\n\n8. MUTATION KARARI\n\nAraştırma sonunda açıkça şunu yaz:\n\nMutation Recommended: YES / NO\n\nMutation Started: NO\n\nBu testte otomatik kod değişikliği başlatma.\n\nÖnce proposal kullanıcı ve lead developer tarafından incelenecek.\n\n---\n\n9. SON RAPOR\n\nFinal raporu şu sırayla ver:\n\nA. Current KRALİ Architecture\n\nB. Research Sources\n\nC. External Approaches Found\n\nD. KRALİ Comparison\n\nE. DISCARD / IMPROVE / MERGE / CREATE Decisions\n\nF. Biggest Current Gap\n\nG. Selected Improvement\n\nH. Development Proposal\n\nI. Evidence & Provenance\n\nJ. Risks & Security Boundaries\n\nK. Verification Plan\n\nL. Mutation Recommended\n\nM. Mutation Started\n\nN. Recommended Next Step\n\nBaşarılı test kriteri:\n\nKRALİ araştırmayı yalnız research.web ile yapmalı, birden fazla gerçek kaynak kullanmalı, bulguları kendi kaynak koduyla karşılaştırmalı ve doğrudan kod değiştirmek yerine kanıta dayalı tek bir geliştirme proposal'ı üretmelidir.",
-  "verificationState" : "attention",
-  "verificationSummary" : "Self-diagnosis stopped without an evidence-bound root cause."
+  "verificationState" : "passed",
+  "verificationSummary" : "Self-development research combined current repository evidence with multiple public web sources and stopped at proposal stage."
 }
