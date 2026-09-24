@@ -58,6 +58,7 @@ final class AgentEngine: ObservableObject {
     @Published var currentOutcomeResolution: AgentOutcomeResolution?
     @Published var currentOutcomeAttempts: [AgentOutcomeStrategyAttempt] = []
     @Published var currentReflectionSummary: String?
+    @Published var currentSelfDiagnosisReport: AgentSelfDiagnosisReport?
     @Published var currentCapabilityGaps: [CapabilityGapResolution] = []
     @Published var executionSteps: [AgentExecutionStep] = []
     @Published var verificationState: AgentVerificationState = .idle
@@ -124,6 +125,8 @@ final class AgentEngine: ObservableObject {
     private let developerBridge = AgentDeveloperBridge()
     private let missionRouter = AgentMissionRouter()
     private let developerRepositoryResolver = AgentDeveloperRepositoryResolver()
+    private let developerContextFirewall = AgentDeveloperContextFirewall()
+    private let selfDiagnosisExecutor = AgentSelfDiagnosisExecutor()
     private let developerToolSafetyPolicy =
         AgentDeveloperToolSafetyPolicy()
     private let learningQueueStore = AgentLearningQueueStore()
