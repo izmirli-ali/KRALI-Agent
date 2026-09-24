@@ -31,3 +31,17 @@ assert "diagnosticCount: 1" in intel
 assert "sourceExcerptCharacters: 380" in intel
 
 print("self_development_research_policy_ok")
+
+reader = (root / "App/KRALIAgentNative/AgentWebSourceReader.swift").read_text()
+quality = (root / "App/KRALIAgentNative/AgentDevelopmentResearch.swift").read_text()
+
+assert "allowSnippetFallback: Bool = true" in reader
+assert "allowSnippetEvidence:" in engine
+assert "allowSnippetEvidence:" in engine and "false" in engine
+assert "developmentPlan(text)" in engine
+assert "AgentDevelopmentResearchVerifier" in quality
+assert "qualifiesForTechnicalCoverage" in quality
+assert "mutationStarted" in quality
+assert "evidenceIDs" in quality
+assert "repositoryEvidenceIDs" in quality
+print("development_research_quality_policy_ok")
