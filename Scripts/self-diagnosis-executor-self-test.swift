@@ -161,6 +161,19 @@ struct SelfDiagnosisExecutorSelfTest {
 
         write(
             """
+            struct ResearchNotes {
+                let primary = "research.web"
+                let optionalUI = "browser.control"
+                let note = "public research capability inventory"
+            }
+            """,
+            to: root.appendingPathComponent(
+                "App/ResearchNotes.swift"
+            )
+        )
+
+        write(
+            """
             {
               "appVersion": "0.10.43",
               "userInput": "public URL araştır",
@@ -467,11 +480,15 @@ struct SelfDiagnosisExecutorSelfTest {
             package.evidence.first(
                 where: {
                     $0.kind == "source" &&
-                    !$0.excerpt.contains(
-                        "dependency"
-                    )
+                    $0.path ==
+                        "App/ResearchNotes.swift"
                 }
             )?.id
+
+        expect(
+            unrelatedSourceID != nil,
+            "deterministic unrelated source evidence discovered"
+        )
 
         if let unrelatedSourceID {
             let weakSupportOutput =
