@@ -55,6 +55,7 @@
 		A10000000000000000000046 /* AgentMissionRouter.swift in Sources */ = {isa = PBXBuildFile; fileRef = B10000000000000000000046 /* AgentMissionRouter.swift */; };
 		A10000000000000000000047 /* AgentExecutionProfile.swift in Sources */ = {isa = PBXBuildFile; fileRef = B10000000000000000000047 /* AgentExecutionProfile.swift */; };
 		A10000000000000000000048 /* AgentSelfDiagnosisExecutor.swift in Sources */ = {isa = PBXBuildFile; fileRef = B10000000000000000000048 /* AgentSelfDiagnosisExecutor.swift */; };
+		A10000000000000000000049 /* AgentDevelopmentResearch.swift in Sources */ = {isa = PBXBuildFile; fileRef = B10000000000000000000049 /* AgentDevelopmentResearch.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
@@ -107,6 +108,7 @@
 		B10000000000000000000046 /* AgentMissionRouter.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AgentMissionRouter.swift; sourceTree = "<group>"; };
 		B10000000000000000000047 /* AgentExecutionProfile.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AgentExecutionProfile.swift; sourceTree = "<group>"; };
 		B10000000000000000000048 /* AgentSelfDiagnosisExecutor.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AgentSelfDiagnosisExecutor.swift; sourceTree = "<group>"; };
+		B10000000000000000000049 /* AgentDevelopmentResearch.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AgentDevelopmentResearch.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -179,6 +181,7 @@
 				B10000000000000000000046 /* AgentMissionRouter.swift */,
 				B10000000000000000000047 /* AgentExecutionProfile.swift */,
 				B10000000000000000000048 /* AgentSelfDiagnosisExecutor.swift */,
+				B10000000000000000000049 /* AgentDevelopmentResearch.swift */,
 			);
 			path = KRALIAgentNative;
 			sourceTree = "<group>";
@@ -325,6 +328,7 @@
 				A10000000000000000000046 /* AgentMissionRouter.swift in Sources */,
 				A10000000000000000000047 /* AgentExecutionProfile.swift in Sources */,
 				A10000000000000000000048 /* AgentSelfDiagnosisExecutor.swift in Sources */,
+				A10000000000000000000049 /* AgentDevelopmentResearch.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
