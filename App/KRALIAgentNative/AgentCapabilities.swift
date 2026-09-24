@@ -279,7 +279,9 @@ struct AgentCapabilityRegistry {
     }
 
     func availableCapabilities(for profile: AgentExecutionProfile) -> [AgentCapability] {
-        all.map(profile.applies)
+        all
+            .filter { !profile.isPaused($0.id) }
+            .map(profile.applies)
     }
 
     func resolve(
