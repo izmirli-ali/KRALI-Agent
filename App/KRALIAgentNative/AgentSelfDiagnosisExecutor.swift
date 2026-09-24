@@ -867,11 +867,21 @@ struct AgentSelfDiagnosisExecutor {
                 claimText.contains($0)
             }
 
+        let causalOverlapCount =
+            causalClaimAnchors.filter {
+                excerptText.contains($0)
+            }.count
+
+        if evidence.kind == "source" {
+            // Source code is responsible for proving the mechanism itself
+            // (for example, a dependency edge). Historical failure evidence
+            // separately proves that the mechanism actually blocked the run.
+            return causalOverlapCount >= 1
+        }
+
         let hasCausalSupport =
             causalClaimAnchors.isEmpty ||
-            causalClaimAnchors.contains {
-                excerptText.contains($0)
-            }
+            causalOverlapCount >= 1
 
         return overlapCount >= 2 &&
             hasCausalSupport
