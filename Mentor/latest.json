@@ -1,122 +1,107 @@
 {
   "activityTail" : [
     {
-      "date" : "2026-09-23T18:07:35Z",
-      "text" : "Debug/Recovery: Doğrulama uyuşmazlığı • Hata ayıklanıyor • desktop.app"
+      "date" : "2026-09-24T17:14:35Z",
+      "text" : "Debug/Recovery: Bilinmeyen hata • Hata ayıklanıyor • verifier"
     },
     {
-      "date" : "2026-09-23T18:07:35Z",
-      "text" : "Desktop runtime: Notes • activate=true • workspace=false • axRecovery=true • screenKit=false • screenPerception=false • foreground=false • source=unverified"
+      "date" : "2026-09-24T17:14:35Z",
+      "text" : "Semantic rota: Core → Goal → Context → Plan → Browser → Research → Verify → Response"
     },
     {
-      "date" : "2026-09-23T18:07:14Z",
-      "text" : "Diagnostics isteğe bağlı yüklendi"
+      "date" : "2026-09-24T17:14:35Z",
+      "text" : "Task Graph kullanıcı onayı bekleyen step: 1"
     },
     {
-      "date" : "2026-09-23T18:07:14Z",
-      "text" : "Görev tamamlandı • 6.58 sn"
+      "date" : "2026-09-24T17:14:35Z",
+      "text" : "Task Graph blocked capability: browser.control"
     },
     {
-      "date" : "2026-09-23T18:07:14Z",
-      "text" : "Mentor trace yerel olarak kaydedildi"
+      "date" : "2026-09-24T17:14:35Z",
+      "text" : "Task Graph: 0:context.local[reason] → 1:browser.control[act] → 2:research.web[retrieve] → 3:core.reasoning[transform]"
     },
     {
-      "date" : "2026-09-23T18:07:14Z",
-      "text" : "Task Graph approval gate: 2 • desktop.app • Bir uygulama açılacak veya öne getirilecek."
-    },
-    {
-      "date" : "2026-09-23T18:07:07Z",
-      "text" : "Semantic rota: Core → Goal → Context → Plan → Desktop → Verify → Response"
-    },
-    {
-      "date" : "2026-09-23T18:07:07Z",
-      "text" : "Task Graph kullanıcı onayı bekleyen step: 2"
-    },
-    {
-      "date" : "2026-09-23T18:07:07Z",
-      "text" : "Task Graph: 0:core.reasoning[reason] → 1:context.local[reason] → 2:desktop.app[act]"
-    },
-    {
-      "date" : "2026-09-23T18:07:07Z",
+      "date" : "2026-09-24T17:14:35Z",
       "text" : "Problem Solver adayları: Mevcut provider'ı kullan[100] | Mevcut provider'ı kullan[100] | Mevcut provider'ı kullan[100] | Kanıtı reasoning ile dönüştür[75]"
     },
     {
-      "date" : "2026-09-23T18:07:07Z",
-      "text" : "Problem Solver seçimi: Mevcut provider'ı kullan • score=100 • capabilities=core.reasoning"
+      "date" : "2026-09-24T17:14:35Z",
+      "text" : "Problem Solver seçimi: Mevcut provider'ı kullan • score=100 • capabilities=context.local"
     },
     {
-      "date" : "2026-09-23T18:07:07Z",
-      "text" : "Semantic capability planı: context.local, core.reasoning, desktop.app"
+      "date" : "2026-09-24T17:14:35Z",
+      "text" : "Semantic capability planı: browser.control, context.local, core.reasoning, research.web"
     },
     {
-      "date" : "2026-09-23T18:07:07Z",
-      "text" : "Semantic planner sağlayıcısı: Local Contract Repair"
+      "date" : "2026-09-24T17:14:35Z",
+      "text" : "Semantic planner sağlayıcısı: Apple Foundation Models"
     },
     {
-      "date" : "2026-09-23T18:07:07Z",
-      "text" : "Semantic Mission: Notlar uygulamasını aç ve gerçekten ön planda olduğunu doğrula. Başka hiçbir işlem yapma."
+      "date" : "2026-09-24T17:14:35Z",
+      "text" : "Semantic Mission: # BEFORE BENCHMARK — WEB RESEARCH\n\nBu görevde kod değiştirme, repository üzerinde geliştirme yapma, yeni capability oluşturma veya kendi sistemini güncelleme.\n\nAmaç yalnızca mevcut v0.10.43 yeteneklerinle ne kadar iyi web araştırması yapabildiğini ölçmektir.\n\n## Görev\n\nAşağıdaki sayfayı ve gerektiğinde ilgili açık web kaynaklarını araştır:\n\n`https://estafiz.com/franchise/`\n\nKullanıcı için detaylı fakat ilgili bir analiz hazırla.\n\nŞunları anlamaya çalış:\n\n- Estafiz ne sunuyor?\n- Franchise modeli nasıl anlatılıyor?\n- Franchise almak isteyen kişiye hangi değer önerisi sunuluyor?\n- Hedef kitle kim?\n- Sayfada hangi güven unsurları bulunuyor?\n- Hangi önemli bilgiler eksik veya belirsiz?\n- Kullanıcının franchise başvurusu yapmasını kolaylaştıran veya zorlaştıran noktalar neler?\n- Sayfanın pazarlama ve dönüşüm açısından güçlü tarafları neler?\n- Dönüşümü düşürebilecek noktalar neler?\n- Marka hakkında sayfadaki bilgileri destekleyen veya tamamlayan başka güvenilir açık kaynaklar var mı?\n- Sayfanın daha güçlü hale gelmesi için hangi geliştirmeler önerilebilir?\n\n## Araştırma Kuralları\n\nArama sonucu snippet'lerini doğrudan gerçek bilgi kabul etme.\n\nMümkün olduğunca gerçek kaynak sayfasını aç ve içeriğini incele.\n\nResmi kaynakları üçüncü taraf kaynaklardan ayır.\n\nBulamadığın veya doğrulayamadığın bilgiyi uydurma.\n\nŞu ayrımı koru:\n\n- FACT\n- INFERENCE\n- RECOMMENDATION\n- UNKNOWN\n\nBir çıkarımı gerçek bilgi gibi sunma.\n\n## Araştırma Sırasında Kaydet\n\nHer önemli bulgu için içsel olarak şunları takip et:\n\n- hangi kaynaktan geldi;\n- gerçekten kaynak içeriği okunabildi mi;\n- yalnızca snippet mi görüldü;\n- bilginin güven seviyesi;\n- başka kaynakla doğrulandı mı.\n\n## Sonuç Formatı\n\n### A. Site Analizi\n\nKullanıcıya verilecek gerçek analiz.\n\n### B. Doğrulanmış Bilgiler\n\nKaynaklardan gerçekten elde edilen ana bulgular.\n\n### C. Çıkarımlar\n\nKaynaklardan yaptığın yorumlar. Bunları fact olarak gösterme.\n\n### D. Bilinmeyen / Doğrulanamayan Noktalar\n\nBulamadığın veya güvenilir şekilde doğrulayamadığın bilgiler.\n\n### E. Kullanılan Kaynaklar\n\nYalnızca gerçekten kullandığın kaynakları belirt.\n\nHer kaynak için mümkünse:\n\n- kaynak adı;\n- URL;\n- hangi bilgi için kullanıldığı;\n- sayfa içeriği gerçekten okunabildi mi?\n\n### F. Kendi Performans Değerlendirmen\n\nAşağıdaki her alanı 0–5 puanla:\n\n- Kullanıcı amacını anlama\n- Kaynak keşfi\n- Gerçek kaynak içeriğini okuyabilme\n- İlgili bilgi çıkarma\n- Kaynak doğrulama\n- Halüsinasyondan kaçınma\n- Sonucun kullanıcı ihtiyacına uygunluğu\n- Genel araştırma kalitesi\n\nHer puanın yanında kısa gerekçe ver.\n\n### G. Yaşadığın Sorunlar\n\nAraştırma sırasında gerçekten karşılaştığın problemleri belirt.\n\nÖrneğin:\n\n- URL açılamadı;\n- sayfanın içeriği alınamadı;\n- yalnızca snippet erişilebildi;\n- alt sayfalar keşfedilemedi;\n- kaynakların içeriği karşılaştırılamadı;\n- hangi bilginin kaynaktan hangisinin model bilgisinden geldiği belirsiz kaldı;\n- kullanıcıyla ilgisiz sonuçlara yöneldin.\n\nSorun yaşamadıysan uydurma.\n\n### H. Capability Gap Gözlemleri\n\nHenüz kod değiştirme.\n\nSadece şu soruya cevap ver:\n\n> Bu görevi daha güvenilir yapmak için mevcut sistemimde eksik veya zayıf olduğunu düşündüğüm genellenebilir yetenekler var mı?\n\nVarsa her biri için:\n\n- gözlenen problem;\n- buna dair evidence;\n- olası root cause;\n- güven düzeyi.\n\nRoot cause konusunda emin değilsen açıkça `henüz kanıtlanmadı` yaz.\n\n## Kritik Kural\n\nBu benchmarkta amaç iyi görünmek değildir.\n\nAmaç mevcut sistemin gerçek kapasitesini ölçmektir.\n\nAraştırma yapamadığın bir noktada tahmin üretmek yerine bunu açıkça bildir.\n\nHiçbir kod veya sistem değişikliği yapma.\n\nHiçbir otomatik geliştirme görevi başlatma.\n\nSadece araştır, cevapla ve kendi performansını ölç."
     },
     {
-      "date" : "2026-09-23T18:07:07Z",
-      "text" : "Outcome Solver: başarı kriterleri mevcut capability'lerle kapsandı • Outcome'u desktop.app ile çöz"
+      "date" : "2026-09-24T17:14:35Z",
+      "text" : "Problem Solver semantic Learning'i erteledi: app.workflow, browser.control, desktop.app"
     },
     {
-      "date" : "2026-09-23T18:07:07Z",
-      "text" : "Seçilen kabiliyetler: Akıl yürütme, Bağlam, Uygulama kontrolü"
+      "date" : "2026-09-24T17:14:35Z",
+      "text" : "Outcome Solver: başarı kriterleri mevcut capability'lerle kapsandı • Public kaynaktan bilgi edin | Outcome'u core.reasoning ile çöz"
     },
     {
-      "date" : "2026-09-23T18:07:07Z",
-      "text" : "Otomatik rota: Core → Goal → Context → Plan → Desktop → Response"
+      "date" : "2026-09-24T17:14:30Z",
+      "text" : "Diagnostics isteğe bağlı yüklendi"
     },
     {
-      "date" : "2026-09-23T18:07:07Z",
-      "text" : "Seçilen plan: Uygulama adını çöz, uygulamayı aç veya öne getir ve sonucu doğrula"
+      "date" : "2026-09-24T17:14:05Z",
+      "text" : "Yetkinlik öğrenme planı: Tarayıcı kontrolü → Entegrasyon gerekli"
     },
     {
-      "date" : "2026-09-23T18:07:07Z",
-      "text" : "KRALİ Core hedef sözleşmesi: istenen uygulamayı aç veya öne getir"
+      "date" : "2026-09-24T17:14:05Z",
+      "text" : "Seçilen kabiliyetler: Akıl yürütme, Bağlam, Tarayıcı kontrolü [bekliyor], Web araştırma, URL açma, Ekran algısı"
     },
     {
-      "date" : "2026-09-23T18:07:07Z",
+      "date" : "2026-09-24T17:14:05Z",
+      "text" : "Otomatik rota: Core → Goal → Context → Plan → Browser → Research → Screen → Learn → Verify → Response"
+    },
+    {
+      "date" : "2026-09-24T17:14:05Z",
+      "text" : "Seçilen plan: İlgili önceki görev bağlamını geri çağır; yeni isteği ona bağla ve gerekmedikçe aynı araştırmayı baştan yapma"
+    },
+    {
+      "date" : "2026-09-24T17:14:05Z",
+      "text" : "KRALİ Core hedef sözleşmesi: bulguları analiz et → güncel kaynaklarla araştır → sonucu ve gerekçeyi açıkla"
+    },
+    {
+      "date" : "2026-09-24T17:14:05Z",
       "text" : "Problem Solver başlangıç stratejisi: Mevcut provider'ı kullan • Task Graph bu capability'yi doğrudan seçti ve provider available."
     },
     {
-      "date" : "2026-09-23T18:07:07Z",
-      "text" : "Bağlam firewall: önceki görev bağlamları bu tura taşınmadı"
+      "date" : "2026-09-24T17:14:04Z",
+      "text" : "Bağlam hafızası: Çalışma kuralı • Çalışma kuralı • Estafiz için 30 saniyelik bir Reels çekim planı hazırla. 3 bölüm olsu… • estafizsym instagram sayfasını incele ve bana detaylı bir rapor sun"
     },
     {
-      "date" : "2026-09-23T18:07:01Z",
+      "date" : "2026-09-24T16:13:43Z",
       "text" : "Apple yerel zeka hazır"
     },
     {
-      "date" : "2026-09-23T18:07:01Z",
+      "date" : "2026-09-24T16:13:43Z",
       "text" : "Çalışma klasörü yolu geri yüklendi; indeks gerektiğinde oluşturulacak: Desktop"
     },
     {
-      "date" : "2026-09-23T18:07:01Z",
+      "date" : "2026-09-24T16:13:43Z",
       "text" : "Ağır geliştirici testleri normal açılışta otomatik çalıştırılmıyor"
     },
     {
-      "date" : "2026-09-23T18:07:01Z",
+      "date" : "2026-09-24T16:13:43Z",
       "text" : "Dinamik hedef ve kabiliyet yönlendirme aktif"
     },
     {
-      "date" : "2026-09-23T18:07:01Z",
+      "date" : "2026-09-24T16:13:43Z",
       "text" : "KRALİ Core hazır"
     }
   ],
-  "appVersion" : "0.10.26",
-  "approvalAudit" : {
-    "capabilityID" : "desktop.app",
-    "decision" : "approved",
-    "recordedAt" : "2026-09-23T18:07:20Z",
-    "stepIndex" : 2,
-    "targetBundleIdentifier" : "com.apple.Notes",
-    "targetName" : "Notes",
-    "targetPath" : "/System/Applications/Notes.app",
-    "targetSummary" : "Notes • com.apple.Notes",
-    "title" : "Uygulama kontrolü"
-  },
+  "appVersion" : "0.10.43",
   "capabilities" : [
     {
       "available" : true,
@@ -131,57 +116,82 @@
       "risk" : "reasoning"
     },
     {
+      "available" : false,
+      "id" : "browser.control",
+      "name" : "Tarayıcı kontrolü",
+      "risk" : "external"
+    },
+    {
       "available" : true,
-      "id" : "desktop.app",
-      "name" : "Uygulama kontrolü",
+      "id" : "research.web",
+      "name" : "Web araştırma",
       "risk" : "external"
     }
   ],
   "capabilityGaps" : [
-    {
-      "candidateCapabilityIDs" : [
 
-      ],
-      "capabilityID" : "desktop.app",
-      "capabilityName" : "Uygulama kontrolü",
-      "developerBrief" : "KRALİ Runtime Capability Failure Developer Brief\n\nKullanıcı hedefi:\nNotlar uygulamasını aç ve gerçekten ön planda olduğunu doğrula. Başka hiçbir işlem yapma.\n\nRuntime'da başarısız capability:\ndesktop.app — Uygulama kontrolü\n\nStep:\n2: Uygulama kontrolü\nOperation: capability.contract\nRole: act\n\nMevcut strategy adayları:\nYok\n\nSorun:\nProvider available olmasına rağmen runtime step tamamlanamadı veya postcondition doğrulanamadı: desktop.app • capability.contract • kullanıcı onayı verildi\n\nÇözüm kuralları:\n- Önce problemi, gözlemleri ve başarısız postcondition'ı tanımla; doğrudan kod satırı aramaya başlama.\n- En az iki makul çözüm stratejisini değerlendir; mevcut capability kombinasyonu problemi çözebiliyorsa yeni provider yazma.\n- Capability zaten available ise önce mevcut provider'ı ve postcondition verifier'ı debug et.\n- Uygulama/marka adına hard-code yazma; hatayı genel resolver/provider/strategy seviyesinde çöz.\n- Başarı gerçek observation/verification ile kanıtlanmadan PASS üretme.\n- Dış dünyaya commit eden eylemlerde kullanıcı onayı korunmalı.\n- Candidate branch/worktree kullan; ana branch'i doğrudan değiştirme.\n- Build + regression + mümkünse runtime probe geçmeden düzeltmeyi available/healthy sayma.\n\nKabul kriteri:\nAynı sınıftaki bilinmeyen hedeflerde de provider doğru hedefi çözebilmeli; başarısız runtime step tamamlanmalı ve verifier gerçek evidence ile PASS verebilmeli.",
-      "kind" : "strategy",
-      "learningPath" : "primitivePatch",
-      "reason" : "Provider available olmasına rağmen runtime step tamamlanamadı veya postcondition doğrulanamadı: desktop.app • capability.contract • kullanıcı onayı verildi",
-      "researchGoal" : "Mevcut Uygulama kontrolü provider'ının neden runtime'da başarısız olduğunu kanıtla; önce mevcut provider/strategy'yi debug et, gerekirse generic recovery veya yeni provider stratejisi geliştir ve aynı postcondition'ı gerçek observation ile doğrula."
-    }
   ],
   "contextMemory" : [
-
+    {
+      "createdAt" : "2026-09-20T09:47:42Z",
+      "kind" : "userRule",
+      "summary" : "Estafiz'e özel marka detaylarını başka markalara otomatik uygulama",
+      "title" : "Çalışma kuralı"
+    },
+    {
+      "createdAt" : "2026-09-20T01:00:28Z",
+      "kind" : "userRule",
+      "summary" : "Ana projeyi doğrudan değiştirme; çalışma kopyasında ilerle.",
+      "title" : "Çalışma kuralı"
+    },
+    {
+      "createdAt" : "2026-09-20T09:05:38Z",
+      "kind" : "task",
+      "summary" : "**1. Açılış Bölümü (0-5 saniye)** **“Aynı hareket, üç farklı beden”** serisi temel alınarak hazırlanan bu bölüm, görsel bir karşılaştırma sunar. Reformer üzerinde aynı pozisyon, ancak üç farklı hedef kitleye göre uyarlanmıştır. Başlangıç seviyesi, masa başında çalışan birey ve düzenli egzersiz yapan kişi. **Neden işe yarar?** - Hareketin görünüşü sabit kalırken, direnç ve açı gibi faktörlerin kişiye göre değiştiğini somutlaştırır. - İzleyicinin “bu hareketi ben yapabilir miyim?” sorusunu yanıtlar. - Hesabı yalnızca hareket gösteren bir sayfa değil, **kişiye özel yaklaşım sunan uzman bir merkez** olarak konumlandırır. - Seri formatına uygun yapı, içerik tekrarlarına imkân tanır. **2. Ana Mesaj Bölümü (5-20 saniye)** Günlük yaşamdan kısa bir sahneyle başlar: Bilgisayar başında çalışan bir kişi kalktığında belini tutuyor veya omuzlarını çeviriyor. Ekranda sorular sırayla belirir: - “Sandalyeden kalkınca birkaç saniye doğrulamaya çalışıyor musun?” - “Günün sonunda omuzların öne mi düşüyor?” - “Sorun yalnızca ‘esnek olmamak’ olmayabilir.” Ardından eğitmen, tanı koymadan **kişiye özel değerlendirme ve kontrollü egzersiz** önerir. **Neden işe yarar?** - Hizmetin soyut bir kavram değil, iz",
+      "title" : "Estafiz için 30 saniyelik bir Reels çekim planı hazırla. 3 bölüm olsu…"
+    },
+    {
+      "createdAt" : "2026-09-20T01:02:49Z",
+      "kind" : "research",
+      "summary" : "# @estafizsym Instagram Sayfası İnceleme Raporu ## 1. Yönetici özeti Doğrulanan profil: - **Kullanıcı adı:** `@estafizsym` - **Görünen ad:** **Estafiz SYM | Reformer | Klinik Pilates** - **Platform:** Instagram - **Temel faaliyet alanı:** Profil adlandırmasına göre reformer ve klinik pilates hizmetleri cite1 Hesap, görünen adında hem marka ismini hem de temel hizmetlerini açıkça belirtiyor. Bu, Instagram aramalarında ve profil ilk izleniminde kullanıcının faaliyet alanını hızlıca anlamasını sağlayabilecek olumlu bir tercih. Ancak erişilebilen doğrulanmış veri yalnızca profil kimliği ve görünen adla sınırlı. **Biyografi, konum, iletişim bilgileri, gönderiler, Reels içerikleri, takipçi sayısı, paylaşım sıklığı ve etkileşim oranı görüntülenemedi.** Dolayısıyla aşağıdaki çalışma, tam kapsamlı içerik ve performans denetimi değil; doğrulanabilen bilgiler üzerinden hazırlanmış bir **ön değerlendirmedir**. --- ## 2. Profil kimliği ve konumlandırma ### Doğrulanan bilgiler | Alan | Sonuç | |---|---| | Hesap | `@estafizsym` | | Görünen ad | Estafiz SYM \\| Reformer \\| Klinik Pilates | | Sektör | Pilates/egzersiz ve sağlıklı yaşam | | Belirtilen hizmetler | Reformer, klinik pilates | | Hesab",
+      "title" : "estafizsym instagram sayfasını incele ve bana detaylı bir rapor sun"
+    }
   ],
-  "createdAt" : "2026-09-23T18:07:35Z",
+  "createdAt" : "2026-09-24T17:14:35Z",
   "executionSteps" : [
     {
-      "capabilityID" : "core.reasoning",
-      "detail" : "Semantic model geçici olarak mission üretemedi; capability contract güncel kullanıcı mesajından güvenli fallback oluşturuyor. Operation: semantic.fallback",
-      "kind" : "reasoning",
-      "state" : "completed",
-      "title" : "Hedefi çöz"
-    },
-    {
       "capabilityID" : "context.local",
-      "detail" : "Mission hedefini uçtan uca tamamlamak için gerekli capability sözleşmesi. Ön koşul adımları: 1. Operation: capability.contract",
+      "detail" : "Yalnızca bu kullanıcı hedefiyle ilgili bağlamı hazırla; eski görev hedeflerini yeni göreve taşıma. Operation: context.resolve",
       "kind" : "reasoning",
       "state" : "completed",
-      "title" : "Bağlam"
+      "title" : "Görev bağlamını hazırla"
     },
     {
-      "capabilityID" : "desktop.app",
-      "detail" : "Mission hedefini uçtan uca tamamlamak için gerekli capability sözleşmesi. Ön koşul adımları: 2. Operation: capability.contract",
+      "capabilityID" : "browser.control",
+      "detail" : "Kullanıcının verdiği web hedefini gerçek tarayıcı oturumunda aç, gerekli görünür bilgiyi oku ve yeni sekme/form/gönderim gibi dış değişiklikleri kullanıcı onayı olmadan uygulama. Provider yoksa capability gap üret ve öğrenme hattına geçir. Ön koşul adımları: 1. Operation: browser.navigate.observe",
+      "kind" : "action",
+      "state" : "blocked",
+      "title" : "Web hedefini tarayıcıda yürüt"
+    },
+    {
+      "capabilityID" : "research.web",
+      "detail" : "Önceki adımda çözülen gerçek hedef/veriyi kullanarak dış kaynaklardan gerekli bilgiyi araştır. Ön koşul adımları: 2. Operation: web.research",
       "kind" : "action",
       "state" : "partial",
-      "title" : "Uygulama kontrolü"
+      "title" : "Gerekli dış bilgiyi araştır"
+    },
+    {
+      "capabilityID" : "core.reasoning",
+      "detail" : "Önceki adımların gerçek çıktısını birlikte değerlendir ve sonraki adımın kullanabileceği sonucu üret. Ön koşul adımları: 3. Operation: content.analyze",
+      "kind" : "reasoning",
+      "state" : "pending",
+      "title" : "Toplanan veriyi analiz et"
     },
     {
       "capabilityID" : "core.reasoning",
       "detail" : "Gerçekleşen adımları hedefle, capability durumuyla ve üretilen sonuçla karşılaştır.",
       "kind" : "verification",
-      "state" : "partial",
+      "state" : "attention",
       "title" : "Mission sonucunu doğrula"
     },
     {
@@ -191,8 +201,9 @@
       "title" : "Sonucu kullanıcıya aktar"
     }
   ],
-  "finalResponse" : "Görev tamamlanamadı. Eksik kabiliyet: Uygulama kontrolü.\n\nDoğrulama: Semantic mission içindeki zorunlu action step'lerinden bazıları tamamlanmadı: desktop.app",
-  "goal" : "Notlar uygulamasını aç ve gerçekten ön planda olduğunu doğrula. Başka hiçbir işlem yapma.",
+  "fallbackPlan" : "Aynı başarı kriteri için başka güvenli outcome stratejisini dene; kanıt üretmeden başarılı sayma.",
+  "finalResponse" : "Hedefi “# BEFORE BENCHMARK — WEB RESEARCH\n\nBu görevde kod değiştirme, repository üzerinde geliştirme yapma, yeni capability oluşturma veya kendi sistemini güncelleme.\n\nAmaç yalnızca mevcut v0.10.43 yeteneklerinle ne kadar iyi web araştırması yapabildiğini ölçmektir.\n\n## Görev\n\nAşağıdaki sayfayı ve gerektiğinde ilgili açık web kaynaklarını araştır:\n\n`https://estafiz.com/franchise/`\n\nKullanıcı için detaylı fakat ilgili bir analiz hazırla.\n\nŞunları anlamaya çalış:\n\n- Estafiz ne sunuyor?\n- Franchise modeli nasıl anlatılıyor?\n- Franchise almak isteyen kişiye hangi değer önerisi sunuluyor?\n- Hedef kitle kim?\n- Sayfada hangi güven unsurları bulunuyor?\n- Hangi önemli bilgiler eksik veya belirsiz?\n- Kullanıcının franchise başvurusu yapmasını kolaylaştıran veya zorlaştıran noktalar neler?\n- Sayfanın pazarlama ve dönüşüm açısından güçlü tarafları neler?\n- Dönüşümü düşürebilecek noktalar neler?\n- Marka hakkında sayfadaki bilgileri destekleyen veya tamamlayan başka güvenilir açık kaynaklar var mı?\n- Sayfanın daha güçlü hale gelmesi için hangi geliştirmeler önerilebilir?\n\n## Araştırma Kuralları\n\nArama sonucu snippet'lerini doğrudan gerçek bilgi kabul etme.\n\nMümkün olduğunca gerçek kaynak sayfasını aç ve içeriğini incele.\n\nResmi kaynakları üçüncü taraf kaynaklardan ayır.\n\nBulamadığın veya doğrulayamadığın bilgiyi uydurma.\n\nŞu ayrımı koru:\n\n- FACT\n- INFERENCE\n- RECOMMENDATION\n- UNKNOWN\n\nBir çıkarımı gerçek bilgi gibi sunma.\n\n## Araştırma Sırasında Kaydet\n\nHer önemli bulgu için içsel olarak şunları takip et:\n\n- hangi kaynaktan geldi;\n- gerçekten kaynak içeriği okunabildi mi;\n- yalnızca snippet mi görüldü;\n- bilginin güven seviyesi;\n- başka kaynakla doğrulandı mı.\n\n## Sonuç Formatı\n\n### A. Site Analizi\n\nKullanıcıya verilecek gerçek analiz.\n\n### B. Doğrulanmış Bilgiler\n\nKaynaklardan gerçekten elde edilen ana bulgular.\n\n### C. Çıkarımlar\n\nKaynaklardan yaptığın yorumlar. Bunları fact olarak gösterme.\n\n### D. Bilinmeyen / Doğrulanamayan Noktalar\n\nBulamadığın veya güvenilir şekilde doğrulayamadığın bilgiler.\n\n### E. Kullanılan Kaynaklar\n\nYalnızca gerçekten kullandığın kaynakları belirt.\n\nHer kaynak için mümkünse:\n\n- kaynak adı;\n- URL;\n- hangi bilgi için kullanıldığı;\n- sayfa içeriği gerçekten okunabildi mi?\n\n### F. Kendi Performans Değerlendirmen\n\nAşağıdaki her alanı 0–5 puanla:\n\n- Kullanıcı amacını anlama\n- Kaynak keşfi\n- Gerçek kaynak içeriğini okuyabilme\n- İlgili bilgi çıkarma\n- Kaynak doğrulama\n- Halüsinasyondan kaçınma\n- Sonucun kullanıcı ihtiyacına uygunluğu\n- Genel araştırma kalitesi\n\nHer puanın yanında kısa gerekçe ver.\n\n### G. Yaşadığın Sorunlar\n\nAraştırma sırasında gerçekten karşılaştığın problemleri belirt.\n\nÖrneğin:\n\n- URL açılamadı;\n- sayfanın içeriği alınamadı;\n- yalnızca snippet erişilebildi;\n- alt sayfalar keşfedilemedi;\n- kaynakların içeriği karşılaştırılamadı;\n- hangi bilginin kaynaktan hangisinin model bilgisinden geldiği belirsiz kaldı;\n- kullanıcıyla ilgisiz sonuçlara yöneldin.\n\nSorun yaşamadıysan uydurma.\n\n### H. Capability Gap Gözlemleri\n\nHenüz kod değiştirme.\n\nSadece şu soruya cevap ver:\n\n> Bu görevi daha güvenilir yapmak için mevcut sistemimde eksik veya zayıf olduğunu düşündüğüm genellenebilir yetenekler var mı?\n\nVarsa her biri için:\n\n- gözlenen problem;\n- buna dair evidence;\n- olası root cause;\n- güven düzeyi.\n\nRoot cause konusunda emin değilsen açıkça `henüz kanıtlanmadı` yaz.\n\n## Kritik Kural\n\nBu benchmarkta amaç iyi görünmek değildir.\n\nAmaç mevcut sistemin gerçek kapasitesini ölçmektir.\n\nAraştırma yapamadığın bir noktada tahmin üretmek yerine bunu açıkça bildir.\n\nHiçbir kod veya sistem değişikliği yapma.\n\nHiçbir otomatik geliştirme görevi başlatma.\n\nSadece araştır, cevapla ve kendi performansını ölç.” olarak çözdüm. Semantic plan hazır; şu capability'ler henüz bağlı olmadığı için ilgili uygulama adımları bekliyor: Tarayıcı kontrolü.\n\nDoğrulama: Outcome stratejisi public web araştırmasını seçti ancak gerçek kaynak kanıtı üretmedi.\nAlternatif plan: Aynı başarı kriteri için başka güvenli outcome stratejisini dene; kanıt üretmeden başarılı sayma.",
+  "goal" : "# BEFORE BENCHMARK — WEB RESEARCH\n\nBu görevde kod değiştirme, repository üzerinde geliştirme yapma, yeni capability oluşturma veya kendi sistemini güncelleme.\n\nAmaç yalnızca mevcut v0.10.43 yeteneklerinle ne kadar iyi web araştırması yapabildiğini ölçmektir.\n\n## Görev\n\nAşağıdaki sayfayı ve gerektiğinde ilgili açık web kaynaklarını araştır:\n\n`https://estafiz.com/franchise/`\n\nKullanıcı için detaylı fakat ilgili bir analiz hazırla.\n\nŞunları anlamaya çalış:\n\n- Estafiz ne sunuyor?\n- Franchise modeli nasıl anlatılıyor?\n- Franchise almak isteyen kişiye hangi değer önerisi sunuluyor?\n- Hedef kitle kim?\n- Sayfada hangi güven unsurları bulunuyor?\n- Hangi önemli bilgiler eksik veya belirsiz?\n- Kullanıcının franchise başvurusu yapmasını kolaylaştıran veya zorlaştıran noktalar neler?\n- Sayfanın pazarlama ve dönüşüm açısından güçlü tarafları neler?\n- Dönüşümü düşürebilecek noktalar neler?\n- Marka hakkında sayfadaki bilgileri destekleyen veya tamamlayan başka güvenilir açık kaynaklar var mı?\n- Sayfanın daha güçlü hale gelmesi için hangi geliştirmeler önerilebilir?\n\n## Araştırma Kuralları\n\nArama sonucu snippet'lerini doğrudan gerçek bilgi kabul etme.\n\nMümkün olduğunca gerçek kaynak sayfasını aç ve içeriğini incele.\n\nResmi kaynakları üçüncü taraf kaynaklardan ayır.\n\nBulamadığın veya doğrulayamadığın bilgiyi uydurma.\n\nŞu ayrımı koru:\n\n- FACT\n- INFERENCE\n- RECOMMENDATION\n- UNKNOWN\n\nBir çıkarımı gerçek bilgi gibi sunma.\n\n## Araştırma Sırasında Kaydet\n\nHer önemli bulgu için içsel olarak şunları takip et:\n\n- hangi kaynaktan geldi;\n- gerçekten kaynak içeriği okunabildi mi;\n- yalnızca snippet mi görüldü;\n- bilginin güven seviyesi;\n- başka kaynakla doğrulandı mı.\n\n## Sonuç Formatı\n\n### A. Site Analizi\n\nKullanıcıya verilecek gerçek analiz.\n\n### B. Doğrulanmış Bilgiler\n\nKaynaklardan gerçekten elde edilen ana bulgular.\n\n### C. Çıkarımlar\n\nKaynaklardan yaptığın yorumlar. Bunları fact olarak gösterme.\n\n### D. Bilinmeyen / Doğrulanamayan Noktalar\n\nBulamadığın veya güvenilir şekilde doğrulayamadığın bilgiler.\n\n### E. Kullanılan Kaynaklar\n\nYalnızca gerçekten kullandığın kaynakları belirt.\n\nHer kaynak için mümkünse:\n\n- kaynak adı;\n- URL;\n- hangi bilgi için kullanıldığı;\n- sayfa içeriği gerçekten okunabildi mi?\n\n### F. Kendi Performans Değerlendirmen\n\nAşağıdaki her alanı 0–5 puanla:\n\n- Kullanıcı amacını anlama\n- Kaynak keşfi\n- Gerçek kaynak içeriğini okuyabilme\n- İlgili bilgi çıkarma\n- Kaynak doğrulama\n- Halüsinasyondan kaçınma\n- Sonucun kullanıcı ihtiyacına uygunluğu\n- Genel araştırma kalitesi\n\nHer puanın yanında kısa gerekçe ver.\n\n### G. Yaşadığın Sorunlar\n\nAraştırma sırasında gerçekten karşılaştığın problemleri belirt.\n\nÖrneğin:\n\n- URL açılamadı;\n- sayfanın içeriği alınamadı;\n- yalnızca snippet erişilebildi;\n- alt sayfalar keşfedilemedi;\n- kaynakların içeriği karşılaştırılamadı;\n- hangi bilginin kaynaktan hangisinin model bilgisinden geldiği belirsiz kaldı;\n- kullanıcıyla ilgisiz sonuçlara yöneldin.\n\nSorun yaşamadıysan uydurma.\n\n### H. Capability Gap Gözlemleri\n\nHenüz kod değiştirme.\n\nSadece şu soruya cevap ver:\n\n> Bu görevi daha güvenilir yapmak için mevcut sistemimde eksik veya zayıf olduğunu düşündüğüm genellenebilir yetenekler var mı?\n\nVarsa her biri için:\n\n- gözlenen problem;\n- buna dair evidence;\n- olası root cause;\n- güven düzeyi.\n\nRoot cause konusunda emin değilsen açıkça `henüz kanıtlanmadı` yaz.\n\n## Kritik Kural\n\nBu benchmarkta amaç iyi görünmek değildir.\n\nAmaç mevcut sistemin gerçek kapasitesini ölçmektir.\n\nAraştırma yapamadığın bir noktada tahmin üretmek yerine bunu açıkça bildir.\n\nHiçbir kod veya sistem değişikliği yapma.\n\nHiçbir otomatik geliştirme görevi başlatma.\n\nSadece araştır, cevapla ve kendi performansını ölç.",
   "inputSource" : "text",
   "learningPlans" : [
 
@@ -202,75 +213,107 @@
   ],
   "outcomeResolution" : {
     "chosenStrategyIDs" : [
-      "open-resource:direct:desktop.app"
+      "public-information:public-research",
+      "reasoning-output:direct:core.reasoning"
     ],
     "contract" : {
       "instrumentalCapabilityIDs" : [
-
+        "browser.control",
+        "desktop.app",
+        "app.workflow"
       ],
-      "objective" : "Notlar uygulamasını aç ve gerçekten ön planda olduğunu doğrula. Başka hiçbir işlem yapma.",
+      "objective" : "# BEFORE BENCHMARK — WEB RESEARCH\n\nBu görevde kod değiştirme, repository üzerinde geliştirme yapma, yeni capability oluşturma veya kendi sistemini güncelleme.\n\nAmaç yalnızca mevcut v0.10.43 yeteneklerinle ne kadar iyi web araştırması yapabildiğini ölçmektir.\n\n## Görev\n\nAşağıdaki sayfayı ve gerektiğinde ilgili açık web kaynaklarını araştır:\n\n`https://estafiz.com/franchise/`\n\nKullanıcı için detaylı fakat ilgili bir analiz hazırla.\n\nŞunları anlamaya çalış:\n\n- Estafiz ne sunuyor?\n- Franchise modeli nasıl anlatılıyor?\n- Franchise almak isteyen kişiye hangi değer önerisi sunuluyor?\n- Hedef kitle kim?\n- Sayfada hangi güven unsurları bulunuyor?\n- Hangi önemli bilgiler eksik veya belirsiz?\n- Kullanıcının franchise başvurusu yapmasını kolaylaştıran veya zorlaştıran noktalar neler?\n- Sayfanın pazarlama ve dönüşüm açısından güçlü tarafları neler?\n- Dönüşümü düşürebilecek noktalar neler?\n- Marka hakkında sayfadaki bilgileri destekleyen veya tamamlayan başka güvenilir açık kaynaklar var mı?\n- Sayfanın daha güçlü hale gelmesi için hangi geliştirmeler önerilebilir?\n\n## Araştırma Kuralları\n\nArama sonucu snippet'lerini doğrudan gerçek bilgi kabul etme.\n\nMümkün olduğunca gerçek kaynak sayfasını aç ve içeriğini incele.\n\nResmi kaynakları üçüncü taraf kaynaklardan ayır.\n\nBulamadığın veya doğrulayamadığın bilgiyi uydurma.\n\nŞu ayrımı koru:\n\n- FACT\n- INFERENCE\n- RECOMMENDATION\n- UNKNOWN\n\nBir çıkarımı gerçek bilgi gibi sunma.\n\n## Araştırma Sırasında Kaydet\n\nHer önemli bulgu için içsel olarak şunları takip et:\n\n- hangi kaynaktan geldi;\n- gerçekten kaynak içeriği okunabildi mi;\n- yalnızca snippet mi görüldü;\n- bilginin güven seviyesi;\n- başka kaynakla doğrulandı mı.\n\n## Sonuç Formatı\n\n### A. Site Analizi\n\nKullanıcıya verilecek gerçek analiz.\n\n### B. Doğrulanmış Bilgiler\n\nKaynaklardan gerçekten elde edilen ana bulgular.\n\n### C. Çıkarımlar\n\nKaynaklardan yaptığın yorumlar. Bunları fact olarak gösterme.\n\n### D. Bilinmeyen / Doğrulanamayan Noktalar\n\nBulamadığın veya güvenilir şekilde doğrulayamadığın bilgiler.\n\n### E. Kullanılan Kaynaklar\n\nYalnızca gerçekten kullandığın kaynakları belirt.\n\nHer kaynak için mümkünse:\n\n- kaynak adı;\n- URL;\n- hangi bilgi için kullanıldığı;\n- sayfa içeriği gerçekten okunabildi mi?\n\n### F. Kendi Performans Değerlendirmen\n\nAşağıdaki her alanı 0–5 puanla:\n\n- Kullanıcı amacını anlama\n- Kaynak keşfi\n- Gerçek kaynak içeriğini okuyabilme\n- İlgili bilgi çıkarma\n- Kaynak doğrulama\n- Halüsinasyondan kaçınma\n- Sonucun kullanıcı ihtiyacına uygunluğu\n- Genel araştırma kalitesi\n\nHer puanın yanında kısa gerekçe ver.\n\n### G. Yaşadığın Sorunlar\n\nAraştırma sırasında gerçekten karşılaştığın problemleri belirt.\n\nÖrneğin:\n\n- URL açılamadı;\n- sayfanın içeriği alınamadı;\n- yalnızca snippet erişilebildi;\n- alt sayfalar keşfedilemedi;\n- kaynakların içeriği karşılaştırılamadı;\n- hangi bilginin kaynaktan hangisinin model bilgisinden geldiği belirsiz kaldı;\n- kullanıcıyla ilgisiz sonuçlara yöneldin.\n\nSorun yaşamadıysan uydurma.\n\n### H. Capability Gap Gözlemleri\n\nHenüz kod değiştirme.\n\nSadece şu soruya cevap ver:\n\n> Bu görevi daha güvenilir yapmak için mevcut sistemimde eksik veya zayıf olduğunu düşündüğüm genellenebilir yetenekler var mı?\n\nVarsa her biri için:\n\n- gözlenen problem;\n- buna dair evidence;\n- olası root cause;\n- güven düzeyi.\n\nRoot cause konusunda emin değilsen açıkça `henüz kanıtlanmadı` yaz.\n\n## Kritik Kural\n\nBu benchmarkta amaç iyi görünmek değildir.\n\nAmaç mevcut sistemin gerçek kapasitesini ölçmektir.\n\nAraştırma yapamadığın bir noktada tahmin üretmek yerine bunu açıkça bildir.\n\nHiçbir kod veya sistem değişikliği yapma.\n\nHiçbir otomatik geliştirme görevi başlatma.\n\nSadece araştır, cevapla ve kendi performansını ölç.",
       "requirements" : [
         {
           "acceptableCapabilityIDs" : [
-            "desktop.app",
-            "files.reveal",
-            "browser.control",
-            "app.workflow"
-          ],
-          "id" : "open-resource",
-          "kind" : "openResource",
-          "preferredCapabilityIDs" : [
-            "desktop.app",
-            "files.reveal",
+            "research.web",
+            "system.open.url",
+            "perception.screen",
             "browser.control"
           ],
+          "id" : "public-information",
+          "kind" : "retrievePublicInformation",
+          "preferredCapabilityIDs" : [
+            "research.web"
+          ],
           "requiresMutation" : false,
-          "successCriterion" : "Hedef kaynak gerçekten açılmış/öne gelmiş olmalı.",
-          "title" : "Hedef kaynağı aç veya öne getir"
+          "successCriterion" : "Kullanıcının istediği bilgi gerçek public kaynaktan kanıtla elde edilmiş olmalı.",
+          "title" : "İstenen public bilgiyi elde et"
+        },
+        {
+          "acceptableCapabilityIDs" : [
+            "core.reasoning"
+          ],
+          "id" : "reasoning-output",
+          "kind" : "transformEvidence",
+          "preferredCapabilityIDs" : [
+            "core.reasoning"
+          ],
+          "requiresMutation" : false,
+          "successCriterion" : "Çıktı eldeki kanıt ve kullanıcı hedefiyle tutarlı olmalı.",
+          "title" : "Kanıttan istenen çıktıyı üret"
         }
       ],
       "successCriteria" : [
-        "Hedef kaynak gerçekten açılmış/öne gelmiş olmalı."
+        "Kullanıcının istediği bilgi gerçek public kaynaktan kanıtla elde edilmiş olmalı.",
+        "Çıktı eldeki kanıt ve kullanıcı hedefiyle tutarlı olmalı."
       ]
     },
     "coveredRequirementIDs" : [
-      "open-resource"
+      "public-information",
+      "reasoning-output"
     ],
     "strategies" : [
       {
         "capabilityIDs" : [
-          "desktop.app"
+          "research.web"
         ],
         "executableNow" : true,
-        "id" : "open-resource:direct:desktop.app",
-        "kind" : "genericAppWorkflow",
-        "rationale" : "Bu capability başarı kriterini doğrudan karşılayabiliyor.",
-        "requirementID" : "open-resource",
+        "id" : "public-information:public-research",
+        "kind" : "publicResearch",
+        "rationale" : "Kullanıcının başarı kriteri bilgi edinmek; tarayıcı UI'sı araçtır, zorunlu outcome değildir.",
+        "requirementID" : "public-information",
         "requiresLearning" : false,
-        "score" : 90,
-        "title" : "Outcome'u desktop.app ile çöz"
+        "score" : 110,
+        "title" : "Public kaynaktan bilgi edin"
       },
       {
         "capabilityIDs" : [
-          "files.reveal"
+          "system.open.url",
+          "perception.screen"
         ],
         "executableNow" : true,
-        "id" : "open-resource:direct:files.reveal",
-        "kind" : "localFiles",
-        "rationale" : "Bu capability başarı kriterini doğrudan karşılayabiliyor.",
-        "requirementID" : "open-resource",
+        "id" : "public-information:open-url-observe",
+        "kind" : "openURLAndObserve",
+        "rationale" : "Statik web okuma kanıt üretmezse belirli bir tarayıcıya bağlanmadan macOS varsayılan URL işleyicisiyle hedef açılıp görünür içerik doğrulanabilir.",
+        "requirementID" : "public-information",
         "requiresLearning" : false,
-        "score" : 90,
-        "title" : "Outcome'u files.reveal ile çöz"
+        "score" : 80,
+        "title" : "URL'yi sistemle aç ve ekranı gözlemle"
+      },
+      {
+        "capabilityIDs" : [
+          "core.reasoning"
+        ],
+        "executableNow" : true,
+        "id" : "reasoning-output:direct:core.reasoning",
+        "kind" : "reasoningTransform",
+        "rationale" : "Bu capability başarı kriterini doğrudan karşılayabiliyor.",
+        "requirementID" : "reasoning-output",
+        "requiresLearning" : false,
+        "score" : 95,
+        "title" : "Outcome'u core.reasoning ile çöz"
       }
     ],
     "suppressedLearningCapabilityIDs" : [
-
+      "app.workflow",
+      "desktop.app",
+      "browser.control"
     ]
   },
-  "plan" : "Hedefi çöz → Bağlam → Uygulama kontrolü",
+  "plan" : "Görev bağlamını hazırla → Web hedefini tarayıcıda yürüt → Gerekli dış bilgiyi araştır → Toplanan veriyi analiz et",
   "problemResolution" : {
-    "chosenStrategyID" : "primary:core.reasoning",
+    "chosenStrategyID" : "learn:browser.control",
     "frame" : {
       "availableCapabilityIDs" : [
         "app.workflow",
@@ -290,73 +333,37 @@
         "system.open.url"
       ],
       "blockedCapabilityIDs" : [
-
+        "browser.control"
       ],
       "constraints" : [
         "Başarı gerçek observation/verification ile kanıtlanmalı.",
         "Dış dünyaya commit eden işlem kullanıcı onayı olmadan uygulanmamalı.",
         "Uygulama/marka adına özel hard-code yerine generic capability/strategy tercih edilmeli."
       ],
-      "objective" : "Notlar uygulamasını aç ve gerçekten ön planda olduğunu doğrula. Başka hiçbir işlem yapma.",
+      "objective" : "Web hedefini tarayıcıda yürüt",
       "observations" : [
-        "Seçili çalışma alanı: Desktop"
+        "Başarısız step: Web hedefini tarayıcıda yürüt",
+        "Çalışma kuralı: Estafiz'e özel marka detaylarını başka markalara otomatik uygulama\nÇalışma kuralı: Ana projeyi doğrudan değiştirme; çalışma kopyasında ilerle.\nEstafiz için 30 saniyelik bir Reels çekim planı hazırla. 3 bölüm olsu…: **1. Açılış Bölümü (0-5 saniye)** **“Aynı hareket, üç farklı beden”** serisi temel alınarak hazırlanan bu bölüm, görsel bir karşılaştırma sunar. Reformer üzerinde aynı pozisyon, ancak üç farklı hedef kitleye göre uyarlanmıştır. Başlangıç seviyesi, masa başında çalışan birey ve düzenli egzersiz yapan kişi. **Neden işe yarar?** - Hareketin görünüşü sabit kalırken, direnç ve açı gibi faktörlerin kişiye göre değiştiğini somutlaştırır. - İzleyicinin “bu hareketi ben yapabilir miyim?” sorusunu yanıtlar. - Hesabı yalnızca hareket gösteren bir sayfa değil, **kişiye özel yaklaşım sunan uzman bir merkez** olarak konumlandırır. - Seri formatına uygun yapı, içerik tekrarlarına imkân tanır. **2. Ana Mesaj Bölümü (5-20 saniye)** Günlük yaşamdan kısa bir sahneyle başlar: Bilgisayar başında çalışan bir kişi kalktığında belini tutuyor veya omuzlarını çeviriyor. Ekranda sorular sırayla belirir: - “Sandalyeden kalkınca birkaç saniye doğrulamaya çalışıyor musun?” - “Günün sonunda omuzların öne mi düşüyor?” - “Sorun yalnızca ‘esnek olmamak’ olmayabilir.” Ardından eğitmen, tanı koymadan **kişiye özel değerlendirme ve kontrollü egzersiz** önerir. **Neden işe yarar?** - Hizmetin soyut bir kavram değil, izleyicinin günlük deneyimiyle ilişkili olduğu vurgulanır. - Duygusal bağ kurarak profilin klinik Pilates yönünü güçlendirir. - Tanı veya kesin tedavi vaadi yerine, **kişiye özel yaklaşımın** önemi ortaya çıkar. - Reels formatında kısa ama anlamlı bir hikâye sunar. **3. Kapanış Bölümü (20-30 saniye)** Eğitmen, izleyiciyi etkileşime davet eder: **“Sen hangi seviyeden başlardın? Yorumlara 1, 2 veya 3 yaz.”** Bu bölüm, serinin devamına işaret eden bir çağrı niteliği taşır. **Neden işe yarar?** - İzleyiciyi aktif bir katılımcıya dönüştürür. - Serinin devamında benzer temalarla çalışılması için teme…\nestafizsym instagram sayfasını incele ve bana detaylı bir rapor sun: # @estafizsym Instagram Sayfası İnceleme Raporu ## 1. Yönetici özeti Doğrulanan profil: - **Kullanıcı adı:** `@estafizsym` - **Görünen ad:** **Estafiz SYM | Reformer | Klinik Pilates** - **Platform:** Instagram - **Temel faaliyet alanı:** Profil adlandırmasına göre reformer ve klinik pilates hizmetleri cite1 Hesap, görünen adında hem marka ismini hem de temel hizmetlerini açıkça belirtiyor. Bu, Instagram aramalarında ve profil ilk izleniminde kullanıcının faaliyet alanını hızlıca anlamasını sağlayabilecek olumlu bir tercih. Ancak erişilebilen doğrulanmış veri yalnızca profil kimliği ve görünen adla sınırlı. **Biyografi, konum, iletişim bilgileri, gönderiler, Reels içerikleri, takipçi sayısı, paylaşım sıklığı ve etkileşim oranı görüntülenemedi.** Dolayısıyla aşağıdaki çalışma, tam kapsamlı içerik ve performans denetimi değil; doğrulanabilen bilgiler üzerinden hazırlanmış bir **ön değerlendirmedir**. --- ## 2. Profil kimliği ve konumlandırma ### Doğrulanan bilgiler | Alan | Sonuç | |---|---| | Hesap | `@estafizsym` | | Görünen ad | Estafiz SYM \\| Reformer \\| Klinik Pilates | | Sektör | Pilates/egzersiz ve sağlıklı yaşam | | Belirtilen hizmetler | Reformer, klinik pilates | | Hesabın gerçek işletme bağlantısı | Mevcut kanıtla ayrıca doğrulanamadı | | Fiziksel konum | Doğrulanamadı | | Resmî web sitesi | Doğrulanamadı | | İletişim/randevu kanalı | Doğrulanamadı | ### Konumlandırma değerlendirmesi Görünen ad üç parçalı bir yapı kullanıyor: 1. **Estafiz SYM:** Marka veya işletme adı 2. **Reformer:** Daha geniş kullanıcı kitlesinin tanıyabileceği hizmet 3. **Klinik Pilates:** Daha uzmanlık odaklı bir hizmet tanımı Bu yapı, hesabın yalnızca genel fitness içerikleri sunan bir sayfa değil, daha kontrollü veya uzmanlık temelli bir pilates hizmeti olarak konumlanmak istediğini …"
       ]
     },
+    "reflection" : "İlk yaklaşım hedefe ulaşmadı. Kalan güvenli stratejiler değerlendirildi; sıradaki yaklaşım: Capability öğren.",
     "strategies" : [
       {
         "capabilityIDs" : [
-          "core.reasoning"
+          "browser.control"
         ],
-        "executableNow" : true,
-        "id" : "primary:core.reasoning",
-        "kind" : "primary",
-        "rationale" : "Task Graph bu capability'yi doğrudan seçti ve provider available.",
-        "requiresLearning" : false,
-        "score" : 100,
-        "summary" : "Hedefi çöz adımını core.reasoning ile yürüt.",
-        "title" : "Mevcut provider'ı kullan"
-      },
-      {
-        "capabilityIDs" : [
-          "context.local"
-        ],
-        "executableNow" : true,
-        "id" : "primary:context.local",
-        "kind" : "primary",
-        "rationale" : "Task Graph bu capability'yi doğrudan seçti ve provider available.",
-        "requiresLearning" : false,
-        "score" : 100,
-        "summary" : "Bağlam adımını context.local ile yürüt.",
-        "title" : "Mevcut provider'ı kullan"
-      },
-      {
-        "capabilityIDs" : [
-          "desktop.app"
-        ],
-        "executableNow" : true,
-        "id" : "primary:desktop.app",
-        "kind" : "primary",
-        "rationale" : "Task Graph bu capability'yi doğrudan seçti ve provider available.",
-        "requiresLearning" : false,
-        "score" : 100,
-        "summary" : "Uygulama kontrolü adımını desktop.app ile yürüt.",
-        "title" : "Mevcut provider'ı kullan"
-      },
-      {
-        "capabilityIDs" : [
-          "core.reasoning"
-        ],
-        "executableNow" : true,
-        "id" : "reasoning:1",
-        "kind" : "reasoningTransform",
-        "rationale" : "Adımın amacı dış değişiklik değil; mevcut kanıttan yeni bir bilgi/çıktı üretmek.",
-        "requiresLearning" : false,
-        "score" : 75,
-        "summary" : "Mevcut dependency evidence üzerinde analiz/sentez uygula.",
-        "title" : "Kanıtı reasoning ile dönüştür"
+        "executableNow" : false,
+        "id" : "learn:browser.control",
+        "kind" : "learning",
+        "rationale" : "Mevcut capability setinde hedefi güvenilir biçimde tamamlayacak güvenli alternatif bulunamadı.",
+        "requiresLearning" : true,
+        "score" : 10,
+        "summary" : "browser.control için güvenli provider/strategy öğrenme hattını başlat.",
+        "title" : "Capability öğren"
       }
     ]
   },
+  "reflectionSummary" : "İlk yaklaşım hedefe ulaşmadı. Kalan güvenli stratejiler değerlendirildi; sıradaki yaklaşım: Capability öğren.",
   "researchEvidence" : [
 
   ],
@@ -368,18 +375,18 @@
     "Goal",
     "Context",
     "Plan",
-    "Desktop",
+    "Browser",
+    "Research",
     "Verify",
     "Response"
   ],
   "runtimeTask" : {
     "completedStepIndexes" : [
-      1,
       0
     ],
-    "createdAt" : "2026-09-23T18:07:07Z",
-    "id" : "83D679B6-2B8F-45A7-B38E-7BC61432C853",
-    "objective" : "Notlar uygulamasını aç ve gerçekten ön planda olduğunu doğrula. Başka hiçbir işlem yapma.",
+    "createdAt" : "2026-09-24T17:14:35Z",
+    "id" : "94C33AAA-EF3C-4B1B-B262-F0EBD2370E5C",
+    "objective" : "# BEFORE BENCHMARK — WEB RESEARCH\n\nBu görevde kod değiştirme, repository üzerinde geliştirme yapma, yeni capability oluşturma veya kendi sistemini güncelleme.\n\nAmaç yalnızca mevcut v0.10.43 yeteneklerinle ne kadar iyi web araştırması yapabildiğini ölçmektir.\n\n## Görev\n\nAşağıdaki sayfayı ve gerektiğinde ilgili açık web kaynaklarını araştır:\n\n`https://estafiz.com/franchise/`\n\nKullanıcı için detaylı fakat ilgili bir analiz hazırla.\n\nŞunları anlamaya çalış:\n\n- Estafiz ne sunuyor?\n- Franchise modeli nasıl anlatılıyor?\n- Franchise almak isteyen kişiye hangi değer önerisi sunuluyor?\n- Hedef kitle kim?\n- Sayfada hangi güven unsurları bulunuyor?\n- Hangi önemli bilgiler eksik veya belirsiz?\n- Kullanıcının franchise başvurusu yapmasını kolaylaştıran veya zorlaştıran noktalar neler?\n- Sayfanın pazarlama ve dönüşüm açısından güçlü tarafları neler?\n- Dönüşümü düşürebilecek noktalar neler?\n- Marka hakkında sayfadaki bilgileri destekleyen veya tamamlayan başka güvenilir açık kaynaklar var mı?\n- Sayfanın daha güçlü hale gelmesi için hangi geliştirmeler önerilebilir?\n\n## Araştırma Kuralları\n\nArama sonucu snippet'lerini doğrudan gerçek bilgi kabul etme.\n\nMümkün olduğunca gerçek kaynak sayfasını aç ve içeriğini incele.\n\nResmi kaynakları üçüncü taraf kaynaklardan ayır.\n\nBulamadığın veya doğrulayamadığın bilgiyi uydurma.\n\nŞu ayrımı koru:\n\n- FACT\n- INFERENCE\n- RECOMMENDATION\n- UNKNOWN\n\nBir çıkarımı gerçek bilgi gibi sunma.\n\n## Araştırma Sırasında Kaydet\n\nHer önemli bulgu için içsel olarak şunları takip et:\n\n- hangi kaynaktan geldi;\n- gerçekten kaynak içeriği okunabildi mi;\n- yalnızca snippet mi görüldü;\n- bilginin güven seviyesi;\n- başka kaynakla doğrulandı mı.\n\n## Sonuç Formatı\n\n### A. Site Analizi\n\nKullanıcıya verilecek gerçek analiz.\n\n### B. Doğrulanmış Bilgiler\n\nKaynaklardan gerçekten elde edilen ana bulgular.\n\n### C. Çıkarımlar\n\nKaynaklardan yaptığın yorumlar. Bunları fact olarak gösterme.\n\n### D. Bilinmeyen / Doğrulanamayan Noktalar\n\nBulamadığın veya güvenilir şekilde doğrulayamadığın bilgiler.\n\n### E. Kullanılan Kaynaklar\n\nYalnızca gerçekten kullandığın kaynakları belirt.\n\nHer kaynak için mümkünse:\n\n- kaynak adı;\n- URL;\n- hangi bilgi için kullanıldığı;\n- sayfa içeriği gerçekten okunabildi mi?\n\n### F. Kendi Performans Değerlendirmen\n\nAşağıdaki her alanı 0–5 puanla:\n\n- Kullanıcı amacını anlama\n- Kaynak keşfi\n- Gerçek kaynak içeriğini okuyabilme\n- İlgili bilgi çıkarma\n- Kaynak doğrulama\n- Halüsinasyondan kaçınma\n- Sonucun kullanıcı ihtiyacına uygunluğu\n- Genel araştırma kalitesi\n\nHer puanın yanında kısa gerekçe ver.\n\n### G. Yaşadığın Sorunlar\n\nAraştırma sırasında gerçekten karşılaştığın problemleri belirt.\n\nÖrneğin:\n\n- URL açılamadı;\n- sayfanın içeriği alınamadı;\n- yalnızca snippet erişilebildi;\n- alt sayfalar keşfedilemedi;\n- kaynakların içeriği karşılaştırılamadı;\n- hangi bilginin kaynaktan hangisinin model bilgisinden geldiği belirsiz kaldı;\n- kullanıcıyla ilgisiz sonuçlara yöneldin.\n\nSorun yaşamadıysan uydurma.\n\n### H. Capability Gap Gözlemleri\n\nHenüz kod değiştirme.\n\nSadece şu soruya cevap ver:\n\n> Bu görevi daha güvenilir yapmak için mevcut sistemimde eksik veya zayıf olduğunu düşündüğüm genellenebilir yetenekler var mı?\n\nVarsa her biri için:\n\n- gözlenen problem;\n- buna dair evidence;\n- olası root cause;\n- güven düzeyi.\n\nRoot cause konusunda emin değilsen açıkça `henüz kanıtlanmadı` yaz.\n\n## Kritik Kural\n\nBu benchmarkta amaç iyi görünmek değildir.\n\nAmaç mevcut sistemin gerçek kapasitesini ölçmektir.\n\nAraştırma yapamadığın bir noktada tahmin üretmek yerine bunu açıkça bildir.\n\nHiçbir kod veya sistem değişikliği yapma.\n\nHiçbir otomatik geliştirme görevi başlatma.\n\nSadece araştır, cevapla ve kendi performansını ölç.",
     "priority" : 0,
     "runningStepIndexes" : [
 
@@ -390,102 +397,129 @@
     ]
   },
   "semanticMission" : {
-    "confidence" : 0.65,
-    "objective" : "Notlar uygulamasını aç ve gerçekten ön planda olduğunu doğrula. Başka hiçbir işlem yapma.",
+    "confidence" : 0.9,
+    "objective" : "# BEFORE BENCHMARK — WEB RESEARCH\n\nBu görevde kod değiştirme, repository üzerinde geliştirme yapma, yeni capability oluşturma veya kendi sistemini güncelleme.\n\nAmaç yalnızca mevcut v0.10.43 yeteneklerinle ne kadar iyi web araştırması yapabildiğini ölçmektir.\n\n## Görev\n\nAşağıdaki sayfayı ve gerektiğinde ilgili açık web kaynaklarını araştır:\n\n`https://estafiz.com/franchise/`\n\nKullanıcı için detaylı fakat ilgili bir analiz hazırla.\n\nŞunları anlamaya çalış:\n\n- Estafiz ne sunuyor?\n- Franchise modeli nasıl anlatılıyor?\n- Franchise almak isteyen kişiye hangi değer önerisi sunuluyor?\n- Hedef kitle kim?\n- Sayfada hangi güven unsurları bulunuyor?\n- Hangi önemli bilgiler eksik veya belirsiz?\n- Kullanıcının franchise başvurusu yapmasını kolaylaştıran veya zorlaştıran noktalar neler?\n- Sayfanın pazarlama ve dönüşüm açısından güçlü tarafları neler?\n- Dönüşümü düşürebilecek noktalar neler?\n- Marka hakkında sayfadaki bilgileri destekleyen veya tamamlayan başka güvenilir açık kaynaklar var mı?\n- Sayfanın daha güçlü hale gelmesi için hangi geliştirmeler önerilebilir?\n\n## Araştırma Kuralları\n\nArama sonucu snippet'lerini doğrudan gerçek bilgi kabul etme.\n\nMümkün olduğunca gerçek kaynak sayfasını aç ve içeriğini incele.\n\nResmi kaynakları üçüncü taraf kaynaklardan ayır.\n\nBulamadığın veya doğrulayamadığın bilgiyi uydurma.\n\nŞu ayrımı koru:\n\n- FACT\n- INFERENCE\n- RECOMMENDATION\n- UNKNOWN\n\nBir çıkarımı gerçek bilgi gibi sunma.\n\n## Araştırma Sırasında Kaydet\n\nHer önemli bulgu için içsel olarak şunları takip et:\n\n- hangi kaynaktan geldi;\n- gerçekten kaynak içeriği okunabildi mi;\n- yalnızca snippet mi görüldü;\n- bilginin güven seviyesi;\n- başka kaynakla doğrulandı mı.\n\n## Sonuç Formatı\n\n### A. Site Analizi\n\nKullanıcıya verilecek gerçek analiz.\n\n### B. Doğrulanmış Bilgiler\n\nKaynaklardan gerçekten elde edilen ana bulgular.\n\n### C. Çıkarımlar\n\nKaynaklardan yaptığın yorumlar. Bunları fact olarak gösterme.\n\n### D. Bilinmeyen / Doğrulanamayan Noktalar\n\nBulamadığın veya güvenilir şekilde doğrulayamadığın bilgiler.\n\n### E. Kullanılan Kaynaklar\n\nYalnızca gerçekten kullandığın kaynakları belirt.\n\nHer kaynak için mümkünse:\n\n- kaynak adı;\n- URL;\n- hangi bilgi için kullanıldığı;\n- sayfa içeriği gerçekten okunabildi mi?\n\n### F. Kendi Performans Değerlendirmen\n\nAşağıdaki her alanı 0–5 puanla:\n\n- Kullanıcı amacını anlama\n- Kaynak keşfi\n- Gerçek kaynak içeriğini okuyabilme\n- İlgili bilgi çıkarma\n- Kaynak doğrulama\n- Halüsinasyondan kaçınma\n- Sonucun kullanıcı ihtiyacına uygunluğu\n- Genel araştırma kalitesi\n\nHer puanın yanında kısa gerekçe ver.\n\n### G. Yaşadığın Sorunlar\n\nAraştırma sırasında gerçekten karşılaştığın problemleri belirt.\n\nÖrneğin:\n\n- URL açılamadı;\n- sayfanın içeriği alınamadı;\n- yalnızca snippet erişilebildi;\n- alt sayfalar keşfedilemedi;\n- kaynakların içeriği karşılaştırılamadı;\n- hangi bilginin kaynaktan hangisinin model bilgisinden geldiği belirsiz kaldı;\n- kullanıcıyla ilgisiz sonuçlara yöneldin.\n\nSorun yaşamadıysan uydurma.\n\n### H. Capability Gap Gözlemleri\n\nHenüz kod değiştirme.\n\nSadece şu soruya cevap ver:\n\n> Bu görevi daha güvenilir yapmak için mevcut sistemimde eksik veya zayıf olduğunu düşündüğüm genellenebilir yetenekler var mı?\n\nVarsa her biri için:\n\n- gözlenen problem;\n- buna dair evidence;\n- olası root cause;\n- güven düzeyi.\n\nRoot cause konusunda emin değilsen açıkça `henüz kanıtlanmadı` yaz.\n\n## Kritik Kural\n\nBu benchmarkta amaç iyi görünmek değildir.\n\nAmaç mevcut sistemin gerçek kapasitesini ölçmektir.\n\nAraştırma yapamadığın bir noktada tahmin üretmek yerine bunu açıkça bildir.\n\nHiçbir kod veya sistem değişikliği yapma.\n\nHiçbir otomatik geliştirme görevi başlatma.\n\nSadece araştır, cevapla ve kendi performansını ölç.",
     "outcomes" : [
-      "open"
+      "analyze",
+      "explain",
+      "research"
     ],
     "requiredCapabilityIDs" : [
+      "browser.control",
       "context.local",
       "core.reasoning",
-      "desktop.app"
+      "research.web"
     ],
     "requiresUserInput" : false,
     "steps" : [
       {
-        "capabilityID" : "core.reasoning",
+        "capabilityID" : "context.local",
         "dependsOn" : [
 
         ],
-        "operation" : "semantic.fallback",
-        "purpose" : "Semantic model geçici olarak mission üretemedi; capability contract güncel kullanıcı mesajından güvenli fallback oluşturuyor.",
-        "title" : "Hedefi çöz"
+        "operation" : "context.resolve",
+        "purpose" : "Yalnızca bu kullanıcı hedefiyle ilgili bağlamı hazırla; eski görev hedeflerini yeni göreve taşıma.",
+        "title" : "Görev bağlamını hazırla"
       },
       {
-        "capabilityID" : "context.local",
+        "capabilityID" : "browser.control",
         "dependsOn" : [
           0
         ],
-        "operation" : "capability.contract",
-        "purpose" : "Mission hedefini uçtan uca tamamlamak için gerekli capability sözleşmesi.",
-        "title" : "Bağlam"
+        "operation" : "browser.navigate.observe",
+        "purpose" : "Kullanıcının verdiği web hedefini gerçek tarayıcı oturumunda aç, gerekli görünür bilgiyi oku ve yeni sekme/form/gönderim gibi dış değişiklikleri kullanıcı onayı olmadan uygulama. Provider yoksa capability gap üret ve öğrenme hattına geçir.",
+        "title" : "Web hedefini tarayıcıda yürüt"
       },
       {
-        "capabilityID" : "desktop.app",
+        "capabilityID" : "research.web",
         "dependsOn" : [
           1
         ],
-        "operation" : "capability.contract",
-        "purpose" : "Mission hedefini uçtan uca tamamlamak için gerekli capability sözleşmesi.",
-        "title" : "Uygulama kontrolü"
+        "operation" : "web.research",
+        "purpose" : "Önceki adımda çözülen gerçek hedef/veriyi kullanarak dış kaynaklardan gerekli bilgiyi araştır.",
+        "title" : "Gerekli dış bilgiyi araştır"
+      },
+      {
+        "capabilityID" : "core.reasoning",
+        "dependsOn" : [
+          2
+        ],
+        "operation" : "content.analyze",
+        "purpose" : "Önceki adımların gerçek çıktısını birlikte değerlendir ve sonraki adımın kullanabileceği sonucu üret.",
+        "title" : "Toplanan veriyi analiz et"
       }
     ]
   },
-  "semanticPlannerProvider" : "Local Contract Repair",
+  "semanticPlannerProvider" : "Apple Foundation Models",
   "taskGraph" : [
-    {
-      "available" : true,
-      "capabilityID" : "core.reasoning",
-      "dependsOn" : [
-
-      ],
-      "index" : 0,
-      "operation" : "semantic.fallback",
-      "requiresApproval" : false,
-      "resourceIDs" : [
-
-      ],
-      "risk" : "reasoning",
-      "role" : "reason",
-      "title" : "Hedefi çöz"
-    },
     {
       "available" : true,
       "capabilityID" : "context.local",
       "dependsOn" : [
-        0
+
       ],
-      "index" : 1,
-      "operation" : "capability.contract",
+      "index" : 0,
+      "operation" : "context.resolve",
       "requiresApproval" : false,
       "resourceIDs" : [
 
       ],
       "risk" : "reasoning",
       "role" : "reason",
-      "title" : "Bağlam"
+      "title" : "Görev bağlamını hazırla"
     },
     {
-      "approvalReason" : "Bir uygulama açılacak veya öne getirilecek.",
+      "approvalReason" : "Tarayıcı arayüzünde kullanıcı etkileşimi yapılacak.",
+      "available" : false,
+      "capabilityID" : "browser.control",
+      "dependsOn" : [
+        0
+      ],
+      "index" : 1,
+      "operation" : "browser.navigate.observe",
+      "requiresApproval" : true,
+      "resourceIDs" : [
+
+      ],
+      "risk" : "external",
+      "role" : "act",
+      "title" : "Web hedefini tarayıcıda yürüt"
+    },
+    {
       "available" : true,
-      "capabilityID" : "desktop.app",
+      "capabilityID" : "research.web",
       "dependsOn" : [
         1
       ],
       "index" : 2,
-      "operation" : "capability.contract",
-      "requiresApproval" : true,
+      "operation" : "web.research",
+      "requiresApproval" : false,
       "resourceIDs" : [
-        "foreground",
-        "userInteraction"
+        "network"
       ],
       "risk" : "external",
-      "role" : "act",
-      "title" : "Uygulama kontrolü"
+      "role" : "retrieve",
+      "title" : "Gerekli dış bilgiyi araştır"
+    },
+    {
+      "available" : true,
+      "capabilityID" : "core.reasoning",
+      "dependsOn" : [
+        2
+      ],
+      "index" : 3,
+      "operation" : "content.analyze",
+      "requiresApproval" : false,
+      "resourceIDs" : [
+
+      ],
+      "risk" : "reasoning",
+      "role" : "transform",
+      "title" : "Toplanan veriyi analiz et"
     }
   ],
-  "traceID" : "0643288E-C340-452E-9557-B4C1318D7495",
-  "userInput" : "Notlar uygulamasını aç ve gerçekten ön planda olduğunu doğrula. Başka hiçbir işlem yapma.",
+  "traceID" : "590F6A95-09F4-4477-BDA8-2C4A1EEE29C2",
+  "userInput" : "# BEFORE BENCHMARK — WEB RESEARCH\n\nBu görevde kod değiştirme, repository üzerinde geliştirme yapma, yeni capability oluşturma veya kendi sistemini güncelleme.\n\nAmaç yalnızca mevcut v0.10.43 yeteneklerinle ne kadar iyi web araştırması yapabildiğini ölçmektir.\n\n## Görev\n\nAşağıdaki sayfayı ve gerektiğinde ilgili açık web kaynaklarını araştır:\n\n`https://estafiz.com/franchise/`\n\nKullanıcı için detaylı fakat ilgili bir analiz hazırla.\n\nŞunları anlamaya çalış:\n\n- Estafiz ne sunuyor?\n- Franchise modeli nasıl anlatılıyor?\n- Franchise almak isteyen kişiye hangi değer önerisi sunuluyor?\n- Hedef kitle kim?\n- Sayfada hangi güven unsurları bulunuyor?\n- Hangi önemli bilgiler eksik veya belirsiz?\n- Kullanıcının franchise başvurusu yapmasını kolaylaştıran veya zorlaştıran noktalar neler?\n- Sayfanın pazarlama ve dönüşüm açısından güçlü tarafları neler?\n- Dönüşümü düşürebilecek noktalar neler?\n- Marka hakkında sayfadaki bilgileri destekleyen veya tamamlayan başka güvenilir açık kaynaklar var mı?\n- Sayfanın daha güçlü hale gelmesi için hangi geliştirmeler önerilebilir?\n\n## Araştırma Kuralları\n\nArama sonucu snippet'lerini doğrudan gerçek bilgi kabul etme.\n\nMümkün olduğunca gerçek kaynak sayfasını aç ve içeriğini incele.\n\nResmi kaynakları üçüncü taraf kaynaklardan ayır.\n\nBulamadığın veya doğrulayamadığın bilgiyi uydurma.\n\nŞu ayrımı koru:\n\n- FACT\n- INFERENCE\n- RECOMMENDATION\n- UNKNOWN\n\nBir çıkarımı gerçek bilgi gibi sunma.\n\n## Araştırma Sırasında Kaydet\n\nHer önemli bulgu için içsel olarak şunları takip et:\n\n- hangi kaynaktan geldi;\n- gerçekten kaynak içeriği okunabildi mi;\n- yalnızca snippet mi görüldü;\n- bilginin güven seviyesi;\n- başka kaynakla doğrulandı mı.\n\n## Sonuç Formatı\n\n### A. Site Analizi\n\nKullanıcıya verilecek gerçek analiz.\n\n### B. Doğrulanmış Bilgiler\n\nKaynaklardan gerçekten elde edilen ana bulgular.\n\n### C. Çıkarımlar\n\nKaynaklardan yaptığın yorumlar. Bunları fact olarak gösterme.\n\n### D. Bilinmeyen / Doğrulanamayan Noktalar\n\nBulamadığın veya güvenilir şekilde doğrulayamadığın bilgiler.\n\n### E. Kullanılan Kaynaklar\n\nYalnızca gerçekten kullandığın kaynakları belirt.\n\nHer kaynak için mümkünse:\n\n- kaynak adı;\n- URL;\n- hangi bilgi için kullanıldığı;\n- sayfa içeriği gerçekten okunabildi mi?\n\n### F. Kendi Performans Değerlendirmen\n\nAşağıdaki her alanı 0–5 puanla:\n\n- Kullanıcı amacını anlama\n- Kaynak keşfi\n- Gerçek kaynak içeriğini okuyabilme\n- İlgili bilgi çıkarma\n- Kaynak doğrulama\n- Halüsinasyondan kaçınma\n- Sonucun kullanıcı ihtiyacına uygunluğu\n- Genel araştırma kalitesi\n\nHer puanın yanında kısa gerekçe ver.\n\n### G. Yaşadığın Sorunlar\n\nAraştırma sırasında gerçekten karşılaştığın problemleri belirt.\n\nÖrneğin:\n\n- URL açılamadı;\n- sayfanın içeriği alınamadı;\n- yalnızca snippet erişilebildi;\n- alt sayfalar keşfedilemedi;\n- kaynakların içeriği karşılaştırılamadı;\n- hangi bilginin kaynaktan hangisinin model bilgisinden geldiği belirsiz kaldı;\n- kullanıcıyla ilgisiz sonuçlara yöneldin.\n\nSorun yaşamadıysan uydurma.\n\n### H. Capability Gap Gözlemleri\n\nHenüz kod değiştirme.\n\nSadece şu soruya cevap ver:\n\n> Bu görevi daha güvenilir yapmak için mevcut sistemimde eksik veya zayıf olduğunu düşündüğüm genellenebilir yetenekler var mı?\n\nVarsa her biri için:\n\n- gözlenen problem;\n- buna dair evidence;\n- olası root cause;\n- güven düzeyi.\n\nRoot cause konusunda emin değilsen açıkça `henüz kanıtlanmadı` yaz.\n\n## Kritik Kural\n\nBu benchmarkta amaç iyi görünmek değildir.\n\nAmaç mevcut sistemin gerçek kapasitesini ölçmektir.\n\nAraştırma yapamadığın bir noktada tahmin üretmek yerine bunu açıkça bildir.\n\nHiçbir kod veya sistem değişikliği yapma.\n\nHiçbir otomatik geliştirme görevi başlatma.\n\nSadece araştır, cevapla ve kendi performansını ölç.",
   "verificationState" : "attention",
-  "verificationSummary" : "Semantic mission içindeki zorunlu action step'lerinden bazıları tamamlanmadı: desktop.app"
+  "verificationSummary" : "Outcome stratejisi public web araştırmasını seçti ancak gerçek kaynak kanıtı üretmedi."
 }
