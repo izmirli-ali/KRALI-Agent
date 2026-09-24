@@ -136,9 +136,74 @@ struct SelfDiagnosisExecutorSelfTest {
         )
 
         write(
+            "0.10.43\n",
+            to: root.appendingPathComponent(
+                "VERSION"
+            )
+        )
+        write(
+            """
+            CURRENT_PROJECT_VERSION = 216;
+            MARKETING_VERSION = 0.10.43;
+            """,
+            to: root.appendingPathComponent(
+                "App/KRALIAgentNative.xcodeproj/project.pbxproj"
+            )
+        )
+        write(
+            """
+            struct HistoricalResearchPlanner {
+                func plan() {
+                    let browserCapability = "browser.control"
+                    let researchCapability = "research.web"
+                    let browserStep = 0
+                    let researchDependsOn = [browserStep]
+                    let dependency = browserCapability
+                    _ = researchCapability
+                    _ = researchDependsOn
+                    _ = dependency
+                }
+            }
+            """,
+            to: root.appendingPathComponent(
+                "App/HistoricalResearchPlanner.swift"
+            )
+        )
+
+        _ = run(["add", "."], root: root)
+        _ = run(
+            [
+                "commit",
+                "-m",
+                "v0.10.43 historical fixture"
+            ],
+            root: root
+        )
+        let historicalHead =
+            run(
+                ["rev-parse", "HEAD"],
+                root: root
+            )
+
+        try? fileManager.removeItem(
+            at: root.appendingPathComponent(
+                "App/HistoricalResearchPlanner.swift"
+            )
+        )
+
+        write(
             "0.11.2\n",
             to: root.appendingPathComponent(
                 "VERSION"
+            )
+        )
+        write(
+            """
+            CURRENT_PROJECT_VERSION = 231;
+            MARKETING_VERSION = 0.11.2;
+            """,
+            to: root.appendingPathComponent(
+                "App/KRALIAgentNative.xcodeproj/project.pbxproj"
             )
         )
 
@@ -272,6 +337,7 @@ struct SelfDiagnosisExecutorSelfTest {
             AgentSelfDiagnosisExecutor()
         let mission =
             """
+            v0.10.43 historical failure'ını kendi Git geçmişinden incele.
             Kendi research.web mimarini incele.
             browser.control unavailable iken public araştırma neden task graph dependency nedeniyle durdu?
             Bu görev için kullanma:
@@ -307,6 +373,41 @@ struct SelfDiagnosisExecutorSelfTest {
                 }
             ),
             "source evidence discovered"
+        )
+        let historicalSourceEvidence =
+            package.evidence.filter {
+                $0.kind ==
+                    "historical_source"
+            }
+
+        expect(
+            historicalSourceEvidence.contains(
+                where: {
+                    $0.path ==
+                        "git:" +
+                        String(
+                            historicalHead.prefix(12)
+                        ) +
+                        ":App/HistoricalResearchPlanner.swift"
+                }
+            ),
+            "historical source revision discovered"
+        )
+        expect(
+            historicalSourceEvidence.contains(
+                where: {
+                    $0.excerpt.contains(
+                        "historicalVersion=v0.10.43"
+                    ) &&
+                    $0.excerpt.contains(
+                        "browser.control"
+                    ) &&
+                    $0.excerpt.contains(
+                        "research.web"
+                    )
+                }
+            ),
+            "historical source excerpt preserves version and mechanism provenance"
         )
         let sourceEvidence =
             package.evidence.filter {
@@ -376,9 +477,11 @@ struct SelfDiagnosisExecutorSelfTest {
             let sourceID =
                 package.evidence.first(
                     where: {
-                        $0.kind == "source" &&
-                        $0.path ==
-                            "App/ResearchPlanner.swift"
+                        $0.kind ==
+                            "historical_source" &&
+                        $0.path.hasSuffix(
+                            ":App/HistoricalResearchPlanner.swift"
+                        )
                     }
                 )?.id,
             let failureID =
@@ -464,6 +567,11 @@ struct SelfDiagnosisExecutorSelfTest {
                 confidence:
                     .high,
                 architectureInspected: [
+                    "git:" +
+                    String(
+                        historicalHead.prefix(12)
+                    ) +
+                    ":App/HistoricalResearchPlanner.swift",
                     "App/ResearchPlanner.swift"
                 ],
                 capabilityAssessment: [
