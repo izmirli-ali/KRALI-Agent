@@ -970,7 +970,6 @@ prepare_existing_local_fallback() {
     local controller_candidates=(
         "qwen2.5-coder:7b-instruct"
         "qwen3:8b"
-        "$LOCAL_FALLBACK_MODEL"
     )
     local seen="|"
 
@@ -994,6 +993,10 @@ prepare_existing_local_fallback() {
         while IFS= read -r candidate; do
             [ -n "$candidate" ] || continue
 
+            if [ "$candidate" = "$LOCAL_FALLBACK_MODEL" ]; then
+                continue
+            fi
+
             if [[ "$seen" == *"|$candidate|"* ]]; then
                 continue
             fi
@@ -1012,6 +1015,13 @@ prepare_existing_local_fallback() {
                 break
             fi
         done < <(list_existing_local_models_by_size)
+    fi
+
+    if [ -z "$LOCAL_FALLBACK_CONTROLLER_MODEL" ] &&
+       "$local_ollama" show "$LOCAL_FALLBACK_MODEL" >/dev/null 2>&1 &&
+       probe_existing_local_controller_model "$LOCAL_FALLBACK_MODEL"; then
+        LOCAL_FALLBACK_CONTROLLER_MODEL="$LOCAL_FALLBACK_MODEL"
+        echo "ℹ️ Hafif structured controller bulunamadı; coding modeli controller fallback olarak kullanılacak: $LOCAL_FALLBACK_MODEL" | tee -a "$LOG"
     fi
 
     if [ -z "$LOCAL_FALLBACK_CONTROLLER_MODEL" ]; then
