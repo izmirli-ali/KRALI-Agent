@@ -716,7 +716,15 @@ actor AgentLocalIntelligence {
 
         if webTask {
             outcomes.insert("research")
-            requiredIDs.insert("browser.control")
+
+            if knownIDs.contains("browser.control") {
+                requiredIDs.insert("browser.control")
+            } else if knownIDs.contains("research.web") {
+                // Research-core mode deliberately has no GUI/browser-control
+                // surface. Treat web URLs as information targets, not as a
+                // request to bootstrap computer control.
+                requiredIDs.insert("research.web")
+            }
 
             let explicitLocalFileTask =
                 containsMissionConcept(
