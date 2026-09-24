@@ -14,11 +14,13 @@ const model =
   "";
 const appVersion = process.env.KRALI_APP_VERSION || "unknown";
 const runID = process.env.KRALI_RUN_ID || "unknown";
+const compactMode =
+  (process.env.KRALI_TASK_DECOMPOSER_COMPACT || "0") === "1";
 const timeoutMs = Math.max(
   15000,
   Math.min(
     Number(process.env.KRALI_TASK_DECOMPOSER_TIMEOUT_MS || 70000),
-    120000
+    300000
   )
 );
 
@@ -81,9 +83,18 @@ function compactTask(payload) {
     capabilityName: String(task.capabilityName || ""),
     kind: String(task.kind || ""),
     learningPath: String(task.learningPath || ""),
-    reason: String(task.reason || "").slice(0, 3200),
-    researchGoal: String(task.researchGoal || "").slice(0, 3200),
-    developerBrief: String(task.developerBrief || "").slice(0, 16000),
+    reason: String(task.reason || "").slice(
+      0,
+      compactMode ? 1600 : 3200
+    ),
+    researchGoal: String(task.researchGoal || "").slice(
+      0,
+      compactMode ? 1600 : 3200
+    ),
+    developerBrief: String(task.developerBrief || "").slice(
+      0,
+      compactMode ? 8000 : 16000
+    ),
     allowedScope: Array.isArray(meta.allowedScope)
       ? meta.allowedScope.map(normalizeScope).filter(Boolean)
       : [],
@@ -393,8 +404,8 @@ try {
       keep_alive: "2m",
       options: {
         temperature: 0.02,
-        num_ctx: 6144,
-        num_predict: 1200,
+        num_ctx: compactMode ? 5120 : 6144,
+        num_predict: compactMode ? 800 : 1200,
       },
       messages: [
         {
@@ -467,6 +478,7 @@ const artifact = {
     findings: [],
     generalized_lessons: [],
   },
+  executionProfile: compactMode ? "compact-local" : "default",
   authority: {
     plannerOnly: true,
     mutationAuthority: false,
