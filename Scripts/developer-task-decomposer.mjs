@@ -419,6 +419,9 @@ try {
 clearTimeout(timer);
 
 if (!response.ok) {
+  if (response.status === 429) {
+    fail("http-429", 29);
+  }
   fail("http-" + response.status, 21);
 }
 
