@@ -54,6 +54,7 @@ jobs:
           python3 Scripts/mentor-sync-freshness-self-test.py
           python3 Scripts/mentor-sync-refspec-self-test.py
           python3 Scripts/visible-build-label-self-test.py
+          python3 Scripts/research-core-source-policy-self-test.py
 
       - name: Validate Swift mission and execution-profile policies
         shell: bash
@@ -70,6 +71,13 @@ jobs:
             Scripts/development-research-profile-self-test.swift \
             -o /tmp/krali-development-research-profile-self-test
           /tmp/krali-development-research-profile-self-test
+
+          swiftc \
+            App/KRALIAgentNative/AgentExecutionProfile.swift \
+            App/KRALIAgentNative/AgentOutcomePlanner.swift \
+            Scripts/research-core-outcome-self-test.swift \
+            -o /tmp/krali-research-core-outcome-self-test
+          /tmp/krali-research-core-outcome-self-test
 
           swiftc \
             App/KRALIAgentNative/AgentMissionRouter.swift \

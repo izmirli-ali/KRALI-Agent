@@ -164,7 +164,8 @@ struct AgentOutcomePlanner {
     func makeContract(
         userInput: String,
         goal: AgentGoalProfile,
-        mission: AgentSemanticMission?
+        mission: AgentSemanticMission?,
+        profile: AgentExecutionProfile = .full
     ) -> AgentOutcomeContract {
         let text = normalize(userInput)
         var requirements: [AgentOutcomeRequirement] = []
@@ -248,7 +249,11 @@ struct AgentOutcomePlanner {
                 modelResearchLike
             )
 
-        if navigationLike {
+        if navigationLike &&
+           (
+                profile.allowsComputerControl ||
+                !researchLike
+           ) {
             requirements.append(
                 AgentOutcomeRequirement(
                     id:
@@ -272,11 +277,13 @@ struct AgentOutcomePlanner {
                 )
             )
 
-            instrumental.formUnion([
-                "browser.control",
-                "desktop.app",
-                "app.workflow"
-            ])
+            if profile.allowsComputerControl {
+                instrumental.formUnion([
+                    "browser.control",
+                    "desktop.app",
+                    "app.workflow"
+                ])
+            }
         }
 
         if researchLike && webLike {
@@ -293,21 +300,28 @@ struct AgentOutcomePlanner {
                     preferredCapabilityIDs: [
                         "research.web"
                     ],
-                    acceptableCapabilityIDs: [
-                        "research.web",
-                        "system.open.url",
-                        "perception.screen",
-                        "browser.control"
-                    ],
+                    acceptableCapabilityIDs:
+                        profile.allowsComputerControl
+                        ? [
+                            "research.web",
+                            "system.open.url",
+                            "perception.screen",
+                            "browser.control"
+                        ]
+                        : [
+                            "research.web"
+                        ],
                     requiresMutation: false
                 )
             )
 
-            instrumental.formUnion([
-                "browser.control",
-                "desktop.app",
-                "app.workflow"
-            ])
+            if profile.allowsComputerControl {
+                instrumental.formUnion([
+                    "browser.control",
+                    "desktop.app",
+                    "app.workflow"
+                ])
+            }
         }
 
         if goal.outcomes.contains(.locate) {

@@ -441,15 +441,32 @@ struct AgentMissionNormalizer {
         }
 
         if browserWorkflow {
-            append(
-                title: "Web hedefini tarayıcıda yürüt",
-                purpose:
-                    "Kullanıcının verdiği web hedefini gerçek tarayıcı oturumunda aç, gerekli görünür bilgiyi oku ve yeni sekme/form/gönderim gibi dış değişiklikleri kullanıcı onayı olmadan uygulama. Provider yoksa capability gap üret ve öğrenme hattına geçir.",
-                capabilityID: "browser.control",
-                operation: "browser.navigate.observe",
-                dependsOn:
-                    latestDataStep.map { [$0] } ?? []
-            )
+            if knownIDs.contains("browser.control") {
+                append(
+                    title: "Web hedefini tarayıcıda yürüt",
+                    purpose:
+                        "Kullanıcının verdiği web hedefini gerçek tarayıcı oturumunda aç, gerekli görünür bilgiyi oku ve yeni sekme/form/gönderim gibi dış değişiklikleri kullanıcı onayı olmadan uygulama.",
+                    capabilityID: "browser.control",
+                    operation: "browser.navigate.observe",
+                    dependsOn:
+                        latestDataStep.map { [$0] } ?? []
+                )
+            } else if knownIDs.contains("research.web") {
+                append(
+                    title: "Web hedefini araştır",
+                    purpose:
+                        "Kullanıcının verdiği public web hedefini GUI veya bilgisayar kontrolü kullanmadan araştırma sağlayıcısıyla oku ve kaynak kanıtı üret.",
+                    capabilityID: "research.web",
+                    operation: "web.research",
+                    dependsOn:
+                        latestDataStep.map { [$0] } ?? []
+                )
+
+                if !steps.isEmpty {
+                    researchStepIndex =
+                        steps.count - 1
+                }
+            }
 
             if !steps.isEmpty {
                 latestDataStep =
@@ -534,7 +551,8 @@ struct AgentMissionNormalizer {
             outcomes.insert("analyze")
         }
 
-        if research {
+        if research &&
+           researchStepIndex == nil {
             append(
                 title: "Gerekli dış bilgiyi araştır",
                 purpose:

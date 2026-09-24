@@ -272,7 +272,7 @@ final class AgentEngine: ObservableObject {
             ? "Henüz görev bağlamı yok."
             : "\(contextMemoryEntries.count) bağlam kaydı hazır."
 
-        capabilityLearningBacklog =
+        let mergedLearningBacklog =
             learningStore.merge(
                 existing:
                     learningStore.load(),
@@ -280,6 +280,13 @@ final class AgentEngine: ObservableObject {
                 capabilities:
                     capabilityRegistry.all
             )
+
+        capabilityLearningBacklog =
+            mergedLearningBacklog.filter {
+                !executionProfile.isPaused(
+                    $0.capabilityID
+                )
+            }
 
         inspectorState.mentorTraceReady =
             fileManager.fileExists(
@@ -1192,11 +1199,17 @@ final class AgentEngine: ObservableObject {
             context: brainContext()
         )
 
-        let goalProfile = goalInterpreter.interpret(
-            text,
-            decision: decision,
-            context: brainContext()
-        )
+        let interpretedGoalProfile =
+            goalInterpreter.interpret(
+                text,
+                decision: decision,
+                context: brainContext()
+            )
+
+        let goalProfile =
+            researchCoreGoalProfile(
+                interpretedGoalProfile
+            )
 
         let requestedActionCapabilityIDs =
             goalProfile.requiredCapabilityIDs
@@ -1639,7 +1652,8 @@ final class AgentEngine: ObservableObject {
                 outcomePlanner.makeContract(
                     userInput: text,
                     goal: resolvedGoal,
-                    mission: mission
+                    mission: mission,
+                    profile: executionProfile
                 )
             let outcomeResolution =
                 outcomePlanner.resolve(
@@ -2641,6 +2655,44 @@ final class AgentEngine: ObservableObject {
         }
     }
 
+    private func researchCoreGoalProfile(
+        _ goal: AgentGoalProfile
+    ) -> AgentGoalProfile {
+        guard
+            executionProfile ==
+                .developmentResearchMode,
+            goal.outcomes.contains(.research) ||
+            goal.requiredCapabilityIDs.contains(
+                "research.web"
+            )
+        else {
+            return goal
+        }
+
+        var capabilityIDs =
+            goal.requiredCapabilityIDs
+                .subtracting(
+                    executionProfile
+                        .pausedCapabilityIDs
+                )
+
+        capabilityIDs.insert(
+            "core.reasoning"
+        )
+        capabilityIDs.insert(
+            "context.local"
+        )
+
+        return AgentGoalProfile(
+            summary: goal.summary,
+            outcomes: goal.outcomes,
+            requiredCapabilityIDs:
+                capabilityIDs,
+            isCompound:
+                goal.isCompound
+        )
+    }
+
     private func semanticMissionCoverageIsValid(
         _ mission: AgentSemanticMission,
         fallbackGoal: AgentGoalProfile
@@ -2729,8 +2781,15 @@ final class AgentEngine: ObservableObject {
         }
 
         if outcomes.contains(.research) {
-            guard ids.contains("research.web") ||
-                  ids.contains("browser.control") else {
+            let researchCovered =
+                ids.contains("research.web") ||
+                (
+                    executionProfile
+                        .allowsComputerControl &&
+                    ids.contains("browser.control")
+                )
+
+            guard researchCovered else {
                 return false
             }
         }
