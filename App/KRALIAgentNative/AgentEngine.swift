@@ -50,6 +50,7 @@ final class AgentEngine: ObservableObject {
     @Published var missionPhase: AgentMissionPhase = .runtime
     @Published var developerRepository: AgentDeveloperRepository?
     @Published var developerMissionReason: String?
+    @Published var executionProfile: AgentExecutionProfile = .developmentResearchMode
     @Published var currentTaskGraph: AgentTaskGraph?
     @Published var currentRuntimeTask: AgentRuntimeTask?
     @Published var taskGraphStatus = "Henüz görev grafiği yok."
@@ -861,12 +862,13 @@ final class AgentEngine: ObservableObject {
             for: text,
             decision: decision,
             context: brainContext(),
-            goal: goalProfile
+            goal: goalProfile,
+            profile: executionProfile
         )
         selectedCapabilities = capabilities
 
         let webResearchAvailable =
-            capabilityRegistry.all.first(
+            capabilityRegistry.availableCapabilities(for: executionProfile).first(
                 where: { $0.id == "research.web" }
             )?.isAvailable == true
 
@@ -5832,6 +5834,7 @@ final class AgentEngine: ObservableObject {
                 developerRepository: developerRepository,
                 developerMissionReason: developerMissionReason,
                 developerRunID: missionDeveloperRunID,
+                executionProfile: executionProfile,
                 semanticMission: currentSemanticMission,
                 semanticPlannerProvider:
                     currentSemanticPlannerProvider,
