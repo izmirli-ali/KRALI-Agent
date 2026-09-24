@@ -170,7 +170,8 @@ CLINE_BIN="$(command -v cline || true)"
 PROVIDER="${KRALI_DEV_PROVIDER:-ollama}"
 MODEL="${KRALI_DEV_MODEL:-}"
 LOCAL_AGENT_ENGINE="${KRALI_LOCAL_AGENT_ENGINE:-native-ollama}"
-OLLAMA_BASE_URL="${KRALI_OLLAMA_BASE_URL:-http://127.0.0.1:11434}"
+LOCAL_OLLAMA_BASE_URL="${KRALI_LOCAL_OLLAMA_BASE_URL:-http://127.0.0.1:11434}"
+OLLAMA_BASE_URL="${KRALI_OLLAMA_BASE_URL:-$LOCAL_OLLAMA_BASE_URL}"
 CLINE_SETTINGS="${CLINE_PROVIDER_SETTINGS_PATH:-$HOME/.cline/data/settings/providers.json}"
 USE_SDK_FALLBACK=0
 SDK_HOST="$STATUS_DIR/cline-sdk-host"
@@ -191,6 +192,13 @@ CLOUDFLARE_KEYCHAIN_SERVICE="KRALI Cloudflare Workers AI"
 CLOUDFLARE_KEYCHAIN_ACCOUNT="api-token"
 REMOTE_MAIN_ALIAS="cloudflare-main"
 REMOTE_JSON_ALIAS="cloudflare-json"
+REMOTE_CIRCUIT_OPEN=0
+REMOTE_CIRCUIT_REASON=""
+PROVIDER_FAILOVER_BLOCKED=0
+LOCAL_FALLBACK_READY=0
+LOCAL_FALLBACK_MODEL=""
+LOCAL_FALLBACK_CONTROLLER_MODEL=""
+LOCAL_FALLBACK_REASON=""
 
 load_openai_teacher_key() {
     [ "$OPENAI_TEACHER_ENABLED" = "1" ] || return 1
@@ -878,6 +886,129 @@ prepare_ollama_runtime() {
 
     write_status "local_ai_ready|Ücretsiz yerel Developer AI hazır ve tool-call doğrulandı: $MODEL"
     echo "✅ Yerel Developer AI hazır + tool-call doğrulandı: $MODEL" | tee -a "$LOG"
+    return 0
+}
+
+probe_existing_local_tool_model() {
+    local candidate="$1"
+
+    KRALI_OLLAMA_BASE_URL="$LOCAL_OLLAMA_BASE_URL" \
+    KRALI_DEV_MODEL="$candidate" \
+        "$NODE_BIN" "$ROOT/Scripts/ollama-tool-probe.mjs" >>"$LOG" 2>&1
+}
+
+probe_existing_local_controller_model() {
+    local candidate="$1"
+
+    KRALI_OLLAMA_BASE_URL="$LOCAL_OLLAMA_BASE_URL" \
+    KRALI_CONTROLLER_PROBE_MODEL="$candidate" \
+    KRALI_CONTROLLER_PROBE_TIMEOUT_MS="$CONTROLLER_PROBE_TIMEOUT_MS" \
+        "$NODE_BIN" "$ROOT/Scripts/ollama-controller-probe.mjs" >>"$LOG" 2>&1
+}
+
+prepare_existing_local_fallback() {
+    if [ "$LOCAL_FALLBACK_READY" -eq 1 ]; then
+        return 0
+    fi
+
+    LOCAL_FALLBACK_REASON=""
+    local local_ollama
+    local_ollama="$(command -v ollama || true)"
+
+    if [ -z "$local_ollama" ]; then
+        LOCAL_FALLBACK_REASON="ollama-missing"
+        return 1
+    fi
+
+    if ! /usr/bin/curl -fsS "$LOCAL_OLLAMA_BASE_URL/api/tags" >/dev/null 2>&1; then
+        LOCAL_FALLBACK_REASON="ollama-service-not-running"
+        return 1
+    fi
+
+    local tool_candidates=(
+        "qwen2.5-coder:7b-instruct"
+        "qwen3:8b"
+        "qwen2.5-coder:14b-instruct"
+        "devstral-small-2:24b"
+        "devstral:24b"
+        "qwen3-coder:30b"
+    )
+
+    local candidate
+    for candidate in "${tool_candidates[@]}"; do
+        if "$local_ollama" show "$candidate" >/dev/null 2>&1 &&
+           probe_existing_local_tool_model "$candidate"; then
+            LOCAL_FALLBACK_MODEL="$candidate"
+            break
+        fi
+    done
+
+    if [ -z "$LOCAL_FALLBACK_MODEL" ]; then
+        LOCAL_FALLBACK_REASON="no-installed-tool-capable-model"
+        return 1
+    fi
+
+    local controller_candidates=(
+        "qwen2.5-coder:7b-instruct"
+        "qwen3:8b"
+        "$LOCAL_FALLBACK_MODEL"
+    )
+    local seen="|"
+
+    for candidate in "${controller_candidates[@]}"; do
+        [ -n "$candidate" ] || continue
+        if [[ "$seen" == *"|$candidate|"* ]]; then
+            continue
+        fi
+        seen="${seen}$candidate|"
+
+        if "$local_ollama" show "$candidate" >/dev/null 2>&1 &&
+           probe_existing_local_controller_model "$candidate"; then
+            LOCAL_FALLBACK_CONTROLLER_MODEL="$candidate"
+            break
+        fi
+    done
+
+    if [ -z "$LOCAL_FALLBACK_CONTROLLER_MODEL" ]; then
+        LOCAL_FALLBACK_REASON="no-installed-structured-controller-model"
+        return 1
+    fi
+
+    LOCAL_FALLBACK_READY=1
+    LOCAL_FALLBACK_REASON=""
+    echo "✅ Side-effect-free local fallback hazır • main=$LOCAL_FALLBACK_MODEL • controller=$LOCAL_FALLBACK_CONTROLLER_MODEL" | tee -a "$LOG"
+    return 0
+}
+
+activate_local_fallback() {
+    local reason="$1"
+
+    if [ "$REMOTE_CIRCUIT_OPEN" -eq 1 ] &&
+       [ "$LOCAL_FALLBACK_READY" -eq 1 ]; then
+        return 0
+    fi
+
+    REMOTE_CIRCUIT_OPEN=1
+    REMOTE_CIRCUIT_REASON="$reason"
+
+    echo "⚡ Remote provider circuit breaker açıldı • reason=$reason" | tee -a "$LOG"
+
+    if ! prepare_existing_local_fallback; then
+        PROVIDER_FAILOVER_BLOCKED=1
+        write_status "provider_failover_unavailable|Cloudflare devre dışı • local fallback hazır değil: $LOCAL_FALLBACK_REASON • otomatik install/start/pull yapılmadı|$BRANCH|$WORKTREE"
+        echo "⛔ Local fallback kullanılamıyor: $LOCAL_FALLBACK_REASON • otomatik sistem değişikliği yapılmadı." | tee -a "$LOG"
+        return 1
+    fi
+
+    cleanup_remote_proxy
+    OLLAMA_BASE_URL="$LOCAL_OLLAMA_BASE_URL"
+    MODEL="$LOCAL_FALLBACK_MODEL"
+    CONTROLLER_MODEL="$LOCAL_FALLBACK_CONTROLLER_MODEL"
+    REMOTE_PROVIDER_MODE=0
+    REMOTE_PROVIDER_NAME="local-ollama-fallback"
+
+    write_status "local_fallback_active|Cloudflare circuit breaker sonrası mevcut local Ollama aktif • main=$MODEL • controller=$CONTROLLER_MODEL|$BRANCH|$WORKTREE"
+    echo "🛟 Local fallback aktif • main=$MODEL • controller=$CONTROLLER_MODEL" | tee -a "$LOG"
     return 0
 }
 
@@ -2026,16 +2157,40 @@ NODE
     fi
 fi
 
+run_baseline_decomposer_once() {
+    KRALI_DEV_TASK_FILE="$DEV_TASK_FILE" \
+    KRALI_TASK_DECOMPOSER_RESULT_FILE="$BASELINE_TASK_PLAN_RESULT" \
+    KRALI_OLLAMA_BASE_URL="$OLLAMA_BASE_URL" \
+    KRALI_DECOMPOSER_MODEL="$CONTROLLER_MODEL" \
+    KRALI_APP_VERSION="$(/bin/cat "$ROOT/VERSION" 2>/dev/null | /usr/bin/tr -d '[:space:]')" \
+    KRALI_RUN_ID="$STAMP" \
+        "$NODE_BIN" "$ROOT/Scripts/developer-task-decomposer.mjs" >>"$LOG" 2>&1
+}
+
 if [ -n "$DEV_TASK_FILE" ] && [ -f "$DEV_TASK_FILE" ]; then
     write_status "task_decomposing|$GAP_LABEL KRALİ baseline decomposer ile alt görevlere ayrılıyor|$BRANCH|$WORKTREE"
 
-    if KRALI_DEV_TASK_FILE="$DEV_TASK_FILE" \
-       KRALI_TASK_DECOMPOSER_RESULT_FILE="$BASELINE_TASK_PLAN_RESULT" \
-       KRALI_OLLAMA_BASE_URL="$OLLAMA_BASE_URL" \
-       KRALI_DECOMPOSER_MODEL="$CONTROLLER_MODEL" \
-       KRALI_APP_VERSION="$(/bin/cat "$ROOT/VERSION" 2>/dev/null | /usr/bin/tr -d '[:space:]')" \
-       KRALI_RUN_ID="$STAMP" \
-       "$NODE_BIN" "$ROOT/Scripts/developer-task-decomposer.mjs" >>"$LOG" 2>&1; then
+    DECOMPOSER_EXIT=0
+    run_baseline_decomposer_once || DECOMPOSER_EXIT=$?
+
+    if { [ "$DECOMPOSER_EXIT" -eq 29 ] || [ "$DECOMPOSER_EXIT" -eq 28 ]; } &&
+       [ "$REMOTE_PROVIDER_MODE" -eq 1 ]; then
+        if [ "$DECOMPOSER_EXIT" -eq 29 ]; then
+            DECOMPOSER_FAILOVER_REASON="cloudflare-json-quota"
+        else
+            DECOMPOSER_FAILOVER_REASON="cloudflare-json-timeout"
+        fi
+        echo "⚡ Cloudflare structured controller quota/timeout verdi; aynı run içinde local circuit-breaker fallback deneniyor." | tee -a "$LOG"
+
+        if activate_local_fallback "$DECOMPOSER_FAILOVER_REASON"; then
+            write_status "task_decomposing_local_fallback|$GAP_LABEL baseline decomposer mevcut local controller ile yeniden deneniyor|$BRANCH|$WORKTREE"
+            rm -f "$BASELINE_TASK_PLAN_RESULT"
+            DECOMPOSER_EXIT=0
+            run_baseline_decomposer_once || DECOMPOSER_EXIT=$?
+        fi
+    fi
+
+    if [ "$DECOMPOSER_EXIT" -eq 0 ]; then
         DEVELOPER_TASK_GRAPH_PLAN="$BASELINE_TASK_PLAN_RESULT"
         BASELINE_PLAN_CONTEXT="$("$NODE_BIN" - "$BASELINE_TASK_PLAN_RESULT" <<'NODE'
 const fs = require("fs");
@@ -2053,10 +2208,19 @@ NODE
                 echo "Bu graph yalnız planlama bağlamıdır; scope/approval/verification kuralları authority olmaya devam eder."
             } >> "$PROMPT_FILE"
         fi
-        echo "🧩 KRALİ baseline task decomposition hazır." | tee -a "$LOG"
-    else
+        echo "🧩 KRALİ baseline task decomposition hazır • provider=$([ "$REMOTE_PROVIDER_MODE" -eq 1 ] && echo remote || echo local-fallback)" | tee -a "$LOG"
+    elif [ "$PROVIDER_FAILOVER_BLOCKED" -eq 0 ]; then
         echo "⚠️ KRALİ baseline task decomposition üretilemedi; mevcut tek-task güvenli akış korunuyor." | tee -a "$LOG"
     fi
+fi
+
+if [ "$PROVIDER_FAILOVER_BLOCKED" -eq 1 ]; then
+    echo "⛔ Remote quota nedeniyle devam edilemiyor ve side-effect-free local fallback hazır değil; candidate üretilmeden oturum kapatılıyor." | tee -a "$LOG"
+    rm -f "$PROMPT_FILE"
+    cd "$ROOT"
+    git worktree remove "$WORKTREE" --force >>"$LOG" 2>&1 || true
+    git branch -D "$BRANCH" >>"$LOG" 2>&1 || true
+    exit 29
 fi
 
 if [ -n "$DEV_TASK_FILE" ] && [ -f "$DEV_TASK_FILE" ]; then
@@ -2129,18 +2293,7 @@ CLINE_RUN_STREAMED_TO_LOG=0
 
 CLINE_STARTED_AT="$(date +%s)"
 
-if [ "$PROVIDER" = "ollama" ] &&
-   [ "$LOCAL_AGENT_ENGINE" = "native-ollama" ]; then
-    CLINE_RUN_LOG="$LOG_DIR/KRALI-Developer-Agent-Local-$STAMP.log"
-    CLINE_RUN_STREAMED_TO_LOG=1
-    if [ "$REMOTE_PROVIDER_MODE" -eq 1 ]; then
-        write_status "remote_agent_starting|$GAP_LABEL Cloudflare Workers AI ile öğreniliyor|$BRANCH|$WORKTREE"
-        echo "☁️ Model rolleri: remote main=$KRALI_CF_MAIN_MODEL • structured=$KRALI_CF_JSON_MODEL" | tee -a "$LOG"
-    else
-        write_status "local_agent_starting|$GAP_LABEL native Ollama Developer Agent ile öğreniliyor|$BRANCH|$WORKTREE"
-        echo "🧠 Model rolleri: root-cause=$CONTROLLER_MODEL • mutation=$MODEL • controller=$CONTROLLER_MODEL" | tee -a "$LOG"
-    fi
-
+run_native_developer_agent_once() {
     KRALI_WORKTREE="$WORKTREE" \
     KRALI_INFERENCE_MODE="$([ "$REMOTE_PROVIDER_MODE" -eq 1 ] && echo remote || echo local)" \
     KRALI_PROMPT_FILE="$PROMPT_FILE" \
@@ -2186,9 +2339,26 @@ if [ "$PROVIDER" = "ollama" ] &&
     )" \
     KRALI_LOCAL_AGENT_REQUEST_TIMEOUT_MS="$([ "$LEARNING_PATH" = "primitivePatch" ] && echo 45000 || echo 60000)" \
     KRALI_LOCAL_AGENT_STRUCTURED_TIMEOUT_MS="$([ "$LEARNING_PATH" = "primitivePatch" ] && echo 120000 || echo 60000)" \
-    "$NODE_BIN" "$ROOT/Scripts/ollama-developer-agent.mjs" \
-        > >(tee "$CLINE_RUN_LOG" >>"$LOG") \
-        2> >(tee -a "$CLINE_RUN_LOG" >>"$LOG" >&2)
+        "$NODE_BIN" "$ROOT/Scripts/ollama-developer-agent.mjs" \
+            > >(tee -a "$CLINE_RUN_LOG" >>"$LOG") \
+            2> >(tee -a "$CLINE_RUN_LOG" >>"$LOG" >&2)
+}
+
+if [ "$PROVIDER" = "ollama" ] &&
+   [ "$LOCAL_AGENT_ENGINE" = "native-ollama" ]; then
+    CLINE_RUN_LOG="$LOG_DIR/KRALI-Developer-Agent-Local-$STAMP.log"
+    CLINE_RUN_STREAMED_TO_LOG=1
+    rm -f "$CLINE_RUN_LOG"
+
+    if [ "$REMOTE_PROVIDER_MODE" -eq 1 ]; then
+        write_status "remote_agent_starting|$GAP_LABEL Cloudflare Workers AI ile öğreniliyor|$BRANCH|$WORKTREE"
+        echo "☁️ Model rolleri: remote main=$KRALI_CF_MAIN_MODEL • structured=$KRALI_CF_JSON_MODEL" | tee -a "$LOG"
+    else
+        write_status "local_agent_starting|$GAP_LABEL native Ollama Developer Agent ile öğreniliyor|$BRANCH|$WORKTREE"
+        echo "🧠 Model rolleri: root-cause=$CONTROLLER_MODEL • mutation=$MODEL • controller=$CONTROLLER_MODEL" | tee -a "$LOG"
+    fi
+
+    run_native_developer_agent_once
     CLINE_EXIT=$?
 elif [ "$USE_SDK_FALLBACK" -eq 1 ]; then
     CLINE_RUN_STREAMED_TO_LOG=1
@@ -2228,6 +2398,29 @@ CLINE_DURATION="$(( $(date +%s) - CLINE_STARTED_AT ))"
 
 if [ "$CLINE_RUN_STREAMED_TO_LOG" -eq 0 ]; then
     cat "$CLINE_RUN_LOG" >>"$LOG"
+fi
+
+if [ "$CLINE_EXIT" -ne 0 ] &&
+   [ "$PROVIDER" = "ollama" ] &&
+   [ "$LOCAL_AGENT_ENGINE" = "native-ollama" ] &&
+   [ "$REMOTE_PROVIDER_MODE" -eq 1 ] &&
+   /usr/bin/grep -Eqi 'HTTP 429|status=429|daily free allocation|used up your daily|quota|cloudflare_provider_transport\|timeout' "$CLINE_RUN_LOG" 2>/dev/null; then
+    if /usr/bin/grep -Eqi 'HTTP 429|status=429|daily free allocation|used up your daily|quota' "$CLINE_RUN_LOG" 2>/dev/null; then
+        AGENT_FAILOVER_REASON="cloudflare-main-quota"
+    else
+        AGENT_FAILOVER_REASON="cloudflare-main-timeout"
+    fi
+    echo "⚡ Cloudflare coding provider quota/timeout verdi; remote circuit breaker açılıyor." | tee -a "$LOG"
+
+    if activate_local_fallback "$AGENT_FAILOVER_REASON"; then
+        write_status "local_fallback_retrying|$GAP_LABEL aynı worktree/checkpoint üzerinde local modelle devam ediyor|$BRANCH|$WORKTREE"
+        echo "🛟 Aynı candidate/checkpoint local modelle yeniden başlatılıyor; yeni branch oluşturulmayacak." | tee -a "$LOG"
+
+        LOCAL_FAILOVER_STARTED_AT="$(date +%s)"
+        run_native_developer_agent_once
+        CLINE_EXIT=$?
+        CLINE_DURATION="$(( CLINE_DURATION + $(date +%s) - LOCAL_FAILOVER_STARTED_AT ))"
+    fi
 fi
 
 if [ "$CLINE_EXIT" -eq 25 ] &&
@@ -2457,12 +2650,21 @@ NODE
         echo "🧩 Developer Agent hata verdi ancak candidate değişiklik üretti; recovery başlatılıyor." | tee -a "$LOG"
         write_status "recovering_candidate|Developer Agent oturumu tamamlanmadı ancak üretilen candidate değişiklikler korunuyor|$BRANCH|$WORKTREE"
 
+        RECOVERY_MODEL="$MODEL"
+        RECOVERY_REPAIR_ATTEMPTS="2"
+
+        if [ "$PROVIDER_FAILOVER_BLOCKED" -eq 1 ]; then
+            RECOVERY_MODEL=""
+            RECOVERY_REPAIR_ATTEMPTS="0"
+            echo "ℹ️ Provider failover hazır değil; recovery yalnız deterministic build/verification yapacak, AI repair çalıştırılmayacak." | tee -a "$LOG"
+        fi
+
         KRALI_NODE_BIN="$NODE_BIN" \
-        KRALI_RECOVERY_MODEL="$MODEL" \
+        KRALI_RECOVERY_MODEL="$RECOVERY_MODEL" \
         KRALI_OLLAMA_BASE_URL="$OLLAMA_BASE_URL" \
         KRALI_DEV_TASK_FILE="$DEV_TASK_FILE" \
         KRALI_LEARNING_PATH="$LEARNING_PATH" \
-        KRALI_CANDIDATE_REPAIR_ATTEMPTS="2" \
+        KRALI_CANDIDATE_REPAIR_ATTEMPTS="$RECOVERY_REPAIR_ATTEMPTS" \
         /bin/zsh "$ROOT/Scripts/recover-developer-candidate.command" >>"$LOG" 2>&1 || true
 
         RECOVERY_STATE="$(
@@ -2499,6 +2701,12 @@ NODE
     else
         git -C "$ROOT" worktree remove "$WORKTREE" --force >>"$LOG" 2>&1 || true
         git -C "$ROOT" branch -D "$BRANCH" >>"$LOG" 2>&1 || true
+    fi
+
+    if [ "$PROVIDER_FAILOVER_BLOCKED" -eq 1 ]; then
+        write_status "provider_failover_unavailable|Remote provider circuit açık; mevcut local fallback hazır değil ve otomatik install/start/pull yapılmadı|$BRANCH|$WORKTREE"
+        echo "⛔ Provider failover kullanılamadı; kullanıcı onayı olmadan sistem kurulumu/değişikliği yapılmadı." | tee -a "$LOG"
+        exit 29
     fi
 
     if [ "$CURSOR_ARCHITECT_READY" -eq 1 ]; then

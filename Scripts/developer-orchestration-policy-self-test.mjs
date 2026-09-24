@@ -133,6 +133,27 @@ assertContains(
   "repair agent inherits stable surface-guard base"
 );
 
+assertContains(
+  runner,
+  "prepare_existing_local_fallback",
+  "remote provider failure can use already-ready local Ollama without installation"
+);
+assertContains(
+  runner,
+  "REMOTE_CIRCUIT_OPEN=1",
+  "quota/timeout failure opens a per-run remote circuit breaker"
+);
+assertContains(
+  runner,
+  "local_fallback_retrying",
+  "native Developer Agent resumes same run on local fallback"
+);
+assertContains(
+  runner,
+  'RECOVERY_REPAIR_ATTEMPTS="0"',
+  "provider-unavailable candidate recovery does not repeatedly call failed AI providers"
+);
+
 process.stdout.write(
   "developer_orchestration_policy_ok\n"
 );

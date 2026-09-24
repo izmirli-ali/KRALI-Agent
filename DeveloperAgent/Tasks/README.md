@@ -119,3 +119,16 @@ Controlled developer tasks no longer depend on OpenAI Teacher to obtain a task g
 - An explicit registered task may opt into destructive change only with `taskMetadata.allowDestructiveChange=true`; this is not inferred by the model.
 - A failed guard produces `candidate_surface_regression`. Recovery may repair the candidate, but main is never changed automatically.
 
+## Provider Resilience
+
+Developer Agent remote-first çalışırken Cloudflare Workers AI quota/429 veya tekrarlayan transport timeout ile kullanılamaz hale gelirse aynı run içinde provider circuit breaker açılır.
+
+- Baseline decomposer Cloudflare structured controller'dan HTTP 429 alırsa veya request timeout olursa önce side-effect-free local fallback probe çalışır.
+- Native coding agent kendi retry bütçesini tüketip Cloudflare quota/429 ya da provider transport timeout ile durursa aynı worktree, task graph ve checkpoint korunarak bir kez local modelle devam edilir.
+- Local fallback yalnız zaten kurulu Ollama binary, zaten çalışan local Ollama endpoint ve zaten indirilmiş modeller arasından seçim yapar.
+- Failover probe hiçbir zaman Homebrew install/upgrade, Ollama service start, model pull/download veya başka sistem değişikliği yapmaz.
+- Local fallback için hem native tool-call probe geçen bir coding model hem de structured-controller probe geçen bir model gerekir.
+- Local fallback hazır değilse `provider_failover_unavailable` terminal state üretilir. Candidate yoksa worktree temizlenir; candidate varsa deterministic build/verification korunur fakat AI repair tekrar tekrar başarısız remote provider'a gönderilmez.
+- Remote circuit breaker aynı run içinde tekrar remote provider'a dönmez. Sonraki yeni run remote-first provider'ı yeniden deneyebilir.
+- Local fallback endpoint varsayılan olarak `http://127.0.0.1:11434` kullanır ve `KRALI_LOCAL_OLLAMA_BASE_URL` ile ayrıca değiştirilebilir.
+

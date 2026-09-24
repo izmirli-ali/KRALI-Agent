@@ -599,3 +599,17 @@ Target runtime:
 - CI now self-tests baseline task decomposition and destructive candidate surface protection.
 - VERSION 0.10.40 / build 213.
 
+## v0.10.41 progress
+
+- v0.10.40 Learning Suggestions real run reached the new baseline decomposer but Cloudflare Workers AI returned HTTP 429 because the account's daily free 10,000-neuron allocation was exhausted.
+- Added per-run remote provider circuit breaker for Cloudflare quota/429 and repeated provider transport timeout failures.
+- Developer task decomposer now returns dedicated exit codes for transport timeout (28) and HTTP 429 (29), allowing deterministic failover instead of collapsing into generic single-task fallback.
+- Added side-effect-free local fallback discovery: it only checks an already-installed Ollama binary, an already-running local endpoint and already-downloaded models.
+- Local fallback requires both a tool-call-proven coding model and a structured-controller-proven local model.
+- The fallback probe never installs/upgrades packages, starts services or pulls models. If local prerequisites are absent, the run ends with provider_failover_unavailable rather than changing the Mac without approval.
+- If the structured decomposer trips the circuit breaker, baseline task decomposition is retried locally before coding starts.
+- If the remote coding agent fails later, the same worktree, task graph, candidate state and checkpoint are retried once with the proven local models; no new branch/worktree is created.
+- If provider failover is unavailable after a partial candidate, recovery is limited to deterministic build/task verification with AI repair attempts disabled.
+- Added provider failover states to AgentDeveloperBridge and a dedicated CI self-test covering quota, timeout, checkpoint preservation, circuit breaker behavior and no-side-effect local probing.
+- VERSION 0.10.41 / build 214.
+

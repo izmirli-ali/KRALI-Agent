@@ -410,15 +410,19 @@ try {
   });
 } catch (error) {
   clearTimeout(timer);
-  fail(
-    "transport:" +
-      (error instanceof Error ? error.name : "unknown"),
-    20
-  );
+  const name =
+    error instanceof Error ? error.name : "unknown";
+  if (name === "AbortError") {
+    fail("transport-timeout", 28);
+  }
+  fail("transport:" + name, 20);
 }
 clearTimeout(timer);
 
 if (!response.ok) {
+  if (response.status === 429) {
+    fail("http-429", 29);
+  }
   fail("http-" + response.status, 21);
 }
 
