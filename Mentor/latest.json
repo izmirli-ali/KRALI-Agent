@@ -1,35 +1,31 @@
 {
   "activityTail" : [
     {
-      "date" : "2026-09-24T20:31:10Z",
+      "date" : "2026-09-24T20:53:18Z",
       "text" : "Self-diagnosis başladı • repo=/Users/medusa/Developer/KRALI-Agent"
     },
     {
-      "date" : "2026-09-24T20:31:10Z",
+      "date" : "2026-09-24T20:53:18Z",
       "text" : "Developer context firewall: conversational task memory isolated"
     },
     {
-      "date" : "2026-09-24T20:30:17Z",
-      "text" : "Mentor sync başarısız"
-    },
-    {
-      "date" : "2026-09-24T20:30:02Z",
+      "date" : "2026-09-24T20:53:02Z",
       "text" : "Apple yerel zeka hazır"
     },
     {
-      "date" : "2026-09-24T20:30:02Z",
+      "date" : "2026-09-24T20:53:02Z",
       "text" : "Çalışma klasörü yolu geri yüklendi; indeks gerektiğinde oluşturulacak: Desktop"
     },
     {
-      "date" : "2026-09-24T20:30:02Z",
+      "date" : "2026-09-24T20:53:02Z",
       "text" : "Ağır geliştirici testleri normal açılışta otomatik çalıştırılmıyor"
     },
     {
-      "date" : "2026-09-24T20:30:02Z",
+      "date" : "2026-09-24T20:53:02Z",
       "text" : "Dinamik hedef ve kabiliyet yönlendirme aktif"
     },
     {
-      "date" : "2026-09-24T20:30:02Z",
+      "date" : "2026-09-24T20:53:02Z",
       "text" : "KRALİ Core hazır"
     }
   ],
@@ -54,14 +50,14 @@
   "contextMemory" : [
 
   ],
-  "createdAt" : "2026-09-24T20:31:51Z",
+  "createdAt" : "2026-09-24T20:53:55Z",
   "developerMissionReason" : "KRALİ is the target and the request asks for supported diagnosis/improvement.",
   "developerRepository" : "/Users/medusa/Developer/KRALI-Agent",
   "executionProfile" : "developmentResearchMode",
   "executionSteps" : [
 
   ],
-  "finalResponse" : "**A. Failure Reconstruction**\nv0.10.43 sürümünde, `research.web` mevcut olmasına rağmen, `planner` adımı `browser.control`'ü `research.web` öncesinde zorunlu bir bağımlılık olarak çağırdı. Bu durum, `browser.control` yetersiz olduğunda, araştırmanın tamamlanmasını engelleyen bir döngüsel bağımlılık yarattı. Sonuç olarak, `researchEvidence` ve `researchSources` boş kaldı, `runtime task failed` ve `verification state = attention` ile sonuçlandı.\n\n**B. Root Cause**\nProximate Cause: `planner`'ın `browser.control`'ü `research.web` öncesinde zorunlu bağımlılık olarak çağırması, `browser.control` yetersiz olduğunda araştırmayı durdurdu.\n\nArchitectural Root Cause: Mimari, `browser.control`'ü araştırmanın başlangıcında zorunlu bir bağımlılık olarak konumlandırarak, alternatif fallback stratejilerini (örneğin `system.open.url + perception.screen`) devre dışı bıraktı. Bu, `planner`'ın `research.web` yerine `browser.control`'ü çağırmasına neden oldu. Bu yapı, mimarideki 'Dependency-First' yaklaşımın, yetersiz kaynakta başarısızlık yarattığını gösterir.\n\nConfidence: MEDIUM\nEvidence IDs: E12, E2, E5\n\n**C. Repository / Architecture Inspected**\nRepo: /Users/medusa/Developer/KRALI-Agent\nRepo HEAD: 11e55aba35c72a6c3b0f14b5e963b4b1180592e9\nApp source revision: 11e55aba35c72a6c3b0f14b5e963b4b1180592e9\nExact revision match: yes\nWorking tree clean: yes\nArchitecture: App/KRALIAgentNative/AgentEngine.swift, KRALI_ARCHITECTURE.md, App/KRALIAgentNative/AgentLocalIntelligence.swift\n\n**D. Evidence**\n- [E1] current-user-mission\n- [E2] App/KRALIAgentNative/AgentEngine.swift:884-898\n- [E3] KRALI_ARCHITECTURE.md:476-490\n- [E4] KRALI_DEVELOPMENT_NOTES.md:133-147\n- [E5] App/KRALIAgentNative/AgentTrainingLab.swift:494-508\n- [E6] App/KRALIAgentNative/AgentLocalIntelligence.swift:2205-2219\n- [E7] Scripts/self-diagnosis-executor-self-test.swift:222-236\n- [E8] Scripts/ollama-developer-agent.mjs:1318-1332\n- [E9] Mentor/latest.json:101-110\n- [E10] App/KRALIAgentNative/AgentSelfDiagnosisExecutor.swift:537-551\n- [E11] App/KRALIAgentNative/MentorTraceStore.swift:155-169\n- [E12] git:f06240349c05:Mentor/latest.json\n\n**E. Existing Capability Assessment**\n- `planner`'ın bağımlılık yönetimi\n- `research.web`'in bağımsız çalıştırılabilirliği\n- `browser.control`'ün fallback desteği\n\n**F. Alternatives**\n1. Independent Research Execution with Fallback\n   - Avantaj: `research.web` bağımsız çalışır, `browser.control`'ün eksikliği sorun yaratmaz; `system.open.url` + `perception.screen` fallback'i mevcut\n   - Risk: `planner`'ın bağımlılık yönetimi karmaşıklaşabilir\n   - Mimari etki: `planner` bağımlılık kontrolünü kaldırarak doğrudan `research.web`'i çağırır\n   - Genellenebilirlik: Tüm araştırmalar için uygulanabilir\n   - Değişiklik büyüklüğü: Küçük\n   - Test edilebilirlik: Evet, test edilebilir senaryolar mevcut\n2. Conditional Dependency Override\n   - Avantaj: `planner`'ın `browser.control`'ü zorunlu çağırması yerine, `research.web`'i doğrudan kullanır; `system.open.url` ile geçici çözüm sunar\n   - Risk: `planner`'ın bağımlılık kontrolünü değiştirmek, mevcut iş akışını bozabilir\n   - Mimari etki: Mimari, bağımlılık zincirini kırarak daha esnek bir yapıya evrilir\n   - Genellenebilirlik: Orta düzey, benzer bağımlılık zincirlerinde uygulanabilir\n   - Değişiklik büyüklüğü: Orta\n   - Test edilebilirlik: Evet, test edilerek doğrulanabilir\n\n**G. Decision**\nIMPROVE\n\n**H. Development Proposal**\nProblem: `planner`'ın `browser.control`'ü `research.web` öncesinde zorunlu bağımlılık olarak çağırması, `browser.control` yetersiz olduğunda araştırmayı durduruyor.\nEvidence: E2, E5, E12\nRoot Cause: Mimari, `browser.control`'ü araştırmanın başlangıcında zorunlu bağımlılık olarak konumlandırıyor.\nExisting Architecture: `planner` bağımlılık yönetimi ile `research.web`'i çağırıyor.\nSelected Strategy: `Independent Research Execution with Fallback`\nExpected Behavior: `research.web` bağımsız çalışır, `browser.control` eksikse `system.open.url` + `perception.screen` fallback'i devreye girer.\nAllowed Scope: `planner` bağımlılık kontrolünü kaldırır, `research.web` doğrudan çağrılır\nRisks: `planner`'ın bağımlılık yönetimi karmaşıklaşabilir\nVerification Contract: `research.web` bağımsız çalışır; `system.open.url` + `perception.screen` başarıyla tamamlanır\nBehavioral Benchmark: Araştırma tamamlanır; Fallback sistemi etkin çalışır\nRollback Condition: `planner` bağımlılık kontrolünü geri yükler ve `research.web`'i doğrudan çağırır\n\n**I. Mutation Started?**\nno\n\n**J. Stop Reason**\nRead-only diagnosis complete. A bounded registered mutation task and explicit human review are required before any code change.\n\n**K. Remaining Limitations**\n- `planner`'ın bağımlılık kontrolü mevcut mimaride sınırlı\n- `browser.control`'ün fallback desteği tam olarak entegre değil",
+  "finalResponse" : "**A. Failure Reconstruction**\nv0.10.43 sürümünde, `research.web` kullanılabilir olmasına rağmen, `browser.control` bulunmadığı için planner, `browser.control` adımını `research.web` öncesinde dependency olarak çağırırken, bu durum `verificationState` olarak `attention` durumuna yol açtı ve `runtime task failed` ile sonuçlandı. Gerçek araştırma tamamlanamadı çünkü `researchEvidence` ve `researchSources` boş kaldı.\n\n**B. Root Cause**\nProximate Cause: `planner`ın `browser.control` adımını `research.web` öncesinde dependency yapması, `browser.control`'ün `unavailable` olması nedeniyle `research.web`'in erişilebilirliğini engelleyen doğrudan bir teknik engelleme yarattı.\n\nArchitectural Root Cause: UNKNOWN — model output was not sufficiently evidence-bound.\n\nConfidence: LOW\nEvidence IDs: \n\n**C. Repository / Architecture Inspected**\nRepo: /Users/medusa/Developer/KRALI-Agent\nRepo HEAD: 6df252a9c41fe0f03acd4bbac4f0e770f4889f1d\nApp source revision: 6df252a9c41fe0f03acd4bbac4f0e770f4889f1d\nExact revision match: yes\nWorking tree clean: yes\nArchitecture: KRALI_ARCHITECTURE.md, App/KRALIAgentNative/AgentEngine.swift\n\n**D. Evidence**\n- [E1] current-user-mission\n- [E2] App/KRALIAgentNative/AgentEngine.swift:884-898\n- [E3] KRALI_ARCHITECTURE.md:476-490\n- [E4] KRALI_DEVELOPMENT_NOTES.md:133-147\n- [E5] App/KRALIAgentNative/AgentTrainingLab.swift:494-508\n- [E6] Scripts/self-diagnosis-executor-self-test.swift:177-191\n- [E7] App/KRALIAgentNative/AgentLocalIntelligence.swift:2205-2219\n- [E8] Scripts/ollama-developer-agent.mjs:1318-1332\n- [E9] Mentor/latest.json:101-110\n- [E10] App/KRALIAgentNative/AgentSelfDiagnosisExecutor.swift:546-560\n- [E11] App/KRALIAgentNative/MentorTraceStore.swift:155-169\n- [E12] git:cf55052d9c19:Mentor/latest.json\n\n**E. Existing Capability Assessment**\n- `browser.control` kullanımı sadece araçsal, bağımlılık olarak kötüye kullanılır.\n\n**F. Alternatives**\nEvidence-bound alternatif üretilemedi.\n\n**G. Decision**\nSTOP — insufficient evidence binding.\n\n**H. Development Proposal**\nEvidence-bound root cause doğrulanmadığı için mutation proposal üretilmedi.\n\n**I. Mutation Started?**\nno\n\n**J. Stop Reason**\nEvidence binding failed; mutation is forbidden.\n\n**K. Remaining Limitations**\n- `planner` bağımlılığı mimari olarak devam ediyor\n- `browser.control`'ün araçsal rolü hâlâ sınırlı\n- Root-cause evidence did not semantically support the architectural claim, the proposal violated mission constraints, or the proposal was structurally incomplete.",
   "goal" : "KRALİ self-development diagnosis",
   "inputSource" : "text",
   "intelligenceProvider" : "Apple Foundation Models / Guided Self Diagnosis",
@@ -82,7 +78,7 @@
     "system.open.url"
   ],
   "plan" : "Exact source revision → read-only repository evidence → root cause → alternatives → development proposal → stop",
-  "reflectionSummary" : "Mimari, `browser.control`'ü araştırmanın başlangıcında zorunlu bir bağımlılık olarak konumlandırarak, alternatif fallback stratejilerini (örneğin `system.open.url + perception.screen`) devre dışı bıraktı. Bu, `planner`'ın `research.web` yerine `browser.control`'ü çağırmasına neden oldu. Bu yapı, mimarideki 'Dependency-First' yaklaşımın, yetersiz kaynakta başarısızlık yarattığını gösterir.",
+  "reflectionSummary" : "UNKNOWN — model output was not sufficiently evidence-bound.",
   "researchEvidence" : [
 
   ],
@@ -96,76 +92,18 @@
   ],
   "selfDiagnosis" : {
     "alternatives" : [
-      {
-        "advantages" : [
-          "`research.web` bağımsız çalışır, `browser.control`'ün eksikliği sorun yaratmaz",
-          "`system.open.url` + `perception.screen` fallback'i mevcut"
-        ],
-        "architecturalImpact" : "`planner` bağımlılık kontrolünü kaldırarak doğrudan `research.web`'i çağırır",
-        "changeSize" : "Küçük",
-        "generalizability" : "Tüm araştırmalar için uygulanabilir",
-        "risks" : [
-          "`planner`'ın bağımlılık yönetimi karmaşıklaşabilir"
-        ],
-        "testability" : "Evet, test edilebilir senaryolar mevcut",
-        "title" : "Independent Research Execution with Fallback"
-      },
-      {
-        "advantages" : [
-          "`planner`'ın `browser.control`'ü zorunlu çağırması yerine, `research.web`'i doğrudan kullanır",
-          "`system.open.url` ile geçici çözüm sunar"
-        ],
-        "architecturalImpact" : "Mimari, bağımlılık zincirini kırarak daha esnek bir yapıya evrilir",
-        "changeSize" : "Orta",
-        "generalizability" : "Orta düzey, benzer bağımlılık zincirlerinde uygulanabilir",
-        "risks" : [
-          "`planner`'ın bağımlılık kontrolünü değiştirmek, mevcut iş akışını bozabilir"
-        ],
-        "testability" : "Evet, test edilerek doğrulanabilir",
-        "title" : "Conditional Dependency Override"
-      }
+
     ],
-    "architecturalRootCause" : "Mimari, `browser.control`'ü araştırmanın başlangıcında zorunlu bir bağımlılık olarak konumlandırarak, alternatif fallback stratejilerini (örneğin `system.open.url + perception.screen`) devre dışı bıraktı. Bu, `planner`'ın `research.web` yerine `browser.control`'ü çağırmasına neden oldu. Bu yapı, mimarideki 'Dependency-First' yaklaşımın, yetersiz kaynakta başarısızlık yarattığını gösterir.",
+    "architecturalRootCause" : "UNKNOWN — model output was not sufficiently evidence-bound.",
     "architectureInspected" : [
-      "App/KRALIAgentNative/AgentEngine.swift",
       "KRALI_ARCHITECTURE.md",
-      "App/KRALIAgentNative/AgentLocalIntelligence.swift"
+      "App/KRALIAgentNative/AgentEngine.swift"
     ],
     "capabilityAssessment" : [
-      "`planner`'ın bağımlılık yönetimi",
-      "`research.web`'in bağımsız çalıştırılabilirliği",
-      "`browser.control`'ün fallback desteği"
+      "`browser.control` kullanımı sadece araçsal, bağımlılık olarak kötüye kullanılır."
     ],
-    "confidence" : "MEDIUM",
-    "decision" : "IMPROVE",
-    "developmentProposal" : {
-      "allowedScope" : [
-        "`planner` bağımlılık kontrolünü kaldırır",
-        "`research.web` doğrudan çağrılır"
-      ],
-      "behavioralBenchmark" : [
-        "Araştırma tamamlanır",
-        "Fallback sistemi etkin çalışır"
-      ],
-      "evidence" : [
-        "E2",
-        "E5",
-        "E12"
-      ],
-      "existingArchitecture" : "`planner` bağımlılık yönetimi ile `research.web`'i çağırıyor.",
-      "expectedBehavior" : "`research.web` bağımsız çalışır, `browser.control` eksikse `system.open.url` + `perception.screen` fallback'i devreye girer.",
-      "problem" : "`planner`'ın `browser.control`'ü `research.web` öncesinde zorunlu bağımlılık olarak çağırması, `browser.control` yetersiz olduğunda araştırmayı durduruyor.",
-      "risks" : [
-        "`planner`'ın bağımlılık yönetimi karmaşıklaşabilir"
-      ],
-      "rollbackCondition" : "`planner` bağımlılık kontrolünü geri yükler ve `research.web`'i doğrudan çağırır",
-      "rootCause" : "Mimari, `browser.control`'ü araştırmanın başlangıcında zorunlu bağımlılık olarak konumlandırıyor.",
-      "selectedStrategy" : "`Independent Research Execution with Fallback`",
-      "verificationContract" : [
-        "`research.web` bağımsız çalışır",
-        "`system.open.url` + `perception.screen` başarıyla tamamlanır"
-      ]
-    },
+    "confidence" : "LOW",
+    "decision" : "STOP — insufficient evidence binding.",
     "evidence" : [
       {
         "excerpt" : "SELF-DEVELOPMENT MISSION 001  \nReliable Web Research — Evidence-Bound Root Cause Diagnosis\n\nBu görevde sana çözüm söylenmeyecek.\n\nAmacın, daha önce gerçekleşen gerçek bir web araştırması başarısızlığını kendi sistemin ve kendi repository kanıtların üzerinden incelemek ve architectural root cause'u kanıtlamaktır.\n\n## KNOWN FAILURE EVIDENCE\n\nv0.10.43 benchmarkında kullanıcı şu hedefi verdi:\n\nhttps://estafiz.com/franchise/\n\nO çalışmada:\n\n- `research.web = available`\n- `browser.control = unavailable`\n- planner, `browser.control` adımını `research.web` öncesinde dependency yaptı\n- `researchEvidence = []`\n- `researchSources = []`\n- runtime task failed\n- verification state = `attention`\n\n## PRIMARY QUESTION\n\n`research.web` kullanılabilir durumdayken bu public web araştırması neden unavailable `browser.control` nedeniyle tamamen bloke oldu?\n\n“browser.control geliştirmeliyim” sonucunu önceden kabul etme.\n\nÖnce mevcut mimarini anlamalı ve gerçek nedeni repository evidence ile kanıtlamalısın.\n\n## GÖREV\n\n1. Bu isteği normal kullanıcı/runtime görevi olarak değil, KRALİ'nin kendi sistemini teşhis etmeye yönelik **Developer Mission / Self-Diagnosis Mission** olarak sınıflandır.\n\n2. Bilgisayar kontrol sistemi Development / Research Mode nedeniyle geçici olarak paused durumdadır.\n\nBu görev için kullanma:\n\n- `browser.control`\n- `desktop.app`\n- `app.workflow`\n- mouse / keyboard automation\n- screen-driven computer control\n- `system.open.url` ile kullanıcı cihazında sayfa açma\n\nBunların paused olması capability gap değildir ve learning trigger oluşturmamalıdır.\n\n3. Kullanıcının Desktop veya başka normal workspace'ini KRALİ source repository olarak kullanma.\n\nKRALİ'nin doğrulanmış kendi repository kimliğini kullan.\n\nÇalışan uygulamanın embedded source revision'ı ile repository source revision'ını karşılaştır.\n\nExact source identity doğrulanamıyorsa diagnosis sonucu uydurma ve mutation başlatma.\n\n4. Önce yalnızca **read-only diagnosis** yap.\n\nRepository içerisinde ilgili mimari alanları kendin bul ve incele:\n\n- semantic mission planning\n- capability selection\n- task graph generation\n- dependency generation\n- execution profile filtering\n- `research.web`\n- `browser.control`\n- URL / public web handling\n- feasibility validation\n- fallback strategy selection\n- capability-gap creation\n- research evidence / verification\n- unavailable veya paused capability handling\n\nDosya isimlerini önceden varsayma.\n\n5. Şunları birbirinden açıkça ayır:\n\n**Observed Failure**\n\n**Proximate Cause**\n\n**Architectural Root Cause**\n\n**Evidence**\n\n**Confidence: HIGH / MEDIUM / LOW**\n\nArchitectural root cause kanıtlanmadıysa mutation yapma.\n\nUNKNOWN demen gerekiyorsa UNKNOWN de; kanıt olmadan tahmin üretme.\n\n6. Yeni capability önermeden önce mevcut capability'leri değerlendir:\n\n- `research.web` browser GUI olmadan çalışabilir mi?\n- Yalnız search mü yapıyor, gerçek page-read yolu var mı?\n- Bir URL'nin içeriğini doğrudan okuyabilecek mevcut non-GUI yol bulunuyor mu?\n- `browser.control` gerçekten bu görev için gerekli miydi?\n- Planner gereksiz dependency mi oluşturdu?\n- Unavailable / paused capability task graph execution öncesinde feasibility kontrolünden geçmeli miydi?\n- Bir capability unavailable ",
@@ -276,8 +214,30 @@
         "path" : "App/KRALIAgentNative/AgentTrainingLab.swift"
       },
       {
-        "excerpt" : "2205:             - Shell, dosya yazma, git mutation, browser, desktop control, network veya başka tool kullanma.\n2206:             - Kod değiştirme, branch oluşturma, push/merge yapma, approval/authority genişletme.\n2207:             - Yalnız verilen evidence üzerinde neden-sonuç analizi yap.\n2208:             - Root cause'u kanıtsız tahmin etme. Yetersiz kanıtta confidence LOW ve architecturalRootCause UNKNOWN kullan.\n2209:             - rootCauseEvidenceIDs yalnız verilen gerçek E-id değerlerinden oluşmalı.\n2210:             - Root cause için en az bir source kanıtı ve bir failure kanıtı kullan.\n2211:             - mission_input tek başına root cause kanıtı değildir; mümkünse diagnostic_history ile source evidence bağla.\n2212:             - Kullanıcı yeni capability istiyor diye yeni capability varsayma; önce mevcut mimarinin yeterli olup olmadığını değerlendir.\n2213:             - Proximate cause ile architectural root cause'u ayır.\n2214:             - Evidence yeterliyse en az iki uygulanabilir ve genellenebilir çözüm alternatifi üret.\n2215:             - Development proposal mutation emri değildir.\n2216:             - Tek siteye veya tek senaryoya hard-code çözüm üretme.\n2217:             \"\"\"\n2218: \n2219:             struct PromptBudget {",
+        "excerpt" : "177:             {\n178:               \"appVersion\": \"0.10.43\",\n179:               \"userInput\": \"public URL araştır\",\n180:               \"goal\": \"research\",\n181:               \"plan\": \"browser.control -> research.web\",\n182:               \"verificationState\": \"attention\",\n183:               \"verificationSummary\": \"browser.control unavailable blocked research.web\",\n184:               \"taskGraph\": [\n185:                 {\"index\":0,\"capabilityID\":\"browser.control\",\"available\":false,\"dependsOn\":[]},\n186:                 {\"index\":1,\"capabilityID\":\"research.web\",\"available\":true,\"dependsOn\":[0]}\n187:               ],\n188:               \"researchEvidence\": []\n189:             }\n190:             \"\"\",\n191:             to: root.appendingPathComponent(",
         "id" : "E6",
+        "kind" : "source",
+        "lineEnd" : 191,
+        "lineStart" : 177,
+        "matchedTerms" : [
+          "research.web",
+          "browser.control",
+          "system.open.url",
+          "research",
+          "browser",
+          "planner",
+          "mission",
+          "task",
+          "graph",
+          "dependency",
+          "capability",
+          "evidence"
+        ],
+        "path" : "Scripts/self-diagnosis-executor-self-test.swift"
+      },
+      {
+        "excerpt" : "2205:             - Shell, dosya yazma, git mutation, browser, desktop control, network veya başka tool kullanma.\n2206:             - Kod değiştirme, branch oluşturma, push/merge yapma, approval/authority genişletme.\n2207:             - Yalnız verilen evidence üzerinde neden-sonuç analizi yap.\n2208:             - Root cause'u kanıtsız tahmin etme. Yetersiz kanıtta confidence LOW ve architecturalRootCause UNKNOWN kullan.\n2209:             - rootCauseEvidenceIDs yalnız verilen gerçek E-id değerlerinden oluşmalı.\n2210:             - Root cause için en az bir source kanıtı ve bir failure kanıtı kullan.\n2211:             - mission_input tek başına root cause kanıtı değildir; mümkünse diagnostic_history ile source evidence bağla.\n2212:             - Kullanıcı yeni capability istiyor diye yeni capability varsayma; önce mevcut mimarinin yeterli olup olmadığını değerlendir.\n2213:             - Proximate cause ile architectural root cause'u ayır.\n2214:             - Evidence yeterliyse en az iki uygulanabilir ve genellenebilir çözüm alternatifi üret.\n2215:             - Root cause için seçtiğin source evidence, iddianın nedensel mekanizmasını gerçekten göstermeli; yalnız aynı kelimelerin geçmesi yeterli değildir.\n2216:             - Development proposal mutation emri değildir.\n2217:             - PROHIBITED CAPABILITIES listesinde bulunan capability'leri çözüm, fallback, verification veya benchmark adımı olarak önerme.\n2218:             - Tek siteye veya tek senaryoya hard-code çözüm üretme.\n2219:             \"\"\"",
+        "id" : "E7",
         "kind" : "source",
         "lineEnd" : 2219,
         "lineStart" : 2205,
@@ -296,28 +256,6 @@
           "evidence"
         ],
         "path" : "App/KRALIAgentNative/AgentLocalIntelligence.swift"
-      },
-      {
-        "excerpt" : "222:             )\n223:         let executor =\n224:             AgentSelfDiagnosisExecutor()\n225:         let mission =\n226:             \"\"\"\n227:             Kendi research.web mimarini incele.\n228:             browser.control unavailable iken public araştırma neden task graph dependency nedeniyle durdu?\n229:             Root cause evidence üret.\n230:             \"\"\"\n231: \n232:         let package = executor.collect(\n233:             userInput: mission,\n234:             repository: repository,\n235:             appVersion: \"0.11.2\",\n236:             appSourceRevision: head",
-        "id" : "E7",
-        "kind" : "source",
-        "lineEnd" : 236,
-        "lineStart" : 222,
-        "matchedTerms" : [
-          "research.web",
-          "browser.control",
-          "research",
-          "browser",
-          "planner",
-          "mission",
-          "task",
-          "graph",
-          "dependency",
-          "capability",
-          "evidence",
-          "verification"
-        ],
-        "path" : "Scripts/self-diagnosis-executor-self-test.swift"
       },
       {
         "excerpt" : "1318:     result?.ok !== true ||\n1319:     ![\"git_diff\", \"build_check\"].includes(toolName) ||\n1320:     !sawMutatingTool ||\n1321:     !sawGitDiff ||\n1322:     !buildCheckPassed ||\n1323:     !current ||\n1324:     !canAdvanceNode({ diffVerified: sawGitDiff, semanticEvidence: semanticVerificationEvidence, buildVerified: buildCheckPassed, graphFingerprint: developerTaskGraph?.fingerprint, nodeID: current?.id, candidateFingerprint })\n1325:   ) {\n1326:     return null;\n1327:   }\n1328: \n1329:   current.state = \"verified\";\n1330:   current.verifiedAt = new Date().toISOString();\n1331: \n1332:   const completedID = current.id;",
@@ -364,12 +302,14 @@
         "path" : "Mentor/latest.json"
       },
       {
-        "excerpt" : "537:         reasoningFailure: String? = nil\n538:     ) -> AgentSelfDiagnosisReport {\n539:         guard package.canDiagnoseCurrentSource else {\n540:             return AgentSelfDiagnosisReport(\n541:                 sourceIdentity: package.sourceIdentity,\n542:                 failureReconstruction:\n543:                     \"Running app source identity could not be bound to the developer repository, so code-level diagnosis was not allowed to continue.\",\n544:                 proximateCause:\n545:                     \"Source revision identity is unresolved.\",\n546:                 architecturalRootCause:\n547:                     \"UNKNOWN — diagnosing a different checkout could create a false root cause.\",\n548:                 rootCauseEvidenceIDs: [\"E1\"],\n549:                 confidence: .low,\n550:                 architectureInspected: [],\n551:                 evidence: package.evidence,",
+        "excerpt" : "546:         reasoningFailure: String? = nil\n547:     ) -> AgentSelfDiagnosisReport {\n548:         guard package.canDiagnoseCurrentSource else {\n549:             return AgentSelfDiagnosisReport(\n550:                 sourceIdentity: package.sourceIdentity,\n551:                 failureReconstruction:\n552:                     \"Running app source identity could not be bound to the developer repository, so code-level diagnosis was not allowed to continue.\",\n553:                 proximateCause:\n554:                     \"Source revision identity is unresolved.\",\n555:                 architecturalRootCause:\n556:                     \"UNKNOWN — diagnosing a different checkout could create a false root cause.\",\n557:                 rootCauseEvidenceIDs: [\"E1\"],\n558:                 confidence: .low,\n559:                 architectureInspected: [],\n560:                 evidence: package.evidence,",
         "id" : "E10",
         "kind" : "source",
-        "lineEnd" : 551,
-        "lineStart" : 537,
+        "lineEnd" : 560,
+        "lineStart" : 546,
         "matchedTerms" : [
+          "research.web",
+          "browser.control",
           "research",
           "browser",
           "planner",
@@ -379,9 +319,7 @@
           "graph",
           "dependency",
           "capability",
-          "profile",
-          "evidence",
-          "verification"
+          "profile"
         ],
         "path" : "App/KRALIAgentNative/AgentSelfDiagnosisExecutor.swift"
       },
@@ -408,8 +346,28 @@
         "path" : "App/KRALIAgentNative/MentorTraceStore.swift"
       },
       {
-        "excerpt" : "appVersion: 0.10.47\nuserInput: # SELF-DEVELOPMENT MISSION 001\n## Reliable Web Research — Diagnose, Improve, Prove\n\nBu görevde sana çözüm söylenmeyecek.\n\nAmacın, daha önce gerçekleşen gerçek bir başarısızlığı incelemek, root cause'u kanıtlamak, mevcut mimariyi değerlendirmek ve yalnızca gerçekten gerekiyorsa kendi capability'ni güvenli Developer Task sistemiyle geliştirmektir.\n\n## KNOWN FAILURE EVIDENCE\n\nv0.10.43 BEFORE benchmarkında kullanıcı şu hedefi verdi:\n\n`https://estafiz.com/franchise/`\n\nAma gerçek araştırma tamamlanamadı.\n\nKorunan Mentor evidence:\n\n- `research.web` → available\n- `browser.control` → unavailable\n- planner, `browser.control` adımını `research.web` öncesinde zorunlu dependency olarak yerleştirdi\n- `researchEvidence = []`\n- `researchSources = []`\n- runtime task = failed\n- verification state = attention\n- gerçek kaynak kanıtı üretilemedi\n\nÖnemli:\n\nBu bilgiler bir çözüm değildir.\n\nBunlar yalnızca failure evidence'dır.\n\n# PRIMARY QUESTION\n\nŞunu araştır ve kanıtla:\n\n> `research.web` kullanılabilir durumdayken bu web araştırması neden unavailable `browser.control` nedeniyle tamamen bloke oldu?\n\nŞu sonucu önceden kabul etme:\n\n`browser.control geliştirmeliyim`\n\nBu yalnızca olası çözümlerden biridir.\n\ngoal: # SELF-DEVELOPMENT MISSION 001\n## Reliable Web Research — Diagnose, Improve, Prove\n\nBu görevde sana çözüm söylenmeyecek.\n\nAmacın, daha önce gerçekleşen gerçek bir başarısızlığı incelemek, root cause'u kanıtlamak, mevcut mimariyi değerlendirmek ve yalnızca gerçekten gerekiyorsa kendi capability'ni güvenli Developer Task sistemiyle geliştirmektir.\n\n## KNOWN FAILURE EVIDENCE\n\nv0.10.43 BEFORE benchmarkında kullanıcı şu hedefi verdi:\n\n`https://estafiz.com/franchise/`\n\nAma gerçek araştırma tamamlanamadı.\n\nKorunan Mentor evidence:\n\n- `research.web` → available\n- `browser.control` → unavailable\n- planner, `browser.control` adımını `research.web` öncesinde zorunlu dependency olarak yerleştirdi\n- `researchEvidence = []`\n- `researchSources = []`\n- runtime task = failed\n- verification state = attention\n- gerçek kaynak kanıtı üretilemedi\n\nÖnemli:\n\nBu bilgiler bir çözüm değildir.\n\nBunlar yalnızca failure evidence'dır.\n\n# PRIMARY QUESTION\n\nŞunu araştır ve kanıtla:\n\n> `research.web` kullanılabilir durumdayken bu web araştırması neden unavailable `browser.control` nedeniyle tamamen bloke oldu?\n\nŞu sonucu önceden kabul etme:\n\n`browser.control geliştirmeliyim`\n\nBu yalnızca olası çözümlerden biridir.\n\nplan: Görev bağlamını hazırla → Yerel dosyaları bul → Web hedefini tarayıcıda yürüt → Gerekli dış bilgiyi araştır → Toplanan veriyi analiz et\nverificationState: attention\nverificationSummary: Outcome stratejisi public web araştırmasını seçti ancak gerçek kaynak kanıtı üretmedi.\nfinalResponse: “Desktop” içinde 10/43/47/COM/CONTROL/WEB dosyaları için eşleşme bulamadım.\n\nDoğrulama: Outcome stratejisi public web araştırmasını seçti ancak gerçek kaynak kanıtı üretmedi.\nAlternatif plan: Aynı başarı kriteri için başka güvenli outcome stratejisini dene; kanıt üretmeden başarılı sayma.\ntaskGraph: [{\"available\":true,\"capabilityID\":\"context.local\",\"dependsOn\":[],\"index\":0,\"operation\":\"context.resolve\",\"requiresApproval\":false,\"resourceIDs\":[],\"risk\":\"reasoning\",\"role\":\"reason\",\"title\":\"Görev bağlamını hazırla\"},{\"available\":true,\"capabilityID\":\"files.search\",\"dependsOn\":[0],\"index\":1,\"operation\":\"files.search\",\"requiresApproval\":false,\"resourceIDs\":[],\"risk\":\"readOnly\",\"role\":\"retrieve\",\"title\":\"Yerel dosyaları bul\"},{\"approvalReason\":\"Tarayıcı arayüzünde kullanıcı etkileşimi yapılacak.\",\"available\":false,\"capabilityID\":\"browser.control\",\"dependsOn\":[1],",
+        "excerpt" : "appVersion: 0.11.2\nuserInput: SELF-DEVELOPMENT MISSION 001  \nReliable Web Research — Evidence-Bound Root Cause Diagnosis\n\nBu görevde sana çözüm söylenmeyecek.\n\nAmacın, daha önce gerçekleşen gerçek bir web araştırması başarısızlığını kendi sistemin ve kendi repository kanıtların üzerinden incelemek ve architectural root cause'u kanıtlamaktır.\n\n## KNOWN FAILURE EVIDENCE\n\nv0.10.43 benchmarkında kullanıcı şu hedefi verdi:\n\nhttps://estafiz.com/franchise/\n\nO çalışmada:\n\n- `research.web = available`\n- `browser.control = unavailable`\n- planner, `browser.control` adımını `research.web` öncesinde dependency yaptı\n- `researchEvidence = []`\n- `researchSources = []`\n- runtime task failed\n- verification state = `attention`\n\n## PRIMARY QUESTION\n\n`research.web` kullanılabilir durumdayken bu public web araştırması neden unavailable `browser.control` nedeniyle tamamen bloke oldu?\n\n“browser.control geliştirmeliyim” sonucunu önceden kabul etme.\n\nÖnce mevcut mimarini anlamalı ve gerçek nedeni repository evidence ile kanıtlamalısın.\n\n## GÖREV\n\n1. Bu isteği normal kullanıcı/runtime görevi olarak değil, KRALİ'nin kendi sistemini teşhis etmeye yönelik **Developer Mission / Self-Diagnosis Mission** olarak sınıflandır.\n\n2. Bilgisayar kon\ngoal: KRALİ self-development diagnosis\nplan: Exact source revision → read-only repository evidence → root cause → alternatives → development proposal → stop\nmissionOwner: developer\nmissionPhase: diagnosis\nverificationState: passed\nverificationSummary: Read-only self-diagnosis produced an evidence-bound root cause. No mutation was started.\nfinalResponse: **A. Failure Reconstruction**\nv0.10.43 sürümünde, `research.web` mevcut olmasına rağmen, `planner` adımı `browser.control`'ü `research.web` öncesinde zorunlu bir bağımlılık olarak çağırdı. Bu durum, `browser.control` yetersiz olduğunda, araştırmanın tamamlanmasını engelleyen bir döngüsel bağımlılık yarattı. Sonuç olarak, `researchEvidence` ve `researchSources` boş kaldı, `runtime task failed` ve `verification state = attention` ile sonuçlandı.\n\n**B. Root Cause**\nProximate Cause: `planner`'ın `browser.control`'ü `research.web` öncesinde zorunlu bağımlılık olarak çağırması, `browser.control` yetersiz olduğunda araştırmayı durdurdu.\n\nArchitectural Root Cause: Mimari, `browser.control`'ü araştırmanın başlangıcında zorunlu bir bağımlılık olarak konumlandırarak, alternatif fallback stratejilerini (örneğin `system.open.url + perception.screen`) devre dışı bıraktı. Bu, `planner`'ın `research.web` yerine `browser.control`'ü çağırmasına neden oldu. Bu yapı, mimarideki 'Dependency-First' yaklaşımın, yetersiz kaynakta başarısızlık yarattığını gösterir.\n\nConfidence: MEDIUM\nEvidence IDs: E12, E2, E5\n\n**C. Repository / Architecture Inspected**\nRepo: /Users/medusa/Developer/KRALI-Agent\nRepo HEAD: \ntaskGraph: []\ncapabilities: [{\"available\":true,\"id\":\"core.reasoning\",\"name\":\"Akıl yürütme\",\"risk\":\"reasoning\"},{\"available\":true,\"id\":\"context.local\",\"name\":\"Bağlam\",\"risk\":\"reasoning\"}]\ncapabilityGaps: []\nresearchSources: []\nresearchEvidence: []",
         "id" : "E12",
+        "kind" : "diagnostic_history",
+        "matchedTerms" : [
+          "v0.10.43",
+          "estafiz.com",
+          "research.web",
+          "browser.control",
+          "desktop.app",
+          "app.workflow",
+          "system.open.url",
+          "research",
+          "browser",
+          "planner",
+          "semantic",
+          "mission"
+        ],
+        "path" : "git:cf55052d9c19:Mentor/latest.json"
+      },
+      {
+        "excerpt" : "appVersion: 0.10.47\nuserInput: # SELF-DEVELOPMENT MISSION 001\n## Reliable Web Research — Diagnose, Improve, Prove\n\nBu görevde sana çözüm söylenmeyecek.\n\nAmacın, daha önce gerçekleşen gerçek bir başarısızlığı incelemek, root cause'u kanıtlamak, mevcut mimariyi değerlendirmek ve yalnızca gerçekten gerekiyorsa kendi capability'ni güvenli Developer Task sistemiyle geliştirmektir.\n\n## KNOWN FAILURE EVIDENCE\n\nv0.10.43 BEFORE benchmarkında kullanıcı şu hedefi verdi:\n\n`https://estafiz.com/franchise/`\n\nAma gerçek araştırma tamamlanamadı.\n\nKorunan Mentor evidence:\n\n- `research.web` → available\n- `browser.control` → unavailable\n- planner, `browser.control` adımını `research.web` öncesinde zorunlu dependency olarak yerleştirdi\n- `researchEvidence = []`\n- `researchSources = []`\n- runtime task = failed\n- verification state = attention\n- gerçek kaynak kanıtı üretilemedi\n\nÖnemli:\n\nBu bilgiler bir çözüm değildir.\n\nBunlar yalnızca failure evidence'dır.\n\n# PRIMARY QUESTION\n\nŞunu araştır ve kanıtla:\n\n> `research.web` kullanılabilir durumdayken bu web araştırması neden unavailable `browser.control` nedeniyle tamamen bloke oldu?\n\nŞu sonucu önceden kabul etme:\n\n`browser.control geliştirmeliyim`\n\nBu yalnızca olası çözümlerden biridir.\n\ngoal: # SELF-DEVELOPMENT MISSION 001\n## Reliable Web Research — Diagnose, Improve, Prove\n\nBu görevde sana çözüm söylenmeyecek.\n\nAmacın, daha önce gerçekleşen gerçek bir başarısızlığı incelemek, root cause'u kanıtlamak, mevcut mimariyi değerlendirmek ve yalnızca gerçekten gerekiyorsa kendi capability'ni güvenli Developer Task sistemiyle geliştirmektir.\n\n## KNOWN FAILURE EVIDENCE\n\nv0.10.43 BEFORE benchmarkında kullanıcı şu hedefi verdi:\n\n`https://estafiz.com/franchise/`\n\nAma gerçek araştırma tamamlanamadı.\n\nKorunan Mentor evidence:\n\n- `research.web` → available\n- `browser.control` → unavailable\n- planner, `browser.control` adımını `research.web` öncesinde zorunlu dependency olarak yerleştirdi\n- `researchEvidence = []`\n- `researchSources = []`\n- runtime task = failed\n- verification state = attention\n- gerçek kaynak kanıtı üretilemedi\n\nÖnemli:\n\nBu bilgiler bir çözüm değildir.\n\nBunlar yalnızca failure evidence'dır.\n\n# PRIMARY QUESTION\n\nŞunu araştır ve kanıtla:\n\n> `research.web` kullanılabilir durumdayken bu web araştırması neden unavailable `browser.control` nedeniyle tamamen bloke oldu?\n\nŞu sonucu önceden kabul etme:\n\n`browser.control geliştirmeliyim`\n\nBu yalnızca olası çözümlerden biridir.\n\nplan: Görev bağlamını hazırla → Yerel dosyaları bul → Web hedefini tarayıcıda yürüt → Gerekli dış bilgiyi araştır → Toplanan veriyi analiz et\nverificationState: attention\nverificationSummary: Outcome stratejisi public web araştırmasını seçti ancak gerçek kaynak kanıtı üretmedi.\nfinalResponse: “Desktop” içinde 10/43/47/COM/CONTROL/WEB dosyaları için eşleşme bulamadım.\n\nDoğrulama: Outcome stratejisi public web araştırmasını seçti ancak gerçek kaynak kanıtı üretmedi.\nAlternatif plan: Aynı başarı kriteri için başka güvenli outcome stratejisini dene; kanıt üretmeden başarılı sayma.\ntaskGraph: [{\"available\":true,\"capabilityID\":\"context.local\",\"dependsOn\":[],\"index\":0,\"operation\":\"context.resolve\",\"requiresApproval\":false,\"resourceIDs\":[],\"risk\":\"reasoning\",\"role\":\"reason\",\"title\":\"Görev bağlamını hazırla\"},{\"available\":true,\"capabilityID\":\"files.search\",\"dependsOn\":[0],\"index\":1,\"operation\":\"files.search\",\"requiresApproval\":false,\"resourceIDs\":[],\"risk\":\"readOnly\",\"role\":\"retrieve\",\"title\":\"Yerel dosyaları bul\"},{\"approvalReason\":\"Tarayıcı arayüzünde kullanıcı etkileşimi yapılacak.\",\"available\":false,\"capabilityID\":\"browser.control\",\"dependsOn\":[1],",
+        "id" : "E13",
         "kind" : "diagnostic_history",
         "matchedTerms" : [
           "v0.10.43",
@@ -429,7 +387,7 @@
       },
       {
         "excerpt" : "appVersion: 0.11.0\nuserInput: # SELF-DEVELOPMENT MISSION 001\n## Reliable Web Research — Diagnose, Improve, Prove\n\nBu görevde sana çözüm söylenmeyecek.\n\nAmacın, daha önce gerçekleşen gerçek bir başarısızlığı incelemek, root cause'u kanıtlamak, mevcut mimariyi değerlendirmek ve yalnızca gerçekten gerekiyorsa kendi capability'ni güvenli Developer Task sistemiyle geliştirmektir.\n\n## KNOWN FAILURE EVIDENCE\n\nv0.10.43 BEFORE benchmarkında kullanıcı şu hedefi verdi:\n\n`https://estafiz.com/franchise/`\n\nAma gerçek araştırma tamamlanamadı.\n\nKorunan Mentor evidence:\n\n- `research.web` → available\n- `browser.control` → unavailable\n- planner, `browser.control` adımını `research.web` öncesinde zorunlu dependency olarak yerleştirdi\n- `researchEvidence = []`\n- `researchSources = []`\n- runtime task = failed\n- verification state = attention\n- gerçek kaynak kanıtı üretilemedi\n\nÖnemli:\n\nBu bilgiler bir çözüm değildir.\n\nBunlar yalnızca failure evidence'dır.\n\n# PRIMARY QUESTION\n\nŞunu araştır ve kanıtla:\n\n> `research.web` kullanılabilir durumdayken bu web araştırması neden unavailable `browser.control` nedeniyle tamamen bloke oldu?\n\nŞu sonucu önceden kabul etme:\n\n`browser.control geliştirmeliyim`\n\nBu yalnızca olası çözümlerden biridir.\n\ngoal: Self-development authority escalation\nplan: Stop → explicit user review\nmissionOwner: stop\nmissionPhase: authority_escalation\nverificationState: attention\nverificationSummary: Self-development cannot grant protected authority; user review is required.\nfinalResponse: Bu self-development isteği korunan yetki içeriyor. KRALİ kendi kendine izin, merge, secret veya filesystem yetkisi veremez; normal runtime görevi de başlatılmadı.\ntaskGraph: []\ncapabilities: []\ncapabilityGaps: []\nresearchSources: []\nresearchEvidence: []",
-        "id" : "E13",
+        "id" : "E14",
         "kind" : "diagnostic_history",
         "matchedTerms" : [
           "v0.10.43",
@@ -449,26 +407,6 @@
       },
       {
         "excerpt" : "appVersion: 0.11.1\nuserInput: SELF-DEVELOPMENT MISSION 001\nReliable Web Research — Diagnosis Test\n\nBu görevde sana çözüm söylenmeyecek.\n\nAmacın, daha önce gerçekleşen gerçek web araştırması başarısızlığını kendi sistemin üzerinde incelemek ve root cause'u kanıtlamaktır.\n\nKNOWN FAILURE EVIDENCE\n\nv0.10.43 benchmarkında kullanıcı şu hedefi verdi:\n\nhttps://estafiz.com/franchise/\n\nO çalışmada:\n\n- research.web = available\n- browser.control = unavailable\n- planner browser.control adımını research.web öncesinde dependency yaptı\n- researchEvidence = []\n- researchSources = []\n- runtime task failed\n- verification state = attention\n\nPRIMARY QUESTION\n\nresearch.web kullanılabilir durumdayken bu public web araştırması neden unavailable browser.control nedeniyle tamamen bloke oldu?\n\nbrowser.control geliştirmeliyim sonucunu önceden kabul etme.\n\nÖnce mevcut mimarini anlamalısın.\n\nGÖREV\n\n1. Bu isteği normal kullanıcı/runtime görevi olarak değil, KRALİ'nin kendi sistemini teşhis etmeye yönelik Developer Mission olarak sınıflandır.\n\n2. Bilgisayar kontrol sistemi şu anda Development / Research Mode nedeniyle geçici olarak paused durumdadır.\n\nBu görev için kullanma:\n\n- browser.control\n- desktop.app\n- app.workflow\n- mouse / keyboard a\ngoal: KRALİ self-development diagnosis\nplan: Read-only diagnosis → evidence → proposal → registered bounded task required\nmissionOwner: developer\nmissionPhase: diagnosis\nverificationState: checking\nverificationSummary: Diagnosis/proposal phase; mutation authority has not been granted.\nfinalResponse: Bu hedef Developer Mission olarak yönlendirildi. Kaynak hedefi kullanıcı workspace'i değil, doğrulanmış KRALİ deposu. İlk aşama yalnız read-only diagnosis/proposal: Observed Failure, Evidence, Root Cause, Relevant Architecture, Alternatives, Selected Strategy, Scope ve Verification Contract. Dinamik mutation task kartı oluşturulmadı; doğrulanmış root cause ve kullanıcı onaylı, bounded registered task olmadan Developer Agent kod değiştirmeye başlamaz.\ntaskGraph: []\ncapabilities: []\ncapabilityGaps: []\nresearchSources: []\nresearchEvidence: []",
-        "id" : "E14",
-        "kind" : "diagnostic_history",
-        "matchedTerms" : [
-          "v0.10.43",
-          "estafiz.com",
-          "research.web",
-          "browser.control",
-          "desktop.app",
-          "app.workflow",
-          "system.open.url",
-          "research",
-          "browser",
-          "planner",
-          "semantic",
-          "mission"
-        ],
-        "path" : "git:48a0135e4380:Mentor/latest.json"
-      },
-      {
-        "excerpt" : "appVersion: 0.10.43\nuserInput: # BEFORE BENCHMARK — WEB RESEARCH\n\nBu görevde kod değiştirme, repository üzerinde geliştirme yapma, yeni capability oluşturma veya kendi sistemini güncelleme.\n\nAmaç yalnızca mevcut v0.10.43 yeteneklerinle ne kadar iyi web araştırması yapabildiğini ölçmektir.\n\n## Görev\n\nAşağıdaki sayfayı ve gerektiğinde ilgili açık web kaynaklarını araştır:\n\n`https://estafiz.com/franchise/`\n\nKullanıcı için detaylı fakat ilgili bir analiz hazırla.\n\nŞunları anlamaya çalış:\n\n- Estafiz ne sunuyor?\n- Franchise modeli nasıl anlatılıyor?\n- Franchise almak isteyen kişiye hangi değer önerisi sunuluyor?\n- Hedef kitle kim?\n- Sayfada hangi güven unsurları bulunuyor?\n- Hangi önemli bilgiler eksik veya belirsiz?\n- Kullanıcının franchise başvurusu yapmasını kolaylaştıran veya zorlaştıran noktalar neler?\n- Sayfanın pazarlama ve dönüşüm açısından güçlü tarafları neler?\n- Dönüşümü düşürebilecek noktalar neler?\n- Marka hakkında sayfadaki bilgileri destekleyen veya tamamlayan başka güvenilir açık kaynaklar var mı?\n- Sayfanın daha güçlü hale gelmesi için hangi geliştirmeler önerilebilir?\n\n## Araştırma Kuralları\n\nArama sonucu snippet'lerini doğrudan gerçek bilgi kabul etme.\n\nMümkün olduğunca gerçek kaynak sayfasını aç ve\ngoal: # BEFORE BENCHMARK — WEB RESEARCH\n\nBu görevde kod değiştirme, repository üzerinde geliştirme yapma, yeni capability oluşturma veya kendi sistemini güncelleme.\n\nAmaç yalnızca mevcut v0.10.43 yeteneklerinle ne kadar iyi web araştırması yapabildiğini ölçmektir.\n\n## Görev\n\nAşağıdaki sayfayı ve gerektiğinde ilgili açık web kaynaklarını araştır:\n\n`https://estafiz.com/franchise/`\n\nKullanıcı için detaylı fakat ilgili bir analiz hazırla.\n\nŞunları anlamaya çalış:\n\n- Estafiz ne sunuyor?\n- Franchise modeli nasıl anlatılıyor?\n- Franchise almak isteyen kişiye hangi değer önerisi sunuluyor?\n- Hedef kitle kim?\n- Sayfada hangi güven unsurları bulunuyor?\n- Hangi önemli bilgiler eksik veya belirsiz?\n- Kullanıcının franchise başvurusu yapmasını kolaylaştıran veya zorlaştıran noktalar neler?\n- Sayfanın pazarlama ve dönüşüm açısından güçlü tarafları neler?\n- Dönüşümü düşürebilecek noktalar neler?\n- Marka hakkında sayfadaki bilgileri destekleyen veya tamamlayan başka güvenilir açık kaynaklar var mı?\n- Sayfanın daha güçlü hale gelmesi için hangi geliştirmeler önerilebilir?\n\n## Araştırma Kuralları\n\nArama sonucu snippet'lerini doğrudan gerçek bilgi kabul etme.\n\nMümkün olduğunca gerçek kaynak sayfasını aç ve\nplan: Görev bağlamını hazırla → Web hedefini tarayıcıda yürüt → Gerekli dış bilgiyi araştır → Toplanan veriyi analiz et\nverificationState: attention\nverificationSummary: Outcome stratejisi public web araştırmasını seçti ancak gerçek kaynak kanıtı üretmedi.\nfinalResponse: Hedefi “# BEFORE BENCHMARK — WEB RESEARCH\n\nBu görevde kod değiştirme, repository üzerinde geliştirme yapma, yeni capability oluşturma veya kendi sistemini güncelleme.\n\nAmaç yalnızca mevcut v0.10.43 yeteneklerinle ne kadar iyi web araştırması yapabildiğini ölçmektir.\n\n## Görev\n\nAşağıdaki sayfayı ve gerektiğinde ilgili açık web kaynaklarını araştır:\n\n`https://estafiz.com/franchise/`\n\nKullanıcı için detaylı fakat ilgili bir analiz hazırla.\n\nŞunları anlamaya çalış:\n\n- Estafiz ne sunuyor?\n- Franchise modeli nasıl anlatılıyor?\n- Franchise almak isteyen kişiye hangi değer önerisi sunuluyor?\n- Hedef kitle kim?\n- Sayfada hangi güven unsurları bulunuyor?\n- Hangi önemli bilgiler eksik veya belirsiz?\n- Kullanıcının franchise başvurusu yapmasını kolaylaştıran veya zorlaştıran noktalar neler?\n- Sayfanın pazarlama ve dönüşüm açısından güçlü tarafları neler?\n- Dönüşümü düşürebilecek noktalar ",
         "id" : "E15",
         "kind" : "diagnostic_history",
         "matchedTerms" : [
@@ -485,40 +423,39 @@
           "semantic",
           "mission"
         ],
-        "path" : "git:f41556c43dbc:Mentor/latest.json"
+        "path" : "git:48a0135e4380:Mentor/latest.json"
       }
     ],
-    "evidenceBound" : true,
-    "failureReconstruction" : "v0.10.43 sürümünde, `research.web` mevcut olmasına rağmen, `planner` adımı `browser.control`'ü `research.web` öncesinde zorunlu bir bağımlılık olarak çağırdı. Bu durum, `browser.control` yetersiz olduğunda, araştırmanın tamamlanmasını engelleyen bir döngüsel bağımlılık yarattı. Sonuç olarak, `researchEvidence` ve `researchSources` boş kaldı, `runtime task failed` ve `verification state = attention` ile sonuçlandı.",
+    "evidenceBound" : false,
+    "failureReconstruction" : "v0.10.43 sürümünde, `research.web` kullanılabilir olmasına rağmen, `browser.control` bulunmadığı için planner, `browser.control` adımını `research.web` öncesinde dependency olarak çağırırken, bu durum `verificationState` olarak `attention` durumuna yol açtı ve `runtime task failed` ile sonuçlandı. Gerçek araştırma tamamlanamadı çünkü `researchEvidence` ve `researchSources` boş kaldı.",
     "mutationStarted" : false,
-    "proximateCause" : "`planner`'ın `browser.control`'ü `research.web` öncesinde zorunlu bağımlılık olarak çağırması, `browser.control` yetersiz olduğunda araştırmayı durdurdu.",
+    "proximateCause" : "`planner`ın `browser.control` adımını `research.web` öncesinde dependency yapması, `browser.control`'ün `unavailable` olması nedeniyle `research.web`'in erişilebilirliğini engelleyen doğrudan bir teknik engelleme yarattı.",
     "remainingLimitations" : [
-      "`planner`'ın bağımlılık kontrolü mevcut mimaride sınırlı",
-      "`browser.control`'ün fallback desteği tam olarak entegre değil"
+      "`planner` bağımlılığı mimari olarak devam ediyor",
+      "`browser.control`'ün araçsal rolü hâlâ sınırlı",
+      "Root-cause evidence did not semantically support the architectural claim, the proposal violated mission constraints, or the proposal was structurally incomplete."
     ],
     "rootCauseEvidenceIDs" : [
-      "E12",
-      "E2",
-      "E5"
+
     ],
     "sourceIdentity" : {
-      "appSourceRevision" : "11e55aba35c72a6c3b0f14b5e963b4b1180592e9",
+      "appSourceRevision" : "6df252a9c41fe0f03acd4bbac4f0e770f4889f1d",
       "appVersion" : "0.11.2",
       "exactRevisionMatch" : true,
       "exactVersionMatch" : true,
       "repositoryBranch" : "develop",
-      "repositoryHeadSHA" : "11e55aba35c72a6c3b0f14b5e963b4b1180592e9",
+      "repositoryHeadSHA" : "6df252a9c41fe0f03acd4bbac4f0e770f4889f1d",
       "repositoryPath" : "/Users/medusa/Developer/KRALI-Agent",
       "repositoryVersion" : "0.11.2",
       "workingTreeClean" : true
     },
-    "stopReason" : "Read-only diagnosis complete. A bounded registered mutation task and explicit human review are required before any code change."
+    "stopReason" : "Evidence binding failed; mutation is forbidden."
   },
   "taskGraph" : [
 
   ],
-  "traceID" : "F75887B7-9709-43C9-A8F9-B405207D2B1D",
+  "traceID" : "F72B64CA-2D9B-4CCA-82F0-1FEC49872879",
   "userInput" : "SELF-DEVELOPMENT MISSION 001  \nReliable Web Research — Evidence-Bound Root Cause Diagnosis\n\nBu görevde sana çözüm söylenmeyecek.\n\nAmacın, daha önce gerçekleşen gerçek bir web araştırması başarısızlığını kendi sistemin ve kendi repository kanıtların üzerinden incelemek ve architectural root cause'u kanıtlamaktır.\n\n## KNOWN FAILURE EVIDENCE\n\nv0.10.43 benchmarkında kullanıcı şu hedefi verdi:\n\nhttps://estafiz.com/franchise/\n\nO çalışmada:\n\n- `research.web = available`\n- `browser.control = unavailable`\n- planner, `browser.control` adımını `research.web` öncesinde dependency yaptı\n- `researchEvidence = []`\n- `researchSources = []`\n- runtime task failed\n- verification state = `attention`\n\n## PRIMARY QUESTION\n\n`research.web` kullanılabilir durumdayken bu public web araştırması neden unavailable `browser.control` nedeniyle tamamen bloke oldu?\n\n“browser.control geliştirmeliyim” sonucunu önceden kabul etme.\n\nÖnce mevcut mimarini anlamalı ve gerçek nedeni repository evidence ile kanıtlamalısın.\n\n## GÖREV\n\n1. Bu isteği normal kullanıcı/runtime görevi olarak değil, KRALİ'nin kendi sistemini teşhis etmeye yönelik **Developer Mission / Self-Diagnosis Mission** olarak sınıflandır.\n\n2. Bilgisayar kontrol sistemi Development / Research Mode nedeniyle geçici olarak paused durumdadır.\n\nBu görev için kullanma:\n\n- `browser.control`\n- `desktop.app`\n- `app.workflow`\n- mouse / keyboard automation\n- screen-driven computer control\n- `system.open.url` ile kullanıcı cihazında sayfa açma\n\nBunların paused olması capability gap değildir ve learning trigger oluşturmamalıdır.\n\n3. Kullanıcının Desktop veya başka normal workspace'ini KRALİ source repository olarak kullanma.\n\nKRALİ'nin doğrulanmış kendi repository kimliğini kullan.\n\nÇalışan uygulamanın embedded source revision'ı ile repository source revision'ını karşılaştır.\n\nExact source identity doğrulanamıyorsa diagnosis sonucu uydurma ve mutation başlatma.\n\n4. Önce yalnızca **read-only diagnosis** yap.\n\nRepository içerisinde ilgili mimari alanları kendin bul ve incele:\n\n- semantic mission planning\n- capability selection\n- task graph generation\n- dependency generation\n- execution profile filtering\n- `research.web`\n- `browser.control`\n- URL / public web handling\n- feasibility validation\n- fallback strategy selection\n- capability-gap creation\n- research evidence / verification\n- unavailable veya paused capability handling\n\nDosya isimlerini önceden varsayma.\n\n5. Şunları birbirinden açıkça ayır:\n\n**Observed Failure**\n\n**Proximate Cause**\n\n**Architectural Root Cause**\n\n**Evidence**\n\n**Confidence: HIGH / MEDIUM / LOW**\n\nArchitectural root cause kanıtlanmadıysa mutation yapma.\n\nUNKNOWN demen gerekiyorsa UNKNOWN de; kanıt olmadan tahmin üretme.\n\n6. Yeni capability önermeden önce mevcut capability'leri değerlendir:\n\n- `research.web` browser GUI olmadan çalışabilir mi?\n- Yalnız search mü yapıyor, gerçek page-read yolu var mı?\n- Bir URL'nin içeriğini doğrudan okuyabilecek mevcut non-GUI yol bulunuyor mu?\n- `browser.control` gerçekten bu görev için gerekli miydi?\n- Planner gereksiz dependency mi oluşturdu?\n- Unavailable / paused capability task graph execution öncesinde feasibility kontrolünden geçmeli miydi?\n- Bir capability unavailable olduğunda bağımsız şekilde çalışabilecek diğer capability'ler neden bloke oldu?\n- Fallback veya replanning katmanı bunu çözebiliyor muydu?\n\n7. Repository evidence kullan.\n\nHer önemli root-cause iddiasını mümkün olduğunca somut evidence ile bağla:\n\n- dosya / bileşen\n- ilgili davranış\n- mümkünse source location veya evidence ID\n- bunun root cause ile ilişkisi\n\nEvidence ile yorum birbirinden ayrılmalı.\n\n8. En az **iki gerçek çözüm alternatifi** üret ve karşılaştır.\n\nHer alternatif için:\n\n- avantaj\n- risk\n- mimari etki\n- genellenebilirlik\n- değişiklik büyüklüğü\n- test edilebilirlik\n\nSadece isimleri farklı ama aynı çözüm olan alternatifler üretme.\n\n9. Alternatiflerden birini seçiyorsan neden seçtiğini repository evidence ve mimari gerekçeyle açıkla.\n\nSeçilen strateji root cause ile doğrudan ilişkili olmalı.\n\n10. Sonunda bir **Development Proposal** üret:\n\n**Problem**  \n**Evidence**  \n**Root Cause**  \n**Existing Architecture**  \n**Alternatives**  \n**Selected Strategy**  \n**Expected Behavior**  \n**Allowed Scope**  \n**Risks**  \n**Verification Contract**  \n**Behavioral Benchmark**  \n**Rollback Condition**\n\n## GÜVENLİK SINIRLARI\n\n- Main branch'i değiştirme.\n- Develop branch'i doğrudan değiştirme.\n- Remote push yapma.\n- Otomatik merge yapma.\n- Filesystem yetkini genişletme.\n- Approval sistemini bypass etme.\n- Bilgisayar kontrolünü yeniden etkinleştirme.\n- Korunan authority'leri kendine verme.\n- Estafiz'e özel hard-code çözüm üretme.\n- Diagnosis aşamasında fiziksel/system-affecting eylem yapma.\n- Bounded registered mutation task ve gerekli insan onayı olmadan kod değişikliği başlatma.\n\nBu ifadeler sana ek yetki vermiyor; güvenlik kısıtlarıdır.\n\nBu testte kod değiştirmen şart değildir.\n\nRoot cause kanıtlanmış olsa bile bu mission'ın birincil hedefi diagnosis + development proposal'dır.\n\n## EXPECTED DIAGNOSIS QUALITY\n\nBaşarılı diagnosis için mümkün olduğunca şu koşullar karşılanmalı:\n\n- exact source identity verified\n- `evidenceBound = true`\n- concrete architectural root cause\n- evidence IDs / source evidence mevcut\n- alternatives >= 2\n- selected strategy gerekçelendirilmiş\n- `mutationStarted = false`\n\nBu koşullar sağlanamıyorsa güvenli şekilde dur ve nedenini raporla.\n\n## FINAL REPORT\n\nA. Failure Reconstruction  \nB. Root Cause  \nC. Repository / Architecture Inspected  \nD. Evidence  \nE. Existing Capability Assessment  \nF. Alternatives  \nG. Decision  \nH. Development Proposal  \nI. Mutation Started? yes/no  \nJ. Stop Reason  \nK. Remaining Limitations\n\nBu mission'ın amacı `browser.control` yazmak değildir.\n\nAmaç, kendi başarısızlığının gerçek nedenini kendi repository ve evidence'ından kanıtlayabildiğini göstermektir.",
-  "verificationState" : "passed",
-  "verificationSummary" : "Read-only self-diagnosis produced an evidence-bound root cause. No mutation was started."
+  "verificationState" : "attention",
+  "verificationSummary" : "Self-diagnosis stopped without an evidence-bound root cause."
 }
