@@ -4,13 +4,30 @@ enum AgentExecutionProfile: String, Codable {
     case developmentResearchMode
     case full
 
+    static let computerControlCapabilityIDs: Set<String> = [
+        "browser.control",
+        "desktop.app",
+        "app.workflow",
+        "desktop.control",
+        "system.open.url",
+        "perception.screen"
+    ]
+
     var pausedCapabilityIDs: Set<String> {
         switch self {
         case .developmentResearchMode:
-            return ["browser.control", "desktop.app", "app.workflow", "desktop.control", "system.open.url", "perception.screen"]
+            return Self.computerControlCapabilityIDs
         case .full:
             return []
         }
+    }
+
+    var allowsComputerControl: Bool {
+        pausedCapabilityIDs
+            .isDisjoint(
+                with:
+                    Self.computerControlCapabilityIDs
+            )
     }
 
     func applies(to capability: AgentCapability) -> AgentCapability {
