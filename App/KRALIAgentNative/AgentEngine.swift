@@ -5029,6 +5029,11 @@ final class AgentEngine: ObservableObject {
         lastFileSearchOutcome = nil
         webResearchStatus = "Bu tur için araştırma henüz başlamadı."
         intelligenceProviderStatus = "Sentez sağlayıcısı henüz kullanılmadı."
+        inspectorState.mentorTraceReady = false
+        if !inspectorState.mentorSyncBusy {
+            inspectorState.mentorTraceStatus =
+                "Yeni görev için güncel Mentor kaydı bekleniyor."
+        }
     }
 
     private func problemSolverObservations()
@@ -7669,6 +7674,12 @@ final class AgentEngine: ObservableObject {
 
     func syncMentorTrace() {
         guard !inspectorState.mentorSyncBusy else { return }
+
+        guard !busy else {
+            inspectorState.mentorTraceStatus =
+                "Mevcut görev tamamlanmadan Mentor gönderilemez; eski Mentor kaydı gönderilmedi."
+            return
+        }
 
         let hasTrace = fileManager.fileExists(
             atPath: mentorTraceStore.latestURL.path
