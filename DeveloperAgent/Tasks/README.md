@@ -146,3 +146,21 @@ When Cloudflare failover activates an already-installed local Ollama model, KRAL
 - The local coding model is kept warm for 15 minutes and receives an 8K context cap to avoid repeated model reload/context expansion overhead.
 - The local system prompt explicitly prefers checkpoint evidence and immediate minimal mutation once required source evidence is satisfied.
 
+## Task Scope Repair + Verified Mutation Packet
+
+KRALİ no longer discards an otherwise valid task graph merely because a planner emits a broad wildcard inside the parent task area.
+
+- Broad wildcard subtask scopes are deterministically intersected with the registered parent `allowedScope`; no new file authority is created.
+- When multiple parent files match, task title/expected-result/verification tokens narrow the clamp by path affinity.
+- The decomposer and native executor both apply the parent-contract check independently.
+- Wildcards with no safe parent intersection, forbidden paths, absolute paths, or traversal entries are still rejected.
+- Mentor task-graph status exposes `scopeRepairs=N`.
+
+Generic implementation mutations now require a verified mutation packet.
+
+- The agent derives the mutation target from successful `search_codebase` + `read_file` evidence.
+- The exact read window is re-read from live disk; if source changed since evidence capture, the packet is rejected as stale.
+- A replace anchor must be an exact, unique live-source block and is preferentially centered around the verified search line.
+- Structured mutation controllers receive a fixed path and fixed old_text; they may only return replacement `new_text` and cannot invent the anchor.
+- Existing root-cause verified source remains preferred for runtime-diagnostic tasks; generic capability tasks can use the verified-read packet without a runtime root-cause gate.
+
