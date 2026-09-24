@@ -260,45 +260,62 @@ struct AgentSelfDiagnosisExecutor {
         terms: [String],
         at root: URL
     ) -> [(path: String, score: Int)] {
-        guard let listing = git(
-            ["ls-tree", "-r", "--name-only", revision],
-            at: root
-        ) else { return [] }
+        let boundedTerms = Array(terms.prefix(24))
+        var arguments = ["grep", "-n", "-I", "-i"]
 
-        let paths = listing
-            .split(separator: "\n")
-            .map(String.init)
-            .filter(isInspectableSource)
-
-        var ranked: [(String, Int)] = []
-
-        for path in paths {
-            guard let content = gitShow(
-                revision: revision,
-                path: path,
-                at: root
-            ) else { continue }
-
-            let corpus = normalize(path + "\n" + content)
-            var score = 0
-
-            for term in terms {
-                let count = occurrenceCount(of: normalize(term), in: corpus)
-                score += min(count, 8) * (term.contains(".") ? 4 : 1)
-            }
-
-            if corpus.contains("research.web") { score += 6 }
-            if corpus.contains("browser.control") { score += 6 }
-            if corpus.contains("dependson") || corpus.contains("dependency") { score += 3 }
-            if corpus.contains("urlsession") { score += 3 }
-            if corpus.contains("capability") { score += 2 }
-
-            if score > 0 {
-                ranked.append((path, score))
-            }
+        for term in boundedTerms {
+            arguments += ["-e", term]
         }
 
-        return ranked.sorted {
+        arguments += [
+            revision,
+            "--",
+            "*.swift",
+            "*.mjs",
+            "*.js",
+            "*.command",
+            "*.json",
+            "*.yml",
+            "*.yaml",
+            "*.md"
+        ]
+
+        guard let matches = git(
+            arguments,
+            at: root,
+            acceptedExitCodes: [0, 1]
+        ) else { return [] }
+
+        var scores: [String: Int] = [:]
+
+        for row in matches.split(separator: "\n") {
+            let parts = row.split(
+                separator: ":",
+                maxSplits: 3,
+                omittingEmptySubsequences: false
+            )
+
+            guard parts.count >= 4 else { continue }
+            let path = String(parts[1])
+            guard isInspectableSource(path) else { continue }
+
+            let line = normalize(String(parts[3]))
+            var score = 1
+
+            for term in boundedTerms where line.contains(normalize(term)) {
+                score += term.contains(".") ? 4 : 1
+            }
+
+            if line.contains("research.web") { score += 6 }
+            if line.contains("browser.control") { score += 6 }
+            if line.contains("dependson") || line.contains("dependency") { score += 3 }
+            if line.contains("urlsession") { score += 3 }
+            if line.contains("capability") { score += 2 }
+
+            scores[path, default: 0] += score
+        }
+
+        return scores.map { ($0.key, $0.value) }.sorted {
             if $0.1 == $1.1 { return $0.0 < $1.0 }
             return $0.1 > $1.1
         }
@@ -424,12 +441,27 @@ struct AgentSelfDiagnosisExecutor {
         forVersion version: String,
         at root: URL
     ) -> String? {
-        guard let log = git(
+        let focused = git(
+            ["log", "--all", "-S", version, "--format=%H", "--", "VERSION"],
+            at: root
+        ) ?? ""
+
+        let fallback = git(
             ["log", "--all", "--format=%H", "--", "VERSION"],
             at: root
-        ) else { return nil }
+        ) ?? ""
 
-        for sha in log.split(separator: "\n").prefix(200).map(String.init) {
+        var candidates: [String] = []
+        for sha in (focused + "\n" + fallback)
+            .split(separator: "\n")
+            .map(String.init) {
+            if !candidates.contains(sha) {
+                candidates.append(sha)
+            }
+            if candidates.count >= 60 { break }
+        }
+
+        for sha in candidates {
             if gitShow(revision: sha, path: "VERSION", at: root)?.trimmed == version {
                 return sha
             }
@@ -466,7 +498,8 @@ struct AgentSelfDiagnosisExecutor {
 
     private func git(
         _ arguments: [String],
-        at root: URL
+        at root: URL,
+        acceptedExitCodes: Set<Int32> = [0]
     ) -> String? {
         let process = Process()
         process.executableURL = URL(fileURLWithPath: "/usr/bin/git")
@@ -483,7 +516,7 @@ struct AgentSelfDiagnosisExecutor {
             let data = output.fileHandleForReading.readDataToEndOfFile()
             process.waitUntilExit()
 
-            guard process.terminationStatus == 0 else {
+            guard acceptedExitCodes.contains(process.terminationStatus) else {
                 return nil
             }
 
