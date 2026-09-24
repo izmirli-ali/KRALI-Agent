@@ -77,7 +77,7 @@ assertContains(
 assertContains(
   agent,
   "outside_active_subtask_scope",
-  "Teacher task graph narrows mutation scope per active subtask"
+  "Developer task graph narrows mutation scope per active subtask"
 );
 assertContains(
   agent,
@@ -91,8 +91,23 @@ assertContains(
 );
 assertContains(
   runner,
-  "KRALI_TEACHER_PLAN_FILE",
-  "Teacher plan is passed into native Developer Agent"
+  "KRALI_DEVELOPER_TASK_PLAN_FILE",
+  "Selected baseline/Teacher-reviewed plan is passed into native Developer Agent"
+);
+assertContains(
+  runner,
+  "developer-task-decomposer.mjs",
+  "controlled tasks receive KRALI baseline decomposition"
+);
+assertContains(
+  runner,
+  "KRALI_TEACHER_BASELINE_PLAN_FILE",
+  "OpenAI Teacher reviews KRALI baseline graph"
+);
+assertContains(
+  agent,
+  "developer-candidate-surface-guard.mjs",
+  "native build_check enforces destructive surface guard"
 );
 
 process.stdout.write(
