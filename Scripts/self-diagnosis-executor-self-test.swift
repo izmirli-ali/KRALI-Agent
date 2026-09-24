@@ -17,19 +17,53 @@ struct SelfDiagnosisExecutorSelfTest {
         root: URL
     ) -> String {
         let process = Process()
-        let pipe = Pipe()
+        let outputPipe = Pipe()
+        let errorPipe = Pipe()
         process.executableURL = URL(
             fileURLWithPath: "/usr/bin/git"
         )
         process.arguments =
             ["-C", root.path] +
             arguments
-        process.standardOutput = pipe
-        process.standardError = pipe
+        process.standardOutput =
+            outputPipe
+        process.standardError =
+            errorPipe
 
         do {
             try process.run()
+
+            let outputData =
+                outputPipe
+                    .fileHandleForReading
+                    .readDataToEndOfFile()
+            let errorData =
+                errorPipe
+                    .fileHandleForReading
+                    .readDataToEndOfFile()
+
             process.waitUntilExit()
+
+            let output = String(
+                data: outputData,
+                encoding: .utf8
+            ) ?? ""
+            let errorOutput = String(
+                data: errorData,
+                encoding: .utf8
+            ) ?? ""
+
+            if process.terminationStatus != 0 {
+                fputs(
+                    "FAIL: git \(arguments.joined(separator: " ")) => \(errorOutput.isEmpty ? output : errorOutput)\n",
+                    stderr
+                )
+                exit(1)
+            }
+
+            return output.trimmingCharacters(
+                in: .whitespacesAndNewlines
+            )
         } catch {
             fputs(
                 "FAIL: git launch \(error)\n",
@@ -37,25 +71,6 @@ struct SelfDiagnosisExecutorSelfTest {
             )
             exit(1)
         }
-
-        let data = pipe.fileHandleForReading
-            .readDataToEndOfFile()
-        let output = String(
-            data: data,
-            encoding: .utf8
-        ) ?? ""
-
-        if process.terminationStatus != 0 {
-            fputs(
-                "FAIL: git \(arguments.joined(separator: " ")) => \(output)\n",
-                stderr
-            )
-            exit(1)
-        }
-
-        return output.trimmingCharacters(
-            in: .whitespacesAndNewlines
-        )
     }
 
     static func write(
