@@ -77,6 +77,11 @@ struct MentorTrace: Codable {
     let goal: String
     let plan: String
     let route: [String]
+    let missionOwner: String
+    let missionPhase: String
+    let developerRepository: String?
+    let developerMissionReason: String?
+    let developerRunID: String?
     let semanticMission: AgentSemanticMission?
     let semanticPlannerProvider: String?
     let taskGraph: [MentorTraceTaskGraphStep]
@@ -125,6 +130,11 @@ struct MentorTraceStore {
         goal: String,
         plan: String,
         route: [String],
+        missionOwner: AgentMissionOwner = .runtime,
+        missionPhase: AgentMissionPhase = .runtime,
+        developerRepository: AgentDeveloperRepository? = nil,
+        developerMissionReason: String? = nil,
+        developerRunID: String? = nil,
         semanticMission: AgentSemanticMission?,
         semanticPlannerProvider: String?,
         taskGraph: AgentTaskGraph?,
@@ -174,6 +184,11 @@ struct MentorTraceStore {
             goal: goal,
             plan: plan,
             route: route,
+            missionOwner: missionOwner.rawValue,
+            missionPhase: missionPhase.rawValue,
+            developerRepository: developerRepository?.path,
+            developerMissionReason: developerMissionReason,
+            developerRunID: developerRunID,
             semanticMission: semanticMission,
             semanticPlannerProvider:
                 semanticPlannerProvider,

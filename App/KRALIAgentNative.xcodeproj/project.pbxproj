@@ -52,6 +52,7 @@
 		A10000000000000000000043 /* AgentFileSearchCoordinator.swift in Sources */ = {isa = PBXBuildFile; fileRef = B10000000000000000000043 /* AgentFileSearchCoordinator.swift */; };
 		A10000000000000000000044 /* AgentProblemSolver.swift in Sources */ = {isa = PBXBuildFile; fileRef = B10000000000000000000044 /* AgentProblemSolver.swift */; };
 		A10000000000000000000045 /* AgentOutcomePlanner.swift in Sources */ = {isa = PBXBuildFile; fileRef = B10000000000000000000045 /* AgentOutcomePlanner.swift */; };
+		A10000000000000000000046 /* AgentMissionRouter.swift in Sources */ = {isa = PBXBuildFile; fileRef = B10000000000000000000046 /* AgentMissionRouter.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
@@ -101,6 +102,7 @@
 		B10000000000000000000043 /* AgentFileSearchCoordinator.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AgentFileSearchCoordinator.swift; sourceTree = "<group>"; };
 		B10000000000000000000044 /* AgentProblemSolver.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AgentProblemSolver.swift; sourceTree = "<group>"; };
 		B10000000000000000000045 /* AgentOutcomePlanner.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AgentOutcomePlanner.swift; sourceTree = "<group>"; };
+		B10000000000000000000046 /* AgentMissionRouter.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AgentMissionRouter.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -170,6 +172,7 @@
 				B10000000000000000000043 /* AgentFileSearchCoordinator.swift */,
 				B10000000000000000000044 /* AgentProblemSolver.swift */,
 				B10000000000000000000045 /* AgentOutcomePlanner.swift */,
+				B10000000000000000000046 /* AgentMissionRouter.swift */,
 			);
 			path = KRALIAgentNative;
 			sourceTree = "<group>";
@@ -296,6 +299,7 @@
 				A10000000000000000000043 /* AgentFileSearchCoordinator.swift in Sources */,
 				A10000000000000000000044 /* AgentProblemSolver.swift in Sources */,
 				A10000000000000000000045 /* AgentOutcomePlanner.swift in Sources */,
+				A10000000000000000000046 /* AgentMissionRouter.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -333,7 +337,7 @@
 				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
 				CODE_SIGN_STYLE = Automatic;
 				COMBINE_HIDPI_IMAGES = YES;
-				CURRENT_PROJECT_VERSION = 220;
+				CURRENT_PROJECT_VERSION = 221;
 				DEVELOPMENT_TEAM = 65244UMFCK;
 				ENABLE_HARDENED_RUNTIME = NO;
 				ENABLE_PREVIEWS = YES;
@@ -349,7 +353,7 @@
 					"@executable_path/../Frameworks",
 				);
 				MACOSX_DEPLOYMENT_TARGET = 14.0;
-				MARKETING_VERSION = 0.10.47;
+				MARKETING_VERSION = 0.11.0;
 				PRODUCT_BUNDLE_IDENTIFIER = com.aliihsancanuysal.kraliagent;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				SDKROOT = macosx;
@@ -365,7 +369,7 @@
 				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
 				CODE_SIGN_STYLE = Automatic;
 				COMBINE_HIDPI_IMAGES = YES;
-				CURRENT_PROJECT_VERSION = 220;
+				CURRENT_PROJECT_VERSION = 221;
 				DEVELOPMENT_TEAM = 65244UMFCK;
 				ENABLE_HARDENED_RUNTIME = NO;
 				GENERATE_INFOPLIST_FILE = YES;
@@ -380,7 +384,7 @@
 					"@executable_path/../Frameworks",
 				);
 				MACOSX_DEPLOYMENT_TARGET = 14.0;
-				MARKETING_VERSION = 0.10.47;
+				MARKETING_VERSION = 0.11.0;
 				PRODUCT_BUNDLE_IDENTIFIER = com.aliihsancanuysal.kraliagent;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				SDKROOT = macosx;

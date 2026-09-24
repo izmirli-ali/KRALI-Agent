@@ -46,6 +46,10 @@ final class AgentEngine: ObservableObject {
     @Published var currentAlternatives: [String] = []
     @Published var currentSemanticMission: AgentSemanticMission?
     @Published var currentSemanticPlannerProvider: String?
+    @Published var missionOwner: AgentMissionOwner = .runtime
+    @Published var missionPhase: AgentMissionPhase = .runtime
+    @Published var developerRepository: AgentDeveloperRepository?
+    @Published var developerMissionReason: String?
     @Published var currentTaskGraph: AgentTaskGraph?
     @Published var currentRuntimeTask: AgentRuntimeTask?
     @Published var taskGraphStatus = "Henüz görev grafiği yok."
@@ -117,6 +121,8 @@ final class AgentEngine: ObservableObject {
     private let desktopControlStore = DesktopControlProbeStore()
     private let textFileWriter = AgentTextFileWriter()
     private let developerBridge = AgentDeveloperBridge()
+    private let missionRouter = AgentMissionRouter()
+    private let developerRepositoryResolver = AgentDeveloperRepositoryResolver()
     private let developerToolSafetyPolicy =
         AgentDeveloperToolSafetyPolicy()
     private let learningQueueStore = AgentLearningQueueStore()
@@ -701,6 +707,57 @@ final class AgentEngine: ObservableObject {
         return true
     }
 
+    /// Dynamic self-development goals intentionally stop at diagnosis.  The
+    /// existing runner accepts only registered task cards with predeclared
+    /// mutation scope, so this bridge cannot create mutation authority.
+    private func handleSelfDevelopmentMission(
+        _ text: String,
+        source: ChatInputSource
+    ) -> Bool {
+        let routing = missionRouter.classify(text)
+        missionOwner = routing.owner
+        missionPhase = routing.phase
+        developerMissionReason = routing.reason
+
+        guard routing.owner != .runtime else { return false }
+
+        currentTaskGraph = nil
+        currentRuntimeTask = nil
+        selectedCapabilities = []
+        capabilityLearningPlans = []
+        executionSteps = []
+        activeRoute = routing.owner == .developer ? ["Core", "Developer", "Diagnosis"] : ["Core", "Stop"]
+
+        if routing.owner == .stop {
+            currentGoal = "Self-development authority escalation"
+            currentPlan = "Stop → explicit user review"
+            verificationState = .attention
+            verificationSummary = routing.reason
+            postAssistantMessage("Bu self-development isteği korunan yetki içeriyor. KRALİ kendi kendine izin, merge, secret veya filesystem yetkisi veremez; normal runtime görevi de başlatılmadı.")
+            recordMentorTrace(input: text, source: source, goal: currentGoal, plan: currentPlan, route: activeRoute, capabilities: [], learningPlans: [], verification: AgentVerificationResult(state: .attention, summary: routing.reason, fallback: "Explicit user review is required."), intelligenceProvider: nil, finalResponse: messages.last?.text ?? "")
+            return true
+        }
+
+        guard let repository = developerRepositoryResolver.resolve(userWorkspace: selectedRootURL) else {
+            currentGoal = "KRALİ self-development diagnosis"
+            currentPlan = "Stop → approved KRALİ repository identity required"
+            verificationState = .attention
+            verificationSummary = "Developer repository identity could not be resolved safely."
+            postAssistantMessage("Bu hedef Developer Mission olarak sınıflandı; ancak KRALİ kaynak deposu güvenle doğrulanamadı. Kullanıcı çalışma alanı developer kaynağı olarak kullanılmadı ve mutation başlatılmadı.")
+            recordMentorTrace(input: text, source: source, goal: currentGoal, plan: currentPlan, route: activeRoute, capabilities: [], learningPlans: [], verification: AgentVerificationResult(state: .attention, summary: verificationSummary, fallback: "Configure an approved KRALİ repository."), intelligenceProvider: nil, finalResponse: messages.last?.text ?? "")
+            return true
+        }
+
+        developerRepository = repository
+        currentGoal = "KRALİ self-development diagnosis"
+        currentPlan = "Read-only diagnosis → evidence → proposal → registered bounded task required"
+        verificationState = .checking
+        verificationSummary = "Diagnosis/proposal phase; mutation authority has not been granted."
+        postAssistantMessage("Bu hedef Developer Mission olarak yönlendirildi. Kaynak hedefi kullanıcı workspace'i değil, doğrulanmış KRALİ deposu. İlk aşama yalnız read-only diagnosis/proposal: Observed Failure, Evidence, Root Cause, Relevant Architecture, Alternatives, Selected Strategy, Scope ve Verification Contract. Dinamik mutation task kartı oluşturulmadı; doğrulanmış root cause ve kullanıcı onaylı, bounded registered task olmadan Developer Agent kod değiştirmeye başlamaz.")
+        recordMentorTrace(input: text, source: source, goal: currentGoal, plan: currentPlan, route: activeRoute, capabilities: [], learningPlans: [], verification: AgentVerificationResult(state: .checking, summary: verificationSummary, fallback: "Registered bounded task required before mutation."), intelligenceProvider: nil, finalResponse: messages.last?.text ?? "")
+        return true
+    }
+
     func send(
         _ raw: String,
         source: ChatInputSource = .text
@@ -769,6 +826,13 @@ final class AgentEngine: ObservableObject {
 
         if handleDeveloperTaskChatCommand(
             text
+        ) {
+            return
+        }
+
+        if handleSelfDevelopmentMission(
+            text,
+            source: source
         ) {
             return
         }
@@ -5759,6 +5823,11 @@ final class AgentEngine: ObservableObject {
                 goal: goal,
                 plan: plan,
                 route: route,
+                missionOwner: missionOwner,
+                missionPhase: missionPhase,
+                developerRepository: developerRepository,
+                developerMissionReason: developerMissionReason,
+                developerRunID: inspectorState.developerAgentStatus.runID,
                 semanticMission: currentSemanticMission,
                 semanticPlannerProvider:
                     currentSemanticPlannerProvider,
