@@ -4956,6 +4956,7 @@ final class AgentEngine: ObservableObject {
         currentOutcomeResolution = nil
         currentOutcomeAttempts = []
         currentReflectionSummary = nil
+        currentSelfDiagnosisReport = nil
         currentCapabilityGaps = []
         currentOutcomeFailureIsTransient = false
         activeRoute = ["Core"]
