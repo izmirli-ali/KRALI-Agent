@@ -5,6 +5,7 @@ root = Path(__file__).resolve().parents[1]
 router = (root / "App/KRALIAgentNative/AgentMissionRouter.swift").read_text()
 engine = (root / "App/KRALIAgentNative/AgentEngine.swift").read_text()
 intel = (root / "App/KRALIAgentNative/AgentLocalIntelligence.swift").read_text()
+quality = (root / "App/KRALIAgentNative/AgentDevelopmentResearch.swift").read_text()
 
 assert "case research" in router
 assert "researchScore >= 2" in router
