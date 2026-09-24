@@ -2157,16 +2157,35 @@ NODE
     fi
 fi
 
+run_baseline_decomposer_once() {
+    KRALI_DEV_TASK_FILE="$DEV_TASK_FILE" \
+    KRALI_TASK_DECOMPOSER_RESULT_FILE="$BASELINE_TASK_PLAN_RESULT" \
+    KRALI_OLLAMA_BASE_URL="$OLLAMA_BASE_URL" \
+    KRALI_DECOMPOSER_MODEL="$CONTROLLER_MODEL" \
+    KRALI_APP_VERSION="$(/bin/cat "$ROOT/VERSION" 2>/dev/null | /usr/bin/tr -d '[:space:]')" \
+    KRALI_RUN_ID="$STAMP" \
+        "$NODE_BIN" "$ROOT/Scripts/developer-task-decomposer.mjs" >>"$LOG" 2>&1
+}
+
 if [ -n "$DEV_TASK_FILE" ] && [ -f "$DEV_TASK_FILE" ]; then
     write_status "task_decomposing|$GAP_LABEL KRALİ baseline decomposer ile alt görevlere ayrılıyor|$BRANCH|$WORKTREE"
 
-    if KRALI_DEV_TASK_FILE="$DEV_TASK_FILE" \
-       KRALI_TASK_DECOMPOSER_RESULT_FILE="$BASELINE_TASK_PLAN_RESULT" \
-       KRALI_OLLAMA_BASE_URL="$OLLAMA_BASE_URL" \
-       KRALI_DECOMPOSER_MODEL="$CONTROLLER_MODEL" \
-       KRALI_APP_VERSION="$(/bin/cat "$ROOT/VERSION" 2>/dev/null | /usr/bin/tr -d '[:space:]')" \
-       KRALI_RUN_ID="$STAMP" \
-       "$NODE_BIN" "$ROOT/Scripts/developer-task-decomposer.mjs" >>"$LOG" 2>&1; then
+    DECOMPOSER_EXIT=0
+    run_baseline_decomposer_once || DECOMPOSER_EXIT=$?
+
+    if [ "$DECOMPOSER_EXIT" -eq 29 ] &&
+       [ "$REMOTE_PROVIDER_MODE" -eq 1 ]; then
+        echo "⚡ Cloudflare structured controller quota/429 verdi; aynı run içinde local circuit-breaker fallback deneniyor." | tee -a "$LOG"
+
+        if activate_local_fallback "cloudflare-json-quota"; then
+            write_status "task_decomposing_local_fallback|$GAP_LABEL baseline decomposer mevcut local controller ile yeniden deneniyor|$BRANCH|$WORKTREE"
+            rm -f "$BASELINE_TASK_PLAN_RESULT"
+            DECOMPOSER_EXIT=0
+            run_baseline_decomposer_once || DECOMPOSER_EXIT=$?
+        fi
+    fi
+
+    if [ "$DECOMPOSER_EXIT" -eq 0 ]; then
         DEVELOPER_TASK_GRAPH_PLAN="$BASELINE_TASK_PLAN_RESULT"
         BASELINE_PLAN_CONTEXT="$("$NODE_BIN" - "$BASELINE_TASK_PLAN_RESULT" <<'NODE'
 const fs = require("fs");
@@ -2184,10 +2203,19 @@ NODE
                 echo "Bu graph yalnız planlama bağlamıdır; scope/approval/verification kuralları authority olmaya devam eder."
             } >> "$PROMPT_FILE"
         fi
-        echo "🧩 KRALİ baseline task decomposition hazır." | tee -a "$LOG"
-    else
+        echo "🧩 KRALİ baseline task decomposition hazır • provider=$([ "$REMOTE_PROVIDER_MODE" -eq 1 ] && echo remote || echo local-fallback)" | tee -a "$LOG"
+    elif [ "$PROVIDER_FAILOVER_BLOCKED" -eq 0 ]; then
         echo "⚠️ KRALİ baseline task decomposition üretilemedi; mevcut tek-task güvenli akış korunuyor." | tee -a "$LOG"
     fi
+fi
+
+if [ "$PROVIDER_FAILOVER_BLOCKED" -eq 1 ]; then
+    echo "⛔ Remote quota nedeniyle devam edilemiyor ve side-effect-free local fallback hazır değil; candidate üretilmeden oturum kapatılıyor." | tee -a "$LOG"
+    rm -f "$PROMPT_FILE"
+    cd "$ROOT"
+    git worktree remove "$WORKTREE" --force >>"$LOG" 2>&1 || true
+    git branch -D "$BRANCH" >>"$LOG" 2>&1 || true
+    exit 29
 fi
 
 if [ -n "$DEV_TASK_FILE" ] && [ -f "$DEV_TASK_FILE" ]; then
