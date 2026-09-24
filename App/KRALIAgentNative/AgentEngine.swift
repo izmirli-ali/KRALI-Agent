@@ -170,6 +170,15 @@ final class AgentEngine: ObservableObject {
         ) as? String ?? "unknown"
     }
 
+    /// The active runtime capability surface after execution-profile policy.
+    /// Paused computer-control capabilities are excluded from planning,
+    /// normalization, fallback selection, execution and gap generation.
+    private func runtimeCapabilities() -> [AgentCapability] {
+        capabilityRegistry.availableCapabilities(
+            for: executionProfile
+        )
+    }
+
     init() {
         inspectorStateForwarder =
             inspectorState.objectWillChange
@@ -904,7 +913,7 @@ final class AgentEngine: ObservableObject {
                             .candidateCapabilityIDs(
                                 for: step,
                                 availableCapabilities:
-                                    capabilityRegistry.all
+                                    runtimeCapabilities()
                             )
                             .isEmpty
                     }
@@ -966,7 +975,7 @@ final class AgentEngine: ObservableObject {
             problemSolver.solve(
                 graph: deterministicGraph,
                 capabilities:
-                    capabilityRegistry.all,
+                    runtimeCapabilities(),
                 observations:
                     problemSolverObservations()
             )
@@ -1078,7 +1087,7 @@ final class AgentEngine: ObservableObject {
                 await localIntelligence.planMission(
                     userInput: text,
                     contextMemory: executionContextMemories,
-                    capabilities: capabilityRegistry.all,
+                    capabilities: runtimeCapabilities(),
                     hasWorkspace: selectedRootURL != nil
                 ),
                localMission.normalizedConfidence >= 0.45,
@@ -1109,7 +1118,7 @@ final class AgentEngine: ObservableObject {
                 await subscriptionIntelligence.planMission(
                     userInput: text,
                     contextMemory: executionContextMemories,
-                    capabilities: capabilityRegistry.all,
+                    capabilities: runtimeCapabilities(),
                     hasWorkspace: selectedRootURL != nil
                 ),
                 subscriptionMission.mission
@@ -1170,7 +1179,7 @@ final class AgentEngine: ObservableObject {
                         rawMission,
                         userInput: text,
                         capabilities:
-                            capabilityRegistry.all
+                            runtimeCapabilities()
                     )
 
                 semanticMission = mission
@@ -1191,7 +1200,7 @@ final class AgentEngine: ObservableObject {
                 taskOrchestrator.compile(
                     mission: mission,
                     capabilities:
-                        capabilityRegistry.all
+                        runtimeCapabilities()
                 )
 
             currentTaskGraph =
@@ -1206,7 +1215,7 @@ final class AgentEngine: ObservableObject {
                 problemSolver.solve(
                     graph: compiledTaskGraph,
                     capabilities:
-                        capabilityRegistry.all,
+                        runtimeCapabilities(),
                     observations:
                         problemSolverObservations()
                 )
@@ -1226,7 +1235,7 @@ final class AgentEngine: ObservableObject {
                 outcomePlanner.resolve(
                     contract: outcomeContract,
                     capabilities:
-                        capabilityRegistry.all
+                        runtimeCapabilities()
                 )
             currentOutcomeResolution =
                 outcomeResolution
@@ -1256,7 +1265,7 @@ final class AgentEngine: ObservableObject {
                                 .candidateCapabilityIDs(
                                     for: step,
                                     availableCapabilities:
-                                        capabilityRegistry.all
+                                        runtimeCapabilities()
                                 )
                                 .isEmpty
                         }
@@ -1307,7 +1316,7 @@ final class AgentEngine: ObservableObject {
                     graph:
                         compiledTaskGraph,
                     capabilities:
-                        capabilityRegistry.all
+                        runtimeCapabilities()
                 )
                 .filter {
                     !outcomeSuppressedLearningIDs
@@ -1681,7 +1690,7 @@ final class AgentEngine: ObservableObject {
                             approvedStepIndexes:
                                 approvedRuntimeStepIndexes,
                             capabilities:
-                                capabilityRegistry.all
+                                runtimeCapabilities()
                         )
 
                 let suppressedRuntimeIDs =
@@ -2501,7 +2510,7 @@ final class AgentEngine: ObservableObject {
             taskOrchestrator.compile(
                 mission: mission,
                 capabilities:
-                    capabilityRegistry.all
+                    runtimeCapabilities()
             )
 
         if currentRuntimeTask?.objective ==
@@ -3687,7 +3696,7 @@ final class AgentEngine: ObservableObject {
                         approvedStepIndexes:
                             approvedRuntimeStepIndexes,
                         capabilities:
-                            capabilityRegistry.all
+                            runtimeCapabilities()
                     )
 
             for gap in runtimeGaps
@@ -3886,7 +3895,7 @@ final class AgentEngine: ObservableObject {
                 dependencyEvidence:
                     dependencyEvidence,
                 capabilities:
-                    capabilityRegistry.all
+                    runtimeCapabilities()
             )
 
         currentProblemResolution =
@@ -4497,7 +4506,7 @@ final class AgentEngine: ObservableObject {
                     "core.reasoning"
 
                 let capability =
-                    capabilityRegistry.all
+                    runtimeCapabilities()
                         .first {
                             $0.id ==
                                 capabilityID
@@ -5632,7 +5641,7 @@ final class AgentEngine: ObservableObject {
 
     private func queueInteractiveAccessCapability() {
         guard
-            let browser = capabilityRegistry.all.first(
+            let browser = runtimeCapabilities().first(
                 where: { $0.id == "browser.control" }
             ),
             !browser.isAvailable
