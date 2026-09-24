@@ -37,7 +37,7 @@ struct SelfDiagnosisExecutorSelfTest {
         print("DEBUG target_version=\(report.targetVersion ?? "none")")
         print("DEBUG confidence=\(report.confidence)")
         print("DEBUG inspected=\(report.inspectedFiles.joined(separator: ","))")
-        print("DEBUG evidence_paths=\(report.evidence.map(\\.path).joined(separator: ","))")
+        print("DEBUG evidence_paths=\(report.evidence.map { $0.path }.joined(separator: ","))")
         print("DEBUG root_cause=\(report.rootCause)")
 
         expect(report.repositoryRevision != "unknown", "repository revision resolved")
