@@ -77,6 +77,7 @@ struct AgentSelfDiagnosisEvidencePackage: Codable, Hashable {
     let queryTerms: [String]
     let evidence: [AgentSelfDiagnosisEvidence]
     let warnings: [String]
+    let prohibitedCapabilityIDs: [String]
 
     var canDiagnoseCurrentSource: Bool {
         sourceIdentity.isExact
@@ -325,6 +326,10 @@ struct AgentSelfDiagnosisExecutor {
         let terms = diagnosisTerms(
             from: userInput
         )
+        let prohibitedCapabilities =
+            prohibitedCapabilityIDs(
+                from: userInput
+            )
 
         var evidence: [AgentSelfDiagnosisEvidence] = [
             AgentSelfDiagnosisEvidence(
@@ -371,7 +376,9 @@ struct AgentSelfDiagnosisExecutor {
                 sourceIdentity: identity,
                 queryTerms: terms,
                 evidence: evidence,
-                warnings: warnings
+                warnings: warnings,
+                prohibitedCapabilityIDs:
+                    prohibitedCapabilities
             )
         }
 
@@ -527,7 +534,9 @@ struct AgentSelfDiagnosisExecutor {
                 finalIdentity,
             queryTerms: terms,
             evidence: evidence,
-            warnings: warnings
+            warnings: warnings,
+            prohibitedCapabilityIDs:
+                prohibitedCapabilities
         )
     }
 
@@ -641,11 +650,81 @@ struct AgentSelfDiagnosisExecutor {
                 $0.kind == "mission_input"
             }
 
+        let rootCauseClaim =
+            modelOutput.architecturalRootCause
+
+        let supportingSourceEvidence =
+            citedEvidence.filter {
+                $0.kind == "source" &&
+                evidenceSupportsRootCause(
+                    $0,
+                    claim: rootCauseClaim
+                )
+            }
+
+        let supportingFailureEvidence =
+            citedEvidence.filter {
+                (
+                    $0.kind == "diagnostic_history" ||
+                    $0.kind == "mission_input"
+                ) &&
+                evidenceSupportsRootCause(
+                    $0,
+                    claim: rootCauseClaim
+                )
+            }
+
+        let citedProposalEvidenceValid =
+            !modelOutput.developmentProposal
+                .evidence.isEmpty &&
+            modelOutput.developmentProposal
+                .evidence.allSatisfy {
+                    knownEvidence[$0] != nil
+                }
+
+        let hasDistinctAlternatives =
+            Set(
+                modelOutput.alternatives.map {
+                    normalized($0.title)
+                }
+            ).count >= 2
+
+        let selectedStrategyMatchesAlternative =
+            modelOutput.alternatives.contains {
+                normalized(
+                    modelOutput.developmentProposal
+                        .selectedStrategy
+                )
+                .contains(
+                    normalized($0.title)
+                ) ||
+                normalized($0.title)
+                    .contains(
+                        normalized(
+                            modelOutput.developmentProposal
+                                .selectedStrategy
+                        )
+                    )
+            }
+
+        let proposalConstraintSafe =
+            proposalRespectsMissionConstraints(
+                modelOutput,
+                prohibitedCapabilityIDs:
+                    package.prohibitedCapabilityIDs
+            )
+
         let evidenceBound =
             citationsValid &&
             hasSourceEvidence &&
             hasFailureEvidence &&
-            !modelOutput.architecturalRootCause
+            !supportingSourceEvidence.isEmpty &&
+            !supportingFailureEvidence.isEmpty &&
+            citedProposalEvidenceValid &&
+            hasDistinctAlternatives &&
+            selectedStrategyMatchesAlternative &&
+            proposalConstraintSafe &&
+            !rootCauseClaim
                 .trimmingCharacters(
                     in: .whitespacesAndNewlines
                 )
@@ -686,7 +765,7 @@ struct AgentSelfDiagnosisExecutor {
                 evidenceBound
                 ? []
                 : [
-                    "Root-cause evidence IDs did not bind both source evidence and failure evidence."
+                    "Root-cause evidence did not semantically support the architectural claim, the proposal violated mission constraints, or the proposal was structurally incomplete."
                 ]
             )
 
@@ -726,6 +805,216 @@ struct AgentSelfDiagnosisExecutor {
             evidenceBound:
                 evidenceBound
         )
+    }
+
+    private func evidenceSupportsRootCause(
+        _ evidence: AgentSelfDiagnosisEvidence,
+        claim: String
+    ) -> Bool {
+        let claimText = normalized(claim)
+        let excerptText = normalized(evidence.excerpt)
+
+        let architectureAnchors = [
+            "planner",
+            "dependency",
+            "dependson",
+            "task graph",
+            "feasibility",
+            "browser.control",
+            "research.web",
+            "outcome",
+            "fallback",
+            "unavailable",
+            "blocked",
+            "zorunlu",
+            "bagimlilik",
+            "planlayici"
+        ]
+
+        let causalAnchors = [
+            "planner",
+            "dependency",
+            "dependson",
+            "task graph",
+            "feasibility",
+            "unavailable",
+            "blocked",
+            "zorunlu",
+            "bagimlilik",
+            "planlayici"
+        ]
+
+        let claimAnchors =
+            architectureAnchors.filter {
+                claimText.contains($0)
+            }
+
+        guard !claimAnchors.isEmpty else {
+            return false
+        }
+
+        let overlapCount =
+            claimAnchors.filter {
+                excerptText.contains($0)
+            }.count
+
+        let causalClaimAnchors =
+            causalAnchors.filter {
+                claimText.contains($0)
+            }
+
+        let hasCausalSupport =
+            causalClaimAnchors.isEmpty ||
+            causalClaimAnchors.contains {
+                excerptText.contains($0)
+            }
+
+        return overlapCount >= 2 &&
+            hasCausalSupport
+    }
+
+    private func proposalRespectsMissionConstraints(
+        _ output: AgentSelfDiagnosisModelOutput,
+        prohibitedCapabilityIDs: [String]
+    ) -> Bool {
+        guard !prohibitedCapabilityIDs.isEmpty else {
+            return true
+        }
+
+        let alternativeText =
+            output.alternatives.flatMap {
+                [$0.title] +
+                $0.advantages +
+                $0.risks +
+                [
+                    $0.architecturalImpact,
+                    $0.generalizability,
+                    $0.changeSize,
+                    $0.testability
+                ]
+            }
+
+        let proposal = output.developmentProposal
+        let proposalText =
+            [
+                proposal.problem,
+                proposal.rootCause,
+                proposal.existingArchitecture,
+                proposal.selectedStrategy,
+                proposal.expectedBehavior,
+                proposal.rollbackCondition
+            ] +
+            proposal.allowedScope +
+            proposal.risks +
+            proposal.verificationContract +
+            proposal.behavioralBenchmark +
+            alternativeText
+
+        let normalizedProposal =
+            normalized(
+                proposalText.joined(
+                    separator: "\n"
+                )
+            )
+
+        return prohibitedCapabilityIDs.allSatisfy {
+            !normalizedProposal.contains(
+                normalized($0)
+            )
+        }
+    }
+
+    private func prohibitedCapabilityIDs(
+        from userInput: String
+    ) -> [String] {
+        let capabilityPattern =
+            try? NSRegularExpression(
+                pattern:
+                    #"[A-Za-z][A-Za-z0-9_-]*(?:\.[A-Za-z][A-Za-z0-9_-]*)+"#
+            )
+
+        guard let capabilityPattern else {
+            return []
+        }
+
+        let lines =
+            userInput.components(
+                separatedBy: .newlines
+            )
+
+        var result: Set<String> = []
+        var inProhibitionBlock = false
+        var blockCapturedCapability = false
+
+        for rawLine in lines {
+            let line =
+                rawLine.trimmingCharacters(
+                    in: .whitespacesAndNewlines
+                )
+            let normalizedLine = normalized(line)
+
+            let startsBlock =
+                normalizedLine.contains(
+                    "bu gorev icin kullanma"
+                ) ||
+                normalizedLine.contains(
+                    "do not use"
+                ) ||
+                normalizedLine.contains(
+                    "prohibited capabilities"
+                )
+
+            if startsBlock {
+                inProhibitionBlock = true
+                blockCapturedCapability = false
+            }
+
+            let range =
+                NSRange(
+                    line.startIndex..<line.endIndex,
+                    in: line
+                )
+            let matches =
+                capabilityPattern.matches(
+                    in: line,
+                    range: range
+                )
+            let capabilityIDs =
+                matches.compactMap {
+                    Range($0.range, in: line)
+                }
+                .map {
+                    String(line[$0])
+                }
+
+            let lineHasDirectProhibition =
+                normalizedLine.contains("kullanma") ||
+                normalizedLine.contains("do not use") ||
+                normalizedLine.contains("prohibited") ||
+                normalizedLine.contains("yasak")
+
+            if inProhibitionBlock {
+                if !capabilityIDs.isEmpty {
+                    capabilityIDs.forEach {
+                        result.insert($0)
+                    }
+                    blockCapturedCapability = true
+                } else if
+                    blockCapturedCapability &&
+                    !line.isEmpty &&
+                    !line.hasPrefix("-") &&
+                    !line.hasPrefix("*")
+                {
+                    inProhibitionBlock = false
+                }
+            } else if lineHasDirectProhibition {
+                capabilityIDs.forEach {
+                    result.insert($0)
+                }
+            }
+        }
+
+        return result.sorted()
     }
 
     private struct RankedFile {
