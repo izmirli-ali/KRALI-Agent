@@ -2640,12 +2640,21 @@ NODE
         echo "🧩 Developer Agent hata verdi ancak candidate değişiklik üretti; recovery başlatılıyor." | tee -a "$LOG"
         write_status "recovering_candidate|Developer Agent oturumu tamamlanmadı ancak üretilen candidate değişiklikler korunuyor|$BRANCH|$WORKTREE"
 
+        RECOVERY_MODEL="$MODEL"
+        RECOVERY_REPAIR_ATTEMPTS="2"
+
+        if [ "$PROVIDER_FAILOVER_BLOCKED" -eq 1 ]; then
+            RECOVERY_MODEL=""
+            RECOVERY_REPAIR_ATTEMPTS="0"
+            echo "ℹ️ Provider failover hazır değil; recovery yalnız deterministic build/verification yapacak, AI repair çalıştırılmayacak." | tee -a "$LOG"
+        fi
+
         KRALI_NODE_BIN="$NODE_BIN" \
-        KRALI_RECOVERY_MODEL="$MODEL" \
+        KRALI_RECOVERY_MODEL="$RECOVERY_MODEL" \
         KRALI_OLLAMA_BASE_URL="$OLLAMA_BASE_URL" \
         KRALI_DEV_TASK_FILE="$DEV_TASK_FILE" \
         KRALI_LEARNING_PATH="$LEARNING_PATH" \
-        KRALI_CANDIDATE_REPAIR_ATTEMPTS="2" \
+        KRALI_CANDIDATE_REPAIR_ATTEMPTS="$RECOVERY_REPAIR_ATTEMPTS" \
         /bin/zsh "$ROOT/Scripts/recover-developer-candidate.command" >>"$LOG" 2>&1 || true
 
         RECOVERY_STATE="$(
@@ -2682,6 +2691,12 @@ NODE
     else
         git -C "$ROOT" worktree remove "$WORKTREE" --force >>"$LOG" 2>&1 || true
         git -C "$ROOT" branch -D "$BRANCH" >>"$LOG" 2>&1 || true
+    fi
+
+    if [ "$PROVIDER_FAILOVER_BLOCKED" -eq 1 ]; then
+        write_status "provider_failover_unavailable|Remote provider circuit açık; mevcut local fallback hazır değil ve otomatik install/start/pull yapılmadı|$BRANCH|$WORKTREE"
+        echo "⛔ Provider failover kullanılamadı; kullanıcı onayı olmadan sistem kurulumu/değişikliği yapılmadı." | tee -a "$LOG"
+        exit 29
     fi
 
     if [ "$CURSOR_ARCHITECT_READY" -eq 1 ]; then
