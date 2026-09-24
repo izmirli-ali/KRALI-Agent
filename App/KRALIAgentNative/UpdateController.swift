@@ -4,6 +4,7 @@ import AppKit
 @MainActor
 final class UpdateController: ObservableObject {
     @Published var currentVersion: String
+    @Published var currentBuild: String
     @Published var remoteVersion: String?
     @Published var updateAvailable = false
     @Published var isChecking = false
@@ -24,6 +25,9 @@ final class UpdateController: ObservableObject {
         currentVersion = Bundle.main.object(
             forInfoDictionaryKey: "CFBundleShortVersionString"
         ) as? String ?? "0.0.0"
+        currentBuild = Bundle.main.object(
+            forInfoDictionaryKey: "CFBundleVersion"
+        ) as? String ?? "0"
 
         Task { @MainActor [weak self] in
             try? await Task.sleep(

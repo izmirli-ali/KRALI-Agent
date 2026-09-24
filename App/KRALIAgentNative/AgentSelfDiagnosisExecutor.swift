@@ -1079,7 +1079,7 @@ struct AgentSelfDiagnosisExecutor {
                         relative.hasPrefix($0)
                     }),
                 !relative.hasPrefix(
-                    "Mentor/History/"
+                    "Mentor/"
                 )
             else {
                 continue
@@ -1165,6 +1165,10 @@ struct AgentSelfDiagnosisExecutor {
                 }
             }
 
+            // Generic term density is useful for discovery but must not let
+            // very large files drown out a smaller file that contains the
+            // actual planner/dependency mechanism.
+            score = min(score, 120)
             score += causalArchitectureBonus(
                 relativePath: relative,
                 corpus: corpus,
@@ -1221,39 +1225,45 @@ struct AgentSelfDiagnosisExecutor {
         let path = normalized(relativePath)
         var bonus = 0
 
-        if path.contains("agentoutcomeplanner") {
-            bonus += 42
+        if path.hasPrefix("app/") {
+            bonus += 35
         }
-        if path.contains("agentcapabilitygapresolver") {
-            bonus += 30
+        if path.contains("planner") {
+            bonus += 35
         }
-        if path.contains("agentplanner") {
-            bonus += 24
+        if path.contains("capability") {
+            bonus += 20
         }
-        if path.contains("agentwebresearch") {
-            bonus += 18
+        if path.hasPrefix("scripts/") {
+            bonus -= 15
         }
 
-        let causalSignatures = [
-            ("retrievepublicinformation", 18),
-            ("preferredcapabilityids", 14),
-            ("acceptablecapabilityids", 12),
-            ("executablenow", 14),
-            ("dependson", 18),
-            ("instrumental", 10),
-            ("research.web", 8),
-            ("browser.control", 8),
-            ("unavailable", 6),
-            ("fallback", 6)
-        ]
+        if corpus.contains("retrievepublicinformation") &&
+           corpus.contains("research.web") {
+            bonus += 160
+        }
 
-        for (signature, weight) in causalSignatures
-            where corpus.contains(signature) {
-            bonus += weight
+        if corpus.contains("dependson") &&
+           corpus.contains("capabilityid") {
+            bonus += 130
+        }
+
+        if corpus.contains("executablenow") &&
+           corpus.contains("availablecapabilityids") {
+            bonus += 110
+        }
+
+        if corpus.contains("preferredcapabilityids") &&
+           corpus.contains("acceptablecapabilityids") {
+            bonus += 80
         }
 
         if corpus.contains("research.web") &&
            corpus.contains("browser.control") {
+            bonus += 60
+        }
+
+        if corpus.contains("unavailable") {
             bonus += 20
         }
 
@@ -1493,8 +1503,17 @@ struct AgentSelfDiagnosisExecutor {
             "fallback"
         ]
 
-        for (index, line) in lines.enumerated() {
-            let corpus = normalized(line)
+        for index in lines.indices {
+            let localStart = max(0, index - 3)
+            let localEnd = min(
+                lines.count - 1,
+                index + 3
+            )
+            let corpus =
+                normalized(
+                    lines[localStart...localEnd]
+                        .joined(separator: "\n")
+                )
             var score = 0
 
             for term in terms {
@@ -1508,6 +1527,18 @@ struct AgentSelfDiagnosisExecutor {
             for anchor in weightedAnchors
                 where corpus.contains(anchor) {
                 score += 4
+            }
+
+            if corpus.contains(
+                "retrievepublicinformation"
+            ) &&
+               corpus.contains("research.web") {
+                score += 30
+            }
+
+            if corpus.contains("dependson") &&
+               corpus.contains("capabilityid") {
+                score += 24
             }
 
             if score > bestScore {

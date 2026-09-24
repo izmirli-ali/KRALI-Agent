@@ -358,7 +358,7 @@ struct ContentView: View {
                 updater.isLaunchingUpdate
             )
             .help(
-                "Güncellemeleri kontrol et • v\(updater.currentVersion)"
+                "Güncellemeleri kontrol et • v\(updater.currentVersion) • build \(updater.currentBuild)"
             )
 
             Button {
@@ -400,8 +400,8 @@ struct ContentView: View {
         }
 
         return updater.updateAvailable
-            ? "Yeni sürüm hazır • v\(updater.currentVersion)"
-            : "Hazır • v\(updater.currentVersion)"
+            ? "Yeni sürüm hazır • v\(updater.currentVersion) • build \(updater.currentBuild)"
+            : "Hazır • v\(updater.currentVersion) • build \(updater.currentBuild)"
     }
 
     private func chatPane(
