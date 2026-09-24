@@ -300,19 +300,12 @@ struct AgentSelfDiagnosisExecutor {
             guard isInspectableSource(path) else { continue }
 
             let line = normalize(String(parts[3]))
-            let compactPath = compactConcept(path)
             var score = 1
 
             for term in boundedTerms {
                 let normalizedTerm = normalize(term)
                 if line.contains(normalizedTerm) {
                     score += term.contains(".") ? 4 : 1
-                }
-
-                let compactTerm = compactConcept(term)
-                if compactTerm.count >= 5 &&
-                   compactPath.contains(compactTerm) {
-                    score += 8
                 }
             }
 
@@ -323,6 +316,35 @@ struct AgentSelfDiagnosisExecutor {
             if line.contains("capability") { score += 2 }
 
             scores[path, default: 0] += score
+        }
+
+        // Content grep and filename affinity are separate evidence channels.
+        // A source file can be highly relevant to the mission even when the
+        // exact natural-language term appears only in its type/file name.
+        if let listing = git(
+            ["ls-tree", "-r", "--name-only", revision],
+            at: root
+        ) {
+            for rawPath in listing.split(separator: "\n") {
+                let path = String(rawPath)
+                guard isInspectableSource(path) else { continue }
+
+                let compactPath = compactConcept(path)
+                var pathScore = 0
+
+                for term in boundedTerms {
+                    let compactTerm = compactConcept(term)
+                    guard compactTerm.count >= 5 else { continue }
+
+                    if compactPath.contains(compactTerm) {
+                        pathScore += term.contains(".") ? 14 : 10
+                    }
+                }
+
+                if pathScore > 0 {
+                    scores[path, default: 0] += pathScore
+                }
+            }
         }
 
         return scores.map { ($0.key, $0.value) }.sorted {
