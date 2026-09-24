@@ -17,9 +17,21 @@ struct AgentCapability: Identifiable, Hashable {
 }
 
 enum AgentGoalOutcome: String, Hashable {
-    case research
+    case converse
+    case locate
+    case shortlist
+    case assessContent
+    case analyze
+    case ideate
+    case compose
+    case transform
     case explain
+    case organize
     case open
+    case remember
+    case research
+    case edit
+    case communicate
 }
 
 struct AgentGoalProfile: Hashable {
@@ -30,6 +42,7 @@ struct AgentGoalProfile: Hashable {
 }
 
 struct AgentSemanticMission {
+    let objective: String
     let outcomes: [String]
 }
 
