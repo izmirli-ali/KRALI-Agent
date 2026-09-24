@@ -1,1 +1,1 @@
-local_agent_failed|Ollama native agent HTTP 429|krali-dev-agent/20260924-093138|/Users/medusa/Developer/KRALI-Agent-Dev-20260924-093138|@meta|app=0.10.40|at=1790231502|run=20260924-093138
+local_agent_running|Learning Suggestions Foundation (developer.task.learning-suggestions-foundation) yerel model çalışıyor • adım 4/14|krali-dev-agent/20260924-100755|/Users/medusa/Developer/KRALI-Agent-Dev-20260924-100755|@meta|app=0.10.41|at=1790233992|run=20260924-100755

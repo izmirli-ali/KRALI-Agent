@@ -1,32 +1,40 @@
 
 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
  KRALİ DEVELOPER AGENT
- 20260924-093138
+ 20260924-100755
 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 ⚠️ Global Node.js v26 Cline bağımlılıklarıyla uyumlu değil; izole Node 22 runtime hazırlanıyor.
 ✅ Developer Agent runtime: v22.23.2
-cloudflare_proxy_ready|127.0.0.1:28267|main=@cf/zai-org/glm-4.7-flash|json=@cf/meta/llama-3.3-70b-instruct-fp8-fast|transport=openai-chat-completions
+cloudflare_proxy_ready|127.0.0.1:28888|main=@cf/zai-org/glm-4.7-flash|json=@cf/meta/llama-3.3-70b-instruct-fp8-fast|transport=openai-chat-completions
 ☁️ Remote-first Developer AI hazır: Cloudflare Workers AI • main=@cf/zai-org/glm-4.7-flash • json=@cf/meta/llama-3.3-70b-instruct-fp8-fast
 ☁️ Yerel Ollama hazırlığı atlandı; Developer inference remote-first çalışacak.
 From https://github.com/izmirli-ali/KRALI-Agent
  * branch            main       -> FETCH_HEAD
 Already up to date.
 Kontrollü KRALİ Developer görevi bulundu; task kartı kullanılacak.
-Preparing worktree (new branch 'krali-dev-agent/20260924-093138')
-branch 'krali-dev-agent/20260924-093138' set up to track 'origin/main'.
-HEAD is now at ea17e03 v0.10.40: add baseline task decomposition and surface guard
+Preparing worktree (new branch 'krali-dev-agent/20260924-100755')
+branch 'krali-dev-agent/20260924-100755' set up to track 'origin/main'.
+HEAD is now at 5154a5d v0.10.41: add Cloudflare-to-local provider resilience
 Developer prompt mode: gap • 6215 bytes
 ☁️ Structured controller remote: @cf/meta/llama-3.3-70b-instruct-fp8-fast
-♻️ Developer checkpoint bulundu; aynı gap teşhisi kaldığı yerden devam edecek: developer.task.learning-suggestions-foundation-4261e771ca64
-cloudflare_provider_error|status=429|model=@cf/meta/llama-3.3-70b-instruct-fp8-fast|detail=[{"code":4006,"message":"AiError: AiError: you have used up your daily free allocation of 10,000 neurons, please upgrade to Cloudflare's Workers Paid plan if you would like to continue usage. (410ee498-feb2-448d-addf-7ccf2a873024)"}]
+cloudflare_provider_error|status=429|model=@cf/meta/llama-3.3-70b-instruct-fp8-fast|detail=[{"code":4006,"message":"AiError: AiError: you have used up your daily free allocation of 10,000 neurons, please upgrade to Cloudflare's Workers Paid plan if you would like to continue usage. (d037b32e-7358-4742-b224-9fb4bbdbb695)"}]
 developer_task_decomposer_failed|http-429
+⚡ Cloudflare structured controller quota/timeout verdi; aynı run içinde local circuit-breaker fallback deneniyor.
+⚡ Remote provider circuit breaker açıldı • reason=cloudflare-json-quota
+KRALI local tool probe: native tool_call görülmedi • text={"name": "krali_tool_probe", "arguments": {}}
+tool_call_ok|devstral-small-2:24b
+controller_probe_ok|devstral-small-2:24b|17443ms
+✅ Side-effect-free local fallback hazır • main=devstral-small-2:24b • controller=devstral-small-2:24b
+🛟 Local fallback aktif • main=devstral-small-2:24b • controller=devstral-small-2:24b
+developer_task_decomposer_failed|transport-timeout
 ⚠️ KRALİ baseline task decomposition üretilemedi; mevcut tek-task güvenli akış korunuyor.
 ℹ️ OpenAI Teacher atlandı • Keychain API anahtarı bulunamadı.
-☁️ Model rolleri: remote main=@cf/zai-org/glm-4.7-flash • structured=@cf/meta/llama-3.3-70b-instruct-fp8-fast
-KRALI_LOCAL_STAGE local_agent_checkpoint_stale • Learning Suggestions Foundation (developer.task.learning-suggestions-foundation) checkpoint source provenance eski • recordedHead=d6d9d30df63d47fb18f4d650f062ffb0e9d8b705 • liveHead=ea17e0333398ecc958138cb36f40a108af106726 • source hedefleri yeniden doğrulanacak
-KRALI_LOCAL_STAGE local_agent_starting • Learning Suggestions Foundation (developer.task.learning-suggestions-foundation) native Ollama agent başlatılıyor: cloudflare-main
+🧠 Model rolleri: root-cause=devstral-small-2:24b • mutation=devstral-small-2:24b • controller=devstral-small-2:24b
+KRALI_LOCAL_STAGE local_agent_starting • Learning Suggestions Foundation (developer.task.learning-suggestions-foundation) native Ollama agent başlatılıyor: devstral-small-2:24b
 KRALI_LOCAL_STAGE local_agent_running • Learning Suggestions Foundation (developer.task.learning-suggestions-foundation) yerel model çalışıyor • adım 1/14
-cloudflare_provider_error|status=429|model=@cf/zai-org/glm-4.7-flash|detail=[{"code":4006,"message":"AiError: AiError: you have used up your daily free allocation of 10,000 neurons, please upgrade to Cloudflare's Workers Paid plan if you would like to continue usage. (937f23f2-1cea-46dd-8d77-fc50f7c20630)"}]
-Ollama native agent HTTP 429
-Deleted branch krali-dev-agent/20260924-093138 (was ea17e03).
-❌ Native yerel Developer Agent durdu: Ollama native agent HTTP 429
+KRALI_LOCAL_STAGE local_agent_tool • Learning Suggestions Foundation (developer.task.learning-suggestions-foundation) araç çalışıyor: search_codebase
+KRALI_LOCAL_STAGE local_agent_running • Learning Suggestions Foundation (developer.task.learning-suggestions-foundation) yerel model çalışıyor • adım 2/14
+KRALI_LOCAL_STAGE local_agent_tool • Learning Suggestions Foundation (developer.task.learning-suggestions-foundation) araç çalışıyor: list_files
+KRALI_LOCAL_STAGE local_agent_running • Learning Suggestions Foundation (developer.task.learning-suggestions-foundation) yerel model çalışıyor • adım 3/14
+KRALI_LOCAL_STAGE local_agent_tool • Learning Suggestions Foundation (developer.task.learning-suggestions-foundation) araç çalışıyor: search_codebase
+KRALI_LOCAL_STAGE local_agent_running • Learning Suggestions Foundation (developer.task.learning-suggestions-foundation) yerel model çalışıyor • adım 4/14
