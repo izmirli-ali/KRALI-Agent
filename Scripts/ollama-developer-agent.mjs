@@ -8091,10 +8091,21 @@ await runRuntimeFailureBootstrapFastPath();
 await runVerifiedResumeFastPath();
 
 if (developerTaskGraph) {
+  const graphSource =
+    developerTaskGraph.sourceFile ===
+      fallbackDeveloperTaskPlanFile
+      ? "baseline-fallback"
+      : developerTaskGraph.sourceFile ===
+          developerTaskPlanFile
+        ? "selected"
+        : "unknown";
+
   stage(
     "local_agent_task_graph_ready",
     gapLabel +
-      " developer task graph hazır • nodes=" +
+      " developer task graph hazır • source=" +
+      graphSource +
+      " • nodes=" +
       developerTaskGraph.nodes.length +
       " • active=" +
       String(
@@ -8102,8 +8113,14 @@ if (developerTaskGraph) {
       )
   );
 } else if (
-  developerTaskPlanFile &&
-  fs.existsSync(developerTaskPlanFile)
+  (
+    developerTaskPlanFile &&
+    fs.existsSync(developerTaskPlanFile)
+  ) ||
+  (
+    fallbackDeveloperTaskPlanFile &&
+    fs.existsSync(fallbackDeveloperTaskPlanFile)
+  )
 ) {
   stage(
     "local_agent_task_graph_skipped",
