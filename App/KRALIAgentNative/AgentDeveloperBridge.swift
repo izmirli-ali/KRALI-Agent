@@ -60,13 +60,15 @@ struct DeveloperAgentStatus: Hashable {
         state == "task_verification_failed" ||
         state == "recovered_candidate_ready" ||
         state == "recovered_candidate_build_failed" ||
-        state == "recovered_candidate_verification_failed",
-            "recovered_candidate_surface_regression"
+        state == "recovered_candidate_verification_failed" ||
+        state == "recovered_candidate_surface_regression"
     }
 
     var isLearningActive: Bool {
         [
             "checking",
+            "task_decomposing",
+            "teacher_plan_review",
             "learning",
             "running",
             "retrying",
