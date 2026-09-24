@@ -1281,7 +1281,9 @@ final class AgentEngine: ObservableObject {
                 "once", "önce", "sonra", "mevcut", "kendi",
                 "sistem", "sistemi", "mimari", "mimarini",
                 "mimarisini", "kod", "kaynak", "read", "only",
-                "mutation", "started", "recommended", "no"
+                "mutation", "started", "recommended", "no",
+                "browser", "control", "desktop", "app", "workflow",
+                "system", "open", "url", "perception", "screen"
             ])
 
         let words =
