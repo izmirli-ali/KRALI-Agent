@@ -473,23 +473,24 @@ struct AgentSelfDiagnosisExecutor {
         process.arguments = ["-C", root.path] + arguments
 
         let output = Pipe()
-        let error = Pipe()
         process.standardOutput = output
-        process.standardError = error
+        process.standardError = FileHandle.nullDevice
 
         do {
             try process.run()
+            // Drain stdout while git is running. Waiting first can deadlock on
+            // large source objects when the pipe buffer fills.
+            let data = output.fileHandleForReading.readDataToEndOfFile()
             process.waitUntilExit()
+
+            guard process.terminationStatus == 0 else {
+                return nil
+            }
+
+            return String(data: data, encoding: .utf8)
         } catch {
             return nil
         }
-
-        guard process.terminationStatus == 0 else {
-            return nil
-        }
-
-        let data = output.fileHandleForReading.readDataToEndOfFile()
-        return String(data: data, encoding: .utf8)
     }
 
     private func readText(_ url: URL) -> String? {
