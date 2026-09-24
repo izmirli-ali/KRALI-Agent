@@ -109,6 +109,24 @@ assertContains(
   "developer-candidate-surface-guard.mjs",
   "native build_check enforces destructive surface guard"
 );
+assertContains(
+  runner,
+  'KRALI_DEVELOPER_TASK_FALLBACK_PLAN_FILE="$BASELINE_TASK_PLAN_RESULT"',
+  "invalid Teacher graph falls back to KRALI baseline graph"
+);
+const recovery = read(
+  "Scripts/recover-developer-candidate.command"
+);
+assertContains(
+  recovery,
+  "RECOVERY_BASE_COMMIT",
+  "recovery surface guard compares against stable pre-candidate base"
+);
+assertContains(
+  recovery,
+  "KRALI_SURFACE_GUARD_BASE",
+  "repair agent inherits stable surface-guard base"
+);
 
 process.stdout.write(
   "developer_orchestration_policy_ok\n"
