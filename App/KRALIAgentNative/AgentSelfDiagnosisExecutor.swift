@@ -1221,7 +1221,7 @@ struct AgentSelfDiagnosisExecutor {
         root: URL
     ) -> String? {
         let process = Process()
-        let pipe = Pipe()
+        let outputPipe = Pipe()
 
         process.executableURL = URL(
             fileURLWithPath:
@@ -1230,16 +1230,22 @@ struct AgentSelfDiagnosisExecutor {
         process.arguments =
             ["-C", root.path] +
             arguments
-        process.standardOutput = pipe
-        process.standardError = pipe
+        process.standardOutput =
+            outputPipe
+        process.standardError =
+            FileHandle.nullDevice
 
         do {
             try process.run()
-            process.waitUntilExit()
 
-            let data = pipe
-                .fileHandleForReading
-                .readDataToEndOfFile()
+            // Drain stdout while git is running. Waiting before reading can
+            // deadlock when a real repository or Mentor object fills the pipe.
+            let data =
+                outputPipe
+                    .fileHandleForReading
+                    .readDataToEndOfFile()
+
+            process.waitUntilExit()
 
             guard
                 process.terminationStatus == 0,
