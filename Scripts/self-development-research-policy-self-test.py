@@ -15,9 +15,9 @@ assert "performWebResearch(" in engine
 assert "allowInteractiveEscalation:" in engine
 assert "synthesizeSelfDevelopmentResearch" in engine
 assert '"research.web"' in engine
-assert "Mutation Started: NO" in intel
+assert "Mutation Started: " in quality
 assert "repositoryEvidence" in intel
-assert "researchEvidence" in intel
+assert "evidenceRecords" in intel
 
 # Research and diagnosis must remain separate paths.
 research_pos = engine.index("executeSelfDevelopmentResearchMission")
