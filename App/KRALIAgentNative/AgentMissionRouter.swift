@@ -8,6 +8,7 @@ enum AgentMissionOwner: String, Codable {
 
 enum AgentMissionPhase: String, Codable {
     case runtime
+    case research
     case diagnosis
     case authorityEscalation = "authority_escalation"
 }
@@ -40,6 +41,16 @@ struct AgentMissionRouter {
             "gelistir", "geliştir", "iyilestir", "iyileştir", "onar", "repair",
             "duzelt", "düzelt", "ekle", "capability", "yetkinlik", "implement"
         ]
+        let researchTerms: Set<String> = [
+            "arastir", "araştır", "research", "kaynak", "source", "makale",
+            "paper", "github", "dokumantasyon", "dokümantasyon", "yaklasim",
+            "yaklaşım", "karsilastir", "karşılaştır", "guncel", "güncel",
+            "literatur", "literatür", "benchmark", "agent"
+        ]
+        let failureDiagnosisTerms: Set<String> = [
+            "neden", "basarisiz", "başarısız", "failure", "hata", "sorun",
+            "root", "cause", "teshis", "teşhis", "diagnose", "bug"
+        ]
         let protectedAuthorityTerms: Set<String> = [
             "merge", "push", "izin", "permission", "yetki", "secret", "sifre",
             "şifre", "credential", "filesystem", "dosya", "authority"
@@ -48,6 +59,8 @@ struct AgentMissionRouter {
         let selfScore = words.intersection(selfTerms).count
         let diagnosisScore = words.intersection(diagnosisTerms).count
         let improvementScore = words.intersection(improvementTerms).count
+        let researchScore = words.intersection(researchTerms).count
+        let failureDiagnosisScore = words.intersection(failureDiagnosisTerms).count
         let protectedAuthority = !words.intersection(protectedAuthorityTerms).isEmpty
         let authority = authoritySemantics(normalized, mentionsProtected: protectedAuthority)
 
@@ -76,12 +89,23 @@ struct AgentMissionRouter {
             )
         }
 
+        if researchScore >= 2 &&
+           failureDiagnosisScore < 2 {
+            return AgentMissionRoutingDecision(
+                owner: .developer,
+                phase: .research,
+                authorityIntent: authority.intent,
+                authorityPolarity: authority.polarity,
+                reason: "KRALİ is the target and the request asks for read-only self-development research before mutation."
+            )
+        }
+
         return AgentMissionRoutingDecision(
             owner: .developer,
             phase: .diagnosis,
             authorityIntent: authority.intent,
             authorityPolarity: authority.polarity,
-            reason: "KRALİ is the target and the request asks for supported diagnosis/improvement."
+            reason: "KRALİ is the target and the request asks for supported failure diagnosis/improvement."
         )
     }
 
