@@ -111,6 +111,11 @@ assertContains(
 );
 assertContains(
   runner,
+  'KRALI_SURFACE_GUARD_SCRIPT="$ROOT/Scripts/developer-candidate-surface-guard.mjs"',
+  "native agent receives trusted main-repo surface guard path"
+);
+assertContains(
+  runner,
   'KRALI_DEVELOPER_TASK_FALLBACK_PLAN_FILE="$BASELINE_TASK_PLAN_RESULT"',
   "invalid Teacher graph falls back to KRALI baseline graph"
 );
