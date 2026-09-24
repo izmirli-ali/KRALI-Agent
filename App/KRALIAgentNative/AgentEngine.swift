@@ -794,44 +794,76 @@ final class AgentEngine: ObservableObject {
         currentTaskInput = text
         missionDeveloperRunID = nil
 
-        let recalledContextMemories =
-            contextMemoryStore.relevant(
-                to: text,
-                from: contextMemoryEntries,
-                limit: 4
-            )
+        let preliminaryRouting =
+            missionRouter.classify(text)
+        let isolateDeveloperContext =
+            developerContextFirewall
+                .shouldIsolate(
+                    routing:
+                        preliminaryRouting
+                )
 
-        let executionContextMemories =
-            contextMemoryStore.executionContext(
-                to: text,
-                from: recalledContextMemories,
-                limit: 4
-            )
+        let recalledContextMemories:
+            [AgentContextMemoryEntry]
+        let executionContextMemories:
+            [AgentContextMemoryEntry]
 
-        // Only execution-safe context is allowed to influence routing,
-        // planning and verification. Broader recall may still exist in the
-        // persistent store but must not poison an unrelated new task.
-        activeContextMemories =
-            executionContextMemories
-
-        if !executionContextMemories.isEmpty {
+        if isolateDeveloperContext {
+            recalledContextMemories = []
+            executionContextMemories = []
+            activeContextMemories = []
             contextMemoryStatus =
-                "\(executionContextMemories.count) güvenli bağlam kaydı bu tura taşındı."
+                "Developer diagnosis context firewall aktif; önceki kullanıcı görevleri bu tura taşınmadı."
             log(
-                "Bağlam hafızası: " +
-                executionContextMemories
-                    .map(\.title)
-                    .joined(separator: " • ")
-            )
-        } else if !recalledContextMemories.isEmpty {
-            contextMemoryStatus =
-                "Önceki görev bağlamları bulundu ancak yeni hedef bağımsız olduğu için izole edildi."
-            log(
-                "Bağlam firewall: önceki görev bağlamları bu tura taşınmadı"
+                "Developer context firewall: conversational task memory isolated"
             )
         } else {
-            contextMemoryStatus =
-                "Bu tur için ilgili önceki bağlam bulunmadı."
+            recalledContextMemories =
+                contextMemoryStore.relevant(
+                    to: text,
+                    from: contextMemoryEntries,
+                    limit: 4
+                )
+
+            executionContextMemories =
+                contextMemoryStore
+                    .executionContext(
+                        to: text,
+                        from:
+                            recalledContextMemories,
+                        limit: 4
+                    )
+
+            // Only execution-safe context is allowed to influence routing,
+            // planning and verification. Broader recall may still exist in
+            // the persistent store but must not poison an unrelated task.
+            activeContextMemories =
+                executionContextMemories
+
+            if !executionContextMemories
+                .isEmpty {
+                contextMemoryStatus =
+                    "\(executionContextMemories.count) güvenli bağlam kaydı bu tura taşındı."
+                log(
+                    "Bağlam hafızası: " +
+                    executionContextMemories
+                        .map(\.title)
+                        .joined(
+                            separator: " • "
+                        )
+                )
+            } else if
+                !recalledContextMemories
+                    .isEmpty {
+                contextMemoryStatus =
+                    "Önceki görev bağlamları bulundu ancak yeni hedef bağımsız olduğu için izole edildi."
+                log(
+                    "Bağlam firewall: önceki görev bağlamları bu tura taşınmadı"
+                )
+            } else {
+                contextMemoryStatus =
+                    "Bu tur için ilgili önceki bağlam bulunmadı."
+            }
         }
 
         appendConversationMessage(
