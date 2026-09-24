@@ -75,6 +75,447 @@ struct AgentResearchQueryPlanner {
         )
     }
 
+    func developmentPlan(
+        _ rawMission: String
+    ) -> AgentDevelopmentResearchPlan {
+        let normalizedMission =
+            normalize(rawMission)
+
+        let explicitCount =
+            explicitApproachCount(
+                in: rawMission
+            )
+
+        var labels =
+            externalResearchTopicLabels(
+                in: rawMission
+            )
+
+        var seen = Set<String>()
+        labels = labels.filter {
+            let key = normalize($0)
+            guard
+                key.count >= 4,
+                seen.insert(key).inserted
+            else {
+                return false
+            }
+            return true
+        }
+
+        let fallbackTerms =
+            lexicalConcepts(
+                from: normalizedMission
+            )
+
+        if labels.count < 3 {
+            var cursor = 0
+            while
+                labels.count < 5,
+                cursor < fallbackTerms.count {
+                let end = min(
+                    fallbackTerms.count,
+                    cursor + 2
+                )
+                let candidate =
+                    fallbackTerms[cursor..<end]
+                        .joined(separator: " ")
+                cursor = end
+
+                let key = normalize(candidate)
+                if key.count >= 4,
+                   seen.insert(key).inserted {
+                    labels.append(candidate)
+                }
+            }
+        }
+
+        labels =
+            Array(
+                labels.prefix(8)
+            )
+
+        let derivedCount =
+            explicitCount ??
+            min(
+                5,
+                max(
+                    3,
+                    labels.count
+                )
+            )
+
+        let requiredApproachCount =
+            min(
+                8,
+                max(
+                    2,
+                    derivedCount
+                )
+            )
+
+        let preferredKinds: [
+            AgentResearchSourceKind
+        ] = [
+            .paper,
+            .officialDocumentation,
+            .originalRepository,
+            .organizationEngineering
+        ]
+
+        let facets =
+            labels.enumerated().map {
+                index,
+                label in
+
+                let topics =
+                    Array(
+                        lexicalConcepts(
+                            from:
+                                normalize(label)
+                        )
+                        .prefix(6)
+                    )
+
+                let subject =
+                    label
+                        .trimmingCharacters(
+                            in:
+                                .whitespacesAndNewlines
+                        )
+
+                let queries = [
+                    subject +
+                        " AI agents academic paper preprint primary source",
+                    subject +
+                        " AI agents official documentation open source GitHub repository"
+                ]
+
+                return AgentDevelopmentResearchFacet(
+                    id:
+                        developmentFacetID(
+                            label,
+                            index: index
+                        ),
+                    label: subject,
+                    topics:
+                        topics.isEmpty
+                        ? [normalize(subject)]
+                        : topics,
+                    required:
+                        index <
+                        requiredApproachCount,
+                    preferredSourceKinds:
+                        preferredKinds,
+                    queries:
+                        queries
+                )
+            }
+
+        return AgentDevelopmentResearchPlan(
+            facets: facets,
+            requiredApproachCount:
+                requiredApproachCount,
+            minimumQualifyingSourceCount:
+                min(
+                    6,
+                    max(
+                        3,
+                        requiredApproachCount
+                    )
+                ),
+            minimumHighQualitySourceCount:
+                min(
+                    6,
+                    max(
+                        3,
+                        requiredApproachCount
+                    )
+                ),
+            minimumIndependentOriginCount:
+                min(
+                    4,
+                    max(
+                        2,
+                        (requiredApproachCount + 1) /
+                        2
+                    )
+                ),
+            requiresRepositoryComparison:
+                true
+        )
+    }
+
+    private func explicitApproachCount(
+        in raw: String
+    ) -> Int? {
+        let normalized =
+            raw.folding(
+                options: [
+                    .caseInsensitive,
+                    .diacriticInsensitive
+                ],
+                locale:
+                    Locale(
+                        identifier: "tr_TR"
+                    )
+            )
+            .lowercased()
+
+        let patterns = [
+            #"(?:en\s+az|at\s+least)\s+(\d{1,2})"#,
+            #"(\d{1,2})\s+(?:farkli\s+)?yaklasim"#,
+            #"(\d{1,2})\s+(?:different\s+)?approaches"#
+        ]
+
+        for pattern in patterns {
+            guard
+                let regex =
+                    try? NSRegularExpression(
+                        pattern: pattern
+                    )
+            else {
+                continue
+            }
+
+            let nsRange =
+                NSRange(
+                    normalized.startIndex..<normalized.endIndex,
+                    in: normalized
+                )
+
+            guard
+                let match =
+                    regex.firstMatch(
+                        in: normalized,
+                        range: nsRange
+                    ),
+                match.numberOfRanges > 1,
+                let range =
+                    Range(
+                        match.range(at: 1),
+                        in: normalized
+                    ),
+                let value =
+                    Int(
+                        normalized[range]
+                    )
+            else {
+                continue
+            }
+
+            return min(
+                8,
+                max(
+                    2,
+                    value
+                )
+            )
+        }
+
+        return nil
+    }
+
+    private func externalResearchTopicLabels(
+        in raw: String
+    ) -> [String] {
+        let lines =
+            raw.components(
+                separatedBy: .newlines
+            )
+
+        var captureTopicSection = false
+        var sectionLabels: [String] = []
+
+        for line in lines {
+            let normalizedLine =
+                normalize(line)
+
+            if normalizedLine.contains(
+                "ozellikle su konulara bak"
+            ) ||
+               normalizedLine.contains(
+                "especially research"
+               ) ||
+               normalizedLine.contains(
+                "topics to research"
+               ) {
+                captureTopicSection = true
+                continue
+            }
+
+            if captureTopicSection &&
+               (
+                    normalizedLine.contains(
+                        "mumkunse"
+                    ) ||
+                    normalizedLine == "---" ||
+                    normalizedLine
+                        .hasPrefix("3.")
+               ) {
+                break
+            }
+
+            guard captureTopicSection,
+                  let bullet =
+                    cleanedResearchBullet(
+                        line
+                    ),
+                  isExternalResearchTopic(
+                    bullet
+                  )
+            else {
+                continue
+            }
+
+            sectionLabels.append(
+                bullet
+            )
+        }
+
+        if !sectionLabels.isEmpty {
+            return sectionLabels
+        }
+
+        return lines.compactMap {
+            guard
+                let bullet =
+                    cleanedResearchBullet(
+                        $0
+                    ),
+                isExternalResearchTopic(
+                    bullet
+                )
+            else {
+                return nil
+            }
+
+            return bullet
+        }
+    }
+
+    private func cleanedResearchBullet(
+        _ line: String
+    ) -> String? {
+        let trimmed =
+            line.trimmingCharacters(
+                in: .whitespacesAndNewlines
+            )
+
+        guard
+            trimmed.hasPrefix("-") ||
+            trimmed.hasPrefix("•") ||
+            trimmed.hasPrefix("*")
+        else {
+            return nil
+        }
+
+        let clean =
+            String(
+                trimmed.dropFirst()
+            )
+            .trimmingCharacters(
+                in:
+                    .whitespacesAndNewlines
+            )
+
+        return clean.isEmpty
+            ? nil
+            : clean
+    }
+
+    private func isExternalResearchTopic(
+        _ value: String
+    ) -> Bool {
+        let normalizedValue =
+            normalize(value)
+
+        let excluded = [
+            "browser.control",
+            "desktop.app",
+            "desktop.control",
+            "app.workflow",
+            "system.open.url",
+            "perception.screen",
+            "research.web",
+            "self-diagnosis",
+            "developer agent",
+            "learning queue",
+            "capability learning",
+            "mentor",
+            "semantic planner",
+            "outcome planner",
+            "verification",
+            "rollback",
+            "main branch",
+            "develop branch",
+            "merge",
+            "push"
+        ]
+
+        if excluded.contains(
+            where: {
+                normalizedValue
+                    .contains(
+                        normalize($0)
+                    )
+            }
+        ) {
+            return false
+        }
+
+        let topicSignals = [
+            "agent",
+            "memory",
+            "reflection",
+            "replay",
+            "skill",
+            "tool learning",
+            "task decomposition",
+            "debug",
+            "evidence",
+            "long-running",
+            "evaluation",
+            "self-modification",
+            "self-improving",
+            "autonomous"
+        ]
+
+        return topicSignals.contains {
+            normalizedValue
+                .contains(
+                    normalize($0)
+                )
+        }
+    }
+
+    private func developmentFacetID(
+        _ value: String,
+        index: Int
+    ) -> String {
+        let normalizedValue =
+            normalize(value)
+
+        let slug =
+            normalizedValue
+                .components(
+                    separatedBy:
+                        CharacterSet
+                            .alphanumerics
+                            .inverted
+                )
+                .filter {
+                    !$0.isEmpty
+                }
+                .prefix(5)
+                .joined(separator: "-")
+
+        return slug.isEmpty
+            ? "facet-" +
+                String(index + 1)
+            : slug
+    }
+
     private func directWebPlan(
         original: String
     ) -> ResearchQueryPlan? {
