@@ -115,11 +115,15 @@ run_candidate_build() {
     if [ -n "$NODE_BIN" ] &&
        [ -x "$NODE_BIN" ] &&
        [ -f "$ROOT/Scripts/developer-candidate-surface-guard.mjs" ]; then
+        SURFACE_GUARD_ARGS=(--root "$WORKTREE")
+        if [ -n "$DEV_TASK_FILE" ] && [ -f "$DEV_TASK_FILE" ]; then
+            SURFACE_GUARD_ARGS+=(--task "$DEV_TASK_FILE")
+        fi
+
         KRALI_LEARNING_PATH="$LEARNING_PATH" \
         KRALI_DEV_TASK_FILE="$DEV_TASK_FILE" \
             "$NODE_BIN" "$ROOT/Scripts/developer-candidate-surface-guard.mjs" \
-                --root "$WORKTREE" \
-                ${DEV_TASK_FILE:+--task "$DEV_TASK_FILE"} >"$BUILD_LOG" 2>&1
+                "${SURFACE_GUARD_ARGS[@]}" >"$BUILD_LOG" 2>&1
         GUARD_EXIT=$?
 
         if [ "$GUARD_EXIT" -ne 0 ]; then
