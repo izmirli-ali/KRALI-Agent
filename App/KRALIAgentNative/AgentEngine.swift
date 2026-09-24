@@ -151,6 +151,9 @@ final class AgentEngine: ObservableObject {
         AgentDeveloperTaskDescriptor?
     private var currentOutcomeFailureIsTransient = false
     private var currentTaskInput = ""
+    // Only set by the mission that actually starts a Developer Agent run.
+    // Never reuse inspector status from an earlier mission as trace ownership.
+    private var missionDeveloperRunID: String?
     private var approvedRuntimeStepIndexes = Set<Int>()
     private var approvedRuntimeApplicationTargets:
         [Int: DesktopApplicationApprovalTarget] = [:]
@@ -776,6 +779,7 @@ final class AgentEngine: ObservableObject {
 
         resetTransientTaskStateForNewInput()
         currentTaskInput = text
+        missionDeveloperRunID = nil
 
         let recalledContextMemories =
             contextMemoryStore.relevant(
@@ -5827,7 +5831,7 @@ final class AgentEngine: ObservableObject {
                 missionPhase: missionPhase,
                 developerRepository: developerRepository,
                 developerMissionReason: developerMissionReason,
-                developerRunID: inspectorState.developerAgentStatus.runID,
+                developerRunID: missionDeveloperRunID,
                 semanticMission: currentSemanticMission,
                 semanticPlannerProvider:
                     currentSemanticPlannerProvider,
