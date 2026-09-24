@@ -34,6 +34,9 @@ OPENAI_TEACHER_API_KEY=""
 OPENAI_TEACHER_PLAN_VERDICT=""
 OPENAI_TEACHER_FINAL_VERDICT=""
 OPENAI_TEACHER_FINAL_AVAILABLE=0
+DEVELOPER_TASK_PLAN_DIR="$LOCAL_MENTOR_DIR/DeveloperPlans"
+BASELINE_TASK_PLAN_RESULT="$DEVELOPER_TASK_PLAN_DIR/baseline-$STAMP.json"
+DEVELOPER_TASK_GRAPH_PLAN=""
 
 if [ -n "$DEV_TASK_FILE" ] &&
    [ -f "$DEV_TASK_FILE" ] &&
@@ -62,7 +65,7 @@ fi
 
 export PATH="/opt/homebrew/bin:/usr/local/bin:$HOME/.npm-global/bin:$HOME/.local/bin:/usr/bin:/bin:/usr/sbin:/sbin:$PATH"
 
-mkdir -p "$LOG_DIR" "$RUN_LOG_DIR" "$STATUS_DIR" "$SKILL_CANDIDATE_DIR" "$OPENAI_TEACHER_DIR"
+mkdir -p "$LOG_DIR" "$RUN_LOG_DIR" "$STATUS_DIR" "$SKILL_CANDIDATE_DIR" "$OPENAI_TEACHER_DIR" "$DEVELOPER_TASK_PLAN_DIR"
 printf "%s\n" "$LOG" > "$STATUS_DIR/active-run-log.txt"
 
 write_status() {
@@ -251,7 +254,7 @@ run_openai_teacher_review() {
         return 10
     fi
 
-    KRALI_TEACHER_PHASE="$phase"     KRALI_WORKTREE="$WORKTREE"     KRALI_DEV_TASK_FILE="$DEV_TASK_FILE"     KRALI_TEACHER_RESULT_FILE="$result_file"     KRALI_OPENAI_TEACHER_API_KEY="$OPENAI_TEACHER_API_KEY"     KRALI_OPENAI_TEACHER_MODEL="$OPENAI_TEACHER_MODEL"     KRALI_OPENAI_TEACHER_REASONING="$OPENAI_TEACHER_REASONING"     KRALI_APP_VERSION="$(/bin/cat "$ROOT/VERSION" 2>/dev/null | /usr/bin/tr -d '[:space:]')"     KRALI_RUN_ID="$STAMP"     KRALI_TEACHER_BUILD_PASSED="$build_passed"     KRALI_TEACHER_TASK_VERIFICATION_PASSED="$task_verification_passed"         "$NODE_BIN" "$ROOT/Scripts/openai-teacher-bridge.mjs" >>"$LOG" 2>&1
+    KRALI_TEACHER_PHASE="$phase"     KRALI_WORKTREE="$WORKTREE"     KRALI_DEV_TASK_FILE="$DEV_TASK_FILE"     KRALI_TEACHER_BASELINE_PLAN_FILE="$BASELINE_TASK_PLAN_RESULT"     KRALI_TEACHER_RESULT_FILE="$result_file"     KRALI_OPENAI_TEACHER_API_KEY="$OPENAI_TEACHER_API_KEY"     KRALI_OPENAI_TEACHER_MODEL="$OPENAI_TEACHER_MODEL"     KRALI_OPENAI_TEACHER_REASONING="$OPENAI_TEACHER_REASONING"     KRALI_APP_VERSION="$(/bin/cat "$ROOT/VERSION" 2>/dev/null | /usr/bin/tr -d '[:space:]')"     KRALI_RUN_ID="$STAMP"     KRALI_TEACHER_BUILD_PASSED="$build_passed"     KRALI_TEACHER_TASK_VERIFICATION_PASSED="$task_verification_passed"         "$NODE_BIN" "$ROOT/Scripts/openai-teacher-bridge.mjs" >>"$LOG" 2>&1
 }
 
 cleanup_remote_proxy() {
@@ -2024,7 +2027,40 @@ NODE
 fi
 
 if [ -n "$DEV_TASK_FILE" ] && [ -f "$DEV_TASK_FILE" ]; then
-    write_status "teacher_plan_review|$GAP_LABEL için OpenAI Teacher plan review hazırlanıyor|$BRANCH|$WORKTREE"
+    write_status "task_decomposing|$GAP_LABEL KRALİ baseline decomposer ile alt görevlere ayrılıyor|$BRANCH|$WORKTREE"
+
+    if KRALI_DEV_TASK_FILE="$DEV_TASK_FILE" \
+       KRALI_TASK_DECOMPOSER_RESULT_FILE="$BASELINE_TASK_PLAN_RESULT" \
+       KRALI_OLLAMA_BASE_URL="$OLLAMA_BASE_URL" \
+       KRALI_DECOMPOSER_MODEL="$CONTROLLER_MODEL" \
+       KRALI_APP_VERSION="$(/bin/cat "$ROOT/VERSION" 2>/dev/null | /usr/bin/tr -d '[:space:]')" \
+       KRALI_RUN_ID="$STAMP" \
+       "$NODE_BIN" "$ROOT/Scripts/developer-task-decomposer.mjs" >>"$LOG" 2>&1; then
+        DEVELOPER_TASK_GRAPH_PLAN="$BASELINE_TASK_PLAN_RESULT"
+        BASELINE_PLAN_CONTEXT="$("$NODE_BIN" - "$BASELINE_TASK_PLAN_RESULT" <<'NODE'
+const fs = require("fs");
+try {
+  const payload = JSON.parse(fs.readFileSync(process.argv[2], "utf8"));
+  process.stdout.write(JSON.stringify(payload?.review || {}, null, 2).slice(0, 16000));
+} catch {}
+NODE
+)"
+        if [ -n "$BASELINE_PLAN_CONTEXT" ]; then
+            {
+                echo ""
+                echo "KRALİ Baseline Developer Task Graph:"
+                echo "$BASELINE_PLAN_CONTEXT"
+                echo "Bu graph yalnız planlama bağlamıdır; scope/approval/verification kuralları authority olmaya devam eder."
+            } >> "$PROMPT_FILE"
+        fi
+        echo "🧩 KRALİ baseline task decomposition hazır." | tee -a "$LOG"
+    else
+        echo "⚠️ KRALİ baseline task decomposition üretilemedi; mevcut tek-task güvenli akış korunuyor." | tee -a "$LOG"
+    fi
+fi
+
+if [ -n "$DEV_TASK_FILE" ] && [ -f "$DEV_TASK_FILE" ]; then
+    write_status "teacher_plan_review|$GAP_LABEL için OpenAI Teacher baseline plan review hazırlanıyor|$BRANCH|$WORKTREE"
 
     if run_openai_teacher_review "plan" "$OPENAI_TEACHER_PLAN_RESULT" 0 0; then
         OPENAI_TEACHER_PLAN_VERDICT="$(teacher_result_verdict "$OPENAI_TEACHER_PLAN_RESULT" || true)"
@@ -2040,7 +2076,23 @@ if [ -n "$DEV_TASK_FILE" ] && [ -f "$DEV_TASK_FILE" ]; then
             } >> "$PROMPT_FILE"
         fi
 
-        echo "🎓 OpenAI Teacher plan review hazır • verdict=${OPENAI_TEACHER_PLAN_VERDICT:-unknown}" | tee -a "$LOG"
+        if [ "$OPENAI_TEACHER_PLAN_VERDICT" != "ESCALATE" ] &&
+           "$NODE_BIN" - "$OPENAI_TEACHER_PLAN_RESULT" <<'NODE' >/dev/null 2>&1
+const fs = require("fs");
+try {
+  const payload = JSON.parse(fs.readFileSync(process.argv[2], "utf8"));
+  const nodes = payload?.review?.subtasks;
+  process.exit(Array.isArray(nodes) && nodes.length > 0 ? 0 : 1);
+} catch {
+  process.exit(1);
+}
+NODE
+        then
+            DEVELOPER_TASK_GRAPH_PLAN="$OPENAI_TEACHER_PLAN_RESULT"
+            echo "🎓 OpenAI Teacher baseline graph'ı review etti • verdict=${OPENAI_TEACHER_PLAN_VERDICT:-unknown} • reviewed graph seçildi" | tee -a "$LOG"
+        else
+            echo "🎓 OpenAI Teacher plan review hazır • verdict=${OPENAI_TEACHER_PLAN_VERDICT:-unknown} • KRALİ baseline graph korunuyor" | tee -a "$LOG"
+        fi
     else
         TEACHER_PLAN_EXIT=$?
         if [ "$TEACHER_PLAN_EXIT" -ne 10 ]; then
@@ -2104,7 +2156,9 @@ if [ "$PROVIDER" = "ollama" ] &&
     KRALI_APP_VERSION="$(/bin/cat "$ROOT/VERSION" 2>/dev/null | /usr/bin/tr -d '[:space:]')" \
     KRALI_RUN_ID="$STAMP" \
     KRALI_CHECKPOINT_FILE="$CHECKPOINT_FILE" \
-    KRALI_TEACHER_PLAN_FILE="$OPENAI_TEACHER_PLAN_RESULT" \
+    KRALI_DEV_TASK_FILE="$DEV_TASK_FILE" \
+    KRALI_LEARNING_PATH="$LEARNING_PATH" \
+    KRALI_DEVELOPER_TASK_PLAN_FILE="$DEVELOPER_TASK_GRAPH_PLAN" \
     KRALI_RUNTIME_SOURCE_HINTS="$RUNTIME_SOURCE_HINTS" \
     KRALI_REQUIRE_ROOT_CAUSE_GATE="$([ "$GAP_MODE" = "gap" ] && echo 1 || echo 0)" \
     KRALI_REQUIRE_CHANGE="$([ "$GAP_MODE" = "gap" ] && echo 1 || echo 0)" \
@@ -2112,7 +2166,7 @@ if [ "$PROVIDER" = "ollama" ] &&
     KRALI_LOCAL_AGENT_MAX_STRUCTURED_ACTIONS="$([ "$LEARNING_PATH" = "primitivePatch" ] && echo 6 || echo 8)" \
     KRALI_LOCAL_AGENT_MAX_INSPECTIONS="$([ "$LEARNING_PATH" = "primitivePatch" ] && echo 4 || echo 6)" \
     KRALI_LOCAL_AGENT_MAX_ITERATIONS="$(
-        if [ -f "$OPENAI_TEACHER_PLAN_RESULT" ]; then
+        if [ -n "$DEVELOPER_TASK_GRAPH_PLAN" ] && [ -f "$DEVELOPER_TASK_GRAPH_PLAN" ]; then
             echo 32
         elif [ "$LEARNING_PATH" = "primitivePatch" ]; then
             echo 10
@@ -2122,7 +2176,7 @@ if [ "$PROVIDER" = "ollama" ] &&
     )" \
     KRALI_LOCAL_AGENT_MAX_IMPLEMENTATION_REJECTION_GRACE="$([ "$LEARNING_PATH" = "primitivePatch" ] && echo 4 || echo 2)" \
     KRALI_LOCAL_AGENT_TIMEOUT_MS="$(
-        if [ -f "$OPENAI_TEACHER_PLAN_RESULT" ]; then
+        if [ -n "$DEVELOPER_TASK_GRAPH_PLAN" ] && [ -f "$DEVELOPER_TASK_GRAPH_PLAN" ]; then
             echo 720000
         else
             echo 300000
@@ -2405,6 +2459,7 @@ NODE
         KRALI_RECOVERY_MODEL="$MODEL" \
         KRALI_OLLAMA_BASE_URL="$OLLAMA_BASE_URL" \
         KRALI_DEV_TASK_FILE="$DEV_TASK_FILE" \
+        KRALI_LEARNING_PATH="$LEARNING_PATH" \
         KRALI_CANDIDATE_REPAIR_ATTEMPTS="2" \
         /bin/zsh "$ROOT/Scripts/recover-developer-candidate.command" >>"$LOG" 2>&1 || true
 
