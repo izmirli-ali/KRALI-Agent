@@ -774,6 +774,156 @@ function subtaskScopeWithinParent(entry) {
   );
 }
 
+function subtaskScopeAffinityTokens(value) {
+  return String(value || "")
+    .replace(/([a-z0-9])([A-Z])/g, "$1 $2")
+    .toLowerCase()
+    .split(/[^a-z0-9]+/)
+    .filter((token) => token.length >= 3);
+}
+
+function affinityNarrowScopeMatches(
+  matches,
+  descriptor
+) {
+  if (!Array.isArray(matches) || matches.length <= 1) {
+    return matches;
+  }
+
+  const descriptorTokens =
+    new Set(
+      subtaskScopeAffinityTokens(
+        descriptor
+      )
+    );
+
+  if (descriptorTokens.size === 0) {
+    return matches;
+  }
+
+  const scored = matches.map((scope) => {
+    const score =
+      subtaskScopeAffinityTokens(scope)
+        .filter((token) =>
+          descriptorTokens.has(token)
+        ).length;
+
+    return {
+      scope,
+      score,
+    };
+  });
+
+  const maxScore =
+    Math.max(
+      0,
+      ...scored.map((item) => item.score)
+    );
+
+  if (maxScore <= 0) {
+    return matches;
+  }
+
+  return scored
+    .filter((item) => item.score === maxScore)
+    .map((item) => item.scope);
+}
+
+function repairSubtaskScopeEntries(
+  requestedScope,
+  descriptor = ""
+) {
+  const requested =
+    Array.isArray(requestedScope)
+      ? requestedScope
+          .map(normalizeScopeEntry)
+          .filter(Boolean)
+      : [];
+
+  const repaired = [];
+  const repairs = [];
+
+  for (const scope of requested) {
+    if (
+      !scope ||
+      scope.startsWith("/") ||
+      scope.split("/").includes("..") ||
+      (
+        taskForbiddenGlobs.length > 0 &&
+        matchesAnyGlob(
+          scope,
+          taskForbiddenGlobs
+        )
+      )
+    ) {
+      return null;
+    }
+
+    const wildcard =
+      /[*?]/.test(scope);
+
+    if (!wildcard) {
+      if (subtaskScopeWithinParent(scope)) {
+        repaired.push(scope);
+        continue;
+      }
+
+      return null;
+    }
+
+    if (
+      taskAllowedGlobs.includes(scope)
+    ) {
+      repaired.push(scope);
+      continue;
+    }
+
+    const concreteMatches =
+      taskAllowedGlobs.filter((parentScope) => {
+        if (
+          !parentScope ||
+          /[*?]/.test(parentScope)
+        ) {
+          return false;
+        }
+
+        if (
+          taskForbiddenGlobs.length > 0 &&
+          matchesAnyGlob(
+            parentScope,
+            taskForbiddenGlobs
+          )
+        ) {
+          return false;
+        }
+
+        return globToRegExp(scope)
+          .test(parentScope);
+      });
+
+    const narrowed =
+      affinityNarrowScopeMatches(
+        concreteMatches,
+        descriptor
+      );
+
+    if (narrowed.length === 0) {
+      return null;
+    }
+
+    repaired.push(...narrowed);
+    repairs.push({
+      requested: scope,
+      clampedTo: narrowed,
+    });
+  }
+
+  return {
+    scope: [...new Set(repaired)],
+    repairs,
+  };
+}
+
 function developerTaskGraphFingerprint(nodes) {
   return crypto
     .createHash("sha256")
@@ -797,29 +947,45 @@ function validateDeveloperTaskGraphNodes(rawNodes) {
     return null;
   }
 
-  const nodes = rawNodes.map((raw, index) => ({
-    id: String(raw?.id || "").trim(),
-    title: String(raw?.title || "").trim(),
-    dependsOn: Array.isArray(raw?.depends_on)
-      ? raw.depends_on
-          .map((value) => String(value || "").trim())
-          .filter(Boolean)
-      : [],
-    scope: Array.isArray(raw?.scope)
-      ? raw.scope
-          .map(normalizeScopeEntry)
-          .filter(Boolean)
-      : [],
-    expectedResult: String(
-      raw?.expected_result || ""
-    ).trim(),
-    verification: String(
-      raw?.verification || ""
-    ).trim(),
-    state: "pending",
-    order: index,
-    verifiedAt: null,
-  }));
+  const nodes = [];
+
+  for (const [index, raw] of rawNodes.entries()) {
+    const repairedScope =
+      repairSubtaskScopeEntries(
+        raw?.scope,
+        [
+          raw?.id,
+          raw?.title,
+          raw?.expected_result,
+          raw?.verification,
+        ].join(" ")
+      );
+
+    if (!repairedScope) {
+      return null;
+    }
+
+    nodes.push({
+      id: String(raw?.id || "").trim(),
+      title: String(raw?.title || "").trim(),
+      dependsOn: Array.isArray(raw?.depends_on)
+        ? raw.depends_on
+            .map((value) => String(value || "").trim())
+            .filter(Boolean)
+        : [],
+      scope: repairedScope.scope,
+      scopeRepairs: repairedScope.repairs,
+      expectedResult: String(
+        raw?.expected_result || ""
+      ).trim(),
+      verification: String(
+        raw?.verification || ""
+      ).trim(),
+      state: "pending",
+      order: index,
+      verifiedAt: null,
+    });
+  }
 
   if (
     nodes.some(
