@@ -2395,6 +2395,24 @@ if [ "$CLINE_RUN_STREAMED_TO_LOG" -eq 0 ]; then
     cat "$CLINE_RUN_LOG" >>"$LOG"
 fi
 
+if [ "$CLINE_EXIT" -ne 0 ] &&
+   [ "$PROVIDER" = "ollama" ] &&
+   [ "$LOCAL_AGENT_ENGINE" = "native-ollama" ] &&
+   [ "$REMOTE_PROVIDER_MODE" -eq 1 ] &&
+   /usr/bin/grep -Eqi 'HTTP 429|status=429|daily free allocation|used up your daily|quota' "$CLINE_RUN_LOG" 2>/dev/null; then
+    echo "⚡ Cloudflare coding provider quota/429 verdi; remote circuit breaker açılıyor." | tee -a "$LOG"
+
+    if activate_local_fallback "cloudflare-main-quota"; then
+        write_status "local_fallback_retrying|$GAP_LABEL aynı worktree/checkpoint üzerinde local modelle devam ediyor|$BRANCH|$WORKTREE"
+        echo "🛟 Aynı candidate/checkpoint local modelle yeniden başlatılıyor; yeni branch oluşturulmayacak." | tee -a "$LOG"
+
+        LOCAL_FAILOVER_STARTED_AT="$(date +%s)"
+        run_native_developer_agent_once
+        CLINE_EXIT=$?
+        CLINE_DURATION="$(( CLINE_DURATION + $(date +%s) - LOCAL_FAILOVER_STARTED_AT ))"
+    fi
+fi
+
 if [ "$CLINE_EXIT" -eq 25 ] &&
    [ "$PROVIDER" = "ollama" ] &&
    [ "$LOCAL_AGENT_ENGINE" != "native-ollama" ]; then
