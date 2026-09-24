@@ -40,6 +40,7 @@ jobs:
           node Scripts/developer-task-decomposer.mjs --self-test
           node Scripts/developer-candidate-surface-guard.mjs --self-test
           node Scripts/provider-failover-self-test.mjs
+          node Scripts/local-execution-profile-self-test.mjs
 
       - name: Validate KRALI developer task cards
         shell: bash
