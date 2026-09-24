@@ -334,7 +334,8 @@ struct ContentView: View {
             .controlSize(.small)
             .disabled(
                 !engine.inspectorState.mentorTraceReady ||
-                engine.inspectorState.mentorSyncBusy
+                engine.inspectorState.mentorSyncBusy ||
+                engine.busy
             )
             .help("Son görevin Mentor kaydını gönder")
 
