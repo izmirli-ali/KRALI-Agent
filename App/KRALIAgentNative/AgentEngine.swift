@@ -949,6 +949,8 @@ final class AgentEngine: ObservableObject {
 
         let modelOutput:
             AgentSelfDiagnosisModelOutput?
+        let reasoningFailure:
+            String?
 
         if evidencePackage
             .canDiagnoseCurrentSource {
@@ -959,8 +961,16 @@ final class AgentEngine: ObservableObject {
                         evidencePackage:
                             evidencePackage
                     )
+
+            reasoningFailure =
+                modelOutput == nil
+                ? await localIntelligence
+                    .selfDiagnosisFailureReason()
+                : nil
         } else {
             modelOutput = nil
+            reasoningFailure =
+                "Source identity is not exact; reasoning was not started."
         }
 
         let report =
@@ -969,7 +979,9 @@ final class AgentEngine: ObservableObject {
                     package:
                         evidencePackage,
                     modelOutput:
-                        modelOutput
+                        modelOutput,
+                    reasoningFailure:
+                        reasoningFailure
                 )
 
         currentSelfDiagnosisReport =
@@ -1021,11 +1033,16 @@ final class AgentEngine: ObservableObject {
         let provider =
             modelOutput == nil
             ? nil
-            : "Apple Foundation Models / Self Diagnosis"
+            : "Apple Foundation Models / Guided Self Diagnosis"
 
         intelligenceProviderStatus =
             provider ??
-            "Self-diagnosis reasoning provider unavailable"
+            (
+                reasoningFailure?.isEmpty == false
+                ? "Self-diagnosis reasoning failed: " +
+                    reasoningFailure!
+                : "Self-diagnosis reasoning provider unavailable"
+            )
 
         let reply =
             report.formattedFinalReport()
