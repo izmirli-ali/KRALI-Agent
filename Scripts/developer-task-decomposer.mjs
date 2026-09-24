@@ -150,6 +150,86 @@ const schema = {
   },
 };
 
+function repairScopeToParent(requestedScope, task) {
+  const requested = Array.isArray(requestedScope)
+    ? requestedScope.map(normalizeScope).filter(Boolean)
+    : [];
+
+  const repaired = [];
+  const repairs = [];
+
+  for (const scope of requested) {
+    if (
+      !scope ||
+      scope.startsWith("/") ||
+      scope.split("/").includes("..") ||
+      matchesAnyGlob(scope, task.forbiddenScope)
+    ) {
+      return {
+        ok: false,
+        reason: "scope-forbidden:" + scope,
+      };
+    }
+
+    const wildcard = /[*?]/.test(scope);
+
+    if (!wildcard) {
+      if (
+        task.allowedScope.includes(scope) ||
+        matchesAnyGlob(scope, task.allowedScope)
+      ) {
+        repaired.push(scope);
+        continue;
+      }
+
+      return {
+        ok: false,
+        reason: "scope-outside-parent:" + scope,
+      };
+    }
+
+    if (task.allowedScope.includes(scope)) {
+      repaired.push(scope);
+      continue;
+    }
+
+    const safeMatches = task.allowedScope.filter((parentScope) => {
+      if (!parentScope) return false;
+
+      if (matchesAnyGlob(parentScope, task.forbiddenScope)) {
+        return false;
+      }
+
+      const parentWildcard = /[*?]/.test(parentScope);
+
+      if (parentWildcard) {
+        return parentScope === scope;
+      }
+
+      return globToRegExp(scope).test(parentScope);
+    });
+
+    if (safeMatches.length === 0) {
+      return {
+        ok: false,
+        reason: "scope-outside-parent:" + scope,
+      };
+    }
+
+    repaired.push(...safeMatches);
+    repairs.push({
+      requested: scope,
+      clampedTo: safeMatches,
+    });
+  }
+
+  return {
+    ok: true,
+    scope: [...new Set(repaired)],
+    repairs,
+  };
+}
+
 function validatePlan(plan, task) {
   if (
     !plan ||
@@ -160,23 +240,43 @@ function validatePlan(plan, task) {
     return { ok: false, reason: "subtasks-invalid" };
   }
 
-  const nodes = plan.subtasks.map((raw, order) => ({
-    id: String(raw?.id || "").trim(),
-    title: String(raw?.title || "").trim(),
-    depends_on: Array.isArray(raw?.depends_on)
-      ? raw.depends_on
-          .map((value) => String(value || "").trim())
-          .filter(Boolean)
-      : [],
-    scope: Array.isArray(raw?.scope)
-      ? raw.scope
-          .map(normalizeScope)
-          .filter(Boolean)
-      : [],
-    expected_result: String(raw?.expected_result || "").trim(),
-    verification: String(raw?.verification || "").trim(),
-    order,
-  }));
+  const scopeRepairs = [];
+  const nodes = [];
+
+  for (const [order, raw] of plan.subtasks.entries()) {
+    const repairedScope = repairScopeToParent(
+      raw?.scope,
+      task
+    );
+
+    if (!repairedScope.ok) {
+      return {
+        ok: false,
+        reason: repairedScope.reason,
+      };
+    }
+
+    scopeRepairs.push(
+      ...repairedScope.repairs.map((repair) => ({
+        nodeID: String(raw?.id || "").trim(),
+        ...repair,
+      }))
+    );
+
+    nodes.push({
+      id: String(raw?.id || "").trim(),
+      title: String(raw?.title || "").trim(),
+      depends_on: Array.isArray(raw?.depends_on)
+        ? raw.depends_on
+            .map((value) => String(value || "").trim())
+            .filter(Boolean)
+        : [],
+      scope: repairedScope.scope,
+      expected_result: String(raw?.expected_result || "").trim(),
+      verification: String(raw?.verification || "").trim(),
+      order,
+    });
+  }
 
   if (
     nodes.some(
@@ -214,10 +314,9 @@ function validatePlan(plan, task) {
         return { ok: false, reason: "scope-forbidden" };
       }
 
-      const wildcard = /[*?]/.test(scope);
-      const withinParent = wildcard
-        ? task.allowedScope.includes(scope)
-        : matchesAnyGlob(scope, task.allowedScope);
+      const withinParent =
+        task.allowedScope.includes(scope) ||
+        matchesAnyGlob(scope, task.allowedScope);
 
       if (!withinParent) {
         return {
@@ -254,7 +353,11 @@ function validatePlan(plan, task) {
     }
   }
 
-  return { ok: true, nodes };
+  return {
+    ok: true,
+    nodes,
+    scopeRepairs,
+  };
 }
 
 function extractContent(payload) {
@@ -323,9 +426,26 @@ function selfTest() {
     ],
   };
 
+  const repairable = {
+    summary: "repairable",
+    subtasks: [
+      {
+        id: "app",
+        title: "App",
+        depends_on: [],
+        scope: ["App/**"],
+        expected_result: "bounded app change",
+        verification: "build_check",
+      },
+    ],
+  };
+
   const checks = [
     validatePlan(good, task).ok === true,
     validatePlan(bad, task).ok === false,
+    validatePlan(repairable, task).ok === true,
+    validatePlan(repairable, task).scopeRepairs.length === 1,
+    validatePlan(repairable, task).nodes[0].scope.includes("App/Test.swift"),
     globToRegExp("App/**").test("App/Foo.swift"),
     !globToRegExp("App/**").test("Mentor/Foo.swift"),
     parseJSONContent('prefix {"summary":"x","subtasks":[]} suffix')
@@ -339,7 +459,8 @@ function selfTest() {
   process.stdout.write(
     "developer_task_decomposer_self_test_ok\n" +
     "planner_authority=advisory_graph_only\n" +
-    "scope_widening=forbidden\n"
+    "scope_widening=forbidden\n" +
+    "scope_clamp=parent_contract_only\n"
   );
 }
 
@@ -475,6 +596,7 @@ const artifact = {
       expected_result: node.expected_result,
       verification: node.verification,
     })),
+    scope_repairs: validated.scopeRepairs,
     findings: [],
     generalized_lessons: [],
   },
@@ -497,5 +619,7 @@ fs.writeFileSync(
 process.stdout.write(
   "developer_task_decomposer_ok|nodes=" +
     validated.nodes.length +
+    "|scope_repairs=" +
+    validated.scopeRepairs.length +
     "\n"
 );
