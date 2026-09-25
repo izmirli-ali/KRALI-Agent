@@ -1,5 +1,5 @@
 #!/usr/bin/env node
-const fs = require("fs");
+import fs from "node:fs";
 
 function read(path) {
   return fs.readFileSync(path, "utf8");
