@@ -319,18 +319,13 @@ struct AgentDevelopmentSuggestionStore {
     }
 
     /// The original research-quality trial predates the bounded candidate
-    /// workflow. Once it has stopped, it is neither actionable nor useful in
-    /// the compact suggestion surface, so remove only that known legacy
-    /// lineage. User-suppressed and auditable newer suggestions stay intact.
+    /// workflow. It is replaced by the fresh innovation queue, so remove that
+    /// known legacy lineage rather than allowing it to reappear as a card.
     func pruneLegacyStoppedResearch(
         _ existing: [AgentDevelopmentSuggestion]
     ) -> [AgentDevelopmentSuggestion] {
         existing.filter {
-            !(
-                $0.state == .failed &&
-                $0.source == .research &&
-                $0.fingerprint.hasPrefix("fallback:research-quality")
-            )
+            !$0.fingerprint.hasPrefix("fallback:research-quality")
         }
     }
 

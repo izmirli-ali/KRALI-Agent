@@ -331,15 +331,6 @@ final class AgentEngine: ObservableObject {
 
         developmentSuggestions =
             developmentSuggestionStore
-                .ensureVisibleFallbackSuggestions(
-                    sourceRevision:
-                        currentExactSourceRevision,
-                    in:
-                        developmentSuggestions
-                )
-
-        developmentSuggestions =
-            developmentSuggestionStore
                 .refreshInnovationSuggestions(
                     sourceRevision: currentExactSourceRevision,
                     in: developmentSuggestions

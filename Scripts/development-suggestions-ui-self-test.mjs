@@ -44,16 +44,11 @@ ok(
 );
 
 ok(
-  store.includes("func seededFallbackSuggestions") &&
-  store.includes("KRALİ araştırma kalitesini iyileştir") &&
-  store.includes("KRALİ arayüz önerilerini iyileştir") &&
-  store.includes("KRALİ eğitim raporu analizini iyileştir") &&
-  store.includes("func ensureVisibleFallbackSuggestions") &&
-  store.includes("$0.state != .suppressed") &&
-  store.includes("suppressedFingerprints") &&
-  store.includes("existingFingerprints") &&
-  engine.includes("ensureVisibleFallbackSuggestions"),
-  "empty or sidebar-invisible storage must receive deduplicated fallback cards without reviving suppressed cards"
+  store.includes("func refreshInnovationSuggestions") &&
+  store.includes("innovation:ui-development-flow") &&
+  engine.includes("refreshInnovationSuggestions") &&
+  engine.includes("pruneLegacyStoppedResearch"),
+  "fresh innovation queue replaces obsolete static fallback cards"
 );
 
 ok(
