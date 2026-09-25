@@ -6,6 +6,7 @@ router = (root / "App/KRALIAgentNative/AgentMissionRouter.swift").read_text()
 engine = (root / "App/KRALIAgentNative/AgentEngine.swift").read_text()
 intel = (root / "App/KRALIAgentNative/AgentLocalIntelligence.swift").read_text()
 quality = (root / "App/KRALIAgentNative/AgentDevelopmentResearch.swift").read_text()
+web_research = (root / "App/KRALIAgentNative/AgentWebResearch.swift").read_text()
 
 assert "case research" in router
 assert "researchScore >= 2" in router
@@ -19,6 +20,10 @@ assert '"research.web"' in engine
 assert "Mutation Started: " in quality
 assert "repositoryEvidence" in intel
 assert "evidenceRecords" in intel
+assert "case openReview" in web_research
+assert "https://api2.openreview.net/notes/search" in web_research
+assert "parseOpenReview" in web_research
+assert 'domain: "openreview.net"' in web_research
 
 # Research and diagnosis must remain separate paths.
 research_pos = engine.index("executeSelfDevelopmentResearchMission")

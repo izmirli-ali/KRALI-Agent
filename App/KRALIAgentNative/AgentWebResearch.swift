@@ -62,6 +62,7 @@ actor AgentWebResearchService {
         case duckDuckGo
         case arxiv
         case crossref
+        case openReview
 
         var name: String {
             switch self {
@@ -71,6 +72,7 @@ actor AgentWebResearchService {
             case .duckDuckGo: return "DuckDuckGo HTML"
             case .arxiv: return "arXiv API"
             case .crossref: return "Crossref DOI API"
+            case .openReview: return "OpenReview API v2"
             }
         }
     }
@@ -394,6 +396,20 @@ actor AgentWebResearchService {
                 URLQueryItem(name: "select", value: "title,URL,DOI,abstract,published")
             ]
             return components?.url
+
+        case .openReview:
+            var components = URLComponents(
+                string: "https://api2.openreview.net/notes/search"
+            )
+            components?.queryItems = [
+                URLQueryItem(name: "term", value: query),
+                URLQueryItem(name: "type", value: "terms"),
+                URLQueryItem(name: "content", value: "all"),
+                URLQueryItem(name: "source", value: "forum"),
+                URLQueryItem(name: "sort", value: "tmdate:desc"),
+                URLQueryItem(name: "limit", value: "8")
+            ]
+            return components?.url
         }
     }
 
@@ -466,6 +482,9 @@ actor AgentWebResearchService {
 
         case .crossref:
             raw = parseCrossref(payload, limit: limit)
+
+        case .openReview:
+            raw = parseOpenReview(payload, limit: limit)
         }
 
         return raw.compactMap { result in
@@ -615,6 +634,45 @@ actor AgentWebResearchService {
                 snippet: (item["abstract"] as? String).map(cleanHTML)
             )
         }
+    }
+
+    private func parseOpenReview(
+        _ payload: String,
+        limit: Int
+    ) -> [WebResearchResult] {
+        guard
+            let data = payload.data(using: .utf8),
+            let root = try? JSONSerialization.jsonObject(with: data) as? [String: Any],
+            let notes = root["notes"] as? [[String: Any]]
+        else { return [] }
+
+        return notes.prefix(limit).compactMap { note in
+            guard
+                let id = note["id"] as? String,
+                let content = note["content"] as? [String: Any],
+                let title = openReviewValue(content["title"]),
+                let url = URL(string: "https://openreview.net/forum?id=" + id)
+            else { return nil }
+
+            let summary =
+                openReviewValue(content["abstract"]) ??
+                openReviewValue(content["TL;DR"])
+
+            return WebResearchResult(
+                title: title,
+                url: url,
+                domain: "openreview.net",
+                snippet: summary
+            )
+        }
+    }
+
+    private func openReviewValue(_ raw: Any?) -> String? {
+        if let value = raw as? String { return value }
+        if let object = raw as? [String: Any] {
+            return object["value"] as? String
+        }
+        return nil
     }
 
     private func firstTagValue(
