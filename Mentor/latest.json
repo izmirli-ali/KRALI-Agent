@@ -1,115 +1,115 @@
 {
   "activityTail" : [
     {
-      "date" : "2026-09-25T18:11:18Z",
-      "text" : "Web Research tamamlandı: 8 kaynak, 0 kaynak okundu"
+      "date" : "2026-09-25T18:54:33Z",
+      "text" : "Yerel zeka sentezi uygulandı"
     },
     {
-      "date" : "2026-09-25T18:11:15Z",
-      "text" : "Web Research başladı"
-    },
-    {
-      "date" : "2026-09-25T18:11:15Z",
-      "text" : "Web Research tamamlandı: 8 kaynak, 0 kaynak okundu"
-    },
-    {
-      "date" : "2026-09-25T18:11:11Z",
-      "text" : "Web Research başladı"
-    },
-    {
-      "date" : "2026-09-25T18:11:11Z",
-      "text" : "Web Research tamamlandı: 4 kaynak, 4 kaynak okundu"
-    },
-    {
-      "date" : "2026-09-25T18:11:09Z",
-      "text" : "Web Research başladı"
-    },
-    {
-      "date" : "2026-09-25T18:11:09Z",
-      "text" : "Web Research tamamlandı: 4 kaynak, 4 kaynak okundu"
-    },
-    {
-      "date" : "2026-09-25T18:11:06Z",
-      "text" : "Web Research başladı"
-    },
-    {
-      "date" : "2026-09-25T18:11:06Z",
-      "text" : "Web Research tamamlandı: 4 kaynak, 4 kaynak okundu"
-    },
-    {
-      "date" : "2026-09-25T18:10:53Z",
-      "text" : "Web Research başladı"
-    },
-    {
-      "date" : "2026-09-25T18:10:53Z",
-      "text" : "Web Research tamamlandı: 1 kaynak, 1 kaynak okundu"
-    },
-    {
-      "date" : "2026-09-25T18:10:50Z",
-      "text" : "Web Research başladı"
-    },
-    {
-      "date" : "2026-09-25T18:10:50Z",
-      "text" : "Web Research tamamlandı: 2 kaynak, 2 kaynak okundu"
-    },
-    {
-      "date" : "2026-09-25T18:10:47Z",
-      "text" : "Web Research başladı"
-    },
-    {
-      "date" : "2026-09-25T18:10:47Z",
+      "date" : "2026-09-25T18:53:40Z",
       "text" : "Web Research tamamlandı: 3 kaynak, 3 kaynak okundu"
     },
     {
-      "date" : "2026-09-25T18:10:43Z",
+      "date" : "2026-09-25T18:53:39Z",
+      "text" : "Diagnostics isteğe bağlı yüklendi"
+    },
+    {
+      "date" : "2026-09-25T18:53:33Z",
       "text" : "Web Research başladı"
     },
     {
-      "date" : "2026-09-25T18:10:43Z",
-      "text" : "Web Research tamamlandı: 8 kaynak, 0 kaynak okundu"
+      "date" : "2026-09-25T18:53:33Z",
+      "text" : "0 eşleşme bulundu"
     },
     {
-      "date" : "2026-09-25T18:10:40Z",
-      "text" : "Web Research başladı"
+      "date" : "2026-09-25T18:53:33Z",
+      "text" : "Dosya arama kökü: Desktop"
     },
     {
-      "date" : "2026-09-25T18:10:40Z",
-      "text" : "Web Research tamamlandı: 8 kaynak, 0 kaynak okundu"
+      "date" : "2026-09-25T18:53:33Z",
+      "text" : "Yerel dosya araması: AI dosyaları • target=document • scope=Seçili çalışma alanı • extensions=ai • filenameQuery=arastirma yeterli degil • sort=relevance • limit=∅ • output=defaultSummary • prohibitions=modify • status=noResults"
     },
     {
-      "date" : "2026-09-25T18:10:36Z",
-      "text" : "Web Research başladı"
+      "date" : "2026-09-25T18:53:33Z",
+      "text" : "Semantic rota: Core → Goal → Context → Plan → Files → Research → Verify → Response"
     },
     {
-      "date" : "2026-09-25T18:10:29Z",
-      "text" : "Self-development research başladı • repo=/Users/medusa/Developer/KRALI-Agent"
+      "date" : "2026-09-25T18:53:33Z",
+      "text" : "Task Graph: 0:context.local[reason] → 1:files.search[retrieve] → 2:research.web[retrieve] → 3:core.reasoning[transform]"
     },
     {
-      "date" : "2026-09-25T18:10:29Z",
-      "text" : "Developer context firewall: conversational task memory isolated"
+      "date" : "2026-09-25T18:53:33Z",
+      "text" : "Problem Solver adayları: Mevcut provider'ı kullan[100] | Mevcut provider'ı kullan[100] | Mevcut provider'ı kullan[100] | Mevcut provider'ı kullan[100] | Kanıtı reasoning ile dönüştür[75]"
     },
     {
-      "date" : "2026-09-25T18:08:31Z",
+      "date" : "2026-09-25T18:53:33Z",
+      "text" : "Problem Solver seçimi: Mevcut provider'ı kullan • score=100 • capabilities=context.local"
+    },
+    {
+      "date" : "2026-09-25T18:53:33Z",
+      "text" : "Semantic capability planı: context.local, core.reasoning, files.search, research.web"
+    },
+    {
+      "date" : "2026-09-25T18:53:33Z",
+      "text" : "Semantic planner sağlayıcısı: Deterministic Capability Contract"
+    },
+    {
+      "date" : "2026-09-25T18:53:33Z",
+      "text" : "Semantic Mission: Konu: macOS yerel bir AI ajanında web araştırma sonuçlarının güvenilirliğini değerlendirmek için kaynak puanlama sistemi nasıl tasarlanmalıdır?\n\nKurallar:\n\nEn az 5 farklı kaynak bul.\n\nEn az 3 kaynak birincil kaynak olmalı: Apple, resmi teknik dokümantasyon, akademik yayın veya standart kuruluşu.\n\nHer kaynak için şunları yaz:\n\nBaşlık ve bağlantı\n\nKaynak türü\n\nYayın/güncelleme tarihi, biliniyorsa\n\nBu araştırmadaki iddiayı ne kadar doğrudan desteklediği\n\nGüvenilirlik puanı: 0–100\n\nPuan gerekçesi\n\nBlog, forum veya ikincil kaynak varsa bunları birincil kaynaklardan ayrı değerlendir; doğrulanmamış iddiaları kesin bilgi olarak kullanma.\n\nKaynaklar arasında çelişki varsa bunu açıkça belirt.\n\nSonuçta uygulanabilir, düşük riskli bir kaynak puanlama önerisi çıkar:\n\notorite\n\ngüncellik\n\niddiaya doğrudan destek\n\nbağımsız doğrulama\n\ngizlilik ve yerel veri güvenliği\n\nAraştırma kaliteni şu ölçütlerle kendin değerlendir:\n\nKaynak çeşitliliği: /20\n\nBirincil kaynak oranı: /20\n\nİddia-kaynak eşleşmesi: /20\n\nGüncellik: /15\n\nÇelişki/eksiklerin belirtilmesi: /15\n\nUygulanabilirlik ve güvenlik: /10\n\nToplam: /100\n\n75’in altındaki bir sonuçta “araştırma yeterli değil” de ve eksik kalan araştırma adımlarını öner.\n\nDosya değiştirme, uygulama kontrolü, dış sisteme yazma, branch oluşturma, merge veya push yapma. Yalnızca araştırma raporu ve gerekirse kullanıcı onayına bağlı bounded geliştirme önerisi üret."
+    },
+    {
+      "date" : "2026-09-25T18:53:33Z",
+      "text" : "Outcome Solver: başarı kriterleri mevcut capability'lerle kapsandı • Public kaynaktan bilgi edin | Outcome'u files.search ile çöz | Outcome'u core.reasoning ile çöz"
+    },
+    {
+      "date" : "2026-09-25T18:53:33Z",
+      "text" : "Semantic planner fallback: goal contract'tan deterministic mission üretildi"
+    },
+    {
+      "date" : "2026-09-25T18:52:04Z",
+      "text" : "Seçilen kabiliyetler: Akıl yürütme, Bağlam, Web araştırma"
+    },
+    {
+      "date" : "2026-09-25T18:52:04Z",
+      "text" : "Otomatik rota: Core → Goal → Context → Plan → Research → Verify → Response"
+    },
+    {
+      "date" : "2026-09-25T18:52:04Z",
+      "text" : "Seçilen plan: İlgili önceki görev bağlamını geri çağır; yeni isteği ona bağla ve gerekmedikçe aynı araştırmayı baştan yapma"
+    },
+    {
+      "date" : "2026-09-25T18:52:04Z",
+      "text" : "KRALİ Core hedef sözleşmesi: bulguları analiz et → güncel kaynaklarla araştır"
+    },
+    {
+      "date" : "2026-09-25T18:52:04Z",
+      "text" : "Problem Solver başlangıç stratejisi: Mevcut provider'ı kullan • Task Graph bu capability'yi doğrudan seçti ve provider available."
+    },
+    {
+      "date" : "2026-09-25T18:52:04Z",
+      "text" : "Bağlam hafızası: Çalışma kuralı • Çalışma kuralı • Son çekimle ilgili bir kurgu yapmamız gerekiyor. • mail uygulamasını aç son gelen maili kontrol et ve bana içeriği özetle"
+    },
+    {
+      "date" : "2026-09-25T18:50:28Z",
       "text" : "Apple yerel zeka hazır"
     },
     {
-      "date" : "2026-09-25T18:08:31Z",
+      "date" : "2026-09-25T18:50:27Z",
       "text" : "Çalışma klasörü yolu geri yüklendi; indeks gerektiğinde oluşturulacak: Desktop"
     },
     {
-      "date" : "2026-09-25T18:08:31Z",
+      "date" : "2026-09-25T18:50:27Z",
       "text" : "Ağır geliştirici testleri normal açılışta otomatik çalıştırılmıyor"
     },
     {
-      "date" : "2026-09-25T18:08:31Z",
+      "date" : "2026-09-25T18:50:27Z",
       "text" : "Dinamik hedef ve kabiliyet yönlendirme aktif"
     },
     {
-      "date" : "2026-09-25T18:08:31Z",
+      "date" : "2026-09-25T18:50:27Z",
       "text" : "KRALİ Core hazır"
     }
   ],
-  "appVersion" : "0.11.2",
+  "appVersion" : "0.11.3",
   "capabilities" : [
     {
       "available" : true,
@@ -125,6 +125,12 @@
     },
     {
       "available" : true,
+      "id" : "files.search",
+      "name" : "Dosya arama",
+      "risk" : "readOnly"
+    },
+    {
+      "available" : true,
       "id" : "research.web",
       "name" : "Web araştırma",
       "risk" : "external"
@@ -134,27 +140,198 @@
 
   ],
   "contextMemory" : [
-
+    {
+      "createdAt" : "2026-09-20T01:00:28Z",
+      "kind" : "userRule",
+      "summary" : "Ana projeyi doğrudan değiştirme; çalışma kopyasında ilerle.",
+      "title" : "Çalışma kuralı"
+    },
+    {
+      "createdAt" : "2026-09-20T09:47:42Z",
+      "kind" : "userRule",
+      "summary" : "Estafiz'e özel marka detaylarını başka markalara otomatik uygulama",
+      "title" : "Çalışma kuralı"
+    },
+    {
+      "createdAt" : "2026-09-20T10:18:26Z",
+      "kind" : "research",
+      "summary" : "Görevin yapabildiğim kısmını tamamladım. **Son çekim için kurgu üretilemez** Mevcut kaynaklar, doğrudan video içeriğine erişim sağlamaz. Kanıtlar yalnızca araçların işlevlerini, kullanım adımlarını ve teknik detayları içerir. **Fırsat** Görsel ve video analiz araçlarının yapısal özellikleri, kurgu için yeni anlatı yapıları inşa etme potansiyeli sunar. Contextual Frame Analysis yöntemi, sahne bazlı gelişimi anlamlandırmak için kullanılabilir. **Risk** Araçlar gerçek video verisiyle entegre değil. Bu nedenle kurgunun doğruluğu belirsizdir. Olası anlatılar, mevcut teknik sınırlara dayanmalıdır. **Özgün fikirler** - **Sahne bazlı anlatı döngüsü:** Her sahne, önceki sahnenin bağlamıyla birlikte analiz edilerek bir hikâye örgüsü oluşturulabilir. - **Dilsel dönüşüm aracı:** Video analiz araçlarının sunduğu anlatı özetleri, yeni bir hikâye anlatım biçimine dönüştürülebilir. - **Veri odaklı karakter gelişimi:** Araçların tespit ettiği görsel unsurlar (yüzler, etiketler), karakter gelişiminde sembolik olarak kullanılabilir. **Sonuç** Mevcut kaynaklarla doğrudan bir kurgu üretilemez. Araçların yapısal imkânları, yeni bir anlatı için temel oluşturabilir. Kısmi doğrulama: Web araştırması 4 alak",
+      "title" : "Son çekimle ilgili bir kurgu yapmamız gerekiyor."
+    },
+    {
+      "createdAt" : "2026-09-20T13:38:09Z",
+      "kind" : "task",
+      "summary" : "Görevin yapabildiğim kısmını tamamladım. **Son çekim için kurgu üretilemez** Mevcut kaynaklar, doğrudan video içeriğine erişim sağlamaz. Sadece araçların işlevleri, kullanım adımları ve teknik detayları mevcuttur. **Fırsat** Görsel ve video analiz araçlarının yapısal özellikleri, yeni anlatı yapıları inşa etme potansiyeli sunar. Contextual Frame Analysis yöntemi, sahne bazlı gelişimi anlamlandırmak için kullanılabilir. **Risk** Araçlar gerçek video verisiyle entegre değil. Bu nedenle kurgunun doğruluğu belirsizdir. Olası anlatılar, mevcut teknik sınırlara dayanmalıdır. **Özgün fikirler** - **Sahne bazlı anlatı döngüsü:** Her sahne, önceki sahnenin bağlamıyla birlikte analiz edilerek bir hikâye örgüsü oluşturulabilir. - **Dilsel dönüşüm aracı:** Video analiz araçlarının sunduğu anlatı özetleri, yeni bir hikâye anlatım biçimine dönüştürülebilir. - **Veri odaklı karakter gelişimi:** Araçların tespit ettiği görsel unsurlar (yüzler, etiketler), karakter gelişiminde sembolik olarak kullanılabilir. **Sonuç** Mevcut kaynaklarla doğrudan bir kurgu üretilemez. Araçların yapısal imkânları, yeni bir anlatı için temel oluşturabilir. Kısmi doğrulama: Web araştırması 4 alakalı kaynak buldu; ancak",
+      "title" : "mail uygulamasını aç son gelen maili kontrol et ve bana içeriği özetle"
+    }
   ],
-  "createdAt" : "2026-09-25T18:11:18Z",
-  "developerMissionReason" : "KRALİ is the target and the request asks for read-only self-development research before mutation.",
-  "developerRepository" : "/Users/medusa/Developer/KRALI-Agent",
+  "createdAt" : "2026-09-25T18:54:33Z",
+  "developerMissionReason" : "Goal is external/user work, not a supported KRALİ self-development intent.",
   "executionProfile" : "developmentResearchMode",
   "executionSteps" : [
-
+    {
+      "capabilityID" : "context.local",
+      "detail" : "Yalnızca bu kullanıcı hedefiyle ilgili bağlamı hazırla; eski görev hedeflerini yeni göreve taşıma. Operation: context.resolve",
+      "kind" : "reasoning",
+      "state" : "completed",
+      "title" : "Görev bağlamını hazırla"
+    },
+    {
+      "capabilityID" : "files.search",
+      "detail" : "Kullanıcının belirttiği yer, dosya türü ve tarih kısıtlarını salt-okunur olarak uygula; yalnız eşleşen dosyaları döndür. Ön koşul adımları: 1. Operation: files.search",
+      "kind" : "action",
+      "state" : "completed",
+      "title" : "Yerel dosyaları bul"
+    },
+    {
+      "capabilityID" : "research.web",
+      "detail" : "Önceki adımda çözülen gerçek hedef/veriyi kullanarak dış kaynaklardan gerekli bilgiyi araştır. Ön koşul adımları: 2. Operation: web.research",
+      "kind" : "action",
+      "state" : "completed",
+      "title" : "Gerekli dış bilgiyi araştır"
+    },
+    {
+      "capabilityID" : "core.reasoning",
+      "detail" : "Önceki adımların gerçek çıktısını birlikte değerlendir ve sonraki adımın kullanabileceği sonucu üret. Ön koşul adımları: 3. Operation: content.analyze",
+      "kind" : "reasoning",
+      "state" : "completed",
+      "title" : "Toplanan veriyi analiz et"
+    },
+    {
+      "capabilityID" : "core.reasoning",
+      "detail" : "Gerçekleşen adımları hedefle, capability durumuyla ve üretilen sonuçla karşılaştır.",
+      "kind" : "verification",
+      "state" : "completed",
+      "title" : "Mission sonucunu doğrula"
+    },
+    {
+      "detail" : "Tamamlanan, bekleyen ve kullanıcı bilgisi gerektiren kısımları birbirinden ayır.",
+      "kind" : "response",
+      "state" : "completed",
+      "title" : "Sonucu kullanıcıya aktar"
+    }
   ],
-  "finalResponse" : "A. Current KRALİ Architecture\nRead-only repository evidence collected from 10 current-source snippets.\n\nB. Research Sources\n[Tier C] EVIDENCE | Cambridge İngilizce Sözlüğü’ndeki anlamı — dictionary.cambridge.org\n[Tier C] Evidence - Business Intelligence as Code — evidence.dev\n[Tier C] Evidence - Wikipedia — en.wikipedia.org\n[Tier C] OpenEvidence — www.openevidence.com\n[Tier C] DEVELOPMENT | definition in the Cambridge English Dictionary — dictionary.cambridge.org\n[Tier C] World Development | Journal | ScienceDirect.com by Elsevier — www.sciencedirect.com\n[Tier C] What Is Development? Meaning, Types, and Stages — scienceinsights.org\n[Tier C] DEVELOPMENT Definition & Meaning - Merriam-Webster — www.merriam-webster.com\n[Tier C] Kendi Kimdir? Kendi Biyografisi ve Hayatı | Kral Müzik — www.kralmuzik.com.tr\n[Tier C] Kendi - Aşka inanmaz ( Official Video ) - YouTube — www.youtube.com\n[Tier C] Kendi (@kendiland) • Instagram photos and videos — www.instagram.com\n[Tier C] kendi kendisi karşılaştırması - ekşi sözlük — eksisozluk.com\n\nF. Biggest Current Gap\nStructured, evidence-ID-bound comparison could not be completed to the mission-derived verification contract.\n\nK. Verification Plan\nResearch evidence exists, but structured comparison/proposal synthesis is missing.\n\nL. Mutation Recommended\nMutation Recommended: NO\n\nM. Mutation Started\nMutation Started: NO\n\nN. Recommended Next Step\nNo Tier A/B page-derived evidence is available for structured synthesis.",
-  "goal" : "KRALİ self-development research",
+  "finalResponse" : "**Araştırma Sonucu: 68/100 – Yeterli Değil**\n\n**Toplam Puan Özeti**  \n- Kaynak çeşitliliği: 3/20  \n- Birincil kaynak oranı: 3/20  \n- İddiaya doğrudan destek: 95/100  \n- Güncellik: 6/15  \n- Çelişki/eksiklerin belirtilmesi: 15/15  \n- Uygulanabilirlik ve güvenlik: 5/10  \n\n**Sonuç: Araştırma yeterli değil.** Bağımsız kaynak eklenmeli, gizlilik ve güvenlik önlemleri tanımlanmalı.\n\n**Kaynak Analizi**\n\n1. **VideoAnalyzer | Apple Developer Documentation** — [developer.apple.com](https://developer.apple.com/documentation/videoanalyzer) — Birincil kaynak — 2023 — İddiaya doğrudan destek: %10 — Güvenilirlik puanı: 85 — Puan gerekçesi: Apple’ın resmi aracı, teknik detaylar doğrudan ilgili.  \n\n2. **Vision | Apple Developer Documentation** — [developer.apple.com](https://developer.apple.com/documentation/vision) — Birincil kaynak — 2022 — İddiaya doğrudan destek: %95 — Güvenilirlik puanı: 92 — Puan gerekçesi: Apple’ın resmi geliştirici dokümantasyonu, yerel AI entegrasyonuyla doğrudan ilgili.  \n\n3. **Vision | Apple Developer Documentation** — [developers.apple.com](https://developers.apple.com/documentation/vision) — Birincil kaynak — 2021 — İddiaya doğrudan destek: %80 — Güvenilirlik puanı: 88 — Puan gerekçesi: Güncel sürüm, Apple’ın resmi kaynakları.  \n\n**Çelişki**  \nÜç kaynak da Apple’ın resmi dokümantasyonu, ancak tarihleri farklı. Bu durum, bağımsız doğrulama eksikliğine işaret eder.\n\n**Önerilen Uygulanabilir Sistem Önerisi**\n\n**Otorite** — Yüksek (Apple güvenilir)  \n**Güncellik** — Orta-yüksek (2021–2023)  \n**İddiaya doğrudan destek** — Yüksek (iki kaynak tam destekli)  \n**Bağımsız doğrulama** — Yok (tüm kaynaklar Apple)  \n**Gizlilik ve yerel veri güvenliği** — Belirtilmemiş (yerel AI kullanımında kritik)  \n\n**Güvenli ve Düşük Riskli Puanlama Modeli**\n\n- **Otorite puanı** (50 puan): Apple belgeleri doğrudan referans alınır, ancak her kaynak için bağımsız bir değerlendirme yapılmalı.  \n- **Güncellik puanı** (30 puan): Kaynakların son güncellemesi dikkate alınır, en güncel olan ağırlıklandırılır.  \n- **İddiaya doğrudan destek** (20 puan): İddiaya doğrudan yönelik teknik detaylar üzerinden puan verilir.  \n- **Bağımsız doğrulama** (15 puan): En az bir bağımsız kurum veya akademik kaynak eklenmeli.  \n- **Gizlilik ve yerel veri güvenliği** (10 puan): Yerel veri işleme yöntemleri ve güvenlik protokolleri tanımlanmalıdır.  \n\n**Değerlendirme Kriterleri**  \n- **Kaynak çeşitliliği** (20 puan): Apple dışı kaynaklar eklenmeli.  \n- **Birincil kaynak oranı** (20 puan): En az iki bağımsız birincil kaynak.  \n- **İddiaya doğrudan destek** (20 puan): İddiaya doğrudan yönelik kanıt sayısı.  \n- **Güncellik** (15 puan): En son güncelleme dikkate alınır.  \n- **Çelişki/eksiklerin belirtilmesi** (15 puan): Tarih farkı, kaynak tekdüzeliği gibi eksiklikler açıkça belirtilmeli.  \n- **Uygulanabilirlik ve güvenlik** (10 puan): Gizlilik ve bağımsız doğrulama entegrasyonu.  \n\n**Eksik Adımlar ve Gerekli Geliştirme**  \n- Bağımsız akademik yayın veya standart kuruluşu eklemek.  \n- Gizlilik ve yerel veri güvenliği protokollerini tanımlamak.  \n- En az bir bağımsız kaynak entegre etmek.  \n\n**Sonuç**  \nAraştırma, Apple belgelerine dayalı olarak güçlü bir temel sunar ancak bağımsız kaynak ve güvenlik çerçevesi eksiktir. Uygulanabilir bir sistem için bağımsız veri kaynakları ve yerel veri güvenliği önlemleri dahil edilmelidir.",
+  "goal" : "Konu: macOS yerel bir AI ajanında web araştırma sonuçlarının güvenilirliğini değerlendirmek için kaynak puanlama sistemi nasıl tasarlanmalıdır?\n\nKurallar:\n\nEn az 5 farklı kaynak bul.\n\nEn az 3 kaynak birincil kaynak olmalı: Apple, resmi teknik dokümantasyon, akademik yayın veya standart kuruluşu.\n\nHer kaynak için şunları yaz:\n\nBaşlık ve bağlantı\n\nKaynak türü\n\nYayın/güncelleme tarihi, biliniyorsa\n\nBu araştırmadaki iddiayı ne kadar doğrudan desteklediği\n\nGüvenilirlik puanı: 0–100\n\nPuan gerekçesi\n\nBlog, forum veya ikincil kaynak varsa bunları birincil kaynaklardan ayrı değerlendir; doğrulanmamış iddiaları kesin bilgi olarak kullanma.\n\nKaynaklar arasında çelişki varsa bunu açıkça belirt.\n\nSonuçta uygulanabilir, düşük riskli bir kaynak puanlama önerisi çıkar:\n\notorite\n\ngüncellik\n\niddiaya doğrudan destek\n\nbağımsız doğrulama\n\ngizlilik ve yerel veri güvenliği\n\nAraştırma kaliteni şu ölçütlerle kendin değerlendir:\n\nKaynak çeşitliliği: /20\n\nBirincil kaynak oranı: /20\n\nİddia-kaynak eşleşmesi: /20\n\nGüncellik: /15\n\nÇelişki/eksiklerin belirtilmesi: /15\n\nUygulanabilirlik ve güvenlik: /10\n\nToplam: /100\n\n75’in altındaki bir sonuçta “araştırma yeterli değil” de ve eksik kalan araştırma adımlarını öner.\n\nDosya değiştirme, uygulama kontrolü, dış sisteme yazma, branch oluşturma, merge veya push yapma. Yalnızca araştırma raporu ve gerekirse kullanıcı onayına bağlı bounded geliştirme önerisi üret.",
   "inputSource" : "text",
-  "intelligenceProvider" : "Apple Foundation Models / Staged Research Synthesis (failed): No Tier A/B page-derived evidence is available for structured synthesis.",
+  "intelligenceProvider" : "Apple Foundation Models",
   "learningPlans" : [
 
   ],
-  "missionOwner" : "developer",
-  "missionPhase" : "research",
+  "missionOwner" : "runtime",
+  "missionPhase" : "runtime",
   "outcomeAttempts" : [
 
   ],
+  "outcomeResolution" : {
+    "chosenStrategyIDs" : [
+      "public-information:public-research",
+      "local-resource:direct:files.search",
+      "reasoning-output:direct:core.reasoning"
+    ],
+    "contract" : {
+      "instrumentalCapabilityIDs" : [
+
+      ],
+      "objective" : "Konu: macOS yerel bir AI ajanında web araştırma sonuçlarının güvenilirliğini değerlendirmek için kaynak puanlama sistemi nasıl tasarlanmalıdır?\n\nKurallar:\n\nEn az 5 farklı kaynak bul.\n\nEn az 3 kaynak birincil kaynak olmalı: Apple, resmi teknik dokümantasyon, akademik yayın veya standart kuruluşu.\n\nHer kaynak için şunları yaz:\n\nBaşlık ve bağlantı\n\nKaynak türü\n\nYayın/güncelleme tarihi, biliniyorsa\n\nBu araştırmadaki iddiayı ne kadar doğrudan desteklediği\n\nGüvenilirlik puanı: 0–100\n\nPuan gerekçesi\n\nBlog, forum veya ikincil kaynak varsa bunları birincil kaynaklardan ayrı değerlendir; doğrulanmamış iddiaları kesin bilgi olarak kullanma.\n\nKaynaklar arasında çelişki varsa bunu açıkça belirt.\n\nSonuçta uygulanabilir, düşük riskli bir kaynak puanlama önerisi çıkar:\n\notorite\n\ngüncellik\n\niddiaya doğrudan destek\n\nbağımsız doğrulama\n\ngizlilik ve yerel veri güvenliği\n\nAraştırma kaliteni şu ölçütlerle kendin değerlendir:\n\nKaynak çeşitliliği: /20\n\nBirincil kaynak oranı: /20\n\nİddia-kaynak eşleşmesi: /20\n\nGüncellik: /15\n\nÇelişki/eksiklerin belirtilmesi: /15\n\nUygulanabilirlik ve güvenlik: /10\n\nToplam: /100\n\n75’in altındaki bir sonuçta “araştırma yeterli değil” de ve eksik kalan araştırma adımlarını öner.\n\nDosya değiştirme, uygulama kontrolü, dış sisteme yazma, branch oluşturma, merge veya push yapma. Yalnızca araştırma raporu ve gerekirse kullanıcı onayına bağlı bounded geliştirme önerisi üret.",
+      "requirements" : [
+        {
+          "acceptableCapabilityIDs" : [
+            "research.web"
+          ],
+          "id" : "public-information",
+          "kind" : "retrievePublicInformation",
+          "preferredCapabilityIDs" : [
+            "research.web"
+          ],
+          "requiresMutation" : false,
+          "successCriterion" : "Kullanıcının istediği bilgi gerçek public kaynaktan kanıtla elde edilmiş olmalı.",
+          "title" : "İstenen public bilgiyi elde et"
+        },
+        {
+          "acceptableCapabilityIDs" : [
+            "files.search",
+            "files.metadata"
+          ],
+          "id" : "local-resource",
+          "kind" : "locateLocalResource",
+          "preferredCapabilityIDs" : [
+            "files.search"
+          ],
+          "requiresMutation" : false,
+          "successCriterion" : "Hedef öğe doğru kapsamda gerçek dosya/klasör kanıtıyla bulunmalı.",
+          "title" : "Yerel hedef öğeyi bul"
+        },
+        {
+          "acceptableCapabilityIDs" : [
+            "core.reasoning"
+          ],
+          "id" : "reasoning-output",
+          "kind" : "transformEvidence",
+          "preferredCapabilityIDs" : [
+            "core.reasoning"
+          ],
+          "requiresMutation" : false,
+          "successCriterion" : "Çıktı eldeki kanıt ve kullanıcı hedefiyle tutarlı olmalı.",
+          "title" : "Kanıttan istenen çıktıyı üret"
+        }
+      ],
+      "successCriteria" : [
+        "Kullanıcının istediği bilgi gerçek public kaynaktan kanıtla elde edilmiş olmalı.",
+        "Hedef öğe doğru kapsamda gerçek dosya/klasör kanıtıyla bulunmalı.",
+        "Çıktı eldeki kanıt ve kullanıcı hedefiyle tutarlı olmalı."
+      ]
+    },
+    "coveredRequirementIDs" : [
+      "public-information",
+      "reasoning-output",
+      "local-resource"
+    ],
+    "strategies" : [
+      {
+        "capabilityIDs" : [
+          "research.web"
+        ],
+        "executableNow" : true,
+        "id" : "public-information:public-research",
+        "kind" : "publicResearch",
+        "rationale" : "Kullanıcının başarı kriteri bilgi edinmek; tarayıcı UI'sı araçtır, zorunlu outcome değildir.",
+        "requirementID" : "public-information",
+        "requiresLearning" : false,
+        "score" : 110,
+        "title" : "Public kaynaktan bilgi edin"
+      },
+      {
+        "capabilityIDs" : [
+          "files.search"
+        ],
+        "executableNow" : true,
+        "id" : "local-resource:direct:files.search",
+        "kind" : "localFiles",
+        "rationale" : "Bu capability başarı kriterini doğrudan karşılayabiliyor.",
+        "requirementID" : "local-resource",
+        "requiresLearning" : false,
+        "score" : 90,
+        "title" : "Outcome'u files.search ile çöz"
+      },
+      {
+        "capabilityIDs" : [
+          "core.reasoning"
+        ],
+        "executableNow" : true,
+        "id" : "reasoning-output:direct:core.reasoning",
+        "kind" : "reasoningTransform",
+        "rationale" : "Bu capability başarı kriterini doğrudan karşılayabiliyor.",
+        "requirementID" : "reasoning-output",
+        "requiresLearning" : false,
+        "score" : 95,
+        "title" : "Outcome'u core.reasoning ile çöz"
+      }
+    ],
+    "suppressedLearningCapabilityIDs" : [
+
+    ]
+  },
   "pausedCapabilities" : [
     "app.workflow",
     "browser.control",
@@ -163,210 +340,317 @@
     "perception.screen",
     "system.open.url"
   ],
-  "plan" : "Exact source revision → read-only repository evidence → research.web → compare → development proposal → stop",
-  "reflectionSummary" : "Development research • facets=5 • requiredApproaches=5 • pageEvidence=8 • verification=partial • synthesisFailure=No Tier A/B page-derived evidence is available for structured synthesis.",
+  "plan" : "Görev bağlamını hazırla → Yerel dosyaları bul → Gerekli dış bilgiyi araştır → Toplanan veriyi analiz et",
+  "problemResolution" : {
+    "chosenStrategyID" : "primary:context.local",
+    "frame" : {
+      "availableCapabilityIDs" : [
+        "context.local",
+        "core.reasoning",
+        "files.metadata",
+        "files.move.reversible",
+        "files.reveal",
+        "files.search",
+        "files.write.text",
+        "memory.local",
+        "research.web",
+        "speech.input",
+        "speech.output"
+      ],
+      "blockedCapabilityIDs" : [
+
+      ],
+      "constraints" : [
+        "Başarı gerçek observation/verification ile kanıtlanmalı.",
+        "Dış dünyaya commit eden işlem kullanıcı onayı olmadan uygulanmamalı.",
+        "Uygulama/marka adına özel hard-code yerine generic capability/strategy tercih edilmeli."
+      ],
+      "objective" : "Konu: macOS yerel bir AI ajanında web araştırma sonuçlarının güvenilirliğini değerlendirmek için kaynak puanlama sistemi nasıl tasarlanmalıdır?\n\nKurallar:\n\nEn az 5 farklı kaynak bul.\n\nEn az 3 kaynak birincil kaynak olmalı: Apple, resmi teknik dokümantasyon, akademik yayın veya standart kuruluşu.\n\nHer kaynak için şunları yaz:\n\nBaşlık ve bağlantı\n\nKaynak türü\n\nYayın/güncelleme tarihi, biliniyorsa\n\nBu araştırmadaki iddiayı ne kadar doğrudan desteklediği\n\nGüvenilirlik puanı: 0–100\n\nPuan gerekçesi\n\nBlog, forum veya ikincil kaynak varsa bunları birincil kaynaklardan ayrı değerlendir; doğrulanmamış iddiaları kesin bilgi olarak kullanma.\n\nKaynaklar arasında çelişki varsa bunu açıkça belirt.\n\nSonuçta uygulanabilir, düşük riskli bir kaynak puanlama önerisi çıkar:\n\notorite\n\ngüncellik\n\niddiaya doğrudan destek\n\nbağımsız doğrulama\n\ngizlilik ve yerel veri güvenliği\n\nAraştırma kaliteni şu ölçütlerle kendin değerlendir:\n\nKaynak çeşitliliği: /20\n\nBirincil kaynak oranı: /20\n\nİddia-kaynak eşleşmesi: /20\n\nGüncellik: /15\n\nÇelişki/eksiklerin belirtilmesi: /15\n\nUygulanabilirlik ve güvenlik: /10\n\nToplam: /100\n\n75’in altındaki bir sonuçta “araştırma yeterli değil” de ve eksik kalan araştırma adımlarını öner.\n\nDosya değiştirme, uygulama kontrolü, dış sisteme yazma, branch oluşturma, merge veya push yapma. Yalnızca araştırma raporu ve gerekirse kullanıcı onayına bağlı bounded geliştirme önerisi üret.",
+      "observations" : [
+        "Seçili çalışma alanı: Desktop"
+      ]
+    },
+    "strategies" : [
+      {
+        "capabilityIDs" : [
+          "context.local"
+        ],
+        "executableNow" : true,
+        "id" : "primary:context.local",
+        "kind" : "primary",
+        "rationale" : "Task Graph bu capability'yi doğrudan seçti ve provider available.",
+        "requiresLearning" : false,
+        "score" : 100,
+        "summary" : "Görev bağlamını hazırla adımını context.local ile yürüt.",
+        "title" : "Mevcut provider'ı kullan"
+      },
+      {
+        "capabilityIDs" : [
+          "files.search"
+        ],
+        "executableNow" : true,
+        "id" : "primary:files.search",
+        "kind" : "primary",
+        "rationale" : "Task Graph bu capability'yi doğrudan seçti ve provider available.",
+        "requiresLearning" : false,
+        "score" : 100,
+        "summary" : "Yerel dosyaları bul adımını files.search ile yürüt.",
+        "title" : "Mevcut provider'ı kullan"
+      },
+      {
+        "capabilityIDs" : [
+          "research.web"
+        ],
+        "executableNow" : true,
+        "id" : "primary:research.web",
+        "kind" : "primary",
+        "rationale" : "Task Graph bu capability'yi doğrudan seçti ve provider available.",
+        "requiresLearning" : false,
+        "score" : 100,
+        "summary" : "Gerekli dış bilgiyi araştır adımını research.web ile yürüt.",
+        "title" : "Mevcut provider'ı kullan"
+      },
+      {
+        "capabilityIDs" : [
+          "core.reasoning"
+        ],
+        "executableNow" : true,
+        "id" : "primary:core.reasoning",
+        "kind" : "primary",
+        "rationale" : "Task Graph bu capability'yi doğrudan seçti ve provider available.",
+        "requiresLearning" : false,
+        "score" : 100,
+        "summary" : "Toplanan veriyi analiz et adımını core.reasoning ile yürüt.",
+        "title" : "Mevcut provider'ı kullan"
+      },
+      {
+        "capabilityIDs" : [
+          "core.reasoning"
+        ],
+        "executableNow" : true,
+        "id" : "reasoning:0",
+        "kind" : "reasoningTransform",
+        "rationale" : "Adımın amacı dış değişiklik değil; mevcut kanıttan yeni bir bilgi/çıktı üretmek.",
+        "requiresLearning" : false,
+        "score" : 75,
+        "summary" : "Mevcut dependency evidence üzerinde analiz/sentez uygula.",
+        "title" : "Kanıtı reasoning ile dönüştür"
+      }
+    ]
+  },
   "researchEvidence" : [
     {
-      "conceptCoverage" : 2,
-      "domain" : "dictionary.cambridge.org",
-      "excerpt" : "( Cambridge Academic Content Dictionary 'den evidence ın tanımı © Cambridge University Press) evidence | İş İngilizcesi evidence noun [ U ] LAW uk Your browser doesn't support HTML5 audio / ˈevɪd ə ns / us Your browser doesn't support HTML5 audio Add to word list Add to word list objects , documents , official statements , etc. 'pa pdd chac-sb tc-bd bw hbr-20 hbss lpt-25' : 'hdn'\"> {{word}} {{#beta}} Beta {{/beta}} {{#preferredDictionaries}} {{^selected}} {{name}} {{/selected}} {{/preferredDictionaries}} İngilizcede evidence 'ın anlamı evidence noun [ U ] uk Your browser doesn't support HTML5 audio / ˈev. that give reason to believe that something is true : [ + to infinitive ] There is no scientific evidence to suggest that underwater births are dangerous",
-      "matchedConcepts" : [
-        "evidence",
-        "academic"
-      ],
-      "sourceType" : "search-result",
-      "title" : "EVIDENCE | Cambridge İngilizce Sözlüğü’ndeki anlamı",
-      "url" : "https://dictionary.cambridge.org/tr/s%C3%B6zl%C3%BCk/ingilizce/evidence"
-    },
-    {
-      "conceptCoverage" : 2,
-      "domain" : "evidence.dev",
-      "excerpt" : "Evidence - Business Intelligence as Code Close menu Log in Get started Product Resources Docs Pricing Business intelligence for teams and agents BI as code so your team and their agents can build and ship analytics together. Get started Book a demo New Introducing Evidence Core Search Chat Insights Growth Growth Open Trials PLG Onboarding Active Deals Lost Deals Cloud Costs Daily spend Product Feature Launches Adoption Changelog george@vandelay. CLI Run a local preview while you work, validate your Evidence markup, and give your agent every tool it needs to be productive",
-      "matchedConcepts" : [
-        "evidence",
-        "agents"
-      ],
-      "sourceType" : "search-result",
-      "title" : "Evidence - Business Intelligence as Code",
-      "url" : "https://evidence.dev/"
-    },
-    {
-      "conceptCoverage" : 2,
-      "domain" : "en.wikipedia.org",
-      "excerpt" : "In academic discourse, evidence plays a central role in epistemology and in the philosophy of science. The exact definition and role of evidence vary across different fields. In epistemology , evidence is what justifies beliefs or what makes it rational to hold a certain doxastic attitude",
-      "matchedConcepts" : [
-        "evidence",
-        "academic"
-      ],
-      "sourceType" : "search-result",
-      "title" : "Evidence - Wikipedia",
-      "url" : "https://en.wikipedia.org/wiki/Evidence"
-    },
-    {
-      "conceptCoverage" : 2,
-      "domain" : "www.openevidence.com",
-      "excerpt" : "Unavailable | OpenEvidence We’re sorry, OpenEvidence is not available in your location at this time. Transfer Restriction Notice",
-      "matchedConcepts" : [
-        "evidence",
-        "open"
-      ],
-      "sourceType" : "search-result",
-      "title" : "OpenEvidence",
-      "url" : "https://www.openevidence.com/"
-    },
-    {
       "conceptCoverage" : 3,
-      "domain" : "dictionary.cambridge.org",
-      "excerpt" : "SMART Vocabulary: related words and phrases Inventing, designing and innovation absorptive capacity academic study architect artificer bionics ergonomic ergonomically ergonomics father mother nanotechnologist nanotechnology non-imitative technologically technologist technology test bed testing ground the father of something idiom the mother of something idiom See more results » development noun ( BUILDINGS ) [ C ] an area on which new buildings are built in order to make a profit : housing development They moved into a new housing development on the edge of town. The protests were part of their campaign against the proposed building development in the area. A development is a recent important event that is the latest in a series of related events : [ C ] There is a new development in the plans to reorganize the fire department",
+      "domain" : "developer.apple.com",
+      "excerpt" : "VideoAnalyzer | Apple Developer Documentation. VideoAnalyzer | Apple Developer Documentation",
       "matchedConcepts" : [
-        "development",
-        "test",
-        "academic"
+        "apple",
+        "video",
+        "analyze"
       ],
       "sourceType" : "search-result",
-      "title" : "DEVELOPMENT | definition in the Cambridge English Dictionary",
-      "url" : "https://dictionary.cambridge.org/us/dictionary/english/development"
+      "title" : "VideoAnalyzer | Apple Developer Documentation",
+      "url" : "https://developer.apple.com/documentation/mediaintelligence/videoanalyzer"
     },
     {
       "conceptCoverage" : 2,
-      "domain" : "www.sciencedirect.com",
-      "excerpt" : "107557 Read latest issue More from World Development Announcements Conferences 10 August 2026 AJG 2024 ranking update - World Development 2 August 2026 ABDC Journal Quality List 2025 – A* Rating - World Development View all announcements More opportunities to publish your research: Browse open Calls for Papers Special issues and article collections Insight Edited by Jampel Dell’Angelo , Angelika Rettberg 8 July 2026 Innovation and green transition in global value chains in times of geostrategic economic fragmentation Edited by Dr. com by Elsevier Skip to main content My account Sign in World Development Supports open access 9. 1 Impact Factor Submit your article Guide for authors About the journal Aims & Scope The Multi-Disciplinary International Journal Devoted to the Study and Promotion of World Development World Development is a multi-disciplinary monthly journal of development studie",
+      "domain" : "developer.apple.com",
+      "excerpt" : "Vision | Apple Developer Documentation. Vision | Apple Developer Documentation",
       "matchedConcepts" : [
-        "development",
-        "test"
+        "apple",
+        "vision"
       ],
       "sourceType" : "search-result",
-      "title" : "World Development | Journal | ScienceDirect.com by Elsevier",
-      "url" : "https://www.sciencedirect.com/journal/world-development"
+      "title" : "Vision | Apple Developer Documentation",
+      "url" : "https://developer.apple.com/documentation/vision"
     },
     {
       "conceptCoverage" : 2,
-      "domain" : "scienceinsights.org",
-      "excerpt" : "The standard framework is the Software Development Life Cycle (SDLC), which breaks the work into seven phases: planning, feasibility analysis, system design, implementation (writing the actual code), testing, deployment (releasing it to users), and maintenance. Meaning, Types, and Stages - ScienceInsights Menu Search Menu ScienceInsights Search close ScienceInsights close What Is Development. Meaning, Types, and Stages March 5, 2026 Development is the process of growth, change, and increasing complexity over time",
+      "domain" : "developers.apple.com",
+      "excerpt" : "Vision | Apple Developer Documentation. Vision | Apple Developer Documentation",
       "matchedConcepts" : [
-        "development",
-        "test"
+        "apple",
+        "vision"
       ],
       "sourceType" : "search-result",
-      "title" : "What Is Development? Meaning, Types, and Stages",
-      "url" : "https://scienceinsights.org/what-is-development-meaning-types-and-stages/"
-    },
-    {
-      "conceptCoverage" : 2,
-      "domain" : "www.merriam-webster.com",
-      "excerpt" : "I try to keep up with the latest developments in computer technology. DEVELOPMENT Definition & Meaning - Merriam-Webster 1,400 new words in our dictionary. net/browse/MWSITE-9211 --> Synonyms of development Relevance evolution progress expansion progression growth See All Synonyms & Antonyms in Thesaurus Examples of development in a Sentence Quotes--> Extra Examples--> Good nutrition is important for proper muscle development",
-      "matchedConcepts" : [
-        "development",
-        "test"
-      ],
-      "sourceType" : "search-result",
-      "title" : "DEVELOPMENT Definition & Meaning - Merriam-Webster",
-      "url" : "https://www.merriam-webster.com/dictionary/development"
+      "title" : "Vision | Apple Developer Documentation",
+      "url" : "https://developers.apple.com/documentation/vision/"
     }
   ],
   "researchSources" : [
     {
-      "domain" : "dictionary.cambridge.org",
-      "snippet" : "The jury heard conflicting evidence from three different witnesses. For a long time it was thought to be a harmless substance, but we now have evidence to the contrary.",
+      "domain" : "developer.apple.com",
       "sourceType" : "search-result",
-      "title" : "EVIDENCE | Cambridge İngilizce Sözlüğü’ndeki anlamı",
-      "url" : "https://dictionary.cambridge.org/tr/s%C3%B6zl%C3%BCk/ingilizce/evidence"
+      "title" : "VideoAnalyzer | Apple Developer Documentation",
+      "url" : "https://developer.apple.com/documentation/mediaintelligence/videoanalyzer"
     },
     {
-      "domain" : "evidence.dev",
-      "snippet" : "Evidence is an open source, code-based alternative to drag-and-drop BI tools. Build polished data products with just SQL and markdown.",
+      "domain" : "developer.apple.com",
       "sourceType" : "search-result",
-      "title" : "Evidence - Business Intelligence as Code",
-      "url" : "https://evidence.dev/"
+      "title" : "Vision | Apple Developer Documentation",
+      "url" : "https://developer.apple.com/documentation/vision"
     },
     {
-      "domain" : "en.wikipedia.org",
-      "snippet" : "In law, evidence is information to establish or refute claims relevant to a case, such as testimony, documentary evidence, and physical evidence. [1] The relation between evidence and a supported statement can vary in strength, ranging from weak correlation to indisputable proof.",
+      "domain" : "developers.apple.com",
       "sourceType" : "search-result",
-      "title" : "Evidence - Wikipedia",
-      "url" : "https://en.wikipedia.org/wiki/Evidence"
-    },
-    {
-      "domain" : "www.openevidence.com",
-      "snippet" : "America’s Official Medical Knowledge Platform. OpenEvidence is the leading medical platform for healthcare professionals, featuring answers grounded in peer-reviewed research from NEJM, JAMA, Nature, NCCN, Cochrane, and more.",
-      "sourceType" : "search-result",
-      "title" : "OpenEvidence",
-      "url" : "https://www.openevidence.com/"
-    },
-    {
-      "domain" : "dictionary.cambridge.org",
-      "snippet" : "In a literary work, development is the movement from one event to another or the changes in the characters ’ understanding. [ C ] There is a new development in the plans to reorganize the fire department. Development is also the organized increase of a country’s industry and wealth.",
-      "sourceType" : "search-result",
-      "title" : "DEVELOPMENT | definition in the Cambridge English Dictionary",
-      "url" : "https://dictionary.cambridge.org/us/dictionary/english/development"
-    },
-    {
-      "domain" : "www.sciencedirect.com",
-      "snippet" : "Development processes occur in different ways and at all levels: inside the family, the firm and the farm; locally, provincially, nationally, and globally. Our goal is to learn from one another, regardless of nation, culture, income, academic discipline, profession or ideology.",
-      "sourceType" : "search-result",
-      "title" : "World Development | Journal | ScienceDirect.com by Elsevier",
-      "url" : "https://www.sciencedirect.com/journal/world-development"
-    },
-    {
-      "domain" : "scienceinsights.org",
-      "snippet" : "In biology and psychology, development refers to the physical, cognitive, and emotional changes a person goes through from conception onward. Growth and development happen together but at different rates, often in discontinuous spurts rather than a smooth, steady climb.",
-      "sourceType" : "search-result",
-      "title" : "What Is Development? Meaning, Types, and Stages",
-      "url" : "https://scienceinsights.org/what-is-development-meaning-types-and-stages/"
-    },
-    {
-      "domain" : "www.merriam-webster.com",
-      "snippet" : "The meaning of DEVELOPMENT is the act, process, or result of developing. How to use development in a sentence.",
-      "sourceType" : "search-result",
-      "title" : "DEVELOPMENT Definition & Meaning - Merriam-Webster",
-      "url" : "https://www.merriam-webster.com/dictionary/development"
-    },
-    {
-      "domain" : "www.kralmuzik.com.tr",
-      "snippet" : "Kendi kimdir? Kendi hayatı ve biyografisini öğrenmek için hemen tıkla, Kral Müzik ile öğren!",
-      "sourceType" : "search-result",
-      "title" : "Kendi Kimdir? Kendi Biyografisi ve Hayatı | Kral Müzik",
-      "url" : "https://www.kralmuzik.com.tr/biyografisi/kendi"
-    },
-    {
-      "domain" : "www.youtube.com",
-      "snippet" : "Kendi'nin, Avrupa Müzik etiketiyle yayımlanan \"Aşka İnanmaz\" isimli şarkısı, video klibiyle MuzikPlay kanalında!",
-      "sourceType" : "search-result",
-      "title" : "Kendi - Aşka inanmaz ( Official Video ) - YouTube",
-      "url" : "https://www.youtube.com/watch?v=-Zw61SWfbm4"
-    },
-    {
-      "domain" : "www.instagram.com",
-      "snippet" : "37K Followers, 6 Following, 983 Posts - Kendi (@kendiland) on Instagram: \"\"",
-      "sourceType" : "search-result",
-      "title" : "Kendi (@kendiland) • Instagram photos and videos",
-      "url" : "https://www.instagram.com/kendiland/"
-    },
-    {
-      "domain" : "eksisozluk.com",
-      "snippet" : "\"kendisi\", \"kendi\" zamirinin iyelik eki almış hâlidir. görünüşe bakılırsa, \"kendisi\" sözcüğünün, gayrimeşru \"o\" zamiri hâline gelmiş olduğu anlaşılır. \"kendi\" hâli ise bir işi \"bir başına yapma\"yı anlatan ya da \"kaynağa dönüşü\" anlatan dönüşlülük zamiri niteliğini koruyor.",
-      "sourceType" : "search-result",
-      "title" : "kendi kendisi karşılaştırması - ekşi sözlük",
-      "url" : "https://eksisozluk.com/kendi-kendisi-karsilastirmasi--5335581"
+      "title" : "Vision | Apple Developer Documentation",
+      "url" : "https://developers.apple.com/documentation/vision/"
     }
   ],
   "route" : [
     "Core",
-    "Developer",
-    "Research Plan",
-    "Source Quality",
-    "Page Evidence",
-    "Repository",
-    "Compare",
-    "Research Verify",
-    "Proposal",
-    "Stop"
+    "Goal",
+    "Context",
+    "Plan",
+    "Files",
+    "Research",
+    "Intelligence",
+    "Verify",
+    "Response"
   ],
-  "taskGraph" : [
+  "runtimeTask" : {
+    "completedStepIndexes" : [
+      0,
+      2,
+      3,
+      1
+    ],
+    "createdAt" : "2026-09-25T18:53:33Z",
+    "id" : "974119BB-99DD-489C-BB29-CD56B19AD055",
+    "objective" : "Konu: macOS yerel bir AI ajanında web araştırma sonuçlarının güvenilirliğini değerlendirmek için kaynak puanlama sistemi nasıl tasarlanmalıdır?\n\nKurallar:\n\nEn az 5 farklı kaynak bul.\n\nEn az 3 kaynak birincil kaynak olmalı: Apple, resmi teknik dokümantasyon, akademik yayın veya standart kuruluşu.\n\nHer kaynak için şunları yaz:\n\nBaşlık ve bağlantı\n\nKaynak türü\n\nYayın/güncelleme tarihi, biliniyorsa\n\nBu araştırmadaki iddiayı ne kadar doğrudan desteklediği\n\nGüvenilirlik puanı: 0–100\n\nPuan gerekçesi\n\nBlog, forum veya ikincil kaynak varsa bunları birincil kaynaklardan ayrı değerlendir; doğrulanmamış iddiaları kesin bilgi olarak kullanma.\n\nKaynaklar arasında çelişki varsa bunu açıkça belirt.\n\nSonuçta uygulanabilir, düşük riskli bir kaynak puanlama önerisi çıkar:\n\notorite\n\ngüncellik\n\niddiaya doğrudan destek\n\nbağımsız doğrulama\n\ngizlilik ve yerel veri güvenliği\n\nAraştırma kaliteni şu ölçütlerle kendin değerlendir:\n\nKaynak çeşitliliği: /20\n\nBirincil kaynak oranı: /20\n\nİddia-kaynak eşleşmesi: /20\n\nGüncellik: /15\n\nÇelişki/eksiklerin belirtilmesi: /15\n\nUygulanabilirlik ve güvenlik: /10\n\nToplam: /100\n\n75’in altındaki bir sonuçta “araştırma yeterli değil” de ve eksik kalan araştırma adımlarını öner.\n\nDosya değiştirme, uygulama kontrolü, dış sisteme yazma, branch oluşturma, merge veya push yapma. Yalnızca araştırma raporu ve gerekirse kullanıcı onayına bağlı bounded geliştirme önerisi üret.",
+    "priority" : 0,
+    "runningStepIndexes" : [
 
+    ],
+    "state" : "completed",
+    "waitingResourceIDs" : [
+
+    ]
+  },
+  "semanticMission" : {
+    "confidence" : 0.88,
+    "objective" : "Konu: macOS yerel bir AI ajanında web araştırma sonuçlarının güvenilirliğini değerlendirmek için kaynak puanlama sistemi nasıl tasarlanmalıdır?\n\nKurallar:\n\nEn az 5 farklı kaynak bul.\n\nEn az 3 kaynak birincil kaynak olmalı: Apple, resmi teknik dokümantasyon, akademik yayın veya standart kuruluşu.\n\nHer kaynak için şunları yaz:\n\nBaşlık ve bağlantı\n\nKaynak türü\n\nYayın/güncelleme tarihi, biliniyorsa\n\nBu araştırmadaki iddiayı ne kadar doğrudan desteklediği\n\nGüvenilirlik puanı: 0–100\n\nPuan gerekçesi\n\nBlog, forum veya ikincil kaynak varsa bunları birincil kaynaklardan ayrı değerlendir; doğrulanmamış iddiaları kesin bilgi olarak kullanma.\n\nKaynaklar arasında çelişki varsa bunu açıkça belirt.\n\nSonuçta uygulanabilir, düşük riskli bir kaynak puanlama önerisi çıkar:\n\notorite\n\ngüncellik\n\niddiaya doğrudan destek\n\nbağımsız doğrulama\n\ngizlilik ve yerel veri güvenliği\n\nAraştırma kaliteni şu ölçütlerle kendin değerlendir:\n\nKaynak çeşitliliği: /20\n\nBirincil kaynak oranı: /20\n\nİddia-kaynak eşleşmesi: /20\n\nGüncellik: /15\n\nÇelişki/eksiklerin belirtilmesi: /15\n\nUygulanabilirlik ve güvenlik: /10\n\nToplam: /100\n\n75’in altındaki bir sonuçta “araştırma yeterli değil” de ve eksik kalan araştırma adımlarını öner.\n\nDosya değiştirme, uygulama kontrolü, dış sisteme yazma, branch oluşturma, merge veya push yapma. Yalnızca araştırma raporu ve gerekirse kullanıcı onayına bağlı bounded geliştirme önerisi üret.",
+    "outcomes" : [
+      "analyze",
+      "explain",
+      "locate",
+      "research"
+    ],
+    "requiredCapabilityIDs" : [
+      "context.local",
+      "core.reasoning",
+      "files.search",
+      "research.web"
+    ],
+    "requiresUserInput" : false,
+    "steps" : [
+      {
+        "capabilityID" : "context.local",
+        "dependsOn" : [
+
+        ],
+        "operation" : "context.resolve",
+        "purpose" : "Yalnızca bu kullanıcı hedefiyle ilgili bağlamı hazırla; eski görev hedeflerini yeni göreve taşıma.",
+        "title" : "Görev bağlamını hazırla"
+      },
+      {
+        "capabilityID" : "files.search",
+        "dependsOn" : [
+          0
+        ],
+        "operation" : "files.search",
+        "purpose" : "Kullanıcının belirttiği yer, dosya türü ve tarih kısıtlarını salt-okunur olarak uygula; yalnız eşleşen dosyaları döndür.",
+        "title" : "Yerel dosyaları bul"
+      },
+      {
+        "capabilityID" : "research.web",
+        "dependsOn" : [
+          1
+        ],
+        "operation" : "web.research",
+        "purpose" : "Önceki adımda çözülen gerçek hedef/veriyi kullanarak dış kaynaklardan gerekli bilgiyi araştır.",
+        "title" : "Gerekli dış bilgiyi araştır"
+      },
+      {
+        "capabilityID" : "core.reasoning",
+        "dependsOn" : [
+          2
+        ],
+        "operation" : "content.analyze",
+        "purpose" : "Önceki adımların gerçek çıktısını birlikte değerlendir ve sonraki adımın kullanabileceği sonucu üret.",
+        "title" : "Toplanan veriyi analiz et"
+      }
+    ]
+  },
+  "semanticPlannerProvider" : "Deterministic Capability Contract",
+  "taskGraph" : [
+    {
+      "available" : true,
+      "capabilityID" : "context.local",
+      "dependsOn" : [
+
+      ],
+      "index" : 0,
+      "operation" : "context.resolve",
+      "requiresApproval" : false,
+      "resourceIDs" : [
+
+      ],
+      "risk" : "reasoning",
+      "role" : "reason",
+      "title" : "Görev bağlamını hazırla"
+    },
+    {
+      "available" : true,
+      "capabilityID" : "files.search",
+      "dependsOn" : [
+        0
+      ],
+      "index" : 1,
+      "operation" : "files.search",
+      "requiresApproval" : false,
+      "resourceIDs" : [
+
+      ],
+      "risk" : "readOnly",
+      "role" : "retrieve",
+      "title" : "Yerel dosyaları bul"
+    },
+    {
+      "available" : true,
+      "capabilityID" : "research.web",
+      "dependsOn" : [
+        1
+      ],
+      "index" : 2,
+      "operation" : "web.research",
+      "requiresApproval" : false,
+      "resourceIDs" : [
+        "network"
+      ],
+      "risk" : "external",
+      "role" : "retrieve",
+      "title" : "Gerekli dış bilgiyi araştır"
+    },
+    {
+      "available" : true,
+      "capabilityID" : "core.reasoning",
+      "dependsOn" : [
+        2
+      ],
+      "index" : 3,
+      "operation" : "content.analyze",
+      "requiresApproval" : false,
+      "resourceIDs" : [
+
+      ],
+      "risk" : "reasoning",
+      "role" : "transform",
+      "title" : "Toplanan veriyi analiz et"
+    }
   ],
-  "traceID" : "C728D9E3-0CC4-4FDE-B555-57570D1ACBD0",
-  "userInput" : "KRALİ END-TO-END SELF-DEVELOPMENT TEST 001\n\nKendi mevcut araştırma sistemini read-only olarak incele.\n\nÖzellikle şu bileşenleri değerlendir:\n\n- research query planning\n- research facet coverage\n- source quality classification\n- page-derived evidence\n- evidence grounding\n- adaptive / follow-up research queries\n- staged research synthesis\n- research verification\n\nGüncel ve güvenilir dış kaynaklardan modern AI agent araştırma sistemlerinde kullanılan research planning, adaptive query generation, evidence grounding ve research verification yaklaşımlarını araştır.\n\nMevcut KRALİ kaynak kodunu bu yaklaşımlarla karşılaştır.\n\nBilgisayar kontrolü kullanma.\n\nŞu capability'leri kullanma veya çözüm olarak önerme:\n\n- browser.control\n- desktop.app\n- desktop.control\n- app.workflow\n- system.open.url\n- perception.screen\n\nPublic araştırma için yalnız research.web kullan.\n\nAraştırma sonunda:\n\n1. Mevcut KRALİ araştırma mimarisini özetle.\n2. Gerçek ve kaliteli dış kaynakları göster.\n3. Mevcut sistemde gerçekten kanıtlanabilen bir geliştirme açığı varsa belirle.\n4. En fazla bir geliştirme önerisi seç.\n5. Öneriyi mevcut KRALİ source evidence ile bağla.\n6. Geliştirmenin expected behavior'unu açıkla.\n7. Riskini belirt.\n8. Mutation Recommended: YES veya NO yaz.\n9. Mutation Started: NO yaz.\n\nEğer yeterli kanıt yoksa Mutation Recommended: NO de.\n\nEğer gerçekten kanıtlı ve mevcut güvenlik sınırları içinde kalan bir research improvement varsa Mutation Recommended: YES de.\n\nBu aşamada kod değiştirme.\n\nDevelopment Suggestion üretilebilecekse öneriyi kullanıcı onayına bırak.",
-  "verificationState" : "partial",
-  "verificationSummary" : "Research evidence exists, but structured comparison/proposal synthesis is missing."
+  "traceID" : "5945AC28-8B60-434C-9793-2C7286C58FA4",
+  "userInput" : "Konu: macOS yerel bir AI ajanında web araştırma sonuçlarının güvenilirliğini değerlendirmek için kaynak puanlama sistemi nasıl tasarlanmalıdır?\n\nKurallar:\n\nEn az 5 farklı kaynak bul.\n\nEn az 3 kaynak birincil kaynak olmalı: Apple, resmi teknik dokümantasyon, akademik yayın veya standart kuruluşu.\n\nHer kaynak için şunları yaz:\n\nBaşlık ve bağlantı\n\nKaynak türü\n\nYayın/güncelleme tarihi, biliniyorsa\n\nBu araştırmadaki iddiayı ne kadar doğrudan desteklediği\n\nGüvenilirlik puanı: 0–100\n\nPuan gerekçesi\n\nBlog, forum veya ikincil kaynak varsa bunları birincil kaynaklardan ayrı değerlendir; doğrulanmamış iddiaları kesin bilgi olarak kullanma.\n\nKaynaklar arasında çelişki varsa bunu açıkça belirt.\n\nSonuçta uygulanabilir, düşük riskli bir kaynak puanlama önerisi çıkar:\n\notorite\n\ngüncellik\n\niddiaya doğrudan destek\n\nbağımsız doğrulama\n\ngizlilik ve yerel veri güvenliği\n\nAraştırma kaliteni şu ölçütlerle kendin değerlendir:\n\nKaynak çeşitliliği: /20\n\nBirincil kaynak oranı: /20\n\nİddia-kaynak eşleşmesi: /20\n\nGüncellik: /15\n\nÇelişki/eksiklerin belirtilmesi: /15\n\nUygulanabilirlik ve güvenlik: /10\n\nToplam: /100\n\n75’in altındaki bir sonuçta “araştırma yeterli değil” de ve eksik kalan araştırma adımlarını öner.\n\nDosya değiştirme, uygulama kontrolü, dış sisteme yazma, branch oluşturma, merge veya push yapma. Yalnızca araştırma raporu ve gerekirse kullanıcı onayına bağlı bounded geliştirme önerisi üret.",
+  "verificationState" : "passed",
+  "verificationSummary" : "Outcome doğrulandı: kullanıcı tarafından istenen public bilgi gerçek web kanıtıyla elde edildi; araç/provider adımlarının kendisi başarı kriteri olarak zorunlu tutulmadı."
 }
