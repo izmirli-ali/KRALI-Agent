@@ -56,6 +56,7 @@
 		A10000000000000000000047 /* AgentExecutionProfile.swift in Sources */ = {isa = PBXBuildFile; fileRef = B10000000000000000000047 /* AgentExecutionProfile.swift */; };
 		A10000000000000000000048 /* AgentSelfDiagnosisExecutor.swift in Sources */ = {isa = PBXBuildFile; fileRef = B10000000000000000000048 /* AgentSelfDiagnosisExecutor.swift */; };
 		A10000000000000000000049 /* AgentDevelopmentResearch.swift in Sources */ = {isa = PBXBuildFile; fileRef = B10000000000000000000049 /* AgentDevelopmentResearch.swift */; };
+		A10000000000000000000050 /* AgentDevelopmentSuggestionStore.swift in Sources */ = {isa = PBXBuildFile; fileRef = B10000000000000000000050 /* AgentDevelopmentSuggestionStore.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
@@ -109,6 +110,7 @@
 		B10000000000000000000047 /* AgentExecutionProfile.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AgentExecutionProfile.swift; sourceTree = "<group>"; };
 		B10000000000000000000048 /* AgentSelfDiagnosisExecutor.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AgentSelfDiagnosisExecutor.swift; sourceTree = "<group>"; };
 		B10000000000000000000049 /* AgentDevelopmentResearch.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AgentDevelopmentResearch.swift; sourceTree = "<group>"; };
+		B10000000000000000000050 /* AgentDevelopmentSuggestionStore.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AgentDevelopmentSuggestionStore.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -182,6 +184,7 @@
 				B10000000000000000000047 /* AgentExecutionProfile.swift */,
 				B10000000000000000000048 /* AgentSelfDiagnosisExecutor.swift */,
 				B10000000000000000000049 /* AgentDevelopmentResearch.swift */,
+				B10000000000000000000050 /* AgentDevelopmentSuggestionStore.swift */,
 			);
 			path = KRALIAgentNative;
 			sourceTree = "<group>";
@@ -329,6 +332,7 @@
 				A10000000000000000000047 /* AgentExecutionProfile.swift in Sources */,
 				A10000000000000000000048 /* AgentSelfDiagnosisExecutor.swift in Sources */,
 				A10000000000000000000049 /* AgentDevelopmentResearch.swift in Sources */,
+				A10000000000000000000050 /* AgentDevelopmentSuggestionStore.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -366,7 +370,7 @@
 				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
 				CODE_SIGN_STYLE = Automatic;
 				COMBINE_HIDPI_IMAGES = YES;
-				CURRENT_PROJECT_VERSION = 237;
+				CURRENT_PROJECT_VERSION = 238;
 				DEVELOPMENT_TEAM = 65244UMFCK;
 				ENABLE_HARDENED_RUNTIME = NO;
 				ENABLE_PREVIEWS = YES;
@@ -398,7 +402,7 @@
 				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
 				CODE_SIGN_STYLE = Automatic;
 				COMBINE_HIDPI_IMAGES = YES;
-				CURRENT_PROJECT_VERSION = 237;
+				CURRENT_PROJECT_VERSION = 238;
 				DEVELOPMENT_TEAM = 65244UMFCK;
 				ENABLE_HARDENED_RUNTIME = NO;
 				GENERATE_INFOPLIST_FILE = YES;
