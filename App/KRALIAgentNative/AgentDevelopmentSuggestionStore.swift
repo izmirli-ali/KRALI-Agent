@@ -318,6 +318,110 @@ struct AgentDevelopmentSuggestionStore {
         return existing + additions
     }
 
+    /// Keep the discovery surface useful after the first-run cards have been
+    /// shown. This is deliberately a queue refresh, not a self-modification
+    /// mechanism: the returned cards still require the normal bounded-task
+    /// compiler and an explicit user approval before any candidate can run.
+    /// A suppressed idea is never offered again.
+    func refreshInnovationSuggestions(
+        sourceRevision: String?,
+        in existing: [AgentDevelopmentSuggestion],
+        now: Date = Date()
+    ) -> [AgentDevelopmentSuggestion] {
+        guard let revision = AgentSourceRevisionPolicy.exactRevision(sourceRevision) else {
+            return existing
+        }
+
+        let definitions: [(String, String, String, String)] = [
+            (
+                "KRALİ kanıt çelişkisi incelemesini iyileştir",
+                "Aynı iddia için farklı kaynakların uyuşmayan bulgularını ayrı bir inceleme kuyruğunda görünür kılmak.",
+                "Araştırma sonuçlarında güven derecesi ve belirsizliğin daha açık gösterilmesi.",
+                "innovation:claim-contradictions"
+            ),
+            (
+                "KRALİ araştırma tekrar üretilebilirliğini iyileştir",
+                "Kaynak tarihi, sürümü, erişim zamanı ve kanıt alıntısını tutarlı bir araştırma kaydında birleştirmek.",
+                "Bulguların daha sonra denetlenmesi ve aynı araştırmanın tekrar çalıştırılabilmesi.",
+                "innovation:research-reproducibility"
+            ),
+            (
+                "KRALİ geliştirme regresyon hafızasını iyileştir",
+                "Geçmiş candidate hatalarını test sonucu, hata sınıfı ve kullanıcı geri bildirimiyle ilişkilendirmek.",
+                "Benzer geliştirmelerde daha erken risk uyarısı ve daha güvenli planlama.",
+                "innovation:regression-memory"
+            ),
+            (
+                "KRALİ bağımlılık etkisi analizini iyileştir",
+                "Önerilen dosya değişikliklerinin çağrı zinciri ve doğrulama kapsamına etkisini araştırmak.",
+                "Daha küçük, geri alınabilir ve test kapsamı açık candidate paketleri.",
+                "innovation:dependency-impact"
+            ),
+            (
+                "KRALİ çok dilli araştırma değerlendirmesini iyileştir",
+                "Aynı araştırma iddiasını Türkçe ve İngilizce sorgularla karşılaştırarak kaynak kör noktalarını ölçmek.",
+                "Dil kaynaklı bulgu kaybını azaltan daha dengeli araştırma kalitesi.",
+                "innovation:multilingual-evaluation"
+            ),
+            (
+                "KRALİ geliştirme benchmark geçmişini iyileştir",
+                "Araştırma ve candidate çıktılarının kalite puanlarını zaman içinde karşılaştırılabilir biçimde kaydetmek.",
+                "Gelişimin gerçek görevlerde ölçülmesi ve gerilemelerin fark edilmesi.",
+                "innovation:quality-history"
+            )
+        ]
+
+        let fingerprints = Set(existing.map(\.fingerprint))
+        let suppressed = Set(existing.filter { $0.state == .suppressed }.map(\.fingerprint))
+        let activeInnovationCount = existing.filter {
+            $0.fingerprint.hasPrefix("innovation:") &&
+            ($0.state == .proposed || $0.state == .deferred)
+        }.count
+
+        // Keep the sidebar compact. A new idea is added only while fewer than
+        // three user-actionable innovation cards are visible.
+        guard activeInnovationCount < 3 else { return existing }
+
+        let calendar = Calendar(identifier: .gregorian)
+        let day = calendar.ordinality(of: .day, in: .era, for: now) ?? 0
+        let ordered = (0..<definitions.count).map {
+            definitions[(day + $0) % definitions.count]
+        }
+
+        guard let definition = ordered.first(where: {
+            !fingerprints.contains($0.3) && !suppressed.contains($0.3)
+        }) else {
+            return existing
+        }
+
+        var refreshed = existing
+        refreshed.append(
+            AgentDevelopmentSuggestion(
+                id: UUID(),
+                fingerprint: definition.3,
+                source: .research,
+                capabilityID: nil,
+                capabilityName: nil,
+                capabilityKind: nil,
+                learningPath: nil,
+                candidateCapabilityIDs: [],
+                title: definition.0,
+                reason: definition.1,
+                expectedBenefit: definition.2,
+                provenanceIDs: ["innovation-queue:" + definition.3],
+                sourceRevision: revision,
+                risk: "low",
+                occurrenceCount: 1,
+                state: .proposed,
+                developerJobID: nil,
+                candidateBranch: nil,
+                createdAt: now,
+                updatedAt: now
+            )
+        )
+        return refreshed
+    }
+
     func save(
         _ suggestions:
             [AgentDevelopmentSuggestion]

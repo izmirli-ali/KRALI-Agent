@@ -54,8 +54,20 @@ struct ConversationSidebarView: View {
                     }
 
                     if !visibleDevelopmentSuggestions.isEmpty {
-                        sectionLabel("GELİŞTİRME ÖNERİLERİ")
-                            .padding(.top, 10)
+                        HStack(spacing: 6) {
+                            sectionLabel("GELİŞTİRME ÖNERİLERİ")
+
+                            Spacer()
+
+                            Button {
+                                engine.refreshDevelopmentSuggestionIdeas()
+                            } label: {
+                                Image(systemName: "arrow.triangle.2.circlepath")
+                            }
+                            .buttonStyle(.borderless)
+                            .help("Yeni, yalnızca inceleme amaçlı geliştirme fikri ekle")
+                        }
+                        .padding(.top, 10)
 
                         ForEach(
                             visibleDevelopmentSuggestions

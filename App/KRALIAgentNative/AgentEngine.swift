@@ -329,6 +329,13 @@ final class AgentEngine: ObservableObject {
                         developmentSuggestions
                 )
 
+        developmentSuggestions =
+            developmentSuggestionStore
+                .refreshInnovationSuggestions(
+                    sourceRevision: currentExactSourceRevision,
+                    in: developmentSuggestions
+                )
+
         developmentSuggestionStore
             .save(
                 developmentSuggestions
@@ -3678,6 +3685,18 @@ final class AgentEngine: ObservableObject {
                 sourceRevision: currentExactSourceRevision,
                 in: developmentSuggestions
             )
+    }
+
+    /// Refreshing only changes the suggestion queue. It cannot approve,
+    /// compile, run, merge or publish a development candidate.
+    func refreshDevelopmentSuggestionIdeas() {
+        developmentSuggestions =
+            developmentSuggestionStore
+                .refreshInnovationSuggestions(
+                    sourceRevision: currentExactSourceRevision,
+                    in: developmentSuggestions
+                )
+        developmentSuggestionStore.save(developmentSuggestions)
     }
 
     func developmentProgress(
