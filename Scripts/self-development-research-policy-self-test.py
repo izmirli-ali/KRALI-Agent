@@ -30,6 +30,8 @@ assert "citationCount" in quality
 assert "potentialContradictionCount" in quality
 assert "complete impact map" in quality
 assert "behavioralBenchmark.isEmpty" in quality
+assert "AgentDevelopmentResearchQualityBenchmark" in quality
+assert "AgentDevelopmentResearchImpactMap" in quality
 
 # Research and diagnosis must remain separate paths.
 research_pos = engine.index("executeSelfDevelopmentResearchMission")

@@ -614,6 +614,25 @@ struct DevelopmentResearchQualitySelfTest {
             "freshness and contradiction audit"
         )
 
+        let benchmark = AgentDevelopmentResearchQualityBenchmark.evaluate(
+            sources: [datedAssessment],
+            evidence: conflictEvidence,
+            audit: conflictAudit
+        )
+        check(
+            benchmark.score > 0 && benchmark.contradictionHandling == 15,
+            "continuous quality benchmark"
+        )
+
+        let impactMap = AgentDevelopmentResearchImpactMap.build(
+            proposal: proposal
+        )
+        check(
+            impactMap.affectedFiles == ["AgentResearchQueryPlanner.swift"] &&
+            !impactMap.regressionChecks.isEmpty,
+            "proposal impact map preserves regression contract"
+        )
+
         print("development_research_quality_self_test_ok")
         print("facet_plan=PASS")
         print("multi_source_benchmark=PASS")
@@ -623,5 +642,7 @@ struct DevelopmentResearchQualitySelfTest {
         print("computer_control=BLOCKED")
         print("freshness_audit=PASS")
         print("contradiction_audit=PASS")
+        print("continuous_benchmark=PASS")
+        print("impact_map=PASS")
     }
 }

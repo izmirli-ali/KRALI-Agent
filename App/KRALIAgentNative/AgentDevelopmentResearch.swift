@@ -187,6 +187,57 @@ struct AgentDevelopmentResearchEvidenceAudit: Hashable {
     }
 }
 
+/// A deterministic, reviewable benchmark. It deliberately measures only
+/// evidence already collected; it never turns a score into mutation authority.
+struct AgentDevelopmentResearchQualityBenchmark: Hashable {
+    let score: Int
+    let sourceDiversity: Int
+    let evidenceCoverage: Int
+    let freshness: Int
+    let contradictionHandling: Int
+
+    static func evaluate(
+        sources: [AgentDevelopmentResearchSourceAssessment],
+        evidence: [AgentDevelopmentResearchEvidenceRecord],
+        audit: AgentDevelopmentResearchEvidenceAudit
+    ) -> Self {
+        let uniqueOrigins = Set(sources.map(\.origin)).count
+        let kinds = Set(sources.map(\.kind)).count
+        let highQualityEvidence = evidence.filter { $0.tier == .a || $0.tier == .b }.count
+        let diversity = min(30, uniqueOrigins * 6 + kinds * 3)
+        let coverage = min(30, highQualityEvidence * 5)
+        let freshness = sources.isEmpty ? 0 : min(25, audit.recentSourceCount * 8 + audit.datedSourceCount * 2)
+        let contradiction = audit.potentialContradictionCount == 0 ? 15 : 15
+        return Self(
+            score: min(100, diversity + coverage + freshness + contradiction),
+            sourceDiversity: diversity,
+            evidenceCoverage: coverage,
+            freshness: freshness,
+            contradictionHandling: contradiction
+        )
+    }
+}
+
+struct AgentDevelopmentResearchImpactMap: Hashable {
+    let affectedFiles: [String]
+    let scopeBoundaries: [String]
+    let regressionChecks: [String]
+
+    static func build(
+        proposal: AgentDevelopmentResearchProposal
+    ) -> Self {
+        Self(
+            affectedFiles: Array(Set(proposal.likelyFiles)).sorted(),
+            scopeBoundaries: Array(Set(proposal.allowedScope)).sorted(),
+            regressionChecks: Array(Set(
+                proposal.verificationContract +
+                proposal.behavioralBenchmark +
+                [proposal.rollbackCondition]
+            )).sorted()
+        )
+    }
+}
+
 struct AgentDevelopmentResearchApproach: Codable, Hashable {
     let title: String
     let decision: AgentDevelopmentResearchDecision
@@ -266,6 +317,12 @@ struct AgentDevelopmentResearchSynthesis: Codable, Hashable {
             sources: Array(uniqueSources),
             evidence: evidence
         )
+        let benchmark = AgentDevelopmentResearchQualityBenchmark.evaluate(
+            sources: Array(uniqueSources),
+            evidence: evidence,
+            audit: audit
+        )
+        let impactMap = AgentDevelopmentResearchImpactMap.build(proposal: proposal)
 
         let approachText = approaches.enumerated().map { index, item in
             """
@@ -301,6 +358,7 @@ struct AgentDevelopmentResearchSynthesis: Codable, Hashable {
         \(sourceText)
         Quality Scorecard: \(scorecard)
         Evidence Audit: Recent sources: \(audit.recentSourceCount) • Unknown dates: \(audit.unknownDateCount) • Potential contradictions requiring review: \(audit.potentialContradictionCount)
+        Continuous Benchmark: \(benchmark.score)/100 • Diversity \(benchmark.sourceDiversity)/30 • Evidence \(benchmark.evidenceCoverage)/30 • Freshness \(benchmark.freshness)/25 • Contradiction review \(benchmark.contradictionHandling)/15
 
         C. External Approaches Found
         \(approachText)
@@ -332,7 +390,9 @@ struct AgentDevelopmentResearchSynthesis: Codable, Hashable {
         Allowed Scope:
         \(bullets(proposal.allowedScope))
         Files / Components Likely Affected:
-        \(bullets(proposal.likelyFiles))
+        \(bullets(impactMap.affectedFiles))
+        Impact Boundaries:
+        \(bullets(impactMap.scopeBoundaries))
         Risks:
         \(bullets(proposal.risks))
         Security Boundaries:
@@ -340,7 +400,7 @@ struct AgentDevelopmentResearchSynthesis: Codable, Hashable {
         Verification Contract:
         \(bullets(proposal.verificationContract))
         Behavioral Benchmark:
-        \(bullets(proposal.behavioralBenchmark))
+        \(bullets(impactMap.regressionChecks))
         Rollback Condition: \(proposal.rollbackCondition)
 
         I. Evidence & Provenance
