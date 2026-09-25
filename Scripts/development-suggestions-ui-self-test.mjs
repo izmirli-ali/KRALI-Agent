@@ -35,11 +35,12 @@ ok(
 );
 
 ok(
+  sidebar.includes('sectionLabel("YENİ FİKİRLER")') &&
   sidebar.includes('sectionLabel("GELİŞTİRME ÖNERİLERİ")') &&
   sidebar.includes('Button("Geliştir")') &&
-  sidebar.includes('Button("Şimdilik geliştirme")') &&
-  sidebar.includes("suppressDevelopmentSuggestion"),
-  "sidebar exposes multiple suggestion controls"
+  sidebar.includes("suppressDevelopmentSuggestion") &&
+  sidebar.includes("suggestionTooltip"),
+  "sidebar separates compact ideas and suggestions with hover details"
 );
 
 ok(
@@ -57,9 +58,9 @@ ok(
 
 ok(
   sidebar.includes("ProgressView(") &&
-  sidebar.includes('"İnceleme gerekiyor"') &&
-  sidebar.includes("candidateBranch"),
-  "sidebar shows deterministic progress and review-required candidate state"
+  sidebar.includes("suggestionTooltip") &&
+  engine.includes('title: "Candidate hazır"'),
+  "sidebar shows compact lifecycle progress with review state in hover details"
 );
 
 ok(
@@ -70,14 +71,29 @@ ok(
 
 ok(
   sidebar.includes("canDevelopSuggestion") &&
-  sidebar.includes("bounded scope"),
-  "sidebar enables only suggestions accepted by the bounded compiler"
+  engine.includes("boundedDevelopmentTaskCompiler"),
+  "sidebar keeps bounded compiler checks before a suggestion can start"
 );
 
 ok(
-  bridge.includes("fraction: 0.95") &&
+  bridge.includes("fraction: 0.90") &&
   bridge.includes('title: "Candidate hazır"'),
-  "candidate-ready progress is 95 percent"
+  "candidate-ready progress reserves final review as a remaining milestone"
+);
+
+ok(
+  engine.includes("stabilizedDevelopmentProgress") &&
+  engine.includes("developmentProgressFloor") &&
+  bridge.includes("fraction: 1.0"),
+  "active-run progress never moves backwards and terminal failures close the lifecycle"
+);
+
+ok(
+  store.includes("pruneLegacyStoppedResearch") &&
+  store.includes("pruneStaleInnovationSuggestions") &&
+  store.includes("innovation:ui-development-flow") &&
+  store.includes(".usability"),
+  "legacy stopped research is pruned and new ideas prioritize bounded UI improvements"
 );
 
 ok(
@@ -96,5 +112,5 @@ ok(
 
 console.log("development_suggestions_ui_self_test_ok");
 console.log("research_to_suggestion=bounded_after_approval");
-console.log("candidate_progress=95");
+console.log("candidate_progress=90");
 console.log("release_progress=100");

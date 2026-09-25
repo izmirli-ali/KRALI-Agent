@@ -53,9 +53,9 @@ struct ConversationSidebarView: View {
                         engine.showActiveConversation()
                     }
 
-                    if !visibleDevelopmentSuggestions.isEmpty {
+                    if !newIdeaSuggestions.isEmpty {
                         HStack(spacing: 6) {
-                            sectionLabel("GELİŞTİRME ÖNERİLERİ")
+                            sectionLabel("YENİ FİKİRLER")
 
                             Spacer()
 
@@ -65,16 +65,23 @@ struct ConversationSidebarView: View {
                                 Image(systemName: "arrow.triangle.2.circlepath")
                             }
                             .buttonStyle(.borderless)
-                            .help("Yeni, yalnızca inceleme amaçlı geliştirme fikri ekle")
+                            .help("Yeni, yalnızca inceleme amaçlı fikir ekle")
                         }
                         .padding(.top, 10)
 
-                        ForEach(
-                            visibleDevelopmentSuggestions
-                        ) { suggestion in
+                        ForEach(newIdeaSuggestions) { suggestion in
                             developmentSuggestionCard(
                                 suggestion
                             )
+                        }
+                    }
+
+                    if !activeDevelopmentSuggestions.isEmpty {
+                        sectionLabel("GELİŞTİRME ÖNERİLERİ")
+                            .padding(.top, 10)
+
+                        ForEach(activeDevelopmentSuggestions) { suggestion in
+                            developmentSuggestionCard(suggestion)
                         }
                     }
 
@@ -245,6 +252,18 @@ struct ConversationSidebarView: View {
             }
     }
 
+    private var newIdeaSuggestions: [AgentDevelopmentSuggestion] {
+        visibleDevelopmentSuggestions.filter {
+            $0.fingerprint.hasPrefix("innovation:")
+        }
+    }
+
+    private var activeDevelopmentSuggestions: [AgentDevelopmentSuggestion] {
+        visibleDevelopmentSuggestions.filter {
+            !$0.fingerprint.hasPrefix("innovation:")
+        }
+    }
+
     private func suggestionLineageKey(
         _ suggestion: AgentDevelopmentSuggestion
     ) -> String {
@@ -298,227 +317,33 @@ struct ConversationSidebarView: View {
                 for: suggestion
             )
 
-        VStack(
-            alignment: .leading,
-            spacing: 7
-        ) {
-            HStack(spacing: 6) {
-                Text(
-                    suggestion.source.title
-                )
-                .font(
-                    .system(
-                        size: 9,
-                        weight: .semibold
-                    )
-                )
-                .foregroundStyle(.secondary)
-
-                Text("•")
-                    .font(.caption2)
-                    .foregroundStyle(.tertiary)
-
-                Text(
-                    suggestion.state.title
-                )
-                .font(
-                    .system(
-                        size: 9,
-                        weight: .semibold
-                    )
-                )
-                .foregroundStyle(.secondary)
+        VStack(alignment: .leading, spacing: 5) {
+            HStack(spacing: 7) {
+                Text(suggestion.title)
+                    .font(.system(size: 12, weight: .semibold))
+                    .lineLimit(1)
+                    .help(suggestionTooltip(suggestion, progress: progress))
 
                 Spacer(minLength: 0)
 
-                if suggestion.occurrenceCount > 1 {
-                    Text(
-                        "×" +
-                        String(
-                            suggestion
-                                .occurrenceCount
-                        )
-                    )
-                    .font(.caption2)
-                    .foregroundStyle(.tertiary)
-                }
+                Text(suggestion.state.title)
+                    .font(.system(size: 9, weight: .semibold))
+                    .foregroundStyle(.secondary)
+
+                suggestionMenu(suggestion)
             }
 
-            Text(suggestion.title)
-                .font(
-                    .system(
-                        size: 12,
-                        weight: .semibold
-                    )
-                )
-                .foregroundStyle(.primary)
-                .lineLimit(2)
-
-            Text(suggestion.reason)
-                .font(.caption2)
-                .foregroundStyle(.secondary)
-                .lineLimit(3)
-
-            switch suggestion.state {
-            case .proposed,
-                 .deferred:
-                HStack(spacing: 5) {
-                    Button("Geliştir") {
-                        engine
-                            .approveDevelopmentSuggestion(
-                                id:
-                                    suggestion.id
-                            )
-                    }
-                    .buttonStyle(.borderedProminent)
-                    .controlSize(.mini)
-                    .disabled(
-                        !engine
-                            .canDevelopSuggestion(
-                                suggestion
-                            )
-                    )
-                    .help(
-                        engine
-                            .canDevelopSuggestion(
-                                suggestion
-                            )
-                        ? "Kontrollü candidate geliştirmesini başlat"
-                        : "Bu öneri mevcut bounded compiler güvenlik scope'una uygun değil"
-                    )
-
-                    Button("Şimdilik geliştirme") {
-                        engine
-                            .suppressDevelopmentSuggestion(
-                                id:
-                                    suggestion.id
-                            )
-                    }
-                    .buttonStyle(.bordered)
-                    .controlSize(.mini)
-                }
-
-                if !engine
-                    .canDevelopSuggestion(
-                        suggestion
-                    ) {
-                    Label(
-                        "Bu öneri güvenli bounded scope'a derlenemiyor",
-                        systemImage:
-                            "lock.shield"
-                    )
-                    .font(.system(size: 9))
-                    .foregroundStyle(.tertiary)
-                }
-
-            case .approved,
-                 .developing,
-                 .readyForReview,
-                 .failed:
-                ProgressView(
-                    value:
-                        progress.fraction
-                )
-                .progressViewStyle(.linear)
-
-                HStack(spacing: 4) {
-                    Text(
-                        String(
-                            Int(
-                                (
-                                    progress
-                                        .fraction *
-                                    100
-                                )
-                                .rounded()
-                            )
-                        ) +
-                        "%"
-                    )
-                    .font(
-                        .caption2
-                            .weight(.semibold)
-                    )
-
-                    Text("•")
-                        .font(.caption2)
-                        .foregroundStyle(.tertiary)
-
-                    Text(progress.title)
-                        .font(.caption2)
-                        .foregroundStyle(
-                            progress
-                                .isTerminalFailure
-                            ? Color.secondary
-                            : Color.primary
-                        )
-                        .lineLimit(1)
-                }
-
-                Text(progress.detail)
-                    .font(
-                        .system(size: 9)
-                    )
-                    .foregroundStyle(.secondary)
-                    .lineLimit(2)
-
-                if suggestion.state ==
-                    .readyForReview {
-                    Label(
-                        "İnceleme gerekiyor",
-                        systemImage:
-                            "person.badge.shield.checkmark"
-                    )
-                    .font(
-                        .caption2
-                            .weight(.semibold)
-                    )
-                }
-
-                if suggestion.state == .failed ||
-                   suggestion.state == .readyForReview {
-                    Button("Yeniden araştır") {
-                        engine.retryDevelopmentSuggestion(
-                            id: suggestion.id
-                        )
-                    }
-                    .buttonStyle(.bordered)
-                    .controlSize(.mini)
-                    .help("Yeni kaynak revizyonunda yalnız öneri hazırlar; kod değişikliği için ayrıca Geliştir onayı gerekir.")
-                }
-
-                if let branch =
-                    suggestion
-                        .candidateBranch {
-                    Text(branch)
-                        .font(
-                            .system(
-                                size: 9,
-                                design:
-                                    .monospaced
-                            )
-                        )
-                        .foregroundStyle(.tertiary)
-                        .lineLimit(1)
-                }
-
-            case .released,
-                 .completed:
-                Label(
-                    progress.title,
-                    systemImage:
-                        "checkmark.circle.fill"
-                )
-                .font(
-                    .caption2
-                        .weight(.semibold)
-                )
-
-            case .suppressed:
-                EmptyView()
+            if suggestion.state == .approved ||
+                suggestion.state == .developing ||
+                suggestion.state == .readyForReview ||
+                suggestion.state == .failed {
+                ProgressView(value: progress.fraction)
+                    .progressViewStyle(.linear)
+                    .help(progress.title + " — " + progress.detail)
             }
         }
-        .padding(9)
+        .padding(.horizontal, 9)
+        .padding(.vertical, 7)
         .background(
             Color.primary
                 .opacity(0.045)
@@ -540,28 +365,51 @@ struct ConversationSidebarView: View {
                 style: .continuous
             )
         )
-        .contextMenu {
-            if suggestion.state ==
-                .proposed ||
-               suggestion.state ==
-                .deferred {
-                Button(
-                    role: .destructive
-                ) {
-                    engine
-                        .suppressDevelopmentSuggestion(
-                            id:
-                                suggestion.id
-                        )
-                } label: {
-                    Label(
-                        "Bir daha önerme",
-                        systemImage:
-                            "eye.slash"
-                    )
+    }
+
+    @ViewBuilder
+    private func suggestionMenu(
+        _ suggestion: AgentDevelopmentSuggestion
+    ) -> some View {
+        Menu {
+            if suggestion.state == .proposed || suggestion.state == .deferred {
+                Button("Geliştir") {
+                    engine.approveDevelopmentSuggestion(id: suggestion.id)
+                }
+                .disabled(!engine.canDevelopSuggestion(suggestion))
+
+                Button("Bir daha önerme", role: .destructive) {
+                    engine.suppressDevelopmentSuggestion(id: suggestion.id)
                 }
             }
+
+            if suggestion.state == .failed || suggestion.state == .readyForReview {
+                Button("Yeniden araştır") {
+                    engine.retryDevelopmentSuggestion(id: suggestion.id)
+                }
+            }
+        } label: {
+            Image(systemName: "ellipsis")
+                .foregroundStyle(.secondary)
         }
+        .menuStyle(.borderlessButton)
+        .help(suggestionTooltip(
+            suggestion,
+            progress: engine.developmentProgress(for: suggestion)
+        ))
+    }
+
+    private func suggestionTooltip(
+        _ suggestion: AgentDevelopmentSuggestion,
+        progress: AgentDevelopmentProgressSnapshot
+    ) -> String {
+        [
+            suggestion.title,
+            suggestion.reason,
+            "Beklenen fayda: " + suggestion.expectedBenefit,
+            "Durum: " + progress.title,
+            progress.detail
+        ].joined(separator: "\n\n")
     }
 
     private func archiveConversationRow(

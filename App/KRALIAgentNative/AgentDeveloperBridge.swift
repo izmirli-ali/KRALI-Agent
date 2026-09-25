@@ -87,7 +87,7 @@ struct DeveloperAgentStatus: Hashable {
         AgentDevelopmentProgressSnapshot {
         if isCandidateReady {
             return AgentDevelopmentProgressSnapshot(
-                fraction: 0.95,
+                fraction: 0.90,
                 title: "Candidate hazır",
                 detail: "Lead / ChatGPT incelemesi gerekiyor",
                 isTerminalFailure: false
@@ -106,7 +106,7 @@ struct DeveloperAgentStatus: Hashable {
                 "sdk_watchdog_timeout"
            ].contains(state) {
             return AgentDevelopmentProgressSnapshot(
-                fraction: 0.80,
+                fraction: 1.0,
                 title: "Geliştirme durdu",
                 detail: learningStageTitle,
                 isTerminalFailure: true
@@ -120,7 +120,7 @@ struct DeveloperAgentStatus: Hashable {
              "task_decomposing",
              "task_decomposing_local_fallback",
              "teacher_plan_review":
-            fraction = 0.15
+            fraction = 0.10
 
         case "local_ai_checking",
              "local_ai_installing",
@@ -149,7 +149,7 @@ struct DeveloperAgentStatus: Hashable {
              "local_agent_root_cause_verifying",
              "local_agent_root_cause_verified",
              "local_agent_root_cause_selected":
-            fraction = 0.40
+            fraction = 0.45
 
         case "learning",
              "running",
@@ -168,7 +168,7 @@ struct DeveloperAgentStatus: Hashable {
              "sdk_session_ended",
              "sdk_session_completed",
              "local_agent_completed":
-            fraction = 0.78
+            fraction = 0.75
 
         case "skill_extracting",
              "skill_candidate_ready",
@@ -176,7 +176,7 @@ struct DeveloperAgentStatus: Hashable {
              "recovering_candidate",
              "candidate_recovered",
              "candidate_repair_running":
-            fraction = 0.90
+            fraction = 0.85
 
         default:
             fraction =

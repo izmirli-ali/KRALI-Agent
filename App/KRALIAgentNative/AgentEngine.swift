@@ -181,6 +181,8 @@ final class AgentEngine: ObservableObject {
         TaskApprovalAudit?
     private var runtimeStepEvidence: [Int: String] = [:]
     private var runtimeExecutedCapabilityIDs = Set<String>()
+    private var developmentProgressFloorRunID: String?
+    private var developmentProgressFloor = 0.0
 
     private var currentAppVersionString: String {
         Bundle.main.object(
@@ -316,9 +318,16 @@ final class AgentEngine: ObservableObject {
                 .load()
 
         developmentSuggestions =
-            reconcileReleasedDevelopmentSuggestions(
-                storedDevelopmentSuggestions
-            )
+            developmentSuggestionStore
+                .pruneStaleInnovationSuggestions(
+                    sourceRevision: currentExactSourceRevision,
+                    in: developmentSuggestionStore
+                        .pruneLegacyStoppedResearch(
+                            reconcileReleasedDevelopmentSuggestions(
+                                storedDevelopmentSuggestions
+                            )
+                        )
+                )
 
         developmentSuggestions =
             developmentSuggestionStore
@@ -3742,13 +3751,13 @@ final class AgentEngine: ObservableObject {
             )
 
         case .developing:
-            return inspectorState
-                .developerAgentStatus
-                .developmentProgress
+            return stabilizedDevelopmentProgress(
+                inspectorState.developerAgentStatus
+            )
 
         case .readyForReview:
             return AgentDevelopmentProgressSnapshot(
-                fraction: 0.95,
+                fraction: 0.90,
                 title: "Candidate hazır",
                 detail: "Lead / ChatGPT incelemesi gerekiyor",
                 isTerminalFailure: false
@@ -3781,6 +3790,32 @@ final class AgentEngine: ObservableObject {
                 isTerminalFailure: false
             )
         }
+    }
+
+    /// Status callbacks can include a retry or fallback stage after a later
+    /// stage was already observed. Preserve the highest verified milestone
+    /// for the active run so the visible bar never moves backwards.
+    private func stabilizedDevelopmentProgress(
+        _ status: DeveloperAgentStatus
+    ) -> AgentDevelopmentProgressSnapshot {
+        let runID = status.runID ?? status.branch ?? "active"
+        if developmentProgressFloorRunID != runID {
+            developmentProgressFloorRunID = runID
+            developmentProgressFloor = 0.0
+        }
+
+        let snapshot = status.developmentProgress
+        developmentProgressFloor = max(
+            developmentProgressFloor,
+            snapshot.fraction
+        )
+
+        return AgentDevelopmentProgressSnapshot(
+            fraction: developmentProgressFloor,
+            title: snapshot.title,
+            detail: snapshot.detail,
+            isTerminalFailure: snapshot.isTerminalFailure
+        )
     }
 
     private func promoteVerifiedSkills(

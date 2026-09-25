@@ -318,6 +318,42 @@ struct AgentDevelopmentSuggestionStore {
         return existing + additions
     }
 
+    /// The original research-quality trial predates the bounded candidate
+    /// workflow. Once it has stopped, it is neither actionable nor useful in
+    /// the compact suggestion surface, so remove only that known legacy
+    /// lineage. User-suppressed and auditable newer suggestions stay intact.
+    func pruneLegacyStoppedResearch(
+        _ existing: [AgentDevelopmentSuggestion]
+    ) -> [AgentDevelopmentSuggestion] {
+        existing.filter {
+            !(
+                $0.state == .failed &&
+                $0.source == .research &&
+                $0.fingerprint.hasPrefix("fallback:research-quality")
+            )
+        }
+    }
+
+    /// Generated ideas are tied to an exact source revision. Do not present a
+    /// stale idea as if it can be safely developed on a newer build; a fresh
+    /// idea will be generated for the current revision instead.
+    func pruneStaleInnovationSuggestions(
+        sourceRevision: String?,
+        in existing: [AgentDevelopmentSuggestion]
+    ) -> [AgentDevelopmentSuggestion] {
+        guard let revision = AgentSourceRevisionPolicy.exactRevision(sourceRevision) else {
+            return existing
+        }
+
+        return existing.filter {
+            !(
+                $0.fingerprint.hasPrefix("innovation:") &&
+                ($0.state == .proposed || $0.state == .deferred || $0.state == .failed) &&
+                $0.sourceRevision != revision
+            )
+        }
+    }
+
     /// Keep the discovery surface useful after the first-run cards have been
     /// shown. This is deliberately a queue refresh, not a self-modification
     /// mechanism: the returned cards still require the normal bounded-task
@@ -332,42 +368,76 @@ struct AgentDevelopmentSuggestionStore {
             return existing
         }
 
-        let definitions: [(String, String, String, String)] = [
+        let definitions: [(String, String, String, String, AgentDevelopmentSuggestionSource)] = [
+            (
+                "KRALİ araştırma sonuç ekranını iyileştir",
+                "Kaynak, kanıt, çelişki ve puan özetini daha taranabilir bir hiyerarşide sunmak.",
+                "Uzun araştırma sonuçlarında kritik bulgulara daha hızlı ulaşılması.",
+                "innovation:ui-research-results",
+                .usability
+            ),
+            (
+                "KRALİ geliştirme öneri akışını iyileştir",
+                "Yeni fikirler, öneriler, onay durumu ve inceleme gereksinimini daha sade bir kontrol yüzeyinde toplamak.",
+                "Kullanıcının doğru geliştirme kararını daha az arayüz gürültüsüyle vermesi.",
+                "innovation:ui-development-flow",
+                .usability
+            ),
+            (
+                "KRALİ erişilebilirlik ve klavye akışını iyileştir",
+                "Önemli durumlar, odak sırası ve klavye ile erişilebilir geliştirme kontrollerini gözden geçirmek.",
+                "Arayüzün daha hızlı, öngörülebilir ve erişilebilir kullanılması.",
+                "innovation:ui-accessibility",
+                .usability
+            ),
+            (
+                "KRALİ araştırma kaynak kartlarını iyileştir",
+                "Kaynak türü, güncellik, kanıt gücü ve bağımsızlık bilgisini kompakt kartlarda görünür kılmak.",
+                "Araştırma kalitesinin kaynak bazında daha anlaşılır değerlendirilmesi.",
+                "innovation:ui-source-cards",
+                .usability
+            ),
             (
                 "KRALİ kanıt çelişkisi incelemesini iyileştir",
                 "Aynı iddia için farklı kaynakların uyuşmayan bulgularını ayrı bir inceleme kuyruğunda görünür kılmak.",
                 "Araştırma sonuçlarında güven derecesi ve belirsizliğin daha açık gösterilmesi.",
-                "innovation:claim-contradictions"
+                "innovation:claim-contradictions",
+                .research
             ),
             (
                 "KRALİ araştırma tekrar üretilebilirliğini iyileştir",
                 "Kaynak tarihi, sürümü, erişim zamanı ve kanıt alıntısını tutarlı bir araştırma kaydında birleştirmek.",
                 "Bulguların daha sonra denetlenmesi ve aynı araştırmanın tekrar çalıştırılabilmesi.",
-                "innovation:research-reproducibility"
+                "innovation:research-reproducibility",
+                .research
             ),
             (
                 "KRALİ geliştirme regresyon hafızasını iyileştir",
                 "Geçmiş candidate hatalarını test sonucu, hata sınıfı ve kullanıcı geri bildirimiyle ilişkilendirmek.",
                 "Benzer geliştirmelerde daha erken risk uyarısı ve daha güvenli planlama.",
-                "innovation:regression-memory"
+                "innovation:regression-memory",
+                .research
             ),
             (
                 "KRALİ bağımlılık etkisi analizini iyileştir",
                 "Önerilen dosya değişikliklerinin çağrı zinciri ve doğrulama kapsamına etkisini araştırmak.",
                 "Daha küçük, geri alınabilir ve test kapsamı açık candidate paketleri.",
-                "innovation:dependency-impact"
+                "innovation:dependency-impact",
+                .research
             ),
             (
                 "KRALİ çok dilli araştırma değerlendirmesini iyileştir",
                 "Aynı araştırma iddiasını Türkçe ve İngilizce sorgularla karşılaştırarak kaynak kör noktalarını ölçmek.",
                 "Dil kaynaklı bulgu kaybını azaltan daha dengeli araştırma kalitesi.",
-                "innovation:multilingual-evaluation"
+                "innovation:multilingual-evaluation",
+                .research
             ),
             (
                 "KRALİ geliştirme benchmark geçmişini iyileştir",
                 "Araştırma ve candidate çıktılarının kalite puanlarını zaman içinde karşılaştırılabilir biçimde kaydetmek.",
                 "Gelişimin gerçek görevlerde ölçülmesi ve gerilemelerin fark edilmesi.",
-                "innovation:quality-history"
+                "innovation:quality-history",
+                .research
             )
         ]
 
@@ -399,7 +469,7 @@ struct AgentDevelopmentSuggestionStore {
             AgentDevelopmentSuggestion(
                 id: UUID(),
                 fingerprint: definition.3,
-                source: .research,
+                source: definition.4,
                 capabilityID: nil,
                 capabilityName: nil,
                 capabilityKind: nil,
