@@ -62,9 +62,18 @@ struct DevelopmentResearchQualitySelfTest {
         )
         check(
             plan.facets.prefix(5).allSatisfy {
-                $0.queries.count >= 2
+                $0.queries.count >= 4
             },
-            "diversified facet queries"
+            "multi-channel facet queries"
+        )
+        check(
+            plan.minimumPreferredSourceKindCount >= 2 &&
+            plan.facets.prefix(5).allSatisfy {
+                Set($0.preferredSourceKinds).isSuperset(
+                    of: [.paper, .officialDocumentation, .originalRepository]
+                )
+            },
+            "benchmark requires academic official and repository source diversity"
         )
         check(
             plan.facets
@@ -559,6 +568,7 @@ struct DevelopmentResearchQualitySelfTest {
 
         print("development_research_quality_self_test_ok")
         print("facet_plan=PASS")
+        print("multi_source_benchmark=PASS")
         print("source_quality=PASS")
         print("lexical_false_positives=BLOCKED")
         print("evidence_contract=PASS")
