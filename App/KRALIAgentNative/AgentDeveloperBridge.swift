@@ -54,15 +54,26 @@ struct DeveloperAgentStatus: Hashable {
         return self
     }
 
-    var isReadyForReview: Bool {
+    var isCandidateReady: Bool {
         state == "ready_for_review" ||
-        state == "build_failed" ||
-        state == "task_verification_failed" ||
-        state == "recovered_candidate_ready" ||
-        state == "recovered_candidate_build_failed" ||
-        state == "recovered_candidate_verification_failed" ||
-        state == "recovered_candidate_surface_regression" ||
-        state == "provider_failover_unavailable"
+        state == "recovered_candidate_ready"
+    }
+
+    var isReviewableFailure: Bool {
+        [
+            "build_failed",
+            "task_verification_failed",
+            "recovered_candidate_build_failed",
+            "recovered_candidate_verification_failed",
+            "recovered_candidate_surface_regression",
+            "provider_failover_unavailable"
+        ].contains(state)
+    }
+
+    // Compatibility surface for existing UI. Review-ready now means
+    // a verified candidate, never a failed candidate.
+    var isReadyForReview: Bool {
+        isCandidateReady
     }
 
     var isLearningActive: Bool {
@@ -1140,8 +1151,25 @@ struct AgentDeveloperBridge {
     func run(
         learningJobBriefURL: URL? = nil,
         developerTaskURL: URL? = nil,
-        approvedSystemEffect: String? = nil
+        approvedSystemEffect: String? = nil,
+        sourceRevision: String? = nil
     ) async -> DeveloperAgentStatus {
+        guard
+            let exactSourceRevision =
+                AgentSourceRevisionPolicy
+                    .exactRevision(
+                        sourceRevision
+                    )
+        else {
+            return DeveloperAgentStatus(
+                state: "blocked",
+                message:
+                    "Developer Agent exact source revision olmadan başlatılmadı.",
+                branch: nil,
+                worktree: nil
+            )
+        }
+
         guard fileManager.fileExists(
             atPath: scriptURL.path
         ) else {
@@ -1176,6 +1204,11 @@ struct AgentDeveloperBridge {
                 "KRALI_APPROVED_SYSTEM_EFFECT"
             ] =
                 approvedSystemEffect ?? ""
+
+            environment[
+                "KRALI_SOURCE_REVISION"
+            ] =
+                exactSourceRevision
 
             if let learningJobBriefURL {
                 environment[
