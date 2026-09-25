@@ -48,6 +48,7 @@ struct AgentDevelopmentResearchPlan: Codable, Hashable {
     let minimumQualifyingSourceCount: Int
     let minimumHighQualitySourceCount: Int
     let minimumIndependentOriginCount: Int
+    let minimumPreferredSourceKindCount: Int
     let requiresRepositoryComparison: Bool
 }
 
@@ -142,6 +143,14 @@ struct AgentDevelopmentResearchSynthesis: Codable, Hashable {
             }
             .joined(separator: "\n")
 
+        let independentOrigins = Set(uniqueSources.map(\.origin))
+        let sourceKinds = Dictionary(
+            grouping: uniqueSources,
+            by: \.kind
+        )
+        let scorecard =
+            "Sources: \(uniqueSources.count) • Independent origins: \(independentOrigins.count) • Preferred source kinds: \(sourceKinds.keys.count) • Tier A/B: \(uniqueSources.filter { $0.tier == .a || $0.tier == .b }.count)"
+
         let approachText = approaches.enumerated().map { index, item in
             """
             \(index + 1). \(item.title) — \(item.decision.rawValue)
@@ -174,6 +183,7 @@ struct AgentDevelopmentResearchSynthesis: Codable, Hashable {
 
         B. Research Sources
         \(sourceText)
+        Quality Scorecard: \(scorecard)
 
         C. External Approaches Found
         \(approachText)
@@ -642,6 +652,15 @@ struct AgentDevelopmentResearchVerifier {
                 highQuality.map(\.origin)
             )
 
+        let preferredKinds = Set(
+            plan.facets.flatMap(\.preferredSourceKinds)
+        )
+        let coveredPreferredKinds = Set(
+            highQuality
+                .map(\.kind)
+                .filter { preferredKinds.contains($0) }
+        )
+
         let evidenceByID =
             Dictionary(
                 uniqueKeysWithValues:
@@ -910,6 +929,16 @@ struct AgentDevelopmentResearchVerifier {
                 String(origins.count) +
                 "/" +
                 String(plan.minimumIndependentOriginCount)
+            )
+        }
+
+        if coveredPreferredKinds.count <
+            plan.minimumPreferredSourceKindCount {
+            gaps.append(
+                "preferred source kinds " +
+                String(coveredPreferredKinds.count) +
+                "/" +
+                String(plan.minimumPreferredSourceKindCount)
             )
         }
 

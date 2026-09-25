@@ -188,7 +188,11 @@ struct AgentResearchQueryPlanner {
                     subject +
                         " AI agents academic paper preprint primary source",
                     subject +
-                        " AI agents official documentation open source GitHub repository"
+                        " AI agents official documentation open source GitHub repository",
+                    subject +
+                        " site:openreview.net OR site:arxiv.org OR site:aclanthology.org AI agents",
+                    subject +
+                        " site:github.com OR site:huggingface.co OR site:openai.com engineering AI agents"
                 ]
 
                 return AgentDevelopmentResearchFacet(
@@ -239,6 +243,14 @@ struct AgentResearchQueryPlanner {
                         2,
                         (requiredApproachCount + 1) /
                         2
+                    )
+                ),
+            minimumPreferredSourceKindCount:
+                min(
+                    3,
+                    max(
+                        2,
+                        requiredApproachCount - 2
                     )
                 ),
             requiresRepositoryComparison:
