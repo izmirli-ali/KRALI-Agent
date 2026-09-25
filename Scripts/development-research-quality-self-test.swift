@@ -301,7 +301,8 @@ struct DevelopmentResearchQualitySelfTest {
                             .tier,
                     excerpt:
                         "Primary page evidence supporting " +
-                        facet.label
+                        facet.label +
+                        ". Grounding is improved by a structured verifier."
                 )
             }
 
@@ -316,7 +317,7 @@ struct DevelopmentResearchQualitySelfTest {
                     decision:
                         .improve,
                     summary:
-                        "Evidence-backed comparison",
+                        "Structured comparison for " + facet.label,
                     evidenceIDs: [
                         "W" +
                         String(index + 1)
@@ -430,6 +431,50 @@ struct DevelopmentResearchQualitySelfTest {
         check(
             passed.state == .passed,
             "grounded contract passes"
+        )
+
+        let unsupportedEvidence =
+            evidence.enumerated().map {
+                index,
+                item in
+
+                AgentDevelopmentResearchEvidenceRecord(
+                    id: item.id,
+                    facetID: item.facetID,
+                    sourceURL: item.sourceURL,
+                    sourceTitle: item.sourceTitle,
+                    domain: item.domain,
+                    kind: item.kind,
+                    tier: item.tier,
+                    excerpt:
+                        index == 0
+                        ? "Unrelated material without the claimed research finding."
+                        : item.excerpt
+                )
+            }
+
+        let unsupportedResult =
+            verifier.verify(
+                plan: plan,
+                sources: assessments,
+                evidence: unsupportedEvidence,
+                repositoryEvidenceIDs:
+                    Set(
+                        (1...5)
+                            .map {
+                                "E" +
+                                String($0)
+                            }
+                    ),
+                synthesis: synthesis,
+                executedCapabilityIDs: [
+                    "research.web"
+                ]
+            )
+
+        check(
+            unsupportedResult.state == .partial,
+            "citation-only findings cannot pass without excerpt support"
         )
 
         let weakAssessments =

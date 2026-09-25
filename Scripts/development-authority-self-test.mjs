@@ -83,15 +83,16 @@ ok(
 );
 
 ok(
-  engine.includes('status.state ==\n                    "cursor_architect_ready"') &&
-  engine.includes("status.isCandidateReady ||\n                                diagnosisReady\n                                ? .readyForReview"),
-  "read-only Cursor Architect diagnosis remains reviewable instead of being marked failed"
+  engine.includes("status.isCandidateReady\n                                ? .readyForReview\n                                : .failed") &&
+  !engine.includes("diagnosisReady"),
+  "read-only Cursor Architect diagnosis cannot be presented as a verified candidate"
 );
 
 ok(
-  engine.includes("reconcileReadOnlyDiagnosisSuggestions") &&
-  engine.includes("status.message.localizedCaseInsensitiveContains"),
-  "a current-revision read-only diagnosis restores only its matching failed card"
+  engine.includes("reconcileUnverifiedReviewSuggestions") &&
+  engine.includes("candidateBranch == nil") &&
+  engine.includes("reconciled[index].state = .failed"),
+  "unverified persisted review cards are made retryable on launch"
 );
 
 ok(

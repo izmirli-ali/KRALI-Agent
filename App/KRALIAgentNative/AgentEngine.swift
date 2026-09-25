@@ -359,11 +359,8 @@ final class AgentEngine: ObservableObject {
                 )
 
         developmentSuggestions =
-            reconcileReadOnlyDiagnosisSuggestions(
-                developmentSuggestions,
-                status:
-                    inspectorState
-                        .developerAgentStatus
+            reconcileUnverifiedReviewSuggestions(
+                developmentSuggestions
             )
         developmentSuggestionStore.save(
             developmentSuggestions
@@ -3422,28 +3419,19 @@ final class AgentEngine: ObservableObject {
         return reconciled
     }
 
-    /// A read-only Architect diagnosis is useful review evidence, not a
-    /// mutation failure. Recover only the matching current-revision card.
-    private func reconcileReadOnlyDiagnosisSuggestions(
-        _ suggestions: [AgentDevelopmentSuggestion],
-        status: DeveloperAgentStatus
+    /// A review-ready card represents a verified isolated candidate. A
+    /// read-only Architect diagnosis is valuable audit evidence, but it has
+    /// neither a candidate branch nor semantic verification and must remain
+    /// retryable rather than appearing ready for release review.
+    private func reconcileUnverifiedReviewSuggestions(
+        _ suggestions: [AgentDevelopmentSuggestion]
     ) -> [AgentDevelopmentSuggestion] {
-        guard
-            status.state == "cursor_architect_ready",
-            let currentRevision = currentExactSourceRevision
-        else {
-            return suggestions
-        }
-
         var reconciled = suggestions
 
         for index in reconciled.indices where
-            reconciled[index].state == .failed &&
-            reconciled[index].sourceRevision == currentRevision &&
-            status.message.localizedCaseInsensitiveContains(
-                reconciled[index].title
-            ) {
-            reconciled[index].state = .readyForReview
+            reconciled[index].state == .readyForReview &&
+            reconciled[index].candidateBranch == nil {
+            reconciled[index].state = .failed
             reconciled[index].updatedAt = Date()
         }
 
@@ -8510,22 +8498,13 @@ final class AgentEngine: ObservableObject {
             )
 
             if let developmentSuggestionID {
-                // A Cursor Architect result is an explicit read-only diagnosis.
-                // It is not a candidate and must never be mistaken for a failed
-                // mutation: retain it for human review without granting release
-                // authority or inventing a candidate branch.
-                let diagnosisReady =
-                    status.state ==
-                    "cursor_architect_ready"
-
                 developmentSuggestions =
                     developmentSuggestionStore
                         .updateSuggestionDevelopmentState(
                             suggestionID:
                                 developmentSuggestionID,
                             state:
-                                status.isCandidateReady ||
-                                diagnosisReady
+                                status.isCandidateReady
                                 ? .readyForReview
                                 : .failed,
                             candidateBranch:

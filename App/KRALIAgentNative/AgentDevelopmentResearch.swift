@@ -663,6 +663,31 @@ struct AgentDevelopmentResearchVerifier {
                 }
             )
 
+        func claimIsEvidenceBound(
+            _ claim: String,
+            evidenceIDs: Set<String>
+        ) -> Bool {
+            let excerpts = evidenceIDs.compactMap {
+                evidenceByID[$0]?.excerpt
+            }
+
+            guard !excerpts.isEmpty else {
+                return false
+            }
+
+            let claimTokens = evidenceTokens(in: claim)
+            guard !claimTokens.isEmpty else {
+                return false
+            }
+
+            let evidenceText = excerpts.joined(separator: " ")
+            let matches = claimTokens.filter {
+                evidenceText.localizedCaseInsensitiveContains($0)
+            }
+
+            return matches.count >= min(2, claimTokens.count)
+        }
+
         let coveredFacetIDs: Set<String> =
             Set(
                 evidence.compactMap { item -> String? in
@@ -712,6 +737,19 @@ struct AgentDevelopmentResearchVerifier {
                         "At least one material approach is unsupported by qualifying external evidence.",
                     fallback:
                         "Do not promote unsupported claims; collect page-derived Tier A/B evidence first."
+                )
+            }
+
+            guard claimIsEvidenceBound(
+                approach.summary,
+                evidenceIDs: externalIDs
+            ) else {
+                return AgentDevelopmentResearchVerificationOutcome(
+                    state: .partial,
+                    summary:
+                        "A development approach cites evidence IDs, but its summary is not textually supported by their page-derived excerpts.",
+                    fallback:
+                        "Rewrite the approach from the cited excerpts or collect direct evidence; do not promote citation-only claims."
                 )
             }
 
@@ -783,6 +821,23 @@ struct AgentDevelopmentResearchVerifier {
                     "The selected development proposal is not grounded in qualifying external evidence.",
                 fallback:
                     "Select exactly one evidence-backed improvement before proposal completion."
+            )
+        }
+
+        let unsupportedFinding = synthesis.proposal.researchFindings.first {
+            !claimIsEvidenceBound(
+                $0,
+                evidenceIDs: proposalEvidence
+            )
+        }
+
+        if unsupportedFinding != nil {
+            return AgentDevelopmentResearchVerificationOutcome(
+                state: .partial,
+                summary:
+                    "A proposal finding cites evidence IDs, but its wording is not supported by the cited page-derived excerpts.",
+                fallback:
+                    "Keep only findings with direct excerpt support; otherwise collect stronger evidence before proposing development."
             )
         }
 
@@ -876,5 +931,32 @@ struct AgentDevelopmentResearchVerifier {
             fallback:
                 "Human review is still required before any bounded Developer Agent task."
         )
+    }
+
+    private func evidenceTokens(in value: String) -> [String] {
+        let stopWords = Set([
+            "agent", "agents", "research", "evidence", "source",
+            "sources", "current", "system", "systems", "approach",
+            "proposal", "comparison", "with", "from", "into", "using",
+            "this", "that", "these", "those", "and", "the", "for",
+            "bir", "ile", "icin", "gibi", "olan", "olarak", "arastirma",
+            "kanit", "kaynak", "sistem", "yaklasim", "onerisi"
+        ])
+
+        var seen = Set<String>()
+        return value
+            .folding(
+                options: [.caseInsensitive, .diacriticInsensitive],
+                locale: Locale(identifier: "tr_TR")
+            )
+            .lowercased()
+            .components(
+                separatedBy: CharacterSet.alphanumerics.inverted
+            )
+            .filter {
+                $0.count >= 4 &&
+                !stopWords.contains($0) &&
+                seen.insert($0).inserted
+            }
     }
 }
