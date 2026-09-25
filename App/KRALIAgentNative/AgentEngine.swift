@@ -140,6 +140,8 @@ final class AgentEngine: ObservableObject {
     private let learningQueueStore = AgentLearningQueueStore()
     private let developmentSuggestionStore =
         AgentDevelopmentSuggestionStore()
+    private let developmentReleaseVerifier =
+        AgentDevelopmentReleaseVerifier()
     private let boundedDevelopmentTaskCompiler =
         AgentBoundedDevelopmentTaskCompiler()
     private let debugRecoveryCenter = AgentDebugRecoveryCenter()
@@ -310,8 +312,15 @@ final class AgentEngine: ObservableObject {
             }
 
         developmentSuggestions =
-            developmentSuggestionStore
-                .load()
+            reconcileReleasedDevelopmentSuggestions(
+                developmentSuggestionStore
+                    .load()
+            )
+
+        developmentSuggestionStore
+            .save(
+                developmentSuggestions
+            )
 
         inspectorState.mentorTraceReady =
             fileManager.fileExists(
@@ -3346,6 +3355,48 @@ final class AgentEngine: ObservableObject {
                 "Capability gap yalnız geliştirme önerisine dönüştürüldü • onay bekliyor"
             )
         }
+    }
+
+    private func reconcileReleasedDevelopmentSuggestions(
+        _ suggestions:
+            [AgentDevelopmentSuggestion]
+    ) -> [AgentDevelopmentSuggestion] {
+        guard
+            let currentRevision =
+                currentExactSourceRevision
+        else {
+            return suggestions
+        }
+
+        var reconciled =
+            suggestions
+
+        for index in
+            reconciled.indices {
+            guard
+                reconciled[index].state ==
+                    .readyForReview,
+                let candidateBranch =
+                    reconciled[index]
+                        .candidateBranch,
+                developmentReleaseVerifier
+                    .candidateIsIntegrated(
+                        branch:
+                            candidateBranch,
+                        currentSourceRevision:
+                            currentRevision
+                    )
+            else {
+                continue
+            }
+
+            reconciled[index].state =
+                .released
+            reconciled[index].updatedAt =
+                Date()
+        }
+
+        return reconciled
     }
 
     func canDevelopSuggestion(
