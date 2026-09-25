@@ -642,6 +642,43 @@ struct AgentDevelopmentSuggestionStore {
         return suggestions
     }
 
+    func updateSuggestionDevelopmentState(
+        suggestionID: UUID,
+        state:
+            AgentDevelopmentSuggestionState,
+        candidateBranch: String? = nil,
+        in existing:
+            [AgentDevelopmentSuggestion]
+    ) -> [AgentDevelopmentSuggestion] {
+        var suggestions = existing
+
+        guard
+            let index =
+                suggestions.firstIndex(
+                    where: {
+                        $0.id ==
+                            suggestionID
+                    }
+                )
+        else {
+            return suggestions
+        }
+
+        suggestions[index].state =
+            state
+
+        if let candidateBranch {
+            suggestions[index]
+                .candidateBranch =
+                    candidateBranch
+        }
+
+        suggestions[index]
+            .updatedAt = Date()
+        save(suggestions)
+        return suggestions
+    }
+
     func approvedGap(
         from suggestion:
             AgentDevelopmentSuggestion
