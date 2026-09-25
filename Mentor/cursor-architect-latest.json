@@ -1,13 +1,13 @@
 {
-  "createdAt": "2026-09-24T08:09:36.213Z",
+  "createdAt": "2026-09-25T19:00:36.341Z",
   "provider": "cursor-cli",
   "mode": "architect-readonly",
-  "appVersion": "0.10.42",
-  "runID": "20260924-105527",
-  "diagnosticFingerprint": "30c0197eb3070c11a70b0b2e63006e85acefa6f1a07b2b2c3563708ac7e257cd",
-  "failureState": "local_agent_tool_protocol_failed",
-  "failureMessage": "Implementation aşamasında ana model zaman aşımına uğradı ve structured controller güvenli devam kararı üretemedi.",
-  "gapLabel": "Learning Suggestions Foundation (developer.task.learning-suggestions-foundation)",
+  "appVersion": "0.11.3",
+  "runID": "20260925-215747",
+  "diagnosticFingerprint": "70b4db6cf4e59b67e1b39f53ca0d0127c5a9d774cdc02c53eedbd07603c7c71e",
+  "failureState": "local_agent_iteration_limit",
+  "failureMessage": "KRALİ araştırma kalitesini iyileştir (developer.suggestion.research.3ae07532-332) native local agent iteration sınırına ulaştı.",
+  "gapLabel": "KRALİ araştırma kalitesini iyileştir (developer.suggestion.research.3ae07532-332)",
   "safety": {
     "cliMode": "ask",
     "nonInteractive": true,
@@ -19,124 +19,133 @@
     "explicitAPIKeyDisabled": true
   },
   "diagnosis": {
-    "summary": "local_agent_tool_protocol_failed is an implementation-timeout + structured-controller dead-end, not a missing diagnosis of the product gap: Phase-1 Learning Suggestions is still unimplemented on disk (no suggestion store/self-test; gap completion still auto-enqueues/starts learning). Queue API is currently intact and must be surgically gated—not rewritten.",
-    "confidence": 0.9,
+    "summary": "local_agent_iteration_limit happened because this gap is a seeded fallback with no failing runtime/oracle, so the agent burned budget surveying research code without a converging mutation; the smallest in-scope atomic fix is to consume unused preferredSourceKinds during web result scoring/diversity so source-kind diversity actually drives selection.",
+    "confidence": 0.78,
     "rootCauseHypotheses": [
       {
-        "hypothesis": "Product gap remains open: capability-gap completion still auto-enqueues into the learning queue and may start workers, with no userApproved gate and no suggestion observe/accept/defer/suppress surface.",
-        "confidence": 0.95,
+        "hypothesis": "The approved gap is a discoverability seed (fingerprint fallback:research-quality), not a localized failing contract: zero strategy candidates, no runtime error lines, no resolver trace, and development_research_quality self-tests already PASS—so the local agent exhausted iterations on read/search without selecting a trustworthy mutation target.",
+        "confidence": 0.86,
         "evidence": [
-          "AgentLearningSuggestionStore.swift is absent; Scripts/learning-suggestion-policy-self-test.mjs is absent; project.pbxproj references AgentLearningStore/Queue but not AgentLearningSuggestionStore.",
-          "AgentLearningJob has no userApproved; AgentLearningQueueStore.nextQueued returns first state==.queued job with no approval filter; enqueue(gaps:sourceGoal:into:) has no userApproved parameter.",
-          "AgentEngine still calls learningQueueStore.enqueue(...)+startNextLearningJobIfNeeded() on two gap-completion paths (~2045–2067 and ~3777–3791); grep finds zero learningSuggestions/acceptLearningSuggestion/deferLearningSuggestion/suppressLearningSuggestion symbols.",
-          "CapabilityGapResolution already exposes capabilityID/name/kind/reason/researchGoal/learningPath—the correct observe/accept input type."
+          "Provenance IDs use deterministic-fallback:fallback:research-quality from AgentDevelopmentSuggestionStore.seededFallbackSuggestions",
+          "Brief reports strategy candidates Yok, combined evidence count 1, empty runtime source hints, and no matching resolver trace",
+          "Scripts/development-research-quality-self-test.swift already asserts facet diversification, Tier A/B gating, weak-source rejection, evidence contract pass, and computer-control block",
+          "Historical pattern in KRALI_DEVELOPMENT_NOTES: vague foundation tasks consume iteration budget on inspection with no candidate"
         ],
         "sourceTargets": [
           {
-            "path": "App/KRALIAgentNative/AgentEngine.swift",
+            "path": "App/KRALIAgentNative/AgentDevelopmentSuggestionStore.swift",
             "symbols": [
-              "learningQueueStore",
-              "enqueue",
-              "startNextLearningJobIfNeeded",
-              "resumeApprovedSemanticTask"
+              "seededFallbackSuggestions",
+              "ensureVisibleFallbackSuggestions",
+              "fingerprint: fallback:research-quality"
             ]
           },
           {
-            "path": "App/KRALIAgentNative/AgentLearningQueue.swift",
+            "path": "App/KRALIAgentNative/AgentBoundedDevelopmentTaskCompiler.swift",
             "symbols": [
-              "AgentLearningJob",
-              "AgentLearningQueueStore.enqueue",
-              "AgentLearningQueueStore.nextQueued"
+              "researchAllowedScope",
+              "developer.suggestion.research."
             ]
           },
           {
-            "path": "App/KRALIAgentNative/AgentCapabilityGapResolver.swift",
+            "path": "Scripts/development-research-quality-self-test.swift",
             "symbols": [
-              "CapabilityGapResolution",
-              "CapabilityLearningPath"
-            ]
-          },
-          {
-            "path": "App/KRALIAgentNative.xcodeproj/project.pbxproj",
-            "symbols": [
-              "AgentLearningQueue.swift",
-              "AgentLearningStore.swift"
+              "DevelopmentResearchQualitySelfTest.main"
             ]
           }
         ]
       },
       {
-        "hypothesis": "This run died without a candidate because the main implementation request timed out after verified reads, and runStructuredContinuation also failed to emit a safe mutation (implementation_timeout_controller_unavailable → local_agent_tool_protocol_failed).",
-        "confidence": 0.88,
+        "hypothesis": "Source-diversity intent is under-implemented at the selection seam: AgentResearchQueryPlanner.developmentPlan writes preferredSourceKinds on each AgentDevelopmentResearchFacet, but no consumer reads that field; AgentWebResearch.selectDiverseResults only caps by domain, while AgentDevelopmentResearchVerifier only checks independent origins/Tier A/B counts—so kind diversity never becomes an atomic selection behavior.",
+        "confidence": 0.81,
         "evidence": [
-          "Failure message matches Scripts/ollama-developer-agent.mjs fail() text for developmentPhase()==implementation && implementationReadCompleted when runStructuredContinuation returns false.",
-          "ALLOW spans multiple large files (esp. AgentEngine.swift) plus a new store and policy self-test; prior foundation runs already burned iteration budget on read/search without mutation (task reason / KRALI_DEVELOPMENT_NOTES v0.10.37).",
-          "No resolver/runtime source hints were supplied for this gap—failure is agent protocol/timeout, not a missing runtime provider symbol."
+          "preferredSourceKinds is assigned only in AgentResearchQueryPlanner.developmentPlan and declared on AgentDevelopmentResearchFacet",
+          "Workspace search shows preferredSourceKinds is never referenced outside those two declarations",
+          "AgentWebResearch.relevanceEvaluation boosts Tier via AgentDevelopmentResearchSourceClassifier.assess but never rewards preferredSourceKinds coverage",
+          "selectDiverseResults diversifies solely via domainCounts (first unique domain, then max 2/domain)",
+          "Verifier gaps track independent origins / Tier A/B / facet evidence coverage, not preferred kind coverage"
         ],
         "sourceTargets": [
           {
-            "path": "Scripts/ollama-developer-agent.mjs",
+            "path": "App/KRALIAgentNative/AgentResearchQueryPlanner.swift",
             "symbols": [
-              "runStructuredContinuation",
-              "implementation_timeout_controller_unavailable",
-              "local_agent_tool_protocol_failed"
+              "developmentPlan",
+              "preferredKinds",
+              "preferredSourceKinds"
             ]
           },
           {
-            "path": "DeveloperAgent/Tasks/learning-suggestions-foundation-v1.json",
+            "path": "App/KRALIAgentNative/AgentDevelopmentResearch.swift",
             "symbols": [
-              "developer.task.learning-suggestions-foundation",
-              "allowedScope",
-              "verification.command"
+              "AgentDevelopmentResearchFacet",
+              "AgentResearchSourceKind",
+              "AgentDevelopmentResearchSourceClassifier.assess",
+              "AgentDevelopmentResearchVerifier.verify",
+              "canonicalOrigin"
+            ]
+          },
+          {
+            "path": "App/KRALIAgentNative/AgentWebResearch.swift",
+            "symbols": [
+              "relevanceEvaluation",
+              "selectDiverseResults",
+              "developmentFacet"
             ]
           }
         ]
       },
       {
-        "hypothesis": "Historical partial-candidate risk: an earlier attempt replaced the queue surface and broke builds; current worktree has restored AgentLearningQueueStore, so the next mutation must extend—not stub/replace—the existing store API.",
-        "confidence": 0.72,
+        "hypothesis": "Evidence-binding quality is already enforced downstream (Tier A/B evidenceIDs on approaches/proposal in AgentLocalIntelligence.synthesizeSelfDevelopmentResearch + AgentDevelopmentResearchVerifier); without a failing binding oracle, patching synthesis first is unlikely to be the minimal gap and easily burns remaining iteration budget.",
+        "confidence": 0.62,
         "evidence": [
-          "Mentor/cursor-architect-latest.json (prior iteration_limit diagnosis) claimed AgentLearningQueueStore was destroyed; current AgentLearningQueue.swift still defines AgentLearningQueueStore, AgentLearningJobState, enqueue, nextQueued, materializeBrief, recoverInterruptedJobs.",
-          "AgentEngine and AgentTrainingLab still call the intact store API; a rewrite that drops those symbols would fail build_check again."
+          "AgentLocalIntelligence.synthesizeSelfDevelopmentResearch refuses synthesis when Tier A/B evidence is empty and validates evidence ID sets",
+          "AgentDevelopmentResearchVerifier rejects unsupported approaches/proposals lacking qualifying external evidenceIDs",
+          "allowSnippetEvidence:false is already required by self-development research policy for development research page grounding"
         ],
         "sourceTargets": [
           {
-            "path": "App/KRALIAgentNative/AgentLearningQueue.swift",
+            "path": "App/KRALIAgentNative/AgentLocalIntelligence.swift",
             "symbols": [
-              "AgentLearningQueueStore",
-              "AgentLearningJob",
-              "AgentLearningJobState"
+              "synthesizeSelfDevelopmentResearch",
+              "DevelopmentResearchGeneratedApproach",
+              "DevelopmentResearchGeneratedSelection"
             ]
           },
           {
-            "path": "App/KRALIAgentNative/AgentTrainingLab.swift",
+            "path": "App/KRALIAgentNative/AgentDevelopmentResearch.swift",
             "symbols": [
-              "AgentLearningQueueStore",
-              "enqueue",
-              "nextQueued"
+              "AgentDevelopmentResearchVerifier.verify"
+            ]
+          },
+          {
+            "path": "App/KRALIAgentNative/AgentWebSourceReader.swift",
+            "symbols": [
+              "extractEvidence",
+              "allowSnippetFallback",
+              "bestEvidence"
             ]
           }
         ]
       }
     ],
     "recommendedNextSteps": [
-      "Add AgentLearningSuggestionStore.swift with compact suggestion model (states proposed/deferred/suppressed/approved/completed; metadata-only fields; forbid sourceGoal/rawContent/body/messageText/mailBody/webContent/screenshot/file-content). Implement observe(gaps: [CapabilityGapResolution]) upsert-by-capabilityID, occurrenceCount++, deferred→proposed only after ≥2 new occurrences, never auto-unsuppress. Register the file in project.pbxproj.",
-      "Surgically extend AgentLearningJob with optional userApproved: Bool? = nil (nil⇒false); add enqueue(..., userApproved: Bool = false); change nextQueued to require state==.queued && userApproved==true. Do not replace AgentLearningQueueStore.",
-      "In AgentEngine, replace both gap-completion enqueue+startNextLearningJobIfNeeded chains with suggestionStore.observe → @Published learningSuggestions. Add acceptLearningSuggestion/deferLearningSuggestion/suppressLearningSuggestion: accept builds CapabilityGapResolution from suggestion metadata, enqueues with userApproved=true and generic source label (not raw user prompt), then may call startNextLearningJobIfNeeded; defer/suppress must not start workers. On readyForReview/completed, mark matching suggestion completed/approved; failures must not auto-retry.",
-      "Add Scripts/learning-suggestion-policy-self-test.mjs asserting nextQueued requires approval, gap paths do not auto-enqueue, accept path enqueues approved+may start, suggestion model has no raw-content fields; then run that self-test, build_check, and git_diff. Keep AgentLearningStore.swift untouched unless a compile-required glue change appears."
+      "Treat this as a primitivePatch of the dead preferredSourceKinds contract: in AgentWebResearch, when developmentFacet is present, classify candidates with AgentDevelopmentResearchSourceClassifier.assess and bias score/selection toward uncovered preferredSourceKinds (generic kind coverage, not host/brand lists).",
+      "Extend selectDiverseResults (or an adjacent development-only selector) to prefer distinct AgentResearchSourceKind / canonicalOrigin pairs before filling remaining slots by domain—keep Tier A/B and mutation-off verifier semantics unchanged.",
+      "If still short of the approved benefit, only then tighten evidence↔facet binding helpers inside AgentDevelopmentResearch / AgentLocalIntelligence (e.g. prefer binding one qualifying evidence ID per required facet) without rewriting staged synthesis.",
+      "Do not retarget AgentEngine.researchLoop early-exit or Mentors/CI/runner files; they are forbidden and not required for this atomic diversity seam.",
+      "Stop at ready_for_review after a minimal diff confined to allowedScope that keeps Scripts/research-development-verifier.command stdout markers green."
     ],
     "testsRequired": [
-      "node Scripts/learning-suggestion-policy-self-test.mjs must print learning_suggestion_policy_self_test_ok, auto_learning_gate=manual, raw_content_persistence=forbidden and exit 0",
-      "Static asserts: nextQueued excludes nil/false userApproved; both AgentEngine gap-completion sites call observe and do not call enqueue/startNextLearningJobIfNeeded; acceptLearningSuggestion enqueues userApproved=true with generic source label and may start; defer/suppress do not call startNextLearningJobIfNeeded",
-      "/bin/zsh Scripts/build-check.command PASS after candidate",
-      "git_diff limited to ALLOW paths only"
+      "Scripts/research-development-verifier.command must still emit research_development_verifier_ok, development_research_quality_policy_ok, and staged_research_synthesis_policy_ok",
+      "Scripts/development-research-quality-self-test.swift regressions: diversified facet queries, irrelevant official Tier D, Tool music false-positive Tier D, GitHub Topics not originalRepository, grounded contract .passed, weak-only .attention, browser.control .attention",
+      "/bin/zsh Scripts/build-check.command PASS on the candidate worktree",
+      "Manual/read-only check that preferredSourceKinds now affects ranking/diversity when developmentFacet is supplied (same-kind pile-up reduced without hard-coded site names)"
     ],
     "warnings": [
-      "Do not rewrite AgentLearningQueue.swift into a stub; prior runs failed build that way. Only add userApproved gating.",
-      "Do not implement ConversationSidebarView/Phase-2 UI in this task.",
-      "Do not invent CapabilityGap; observe must take CapabilityGapResolution.",
-      "enqueue default userApproved=false keeps AgentTrainingLab call sites compiling without edits outside ALLOW.",
-      "Stale Mentor/cursor-architect-latest.json assumed a destroyed queue API; trust current workspace sources over that prior diagnosis."
+      "This failure is primarily under-specified seed + missing consumer seam, not a runtime crash; fabricating a large research rewrite would violate primitivePatch and Senaryo bağımsızlığı.",
+      "AgentEngine is DENY-listed even though executeSelfDevelopmentResearchMission owns the facet research loop—fix must stay in ALLOW paths.",
+      "Scripts/development-research-quality-self-test.swift is outside allowedScope; keep existing asserts green rather than depending on new test files.",
+      "Do not hard-code app/brand/domain names to chase one diagnostic sentence; parameterize via AgentResearchSourceKind and existing classifier origins."
     ]
   }
 }

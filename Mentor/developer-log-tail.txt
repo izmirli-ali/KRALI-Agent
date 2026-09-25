@@ -73,3 +73,7 @@ KRALI_LOCAL_STAGE local_agent_tool • KRALİ araştırma kalitesini iyileştir 
 KRALI_LOCAL_STAGE local_agent_implementation_required • KRALİ araştırma kalitesini iyileştir (developer.suggestion.research.3ae07532-332) tekrar/genel inspection reddedildi • implementation fazı aktif • search_codebase
 KRALİ araştırma kalitesini iyileştir (developer.suggestion.research.3ae07532-332) native local agent iteration sınırına ulaştı.
 🧭 Cursor Architect devreye giriyor • mode=ask • workspace_readonly • tek danışma
+cursor_architect_ok|local_agent_iteration_limit happened because this gap is a seeded fallback with no failing runtime/oracle, so the agent burned budget surveying research code without a converging mutation; the smallest in-scope atomic fix is to consume unused preferredSourceKinds during web result scoring/diversity so source-kind diversity actually drives selection.
+✅ Cursor Architect read-only diagnosis hazır: /Users/medusa/Library/Application Support/KRALI Agent/Mentor/cursor-architect-latest.json
+Deleted branch krali-dev-agent/20260925-215747 (was 928a4df).
+🧭 Yerel agent durdu; Cursor Architect yalnız teşhis üretti. Kod değişikliği uygulanmadı.
