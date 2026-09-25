@@ -114,9 +114,10 @@ struct AgentBoundedDevelopmentTaskCompiler {
                 limit: 500
             )
         let provenance =
-            suggestion.provenanceIDs
-                .prefix(12)
-                .map(String.init)
+            Array(
+                suggestion.provenanceIDs
+                    .prefix(12)
+            )
 
         let shortID =
             String(
