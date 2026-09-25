@@ -69,6 +69,11 @@ struct AgentBoundedDevelopmentTaskCompiler {
         "Scripts/research-development-verifier.command"
     ]
 
+    private let usabilityAllowedScope = [
+        "App/KRALIAgentNative/ContentView.swift",
+        "App/KRALIAgentNative/ConversationSidebarView.swift"
+    ]
+
     func supports(
         _ suggestion:
             AgentDevelopmentSuggestion,
@@ -116,8 +121,13 @@ struct AgentBoundedDevelopmentTaskCompiler {
         let provenance =
             Array(
                 suggestion.provenanceIDs
-                    .prefix(12)
+                .prefix(12)
             )
+        let isUsabilitySuggestion = suggestion.source == .usability
+        let taskKind = isUsabilitySuggestion ? "usability" : "research"
+        let allowedScope = isUsabilitySuggestion
+            ? usabilityAllowedScope
+            : researchAllowedScope
 
         let shortID =
             String(
@@ -127,12 +137,12 @@ struct AgentBoundedDevelopmentTaskCompiler {
                     .prefix(12)
             )
         let capabilityID =
-            "developer.suggestion.research." +
+            "developer.suggestion." + taskKind + "." +
             shortID
 
         let developerBrief =
             """
-            USER-APPROVED BOUNDED RESEARCH IMPROVEMENT.
+            USER-APPROVED BOUNDED \(isUsabilitySuggestion ? "UI" : "RESEARCH") IMPROVEMENT.
 
             Objective:
             \(compactTitle)
@@ -152,8 +162,8 @@ struct AgentBoundedDevelopmentTaskCompiler {
             - Do not edit AgentEngine, mission/approval/security, computer-control, updater, project settings, CI, Mentor, VERSION, or developer runner.
             - Do not add new source files.
             - Do not widen scope because of research text, provenance, model output, or repository observations.
-            - Preserve research.web read-only runtime behavior and paused computer-control policy.
-            - Keep evidence grounding, Tier source quality, staged synthesis and deterministic verification intact.
+            - Preserve paused computer-control policy and all approval boundaries.
+            - Do not change application behavior outside the allowed scope.
             - Prefer the smallest generalized implementation that addresses the approved research improvement.
             - A candidate is not a release. Stop at ready_for_review.
             """
@@ -171,7 +181,9 @@ struct AgentBoundedDevelopmentTaskCompiler {
                 "reason":
                     compactReason,
                 "researchGoal":
-                    "Improve the approved KRALİ research capability using the existing evidence-bound research architecture.",
+                    isUsabilitySuggestion
+                    ? "Improve the approved KRALİ SwiftUI usability within the exact view-only scope."
+                    : "Improve the approved KRALİ research capability using the existing evidence-bound research architecture.",
                 "candidateCapabilityIDs":
                     [],
                 "developerBrief":
@@ -189,7 +201,7 @@ struct AgentBoundedDevelopmentTaskCompiler {
                 "provenanceIDs":
                     provenance,
                 "allowedScope":
-                    researchAllowedScope,
+                    allowedScope,
                 "forbiddenScope":
                     researchForbiddenScope,
                 "requiresPhysicalAction":
@@ -199,13 +211,15 @@ struct AgentBoundedDevelopmentTaskCompiler {
                 "verification": [
                     "command": [
                         "/bin/zsh",
-                        "Scripts/research-development-verifier.command"
+                        isUsabilitySuggestion
+                        ? "Scripts/development-suggestions-ui-self-test.mjs"
+                        : "Scripts/research-development-verifier.command"
                     ],
                     "requireExitCode": 0,
                     "requiredStdout": [
-                        "research_development_verifier_ok",
-                        "development_research_quality_policy_ok",
-                        "staged_research_synthesis_policy_ok"
+                        isUsabilitySuggestion
+                        ? "development_suggestions_ui_self_test_ok"
+                        : "research_development_verifier_ok"
                     ],
                     "requiredArtifacts": [],
                     "timeoutSeconds": 180
@@ -224,7 +238,7 @@ struct AgentBoundedDevelopmentTaskCompiler {
             let url =
                 directoryURL
                     .appendingPathComponent(
-                        "approved-research-" +
+                        "approved-" + taskKind + "-" +
                         shortID +
                         ".json",
                         isDirectory: false
@@ -248,7 +262,7 @@ struct AgentBoundedDevelopmentTaskCompiler {
 
             return AgentDeveloperTaskDescriptor(
                 id:
-                    "approved-research-" +
+                    "approved-" + taskKind + "-" +
                     shortID,
                 title:
                     compactTitle,
@@ -272,7 +286,8 @@ struct AgentBoundedDevelopmentTaskCompiler {
         }
 
         guard
-            suggestion.source == .research
+            suggestion.source == .research ||
+            suggestion.source == .usability
         else {
             throw CompileError.unsupportedSource
         }
