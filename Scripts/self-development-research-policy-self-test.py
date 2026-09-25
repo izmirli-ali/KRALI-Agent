@@ -32,6 +32,9 @@ assert "complete impact map" in quality
 assert "behavioralBenchmark.isEmpty" in quality
 assert "AgentDevelopmentResearchQualityBenchmark" in quality
 assert "AgentDevelopmentResearchImpactMap" in quality
+suggestions = (root / "App/KRALIAgentNative/AgentDevelopmentSuggestionStore.swift").read_text()
+assert "AgentDevelopmentRegressionMemory" in suggestions
+assert "regressionMemory(" in suggestions
 
 # Research and diagnosis must remain separate paths.
 research_pos = engine.index("executeSelfDevelopmentResearchMission")

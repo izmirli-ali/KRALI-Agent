@@ -149,6 +149,14 @@ struct AgentDevelopmentSuggestion:
     }
 }
 
+struct AgentDevelopmentRegressionMemory: Codable, Hashable, Sendable {
+    let failedCandidateCount: Int
+    let releasedCandidateCount: Int
+    let matchingFailureCount: Int
+    let risk: String
+    let summary: String
+}
+
 struct AgentDevelopmentSuggestionStore {
     private let fileManager =
         FileManager.default
@@ -535,6 +543,10 @@ struct AgentDevelopmentSuggestionStore {
 
         var suggestions = existing
         let now = Date()
+        let regressionMemory = regressionMemory(
+            for: synthesis.selectedImprovement,
+            in: existing
+        )
 
         if let index =
             suggestions.firstIndex(
@@ -598,7 +610,7 @@ struct AgentDevelopmentSuggestionStore {
                             .proposal
                             .expectedBehavior,
                         limit: 360
-                    ),
+                    ) + " Historical regression memory: " + regressionMemory.summary,
                 provenanceIDs:
                     Array(
                         externalIDs +
@@ -609,13 +621,7 @@ struct AgentDevelopmentSuggestionStore {
                         .exactRevision(
                             sourceRevision
                         ),
-                risk:
-                    synthesis
-                        .proposal
-                        .risks
-                        .isEmpty
-                    ? "low"
-                    : "medium",
+                risk: regressionMemory.risk,
                 occurrenceCount: 1,
                 state: .proposed,
                 developerJobID: nil,
@@ -627,6 +633,65 @@ struct AgentDevelopmentSuggestionStore {
 
         save(suggestions)
         return suggestions
+    }
+
+    func regressionMemory(
+        for candidateTitle: String,
+        in suggestions: [AgentDevelopmentSuggestion]
+    ) -> AgentDevelopmentRegressionMemory {
+        let failed = suggestions.filter { $0.state == .failed }
+        let released = suggestions.filter {
+            $0.state == .released || $0.state == .completed
+        }
+        let candidateTokens = meaningfulTokens(candidateTitle)
+        let matchingFailures = failed.filter {
+            !candidateTokens.isEmpty &&
+            !candidateTokens.intersection(
+                meaningfulTokens($0.title + " " + $0.reason)
+            ).isEmpty
+        }
+
+        let risk: String
+        if matchingFailures.count >= 2 {
+            risk = "high"
+        } else if !matchingFailures.isEmpty {
+            risk = "medium"
+        } else {
+            risk = "low"
+        }
+
+        let summary: String
+        if matchingFailures.isEmpty {
+            summary = "No matching historical failure was found; normal review remains required."
+        } else {
+            summary = String(matchingFailures.count) + " similar failed candidate(s) found; require explicit regression checks before review."
+        }
+
+        return AgentDevelopmentRegressionMemory(
+            failedCandidateCount: failed.count,
+            releasedCandidateCount: released.count,
+            matchingFailureCount: matchingFailures.count,
+            risk: risk,
+            summary: summary
+        )
+    }
+
+    private func meaningfulTokens(_ value: String) -> Set<String> {
+        let ignored = Set([
+            "krali", "agent", "research", "arastirma", "gelistirme",
+            "quality", "kalitesi", "improve", "iyilestir", "system"
+        ])
+        return Set(
+            value
+                .folding(
+                    options: [.caseInsensitive, .diacriticInsensitive],
+                    locale: Locale(identifier: "tr_TR")
+                )
+                .lowercased()
+                .split { !$0.isLetter && !$0.isNumber }
+                .map(String.init)
+                .filter { $0.count >= 4 && !ignored.contains($0) }
+        )
     }
 
     func observeArena(
