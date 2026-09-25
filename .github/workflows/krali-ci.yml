@@ -58,6 +58,7 @@ jobs:
           python3 Scripts/chat-initial-scroll-bottom-self-test.py
           python3 Scripts/self-development-research-policy-self-test.py
           node Scripts/development-authority-self-test.mjs
+          node Scripts/development-suggestions-ui-self-test.mjs
 
       - name: Validate Swift mission and execution-profile policies
         shell: bash

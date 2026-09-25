@@ -1547,6 +1547,25 @@ final class AgentEngine: ObservableObject {
             \(synthesisFailure ?? qualityVerification.fallback ?? "Collect stronger Tier A/B page-derived evidence for uncovered facets.")
             """
 
+        if let synthesis,
+           synthesis.mutationRecommended,
+           !synthesis.mutationStarted,
+           verification.state != .attention {
+            developmentSuggestions =
+                developmentSuggestionStore
+                    .observeResearch(
+                        synthesis,
+                        sourceRevision:
+                            currentExactSourceRevision,
+                        in:
+                            developmentSuggestions
+                    )
+
+            log(
+                "Self-development research önerisi sidebar geliştirme listesine eklendi"
+            )
+        }
+
         let reply =
             synthesis?
                 .formattedFinalReport(
@@ -3459,6 +3478,88 @@ final class AgentEngine: ObservableObject {
                     in:
                         developmentSuggestions
                 )
+    }
+
+    func developmentProgress(
+        for suggestion:
+            AgentDevelopmentSuggestion
+    ) -> AgentDevelopmentProgressSnapshot {
+        switch suggestion.state {
+        case .proposed:
+            return AgentDevelopmentProgressSnapshot(
+                fraction: 0.0,
+                title: "Öneri hazır",
+                detail:
+                    suggestion.isExecutableCapabilityGap
+                    ? "Geliştirme için kullanıcı onayı bekleniyor"
+                    : "Güvenli bounded task compiler henüz bu öneri tipini çalıştırmıyor",
+                isTerminalFailure: false
+            )
+
+        case .deferred:
+            return AgentDevelopmentProgressSnapshot(
+                fraction: 0.0,
+                title: "Şimdilik bekletildi",
+                detail: "Yeni geliştirme başlamadı",
+                isTerminalFailure: false
+            )
+
+        case .suppressed:
+            return AgentDevelopmentProgressSnapshot(
+                fraction: 0.0,
+                title: "Gizlendi",
+                detail: "Bu öneri otomatik olarak yeniden başlatılmaz",
+                isTerminalFailure: false
+            )
+
+        case .approved:
+            return AgentDevelopmentProgressSnapshot(
+                fraction: 0.05,
+                title: "Onaylandı",
+                detail: "Developer Agent sırası bekleniyor",
+                isTerminalFailure: false
+            )
+
+        case .developing:
+            return inspectorState
+                .developerAgentStatus
+                .developmentProgress
+
+        case .readyForReview:
+            return AgentDevelopmentProgressSnapshot(
+                fraction: 0.95,
+                title: "Candidate hazır",
+                detail: "Lead / ChatGPT incelemesi gerekiyor",
+                isTerminalFailure: false
+            )
+
+        case .failed:
+            return AgentDevelopmentProgressSnapshot(
+                fraction: 0.80,
+                title: "Geliştirme durdu",
+                detail:
+                    inspectorState
+                        .developerAgentStatus
+                        .message,
+                isTerminalFailure: true
+            )
+
+        case .released:
+            return AgentDevelopmentProgressSnapshot(
+                fraction: 1.0,
+                title: "Yayınlandı",
+                detail: "Review ve release tamamlandı",
+                isTerminalFailure: false
+            )
+
+        case .completed:
+            return AgentDevelopmentProgressSnapshot(
+                fraction: 1.0,
+                title: "Tamamlandı",
+                detail: "Geliştirme yaşam döngüsü tamamlandı",
+                isTerminalFailure: false
+            )
+        }
     }
 
     private func promoteVerifiedSkills(

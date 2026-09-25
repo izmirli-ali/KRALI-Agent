@@ -1,5 +1,12 @@
 import Foundation
 
+struct AgentDevelopmentProgressSnapshot: Hashable {
+    let fraction: Double
+    let title: String
+    let detail: String
+    let isTerminalFailure: Bool
+}
+
 struct DeveloperAgentStatus: Hashable {
     let state: String
     let message: String
@@ -74,6 +81,116 @@ struct DeveloperAgentStatus: Hashable {
     // a verified candidate, never a failed candidate.
     var isReadyForReview: Bool {
         isCandidateReady
+    }
+
+    var developmentProgress:
+        AgentDevelopmentProgressSnapshot {
+        if isCandidateReady {
+            return AgentDevelopmentProgressSnapshot(
+                fraction: 0.95,
+                title: "Candidate hazır",
+                detail: "Lead / ChatGPT incelemesi gerekiyor",
+                isTerminalFailure: false
+            )
+        }
+
+        if isReviewableFailure ||
+           [
+                "failed",
+                "local_agent_failed",
+                "candidate_recovery_failed",
+                "candidate_repair_failed",
+                "local_agent_completion_gate_failed",
+                "local_agent_watchdog_timeout",
+                "sdk_failed",
+                "sdk_watchdog_timeout"
+           ].contains(state) {
+            return AgentDevelopmentProgressSnapshot(
+                fraction: 0.80,
+                title: "Geliştirme durdu",
+                detail: learningStageTitle,
+                isTerminalFailure: true
+            )
+        }
+
+        let fraction: Double
+
+        switch state {
+        case "checking",
+             "task_decomposing",
+             "task_decomposing_local_fallback",
+             "teacher_plan_review":
+            fraction = 0.15
+
+        case "local_ai_checking",
+             "local_ai_installing",
+             "local_ai_starting",
+             "local_model_downloading",
+             "remote_ai_ready",
+             "remote_agent_starting",
+             "local_agent_starting",
+             "sdk_fallback_preparing",
+             "sdk_importing",
+             "sdk_import_ready",
+             "sdk_provider_ready",
+             "sdk_runtime_starting",
+             "sdk_runtime_ready":
+            fraction = 0.25
+
+        case "local_agent_target_found",
+             "local_agent_target_not_found",
+             "local_agent_target_verified",
+             "local_agent_dependency_neighborhood_verified",
+             "local_agent_root_cause_pool_ready",
+             "local_agent_root_cause_pruned",
+             "local_agent_root_cause_ranking",
+             "local_agent_root_cause_ranked",
+             "local_agent_root_cause_analyzing",
+             "local_agent_root_cause_verifying",
+             "local_agent_root_cause_verified",
+             "local_agent_root_cause_selected":
+            fraction = 0.40
+
+        case "learning",
+             "running",
+             "local_agent_running",
+             "local_agent_tool",
+             "local_agent_structured_tool",
+             "local_agent_structured_mutation",
+             "sdk_session_starting",
+             "sdk_session_running",
+             "sdk_tools_running",
+             "sdk_tool_completed":
+            fraction = 0.60
+
+        case "verifying",
+             "task_verifying",
+             "sdk_session_ended",
+             "sdk_session_completed",
+             "local_agent_completed":
+            fraction = 0.78
+
+        case "skill_extracting",
+             "skill_candidate_ready",
+             "local_agent_candidate_handoff",
+             "recovering_candidate",
+             "candidate_recovered",
+             "candidate_repair_running":
+            fraction = 0.90
+
+        default:
+            fraction =
+                isLearningActive
+                ? 0.30
+                : 0.05
+        }
+
+        return AgentDevelopmentProgressSnapshot(
+            fraction: fraction,
+            title: learningStageTitle,
+            detail: message,
+            isTerminalFailure: false
+        )
     }
 
     var isLearningActive: Bool {

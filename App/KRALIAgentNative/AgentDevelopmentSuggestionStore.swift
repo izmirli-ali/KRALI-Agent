@@ -45,6 +45,27 @@ enum AgentDevelopmentSuggestionSource:
     case developerFailure
     case architecture
     case usability
+
+    var title: String {
+        switch self {
+        case .capabilityGap:
+            return "Capability"
+        case .research:
+            return "Araştırma"
+        case .arena:
+            return "Arena"
+        case .training:
+            return "Training"
+        case .mentor:
+            return "Mentor"
+        case .developerFailure:
+            return "Developer"
+        case .architecture:
+            return "Mimari"
+        case .usability:
+            return "Arayüz"
+        }
+    }
 }
 
 enum AgentDevelopmentSuggestionState:
@@ -61,6 +82,29 @@ enum AgentDevelopmentSuggestionState:
     case failed
     case released
     case completed
+
+    var title: String {
+        switch self {
+        case .proposed:
+            return "Önerildi"
+        case .deferred:
+            return "Bekletildi"
+        case .suppressed:
+            return "Gizlendi"
+        case .approved:
+            return "Onaylandı"
+        case .developing:
+            return "Geliştiriliyor"
+        case .readyForReview:
+            return "Aday hazır"
+        case .failed:
+            return "Durdu"
+        case .released:
+            return "Yayınlandı"
+        case .completed:
+            return "Tamamlandı"
+        }
+    }
 }
 
 struct AgentDevelopmentSuggestion:
@@ -283,6 +327,130 @@ struct AgentDevelopmentSuggestionStore {
                 )
             )
         }
+
+        save(suggestions)
+        return suggestions
+    }
+
+    func observeResearch(
+        _ synthesis:
+            AgentDevelopmentResearchSynthesis,
+        sourceRevision: String?,
+        in existing:
+            [AgentDevelopmentSuggestion]
+    ) -> [AgentDevelopmentSuggestion] {
+        guard
+            synthesis.mutationRecommended,
+            !synthesis.mutationStarted,
+            !synthesis
+                .selectedImprovement
+                .trimmingCharacters(
+                    in:
+                        .whitespacesAndNewlines
+                )
+                .isEmpty
+        else {
+            return existing
+        }
+
+        let fingerprint =
+            "research|" +
+            compactIdentifier(
+                synthesis
+                    .selectedImprovement
+            )
+
+        var suggestions = existing
+        let now = Date()
+
+        if let index =
+            suggestions.firstIndex(
+                where: {
+                    $0.fingerprint ==
+                        fingerprint
+                }
+            ) {
+            suggestions[index]
+                .occurrenceCount += 1
+            suggestions[index]
+                .updatedAt = now
+            save(suggestions)
+            return suggestions
+        }
+
+        let externalIDs =
+            synthesis
+                .proposal
+                .evidenceIDs
+                .prefix(6)
+                .map {
+                    "research:" + $0
+                }
+
+        let repositoryIDs =
+            synthesis
+                .proposal
+                .repositoryEvidenceIDs
+                .prefix(6)
+                .map {
+                    "repository:" + $0
+                }
+
+        suggestions.append(
+            AgentDevelopmentSuggestion(
+                id: UUID(),
+                fingerprint:
+                    fingerprint,
+                source: .research,
+                capabilityID: nil,
+                capabilityName: nil,
+                capabilityKind: nil,
+                learningPath: nil,
+                candidateCapabilityIDs: [],
+                title:
+                    compactText(
+                        synthesis
+                            .selectedImprovement,
+                        limit: 110
+                    ),
+                reason:
+                    compactText(
+                        synthesis
+                            .biggestGap,
+                        limit: 360
+                    ),
+                expectedBenefit:
+                    compactText(
+                        synthesis
+                            .proposal
+                            .expectedBehavior,
+                        limit: 360
+                    ),
+                provenanceIDs:
+                    Array(
+                        externalIDs +
+                        repositoryIDs
+                    ),
+                sourceRevision:
+                    AgentSourceRevisionPolicy
+                        .exactRevision(
+                            sourceRevision
+                        ),
+                risk:
+                    synthesis
+                        .proposal
+                        .risks
+                        .isEmpty
+                    ? "low"
+                    : "medium",
+                occurrenceCount: 1,
+                state: .proposed,
+                developerJobID: nil,
+                candidateBranch: nil,
+                createdAt: now,
+                updatedAt: now
+            )
+        )
 
         save(suggestions)
         return suggestions
