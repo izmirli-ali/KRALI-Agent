@@ -63,6 +63,12 @@ ok(
 );
 
 ok(
+  sidebar.includes("suggestionLineageKey") &&
+  sidebar.includes('separatedBy: "|retry|"'),
+  "sidebar keeps retry history auditable without duplicating the active card"
+);
+
+ok(
   sidebar.includes("canDevelopSuggestion") &&
   sidebar.includes("bounded scope"),
   "sidebar enables only suggestions accepted by the bounded compiler"

@@ -204,9 +204,24 @@ struct ConversationSidebarView: View {
 
     private var visibleDevelopmentSuggestions:
         [AgentDevelopmentSuggestion] {
-        engine.developmentSuggestions
+        let grouped = Dictionary(
+            grouping: engine.developmentSuggestions
             .filter {
                 $0.state != .suppressed
+            },
+            by: suggestionLineageKey
+        )
+
+        return grouped
+            .values
+            .compactMap { lineage in
+                lineage.min {
+                    let left = developmentSuggestionPriority($0)
+                    let right = developmentSuggestionPriority($1)
+                    return left == right
+                        ? $0.updatedAt > $1.updatedAt
+                        : left < right
+                }
             }
             .sorted {
                 developmentSuggestionPriority(
@@ -216,6 +231,14 @@ struct ConversationSidebarView: View {
                     $1
                 )
             }
+    }
+
+    private func suggestionLineageKey(
+        _ suggestion: AgentDevelopmentSuggestion
+    ) -> String {
+        suggestion.fingerprint.components(
+            separatedBy: "|retry|"
+        ).first ?? suggestion.fingerprint
     }
 
     private func developmentSuggestionPriority(
