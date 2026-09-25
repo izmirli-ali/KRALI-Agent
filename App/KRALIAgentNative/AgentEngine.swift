@@ -3307,27 +3307,158 @@ final class AgentEngine: ObservableObject {
 
         if pendingTaskApproval == nil &&
            !currentCapabilityGaps.isEmpty {
-            inspectorState.learningQueueJobs =
-                learningQueueStore.enqueue(
-                    gaps:
+            developmentSuggestions =
+                developmentSuggestionStore
+                    .observeCapabilityGaps(
                         currentCapabilityGaps,
-                    sourceGoal: text,
-                    into:
-                        inspectorState.learningQueueJobs
-                )
-
-            let queuedCount =
-                inspectorState.learningQueueJobs.filter {
-                    $0.state == .queued
-                }.count
+                        sourceRevision:
+                            currentExactSourceRevision,
+                        provenancePrefix:
+                            "runtime-gap",
+                        in:
+                            developmentSuggestions
+                    )
 
             log(
-                "Capability gap Learning Queue'ya alındı • sırada=" +
-                String(queuedCount)
+                "Capability gap yalnız geliştirme önerisine dönüştürüldü • onay bekliyor"
             )
         }
+    }
+
+    func approveDevelopmentSuggestion(
+        id: UUID
+    ) {
+        guard
+            let suggestion =
+                developmentSuggestions
+                    .first(
+                        where: {
+                            $0.id == id
+                        }
+                    ),
+            suggestion.state ==
+                .proposed ||
+            suggestion.state ==
+                .deferred
+        else {
+            return
+        }
+
+        guard
+            suggestion.source ==
+                .capabilityGap,
+            let exactRevision =
+                AgentSourceRevisionPolicy
+                    .exactRevision(
+                        suggestion
+                            .sourceRevision
+                    ),
+            exactRevision ==
+                currentExactSourceRevision,
+            let gap =
+                developmentSuggestionStore
+                    .approvedGap(
+                        from:
+                            suggestion
+                    )
+        else {
+            postAssistantMessage(
+                "Bu geliştirme önerisi mevcut build üzerinde güvenli executable capability job'una dönüştürülemiyor. Yeniden gözlem/araştırma gerekli; geliştirme başlatılmadı."
+            )
+            return
+        }
+
+        let updatedJobs =
+            learningQueueStore.enqueue(
+                gaps: [gap],
+                sourceRevision:
+                    exactRevision,
+                userApproved: true,
+                into:
+                    inspectorState
+                        .learningQueueJobs
+            )
+
+        guard
+            let job =
+                updatedJobs
+                    .filter({
+                        $0.capabilityID ==
+                            gap.capabilityID &&
+                        $0.kind ==
+                            gap.kind &&
+                        $0.userApproved ==
+                            true &&
+                        $0.sourceRevision ==
+                            exactRevision
+                    })
+                    .sorted(
+                        by: {
+                            $0.updatedAt >
+                                $1.updatedAt
+                        }
+                    )
+                    .first
+        else {
+            postAssistantMessage(
+                "Geliştirme onayı kaydedildi ancak güvenli learning job oluşturulamadı. Developer Agent başlatılmadı."
+            )
+            return
+        }
+
+        inspectorState.learningQueueJobs =
+            updatedJobs
+
+        developmentSuggestions =
+            developmentSuggestionStore
+                .transition(
+                    id,
+                    to: .approved,
+                    in:
+                        developmentSuggestions
+                )
+
+        developmentSuggestions =
+            developmentSuggestionStore
+                .linkDevelopmentJob(
+                    suggestionID: id,
+                    jobID: job.id,
+                    in:
+                        developmentSuggestions
+                )
+
+        postAssistantMessage(
+            suggestion.title +
+            " geliştirmesi onaylandı. KRALİ yalnız exact source revision üzerinde izole candidate üretecek; merge/release yetkisi verilmedi."
+        )
 
         startNextLearningJobIfNeeded()
+    }
+
+    func deferDevelopmentSuggestion(
+        id: UUID
+    ) {
+        developmentSuggestions =
+            developmentSuggestionStore
+                .transition(
+                    id,
+                    to: .deferred,
+                    in:
+                        developmentSuggestions
+                )
+    }
+
+    func suppressDevelopmentSuggestion(
+        id: UUID
+    ) {
+        developmentSuggestions =
+            developmentSuggestionStore
+                .transition(
+                    id,
+                    to: .suppressed,
+                    in:
+                        developmentSuggestions
+                )
     }
 
     private func promoteVerifiedSkills(
@@ -5088,18 +5219,21 @@ final class AgentEngine: ObservableObject {
         if pendingTaskApproval == nil,
            !currentCapabilityGaps
                 .isEmpty {
-            inspectorState.learningQueueJobs =
-                learningQueueStore.enqueue(
-                    gaps:
+            developmentSuggestions =
+                developmentSuggestionStore
+                    .observeCapabilityGaps(
                         currentCapabilityGaps,
-                    sourceGoal:
-                        currentTaskInput,
-                    into:
-                        inspectorState
-                            .learningQueueJobs
-                )
+                        sourceRevision:
+                            currentExactSourceRevision,
+                        provenancePrefix:
+                            "problem-solver-gap",
+                        in:
+                            developmentSuggestions
+                    )
 
-            startNextLearningJobIfNeeded()
+            log(
+                "Problem-solver capability gap yalnız geliştirme önerisine dönüştürüldü • onay bekliyor"
+            )
         }
     }
 
@@ -7374,12 +7508,20 @@ final class AgentEngine: ObservableObject {
 
             if arenaNeedsDevelopment &&
                trainingGreen &&
-               liveGreen &&
-               !inspectorState.developerAgentBusy {
+               liveGreen {
+                developmentSuggestions =
+                    developmentSuggestionStore
+                        .observeArena(
+                            report,
+                            sourceRevision:
+                                currentExactSourceRevision,
+                            in:
+                                developmentSuggestions
+                        )
+
                 log(
-                    "Arena açık-dünya problemi buldu; Developer Agent candidate düzeltme için otomatik başlatılıyor"
+                    "Arena açık-dünya problemi buldu; otomatik Developer Agent başlatılmadı, geliştirme önerisi oluşturuldu"
                 )
-                runDeveloperAgent()
             } else if !arenaCurrent ||
                       !trainingGreen ||
                       !liveGreen {
@@ -7704,6 +7846,15 @@ final class AgentEngine: ObservableObject {
 
         activeLearningJobID = next.id
 
+        developmentSuggestions =
+            developmentSuggestionStore
+                .updateDevelopmentState(
+                    jobID: next.id,
+                    state: .developing,
+                    in:
+                        developmentSuggestions
+                )
+
         log(
             "Learning Queue worker başlatılıyor • " +
             next.capabilityID +
@@ -7730,6 +7881,61 @@ final class AgentEngine: ObservableObject {
         developerTask: AgentDeveloperTaskDescriptor? = nil,
         approvedSystemEffect: String? = nil
     ) {
+        let developerSourceRevision:
+            String?
+
+        if let learningJob {
+            developerSourceRevision =
+                AgentSourceRevisionPolicy
+                    .exactRevision(
+                        learningJob
+                            .sourceRevision
+                    )
+        } else {
+            developerSourceRevision =
+                currentExactSourceRevision
+        }
+
+        guard
+            let developerSourceRevision
+        else {
+            let blocked =
+                DeveloperAgentStatus(
+                    state: "blocked",
+                    message:
+                        "Developer Agent exact source revision doğrulanamadığı için başlatılmadı.",
+                    branch: nil,
+                    worktree: nil,
+                    appVersion:
+                        currentAppVersionString,
+                    updatedAt: Date()
+                )
+
+            inspectorState
+                .developerAgentStatus =
+                    blocked
+            developerBridge.writeStatus(
+                blocked
+            )
+
+            if let learningJob {
+                developmentSuggestions =
+                    developmentSuggestionStore
+                        .updateDevelopmentState(
+                            jobID:
+                                learningJob.id,
+                            state: .failed,
+                            in:
+                                developmentSuggestions
+                        )
+            }
+
+            postAssistantMessage(
+                "Developer Agent güvenlik nedeniyle durdu: exact source revision yok. Main/develop/HEAD fallback kullanılmadı."
+            )
+            return
+        }
+
         guard !inspectorState.developerAgentBusy else {
             if let learningJob {
                 log(
@@ -7887,7 +8093,9 @@ final class AgentEngine: ObservableObject {
                     developerTaskURL:
                         developerTask?.url,
                     approvedSystemEffect:
-                        approvedSystemEffect
+                        approvedSystemEffect,
+                    sourceRevision:
+                        developerSourceRevision
                 )
 
             monitor.cancel()
@@ -8443,6 +8651,39 @@ final class AgentEngine: ObservableObject {
         learningQueueStore.save(
             inspectorState.learningQueueJobs
         )
+
+        let suggestionState:
+            AgentDevelopmentSuggestionState
+
+        switch state {
+        case .readyForReview:
+            suggestionState =
+                .readyForReview
+        case .completed:
+            // no_change is not a released feature.
+            suggestionState =
+                .failed
+        case .failed:
+            suggestionState =
+                .failed
+        case .queued,
+             .running:
+            suggestionState =
+                .developing
+        }
+
+        developmentSuggestions =
+            developmentSuggestionStore
+                .updateDevelopmentState(
+                    jobID:
+                        activeLearningJobID,
+                    state:
+                        suggestionState,
+                    candidateBranch:
+                        status.branch,
+                    in:
+                        developmentSuggestions
+                )
 
         log(
             "Learning Queue job tamamlandı • " +
