@@ -358,6 +358,17 @@ final class AgentEngine: ObservableObject {
                     launchAppVersion
                 )
 
+        developmentSuggestions =
+            reconcileReadOnlyDiagnosisSuggestions(
+                developmentSuggestions,
+                status:
+                    inspectorState
+                        .developerAgentStatus
+            )
+        developmentSuggestionStore.save(
+            developmentSuggestions
+        )
+
         if inspectorState.developerAgentStatus.state ==
             "stale_run" {
             developerBridge.writeStatus(
@@ -3406,6 +3417,34 @@ final class AgentEngine: ObservableObject {
                 .released
             reconciled[index].updatedAt =
                 Date()
+        }
+
+        return reconciled
+    }
+
+    /// A read-only Architect diagnosis is useful review evidence, not a
+    /// mutation failure. Recover only the matching current-revision card.
+    private func reconcileReadOnlyDiagnosisSuggestions(
+        _ suggestions: [AgentDevelopmentSuggestion],
+        status: DeveloperAgentStatus
+    ) -> [AgentDevelopmentSuggestion] {
+        guard
+            status.state == "cursor_architect_ready",
+            let currentRevision = currentExactSourceRevision
+        else {
+            return suggestions
+        }
+
+        var reconciled = suggestions
+
+        for index in reconciled.indices where
+            reconciled[index].state == .failed &&
+            reconciled[index].sourceRevision == currentRevision &&
+            status.message.localizedCaseInsensitiveContains(
+                reconciled[index].title
+            ) {
+            reconciled[index].state = .readyForReview
+            reconciled[index].updatedAt = Date()
         }
 
         return reconciled
@@ -8460,13 +8499,22 @@ final class AgentEngine: ObservableObject {
             )
 
             if let developmentSuggestionID {
+                // A Cursor Architect result is an explicit read-only diagnosis.
+                // It is not a candidate and must never be mistaken for a failed
+                // mutation: retain it for human review without granting release
+                // authority or inventing a candidate branch.
+                let diagnosisReady =
+                    status.state ==
+                    "cursor_architect_ready"
+
                 developmentSuggestions =
                     developmentSuggestionStore
                         .updateSuggestionDevelopmentState(
                             suggestionID:
                                 developmentSuggestionID,
                             state:
-                                status.isCandidateReady
+                                status.isCandidateReady ||
+                                diagnosisReady
                                 ? .readyForReview
                                 : .failed,
                             candidateBranch:

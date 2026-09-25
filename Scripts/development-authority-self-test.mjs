@@ -74,6 +74,18 @@ ok(
 );
 
 ok(
+  engine.includes('status.state ==\n                    "cursor_architect_ready"') &&
+  engine.includes("status.isCandidateReady ||\n                                diagnosisReady\n                                ? .readyForReview"),
+  "read-only Cursor Architect diagnosis remains reviewable instead of being marked failed"
+);
+
+ok(
+  engine.includes("reconcileReadOnlyDiagnosisSuggestions") &&
+  engine.includes("status.message.localizedCaseInsensitiveContains"),
+  "a current-revision read-only diagnosis restores only its matching failed card"
+);
+
+ok(
   engine.includes("observeCapabilityGaps") &&
   engine.includes('"runtime-gap"') &&
   engine.includes('"problem-solver-gap"'),
