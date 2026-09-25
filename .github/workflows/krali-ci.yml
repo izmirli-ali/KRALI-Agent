@@ -60,6 +60,7 @@ jobs:
           node Scripts/development-authority-self-test.mjs
           node Scripts/development-suggestions-ui-self-test.mjs
           node Scripts/bounded-development-compiler-self-test.mjs
+          node Scripts/development-release-reconciliation-self-test.mjs
 
       - name: Validate Swift mission and execution-profile policies
         shell: bash
