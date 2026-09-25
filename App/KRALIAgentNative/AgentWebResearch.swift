@@ -8,19 +8,22 @@ struct WebResearchResult: Identifiable, Hashable {
     let domain: String
     let snippet: String?
     let evidenceEligible: Bool
+    let publishedAt: Date?
 
     init(
         title: String,
         url: URL,
         domain: String,
         snippet: String?,
-        evidenceEligible: Bool = true
+        evidenceEligible: Bool = true,
+        publishedAt: Date? = nil
     ) {
         self.title = title
         self.url = url
         self.domain = domain
         self.snippet = snippet
         self.evidenceEligible = evidenceEligible
+        self.publishedAt = publishedAt
     }
 }
 
@@ -601,7 +604,9 @@ actor AgentWebResearchService {
                 title: cleanHTML(title).replacingOccurrences(of: "\\n", with: " "),
                 url: url,
                 domain: url.host ?? "arxiv.org",
-                snippet: firstTagValue("summary", in: block).map(cleanHTML)
+                snippet: firstTagValue("summary", in: block).map(cleanHTML),
+                publishedAt: firstTagValue("published", in: block)
+                    .flatMap(parseISO8601Date)
             ))
         }
         return results
@@ -623,7 +628,7 @@ actor AgentWebResearchService {
                 let titles = item["title"] as? [String],
                 let title = titles.first,
                 let rawURL = (item["URL"] as? String) ??
-                    (item["DOI"] as? String).map { "https://doi.org/" + $0 },
+                    (item["DOI"] as? String).map({ "https://doi.org/" + $0 }),
                 let url = URL(string: rawURL),
                 isUsefulExternalURL(url)
             else { return nil }
@@ -631,7 +636,8 @@ actor AgentWebResearchService {
                 title: title,
                 url: url,
                 domain: url.host ?? "doi.org",
-                snippet: (item["abstract"] as? String).map(cleanHTML)
+                snippet: (item["abstract"] as? String).map(cleanHTML),
+                publishedAt: crossrefPublishedDate(item["published"])
             )
         }
     }
@@ -662,7 +668,8 @@ actor AgentWebResearchService {
                 title: title,
                 url: url,
                 domain: "openreview.net",
-                snippet: summary
+                snippet: summary,
+                publishedAt: openReviewPublishedDate(note)
             )
         }
     }
@@ -673,6 +680,36 @@ actor AgentWebResearchService {
             return object["value"] as? String
         }
         return nil
+    }
+
+    private func parseISO8601Date(_ raw: String) -> Date? {
+        ISO8601DateFormatter().date(from: raw.trimmingCharacters(in: .whitespacesAndNewlines))
+    }
+
+    private func crossrefPublishedDate(_ raw: Any?) -> Date? {
+        guard
+            let object = raw as? [String: Any],
+            let parts = object["date-parts"] as? [[Int]],
+            let first = parts.first,
+            let year = first.first
+        else { return nil }
+
+        return Calendar(identifier: .gregorian).date(
+            from: DateComponents(
+                calendar: Calendar(identifier: .gregorian),
+                year: year,
+                month: first.count > 1 ? first[1] : 1,
+                day: first.count > 2 ? first[2] : 1
+            )
+        )
+    }
+
+    private func openReviewPublishedDate(_ note: [String: Any]) -> Date? {
+        let raw = (note["pdate"] as? NSNumber) ??
+            (note["cdate"] as? NSNumber) ??
+            (note["tmdate"] as? NSNumber)
+        guard let milliseconds = raw?.doubleValue else { return nil }
+        return Date(timeIntervalSince1970: milliseconds / 1_000)
     }
 
     private func firstTagValue(

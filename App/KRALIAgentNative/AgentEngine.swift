@@ -1401,7 +1401,9 @@ final class AgentEngine: ObservableObject {
                             item.evidence
                                 .excerpt
                                 .prefix(800)
-                        )
+                        ),
+                    publishedAt:
+                        item.assessment.publishedAt
                 )
             }
 
@@ -1603,7 +1605,9 @@ final class AgentEngine: ObservableObject {
             synthesis?
                 .formattedFinalReport(
                     sources:
-                        sourceAssessments
+                        sourceAssessments,
+                    evidence:
+                        evidenceRecords
                 ) ??
             fallbackReport
 

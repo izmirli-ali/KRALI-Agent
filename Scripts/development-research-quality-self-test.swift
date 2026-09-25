@@ -566,6 +566,54 @@ struct DevelopmentResearchQualitySelfTest {
             "computer control cannot enter development research"
         )
 
+        let datedResult = WebResearchResult(
+            title: "Recent agent evaluation paper",
+            url: URL(string: "https://arxiv.org/abs/2601.00001")!,
+            domain: "arxiv.org",
+            snippet: "agent evaluation benchmark evidence",
+            publishedAt: Date()
+        )
+        let datedAssessment = classifier.assess(
+            datedResult,
+            facet: firstFive[0]
+        )
+        check(
+            datedAssessment.freshnessScore == 100,
+            "recent source receives explicit freshness score"
+        )
+
+        let conflictEvidence = [
+            AgentDevelopmentResearchEvidenceRecord(
+                id: "C1",
+                facetID: firstFive[0].id,
+                sourceURL: "https://example.org/positive",
+                sourceTitle: "Positive",
+                domain: "example.org",
+                kind: .paper,
+                tier: .a,
+                excerpt: "Structured reflection improves benchmark reliability."
+            ),
+            AgentDevelopmentResearchEvidenceRecord(
+                id: "C2",
+                facetID: firstFive[0].id,
+                sourceURL: "https://example.net/negative",
+                sourceTitle: "Negative",
+                domain: "example.net",
+                kind: .paper,
+                tier: .a,
+                excerpt: "Structured reflection fails benchmark reliability under distribution shift."
+            )
+        ]
+        let conflictAudit = AgentDevelopmentResearchEvidenceAudit.analyze(
+            sources: [datedAssessment],
+            evidence: conflictEvidence
+        )
+        check(
+            conflictAudit.recentSourceCount == 1 &&
+            conflictAudit.potentialContradictionCount == 1,
+            "freshness and contradiction audit"
+        )
+
         print("development_research_quality_self_test_ok")
         print("facet_plan=PASS")
         print("multi_source_benchmark=PASS")
@@ -573,5 +621,7 @@ struct DevelopmentResearchQualitySelfTest {
         print("lexical_false_positives=BLOCKED")
         print("evidence_contract=PASS")
         print("computer_control=BLOCKED")
+        print("freshness_audit=PASS")
+        print("contradiction_audit=PASS")
     }
 }

@@ -24,6 +24,11 @@ assert "case openReview" in web_research
 assert "https://api2.openreview.net/notes/search" in web_research
 assert "parseOpenReview" in web_research
 assert 'domain: "openreview.net"' in web_research
+assert "AgentDevelopmentResearchEvidenceAudit" in quality
+assert "freshnessScore" in quality
+assert "potentialContradictionCount" in quality
+assert "complete impact map" in quality
+assert "behavioralBenchmark.isEmpty" in quality
 
 # Research and diagnosis must remain separate paths.
 research_pos = engine.index("executeSelfDevelopmentResearchMission")

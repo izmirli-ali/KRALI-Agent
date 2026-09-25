@@ -63,6 +63,36 @@ struct AgentDevelopmentResearchSourceAssessment: Codable, Hashable {
     let relevance: Double
     let qualityScore: Int
     let qualifiesForTechnicalCoverage: Bool
+    let publishedAt: Date?
+    let freshnessScore: Int?
+
+    init(
+        facetID: String,
+        sourceURL: String,
+        sourceTitle: String,
+        domain: String,
+        origin: String,
+        kind: AgentResearchSourceKind,
+        tier: AgentResearchSourceTier,
+        relevance: Double,
+        qualityScore: Int,
+        qualifiesForTechnicalCoverage: Bool,
+        publishedAt: Date? = nil,
+        freshnessScore: Int? = nil
+    ) {
+        self.facetID = facetID
+        self.sourceURL = sourceURL
+        self.sourceTitle = sourceTitle
+        self.domain = domain
+        self.origin = origin
+        self.kind = kind
+        self.tier = tier
+        self.relevance = relevance
+        self.qualityScore = qualityScore
+        self.qualifiesForTechnicalCoverage = qualifiesForTechnicalCoverage
+        self.publishedAt = publishedAt
+        self.freshnessScore = freshnessScore
+    }
 }
 
 struct AgentDevelopmentResearchEvidenceRecord: Codable, Hashable {
@@ -74,6 +104,84 @@ struct AgentDevelopmentResearchEvidenceRecord: Codable, Hashable {
     let kind: AgentResearchSourceKind
     let tier: AgentResearchSourceTier
     let excerpt: String
+    let publishedAt: Date?
+
+    init(
+        id: String,
+        facetID: String,
+        sourceURL: String,
+        sourceTitle: String,
+        domain: String,
+        kind: AgentResearchSourceKind,
+        tier: AgentResearchSourceTier,
+        excerpt: String,
+        publishedAt: Date? = nil
+    ) {
+        self.id = id
+        self.facetID = facetID
+        self.sourceURL = sourceURL
+        self.sourceTitle = sourceTitle
+        self.domain = domain
+        self.kind = kind
+        self.tier = tier
+        self.excerpt = excerpt
+        self.publishedAt = publishedAt
+    }
+}
+
+struct AgentDevelopmentResearchEvidenceAudit: Hashable {
+    let datedSourceCount: Int
+    let recentSourceCount: Int
+    let unknownDateCount: Int
+    let potentialContradictionCount: Int
+
+    static func analyze(
+        sources: [AgentDevelopmentResearchSourceAssessment],
+        evidence: [AgentDevelopmentResearchEvidenceRecord]
+    ) -> Self {
+        let dated = sources.filter { $0.publishedAt != nil }
+        let recent = dated.filter { ($0.freshnessScore ?? 0) >= 70 }
+        var contradictions = 0
+
+        for leftIndex in evidence.indices {
+            for rightIndex in evidence.indices where rightIndex > leftIndex {
+                let left = normalized(evidence[leftIndex].excerpt)
+                let right = normalized(evidence[rightIndex].excerpt)
+                guard sharedMaterialToken(left, right) else { continue }
+                if polarity(left) != 0,
+                   polarity(right) != 0,
+                   polarity(left) != polarity(right) {
+                    contradictions += 1
+                }
+            }
+        }
+
+        return Self(
+            datedSourceCount: dated.count,
+            recentSourceCount: recent.count,
+            unknownDateCount: max(0, sources.count - dated.count),
+            potentialContradictionCount: contradictions
+        )
+    }
+
+    private static func polarity(_ value: String) -> Int {
+        let negative = [" not ", " no ", "cannot", "fails", "worse", "risk", "degil", "yetersiz", "basarisiz"]
+        let positive = ["improves", "supports", "effective", "better", "passes", "iyilestir", "basarili", "destekler"]
+        let negativeCount = negative.filter { value.contains($0) }.count
+        let positiveCount = positive.filter { value.contains($0) }.count
+        return positiveCount == negativeCount ? 0 : (positiveCount > negativeCount ? 1 : -1)
+    }
+
+    private static func sharedMaterialToken(_ left: String, _ right: String) -> Bool {
+        let stop = Set(["agent", "research", "source", "evidence", "system", "with", "from", "that", "this"])
+        let leftTokens = Set(left.split { !$0.isLetter && !$0.isNumber }.map(String.init).filter { $0.count >= 6 && !stop.contains($0) })
+        let rightTokens = Set(right.split { !$0.isLetter && !$0.isNumber }.map(String.init).filter { $0.count >= 6 && !stop.contains($0) })
+        return !leftTokens.intersection(rightTokens).isEmpty
+    }
+
+    private static func normalized(_ value: String) -> String {
+        " " + value.folding(options: [.caseInsensitive, .diacriticInsensitive], locale: Locale(identifier: "tr_TR")).lowercased() + " "
+    }
 }
 
 struct AgentDevelopmentResearchApproach: Codable, Hashable {
@@ -119,7 +227,8 @@ struct AgentDevelopmentResearchSynthesis: Codable, Hashable {
     let remainingLimitations: [String]
 
     func formattedFinalReport(
-        sources: [AgentDevelopmentResearchSourceAssessment]
+        sources: [AgentDevelopmentResearchSourceAssessment],
+        evidence: [AgentDevelopmentResearchEvidenceRecord]
     ) -> String {
         let uniqueSources = Dictionary(
             sources.map { ($0.sourceURL, $0) },
@@ -149,7 +258,11 @@ struct AgentDevelopmentResearchSynthesis: Codable, Hashable {
             by: \.kind
         )
         let scorecard =
-            "Sources: \(uniqueSources.count) • Independent origins: \(independentOrigins.count) • Preferred source kinds: \(sourceKinds.keys.count) • Tier A/B: \(uniqueSources.filter { $0.tier == .a || $0.tier == .b }.count)"
+            "Sources: \(uniqueSources.count) • Independent origins: \(independentOrigins.count) • Preferred source kinds: \(sourceKinds.keys.count) • Tier A/B: \(uniqueSources.filter { $0.tier == .a || $0.tier == .b }.count) • Dated: \(uniqueSources.filter { $0.publishedAt != nil }.count) • Freshness: \(freshnessAverage(uniqueSources))/100"
+        let audit = AgentDevelopmentResearchEvidenceAudit.analyze(
+            sources: Array(uniqueSources),
+            evidence: evidence
+        )
 
         let approachText = approaches.enumerated().map { index, item in
             """
@@ -184,6 +297,7 @@ struct AgentDevelopmentResearchSynthesis: Codable, Hashable {
         B. Research Sources
         \(sourceText)
         Quality Scorecard: \(scorecard)
+        Evidence Audit: Recent sources: \(audit.recentSourceCount) • Unknown dates: \(audit.unknownDateCount) • Potential contradictions requiring review: \(audit.potentialContradictionCount)
 
         C. External Approaches Found
         \(approachText)
@@ -244,6 +358,14 @@ struct AgentDevelopmentResearchSynthesis: Codable, Hashable {
         N. Recommended Next Step
         \(remainingLimitations.isEmpty ? "Human review of the selected proposal before any bounded Developer Agent task." : remainingLimitations.joined(separator: " • "))
         """
+    }
+
+    private func freshnessAverage(
+        _ sources: [AgentDevelopmentResearchSourceAssessment]
+    ) -> Int {
+        let dated = sources.filter { $0.publishedAt != nil }
+        guard !dated.isEmpty else { return 0 }
+        return dated.map { $0.freshnessScore ?? 0 }.reduce(0, +) / dated.count
     }
 }
 
@@ -344,9 +466,11 @@ struct AgentDevelopmentResearchSourceClassifier {
         case .d: baseScore = 10
         }
 
+        let freshnessScore = freshnessScore(for: result.publishedAt)
         let qualityScore =
             baseScore +
-            Int((relevance * 25).rounded())
+            Int((relevance * 25).rounded()) +
+            (result.publishedAt == nil ? 0 : (freshnessScore - 50) / 5)
 
         let origin = canonicalOrigin(domain)
 
@@ -362,8 +486,22 @@ struct AgentDevelopmentResearchSourceClassifier {
             qualityScore: qualityScore,
             qualifiesForTechnicalCoverage:
                 (tier == .a || tier == .b) &&
-                relevance >= 0.30
+                relevance >= 0.30,
+            publishedAt: result.publishedAt,
+            freshnessScore: freshnessScore
         )
+    }
+
+    private func freshnessScore(for date: Date?) -> Int {
+        guard let date else { return 0 }
+        let years = max(0, Calendar.current.dateComponents([.year], from: date, to: Date()).year ?? 0)
+        switch years {
+        case 0...1: return 100
+        case 2...3: return 85
+        case 4...5: return 70
+        case 6...8: return 50
+        default: return 30
+        }
     }
 
     private func isOriginalGitHubRepository(
@@ -647,6 +785,9 @@ struct AgentDevelopmentResearchVerifier {
                 $0.tier == .b
             }
 
+        let datedHighQuality = highQuality.filter { $0.publishedAt != nil }
+        let recentHighQuality = datedHighQuality.filter { ($0.freshnessScore ?? 0) >= 70 }
+
         let origins: Set<String> =
             Set(
                 highQuality.map(\.origin)
@@ -880,6 +1021,20 @@ struct AgentDevelopmentResearchVerifier {
             }
         }
 
+        guard
+            !synthesis.proposal.allowedScope.isEmpty,
+            !synthesis.proposal.likelyFiles.isEmpty,
+            !synthesis.proposal.verificationContract.isEmpty,
+            !synthesis.proposal.behavioralBenchmark.isEmpty,
+            !synthesis.proposal.rollbackCondition.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty
+        else {
+            return AgentDevelopmentResearchVerificationOutcome(
+                state: .attention,
+                summary: "The selected proposal lacks a complete impact map, regression contract, benchmark, or rollback condition.",
+                fallback: "Complete affected scope/files, verification, behavioral benchmark, and rollback fields before creating a candidate."
+            )
+        }
+
         var gaps: [String] = []
 
         if synthesis.approaches.count <
@@ -942,6 +1097,11 @@ struct AgentDevelopmentResearchVerifier {
             )
         }
 
+
+        if !datedHighQuality.isEmpty && recentHighQuality.isEmpty {
+            gaps.append("recent Tier A/B sources 0/1")
+        }
+
         if !gaps.isEmpty {
             return AgentDevelopmentResearchVerificationOutcome(
                 state: .partial,
@@ -956,7 +1116,7 @@ struct AgentDevelopmentResearchVerifier {
         return AgentDevelopmentResearchVerificationOutcome(
             state: .passed,
             summary:
-                "Development research contract passed: mission-derived approach coverage, Tier A/B evidence, independent source origins, repository comparison, one selected proposal, and mutation-off invariant are all satisfied.",
+                "Development research contract passed: mission-derived approach coverage, Tier A/B evidence, freshness audit, independent source origins, repository comparison, impact map, regression benchmark, rollback condition, one selected proposal, and mutation-off invariant are all satisfied.",
             fallback:
                 "Human review is still required before any bounded Developer Agent task."
         )

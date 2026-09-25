@@ -44,6 +44,7 @@ struct MentorTraceResearchSource: Codable {
     let domain: String
     let snippet: String?
     let sourceType: String
+    let publishedAt: Date?
 }
 
 struct MentorTraceEvidence: Codable {
@@ -54,6 +55,7 @@ struct MentorTraceEvidence: Codable {
     let excerpt: String
     let conceptCoverage: Int
     let matchedConcepts: [String]
+    let publishedAt: Date?
 }
 
 struct MentorTraceActivity: Codable {
@@ -283,7 +285,8 @@ struct MentorTraceStore {
                     snippet: $0.snippet,
                     sourceType: $0.evidenceEligible
                         ? "search-result"
-                        : "canonical-direct"
+                        : "canonical-direct",
+                    publishedAt: $0.publishedAt
                 )
             },
             researchEvidence: researchEvidence.map {
@@ -296,7 +299,8 @@ struct MentorTraceStore {
                         : "canonical-direct",
                     excerpt: String($0.excerpt.prefix(1400)),
                     conceptCoverage: $0.conceptCoverage,
-                    matchedConcepts: $0.matchedConcepts
+                    matchedConcepts: $0.matchedConcepts,
+                    publishedAt: $0.source.publishedAt
                 )
             },
             contextMemory: contextMemory.map {
