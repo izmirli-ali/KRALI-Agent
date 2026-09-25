@@ -61,6 +61,8 @@ struct AgentLearningJob: Identifiable, Codable, Hashable, Sendable {
     var lastStatus: String?
     var learningPath:
         CapabilityLearningPath? = nil
+    /// nil in legacy persisted jobs is deliberately treated as false.
+    var userApproved: Bool? = nil
 
     var shortID: String {
         String(id.uuidString.prefix(8))
@@ -156,7 +158,8 @@ struct AgentLearningQueueStore {
         gaps: [CapabilityGapResolution],
         sourceGoal: String,
         into existing: [AgentLearningJob],
-        persist: Bool = true
+        persist: Bool = true,
+        userApproved: Bool = false
     ) -> [AgentLearningJob] {
         var jobs = existing
 
@@ -222,6 +225,9 @@ struct AgentLearningQueueStore {
                 }
 
                 jobs[index].updatedAt = Date()
+                if userApproved {
+                    jobs[index].userApproved = true
+                }
                 jobs[index].lastStatus =
                     "Yeni immutable kanıt aynı öğrenme işine eklendi."
                 continue
@@ -259,7 +265,8 @@ struct AgentLearningQueueStore {
                     lastStatus:
                         "Öğrenme kuyruğuna eklendi.",
                     learningPath:
-                        gap.learningPath
+                        gap.learningPath,
+                    userApproved: userApproved
                 )
             )
         }
@@ -276,7 +283,7 @@ struct AgentLearningQueueStore {
     ) -> AgentLearningJob? {
         jobs
             .filter {
-                $0.state == .queued
+                $0.state == .queued && $0.userApproved == true
             }
             .sorted {
                 if $0.evidenceCount !=

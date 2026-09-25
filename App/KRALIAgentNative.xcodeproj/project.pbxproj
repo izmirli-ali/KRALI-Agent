@@ -54,6 +54,7 @@
 		A10000000000000000000045 /* AgentOutcomePlanner.swift in Sources */ = {isa = PBXBuildFile; fileRef = B10000000000000000000045 /* AgentOutcomePlanner.swift */; };
 		A10000000000000000000046 /* AgentMissionRouter.swift in Sources */ = {isa = PBXBuildFile; fileRef = B10000000000000000000046 /* AgentMissionRouter.swift */; };
 		A10000000000000000000047 /* AgentExecutionProfile.swift in Sources */ = {isa = PBXBuildFile; fileRef = B10000000000000000000047 /* AgentExecutionProfile.swift */; };
+		A10000000000000000000048 /* AgentLearningSuggestionStore.swift in Sources */ = {isa = PBXBuildFile; fileRef = B10000000000000000000048 /* AgentLearningSuggestionStore.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
@@ -105,6 +106,7 @@
 		B10000000000000000000045 /* AgentOutcomePlanner.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AgentOutcomePlanner.swift; sourceTree = "<group>"; };
 		B10000000000000000000046 /* AgentMissionRouter.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AgentMissionRouter.swift; sourceTree = "<group>"; };
 		B10000000000000000000047 /* AgentExecutionProfile.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AgentExecutionProfile.swift; sourceTree = "<group>"; };
+		B10000000000000000000048 /* AgentLearningSuggestionStore.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AgentLearningSuggestionStore.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -176,6 +178,7 @@
 				B10000000000000000000045 /* AgentOutcomePlanner.swift */,
 				B10000000000000000000046 /* AgentMissionRouter.swift */,
 				B10000000000000000000047 /* AgentExecutionProfile.swift */,
+				B10000000000000000000048 /* AgentLearningSuggestionStore.swift */,
 			);
 			path = KRALIAgentNative;
 			sourceTree = "<group>";
@@ -304,6 +307,7 @@
 				A10000000000000000000045 /* AgentOutcomePlanner.swift in Sources */,
 				A10000000000000000000046 /* AgentMissionRouter.swift in Sources */,
 				A10000000000000000000047 /* AgentExecutionProfile.swift in Sources */,
+				A10000000000000000000048 /* AgentLearningSuggestionStore.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};

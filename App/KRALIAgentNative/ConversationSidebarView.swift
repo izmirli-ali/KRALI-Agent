@@ -53,6 +53,15 @@ struct ConversationSidebarView: View {
                         engine.showActiveConversation()
                     }
 
+                    if !engine.learningSuggestions.filter({ $0.state == .proposed }).isEmpty {
+                        sectionLabel("GELİŞTİRME ÖNERİLERİ")
+                            .padding(.top, 10)
+
+                        ForEach(engine.learningSuggestions.filter({ $0.state == .proposed }).prefix(2)) { suggestion in
+                            learningSuggestionCard(suggestion)
+                        }
+                    }
+
                     sectionLabel("GEÇMİŞ")
                         .padding(.top, 10)
 
@@ -187,6 +196,26 @@ struct ConversationSidebarView: View {
             .foregroundStyle(.tertiary)
             .padding(.horizontal, 8)
             .padding(.top, 4)
+    }
+
+    private func learningSuggestionCard(_ suggestion: AgentLearningSuggestion) -> some View {
+        VStack(alignment: .leading, spacing: 6) {
+            Text(suggestion.capabilityName).font(.caption.weight(.semibold))
+            Text(suggestion.reason).font(.caption2).foregroundStyle(.secondary).lineLimit(2)
+            HStack(spacing: 6) {
+                Button("Geliştir") { engine.acceptLearningSuggestion(suggestion.id) }
+                    .buttonStyle(.borderedProminent).controlSize(.small)
+                    .help("Yalnız izole ve bounded bir aday görevi başlatır.")
+                Button("Şimdilik geliştirme") { engine.deferLearningSuggestion(suggestion.id) }
+                    .buttonStyle(.bordered).controlSize(.small)
+                Menu {
+                    Button("Bir daha önerme") { engine.suppressLearningSuggestion(suggestion.id) }
+                } label: { Image(systemName: "ellipsis") }
+                .help("Bu öneriyi kalıcı olarak gizle")
+            }
+        }
+        .padding(8)
+        .background(.quaternary, in: RoundedRectangle(cornerRadius: 8))
     }
 
     private func archiveConversationRow(

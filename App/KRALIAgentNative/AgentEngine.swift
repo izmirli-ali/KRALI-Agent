@@ -67,6 +67,7 @@ final class AgentEngine: ObservableObject {
     @Published var selectedCapabilities: [AgentCapability] = []
     @Published var capabilityLearningPlans: [CapabilityLearningPlan] = []
     @Published var capabilityLearningBacklog: [CapabilityLearningTask] = []
+    @Published var learningSuggestions: [AgentLearningSuggestion] = []
     @Published var webResearchResults: [WebResearchResult] = []
     @Published var webResearchEvidence: [WebSourceEvidence] = []
     @Published var webResearchStatus = "Henüz web araştırması yapılmadı."
@@ -127,6 +128,7 @@ final class AgentEngine: ObservableObject {
     private let developerToolSafetyPolicy =
         AgentDeveloperToolSafetyPolicy()
     private let learningQueueStore = AgentLearningQueueStore()
+    private let learningSuggestionStore = AgentLearningSuggestionStore()
     private let debugRecoveryCenter = AgentDebugRecoveryCenter()
     private let localIntelligence = AgentLocalIntelligence()
     private let subscriptionIntelligence = AgentSubscriptionIntelligence()
@@ -236,6 +238,11 @@ final class AgentEngine: ObservableObject {
                     capabilityRegistry.all
             )
 
+        learningSuggestions = learningSuggestionStore.restoreVisibleSuggestions(
+            existing: learningSuggestionStore.load(),
+            appVersion: currentAppVersionString
+        )
+
         inspectorState.mentorTraceReady =
             fileManager.fileExists(
                 atPath: mentorTraceStore.latestURL.path
@@ -342,7 +349,7 @@ final class AgentEngine: ObservableObject {
                 )
             }
 
-            self.startNextLearningJobIfNeeded()
+            // Suggestions are explicitly approved by the user; startup never starts one.
         }
     }
 
@@ -2195,29 +2202,7 @@ final class AgentEngine: ObservableObject {
             speech.speak(reply)
         }
 
-        if pendingTaskApproval == nil &&
-           !currentCapabilityGaps.isEmpty {
-            inspectorState.learningQueueJobs =
-                learningQueueStore.enqueue(
-                    gaps:
-                        currentCapabilityGaps,
-                    sourceGoal: text,
-                    into:
-                        inspectorState.learningQueueJobs
-                )
-
-            let queuedCount =
-                inspectorState.learningQueueJobs.filter {
-                    $0.state == .queued
-                }.count
-
-            log(
-                "Capability gap Learning Queue'ya alındı • sırada=" +
-                String(queuedCount)
-            )
-        }
-
-        startNextLearningJobIfNeeded()
+        observeLearningSuggestions(currentCapabilityGaps)
     }
 
     private func promoteVerifiedSkills(
@@ -3930,22 +3915,7 @@ final class AgentEngine: ObservableObject {
 
         busy = false
 
-        if pendingTaskApproval == nil,
-           !currentCapabilityGaps
-                .isEmpty {
-            inspectorState.learningQueueJobs =
-                learningQueueStore.enqueue(
-                    gaps:
-                        currentCapabilityGaps,
-                    sourceGoal:
-                        currentTaskInput,
-                    into:
-                        inspectorState
-                            .learningQueueJobs
-                )
-
-            startNextLearningJobIfNeeded()
-        }
+        observeLearningSuggestions(currentCapabilityGaps)
     }
 
     private struct ProblemSolverFallbackResult {
@@ -6550,6 +6520,45 @@ final class AgentEngine: ObservableObject {
             learningJobBriefURL:
                 briefURL
         )
+    }
+
+    private func observeLearningSuggestions(_ gaps: [CapabilityGapResolution]) {
+        guard !gaps.isEmpty else { return }
+        learningSuggestions = learningSuggestionStore.observe(
+            gaps: gaps,
+            existing: learningSuggestions,
+            appVersion: currentAppVersionString
+        )
+    }
+
+    func acceptLearningSuggestion(_ id: UUID) {
+        guard let suggestion = learningSuggestions.first(where: { $0.id == id }), suggestion.state == .proposed else { return }
+        let gap = CapabilityGapResolution(
+            capabilityID: suggestion.capabilityID,
+            capabilityName: suggestion.capabilityName,
+            kind: suggestion.kind,
+            reason: suggestion.reason,
+            candidateCapabilityIDs: [],
+            researchGoal: suggestion.researchGoal,
+            developerBrief: "User-approved bounded capability proposal. Do not merge, push, control apps, or perform external actions.",
+            learningPath: suggestion.learningPath
+        )
+        inspectorState.learningQueueJobs = learningQueueStore.enqueue(
+            gaps: [gap],
+            sourceGoal: "User-approved capability proposal",
+            into: inspectorState.learningQueueJobs,
+            userApproved: true
+        )
+        learningSuggestions = learningSuggestionStore.update(learningSuggestions, id: id, state: .approved)
+        startNextLearningJobIfNeeded()
+    }
+
+    func deferLearningSuggestion(_ id: UUID) {
+        learningSuggestions = learningSuggestionStore.update(learningSuggestions, id: id, state: .deferred)
+    }
+
+    func suppressLearningSuggestion(_ id: UUID) {
+        learningSuggestions = learningSuggestionStore.update(learningSuggestions, id: id, state: .suppressed)
     }
 
     func runDeveloperAgent(
