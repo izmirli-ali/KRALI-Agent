@@ -28,8 +28,10 @@ ok(
 );
 
 ok(
-  engine.includes("suggestion.source ==\n                .capabilityGap"),
-  "approval path remains fail-closed to executable capability gaps"
+  engine.includes("suggestion.source ==\n                .capabilityGap") &&
+  engine.includes("suggestion.source == .research") &&
+  engine.includes("boundedDevelopmentTaskCompiler"),
+  "approval path supports capability gaps plus bounded research suggestions only"
 );
 
 ok(
@@ -48,8 +50,9 @@ ok(
 );
 
 ok(
-  sidebar.includes(".disabled(\n                        !suggestion\n                            .isExecutableCapabilityGap"),
-  "non-compiled suggestion types cannot start development"
+  sidebar.includes("canDevelopSuggestion") &&
+  sidebar.includes("bounded scope"),
+  "sidebar enables only suggestions accepted by the bounded compiler"
 );
 
 ok(
@@ -73,6 +76,6 @@ ok(
 );
 
 console.log("development_suggestions_ui_self_test_ok");
-console.log("research_to_suggestion=read_only");
+console.log("research_to_suggestion=bounded_after_approval");
 console.log("candidate_progress=95");
 console.log("release_progress=100");
