@@ -47,9 +47,12 @@ ok(
   store.includes("KRALİ araştırma kalitesini iyileştir") &&
   store.includes("KRALİ arayüz önerilerini iyileştir") &&
   store.includes("KRALİ eğitim raporu analizini iyileştir") &&
-  engine.includes("seededFallbackSuggestions") &&
-  engine.includes("if developmentSuggestions.isEmpty"),
-  "empty suggestion storage must receive deterministic, non-executing fallback cards"
+  store.includes("func ensureVisibleFallbackSuggestions") &&
+  store.includes("$0.state != .suppressed") &&
+  store.includes("suppressedFingerprints") &&
+  store.includes("existingFingerprints") &&
+  engine.includes("ensureVisibleFallbackSuggestions"),
+  "empty or sidebar-invisible storage must receive deduplicated fallback cards without reviving suppressed cards"
 );
 
 ok(

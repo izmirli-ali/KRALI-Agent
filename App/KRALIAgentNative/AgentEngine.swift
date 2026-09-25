@@ -320,14 +320,14 @@ final class AgentEngine: ObservableObject {
                 storedDevelopmentSuggestions
             )
 
-        if developmentSuggestions.isEmpty {
-            developmentSuggestions =
-                developmentSuggestionStore
-                    .seededFallbackSuggestions(
-                        sourceRevision:
-                            currentExactSourceRevision
-                    )
-        }
+        developmentSuggestions =
+            developmentSuggestionStore
+                .ensureVisibleFallbackSuggestions(
+                    sourceRevision:
+                        currentExactSourceRevision,
+                    in:
+                        developmentSuggestions
+                )
 
         developmentSuggestionStore
             .save(

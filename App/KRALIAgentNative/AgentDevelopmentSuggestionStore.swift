@@ -264,6 +264,52 @@ struct AgentDevelopmentSuggestionStore {
         }
     }
 
+    /// Add fallback cards only when the sidebar would otherwise have no
+    /// visible suggestion. Existing and suppressed fingerprints are both
+    /// retained: a user's dismissal is never converted back to proposed.
+    func ensureVisibleFallbackSuggestions(
+        sourceRevision: String?,
+        in existing: [AgentDevelopmentSuggestion]
+    ) -> [AgentDevelopmentSuggestion] {
+        guard
+            !existing.contains(
+                where: {
+                    $0.state != .suppressed
+                }
+            )
+        else {
+            return existing
+        }
+
+        let existingFingerprints =
+            Set(
+                existing.map(\.fingerprint)
+            )
+        let suppressedFingerprints =
+            Set(
+                existing
+                    .filter {
+                        $0.state == .suppressed
+                    }
+                    .map(\.fingerprint)
+            )
+
+        let additions =
+            seededFallbackSuggestions(
+                sourceRevision: sourceRevision
+            )
+            .filter {
+                !existingFingerprints.contains(
+                    $0.fingerprint
+                ) &&
+                !suppressedFingerprints.contains(
+                    $0.fingerprint
+                )
+            }
+
+        return existing + additions
+    }
+
     func save(
         _ suggestions:
             [AgentDevelopmentSuggestion]
