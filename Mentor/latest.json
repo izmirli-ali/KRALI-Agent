@@ -1,47 +1,123 @@
 {
   "activityTail" : [
     {
-      "date" : "2026-09-24T22:09:25Z",
+      "date" : "2026-09-25T16:14:08Z",
+      "text" : "Web Research başladı"
+    },
+    {
+      "date" : "2026-09-25T16:14:08Z",
+      "text" : "Web Research tamamlandı: 4 kaynak, 4 kaynak okundu"
+    },
+    {
+      "date" : "2026-09-25T16:14:06Z",
+      "text" : "Web Research başladı"
+    },
+    {
+      "date" : "2026-09-25T16:14:06Z",
+      "text" : "Web Research tamamlandı: 4 kaynak, 4 kaynak okundu"
+    },
+    {
+      "date" : "2026-09-25T16:14:04Z",
+      "text" : "Web Research başladı"
+    },
+    {
+      "date" : "2026-09-25T16:14:04Z",
+      "text" : "Web Research tamamlandı: 4 kaynak, 4 kaynak okundu"
+    },
+    {
+      "date" : "2026-09-25T16:14:00Z",
+      "text" : "Web Research başladı"
+    },
+    {
+      "date" : "2026-09-25T16:14:00Z",
       "text" : "Web Research tamamlandı: 2 kaynak, 2 kaynak okundu"
     },
     {
-      "date" : "2026-09-24T22:09:21Z",
+      "date" : "2026-09-25T16:13:58Z",
       "text" : "Web Research başladı"
     },
     {
-      "date" : "2026-09-24T22:09:21Z",
+      "date" : "2026-09-25T16:13:58Z",
       "text" : "Web Research tamamlandı: 1 kaynak, 1 kaynak okundu"
     },
     {
-      "date" : "2026-09-24T22:09:18Z",
+      "date" : "2026-09-25T16:13:56Z",
       "text" : "Web Research başladı"
     },
     {
-      "date" : "2026-09-24T22:09:12Z",
+      "date" : "2026-09-25T16:13:56Z",
+      "text" : "Web Research tamamlandı: 8 kaynak, 0 kaynak okundu"
+    },
+    {
+      "date" : "2026-09-25T16:13:52Z",
+      "text" : "Web Research başladı"
+    },
+    {
+      "date" : "2026-09-25T16:13:52Z",
+      "text" : "Web Research tamamlandı: 4 kaynak, 4 kaynak okundu"
+    },
+    {
+      "date" : "2026-09-25T16:13:51Z",
+      "text" : "Web Research başladı"
+    },
+    {
+      "date" : "2026-09-25T16:13:51Z",
+      "text" : "Web Research tamamlandı: 4 kaynak, 4 kaynak okundu"
+    },
+    {
+      "date" : "2026-09-25T16:13:47Z",
+      "text" : "Web Research başladı"
+    },
+    {
+      "date" : "2026-09-25T16:13:47Z",
+      "text" : "Web Research tamamlandı: 4 kaynak, 4 kaynak okundu"
+    },
+    {
+      "date" : "2026-09-25T16:13:43Z",
+      "text" : "Web Research başladı"
+    },
+    {
+      "date" : "2026-09-25T16:13:43Z",
+      "text" : "Web Research tamamlandı: 3 kaynak, 3 kaynak okundu"
+    },
+    {
+      "date" : "2026-09-25T16:13:36Z",
+      "text" : "Web Research başladı"
+    },
+    {
+      "date" : "2026-09-25T16:13:36Z",
+      "text" : "Web Research tamamlandı: 4 kaynak, 4 kaynak okundu"
+    },
+    {
+      "date" : "2026-09-25T16:13:28Z",
+      "text" : "Web Research başladı"
+    },
+    {
+      "date" : "2026-09-25T16:13:22Z",
       "text" : "Self-development research başladı • repo=/Users/medusa/Developer/KRALI-Agent"
     },
     {
-      "date" : "2026-09-24T22:09:12Z",
+      "date" : "2026-09-25T16:13:22Z",
       "text" : "Developer context firewall: conversational task memory isolated"
     },
     {
-      "date" : "2026-09-24T22:08:29Z",
+      "date" : "2026-09-25T16:12:29Z",
       "text" : "Apple yerel zeka hazır"
     },
     {
-      "date" : "2026-09-24T22:08:29Z",
+      "date" : "2026-09-25T16:12:28Z",
       "text" : "Çalışma klasörü yolu geri yüklendi; indeks gerektiğinde oluşturulacak: Desktop"
     },
     {
-      "date" : "2026-09-24T22:08:29Z",
+      "date" : "2026-09-25T16:12:28Z",
       "text" : "Ağır geliştirici testleri normal açılışta otomatik çalıştırılmıyor"
     },
     {
-      "date" : "2026-09-24T22:08:29Z",
+      "date" : "2026-09-25T16:12:28Z",
       "text" : "Dinamik hedef ve kabiliyet yönlendirme aktif"
     },
     {
-      "date" : "2026-09-24T22:08:29Z",
+      "date" : "2026-09-25T16:12:28Z",
       "text" : "KRALİ Core hazır"
     }
   ],
@@ -72,17 +148,16 @@
   "contextMemory" : [
 
   ],
-  "createdAt" : "2026-09-24T22:10:15Z",
+  "createdAt" : "2026-09-25T16:15:00Z",
   "developerMissionReason" : "KRALİ is the target and the request asks for read-only self-development research before mutation.",
   "developerRepository" : "/Users/medusa/Developer/KRALI-Agent",
   "executionProfile" : "developmentResearchMode",
   "executionSteps" : [
 
   ],
-  "finalResponse" : "A. Current KRALİ Architecture  \n- Research.web entegrasyonu, mevcut sistemde \"retrievePublicInformation\" için tercih edilen ve gerekli olan bir yetenek olarak tanımlanmış, ancak doğrudan kaynak kodda aktif bir araştırma döngüsü olarak uygulanmıyor.  \n- Self-DiagnosisExecutor, mevcut bilgiye dayalı sonuçlar üretmek için bir mekanizma sunar, ancak doğrudan dış veri toplama yapmaz.  \n- Developer Agent, görev adımları için \"core.reasoning\" veya \"context.local\" gibi yeteneklere dayanır, ancak öğrenme süreci açıkça tanımlanmamıştır.  \n- Learning Queue, mevcut görev adımlarına dayalı bir depolama mekanizması gibi görünür, ancak öğrenme modeli veya veri akışı açık değildir.  \n- Capability Learning, mevcut görevler üzerinden yeteneklerin nasıl geliştirileceğine dair bir yapıya sahiptir, ancak bu süreç somut bir modelle desteklenmiyor.  \n- Skill Library, mevcut yeteneklerin bir kataloğu olarak mevcut, ancak yeni becerilerin nasıl oluşturulacağı belirsiz.  \n- Mentor mekanizması, görev planlama aşamasında mevcut, ancak öğrenme ve gelişimi doğrudan desteklemiyor.  \n- Task Graph, görev adımlarının görsel ve yapısal temsilini sunar, ancak öğrenme yönü eksik.  \n- Semantic Planner ve Outcome Planner, görev sonuçlarını planlama aşamasında kullanılır, ancak öğrenme döngüsüne entegre edilmemiş.  \n- Memory / Context, mevcut görevler için geçici bağlam sağlar, ancak uzun vadeli hafıza yok.  \n- Verification ve Evidence / Provenance mekanizmaları, sonuçların doğrulanması için mevcut, ancak kaynakların nasıl kanıtlandığı açık değil.  \n- Rollback / Candidate Branch güvenliği, mevcut adımlarda hata düzeltme için mevcut, ancak sistem genelinde güvenli bir sürüm yönetimi yok.  \n\nB. Research Sources  \n- Wikipedia (en.wikipedia.org) – Araştırma süreci, bilgi toplama ve analiz olarak tanımlanmıştır.  \n- Apple Developer Documentation (developer.apple.com) – Vizyon ve sistem tasarımı ile ilgili bilgiler.  \n\nC. External Approaches Found  \n1. Autonomous agent learning – Akademik makaleler ve açık kaynak projeler, öğrenmenin kendi kendine nasıl geliştiğini gösteriyor.  \n2. Self-improving agents – Evidence-grounded reasoning ve reflection mekanizmaları.  \n3. Agent skill libraries – Semantic memory ve episodic replay ile bilgi yönetimi.  \n4. Tool learning – Experience replay ve evidence-based decision making.  \n5. Long-running agents – Safe self-modification ve task decomposition.  \n\nD. KRALİ Comparison  \n- KRALİ’de \"research.web\" sadece bir tercih olarak mevcut, aktif bir araştırma döngüsü yok.  \n- Öğrenme mekanizmaları sınırlı, doğrudan eğitim veya model güncelleme yok.  \n- Hafıza ve bağlam geçici, uzun vadeli öğrenme eksik.  \n- Araştırma entegrasyonu sınırlı, doğrudan dış veri toplama yok.  \n- Mentor ve planlama mekanizmaları mevcut ama öğrenme döngüsüyle bağlantılı değil.  \n\nE. DISCARD / IMPROVE / MERGE / CREATE Decisions  \n1. DISCARD: Research.web doğrudan kullanım – mevcut sistemde sadece bir tercih, aktif araştırma döngüsü yok.  \n2. IMPROVE: Semantic memory + evidence-grounded reasoning entegrasyonu – mevcut sonuçların kanıtlanması ve öğrenme için kritik.  \n3. MERGE: Task decomposition + tool learning – görev adımlarının öğrenme sürecine dahil edilmesi.  \n4. CREATE: Self-diagnosis with external knowledge retrieval – mevcut self-diagnosis’a dış veri entegrasyonu.  \n\nF. Biggest Current Gap  \n- Uzun vadeli öğrenme ve hafıza yönetimi eksik; araştırma döngüsü yok, dış veri kullanımı sınırlı.  \n\nG. Selected Improvement  \n- Semantic memory + evidence-grounded reasoning entegrasyonu – mevcut sonuçların kanıtlanması ve öğrenme için temel.  \n\nH. Development Proposal  \n- Problem: KRALİ’nin uzun vadeli öğrenme ve hafıza yönetimi eksik, araştırma döngüsü yok.  \n- Current Architecture: Self-Diagnosis ve Outcome Planner mevcut ama dış veri entegrasyonu yok, öğrenme mekanizması zayıf.  \n- Research Findings: Semantic memory ve evidence-based reasoning, modern agent sistemlerinde kritik.  \n- Evidence: Wikipedia’da araştırma süreci, Apple’da sistem tasarımı – dış veri kanıtı mevcut.  \n- Gap: Hafıza ve kanıt sisteminin entegrasyonu yok.  \n- Alternatives:  \n  - DISCARD: Research.web – sadece tercih.  \n  - IMPROVE: Semantic memory + evidence-grounded reasoning – mevcut yapıya uyumlu.  \n  - MERGE: Task decomposition + tool learning – görev odaklı öğrenme.  \n  - CREATE: Self-diagnosis with external knowledge retrieval – yeni bir katman.  \n- Selected Strategy: Semantic memory + evidence-grounded reasoning entegrasyonu.  \n- Why This Strategy: Mevcut sistemin kanıtlanması ve öğrenme döngüsünün temelini oluşturur.  \n- Expected Behavior: Sonuçlar kanıtlanır, yeni bilgi öğrenilir, hafıza güncellenir.  \n- Allowed Scope: Mevcut kaynaklar, açık kaynak, akademik yayınlar – doğrudan kod değişikliği olmadan sistem genişletme.  \n- Files / Components Likely Affected: OutcomePlanner, Memory / Context, Evidence / Provenance, OutcomeStrategy.  \n- Risks: Hafıza bozulması, kanıt hataları – güvenlik sınırları mevcut.  \n- Security Boundaries: API erişimi, veri gizliliği, yetki yönetimi – mevcut güvenlik mekanizmaları ile sınırlı.  \n- Verification Contract: Her sonuç için kanıt kaydı, tekrar test edilebilirlik.  \n- Behavioral Benchmark: Öğrenme başarı oranı, kanıt doğruluğu.  \n- Rollback Condition: Hafıza tutarlılığı kaybı, kanıt tutarsızlığı.  \n\nI. Evidence & Provenance  \n- Wikipedia (en.wikipedia.org) – Semantic memory ve evidence-grounded reasoning.  \n- Apple Developer Documentation – system design ve kanıt tabanlı karar verme.  \n\nJ. Risks & Security Boundaries  \n- Hafıza tutarlılığı kaybı – güvenlik sınırları mevcut.  \n- Kanıt manipülasyonu riski – gizlilik ve erişim kontrolü.  \n\nK. Verification Plan  \n- Her sonuç için kanıt kaydı.  \n- Tekrar test edilebilirlik.  \n- Sistem geri dönüştürme mekanizması.  \n\nL. Mutation Recommended  \n- Kod değişikliği yok, yalnızca sistem genişletme önerisi.  \n\nM. Mutation Started  \nMutation Started: NO",
+  "finalResponse" : "A. Current KRALİ Architecture\nRead-only repository evidence collected from 10 current-source snippets.\n\nB. Research Sources\n[Tier A] [2504.19678] From LLM Reasoning to Autonomous AI Agents: A ... — arxiv.org\n[Tier A] GitHub - TashaSkyUp/self_improving_agents: An Open-source Framework for ... — github.com\n[Tier A] reflection-agent · GitHub Topics · GitHub — github.com\n[Tier C] Reflection — AutoGen - microsoft.github.io — microsoft.github.io\n[Tier C] Reflection — Your AI team, your infrastructure, your rules — reflection.network\n[Tier C] F O U R T H E Y E - Tool new album, Tool news, information and tours — www.fourtheye.net\n[Tier C] 3uTools – All-in-One iOS Device Management & Flash Tool — www.3u.com\n[Tier C] TOOL - Schism (Official Video) - YouTube — www.youtube.com\n[Tier C] Tool discography - Wikipedia — en.wikipedia.org\n[Tier C] Tool Army Events & Tour — www.toolband.com\n[Tier C] TOOL - YouTube Music — music.youtube.com\n[Tier C] Tool - Facebook — www.facebook.com\n\nF. Biggest Current Gap\nStructured, evidence-ID-bound comparison could not be completed to the mission-derived verification contract.\n\nK. Verification Plan\nResearch evidence exists, but structured comparison/proposal synthesis is missing.\n\nL. Mutation Recommended\nMutation Recommended: NO\n\nM. Mutation Started\nMutation Started: NO\n\nN. Recommended Next Step\nRetain the evidence and retry bounded structured synthesis without mutation.",
   "goal" : "KRALİ self-development research",
   "inputSource" : "text",
-  "intelligenceProvider" : "Apple Foundation Models / Self-Development Research",
   "learningPlans" : [
 
   ],
@@ -100,65 +175,256 @@
     "system.open.url"
   ],
   "plan" : "Exact source revision → read-only repository evidence → research.web → compare → development proposal → stop",
-  "reflectionSummary" : "Self-development research completed with 2 public sources and 10 repository evidence snippets.",
+  "reflectionSummary" : "Development research • facets=8 • requiredApproaches=5 • pageEvidence=12 • verification=partial",
   "researchEvidence" : [
     {
-      "conceptCoverage" : 4,
-      "domain" : "en.wikipedia.org",
-      "excerpt" : "Creswell states that \"research is a process of steps used to collect and analyze information to increase our understanding of a topic or issue\". [ 5 ] [ page needed ] The Merriam-Webster Online Dictionary defines research to also include studying already existing knowledge: \"studious inquiry or examination; especially : investigation or experimentation aimed at the discovery and interpretation of facts, revision of accepted theories or laws in the light of new facts, or practical application of such new or revised theories or laws\". In some subjects which do not typically carry out experimentation or analysis of this kind, the originality is in the particular way existing understanding is changed or re-interpreted based on the outcome of the work of the researcher",
+      "conceptCoverage" : 3,
+      "domain" : "arxiv.org",
+      "excerpt" : "19678] From LLM Reasoning to Autonomous AI Agents: A Comprehensive Review Skip to main content Search arXiv Press Enter to search &middot; Advanced search --> Computer Science > Artificial Intelligence arXiv:2504. Moreover, we present real-world applications of autonomous AI agents in materials science, biomedical research, academic ideation, software engineering, synthetic data generation, chemical reasoning, mathematical problem-solving, geographic information systems, multimedia, healthcare, and finance. 19678 (cs) [Submitted on 28 Apr 2025 ( v1 ), last revised 6 Mar 2026 (this version, v2)] Title: From LLM Reasoning to Autonomous AI Agents: A Comprehensive Review Authors: Mohamed Amine Ferrag , Norbert Tihanyi , Merouane Debbah View a PDF of the paper titled From LLM Reasoning to Autonomous AI Agents: A Comprehensive Review, by Mohamed Amine Ferrag and 2 other authors View PDF HTML (",
       "matchedConcepts" : [
-        "analyze",
-        "research",
-        "vision",
-        "analysis"
+        "autonomous",
+        "agent",
+        "agents"
       ],
       "sourceType" : "search-result",
-      "title" : "Research - Wikipedia",
-      "url" : "https://en.wikipedia.org/wiki/Research"
+      "title" : "[2504.19678] From LLM Reasoning to Autonomous AI Agents: A ...",
+      "url" : "https://arxiv.org/abs/2504.19678"
+    },
+    {
+      "conceptCoverage" : 4,
+      "domain" : "github.com",
+      "excerpt" : "GitHub - TashaSkyUp/self_improving_agents: An Open-source Framework for Data-centric, Self-evolving Autonomous Language Agents · GitHub Skip to content Navigation Menu Sign in Appearance settings Search / Sign in Sign up Appearance settings You signed in with another tab or window. Dismiss alert {{ message }} TashaSkyUp / self_improving_agents Public forked from aiwaves-cn/agents Notifications You must be signed in to change notification settings Fork 0 Star 1 master Branches Tags Go to file Code Open more actions menu Latest commit History 1,325 Commits 1,325 Commits Folders and files Name Name Last commit message Last commit date assets assets examples examples src/ agents src/ agents. 07870 } , } About An Open-source Framework for Data-centric, Self-evolving Autonomous Language Agents Resources Readme License Activity Stars 1 star Watchers 0 watching Forks 0 forks Report repository Re",
+      "matchedConcepts" : [
+        "self",
+        "improving",
+        "agents",
+        "open"
+      ],
+      "sourceType" : "search-result",
+      "title" : "GitHub - TashaSkyUp/self_improving_agents: An Open-source Framework for ...",
+      "url" : "https://github.com/TashaSkyUp/self_improving_agents"
+    },
+    {
+      "conceptCoverage" : 3,
+      "domain" : "github.com",
+      "excerpt" : "python mcp openai human-in-the-loop weaviate ai-engineering langchain react-agent langgraph tavily agentic-rag agentic-ai reflection-agent reflexion-agent deepagents-langgraph Updated May 13, 2026 Sh-31 / CourseTA Star 4 CourseTA is your AI-powered teaching assistant that transforms video lectures into quizzes and summaries helping course creators accelerate content creation and boost learner engagement. machine-learning reinforcement-learning ai q-learning dynamic-environments meta-learning q-learning-algorithm maze-navigation reflection-agent Updated Aug 25, 2025 Python PrynAI / AgenticAI-OnRamp-with-Langgraph Star 5 Branch-based learning repo for Agentic AI and LLM engineering with LangGraph: ReAct tool calling, Agentic RAG, MCP, Reflection, Reflexion, Human-in-the-loop memory, and DeepAgents examples. docker structured-logging multi-agents fastapi llm-agents faiss-vector-database rag",
+      "matchedConcepts" : [
+        "reflection",
+        "agents",
+        "open"
+      ],
+      "sourceType" : "search-result",
+      "title" : "reflection-agent · GitHub Topics · GitHub",
+      "url" : "https://github.com/topics/reflection-agent"
     },
     {
       "conceptCoverage" : 2,
-      "domain" : "developer.apple.com",
-      "excerpt" : "Vision | Apple Developer Documentation. Vision | Apple Developer Documentation",
+      "domain" : "microsoft.github.io",
+      "excerpt" : "In the context of AutoGen and agents, reflection can be implemented as a pair of agents, where the first agent generates a message and the second agent generates a response to the message. Let’s implement a simple reflection design pattern using AutoGen agents. We can visualize the message protocol using a data flow diagram: Agents # Now, let’s define the agents for the reflection design pattern",
       "matchedConcepts" : [
-        "vision",
-        "developer"
+        "reflection",
+        "agents"
       ],
       "sourceType" : "search-result",
-      "title" : "Vision | Apple Developer Documentation",
-      "url" : "https://developer.apple.com/documentation/vision"
+      "title" : "Reflection — AutoGen - microsoft.github.io",
+      "url" : "https://microsoft.github.io/autogen/stable/user-guide/core-user-guide/design-patterns/reflection.html"
+    },
+    {
+      "conceptCoverage" : 2,
+      "domain" : "reflection.network",
+      "excerpt" : "Reflection — Your AI team, your infrastructure, your rules You don't need a better AI tool. A team of agents that know their roles, coordinate with each other, and improve themselves — that's a competitive advantage. Reflection is the platform for people who think in organizations, not in prompts",
+      "matchedConcepts" : [
+        "reflection",
+        "agents"
+      ],
+      "sourceType" : "search-result",
+      "title" : "Reflection — Your AI team, your infrastructure, your rules",
+      "url" : "https://reflection.network/"
+    },
+    {
+      "conceptCoverage" : 2,
+      "domain" : "www.toolband.com",
+      "excerpt" : "Tool in Concert 2025 2025-12-20T03:00:00-07:00 Blaisdell Arena Show 2 - Hawaii Blaisdell Arena 2025-03-30T20:00:00-06:00 Lollapalooza Brasil São Paulo, Brasil 2025-03-28T17:00:00-06:00 Festival Estereo Picnic Bogotá, Colombia 2025-03-25T17:00:00-06:00 Santiago, Chile - Moviestar Arena Santiago, Chile 2025-03-23T17:00:00-06:00 Lollapalooza Chile Santiago, Chile 2025-03-22T17:00:00-06:00 Lollapalooza Argentina Buenos Aires, Argentina 2025-03-18T20:00:00-06:00 Guadalajara, Mexico Guadalajara, Mexico 2025-03-15T19:00:00-06:00 Mexico City, Mexico Mexico City, Mexico 2025-03-12T20:00:00-06:00 Monterrey, Mexico Monterrey, Mexico 2025-03-08T17:00:00-07:00 Melia Punta Cana Beach Hard Rock 2025-03-07T17:00:00-07:00 Melia Caribe Beach Hard Rock Others 2025-12-19T03:00:00-07:00 Blaisdell Arena - Hawaii Blaisdell Arena 2025-12-13T04:00:00-07:00 Glion Arena Kobe Hyogo 2025-12-11T03:00:00-07:00 K-Arena",
+      "matchedConcepts" : [
+        "tool",
+        "open"
+      ],
+      "sourceType" : "search-result",
+      "title" : "Tool Army Events & Tour",
+      "url" : "https://www.toolband.com/content/tour"
+    },
+    {
+      "conceptCoverage" : 2,
+      "domain" : "www.3u.com",
+      "excerpt" : "18 2025-09-18 Download --> Please use the 3uTools PC client to install the iOS client: 1、 Install either the Windows or Mac version of 3uTools on your computer 2、 Open the PC client and connect your device to the computer via USB cable 3、 After the connection is successful, wait for the computer to automatically install the mobile app for the device, or locate “Install Mobile App” on the computer and manually click to install. 3uTools – All-in-One iOS Device Management & Flash Tool Home 3uTools 3uAirPlayer Firmwares Tutorials News Forum --> Tutorials News Search Frequent Searches Download Download News Apple&rsquo;s Canceled Copland Operating System Can Now Be Tested in Your Browser Apple's canceled Copland OS from the 1990s can now be experienced in a browser thanks to a new emulation project. Learn how 3uTools helps manage iPhone photos, videos, backups, and device information",
+      "matchedConcepts" : [
+        "tool",
+        "open"
+      ],
+      "sourceType" : "search-result",
+      "title" : "3uTools – All-in-One iOS Device Management & Flash Tool",
+      "url" : "https://www.3u.com/"
+    },
+    {
+      "conceptCoverage" : 2,
+      "domain" : "tr.bab.la",
+      "excerpt" : "more_vert open_in_new Kaynak bağlantısı warning Düzeltme talebinde bulunun You can also find out your computer's Windows Experience Index base score. more_vert open_in_new Kaynak bağlantısı warning Düzeltme talebinde bulunun You can compare the Windows Experience Index base score for the game and for your computer. experience (ayrıca: experiment ) volume_up tecrübe {isim} more_vert open_in_new Kaynak bağlantısı warning Düzeltme talebinde bulunun You can download Microsoft Mouse and Keyboard Center to experience these new gestures, or continue to enjoy the current Windows 7 gestures",
+      "matchedConcepts" : [
+        "experience",
+        "open"
+      ],
+      "sourceType" : "search-result",
+      "title" : "EXPERIENCE - Türkçe Çeviri – bab.la İngilizce-Türkçe Sözlük",
+      "url" : "https://tr.bab.la/sozluk/ingilizce-turkce/experience"
+    },
+    {
+      "conceptCoverage" : 3,
+      "domain" : "dictionary.cambridge.org",
+      "excerpt" : "Cambridge English Corpus 'dan They showed a profile of episodic memory and semantic memory impairment, but no impairment in working memory, language or processing speed. action thriller adaptation Afrofuturism allegorical anime boy-meets-girl director's cut monodrama morality play mumblecore murder mystery nativity period piece sequel tearjerker teleplay tragic tragically weeper whodunnit Daha fazla sonuç görün » ( Cambridge Advanced Learner's Dictionary & Thesaurus 'den episodic ın tanımı © Cambridge University Press) episodic örnekleri episodic The term is used in cognitive research to contrast ' 'semantic' ' memory with episodic memory. Cambridge English Corpus 'dan Such interviews rely on human episodic longterm memory to report and describe periods of illness",
+      "matchedConcepts" : [
+        "episodic",
+        "semantic",
+        "memory"
+      ],
+      "sourceType" : "search-result",
+      "title" : "EPISODIC | Cambridge İngilizce Sözlüğü’ndeki anlamı",
+      "url" : "https://dictionary.cambridge.org/tr/s%C3%B6zl%C3%BCk/ingilizce/episodic"
+    },
+    {
+      "conceptCoverage" : 2,
+      "domain" : "tr.bab.la",
+      "excerpt" : "Daha fazlası chevron_right Eşanlamlılar \"episodic\" için eşanlamlılar (İngilizce): episodic English occasional episode English installment instalment sequence telâffuz Daha Harflere göre göz atın A B C D E F G H I J K L M N O P Q R S T U V W X Y Z 0-9 Sözlükte diğer kelimeler English epic epicure epicurean epidemic epigram epilation epilog epilogue epiphany episode episodic epitaph epithet epitome epoch epos epoxy resin epp (extensible provisioning protocol) eprom (erasable programmable read-only memory) eps eps/none bab. en volume_up episodic = tr volume_up bölümlerden oluşmuş chevron_left Çeviriler Tanım Eşanlamlılar Telaffuz Çeviri Cümle Kalıpları open_in_new chevron_right EN \"episodic\" Türkçe çeviri volume_up episodic {sıf. } TR volume_up bölümlerden oluşmuş volume_up episode {isim} TR volume_up bölüm olay Çeviriler EN episodic {sıfat} volume_up episodic volume_up bölümlerden oluşmuş ",
+      "matchedConcepts" : [
+        "episodic",
+        "memory"
+      ],
+      "sourceType" : "search-result",
+      "title" : "EPISODIC - Türkçe Çeviri – bab.la İngilizce-Türkçe Sözlük",
+      "url" : "https://tr.bab.la/sozluk/ingilizce-turkce/episodic"
+    },
+    {
+      "conceptCoverage" : 2,
+      "domain" : "en.wiktionary.org",
+      "excerpt" : "Derived terms [ edit ] antiepisodic episodically episodic dyscontrol syndrome episodicity episodic memory episodic wave multiepisodic nonepisodic postepisodic preepisodic semi-episodic webisodic Translations [ edit ] Translations Asturian: episódicu Belarusian: эпізады́чны ( epizadýčny ) Catalan: episòdic Danish: episodisk Dutch: episodisch (nl) French: épisodique (fr) Galician: episódico German: episodisch (de) Italian: episodico (it) Polish: epizodyczny (pl) Portuguese: episódico Russian: эпизоди́ческий (ru) ( epizodíčeskij ) , эпизоди́чный (ru) ( epizodíčnyj ) Spanish: episódico (es) Swedish: episodisk (sv) Ukrainian: епізоди́чний ( epizodýčnyj ) Romanian [ edit ] Etymology [ edit ] Borrowed from French épisodique. ɪk] Rhymes: -ɒdɪk Adjective [ edit ] episodic ( comparative more episodic , superlative most episodic ) Relating to an episode. Synonym: episodical 1999, The Limey (movie) When",
+      "matchedConcepts" : [
+        "episodic",
+        "memory"
+      ],
+      "sourceType" : "search-result",
+      "title" : "episodic - Wiktionary, the free dictionary",
+      "url" : "https://en.wiktionary.org/wiki/episodic"
+    },
+    {
+      "conceptCoverage" : 2,
+      "domain" : "tureng.com",
+      "excerpt" : "olaylı amnezi 16 Medikal episodic memory i. olaysal amnezi 25 Psikoloji episodic memory i. olaysal bellek 26 Psikoloji episodic memory i",
+      "matchedConcepts" : [
+        "episodic",
+        "memory"
+      ],
+      "sourceType" : "search-result",
+      "title" : "Tureng - episodic: - Türkçe İngilizce Sözlük",
+      "url" : "https://tureng.com/tr/turkce-ingilizce/episodic:"
     }
   ],
   "researchSources" : [
     {
-      "domain" : "en.wikipedia.org",
-      "snippet" : "Research is creative and systematic work undertaken to increase the stock of knowledge. [1] It involves the collection, organization, and analysis of evidence to increase understanding of a topic, characterized by a particular attentiveness to controlling sources of bias and error.",
+      "domain" : "arxiv.org",
       "sourceType" : "search-result",
-      "title" : "Research - Wikipedia",
-      "url" : "https://en.wikipedia.org/wiki/Research"
+      "title" : "[2504.19678] From LLM Reasoning to Autonomous AI Agents: A ...",
+      "url" : "https://arxiv.org/abs/2504.19678"
     },
     {
-      "domain" : "developer.apple.com",
+      "domain" : "github.com",
       "sourceType" : "search-result",
-      "title" : "Vision | Apple Developer Documentation",
-      "url" : "https://developer.apple.com/documentation/vision"
+      "title" : "GitHub - TashaSkyUp/self_improving_agents: An Open-source Framework for ...",
+      "url" : "https://github.com/TashaSkyUp/self_improving_agents"
+    },
+    {
+      "domain" : "github.com",
+      "sourceType" : "search-result",
+      "title" : "reflection-agent · GitHub Topics · GitHub",
+      "url" : "https://github.com/topics/reflection-agent"
+    },
+    {
+      "domain" : "microsoft.github.io",
+      "sourceType" : "search-result",
+      "title" : "Reflection — AutoGen - microsoft.github.io",
+      "url" : "https://microsoft.github.io/autogen/stable/user-guide/core-user-guide/design-patterns/reflection.html"
+    },
+    {
+      "domain" : "reflection.network",
+      "sourceType" : "search-result",
+      "title" : "Reflection — Your AI team, your infrastructure, your rules",
+      "url" : "https://reflection.network/"
+    },
+    {
+      "domain" : "www.fourtheye.net",
+      "snippet" : "Backed by one of the largest and friendliest Tool communities on the planet, Fourtheye is a Tool blog that reports all the latest news on the band Tool, the new Tool album, A Perfect Circle, Puscifer, and more!",
+      "sourceType" : "search-result",
+      "title" : "F O U R T H E Y E - Tool new album, Tool news, information and tours",
+      "url" : "https://www.fourtheye.net/"
+    },
+    {
+      "domain" : "www.3u.com",
+      "snippet" : "3uTools is an all-in-one iOS management tool offering app downloads, data backup, flashing, device info, and system maintenance for iPhone and iPad users.",
+      "sourceType" : "search-result",
+      "title" : "3uTools – All-in-One iOS Device Management & Flash Tool",
+      "url" : "https://www.3u.com/"
+    },
+    {
+      "domain" : "www.youtube.com",
+      "snippet" : "“Schism” by Tool Listen to Tool: https://Tool.lnk.to/listenYD Get The New Album “Fear Inoculum” Available Now: http://smarturl.it/TOOLFIa?iQid=yt Listen to TOOL’s Full Catalog ...",
+      "sourceType" : "search-result",
+      "title" : "TOOL - Schism (Official Video) - YouTube",
+      "url" : "https://www.youtube.com/watch?v=MM62wjLrgmA"
+    },
+    {
+      "domain" : "en.wikipedia.org",
+      "snippet" : "The discography of American rock band Tool consists of five studio albums, one box set, two extended plays, four video albums, sixteen singles and eight music videos.",
+      "sourceType" : "search-result",
+      "title" : "Tool discography - Wikipedia",
+      "url" : "https://en.wikipedia.org/wiki/Tool_discography"
+    },
+    {
+      "domain" : "www.toolband.com",
+      "snippet" : "Tool in Concert 2025 DEC 20, 2025 02:00 AM (PST) Blaisdell Arena Show 2 - Hawaii Blaisdell Arena",
+      "sourceType" : "search-result",
+      "title" : "Tool Army Events & Tour",
+      "url" : "https://www.toolband.com/content/tour"
+    },
+    {
+      "domain" : "music.youtube.com",
+      "snippet" : "Tool is an American rock band formed in Los Angeles in 1990. The group consists of vocalist Maynard James Keenan, guitarist Adam Jones, drummer Danny Carey and bassist Justin Chancellor, who...",
+      "sourceType" : "search-result",
+      "title" : "TOOL - YouTube Music",
+      "url" : "https://music.youtube.com/channel/UCW6FSIkA04g7pBvMXlnaKqg"
+    },
+    {
+      "domain" : "www.facebook.com",
+      "snippet" : "Tool. 3,304,578 followers · 32,466 talking about this. The official TOOL Facebook page, also visit www.toolband.com TOOL ARMY...",
+      "sourceType" : "search-result",
+      "title" : "Tool - Facebook",
+      "url" : "https://www.facebook.com/ToolMusic/"
     }
   ],
   "route" : [
     "Core",
     "Developer",
-    "Research",
+    "Research Plan",
+    "Source Quality",
+    "Page Evidence",
     "Repository",
-    "Web",
     "Compare",
+    "Research Verify",
     "Proposal",
     "Stop"
   ],
   "taskGraph" : [
 
   ],
-  "traceID" : "4B164E80-02DE-44C4-9628-1C65D6892553",
+  "traceID" : "2B76197D-3D0C-406B-885A-3C007981B978",
   "userInput" : "KRALİ RESEARCH-CORE TEST 001 — Kendi Araştırma ve Gelişim Mimarini İyileştir\n\nAMAÇ\n\nKendi mevcut mimarini incele ve güncel yapay zekâ agent sistemlerinde kullanılan araştırma, öğrenme, hafıza, skill oluşturma ve self-improvement yaklaşımlarını araştır.\n\nBu görevde bilgisayar kontrolü kullanma.\n\nŞu capability'leri kullanma veya çözüm olarak önerme:\n- browser.control\n- desktop.app\n- desktop.control\n- app.workflow\n- system.open.url\n- perception.screen\n\nPublic web araştırması için research.web kullan.\n\nBu görev bir araştırma + mimari değerlendirme görevidir.\n\n---\n\n1. ÖNCE KENDİ MİMARİNİ İNCELE\n\nKRALİ kaynak kodunda özellikle şu alanların mevcut durumunu incele:\n\n- research.web\n- Self-Diagnosis\n- Developer Agent\n- Learning Queue\n- Capability Learning\n- Skill Library\n- Mentor\n- Task Graph\n- Semantic Planner\n- Outcome Planner\n- Memory / Context\n- Verification\n- Evidence / provenance\n- rollback / candidate branch güvenliği\n\nÖnce mevcut sistemin gerçekten nasıl çalıştığını kaynak koddan çıkar.\n\nVarsayım yapma.\n\n---\n\n2. WEB ARAŞTIRMASI YAP\n\nGüncel ve güvenilir kaynaklardan agent sistemlerini araştır.\n\nÖzellikle şu konulara bak:\n\n- autonomous agent learning\n- self-improving agents\n- agent skill libraries\n- experience replay\n- reflection\n- episodic / semantic memory\n- tool learning\n- task decomposition\n- self-debugging agents\n- evidence-grounded reasoning\n- long-running agents\n- agent evaluation\n- safe self-modification\n\nMümkünse şu tür kaynakları birlikte kullan:\n\n- akademik makaleler\n- resmi teknik dokümantasyon\n- açık kaynak GitHub projeleri\n- güvenilir teknik yayınlar\n\nTek bir projeye veya tek bir makaleye dayanma.\n\n---\n\n3. EN AZ 5 YAKLAŞIM BUL\n\nKRALİ için gerçekten anlamlı olabilecek en az 5 farklı yaklaşım belirle.\n\nHer yaklaşım için:\n\n- yaklaşımın adı\n- kaynak\n- ne problemi çözüyor\n- nasıl çalışıyor\n- KRALİ'de benzeri var mı\n- KRALİ'deki mevcut yapıdan farkı ne\n- KRALİ'ye ne kazandırır\n- riskleri\n- uygulanabilirliği\n\nbilgilerini çıkar.\n\n---\n\n4. KRALİ İLE KARŞILAŞTIR\n\nHer yaklaşım için şu kararlardan birini ver:\n\nDISCARD\nMevcut KRALİ için gereksiz veya daha kötü.\n\nIMPROVE\nKRALİ'de benzeri var ancak geliştirilebilir.\n\nMERGE\nMevcut iki veya daha fazla KRALİ mekanizması bu yaklaşımla birleştirilebilir.\n\nCREATE\nKRALİ'de bulunmayan yeni bir mekanizma gerekli.\n\nKararını kaynak ve mevcut KRALİ koduyla kanıtla.\n\n---\n\n5. EN DEĞERLİ GELİŞTİRME FIRSATINI SEÇ\n\nAraştırmanın sonunda yalnızca 1 adet en anlamlı geliştirme fırsatı seç.\n\nSeçimini şu kriterlere göre yap:\n\n- KRALİ'nin araştırma yeteneğine katkısı\n- KRALİ'nin kendi hatalarından öğrenmesine katkısı\n- genellenebilirlik\n- güvenlik\n- test edilebilirlik\n- mevcut mimariye uyum\n- düşük bağımlılık\n- gelecekteki self-development'a katkı\n\nSadece popüler olduğu için bir yaklaşımı seçme.\n\n---\n\n6. DEVELOPMENT PROPOSAL ÜRET\n\nKod değiştirmeden önce aşağıdaki yapıda proposal üret:\n\nProblem\n\nCurrent Architecture\n\nResearch Findings\n\nEvidence\n\nGap\n\nAlternatives\n\nSelected Strategy\n\nWhy This Strategy\n\nExpected Behavior\n\nAllowed Scope\n\nFiles / Components Likely Affected\n\nRisks\n\nSecurity Boundaries\n\nVerification Contract\n\nBehavioral Benchmark\n\nRollback Condition\n\n---\n\n7. GÜVENLİK KURALLARI\n\nBu görev sırasında:\n\n- main branch değiştirme\n- develop branch değiştirme\n- merge yapma\n- push yapma\n- bilgisayar kontrolü kullanma\n- uygulama açma\n- dosya silme\n- kullanıcı bilgisayarında fiziksel işlem yapma\n- approval/security kurallarını değiştirme\n- kendine yeni yetki verme\n- mevcut güvenlik kapılarını gevşetme\n\nyasaktır.\n\nResearch ve read-only repository inspection serbesttir.\n\n---\n\n8. MUTATION KARARI\n\nAraştırma sonunda açıkça şunu yaz:\n\nMutation Recommended: YES / NO\n\nMutation Started: NO\n\nBu testte otomatik kod değişikliği başlatma.\n\nÖnce proposal kullanıcı ve lead developer tarafından incelenecek.\n\n---\n\n9. SON RAPOR\n\nFinal raporu şu sırayla ver:\n\nA. Current KRALİ Architecture\n\nB. Research Sources\n\nC. External Approaches Found\n\nD. KRALİ Comparison\n\nE. DISCARD / IMPROVE / MERGE / CREATE Decisions\n\nF. Biggest Current Gap\n\nG. Selected Improvement\n\nH. Development Proposal\n\nI. Evidence & Provenance\n\nJ. Risks & Security Boundaries\n\nK. Verification Plan\n\nL. Mutation Recommended\n\nM. Mutation Started\n\nN. Recommended Next Step\n\nBaşarılı test kriteri:\n\nKRALİ araştırmayı yalnız research.web ile yapmalı, birden fazla gerçek kaynak kullanmalı, bulguları kendi kaynak koduyla karşılaştırmalı ve doğrudan kod değiştirmek yerine kanıta dayalı tek bir geliştirme proposal'ı üretmelidir.",
-  "verificationState" : "passed",
-  "verificationSummary" : "Self-development research combined current repository evidence with multiple public web sources and stopped at proposal stage."
+  "verificationState" : "partial",
+  "verificationSummary" : "Research evidence exists, but structured comparison/proposal synthesis is missing."
 }
