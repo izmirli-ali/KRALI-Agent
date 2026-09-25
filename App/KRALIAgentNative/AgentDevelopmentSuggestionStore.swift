@@ -88,6 +88,8 @@ struct AgentDevelopmentSuggestion:
     var occurrenceCount: Int
     var state:
         AgentDevelopmentSuggestionState
+    var developerJobID: UUID? = nil
+    var candidateBranch: String? = nil
     let createdAt: Date
     var updatedAt: Date
 
@@ -274,6 +276,8 @@ struct AgentDevelopmentSuggestionStore {
                         ),
                     occurrenceCount: 1,
                     state: .proposed,
+                    developerJobID: nil,
+                    candidateBranch: nil,
                     createdAt: now,
                     updatedAt: now
                 )
@@ -401,6 +405,71 @@ struct AgentDevelopmentSuggestionStore {
             state
         suggestions[index].updatedAt =
             Date()
+        save(suggestions)
+        return suggestions
+    }
+
+    func linkDevelopmentJob(
+        suggestionID: UUID,
+        jobID: UUID,
+        in existing:
+            [AgentDevelopmentSuggestion]
+    ) -> [AgentDevelopmentSuggestion] {
+        var suggestions = existing
+
+        guard
+            let index =
+                suggestions.firstIndex(
+                    where: {
+                        $0.id ==
+                            suggestionID
+                    }
+                )
+        else {
+            return suggestions
+        }
+
+        suggestions[index]
+            .developerJobID = jobID
+        suggestions[index]
+            .updatedAt = Date()
+        save(suggestions)
+        return suggestions
+    }
+
+    func updateDevelopmentState(
+        jobID: UUID,
+        state:
+            AgentDevelopmentSuggestionState,
+        candidateBranch: String? = nil,
+        in existing:
+            [AgentDevelopmentSuggestion]
+    ) -> [AgentDevelopmentSuggestion] {
+        var suggestions = existing
+
+        guard
+            let index =
+                suggestions.firstIndex(
+                    where: {
+                        $0.developerJobID ==
+                            jobID
+                    }
+                )
+        else {
+            return suggestions
+        }
+
+        suggestions[index].state =
+            state
+
+        if let candidateBranch {
+            suggestions[index]
+                .candidateBranch =
+                    candidateBranch
+        }
+
+        suggestions[index]
+            .updatedAt = Date()
         save(suggestions)
         return suggestions
     }
