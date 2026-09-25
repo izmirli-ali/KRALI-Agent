@@ -56,11 +56,11 @@ ok(
 
 ok(
   queue.includes("sourceRevision: String") &&
-  !queue.includes("sourceGoals:\\n                        job.sourceGoals"),
+  !queue.includes("sourceGoals:\n                        job.sourceGoals"),
   "new immutable job briefs carry revision, not raw source goals"
 );
 
-const enqueueCalls = [...engine.matchAll(/learningQueueStore\\.enqueue\\(/g)];
+const enqueueCalls = [...engine.matchAll(/learningQueueStore\.enqueue\(/g)];
 ok(
   enqueueCalls.length === 1,
   "only explicit development approval may enqueue learning work"
@@ -93,7 +93,7 @@ ok(
 ok(
   bridge.includes("var isCandidateReady") &&
   bridge.includes("var isReviewableFailure") &&
-  bridge.includes("var isReadyForReview: Bool {\\n        isCandidateReady"),
+  bridge.includes("var isReadyForReview: Bool {\n        isCandidateReady"),
   "candidate ready is distinct from reviewable failure"
 );
 
@@ -119,7 +119,7 @@ ok(
 
 ok(
   engine.includes("handleDeveloperTaskChatCommand") &&
-  engine.includes("developerTask:\\n                task"),
+  engine.includes("developerTask:\n                task"),
   "explicit registered developer task command remains available"
 );
 
