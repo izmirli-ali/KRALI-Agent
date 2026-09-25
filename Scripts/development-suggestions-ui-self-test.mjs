@@ -37,9 +37,19 @@ ok(
 ok(
   sidebar.includes('sectionLabel("GELİŞTİRME ÖNERİLERİ")') &&
   sidebar.includes('Button("Geliştir")') &&
-  sidebar.includes('Button("Şimdilik")') &&
+  sidebar.includes('Button("Şimdilik geliştirme")') &&
   sidebar.includes("suppressDevelopmentSuggestion"),
   "sidebar exposes multiple suggestion controls"
+);
+
+ok(
+  store.includes("func seededFallbackSuggestions") &&
+  store.includes("KRALİ araştırma kalitesini iyileştir") &&
+  store.includes("KRALİ arayüz önerilerini iyileştir") &&
+  store.includes("KRALİ eğitim raporu analizini iyileştir") &&
+  engine.includes("seededFallbackSuggestions") &&
+  engine.includes("if developmentSuggestions.isEmpty"),
+  "empty suggestion storage must receive deterministic, non-executing fallback cards"
 );
 
 ok(

@@ -311,11 +311,23 @@ final class AgentEngine: ObservableObject {
                 )
             }
 
+        let storedDevelopmentSuggestions =
+            developmentSuggestionStore
+                .load()
+
         developmentSuggestions =
             reconcileReleasedDevelopmentSuggestions(
-                developmentSuggestionStore
-                    .load()
+                storedDevelopmentSuggestions
             )
+
+        if developmentSuggestions.isEmpty {
+            developmentSuggestions =
+                developmentSuggestionStore
+                    .seededFallbackSuggestions(
+                        sourceRevision:
+                            currentExactSourceRevision
+                    )
+        }
 
         developmentSuggestionStore
             .save(

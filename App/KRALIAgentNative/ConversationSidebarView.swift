@@ -352,9 +352,9 @@ struct ConversationSidebarView: View {
                         : "Bu öneri mevcut bounded compiler güvenlik scope'una uygun değil"
                     )
 
-                    Button("Şimdilik") {
+                    Button("Şimdilik geliştirme") {
                         engine
-                            .deferDevelopmentSuggestion(
+                            .suppressDevelopmentSuggestion(
                                 id:
                                     suggestion.id
                             )

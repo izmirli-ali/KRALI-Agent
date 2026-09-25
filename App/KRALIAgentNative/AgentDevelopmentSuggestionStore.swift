@@ -193,6 +193,77 @@ struct AgentDevelopmentSuggestionStore {
         ) ?? []
     }
 
+    /// First-run suggestions are deliberately small, deterministic and
+    /// non-executing.  They make the user-controlled development surface
+    /// discoverable when runtime research has not produced a proposal yet.
+    func seededFallbackSuggestions(
+        sourceRevision: String?
+    ) -> [AgentDevelopmentSuggestion] {
+        guard
+            let exactRevision =
+                AgentSourceRevisionPolicy
+                    .exactRevision(
+                        sourceRevision
+                    )
+        else {
+            return []
+        }
+
+        let now = Date()
+        let definitions: [(
+            title: String,
+            reason: String,
+            benefit: String,
+            fingerprint: String
+        )] = [
+            (
+                title: "KRALİ araştırma kalitesini iyileştir",
+                reason: "Kaynak çeşitliliği ve kanıt bağlama kalitesini kontrollü olarak gözden geçirmek için başlangıç önerisi.",
+                benefit: "Araştırma cevaplarında daha tutarlı, doğrulanabilir kaynak ve bulgu eşleştirmesi.",
+                fingerprint: "fallback:research-quality"
+            ),
+            (
+                title: "KRALİ arayüz önerilerini iyileştir",
+                reason: "Araştırma sonuçlarındaki öneri metinlerinin okunabilirliğini ve öncelik sırasını kontrollü olarak incelemek için başlangıç önerisi.",
+                benefit: "Kullanıcıya sunulan araştırma önerilerinin daha açık ve taranabilir olması.",
+                fingerprint: "fallback:ui-readability"
+            ),
+            (
+                title: "KRALİ eğitim raporu analizini iyileştir",
+                reason: "Eğitim raporlarındaki bulgu ve öneri özetlerinin daha tutarlı analiz edilmesi için başlangıç önerisi.",
+                benefit: "Eğitim raporlarından daha anlaşılır, kanıta dayalı geliştirme bulguları üretmek.",
+                fingerprint: "fallback:training-report-analyzer"
+            )
+        ]
+
+        return definitions.map { definition in
+            AgentDevelopmentSuggestion(
+                id: UUID(),
+                fingerprint: definition.fingerprint,
+                source: .research,
+                capabilityID: nil,
+                capabilityName: nil,
+                capabilityKind: nil,
+                learningPath: nil,
+                candidateCapabilityIDs: [],
+                title: definition.title,
+                reason: definition.reason,
+                expectedBenefit: definition.benefit,
+                provenanceIDs: [
+                    "deterministic-fallback:" + definition.fingerprint
+                ],
+                sourceRevision: exactRevision,
+                risk: "low",
+                occurrenceCount: 1,
+                state: .proposed,
+                developerJobID: nil,
+                candidateBranch: nil,
+                createdAt: now,
+                updatedAt: now
+            )
+        }
+    }
+
     func save(
         _ suggestions:
             [AgentDevelopmentSuggestion]
