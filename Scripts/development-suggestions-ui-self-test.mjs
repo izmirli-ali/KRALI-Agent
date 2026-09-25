@@ -28,8 +28,8 @@ ok(
 );
 
 ok(
-  engine.includes("suggestion.source ==\n                .capabilityGap") &&
-  engine.includes("suggestion.source == .research") &&
+  /if\s+suggestion\.source\s*==\s*\.capabilityGap/.test(engine) &&
+  /guard\s+suggestion\.source\s*==\s*\.research\s+else/.test(engine) &&
   engine.includes("boundedDevelopmentTaskCompiler"),
   "approval path supports capability gaps plus bounded research suggestions only"
 );
