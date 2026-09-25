@@ -74,6 +74,15 @@ ok(
 );
 
 ok(
+  suggestions.includes("func retry(") &&
+  suggestions.includes("original.state == .failed || original.state == .readyForReview") &&
+  suggestions.includes("user-retry:") &&
+  engine.includes("func retryDevelopmentSuggestion") &&
+  !engine.slice(engine.indexOf("func retryDevelopmentSuggestion"), engine.indexOf("func developmentProgress")).includes("runDeveloperAgent"),
+  "retry creates a current-revision proposal without starting a developer task"
+);
+
+ok(
   engine.includes('status.state ==\n                    "cursor_architect_ready"') &&
   engine.includes("status.isCandidateReady ||\n                                diagnosisReady\n                                ? .readyForReview"),
   "read-only Cursor Architect diagnosis remains reviewable instead of being marked failed"

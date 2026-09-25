@@ -343,6 +343,62 @@ struct AgentDevelopmentSuggestionStore {
         }
     }
 
+    /// A stopped diagnosis can be reconsidered only through an explicit user
+    /// action. The original record remains intact for auditability; the new
+    /// proposal is bound to the current exact source revision and still needs
+    /// a separate "Geliştir" approval before any candidate may start.
+    func retry(
+        suggestionID: UUID,
+        sourceRevision: String?,
+        in existing: [AgentDevelopmentSuggestion]
+    ) -> [AgentDevelopmentSuggestion] {
+        guard
+            let revision = AgentSourceRevisionPolicy.exactRevision(sourceRevision),
+            let original = existing.first(where: { $0.id == suggestionID }),
+            original.state == .failed || original.state == .readyForReview,
+            original.sourceRevision != revision
+        else {
+            return existing
+        }
+
+        let fingerprint = original.fingerprint + "|retry|" + compactIdentifier(revision)
+        guard !existing.contains(where: { $0.fingerprint == fingerprint }) else {
+            return existing
+        }
+
+        let now = Date()
+        var provenance = Array(original.provenanceIDs.prefix(8))
+        provenance.append("user-retry:" + compactIdentifier(original.id.uuidString))
+
+        var updated = existing
+        updated.append(
+            AgentDevelopmentSuggestion(
+                id: UUID(),
+                fingerprint: fingerprint,
+                source: original.source,
+                capabilityID: original.capabilityID,
+                capabilityName: original.capabilityName,
+                capabilityKind: original.capabilityKind,
+                learningPath: original.learningPath,
+                candidateCapabilityIDs: original.candidateCapabilityIDs,
+                title: original.title,
+                reason: "Kullanıcı önceki teşhis/denemeden sonra bu önerinin güncel kaynak revizyonunda yeniden araştırılmasını istedi.",
+                expectedBenefit: original.expectedBenefit,
+                provenanceIDs: provenance,
+                sourceRevision: revision,
+                risk: original.risk,
+                occurrenceCount: original.occurrenceCount + 1,
+                state: .proposed,
+                developerJobID: nil,
+                candidateBranch: nil,
+                createdAt: now,
+                updatedAt: now
+            )
+        )
+        save(updated)
+        return updated
+    }
+
     func observeCapabilityGaps(
         _ gaps: [CapabilityGapResolution],
         sourceRevision: String?,

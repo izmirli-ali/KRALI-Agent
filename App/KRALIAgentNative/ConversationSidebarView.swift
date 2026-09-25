@@ -440,6 +440,18 @@ struct ConversationSidebarView: View {
                     )
                 }
 
+                if suggestion.state == .failed ||
+                   suggestion.state == .readyForReview {
+                    Button("Yeniden araştır") {
+                        engine.retryDevelopmentSuggestion(
+                            id: suggestion.id
+                        )
+                    }
+                    .buttonStyle(.bordered)
+                    .controlSize(.mini)
+                    .help("Yeni kaynak revizyonunda yalnız öneri hazırlar; kod değişikliği için ayrıca Geliştir onayı gerekir.")
+                }
+
                 if let branch =
                     suggestion
                         .candidateBranch {

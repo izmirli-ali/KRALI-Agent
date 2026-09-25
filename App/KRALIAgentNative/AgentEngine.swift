@@ -3677,6 +3677,17 @@ final class AgentEngine: ObservableObject {
                 )
     }
 
+    func retryDevelopmentSuggestion(
+        id: UUID
+    ) {
+        developmentSuggestions =
+            developmentSuggestionStore.retry(
+                suggestionID: id,
+                sourceRevision: currentExactSourceRevision,
+                in: developmentSuggestions
+            )
+    }
+
     func developmentProgress(
         for suggestion:
             AgentDevelopmentSuggestion
