@@ -1,13 +1,13 @@
 {
-  "createdAt": "2026-09-25T19:00:36.341Z",
+  "createdAt": "2026-09-25T19:18:13.000Z",
   "provider": "cursor-cli",
   "mode": "architect-readonly",
-  "appVersion": "0.11.3",
-  "runID": "20260925-215747",
-  "diagnosticFingerprint": "70b4db6cf4e59b67e1b39f53ca0d0127c5a9d774cdc02c53eedbd07603c7c71e",
+  "appVersion": "0.11.5",
+  "runID": "20260925-221305",
+  "diagnosticFingerprint": "0e278d4df529735a92e084a33e5e5e0fed434e9252563338240b2e781e93dc2b",
   "failureState": "local_agent_iteration_limit",
-  "failureMessage": "KRALİ araştırma kalitesini iyileştir (developer.suggestion.research.3ae07532-332) native local agent iteration sınırına ulaştı.",
-  "gapLabel": "KRALİ araştırma kalitesini iyileştir (developer.suggestion.research.3ae07532-332)",
+  "failureMessage": "KRALİ araştırma kalitesini iyileştir (developer.suggestion.research.b2127a91-7c6) native local agent iteration sınırına ulaştı.",
+  "gapLabel": "KRALİ araştırma kalitesini iyileştir (developer.suggestion.research.b2127a91-7c6)",
   "safety": {
     "cliMode": "ask",
     "nonInteractive": true,
@@ -19,133 +19,126 @@
     "explicitAPIKeyDisabled": true
   },
   "diagnosis": {
-    "summary": "local_agent_iteration_limit happened because this gap is a seeded fallback with no failing runtime/oracle, so the agent burned budget surveying research code without a converging mutation; the smallest in-scope atomic fix is to consume unused preferredSourceKinds during web result scoring/diversity so source-kind diversity actually drives selection.",
-    "confidence": 0.78,
+    "summary": "Iteration limit hit on an underspecified fallback research-quality gap: architecture already binds Tier/ID evidence, but never deterministically checks that findings/summaries are content-supported by cited excerpts—partial dirty work went down brand/score hardcoding instead.",
+    "confidence": 0.82,
     "rootCauseHypotheses": [
       {
-        "hypothesis": "The approved gap is a discoverability seed (fingerprint fallback:research-quality), not a localized failing contract: zero strategy candidates, no runtime error lines, no resolver trace, and development_research_quality self-tests already PASS—so the local agent exhausted iterations on read/search without selecting a trustworthy mutation target.",
+        "hypothesis": "Missing atomic finding↔source content-alignment gate: AgentDevelopmentResearchVerifier.verify and LocalIntelligence validateApproach/proposal selection only require cited evidenceIDs to exist in Tier A/B sets; researchFindings and approach.summary text are never lexically checked against AgentDevelopmentResearchEvidenceRecord.excerpt, so unsupported claims can still pass the quality contract.",
         "confidence": 0.86,
         "evidence": [
-          "Provenance IDs use deterministic-fallback:fallback:research-quality from AgentDevelopmentSuggestionStore.seededFallbackSuggestions",
-          "Brief reports strategy candidates Yok, combined evidence count 1, empty runtime source hints, and no matching resolver trace",
-          "Scripts/development-research-quality-self-test.swift already asserts facet diversification, Tier A/B gating, weak-source rejection, evidence contract pass, and computer-control block",
-          "Historical pattern in KRALI_DEVELOPMENT_NOTES: vague foundation tasks consume iteration budget on inspection with no candidate"
+          "Approved expected benefit is explicitly “daha tutarlı, doğrulanabilir kaynak ve bulgu eşleştirmesi” (AgentDevelopmentSuggestionStore.seededFallbackSuggestions fingerprint fallback:research-quality).",
+          "AgentDevelopmentResearchVerifier.verify rejects missing/non-qualifying evidenceIDs and facet/origin counts, but never compares proposal.researchFindings or approach.summary tokens to evidence excerpts.",
+          "AgentLocalIntelligence.validateApproach only checks non-empty summary plus evidenceID/repositoryEvidenceID subset membership; no excerpt-overlap support test before accepting a generated approach.",
+          "Proposal selection similarly gates only mutationStarted=false and evidenceID subsets; researchFindings content is accepted unverified.",
+          "existing self-test development-research-quality-self-test.swift covers tier/false-positive/host rejection and ID-grounded pass/fail, not finding-vs-excerpt mismatch."
         ],
         "sourceTargets": [
-          {
-            "path": "App/KRALIAgentNative/AgentDevelopmentSuggestionStore.swift",
-            "symbols": [
-              "seededFallbackSuggestions",
-              "ensureVisibleFallbackSuggestions",
-              "fingerprint: fallback:research-quality"
-            ]
-          },
-          {
-            "path": "App/KRALIAgentNative/AgentBoundedDevelopmentTaskCompiler.swift",
-            "symbols": [
-              "researchAllowedScope",
-              "developer.suggestion.research."
-            ]
-          },
-          {
-            "path": "Scripts/development-research-quality-self-test.swift",
-            "symbols": [
-              "DevelopmentResearchQualitySelfTest.main"
-            ]
-          }
-        ]
-      },
-      {
-        "hypothesis": "Source-diversity intent is under-implemented at the selection seam: AgentResearchQueryPlanner.developmentPlan writes preferredSourceKinds on each AgentDevelopmentResearchFacet, but no consumer reads that field; AgentWebResearch.selectDiverseResults only caps by domain, while AgentDevelopmentResearchVerifier only checks independent origins/Tier A/B counts—so kind diversity never becomes an atomic selection behavior.",
-        "confidence": 0.81,
-        "evidence": [
-          "preferredSourceKinds is assigned only in AgentResearchQueryPlanner.developmentPlan and declared on AgentDevelopmentResearchFacet",
-          "Workspace search shows preferredSourceKinds is never referenced outside those two declarations",
-          "AgentWebResearch.relevanceEvaluation boosts Tier via AgentDevelopmentResearchSourceClassifier.assess but never rewards preferredSourceKinds coverage",
-          "selectDiverseResults diversifies solely via domainCounts (first unique domain, then max 2/domain)",
-          "Verifier gaps track independent origins / Tier A/B / facet evidence coverage, not preferred kind coverage"
-        ],
-        "sourceTargets": [
-          {
-            "path": "App/KRALIAgentNative/AgentResearchQueryPlanner.swift",
-            "symbols": [
-              "developmentPlan",
-              "preferredKinds",
-              "preferredSourceKinds"
-            ]
-          },
           {
             "path": "App/KRALIAgentNative/AgentDevelopmentResearch.swift",
             "symbols": [
-              "AgentDevelopmentResearchFacet",
-              "AgentResearchSourceKind",
-              "AgentDevelopmentResearchSourceClassifier.assess",
               "AgentDevelopmentResearchVerifier.verify",
-              "canonicalOrigin"
+              "AgentDevelopmentResearchProposal.researchFindings",
+              "AgentDevelopmentResearchEvidenceRecord.excerpt",
+              "AgentDevelopmentResearchApproach.summary"
             ]
           },
-          {
-            "path": "App/KRALIAgentNative/AgentWebResearch.swift",
-            "symbols": [
-              "relevanceEvaluation",
-              "selectDiverseResults",
-              "developmentFacet"
-            ]
-          }
-        ]
-      },
-      {
-        "hypothesis": "Evidence-binding quality is already enforced downstream (Tier A/B evidenceIDs on approaches/proposal in AgentLocalIntelligence.synthesizeSelfDevelopmentResearch + AgentDevelopmentResearchVerifier); without a failing binding oracle, patching synthesis first is unlikely to be the minimal gap and easily burns remaining iteration budget.",
-        "confidence": 0.62,
-        "evidence": [
-          "AgentLocalIntelligence.synthesizeSelfDevelopmentResearch refuses synthesis when Tier A/B evidence is empty and validates evidence ID sets",
-          "AgentDevelopmentResearchVerifier rejects unsupported approaches/proposals lacking qualifying external evidenceIDs",
-          "allowSnippetEvidence:false is already required by self-development research policy for development research page grounding"
-        ],
-        "sourceTargets": [
           {
             "path": "App/KRALIAgentNative/AgentLocalIntelligence.swift",
             "symbols": [
               "synthesizeSelfDevelopmentResearch",
-              "DevelopmentResearchGeneratedApproach",
+              "validateApproach",
               "DevelopmentResearchGeneratedSelection"
             ]
           },
           {
+            "path": "App/KRALIAgentNative/AgentDevelopmentSuggestionStore.swift",
+            "symbols": [
+              "seededFallbackSuggestions"
+            ]
+          }
+        ]
+      },
+      {
+        "hypothesis": "Local agent burned the primitivePatch budget without a trustworthy candidate because the gap had no runtime error, no resolver trace, and no strategy candidates—then drifted into non-generic quality-score tweaks (brand authorityDomains / excerpt scoring bonuses) that do not implement verifiable source↔finding matching and conflict with the no-brand-hardcode rule.",
+        "confidence": 0.78,
+        "evidence": [
+          "Failure state local_agent_iteration_limit with empty runtime source hints and “Mevcut strategy adayları: Yok”.",
+          "Provenance is deterministic-fallback:fallback:research-quality plus user-retry; reason is a re-research request, not a concrete runtime failure class.",
+          "Worktree already shows AgentDevelopmentResearchSourceClassifier.calculateSourceConsistency with authorityDomains brand list (google/microsoft/apple/…) and kind/domain score bonuses—orthogonal to finding↔excerpt alignment and non-generic.",
+          "AgentWebSourceReader.bestEvidence also contains soft “Evidence quality bonus” / multi-concept score bumps without a deterministic finding-binding contract.",
+          "KRALI_DEVELOPMENT_NOTES.md documents prior local_agent_iteration_limit failures where inspection budget was exhausted before a minimal mutation."
+        ],
+        "sourceTargets": [
+          {
             "path": "App/KRALIAgentNative/AgentDevelopmentResearch.swift",
             "symbols": [
-              "AgentDevelopmentResearchVerifier.verify"
+              "AgentDevelopmentResearchSourceClassifier.assess",
+              "calculateSourceConsistency"
             ]
           },
           {
             "path": "App/KRALIAgentNative/AgentWebSourceReader.swift",
             "symbols": [
-              "extractEvidence",
-              "allowSnippetFallback",
-              "bestEvidence"
+              "bestEvidence",
+              "readSource",
+              "fallbackEvidence"
+            ]
+          },
+          {
+            "path": "App/KRALIAgentNative/AgentDeveloperBridge.swift",
+            "symbols": [
+              "local_agent_iteration_limit"
+            ]
+          }
+        ]
+      },
+      {
+        "hypothesis": "Secondary gap for user-facing research answers: LocalIntelligence.synthesize prompts separation of evidence vs inference but has no deterministic post-check that synthesized claims remain supported by WebSourceEvidence.excerpt / matchedConcepts; AgentVerifier research checks are count/domain oriented and AgentVerifier.swift is outside mutation ALLOW scope.",
+        "confidence": 0.62,
+        "evidence": [
+          "synthesize builds evidenceText from WebSourceEvidence excerpts then returns model text with no lexical support filter.",
+          "Benefit wording targets research answers broadly, not only development-research proposals.",
+          "AllowedScope includes AgentLocalIntelligence.swift and AgentWebSourceReader.swift but denies AgentVerifier.swift / AgentEngine.swift, so any user-answer grounding must live in synthesis/reader layers."
+        ],
+        "sourceTargets": [
+          {
+            "path": "App/KRALIAgentNative/AgentLocalIntelligence.swift",
+            "symbols": [
+              "synthesize"
+            ]
+          },
+          {
+            "path": "App/KRALIAgentNative/AgentWebSourceReader.swift",
+            "symbols": [
+              "WebSourceEvidence",
+              "bestEvidence",
+              "matchedConcepts"
             ]
           }
         ]
       }
     ],
     "recommendedNextSteps": [
-      "Treat this as a primitivePatch of the dead preferredSourceKinds contract: in AgentWebResearch, when developmentFacet is present, classify candidates with AgentDevelopmentResearchSourceClassifier.assess and bias score/selection toward uncovered preferredSourceKinds (generic kind coverage, not host/brand lists).",
-      "Extend selectDiverseResults (or an adjacent development-only selector) to prefer distinct AgentResearchSourceKind / canonicalOrigin pairs before filling remaining slots by domain—keep Tier A/B and mutation-off verifier semantics unchanged.",
-      "If still short of the approved benefit, only then tighten evidence↔facet binding helpers inside AgentDevelopmentResearch / AgentLocalIntelligence (e.g. prefer binding one qualifying evidence ID per required facet) without rewriting staged synthesis.",
-      "Do not retarget AgentEngine.researchLoop early-exit or Mentors/CI/runner files; they are forbidden and not required for this atomic diversity seam.",
-      "Stop at ready_for_review after a minimal diff confined to allowedScope that keeps Scripts/research-development-verifier.command stdout markers green."
+      "Discard/avoid brand authorityDomains and host soft-score expansions; they are not the approved atomic behavior.",
+      "Implement one generic support primitive: token-overlap (reuse existing normalizeTokens / relevanceTokens stopword style) between claim text and the union of cited evidence excerpts.",
+      "Wire that primitive into AgentDevelopmentResearchVerifier.verify for each approach.summary and each proposal.researchFindings entry against cited evidenceIDs; fail .attention when unsupported.",
+      "Mirror the same check inside LocalIntelligence.validateApproach (and optionally proposal acceptance) so unsupported generations never reach the verifier as false greens.",
+      "Extend Scripts/development-research-quality-self-test.swift with one fixture: valid Tier A/B IDs + mismatched finding text => not .passed; aligned finding text => .passed.",
+      "Only if budget remains: optional lightweight post-filter in LocalIntelligence.synthesize for user answers using WebSourceEvidence excerpts—still generic, no brand/app hardcodes.",
+      "Keep mutation inside ALLOW paths; stop at ready_for_review after research-development-verifier / build-check PASS."
     ],
     "testsRequired": [
-      "Scripts/research-development-verifier.command must still emit research_development_verifier_ok, development_research_quality_policy_ok, and staged_research_synthesis_policy_ok",
-      "Scripts/development-research-quality-self-test.swift regressions: diversified facet queries, irrelevant official Tier D, Tool music false-positive Tier D, GitHub Topics not originalRepository, grounded contract .passed, weak-only .attention, browser.control .attention",
-      "/bin/zsh Scripts/build-check.command PASS on the candidate worktree",
-      "Manual/read-only check that preferredSourceKinds now affects ranking/diversity when developmentFacet is supplied (same-kind pile-up reduced without hard-coded site names)"
+      "Scripts/research-development-verifier.command must still emit research_development_verifier_ok, development_research_quality_policy_ok, staged_research_synthesis_policy_ok",
+      "Scripts/development-research-quality-self-test.swift: add finding↔excerpt mismatch BLOCKED + aligned findings PASS",
+      "Scripts/build-check.command PASS on the candidate worktree",
+      "No new brand/app/site hard-coded branches in classifier/reader diffs"
     ],
     "warnings": [
-      "This failure is primarily under-specified seed + missing consumer seam, not a runtime crash; fabricating a large research rewrite would violate primitivePatch and Senaryo bağımsızlığı.",
-      "AgentEngine is DENY-listed even though executeSelfDevelopmentResearchMission owns the facet research loop—fix must stay in ALLOW paths.",
-      "Scripts/development-research-quality-self-test.swift is outside allowedScope; keep existing asserts green rather than depending on new test files.",
-      "Do not hard-code app/brand/domain names to chase one diagnostic sentence; parameterize via AgentResearchSourceKind and existing classifier origins."
+      "Gap evidence is a seeded fallback suggestion, not a Mentor runtime stack trace; do not invent PASS from narrative research text alone.",
+      "calculateSourceConsistency authorityDomains / medium.com-as-organizationEngineering style lists violate the brief’s no brand/site hard-code rule and should not be the candidate.",
+      "Do not widen into AgentEngine, AgentVerifier, Mentors, VERSION, or research-development-verifier.command.",
+      "Do not add new source files; keep Tier staging and mutation-off invariants intact.",
+      "This diagnosis is read-only; a mutation agent must produce the actual primitive patch."
     ]
   }
 }

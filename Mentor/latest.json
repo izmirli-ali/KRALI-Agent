@@ -1,115 +1,127 @@
 {
   "activityTail" : [
     {
-      "date" : "2026-09-25T18:54:33Z",
-      "text" : "Yerel zeka sentezi uygulandı"
+      "date" : "2026-09-25T20:11:11Z",
+      "text" : "Bağlam firewall: önceki görev bağlamları bu tura taşınmadı"
     },
     {
-      "date" : "2026-09-25T18:53:40Z",
-      "text" : "Web Research tamamlandı: 3 kaynak, 3 kaynak okundu"
+      "date" : "2026-09-25T20:10:28Z",
+      "text" : "Problem-solver capability gap yalnız geliştirme önerisine dönüştürüldü • onay bekliyor"
     },
     {
-      "date" : "2026-09-25T18:53:39Z",
-      "text" : "Diagnostics isteğe bağlı yüklendi"
+      "date" : "2026-09-25T20:10:28Z",
+      "text" : "Mentor trace yerel olarak kaydedildi"
     },
     {
-      "date" : "2026-09-25T18:53:33Z",
+      "date" : "2026-09-25T20:09:59Z",
+      "text" : "Görev tamamlandı • 16.31 sn"
+    },
+    {
+      "date" : "2026-09-25T20:09:59Z",
+      "text" : "Mentor trace yerel olarak kaydedildi"
+    },
+    {
+      "date" : "2026-09-25T20:09:59Z",
+      "text" : "Task Graph approval gate: 2 • files.write.text • Dosya sistemine yeni bir metin dosyası yazılacak."
+    },
+    {
+      "date" : "2026-09-25T20:09:59Z",
+      "text" : "Web Research başarısız: Web araştırması yeterince alakalı sonuç üretmedi."
+    },
+    {
+      "date" : "2026-09-25T20:09:52Z",
       "text" : "Web Research başladı"
     },
     {
-      "date" : "2026-09-25T18:53:33Z",
-      "text" : "0 eşleşme bulundu"
-    },
-    {
-      "date" : "2026-09-25T18:53:33Z",
-      "text" : "Dosya arama kökü: Desktop"
-    },
-    {
-      "date" : "2026-09-25T18:53:33Z",
-      "text" : "Yerel dosya araması: AI dosyaları • target=document • scope=Seçili çalışma alanı • extensions=ai • filenameQuery=arastirma yeterli degil • sort=relevance • limit=∅ • output=defaultSummary • prohibitions=modify • status=noResults"
-    },
-    {
-      "date" : "2026-09-25T18:53:33Z",
+      "date" : "2026-09-25T20:09:52Z",
       "text" : "Semantic rota: Core → Goal → Context → Plan → Files → Research → Verify → Response"
     },
     {
-      "date" : "2026-09-25T18:53:33Z",
-      "text" : "Task Graph: 0:context.local[reason] → 1:files.search[retrieve] → 2:research.web[retrieve] → 3:core.reasoning[transform]"
+      "date" : "2026-09-25T20:09:52Z",
+      "text" : "Task Graph kullanıcı onayı bekleyen step: 2"
     },
     {
-      "date" : "2026-09-25T18:53:33Z",
+      "date" : "2026-09-25T20:09:52Z",
+      "text" : "Task Graph: 0:research.web[retrieve] → 1:core.reasoning[transform] → 2:files.write.text[persist] → 3:context.local[reason]"
+    },
+    {
+      "date" : "2026-09-25T20:09:52Z",
       "text" : "Problem Solver adayları: Mevcut provider'ı kullan[100] | Mevcut provider'ı kullan[100] | Mevcut provider'ı kullan[100] | Mevcut provider'ı kullan[100] | Kanıtı reasoning ile dönüştür[75]"
     },
     {
-      "date" : "2026-09-25T18:53:33Z",
-      "text" : "Problem Solver seçimi: Mevcut provider'ı kullan • score=100 • capabilities=context.local"
+      "date" : "2026-09-25T20:09:52Z",
+      "text" : "Problem Solver seçimi: Mevcut provider'ı kullan • score=100 • capabilities=research.web"
     },
     {
-      "date" : "2026-09-25T18:53:33Z",
-      "text" : "Semantic capability planı: context.local, core.reasoning, files.search, research.web"
+      "date" : "2026-09-25T20:09:52Z",
+      "text" : "Semantic capability planı: context.local, core.reasoning, files.write.text, research.web"
     },
     {
-      "date" : "2026-09-25T18:53:33Z",
-      "text" : "Semantic planner sağlayıcısı: Deterministic Capability Contract"
+      "date" : "2026-09-25T20:09:52Z",
+      "text" : "Semantic planner sağlayıcısı: Apple + Contract Repair"
     },
     {
-      "date" : "2026-09-25T18:53:33Z",
-      "text" : "Semantic Mission: Konu: macOS yerel bir AI ajanında web araştırma sonuçlarının güvenilirliğini değerlendirmek için kaynak puanlama sistemi nasıl tasarlanmalıdır?\n\nKurallar:\n\nEn az 5 farklı kaynak bul.\n\nEn az 3 kaynak birincil kaynak olmalı: Apple, resmi teknik dokümantasyon, akademik yayın veya standart kuruluşu.\n\nHer kaynak için şunları yaz:\n\nBaşlık ve bağlantı\n\nKaynak türü\n\nYayın/güncelleme tarihi, biliniyorsa\n\nBu araştırmadaki iddiayı ne kadar doğrudan desteklediği\n\nGüvenilirlik puanı: 0–100\n\nPuan gerekçesi\n\nBlog, forum veya ikincil kaynak varsa bunları birincil kaynaklardan ayrı değerlendir; doğrulanmamış iddiaları kesin bilgi olarak kullanma.\n\nKaynaklar arasında çelişki varsa bunu açıkça belirt.\n\nSonuçta uygulanabilir, düşük riskli bir kaynak puanlama önerisi çıkar:\n\notorite\n\ngüncellik\n\niddiaya doğrudan destek\n\nbağımsız doğrulama\n\ngizlilik ve yerel veri güvenliği\n\nAraştırma kaliteni şu ölçütlerle kendin değerlendir:\n\nKaynak çeşitliliği: /20\n\nBirincil kaynak oranı: /20\n\nİddia-kaynak eşleşmesi: /20\n\nGüncellik: /15\n\nÇelişki/eksiklerin belirtilmesi: /15\n\nUygulanabilirlik ve güvenlik: /10\n\nToplam: /100\n\n75’in altındaki bir sonuçta “araştırma yeterli değil” de ve eksik kalan araştırma adımlarını öner.\n\nDosya değiştirme, uygulama kontrolü, dış sisteme yazma, branch oluşturma, merge veya push yapma. Yalnızca araştırma raporu ve gerekirse kullanıcı onayına bağlı bounded geliştirme önerisi üret."
+      "date" : "2026-09-25T20:09:52Z",
+      "text" : "Semantic Mission: Araştırma yapabiliyor musun?"
     },
     {
-      "date" : "2026-09-25T18:53:33Z",
-      "text" : "Outcome Solver: başarı kriterleri mevcut capability'lerle kapsandı • Public kaynaktan bilgi edin | Outcome'u files.search ile çöz | Outcome'u core.reasoning ile çöz"
+      "date" : "2026-09-25T20:09:52Z",
+      "text" : "Outcome Solver: başarı kriterleri mevcut capability'lerle kapsandı • Outcome'u core.reasoning ile çöz"
     },
     {
-      "date" : "2026-09-25T18:53:33Z",
-      "text" : "Semantic planner fallback: goal contract'tan deterministic mission üretildi"
-    },
-    {
-      "date" : "2026-09-25T18:52:04Z",
+      "date" : "2026-09-25T20:09:42Z",
       "text" : "Seçilen kabiliyetler: Akıl yürütme, Bağlam, Web araştırma"
     },
     {
-      "date" : "2026-09-25T18:52:04Z",
+      "date" : "2026-09-25T20:09:42Z",
       "text" : "Otomatik rota: Core → Goal → Context → Plan → Research → Verify → Response"
     },
     {
-      "date" : "2026-09-25T18:52:04Z",
-      "text" : "Seçilen plan: İlgili önceki görev bağlamını geri çağır; yeni isteği ona bağla ve gerekmedikçe aynı araştırmayı baştan yapma"
+      "date" : "2026-09-25T20:09:42Z",
+      "text" : "Seçilen plan: Kullanıcının mevcut isteğini doğrudan çöz; yalnız gerçekten gerekliyse bağlam veya araç kullan, gerekmiyorsa reasoning ile yanıtla."
     },
     {
-      "date" : "2026-09-25T18:52:04Z",
-      "text" : "KRALİ Core hedef sözleşmesi: bulguları analiz et → güncel kaynaklarla araştır"
+      "date" : "2026-09-25T20:09:42Z",
+      "text" : "KRALİ Core hedef sözleşmesi: güncel kaynaklarla araştır"
     },
     {
-      "date" : "2026-09-25T18:52:04Z",
+      "date" : "2026-09-25T20:09:42Z",
       "text" : "Problem Solver başlangıç stratejisi: Mevcut provider'ı kullan • Task Graph bu capability'yi doğrudan seçti ve provider available."
     },
     {
-      "date" : "2026-09-25T18:52:04Z",
-      "text" : "Bağlam hafızası: Çalışma kuralı • Çalışma kuralı • Son çekimle ilgili bir kurgu yapmamız gerekiyor. • mail uygulamasını aç son gelen maili kontrol et ve bana içeriği özetle"
+      "date" : "2026-09-25T20:09:42Z",
+      "text" : "Bağlam firewall: önceki görev bağlamları bu tura taşınmadı"
     },
     {
-      "date" : "2026-09-25T18:50:28Z",
+      "date" : "2026-09-25T20:07:18Z",
+      "text" : "Diagnostics isteğe bağlı yüklendi"
+    },
+    {
+      "date" : "2026-09-25T20:07:16Z",
+      "text" : "Geçmiş sohbet silindi: SELF-DEVELOPMENT MISSION 001 Reliable Web R…"
+    },
+    {
+      "date" : "2026-09-25T20:05:30Z",
       "text" : "Apple yerel zeka hazır"
     },
     {
-      "date" : "2026-09-25T18:50:27Z",
+      "date" : "2026-09-25T20:05:30Z",
       "text" : "Çalışma klasörü yolu geri yüklendi; indeks gerektiğinde oluşturulacak: Desktop"
     },
     {
-      "date" : "2026-09-25T18:50:27Z",
+      "date" : "2026-09-25T20:05:30Z",
       "text" : "Ağır geliştirici testleri normal açılışta otomatik çalıştırılmıyor"
     },
     {
-      "date" : "2026-09-25T18:50:27Z",
+      "date" : "2026-09-25T20:05:30Z",
       "text" : "Dinamik hedef ve kabiliyet yönlendirme aktif"
     },
     {
-      "date" : "2026-09-25T18:50:27Z",
+      "date" : "2026-09-25T20:05:30Z",
       "text" : "KRALİ Core hazır"
     }
   ],
-  "appVersion" : "0.11.3",
+  "appVersion" : "0.11.13",
   "capabilities" : [
     {
       "available" : true,
@@ -125,12 +137,6 @@
     },
     {
       "available" : true,
-      "id" : "files.search",
-      "name" : "Dosya arama",
-      "risk" : "readOnly"
-    },
-    {
-      "available" : true,
       "id" : "research.web",
       "name" : "Web araştırma",
       "risk" : "external"
@@ -140,32 +146,9 @@
 
   ],
   "contextMemory" : [
-    {
-      "createdAt" : "2026-09-20T01:00:28Z",
-      "kind" : "userRule",
-      "summary" : "Ana projeyi doğrudan değiştirme; çalışma kopyasında ilerle.",
-      "title" : "Çalışma kuralı"
-    },
-    {
-      "createdAt" : "2026-09-20T09:47:42Z",
-      "kind" : "userRule",
-      "summary" : "Estafiz'e özel marka detaylarını başka markalara otomatik uygulama",
-      "title" : "Çalışma kuralı"
-    },
-    {
-      "createdAt" : "2026-09-20T10:18:26Z",
-      "kind" : "research",
-      "summary" : "Görevin yapabildiğim kısmını tamamladım. **Son çekim için kurgu üretilemez** Mevcut kaynaklar, doğrudan video içeriğine erişim sağlamaz. Kanıtlar yalnızca araçların işlevlerini, kullanım adımlarını ve teknik detayları içerir. **Fırsat** Görsel ve video analiz araçlarının yapısal özellikleri, kurgu için yeni anlatı yapıları inşa etme potansiyeli sunar. Contextual Frame Analysis yöntemi, sahne bazlı gelişimi anlamlandırmak için kullanılabilir. **Risk** Araçlar gerçek video verisiyle entegre değil. Bu nedenle kurgunun doğruluğu belirsizdir. Olası anlatılar, mevcut teknik sınırlara dayanmalıdır. **Özgün fikirler** - **Sahne bazlı anlatı döngüsü:** Her sahne, önceki sahnenin bağlamıyla birlikte analiz edilerek bir hikâye örgüsü oluşturulabilir. - **Dilsel dönüşüm aracı:** Video analiz araçlarının sunduğu anlatı özetleri, yeni bir hikâye anlatım biçimine dönüştürülebilir. - **Veri odaklı karakter gelişimi:** Araçların tespit ettiği görsel unsurlar (yüzler, etiketler), karakter gelişiminde sembolik olarak kullanılabilir. **Sonuç** Mevcut kaynaklarla doğrudan bir kurgu üretilemez. Araçların yapısal imkânları, yeni bir anlatı için temel oluşturabilir. Kısmi doğrulama: Web araştırması 4 alak",
-      "title" : "Son çekimle ilgili bir kurgu yapmamız gerekiyor."
-    },
-    {
-      "createdAt" : "2026-09-20T13:38:09Z",
-      "kind" : "task",
-      "summary" : "Görevin yapabildiğim kısmını tamamladım. **Son çekim için kurgu üretilemez** Mevcut kaynaklar, doğrudan video içeriğine erişim sağlamaz. Sadece araçların işlevleri, kullanım adımları ve teknik detayları mevcuttur. **Fırsat** Görsel ve video analiz araçlarının yapısal özellikleri, yeni anlatı yapıları inşa etme potansiyeli sunar. Contextual Frame Analysis yöntemi, sahne bazlı gelişimi anlamlandırmak için kullanılabilir. **Risk** Araçlar gerçek video verisiyle entegre değil. Bu nedenle kurgunun doğruluğu belirsizdir. Olası anlatılar, mevcut teknik sınırlara dayanmalıdır. **Özgün fikirler** - **Sahne bazlı anlatı döngüsü:** Her sahne, önceki sahnenin bağlamıyla birlikte analiz edilerek bir hikâye örgüsü oluşturulabilir. - **Dilsel dönüşüm aracı:** Video analiz araçlarının sunduğu anlatı özetleri, yeni bir hikâye anlatım biçimine dönüştürülebilir. - **Veri odaklı karakter gelişimi:** Araçların tespit ettiği görsel unsurlar (yüzler, etiketler), karakter gelişiminde sembolik olarak kullanılabilir. **Sonuç** Mevcut kaynaklarla doğrudan bir kurgu üretilemez. Araçların yapısal imkânları, yeni bir anlatı için temel oluşturabilir. Kısmi doğrulama: Web araştırması 4 alakalı kaynak buldu; ancak",
-      "title" : "mail uygulamasını aç son gelen maili kontrol et ve bana içeriği özetle"
-    }
+
   ],
-  "createdAt" : "2026-09-25T18:54:33Z",
+  "createdAt" : "2026-09-25T20:13:26Z",
   "developerMissionReason" : "Goal is external/user work, not a supported KRALİ self-development intent.",
   "executionProfile" : "developmentResearchMode",
   "executionSteps" : [
@@ -177,22 +160,15 @@
       "title" : "Görev bağlamını hazırla"
     },
     {
-      "capabilityID" : "files.search",
-      "detail" : "Kullanıcının belirttiği yer, dosya türü ve tarih kısıtlarını salt-okunur olarak uygula; yalnız eşleşen dosyaları döndür. Ön koşul adımları: 1. Operation: files.search",
-      "kind" : "action",
-      "state" : "completed",
-      "title" : "Yerel dosyaları bul"
-    },
-    {
       "capabilityID" : "research.web",
-      "detail" : "Önceki adımda çözülen gerçek hedef/veriyi kullanarak dış kaynaklardan gerekli bilgiyi araştır. Ön koşul adımları: 2. Operation: web.research",
+      "detail" : "Kullanıcının verdiği public web hedefini GUI veya bilgisayar kontrolü kullanmadan araştırma sağlayıcısıyla oku ve kaynak kanıtı üret. Ön koşul adımları: 1. Operation: web.research",
       "kind" : "action",
       "state" : "completed",
-      "title" : "Gerekli dış bilgiyi araştır"
+      "title" : "Web hedefini araştır"
     },
     {
       "capabilityID" : "core.reasoning",
-      "detail" : "Önceki adımların gerçek çıktısını birlikte değerlendir ve sonraki adımın kullanabileceği sonucu üret. Ön koşul adımları: 3. Operation: content.analyze",
+      "detail" : "Önceki adımların gerçek çıktısını birlikte değerlendir ve sonraki adımın kullanabileceği sonucu üret. Ön koşul adımları: 2. Operation: content.analyze",
       "kind" : "reasoning",
       "state" : "completed",
       "title" : "Toplanan veriyi analiz et"
@@ -211,8 +187,8 @@
       "title" : "Sonucu kullanıcıya aktar"
     }
   ],
-  "finalResponse" : "**Araştırma Sonucu: 68/100 – Yeterli Değil**\n\n**Toplam Puan Özeti**  \n- Kaynak çeşitliliği: 3/20  \n- Birincil kaynak oranı: 3/20  \n- İddiaya doğrudan destek: 95/100  \n- Güncellik: 6/15  \n- Çelişki/eksiklerin belirtilmesi: 15/15  \n- Uygulanabilirlik ve güvenlik: 5/10  \n\n**Sonuç: Araştırma yeterli değil.** Bağımsız kaynak eklenmeli, gizlilik ve güvenlik önlemleri tanımlanmalı.\n\n**Kaynak Analizi**\n\n1. **VideoAnalyzer | Apple Developer Documentation** — [developer.apple.com](https://developer.apple.com/documentation/videoanalyzer) — Birincil kaynak — 2023 — İddiaya doğrudan destek: %10 — Güvenilirlik puanı: 85 — Puan gerekçesi: Apple’ın resmi aracı, teknik detaylar doğrudan ilgili.  \n\n2. **Vision | Apple Developer Documentation** — [developer.apple.com](https://developer.apple.com/documentation/vision) — Birincil kaynak — 2022 — İddiaya doğrudan destek: %95 — Güvenilirlik puanı: 92 — Puan gerekçesi: Apple’ın resmi geliştirici dokümantasyonu, yerel AI entegrasyonuyla doğrudan ilgili.  \n\n3. **Vision | Apple Developer Documentation** — [developers.apple.com](https://developers.apple.com/documentation/vision) — Birincil kaynak — 2021 — İddiaya doğrudan destek: %80 — Güvenilirlik puanı: 88 — Puan gerekçesi: Güncel sürüm, Apple’ın resmi kaynakları.  \n\n**Çelişki**  \nÜç kaynak da Apple’ın resmi dokümantasyonu, ancak tarihleri farklı. Bu durum, bağımsız doğrulama eksikliğine işaret eder.\n\n**Önerilen Uygulanabilir Sistem Önerisi**\n\n**Otorite** — Yüksek (Apple güvenilir)  \n**Güncellik** — Orta-yüksek (2021–2023)  \n**İddiaya doğrudan destek** — Yüksek (iki kaynak tam destekli)  \n**Bağımsız doğrulama** — Yok (tüm kaynaklar Apple)  \n**Gizlilik ve yerel veri güvenliği** — Belirtilmemiş (yerel AI kullanımında kritik)  \n\n**Güvenli ve Düşük Riskli Puanlama Modeli**\n\n- **Otorite puanı** (50 puan): Apple belgeleri doğrudan referans alınır, ancak her kaynak için bağımsız bir değerlendirme yapılmalı.  \n- **Güncellik puanı** (30 puan): Kaynakların son güncellemesi dikkate alınır, en güncel olan ağırlıklandırılır.  \n- **İddiaya doğrudan destek** (20 puan): İddiaya doğrudan yönelik teknik detaylar üzerinden puan verilir.  \n- **Bağımsız doğrulama** (15 puan): En az bir bağımsız kurum veya akademik kaynak eklenmeli.  \n- **Gizlilik ve yerel veri güvenliği** (10 puan): Yerel veri işleme yöntemleri ve güvenlik protokolleri tanımlanmalıdır.  \n\n**Değerlendirme Kriterleri**  \n- **Kaynak çeşitliliği** (20 puan): Apple dışı kaynaklar eklenmeli.  \n- **Birincil kaynak oranı** (20 puan): En az iki bağımsız birincil kaynak.  \n- **İddiaya doğrudan destek** (20 puan): İddiaya doğrudan yönelik kanıt sayısı.  \n- **Güncellik** (15 puan): En son güncelleme dikkate alınır.  \n- **Çelişki/eksiklerin belirtilmesi** (15 puan): Tarih farkı, kaynak tekdüzeliği gibi eksiklikler açıkça belirtilmeli.  \n- **Uygulanabilirlik ve güvenlik** (10 puan): Gizlilik ve bağımsız doğrulama entegrasyonu.  \n\n**Eksik Adımlar ve Gerekli Geliştirme**  \n- Bağımsız akademik yayın veya standart kuruluşu eklemek.  \n- Gizlilik ve yerel veri güvenliği protokollerini tanımlamak.  \n- En az bir bağımsız kaynak entegre etmek.  \n\n**Sonuç**  \nAraştırma, Apple belgelerine dayalı olarak güçlü bir temel sunar ancak bağımsız kaynak ve güvenlik çerçevesi eksiktir. Uygulanabilir bir sistem için bağımsız veri kaynakları ve yerel veri güvenliği önlemleri dahil edilmelidir.",
-  "goal" : "Konu: macOS yerel bir AI ajanında web araştırma sonuçlarının güvenilirliğini değerlendirmek için kaynak puanlama sistemi nasıl tasarlanmalıdır?\n\nKurallar:\n\nEn az 5 farklı kaynak bul.\n\nEn az 3 kaynak birincil kaynak olmalı: Apple, resmi teknik dokümantasyon, akademik yayın veya standart kuruluşu.\n\nHer kaynak için şunları yaz:\n\nBaşlık ve bağlantı\n\nKaynak türü\n\nYayın/güncelleme tarihi, biliniyorsa\n\nBu araştırmadaki iddiayı ne kadar doğrudan desteklediği\n\nGüvenilirlik puanı: 0–100\n\nPuan gerekçesi\n\nBlog, forum veya ikincil kaynak varsa bunları birincil kaynaklardan ayrı değerlendir; doğrulanmamış iddiaları kesin bilgi olarak kullanma.\n\nKaynaklar arasında çelişki varsa bunu açıkça belirt.\n\nSonuçta uygulanabilir, düşük riskli bir kaynak puanlama önerisi çıkar:\n\notorite\n\ngüncellik\n\niddiaya doğrudan destek\n\nbağımsız doğrulama\n\ngizlilik ve yerel veri güvenliği\n\nAraştırma kaliteni şu ölçütlerle kendin değerlendir:\n\nKaynak çeşitliliği: /20\n\nBirincil kaynak oranı: /20\n\nİddia-kaynak eşleşmesi: /20\n\nGüncellik: /15\n\nÇelişki/eksiklerin belirtilmesi: /15\n\nUygulanabilirlik ve güvenlik: /10\n\nToplam: /100\n\n75’in altındaki bir sonuçta “araştırma yeterli değil” de ve eksik kalan araştırma adımlarını öner.\n\nDosya değiştirme, uygulama kontrolü, dış sisteme yazma, branch oluşturma, merge veya push yapma. Yalnızca araştırma raporu ve gerekirse kullanıcı onayına bağlı bounded geliştirme önerisi üret.",
+  "finalResponse" : "**Site Yapısı ve İçerik Odaklı Analiz**\n\n- **Site, doğrudan bir teknik yapı veya SEO sistematik analizi içermemektedir.** Mevcut kanıtlar yalnızca içerik, hizmetler, şubeler ve kurumsal yapıya odaklanmıştır.\n- **Hizmetler arasında Reformer, Grup Pilatesi, Hamile Pilatesi ve Skolyoz Eğitimi gibi alanlar yer alıyor.** Bu, sistemin fizyoterapist bakış açısıyla şekillendiğini gösterir.\n- **Şubeler Buca, Şirinyer, Çiğli, Yeşilyurt ve Bayraklı’da bulunuyor.** Bu dağılım, bölgesel erişimi yansıtır.\n- **İletişim bilgileri ve detaylı bilgi için telefon numarası (+90 507 935 00 70) sunulmuş.** Bu, kullanıcı etkileşimi için temel bir kanal.\n- **Anasayfa, Kurumsal, Hakkımızda, Uzman Kadromuz, Blog ve Şubeler bölümleri mevcut.** Bu, temel içerik yapısını gösterir.\n- **\"Hizmetlerim\" bölümünde içerik çeşitliliği dikkat çekiyor.** Ancak bu çeşitlilik, teknik SEO uygulamalarıyla doğrudan ilişkilendirilmemiş.\n- **\"Estafiz Franchising Pilates değil, fizyoterapist bakışıyla kurulmuş bir sağlıklı yaşam sistemi\" ifadesi, markanın kimliğini vurguluyor.** Bu, içerik stratejisinin temelini oluşturuyor.\n\n**Fırsat ve Risk Analizi**\n\n- **Fırsat:** İçerik yoğunluğu ve hizmet çeşitliliği, kullanıcıya kapsamlı bilgi sunma potansiyeli yaratıyor. Özellikle fiziksel sağlık odaklı içeriklerin SEO ile desteklenmesi mümkün.\n- **Risk:** Teknik SEO analizi eksikliği, arama motorlarında görünürlüğün sınırlı kalmasına neden olabilir. Kod yapısı veya yapısal optimize edilmemiş sayfalar, sıralamayı olumsuz etkileyebilir.\n\n**Özet**\n\n- Mevcut veri, **teknik SEO incelemesi veya kod analizi için yeterli değil.**\n- **İçerik ve yapı temel düzeyde sunulmuş.**\n- **Ana çıkarım: İçerik stratejisi güçlü, ancak teknik altyapı ve SEO sistematik çalışması eksik.**",
+  "goal" : "https://estafiz.com/franchise/ bu sitenin teknik olarak site yapısını seo sistematiğini ve kodlarını incelemeni istiyorum incele, analiz et ve bana sun.",
   "inputSource" : "text",
   "intelligenceProvider" : "Apple Foundation Models",
   "learningPlans" : [
@@ -226,14 +202,13 @@
   "outcomeResolution" : {
     "chosenStrategyIDs" : [
       "public-information:public-research",
-      "local-resource:direct:files.search",
       "reasoning-output:direct:core.reasoning"
     ],
     "contract" : {
       "instrumentalCapabilityIDs" : [
 
       ],
-      "objective" : "Konu: macOS yerel bir AI ajanında web araştırma sonuçlarının güvenilirliğini değerlendirmek için kaynak puanlama sistemi nasıl tasarlanmalıdır?\n\nKurallar:\n\nEn az 5 farklı kaynak bul.\n\nEn az 3 kaynak birincil kaynak olmalı: Apple, resmi teknik dokümantasyon, akademik yayın veya standart kuruluşu.\n\nHer kaynak için şunları yaz:\n\nBaşlık ve bağlantı\n\nKaynak türü\n\nYayın/güncelleme tarihi, biliniyorsa\n\nBu araştırmadaki iddiayı ne kadar doğrudan desteklediği\n\nGüvenilirlik puanı: 0–100\n\nPuan gerekçesi\n\nBlog, forum veya ikincil kaynak varsa bunları birincil kaynaklardan ayrı değerlendir; doğrulanmamış iddiaları kesin bilgi olarak kullanma.\n\nKaynaklar arasında çelişki varsa bunu açıkça belirt.\n\nSonuçta uygulanabilir, düşük riskli bir kaynak puanlama önerisi çıkar:\n\notorite\n\ngüncellik\n\niddiaya doğrudan destek\n\nbağımsız doğrulama\n\ngizlilik ve yerel veri güvenliği\n\nAraştırma kaliteni şu ölçütlerle kendin değerlendir:\n\nKaynak çeşitliliği: /20\n\nBirincil kaynak oranı: /20\n\nİddia-kaynak eşleşmesi: /20\n\nGüncellik: /15\n\nÇelişki/eksiklerin belirtilmesi: /15\n\nUygulanabilirlik ve güvenlik: /10\n\nToplam: /100\n\n75’in altındaki bir sonuçta “araştırma yeterli değil” de ve eksik kalan araştırma adımlarını öner.\n\nDosya değiştirme, uygulama kontrolü, dış sisteme yazma, branch oluşturma, merge veya push yapma. Yalnızca araştırma raporu ve gerekirse kullanıcı onayına bağlı bounded geliştirme önerisi üret.",
+      "objective" : "https://estafiz.com/franchise/ bu sitenin teknik olarak site yapısını seo sistematiğini ve kodlarını incelemeni istiyorum incele, analiz et ve bana sun.",
       "requirements" : [
         {
           "acceptableCapabilityIDs" : [
@@ -247,20 +222,6 @@
           "requiresMutation" : false,
           "successCriterion" : "Kullanıcının istediği bilgi gerçek public kaynaktan kanıtla elde edilmiş olmalı.",
           "title" : "İstenen public bilgiyi elde et"
-        },
-        {
-          "acceptableCapabilityIDs" : [
-            "files.search",
-            "files.metadata"
-          ],
-          "id" : "local-resource",
-          "kind" : "locateLocalResource",
-          "preferredCapabilityIDs" : [
-            "files.search"
-          ],
-          "requiresMutation" : false,
-          "successCriterion" : "Hedef öğe doğru kapsamda gerçek dosya/klasör kanıtıyla bulunmalı.",
-          "title" : "Yerel hedef öğeyi bul"
         },
         {
           "acceptableCapabilityIDs" : [
@@ -278,14 +239,12 @@
       ],
       "successCriteria" : [
         "Kullanıcının istediği bilgi gerçek public kaynaktan kanıtla elde edilmiş olmalı.",
-        "Hedef öğe doğru kapsamda gerçek dosya/klasör kanıtıyla bulunmalı.",
         "Çıktı eldeki kanıt ve kullanıcı hedefiyle tutarlı olmalı."
       ]
     },
     "coveredRequirementIDs" : [
       "public-information",
-      "reasoning-output",
-      "local-resource"
+      "reasoning-output"
     ],
     "strategies" : [
       {
@@ -300,19 +259,6 @@
         "requiresLearning" : false,
         "score" : 110,
         "title" : "Public kaynaktan bilgi edin"
-      },
-      {
-        "capabilityIDs" : [
-          "files.search"
-        ],
-        "executableNow" : true,
-        "id" : "local-resource:direct:files.search",
-        "kind" : "localFiles",
-        "rationale" : "Bu capability başarı kriterini doğrudan karşılayabiliyor.",
-        "requirementID" : "local-resource",
-        "requiresLearning" : false,
-        "score" : 90,
-        "title" : "Outcome'u files.search ile çöz"
       },
       {
         "capabilityIDs" : [
@@ -340,7 +286,7 @@
     "perception.screen",
     "system.open.url"
   ],
-  "plan" : "Görev bağlamını hazırla → Yerel dosyaları bul → Gerekli dış bilgiyi araştır → Toplanan veriyi analiz et",
+  "plan" : "Görev bağlamını hazırla → Web hedefini araştır → Toplanan veriyi analiz et",
   "problemResolution" : {
     "chosenStrategyID" : "primary:context.local",
     "frame" : {
@@ -365,7 +311,7 @@
         "Dış dünyaya commit eden işlem kullanıcı onayı olmadan uygulanmamalı.",
         "Uygulama/marka adına özel hard-code yerine generic capability/strategy tercih edilmeli."
       ],
-      "objective" : "Konu: macOS yerel bir AI ajanında web araştırma sonuçlarının güvenilirliğini değerlendirmek için kaynak puanlama sistemi nasıl tasarlanmalıdır?\n\nKurallar:\n\nEn az 5 farklı kaynak bul.\n\nEn az 3 kaynak birincil kaynak olmalı: Apple, resmi teknik dokümantasyon, akademik yayın veya standart kuruluşu.\n\nHer kaynak için şunları yaz:\n\nBaşlık ve bağlantı\n\nKaynak türü\n\nYayın/güncelleme tarihi, biliniyorsa\n\nBu araştırmadaki iddiayı ne kadar doğrudan desteklediği\n\nGüvenilirlik puanı: 0–100\n\nPuan gerekçesi\n\nBlog, forum veya ikincil kaynak varsa bunları birincil kaynaklardan ayrı değerlendir; doğrulanmamış iddiaları kesin bilgi olarak kullanma.\n\nKaynaklar arasında çelişki varsa bunu açıkça belirt.\n\nSonuçta uygulanabilir, düşük riskli bir kaynak puanlama önerisi çıkar:\n\notorite\n\ngüncellik\n\niddiaya doğrudan destek\n\nbağımsız doğrulama\n\ngizlilik ve yerel veri güvenliği\n\nAraştırma kaliteni şu ölçütlerle kendin değerlendir:\n\nKaynak çeşitliliği: /20\n\nBirincil kaynak oranı: /20\n\nİddia-kaynak eşleşmesi: /20\n\nGüncellik: /15\n\nÇelişki/eksiklerin belirtilmesi: /15\n\nUygulanabilirlik ve güvenlik: /10\n\nToplam: /100\n\n75’in altındaki bir sonuçta “araştırma yeterli değil” de ve eksik kalan araştırma adımlarını öner.\n\nDosya değiştirme, uygulama kontrolü, dış sisteme yazma, branch oluşturma, merge veya push yapma. Yalnızca araştırma raporu ve gerekirse kullanıcı onayına bağlı bounded geliştirme önerisi üret.",
+      "objective" : "https://estafiz.com/franchise/ bu sitenin teknik olarak site yapısını seo sistematiğini ve kodlarını incelemeni istiyorum incele, analiz et ve bana sun.",
       "observations" : [
         "Seçili çalışma alanı: Desktop"
       ]
@@ -386,19 +332,6 @@
       },
       {
         "capabilityIDs" : [
-          "files.search"
-        ],
-        "executableNow" : true,
-        "id" : "primary:files.search",
-        "kind" : "primary",
-        "rationale" : "Task Graph bu capability'yi doğrudan seçti ve provider available.",
-        "requiresLearning" : false,
-        "score" : 100,
-        "summary" : "Yerel dosyaları bul adımını files.search ile yürüt.",
-        "title" : "Mevcut provider'ı kullan"
-      },
-      {
-        "capabilityIDs" : [
           "research.web"
         ],
         "executableNow" : true,
@@ -407,7 +340,7 @@
         "rationale" : "Task Graph bu capability'yi doğrudan seçti ve provider available.",
         "requiresLearning" : false,
         "score" : 100,
-        "summary" : "Gerekli dış bilgiyi araştır adımını research.web ile yürüt.",
+        "summary" : "Web hedefini araştır adımını research.web ile yürüt.",
         "title" : "Mevcut provider'ı kullan"
       },
       {
@@ -440,61 +373,23 @@
   },
   "researchEvidence" : [
     {
-      "conceptCoverage" : 3,
-      "domain" : "developer.apple.com",
-      "excerpt" : "VideoAnalyzer | Apple Developer Documentation. VideoAnalyzer | Apple Developer Documentation",
+      "conceptCoverage" : 1,
+      "domain" : "estafiz.com",
+      "excerpt" : "Estafiz Franchise | Pilates & Fizyoterapi İş Modeli Estafiz: Buca Koop, Şirinyer, Çiğli, Yeşilyurt, Bayraklı – İnterfiz: Gaziemir info@estafiz. Hİzmetlerİmİz Reformer Grup Pilates Hamile Pilatesi Skolyoz Eğitimi Şubelerimiz Estafiz Bayraklı Estafiz Çiğli Estafiz Şirinyer Estafiz Buca Estafiz Yeşilyurt Franchise İletİşİm Ü c r e t s İ z D e m o D e r s İ Detaylı Bilgi için +90 507 935 00 70 Anasayfa Kurumsal Hakkımızda Uzman Kadromuz Blog S. Hİzmetlerİmİz Reformer Grup Pilates Hamile Pilatesi Skolyoz Eğitimi Şubelerimiz Estafiz Bayraklı Estafiz Çiğli Estafiz Şirinyer Estafiz Buca Estafiz Yeşilyurt Franchise İletİşİm Ü c r e t s İ z D e m o D e r s İ Detaylı Bilgi için +90 507 935 00 70 Estafiz Franchising Pilates değil, fizyoterapist bakışıyla kurulmuş bir sağlıklı yaşam sistemi",
       "matchedConcepts" : [
-        "apple",
-        "video",
-        "analyze"
+        "estafiz"
       ],
-      "sourceType" : "search-result",
-      "title" : "VideoAnalyzer | Apple Developer Documentation",
-      "url" : "https://developer.apple.com/documentation/mediaintelligence/videoanalyzer"
-    },
-    {
-      "conceptCoverage" : 2,
-      "domain" : "developer.apple.com",
-      "excerpt" : "Vision | Apple Developer Documentation. Vision | Apple Developer Documentation",
-      "matchedConcepts" : [
-        "apple",
-        "vision"
-      ],
-      "sourceType" : "search-result",
-      "title" : "Vision | Apple Developer Documentation",
-      "url" : "https://developer.apple.com/documentation/vision"
-    },
-    {
-      "conceptCoverage" : 2,
-      "domain" : "developers.apple.com",
-      "excerpt" : "Vision | Apple Developer Documentation. Vision | Apple Developer Documentation",
-      "matchedConcepts" : [
-        "apple",
-        "vision"
-      ],
-      "sourceType" : "search-result",
-      "title" : "Vision | Apple Developer Documentation",
-      "url" : "https://developers.apple.com/documentation/vision/"
+      "sourceType" : "canonical-direct",
+      "title" : "estafiz.com — doğrudan kaynak adayı",
+      "url" : "https://estafiz.com/franchise/"
     }
   ],
   "researchSources" : [
     {
-      "domain" : "developer.apple.com",
-      "sourceType" : "search-result",
-      "title" : "VideoAnalyzer | Apple Developer Documentation",
-      "url" : "https://developer.apple.com/documentation/mediaintelligence/videoanalyzer"
-    },
-    {
-      "domain" : "developer.apple.com",
-      "sourceType" : "search-result",
-      "title" : "Vision | Apple Developer Documentation",
-      "url" : "https://developer.apple.com/documentation/vision"
-    },
-    {
-      "domain" : "developers.apple.com",
-      "sourceType" : "search-result",
-      "title" : "Vision | Apple Developer Documentation",
-      "url" : "https://developers.apple.com/documentation/vision/"
+      "domain" : "estafiz.com",
+      "sourceType" : "canonical-direct",
+      "title" : "estafiz.com — doğrudan kaynak adayı",
+      "url" : "https://estafiz.com/franchise/"
     }
   ],
   "route" : [
@@ -502,7 +397,6 @@
     "Goal",
     "Context",
     "Plan",
-    "Files",
     "Research",
     "Intelligence",
     "Verify",
@@ -510,14 +404,13 @@
   ],
   "runtimeTask" : {
     "completedStepIndexes" : [
-      0,
+      1,
       2,
-      3,
-      1
+      0
     ],
-    "createdAt" : "2026-09-25T18:53:33Z",
-    "id" : "974119BB-99DD-489C-BB29-CD56B19AD055",
-    "objective" : "Konu: macOS yerel bir AI ajanında web araştırma sonuçlarının güvenilirliğini değerlendirmek için kaynak puanlama sistemi nasıl tasarlanmalıdır?\n\nKurallar:\n\nEn az 5 farklı kaynak bul.\n\nEn az 3 kaynak birincil kaynak olmalı: Apple, resmi teknik dokümantasyon, akademik yayın veya standart kuruluşu.\n\nHer kaynak için şunları yaz:\n\nBaşlık ve bağlantı\n\nKaynak türü\n\nYayın/güncelleme tarihi, biliniyorsa\n\nBu araştırmadaki iddiayı ne kadar doğrudan desteklediği\n\nGüvenilirlik puanı: 0–100\n\nPuan gerekçesi\n\nBlog, forum veya ikincil kaynak varsa bunları birincil kaynaklardan ayrı değerlendir; doğrulanmamış iddiaları kesin bilgi olarak kullanma.\n\nKaynaklar arasında çelişki varsa bunu açıkça belirt.\n\nSonuçta uygulanabilir, düşük riskli bir kaynak puanlama önerisi çıkar:\n\notorite\n\ngüncellik\n\niddiaya doğrudan destek\n\nbağımsız doğrulama\n\ngizlilik ve yerel veri güvenliği\n\nAraştırma kaliteni şu ölçütlerle kendin değerlendir:\n\nKaynak çeşitliliği: /20\n\nBirincil kaynak oranı: /20\n\nİddia-kaynak eşleşmesi: /20\n\nGüncellik: /15\n\nÇelişki/eksiklerin belirtilmesi: /15\n\nUygulanabilirlik ve güvenlik: /10\n\nToplam: /100\n\n75’in altındaki bir sonuçta “araştırma yeterli değil” de ve eksik kalan araştırma adımlarını öner.\n\nDosya değiştirme, uygulama kontrolü, dış sisteme yazma, branch oluşturma, merge veya push yapma. Yalnızca araştırma raporu ve gerekirse kullanıcı onayına bağlı bounded geliştirme önerisi üret.",
+    "createdAt" : "2026-09-25T20:12:59Z",
+    "id" : "2B262761-1E67-49F4-A952-A0C05A7EAD3D",
+    "objective" : "https://estafiz.com/franchise/ bu sitenin teknik olarak site yapısını seo sistematiğini ve kodlarını incelemeni istiyorum incele, analiz et ve bana sun.",
     "priority" : 0,
     "runningStepIndexes" : [
 
@@ -528,18 +421,16 @@
     ]
   },
   "semanticMission" : {
-    "confidence" : 0.88,
-    "objective" : "Konu: macOS yerel bir AI ajanında web araştırma sonuçlarının güvenilirliğini değerlendirmek için kaynak puanlama sistemi nasıl tasarlanmalıdır?\n\nKurallar:\n\nEn az 5 farklı kaynak bul.\n\nEn az 3 kaynak birincil kaynak olmalı: Apple, resmi teknik dokümantasyon, akademik yayın veya standart kuruluşu.\n\nHer kaynak için şunları yaz:\n\nBaşlık ve bağlantı\n\nKaynak türü\n\nYayın/güncelleme tarihi, biliniyorsa\n\nBu araştırmadaki iddiayı ne kadar doğrudan desteklediği\n\nGüvenilirlik puanı: 0–100\n\nPuan gerekçesi\n\nBlog, forum veya ikincil kaynak varsa bunları birincil kaynaklardan ayrı değerlendir; doğrulanmamış iddiaları kesin bilgi olarak kullanma.\n\nKaynaklar arasında çelişki varsa bunu açıkça belirt.\n\nSonuçta uygulanabilir, düşük riskli bir kaynak puanlama önerisi çıkar:\n\notorite\n\ngüncellik\n\niddiaya doğrudan destek\n\nbağımsız doğrulama\n\ngizlilik ve yerel veri güvenliği\n\nAraştırma kaliteni şu ölçütlerle kendin değerlendir:\n\nKaynak çeşitliliği: /20\n\nBirincil kaynak oranı: /20\n\nİddia-kaynak eşleşmesi: /20\n\nGüncellik: /15\n\nÇelişki/eksiklerin belirtilmesi: /15\n\nUygulanabilirlik ve güvenlik: /10\n\nToplam: /100\n\n75’in altındaki bir sonuçta “araştırma yeterli değil” de ve eksik kalan araştırma adımlarını öner.\n\nDosya değiştirme, uygulama kontrolü, dış sisteme yazma, branch oluşturma, merge veya push yapma. Yalnızca araştırma raporu ve gerekirse kullanıcı onayına bağlı bounded geliştirme önerisi üret.",
+    "confidence" : 0.9,
+    "objective" : "https://estafiz.com/franchise/ bu sitenin teknik olarak site yapısını seo sistematiğini ve kodlarını incelemeni istiyorum incele, analiz et ve bana sun.",
     "outcomes" : [
       "analyze",
       "explain",
-      "locate",
       "research"
     ],
     "requiredCapabilityIDs" : [
       "context.local",
       "core.reasoning",
-      "files.search",
       "research.web"
     ],
     "requiresUserInput" : false,
@@ -554,27 +445,18 @@
         "title" : "Görev bağlamını hazırla"
       },
       {
-        "capabilityID" : "files.search",
+        "capabilityID" : "research.web",
         "dependsOn" : [
           0
         ],
-        "operation" : "files.search",
-        "purpose" : "Kullanıcının belirttiği yer, dosya türü ve tarih kısıtlarını salt-okunur olarak uygula; yalnız eşleşen dosyaları döndür.",
-        "title" : "Yerel dosyaları bul"
-      },
-      {
-        "capabilityID" : "research.web",
-        "dependsOn" : [
-          1
-        ],
         "operation" : "web.research",
-        "purpose" : "Önceki adımda çözülen gerçek hedef/veriyi kullanarak dış kaynaklardan gerekli bilgiyi araştır.",
-        "title" : "Gerekli dış bilgiyi araştır"
+        "purpose" : "Kullanıcının verdiği public web hedefini GUI veya bilgisayar kontrolü kullanmadan araştırma sağlayıcısıyla oku ve kaynak kanıtı üret.",
+        "title" : "Web hedefini araştır"
       },
       {
         "capabilityID" : "core.reasoning",
         "dependsOn" : [
-          2
+          1
         ],
         "operation" : "content.analyze",
         "purpose" : "Önceki adımların gerçek çıktısını birlikte değerlendir ve sonraki adımın kullanabileceği sonucu üret.",
@@ -582,7 +464,7 @@
       }
     ]
   },
-  "semanticPlannerProvider" : "Deterministic Capability Contract",
+  "semanticPlannerProvider" : "Apple Foundation Models",
   "taskGraph" : [
     {
       "available" : true,
@@ -602,27 +484,11 @@
     },
     {
       "available" : true,
-      "capabilityID" : "files.search",
+      "capabilityID" : "research.web",
       "dependsOn" : [
         0
       ],
       "index" : 1,
-      "operation" : "files.search",
-      "requiresApproval" : false,
-      "resourceIDs" : [
-
-      ],
-      "risk" : "readOnly",
-      "role" : "retrieve",
-      "title" : "Yerel dosyaları bul"
-    },
-    {
-      "available" : true,
-      "capabilityID" : "research.web",
-      "dependsOn" : [
-        1
-      ],
-      "index" : 2,
       "operation" : "web.research",
       "requiresApproval" : false,
       "resourceIDs" : [
@@ -630,15 +496,15 @@
       ],
       "risk" : "external",
       "role" : "retrieve",
-      "title" : "Gerekli dış bilgiyi araştır"
+      "title" : "Web hedefini araştır"
     },
     {
       "available" : true,
       "capabilityID" : "core.reasoning",
       "dependsOn" : [
-        2
+        1
       ],
-      "index" : 3,
+      "index" : 2,
       "operation" : "content.analyze",
       "requiresApproval" : false,
       "resourceIDs" : [
@@ -649,8 +515,8 @@
       "title" : "Toplanan veriyi analiz et"
     }
   ],
-  "traceID" : "5945AC28-8B60-434C-9793-2C7286C58FA4",
-  "userInput" : "Konu: macOS yerel bir AI ajanında web araştırma sonuçlarının güvenilirliğini değerlendirmek için kaynak puanlama sistemi nasıl tasarlanmalıdır?\n\nKurallar:\n\nEn az 5 farklı kaynak bul.\n\nEn az 3 kaynak birincil kaynak olmalı: Apple, resmi teknik dokümantasyon, akademik yayın veya standart kuruluşu.\n\nHer kaynak için şunları yaz:\n\nBaşlık ve bağlantı\n\nKaynak türü\n\nYayın/güncelleme tarihi, biliniyorsa\n\nBu araştırmadaki iddiayı ne kadar doğrudan desteklediği\n\nGüvenilirlik puanı: 0–100\n\nPuan gerekçesi\n\nBlog, forum veya ikincil kaynak varsa bunları birincil kaynaklardan ayrı değerlendir; doğrulanmamış iddiaları kesin bilgi olarak kullanma.\n\nKaynaklar arasında çelişki varsa bunu açıkça belirt.\n\nSonuçta uygulanabilir, düşük riskli bir kaynak puanlama önerisi çıkar:\n\notorite\n\ngüncellik\n\niddiaya doğrudan destek\n\nbağımsız doğrulama\n\ngizlilik ve yerel veri güvenliği\n\nAraştırma kaliteni şu ölçütlerle kendin değerlendir:\n\nKaynak çeşitliliği: /20\n\nBirincil kaynak oranı: /20\n\nİddia-kaynak eşleşmesi: /20\n\nGüncellik: /15\n\nÇelişki/eksiklerin belirtilmesi: /15\n\nUygulanabilirlik ve güvenlik: /10\n\nToplam: /100\n\n75’in altındaki bir sonuçta “araştırma yeterli değil” de ve eksik kalan araştırma adımlarını öner.\n\nDosya değiştirme, uygulama kontrolü, dış sisteme yazma, branch oluşturma, merge veya push yapma. Yalnızca araştırma raporu ve gerekirse kullanıcı onayına bağlı bounded geliştirme önerisi üret.",
+  "traceID" : "F0BF0030-3639-4C24-A266-3F4508B046DB",
+  "userInput" : "https://estafiz.com/franchise/ bu sitenin teknik olarak site yapısını seo sistematiğini ve kodlarını incelemeni istiyorum incele, analiz et ve bana sun.",
   "verificationState" : "passed",
   "verificationSummary" : "Outcome doğrulandı: kullanıcı tarafından istenen public bilgi gerçek web kanıtıyla elde edildi; araç/provider adımlarının kendisi başarı kriteri olarak zorunlu tutulmadı."
 }
