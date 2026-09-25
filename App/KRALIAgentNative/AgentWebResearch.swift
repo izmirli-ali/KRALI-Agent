@@ -60,6 +60,7 @@ actor AgentWebResearchService {
         case google
         case bingHTML
         case duckDuckGo
+        case arxiv
 
         var name: String {
             switch self {
@@ -67,6 +68,7 @@ actor AgentWebResearchService {
             case .google: return "Google HTML"
             case .bingHTML: return "Bing HTML"
             case .duckDuckGo: return "DuckDuckGo HTML"
+            case .arxiv: return "arXiv API"
             }
         }
     }
@@ -367,6 +369,18 @@ actor AgentWebResearchService {
                 URLQueryItem(name: "q", value: query)
             ]
             return components?.url
+
+        case .arxiv:
+            var components = URLComponents(
+                string: "https://export.arxiv.org/api/query"
+            )
+            components?.queryItems = [
+                URLQueryItem(name: "search_query", value: "all:" + query),
+                URLQueryItem(name: "start", value: "0"),
+                URLQueryItem(name: "max_results", value: "8"),
+                URLQueryItem(name: "sortBy", value: "relevance")
+            ]
+            return components?.url
         }
     }
 
@@ -433,6 +447,9 @@ actor AgentWebResearchService {
                 ],
                 limit: limit
             )
+
+        case .arxiv:
+            raw = parseArxivAtom(payload, limit: limit)
         }
 
         return raw.compactMap { result in
@@ -525,6 +542,33 @@ actor AgentWebResearchService {
             )
         }
 
+        return results
+    }
+
+    private func parseArxivAtom(
+        _ xml: String,
+        limit: Int
+    ) -> [WebResearchResult] {
+        let entries = regexMatches(
+            pattern: #"<entry>(.*?)</entry>"#,
+            in: xml
+        )
+        var results: [WebResearchResult] = []
+
+        for entry in entries.prefix(limit) {
+            guard let range = Range(entry.range(at: 1), in: xml) else { continue }
+            let block = String(xml[range])
+            guard let title = firstTagValue("title", in: block),
+                  let id = firstTagValue("id", in: block),
+                  let url = URL(string: id), isUsefulExternalURL(url)
+            else { continue }
+            results.append(WebResearchResult(
+                title: cleanHTML(title).replacingOccurrences(of: "\\n", with: " "),
+                url: url,
+                domain: url.host ?? "arxiv.org",
+                snippet: firstTagValue("summary", in: block).map(cleanHTML)
+            ))
+        }
         return results
     }
 
