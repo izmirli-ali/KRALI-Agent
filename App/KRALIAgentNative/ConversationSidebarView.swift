@@ -338,14 +338,18 @@ struct ConversationSidebarView: View {
                     .buttonStyle(.borderedProminent)
                     .controlSize(.mini)
                     .disabled(
-                        !suggestion
-                            .isExecutableCapabilityGap
+                        !engine
+                            .canDevelopSuggestion(
+                                suggestion
+                            )
                     )
                     .help(
-                        suggestion
-                            .isExecutableCapabilityGap
+                        engine
+                            .canDevelopSuggestion(
+                                suggestion
+                            )
                         ? "Kontrollü candidate geliştirmesini başlat"
-                        : "Bu öneri tipi için bounded task compiler henüz etkin değil"
+                        : "Bu öneri mevcut bounded compiler güvenlik scope'una uygun değil"
                     )
 
                     Button("Şimdilik") {
@@ -359,10 +363,12 @@ struct ConversationSidebarView: View {
                     .controlSize(.mini)
                 }
 
-                if !suggestion
-                    .isExecutableCapabilityGap {
+                if !engine
+                    .canDevelopSuggestion(
+                        suggestion
+                    ) {
                     Label(
-                        "Geliştirme kapsamı derleyicisi bekliyor",
+                        "Bu öneri güvenli bounded scope'a derlenemiyor",
                         systemImage:
                             "lock.shield"
                     )
