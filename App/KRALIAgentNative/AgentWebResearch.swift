@@ -61,6 +61,7 @@ actor AgentWebResearchService {
         case bingHTML
         case duckDuckGo
         case arxiv
+        case crossref
 
         var name: String {
             switch self {
@@ -69,6 +70,7 @@ actor AgentWebResearchService {
             case .bingHTML: return "Bing HTML"
             case .duckDuckGo: return "DuckDuckGo HTML"
             case .arxiv: return "arXiv API"
+            case .crossref: return "Crossref DOI API"
             }
         }
     }
@@ -381,6 +383,17 @@ actor AgentWebResearchService {
                 URLQueryItem(name: "sortBy", value: "relevance")
             ]
             return components?.url
+
+        case .crossref:
+            var components = URLComponents(
+                string: "https://api.crossref.org/works"
+            )
+            components?.queryItems = [
+                URLQueryItem(name: "query", value: query),
+                URLQueryItem(name: "rows", value: "8"),
+                URLQueryItem(name: "select", value: "title,URL,DOI,abstract,published")
+            ]
+            return components?.url
         }
     }
 
@@ -450,6 +463,9 @@ actor AgentWebResearchService {
 
         case .arxiv:
             raw = parseArxivAtom(payload, limit: limit)
+
+        case .crossref:
+            raw = parseCrossref(payload, limit: limit)
         }
 
         return raw.compactMap { result in
@@ -570,6 +586,35 @@ actor AgentWebResearchService {
             ))
         }
         return results
+    }
+
+    private func parseCrossref(
+        _ payload: String,
+        limit: Int
+    ) -> [WebResearchResult] {
+        guard
+            let data = payload.data(using: .utf8),
+            let root = try? JSONSerialization.jsonObject(with: data) as? [String: Any],
+            let message = root["message"] as? [String: Any],
+            let items = message["items"] as? [[String: Any]]
+        else { return [] }
+
+        return items.prefix(limit).compactMap { item in
+            guard
+                let titles = item["title"] as? [String],
+                let title = titles.first,
+                let rawURL = (item["URL"] as? String) ??
+                    (item["DOI"] as? String).map { "https://doi.org/" + $0 },
+                let url = URL(string: rawURL),
+                isUsefulExternalURL(url)
+            else { return nil }
+            return WebResearchResult(
+                title: title,
+                url: url,
+                domain: url.host ?? "doi.org",
+                snippet: (item["abstract"] as? String).map(cleanHTML)
+            )
+        }
     }
 
     private func firstTagValue(
