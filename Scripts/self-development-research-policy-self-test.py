@@ -26,6 +26,7 @@ assert "parseOpenReview" in web_research
 assert 'domain: "openreview.net"' in web_research
 assert "AgentDevelopmentResearchEvidenceAudit" in quality
 assert "freshnessScore" in quality
+assert "citationCount" in quality
 assert "potentialContradictionCount" in quality
 assert "complete impact map" in quality
 assert "behavioralBenchmark.isEmpty" in quality

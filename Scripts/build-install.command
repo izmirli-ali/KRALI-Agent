@@ -17,6 +17,7 @@ TARGET="/Applications/KRALI Agent.app"
 STAMP="$(date +%Y-%m-%d_%H-%M-%S)"
 BACKUP="$ROOT/Backups/KRALI-Agent_$STAMP.app"
 PROCESS_NAME="KRALIAgentNative"
+BACKUP_RETENTION_COUNT=2
 
 echo ""
 echo "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
@@ -136,6 +137,14 @@ echo "3/6  Mevcut sürüm yedekleniyor..."
 if [ -d "$TARGET" ]; then
     ditto "$TARGET" "$BACKUP"
     echo "✓ Yedek: $BACKUP"
+
+    # Keep a small, known rollback window. The rollback script selects the
+    # newest archive, so pruning only older bundles preserves its contract.
+    old_backups=("${(@f)$(find "$ROOT/Backups" -maxdepth 1 -type d -name 'KRALI-Agent_*.app' -print | sort | head -n -"$BACKUP_RETENTION_COUNT")}")
+    if [ "${#old_backups[@]}" -gt 0 ]; then
+        rm -rf -- "${old_backups[@]}"
+        echo "✓ Eski yedekler temizlendi; son $BACKUP_RETENTION_COUNT geri dönüş paketi korundu."
+    fi
 fi
 
 echo "4/6  Çalışan KRALİ kapatılıyor..."

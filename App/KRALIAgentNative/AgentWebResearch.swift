@@ -9,6 +9,7 @@ struct WebResearchResult: Identifiable, Hashable {
     let snippet: String?
     let evidenceEligible: Bool
     let publishedAt: Date?
+    let citationCount: Int?
 
     init(
         title: String,
@@ -16,7 +17,8 @@ struct WebResearchResult: Identifiable, Hashable {
         domain: String,
         snippet: String?,
         evidenceEligible: Bool = true,
-        publishedAt: Date? = nil
+        publishedAt: Date? = nil,
+        citationCount: Int? = nil
     ) {
         self.title = title
         self.url = url
@@ -24,6 +26,7 @@ struct WebResearchResult: Identifiable, Hashable {
         self.snippet = snippet
         self.evidenceEligible = evidenceEligible
         self.publishedAt = publishedAt
+        self.citationCount = citationCount
     }
 }
 
@@ -637,7 +640,8 @@ actor AgentWebResearchService {
                 url: url,
                 domain: url.host ?? "doi.org",
                 snippet: (item["abstract"] as? String).map(cleanHTML),
-                publishedAt: crossrefPublishedDate(item["published"])
+                publishedAt: crossrefPublishedDate(item["published"]),
+                citationCount: item["is-referenced-by-count"] as? Int
             )
         }
     }

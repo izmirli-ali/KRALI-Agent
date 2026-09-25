@@ -65,6 +65,7 @@ struct AgentDevelopmentResearchSourceAssessment: Codable, Hashable {
     let qualifiesForTechnicalCoverage: Bool
     let publishedAt: Date?
     let freshnessScore: Int?
+    let citationCount: Int?
 
     init(
         facetID: String,
@@ -78,7 +79,8 @@ struct AgentDevelopmentResearchSourceAssessment: Codable, Hashable {
         qualityScore: Int,
         qualifiesForTechnicalCoverage: Bool,
         publishedAt: Date? = nil,
-        freshnessScore: Int? = nil
+        freshnessScore: Int? = nil,
+        citationCount: Int? = nil
     ) {
         self.facetID = facetID
         self.sourceURL = sourceURL
@@ -92,6 +94,7 @@ struct AgentDevelopmentResearchSourceAssessment: Codable, Hashable {
         self.qualifiesForTechnicalCoverage = qualifiesForTechnicalCoverage
         self.publishedAt = publishedAt
         self.freshnessScore = freshnessScore
+        self.citationCount = citationCount
     }
 }
 
@@ -258,7 +261,7 @@ struct AgentDevelopmentResearchSynthesis: Codable, Hashable {
             by: \.kind
         )
         let scorecard =
-            "Sources: \(uniqueSources.count) • Independent origins: \(independentOrigins.count) • Preferred source kinds: \(sourceKinds.keys.count) • Tier A/B: \(uniqueSources.filter { $0.tier == .a || $0.tier == .b }.count) • Dated: \(uniqueSources.filter { $0.publishedAt != nil }.count) • Freshness: \(freshnessAverage(uniqueSources))/100"
+            "Sources: \(uniqueSources.count) • Independent origins: \(independentOrigins.count) • Preferred source kinds: \(sourceKinds.keys.count) • Tier A/B: \(uniqueSources.filter { $0.tier == .a || $0.tier == .b }.count) • Dated: \(uniqueSources.filter { $0.publishedAt != nil }.count) • Freshness: \(freshnessAverage(uniqueSources))/100 • Known citations: \(uniqueSources.compactMap(\.citationCount).reduce(0, +))"
         let audit = AgentDevelopmentResearchEvidenceAudit.analyze(
             sources: Array(uniqueSources),
             evidence: evidence
@@ -467,10 +470,12 @@ struct AgentDevelopmentResearchSourceClassifier {
         }
 
         let freshnessScore = freshnessScore(for: result.publishedAt)
+        let citationBoost = min(12, Int(log10(Double(max(1, result.citationCount ?? 0))) * 4))
         let qualityScore =
             baseScore +
             Int((relevance * 25).rounded()) +
-            (result.publishedAt == nil ? 0 : (freshnessScore - 50) / 5)
+            (result.publishedAt == nil ? 0 : (freshnessScore - 50) / 5) +
+            citationBoost
 
         let origin = canonicalOrigin(domain)
 
@@ -488,7 +493,8 @@ struct AgentDevelopmentResearchSourceClassifier {
                 (tier == .a || tier == .b) &&
                 relevance >= 0.30,
             publishedAt: result.publishedAt,
-            freshnessScore: freshnessScore
+            freshnessScore: freshnessScore,
+            citationCount: result.citationCount
         )
     }
 
