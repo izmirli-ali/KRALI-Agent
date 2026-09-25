@@ -33,7 +33,8 @@ enum AgentLearningJobState: String, Codable, Hashable, Sendable {
 }
 
 struct AgentLearningEvidenceSnapshot: Codable, Hashable, Sendable {
-    let sourceGoal: String
+    // Legacy decode-only field. New queue writes scrub raw source text.
+    let sourceGoal: String?
     let capturedAt: Date
     let runtimeEvidence: [String]
     let resolverTraceJSON: String?
@@ -49,10 +50,13 @@ struct AgentLearningJob: Identifiable, Codable, Hashable, Sendable {
     let researchGoal: String
     let developerBrief: String
     let candidateCapabilityIDs: [String]
-    var sourceGoals: [String]
+    // Legacy decode-only field. New queue writes persist no raw goals.
+    var sourceGoals: [String]? = nil
     var evidenceCount: Int
     var evidenceSnapshots:
         [AgentLearningEvidenceSnapshot]? = nil
+    var userApproved: Bool? = nil
+    var sourceRevision: String? = nil
     let createdAt: Date
     var updatedAt: Date
     var state: AgentLearningJobState
@@ -71,10 +75,8 @@ struct AgentLearningJobBrief: Codable, Sendable {
     let jobID: UUID
     let fingerprint: String
     let gap: CapabilityGapResolution
-    let sourceGoals: [String]
     let evidenceCount: Int
-    let evidenceSnapshots:
-        [AgentLearningEvidenceSnapshot]?
+    let sourceRevision: String
     let createdAt: Date
 }
 
@@ -142,7 +144,18 @@ struct AgentLearningQueueStore {
             ]
             encoder.dateEncodingStrategy = .iso8601
 
-            let data = try encoder.encode(jobs)
+            let sanitizedJobs =
+                jobs.map { job in
+                    var copy = job
+                    copy.sourceGoals = nil
+                    copy.evidenceSnapshots = nil
+                    return copy
+                }
+
+            let data =
+                try encoder.encode(
+                    sanitizedJobs
+                )
             try data.write(
                 to: queueURL,
                 options: .atomic
@@ -154,19 +167,24 @@ struct AgentLearningQueueStore {
 
     func enqueue(
         gaps: [CapabilityGapResolution],
-        sourceGoal: String,
+        sourceRevision: String,
+        userApproved: Bool,
         into existing: [AgentLearningJob],
         persist: Bool = true
     ) -> [AgentLearningJob] {
+        guard
+            let exactRevision =
+                AgentSourceRevisionPolicy
+                    .exactRevision(
+                        sourceRevision
+                    )
+        else {
+            return existing
+        }
+
         var jobs = existing
 
         for gap in gaps {
-            let evidenceSnapshot =
-                captureEvidenceSnapshot(
-                    for: gap,
-                    sourceGoal:
-                        sourceGoal
-                )
             guard !isTransientReason(
                 gap.reason
             ) else {
@@ -190,40 +208,27 @@ struct AgentLearningQueueStore {
                         )
                     }
                 ) {
-                if !jobs[index]
-                    .sourceGoals
-                    .contains(sourceGoal) {
+                jobs[index]
+                    .evidenceCount += 1
+                jobs[index]
+                    .updatedAt = Date()
+                jobs[index]
+                    .sourceGoals = nil
+                jobs[index]
+                    .evidenceSnapshots = nil
+                jobs[index]
+                    .sourceRevision =
+                        exactRevision
+
+                if userApproved {
                     jobs[index]
-                        .sourceGoals
-                        .append(sourceGoal)
-                    jobs[index]
-                        .evidenceCount += 1
+                        .userApproved = true
                 }
 
-                if let evidenceSnapshot {
-                    var snapshots =
-                        jobs[index]
-                            .evidenceSnapshots ??
-                        []
-
-                    if !snapshots.contains(
-                        evidenceSnapshot
-                    ) {
-                        snapshots.append(
-                            evidenceSnapshot
-                        )
-                        jobs[index]
-                            .evidenceSnapshots =
-                            Array(
-                                snapshots
-                                    .suffix(8)
-                            )
-                    }
-                }
-
-                jobs[index].updatedAt = Date()
                 jobs[index].lastStatus =
-                    "Yeni immutable kanıt aynı öğrenme işine eklendi."
+                    userApproved
+                    ? "Kullanıcı onaylı capability önerisi mevcut öğrenme işine bağlandı."
+                    : "Capability önerisi gözlendi; geliştirme onayı yok."
                 continue
             }
 
@@ -245,19 +250,22 @@ struct AgentLearningQueueStore {
                         gap.developerBrief,
                     candidateCapabilityIDs:
                         gap.candidateCapabilityIDs,
-                    sourceGoals:
-                        [sourceGoal],
+                    sourceGoals: nil,
                     evidenceCount: 1,
-                    evidenceSnapshots:
-                        evidenceSnapshot
-                            .map { [$0] },
+                    evidenceSnapshots: nil,
+                    userApproved:
+                        userApproved,
+                    sourceRevision:
+                        exactRevision,
                     createdAt: now,
                     updatedAt: now,
                     state: .queued,
                     branch: nil,
                     worktree: nil,
                     lastStatus:
-                        "Öğrenme kuyruğuna eklendi.",
+                        userApproved
+                        ? "Kullanıcı onaylı geliştirme kuyruğuna eklendi."
+                        : "Onaysız geliştirme işi çalıştırılamaz.",
                     learningPath:
                         gap.learningPath
                 )
@@ -276,7 +284,12 @@ struct AgentLearningQueueStore {
     ) -> AgentLearningJob? {
         jobs
             .filter {
-                $0.state == .queued
+                $0.state == .queued &&
+                $0.userApproved == true &&
+                AgentSourceRevisionPolicy
+                    .exactRevision(
+                        $0.sourceRevision
+                    ) != nil
             }
             .sorted {
                 if $0.evidenceCount !=
@@ -309,6 +322,17 @@ struct AgentLearningQueueStore {
                         isDirectory: false
                     )
 
+            guard
+                job.userApproved == true,
+                let exactRevision =
+                    AgentSourceRevisionPolicy
+                        .exactRevision(
+                            job.sourceRevision
+                        )
+            else {
+                return nil
+            }
+
             let brief =
                 AgentLearningJobBrief(
                     jobID: job.id,
@@ -331,12 +355,10 @@ struct AgentLearningQueueStore {
                             learningPath:
                                 job.learningPath
                         ),
-                    sourceGoals:
-                        job.sourceGoals,
                     evidenceCount:
                         job.evidenceCount,
-                    evidenceSnapshots:
-                        job.evidenceSnapshots,
+                    sourceRevision:
+                        exactRevision,
                     createdAt:
                         job.createdAt
                 )
@@ -538,8 +560,7 @@ struct AgentLearningQueueStore {
         }
 
         return AgentLearningEvidenceSnapshot(
-            sourceGoal:
-                sourceGoal,
+            sourceGoal: nil,
             capturedAt:
                 Date(),
             runtimeEvidence:
