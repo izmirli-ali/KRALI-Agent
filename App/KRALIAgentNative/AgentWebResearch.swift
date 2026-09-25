@@ -75,6 +75,8 @@ actor AgentWebResearchService {
         let result: WebResearchResult
         let score: Int
         let conceptCoverage: Int
+        let sourceKind: AgentResearchSourceKind?
+        let origin: String
     }
 
     private let session: URLSession
@@ -160,7 +162,13 @@ actor AgentWebResearchService {
                         ScoredResult(
                             result: result,
                             score: max(6, evaluation.score),
-                            conceptCoverage: max(1, evaluation.coverage)
+                            conceptCoverage: max(1, evaluation.coverage),
+                            sourceKind: developmentFacet.map {
+                                developmentSourceClassifier
+                                    .assess(result, facet: $0)
+                                    .kind
+                            },
+                            origin: researchOrigin(for: result.domain)
                         )
                     )
                 }
@@ -240,7 +248,9 @@ actor AgentWebResearchService {
 
         let relevant = selectDiverseResults(
             relevantCandidates,
-            limit: safeLimit
+            limit: safeLimit,
+            preferredSourceKinds:
+                developmentFacet?.preferredSourceKinds ?? []
         )
 
         guard !relevant.isEmpty else {
@@ -447,7 +457,13 @@ actor AgentWebResearchService {
             return ScoredResult(
                 result: result,
                 score: evaluation.score,
-                conceptCoverage: evaluation.coverage
+                conceptCoverage: evaluation.coverage,
+                sourceKind: developmentFacet.map {
+                    developmentSourceClassifier
+                        .assess(result, facet: $0)
+                        .kind
+                },
+                origin: researchOrigin(for: result.domain)
             )
         }
     }
@@ -719,49 +735,73 @@ actor AgentWebResearchService {
 
     private func selectDiverseResults(
         _ candidates: [ScoredResult],
-        limit: Int
+        limit: Int,
+        preferredSourceKinds: [AgentResearchSourceKind]
     ) -> [WebResearchResult] {
         var selected: [WebResearchResult] = []
-        var deferred: [ScoredResult] = []
-        var domainCounts: [String: Int] = [:]
+        var remaining = candidates
+        var originCounts: [String: Int] = [:]
+        var selectedKinds = Set<AgentResearchSourceKind>()
+        let preferredKinds = Set(preferredSourceKinds)
 
-        for candidate in candidates {
-            guard selected.count < limit else {
-                break
+        for maximumPerOrigin in [1, 2] {
+            while selected.count < limit {
+                let eligible = remaining.filter {
+                    originCounts[$0.origin, default: 0] < maximumPerOrigin
+                }
+
+                guard let next = eligible.max(by: { left, right in
+                    diversityRank(
+                        left,
+                        selectedKinds: selectedKinds,
+                        preferredKinds: preferredKinds
+                    ) < diversityRank(
+                        right,
+                        selectedKinds: selectedKinds,
+                        preferredKinds: preferredKinds
+                    )
+                }) else {
+                    break
+                }
+
+                selected.append(next.result)
+                originCounts[next.origin, default: 0] += 1
+                if let kind = next.sourceKind {
+                    selectedKinds.insert(kind)
+                }
+                remaining.removeAll { $0.result.id == next.result.id }
             }
-
-            let domain = normalize(
-                candidate.result.domain
-            )
-            let count = domainCounts[domain, default: 0]
-
-            if count == 0 {
-                selected.append(candidate.result)
-                domainCounts[domain] = 1
-            } else {
-                deferred.append(candidate)
-            }
-        }
-
-        for candidate in deferred {
-            guard selected.count < limit else {
-                break
-            }
-
-            let domain = normalize(
-                candidate.result.domain
-            )
-            let count = domainCounts[domain, default: 0]
-
-            guard count < 2 else {
-                continue
-            }
-
-            selected.append(candidate.result)
-            domainCounts[domain] = count + 1
         }
 
         return selected
+    }
+
+    private func diversityRank(
+        _ candidate: ScoredResult,
+        selectedKinds: Set<AgentResearchSourceKind>,
+        preferredKinds: Set<AgentResearchSourceKind>
+    ) -> Int {
+        var rank = candidate.score * 10
+        if let kind = candidate.sourceKind,
+           preferredKinds.contains(kind) {
+            rank += 30
+            if !selectedKinds.contains(kind) {
+                rank += 80
+            }
+        }
+        return rank
+    }
+
+    private func researchOrigin(for domain: String) -> String {
+        let parts = normalize(domain)
+            .split(separator: ".")
+            .map(String.init)
+
+        guard parts.count >= 2 else {
+            return normalize(domain)
+        }
+
+        return parts.suffix(2).joined(separator: ".")
     }
 
     private func isJunkResult(
