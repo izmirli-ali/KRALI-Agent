@@ -140,8 +140,11 @@ if [ -d "$TARGET" ]; then
 
     # Keep a small, known rollback window. The rollback script selects the
     # newest archive, so pruning only older bundles preserves its contract.
-    old_backups=("${(@f)$(find "$ROOT/Backups" -maxdepth 1 -type d -name 'KRALI-Agent_*.app' -print | sort | head -n -"$BACKUP_RETENTION_COUNT")}")
-    if [ "${#old_backups[@]}" -gt 0 ]; then
+    all_backups=("${(@f)$(find "$ROOT/Backups" -maxdepth 1 -type d -name 'KRALI-Agent_*.app' -print | sort)}")
+    old_backup_count=$(( ${#all_backups[@]} - BACKUP_RETENTION_COUNT ))
+    old_backups=()
+    if [ "$old_backup_count" -gt 0 ]; then
+        old_backups=("${all_backups[@]:0:$old_backup_count}")
         rm -rf -- "${old_backups[@]}"
         echo "✓ Eski yedekler temizlendi; son $BACKUP_RETENTION_COUNT geri dönüş paketi korundu."
     fi
