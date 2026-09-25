@@ -45,4 +45,10 @@ assert "qualifiesForTechnicalCoverage" in quality
 assert "mutationStarted" in quality
 assert "evidenceIDs" in quality
 assert "repositoryEvidenceIDs" in quality
+assert "DevelopmentResearchGeneratedApproach.self" in intel
+assert "DevelopmentResearchGeneratedSelection.self" in intel
+assert "developmentResearchSynthesisFailureReason" in intel
+assert "synthesisFailure=" in engine
+assert "Staged Evidence-Bound Development Research" in engine
 print("development_research_quality_policy_ok")
+print("staged_research_synthesis_policy_ok")
