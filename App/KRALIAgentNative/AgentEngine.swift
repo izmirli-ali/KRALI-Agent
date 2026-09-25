@@ -68,6 +68,8 @@ final class AgentEngine: ObservableObject {
     @Published var selectedCapabilities: [AgentCapability] = []
     @Published var capabilityLearningPlans: [CapabilityLearningPlan] = []
     @Published var capabilityLearningBacklog: [CapabilityLearningTask] = []
+    @Published var developmentSuggestions:
+        [AgentDevelopmentSuggestion] = []
     @Published var webResearchResults: [WebResearchResult] = []
     @Published var webResearchEvidence: [WebSourceEvidence] = []
     @Published var webResearchStatus = "Henüz web araştırması yapılmadı."
@@ -136,6 +138,8 @@ final class AgentEngine: ObservableObject {
     private let developerToolSafetyPolicy =
         AgentDeveloperToolSafetyPolicy()
     private let learningQueueStore = AgentLearningQueueStore()
+    private let developmentSuggestionStore =
+        AgentDevelopmentSuggestionStore()
     private let debugRecoveryCenter = AgentDebugRecoveryCenter()
     private let localIntelligence = AgentLocalIntelligence()
     private let subscriptionIntelligence = AgentSubscriptionIntelligence()
@@ -221,6 +225,13 @@ final class AgentEngine: ObservableObject {
             : trimmed
     }
 
+    private var currentExactSourceRevision: String? {
+        AgentSourceRevisionPolicy
+            .exactRevision(
+                currentAppSourceRevision
+            )
+    }
+
     /// The active runtime capability surface after execution-profile policy.
     /// Paused computer-control capabilities are excluded from planning,
     /// normalization, fallback selection, execution and gap generation.
@@ -293,6 +304,10 @@ final class AgentEngine: ObservableObject {
                     $0.capabilityID
                 )
             }
+
+        developmentSuggestions =
+            developmentSuggestionStore
+                .load()
 
         inspectorState.mentorTraceReady =
             fileManager.fileExists(
