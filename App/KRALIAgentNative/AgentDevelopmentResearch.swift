@@ -284,8 +284,15 @@ struct AgentDevelopmentResearchSourceClassifier {
             tier = .a
         } else if domain == "github.com" ||
                     domain.hasSuffix(".github.com") {
-            kind = .originalRepository
-            tier = .a
+            if isOriginalGitHubRepository(
+                result.url
+            ) {
+                kind = .originalRepository
+                tier = .a
+            } else {
+                kind = .secondarySummary
+                tier = .c
+            }
         } else if isOfficialDocumentationHost(domain) {
             kind = .officialDocumentation
             tier = .a
@@ -308,6 +315,15 @@ struct AgentDevelopmentResearchSourceClassifier {
         } else if relevance < 0.30 &&
                     tier == .a {
             tier = .c
+        }
+
+        if requiresAgentContext(
+            facet
+        ) &&
+           !hasAgentContext(
+               combined
+           ) {
+            tier = .d
         }
 
         let baseScore: Int
@@ -338,6 +354,83 @@ struct AgentDevelopmentResearchSourceClassifier {
                 (tier == .a || tier == .b) &&
                 relevance >= 0.30
         )
+    }
+
+    private func isOriginalGitHubRepository(
+        _ url: URL
+    ) -> Bool {
+        let parts =
+            url.pathComponents
+                .filter {
+                    $0 != "/"
+                }
+
+        guard parts.count >= 2 else {
+            return false
+        }
+
+        let reserved = Set([
+            "topics",
+            "search",
+            "collections",
+            "marketplace",
+            "orgs",
+            "settings",
+            "features"
+        ])
+
+        return !reserved.contains(
+            parts[0].lowercased()
+        )
+    }
+
+    private func requiresAgentContext(
+        _ facet: AgentDevelopmentResearchFacet
+    ) -> Bool {
+        let text =
+            normalize(
+                facet.label + " " +
+                facet.topics
+                    .joined(separator: " ")
+            )
+
+        let ambiguousTechnicalTerms = [
+            "tool",
+            "memory",
+            "reflection",
+            "replay",
+            "skill",
+            "evaluation",
+            "debug",
+            "decomposition",
+            "self-modification",
+            "self improving",
+            "self-improving"
+        ]
+
+        return ambiguousTechnicalTerms.contains {
+            text.contains($0)
+        }
+    }
+
+    private func hasAgentContext(
+        _ combined: String
+    ) -> Bool {
+        let anchors = [
+            "agent",
+            "agentic",
+            "llm",
+            "large language model",
+            "language model",
+            "autonomous ai",
+            "artificial intelligence",
+            "multi-agent",
+            "multi agent"
+        ]
+
+        return anchors.contains {
+            combined.contains($0)
+        }
     }
 
     private func isPaperHost(

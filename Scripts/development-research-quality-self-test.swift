@@ -141,6 +141,84 @@ struct DevelopmentResearchQualitySelfTest {
             "relevant paper is Tier A"
         )
 
+        guard let toolFacet =
+            plan.facets.first(
+                where: {
+                    $0.label
+                        .lowercased()
+                        .contains("tool learning")
+                }
+            )
+        else {
+            fputs("FAIL: tool learning facet missing\n", stderr)
+            exit(1)
+        }
+
+        let toolBand = WebResearchResult(
+            title:
+                "TOOL - Schism (Official Video)",
+            url: URL(
+                string:
+                    "https://www.youtube.com/watch?v=example"
+            )!,
+            domain:
+                "www.youtube.com",
+            snippet:
+                "Official music video from the rock band Tool."
+        )
+
+        let toolBandAssessment =
+            classifier.assess(
+                toolBand,
+                facet: toolFacet
+            )
+
+        check(
+            toolBandAssessment.tier == .d &&
+            !toolBandAssessment
+                .qualifiesForTechnicalCoverage,
+            "literal Tool music result is rejected"
+        )
+
+        guard let reflectionFacet =
+            plan.facets.first(
+                where: {
+                    $0.label
+                        .lowercased()
+                        .contains("reflection")
+                }
+            )
+        else {
+            fputs("FAIL: reflection facet missing\n", stderr)
+            exit(1)
+        }
+
+        let githubTopics = WebResearchResult(
+            title:
+                "reflection-agent · GitHub Topics",
+            url: URL(
+                string:
+                    "https://github.com/topics/reflection-agent"
+            )!,
+            domain:
+                "github.com",
+            snippet:
+                "Repositories and examples tagged reflection-agent for LLM agents."
+        )
+
+        let githubTopicsAssessment =
+            classifier.assess(
+                githubTopics,
+                facet: reflectionFacet
+            )
+
+        check(
+            githubTopicsAssessment.tier != .a &&
+            githubTopicsAssessment.kind !=
+                .originalRepository,
+            "GitHub Topics is not an original repository"
+        )
+
         let firstFive =
             Array(plan.facets.prefix(5))
 
@@ -437,6 +515,7 @@ struct DevelopmentResearchQualitySelfTest {
         print("development_research_quality_self_test_ok")
         print("facet_plan=PASS")
         print("source_quality=PASS")
+        print("lexical_false_positives=BLOCKED")
         print("evidence_contract=PASS")
         print("computer_control=BLOCKED")
     }

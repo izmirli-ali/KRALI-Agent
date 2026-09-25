@@ -1418,6 +1418,12 @@ final class AgentEngine: ObservableObject {
                             .prohibitedCapabilityIDs
                 )
 
+        let synthesisFailure =
+            synthesis == nil
+            ? await localIntelligence
+                .developmentResearchSynthesisFailureReason()
+            : nil
+
         let executedCapabilities:
             Set<String> = [
                 "core.reasoning",
@@ -1523,7 +1529,7 @@ final class AgentEngine: ObservableObject {
             Mutation Started: NO
 
             N. Recommended Next Step
-            \(qualityVerification.fallback ?? "Collect stronger Tier A/B page-derived evidence for uncovered facets.")
+            \(synthesisFailure ?? qualityVerification.fallback ?? "Collect stronger Tier A/B page-derived evidence for uncovered facets.")
             """
 
         let reply =
@@ -1549,7 +1555,16 @@ final class AgentEngine: ObservableObject {
                 evidenceRecords.count
             ) +
             " • verification=" +
-            verification.state.rawValue
+            verification.state.rawValue +
+            (
+                synthesisFailure == nil
+                ? ""
+                : " • synthesisFailure=" +
+                    String(
+                        synthesisFailure!
+                            .prefix(500)
+                    )
+            )
 
         currentAlternatives =
             synthesis?
@@ -1563,8 +1578,19 @@ final class AgentEngine: ObservableObject {
 
         intelligenceProviderStatus =
             synthesis == nil
-            ? "Structured self-development research synthesis unavailable"
-            : "Apple Foundation Models / Evidence-Bound Development Research"
+            ? (
+                "Staged development research synthesis failed" +
+                (
+                    synthesisFailure == nil
+                    ? ""
+                    : ": " +
+                        String(
+                            synthesisFailure!
+                                .prefix(600)
+                        )
+                )
+            )
+            : "Apple Foundation Models / Staged Evidence-Bound Development Research"
 
         activeRoute = [
             "Core",
@@ -1592,8 +1618,16 @@ final class AgentEngine: ObservableObject {
                 verification,
             intelligenceProvider:
                 synthesis == nil
-                ? nil
-                : "Apple Foundation Models / Evidence-Bound Development Research",
+                ? (
+                    synthesisFailure == nil
+                    ? "Apple Foundation Models / Staged Research Synthesis (failed)"
+                    : "Apple Foundation Models / Staged Research Synthesis (failed): " +
+                        String(
+                            synthesisFailure!
+                                .prefix(500)
+                        )
+                )
+                : "Apple Foundation Models / Staged Evidence-Bound Development Research",
             finalResponse:
                 reply
         )
@@ -1617,6 +1651,15 @@ final class AgentEngine: ObservableObject {
             ) +
             " • verification=" +
             verification.state.rawValue +
+            (
+                synthesisFailure == nil
+                ? ""
+                : " • synthesisFailure=" +
+                    String(
+                        synthesisFailure!
+                            .prefix(240)
+                    )
+            ) +
             " • mutation=no"
         )
 
