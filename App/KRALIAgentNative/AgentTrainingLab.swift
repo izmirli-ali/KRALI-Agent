@@ -3868,11 +3868,18 @@ struct AgentTrainingLab {
                     "Generic browser.control provider geliştir."
             )
 
+        let sourceRevision =
+            String(
+                repeating: "a",
+                count: 40
+            )
+
         var jobs =
             store.enqueue(
                 gaps: [desktopGap],
-                sourceGoal:
-                    "Notlar uygulamasını aç.",
+                sourceRevision:
+                    sourceRevision,
+                userApproved: true,
                 into: [],
                 persist: false
             )
@@ -3880,8 +3887,9 @@ struct AgentTrainingLab {
         jobs =
             store.enqueue(
                 gaps: [desktopGap],
-                sourceGoal:
-                    "Hesap Makinesi uygulamasını aç.",
+                sourceRevision:
+                    sourceRevision,
+                userApproved: true,
                 into: jobs,
                 persist: false
             )
@@ -3889,8 +3897,9 @@ struct AgentTrainingLab {
         jobs =
             store.enqueue(
                 gaps: [browserGap],
-                sourceGoal:
-                    "Safari ile example.com adresine git.",
+                sourceRevision:
+                    sourceRevision,
+                userApproved: false,
                 into: jobs,
                 persist: false
             )
@@ -3906,13 +3915,23 @@ struct AgentTrainingLab {
                 from: jobs
             )
 
+        let browserJob =
+            jobs.first {
+                $0.capabilityID ==
+                    "browser.control"
+            }
+
         let passed =
             jobs.count == 2 &&
             desktopJobs.count == 1 &&
             desktopJobs.first?
                 .evidenceCount == 2 &&
             desktopJobs.first?
-                .sourceGoals.count == 2 &&
+                .sourceGoals == nil &&
+            desktopJobs.first?
+                .userApproved == true &&
+            browserJob?
+                .userApproved == false &&
             next?.capabilityID ==
                 "desktop.app"
 
@@ -3920,7 +3939,7 @@ struct AgentTrainingLab {
             scenarioID:
                 "learning-queue-deduplication",
             title:
-                "Aynı kök öğrenme hatasını birleştir, farklı capability'yi sıraya al",
+                "Aynı onaylı geliştirme hatasını birleştir, onaysız capability'yi çalıştırma",
             tier: .core,
             prompt:
                 "Arka arkaya bağımsız görevlerden aynı desktop.app hatası ve ayrı browser.control gap'i üret.",

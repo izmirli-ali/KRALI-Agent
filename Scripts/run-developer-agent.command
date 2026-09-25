@@ -1225,19 +1225,30 @@ if ! git diff --quiet || ! git diff --cached --quiet; then
     exit 12
 fi
 
-write_status "preparing|Repo ve worktree hazırlanıyor"
+write_status "preparing|Repo ve exact source revision worktree hazırlanıyor"
 
-if ! git fetch origin main >>"$LOG" 2>&1; then
-    write_status "failed|git fetch başarısız"
+SOURCE_REVISION="${KRALI_SOURCE_REVISION:-}"
+
+if ! [[ "$SOURCE_REVISION" =~ '^[0-9a-f]{40}$' ]]; then
+    write_status "blocked|Exact source revision gerekli; main/develop/HEAD fallback kullanılmadı"
+    echo "❌ Developer Agent exact source revision olmadan başlatılmadı." | tee -a "$LOG"
     exit 13
 fi
 
-if ! git pull --ff-only >>"$LOG" 2>&1; then
-    write_status "failed|git pull başarısız"
+# Fetch remote objects without selecting a branch as the candidate base.
+# The immutable SOURCE_REVISION remains the only allowed worktree base.
+if ! git fetch --no-tags origin >>"$LOG" 2>&1; then
+    write_status "failed|Remote commit nesneleri alınamadı"
     exit 14
 fi
 
-write_status "checking|Training Lab, Live Eval ve mentor trace karşılaştırılıyor"
+if ! git cat-file -e "$SOURCE_REVISION^{commit}" 2>/dev/null; then
+    write_status "blocked|Exact source revision repository içinde çözülemedi"
+    echo "❌ Source revision çözülemedi: $SOURCE_REVISION" | tee -a "$LOG"
+    exit 15
+fi
+
+write_status "checking|Exact source revision doğrulandı; diagnostic'ler karşılaştırılıyor"
 
 DIAGNOSTIC_DECISION="$("$NODE_BIN" - "$ROOT" "$LOCAL_MENTOR_DIR" <<'NODE'
 const fs = require("fs");
@@ -1329,9 +1340,9 @@ if [ "$DIAGNOSTIC_DECISION" = "green" ]; then
     exit 0
 fi
 
-if ! git worktree add -b "$BRANCH" "$WORKTREE" origin/main >>"$LOG" 2>&1; then
-    write_status "failed|worktree oluşturulamadı"
-    exit 15
+if ! git worktree add -b "$BRANCH" "$WORKTREE" "$SOURCE_REVISION" >>"$LOG" 2>&1; then
+    write_status "failed|Exact source revision üzerinden worktree oluşturulamadı"
+    exit 16
 fi
 
 PROMPT_FILE="$WORKTREE/.krali-developer-agent-prompt.txt"
