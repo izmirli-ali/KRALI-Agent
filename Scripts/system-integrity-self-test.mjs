@@ -17,6 +17,7 @@ const compiler = read("App/KRALIAgentNative/AgentBoundedDevelopmentTaskCompiler.
 const missionNormalizer = read("App/KRALIAgentNative/AgentMissionNormalizer.swift");
 const sourceReader = read("App/KRALIAgentNative/AgentWebSourceReader.swift");
 const executionProfile = read("App/KRALIAgentNative/AgentExecutionProfile.swift");
+const suggestionStore = read("App/KRALIAgentNative/AgentDevelopmentSuggestionStore.swift");
 const perception = read("App/KRALIAgentNative/AgentScreenPerception.swift");
 const workflow = read(".github/workflows/krali-ci.yml");
 const marketingVersions = [...project.matchAll(/MARKETING_VERSION = ([^;]+);/g)].map((match) => match[1]);
@@ -80,6 +81,13 @@ ok(
 ok(
   engine.includes("Retired local automation blocked in conversation research core"),
   "Retired local automation must also be blocked on direct intent execution."
+);
+
+ok(
+  engine.includes("prunePausedCapabilitySuggestions") &&
+    suggestionStore.includes("func prunePausedCapabilitySuggestions") &&
+    suggestionStore.includes("profile.pausedCapabilityIDs"),
+  "Persisted suggestions for retired automation must be removed from the development queue."
 );
 
 ok(
