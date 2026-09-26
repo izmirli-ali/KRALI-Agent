@@ -337,7 +337,7 @@ struct AgentDevelopmentSuggestionStore {
             let text = (suggestion.reason + " " + suggestion.expectedBenefit)
                 .folding(options: [.caseInsensitive, .diacriticInsensitive], locale: Locale(identifier: "tr_TR"))
                 .lowercased()
-            return !text.contains("yeterli kanit bulunmamaktadir") &&
+            return !text.contains("yeterli kanıt bulunmamaktadır") &&
                 !text.contains("evidence-bound approach coverage 1/5")
         }
     }
