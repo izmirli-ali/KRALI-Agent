@@ -29,9 +29,9 @@ ok(
 
 ok(
   /if\s+suggestion\.source\s*==\s*\.capabilityGap/.test(engine) &&
-  /guard\s+suggestion\.source\s*==\s*\.research\s+else/.test(engine) &&
+  /guard\s+suggestion\.source\s*==\s*\.research\s*\|\|\s*suggestion\.source\s*==\s*\.usability/.test(engine) &&
   engine.includes("boundedDevelopmentTaskCompiler"),
-  "approval path supports capability gaps plus bounded research suggestions only"
+  "approval path supports bounded research and UI suggestions"
 );
 
 ok(
@@ -60,8 +60,10 @@ ok(
 
 ok(
   sidebar.includes("suggestionLineageKey") &&
+  sidebar.includes("lineageKeys") &&
+  sidebar.includes(".sorted()") &&
   sidebar.includes('separatedBy: "|retry|"'),
-  "sidebar keeps retry history auditable without duplicating the active card"
+  "sidebar keeps retry history auditable and card ordering stable"
 );
 
 ok(
@@ -105,7 +107,17 @@ ok(
   "research suggestion persistence remains compact"
 );
 
+const research = read("App/KRALIAgentNative/AgentDevelopmentResearch.swift");
+ok(
+  research.includes("AgentDevelopmentResearchClaimGraph") &&
+  research.includes("AgentDevelopmentResearchHistoryStore") &&
+  research.includes("dependencyEdges") &&
+  store.includes("replayChecks"),
+  "research claims, local history, dependency checks, and regression replay are explicit"
+);
+
 console.log("development_suggestions_ui_self_test_ok");
 console.log("research_to_suggestion=bounded_after_approval");
 console.log("candidate_progress=90");
 console.log("release_progress=100");
+console.log("stable_cards_and_replay_checks=PASS");

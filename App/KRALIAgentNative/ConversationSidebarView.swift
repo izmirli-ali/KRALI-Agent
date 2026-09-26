@@ -224,24 +224,22 @@ struct ConversationSidebarView: View {
 
     private var visibleDevelopmentSuggestions:
         [AgentDevelopmentSuggestion] {
-        let grouped = Dictionary(
-            grouping: engine.developmentSuggestions
-            .filter {
-                $0.state != .suppressed
-            },
-            by: suggestionLineageKey
-        )
+        let visible = engine.developmentSuggestions.filter {
+            $0.state != .suppressed
+        }
+        let lineageKeys = Set(visible.map { suggestionLineageKey($0) }).sorted()
 
-        return grouped
-            .values
-            .compactMap { lineage in
-                lineage.min {
-                    let left = developmentSuggestionPriority($0)
-                    let right = developmentSuggestionPriority($1)
-                    return left == right
-                        ? $0.updatedAt > $1.updatedAt
-                        : left < right
-                }
+        return lineageKeys
+            .compactMap { key in
+                visible
+                    .filter { suggestionLineageKey($0) == key }
+                    .min {
+                        let left = developmentSuggestionPriority($0)
+                        let right = developmentSuggestionPriority($1)
+                        return left == right
+                            ? $0.updatedAt > $1.updatedAt
+                            : left < right
+                    }
             }
             .sorted {
                 developmentSuggestionPriority(

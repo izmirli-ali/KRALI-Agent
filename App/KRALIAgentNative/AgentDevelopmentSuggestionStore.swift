@@ -155,6 +155,7 @@ struct AgentDevelopmentRegressionMemory: Codable, Hashable, Sendable {
     let matchingFailureCount: Int
     let risk: String
     let summary: String
+    let replayChecks: [String]
 }
 
 struct AgentDevelopmentSuggestionStore {
@@ -794,7 +795,8 @@ struct AgentDevelopmentSuggestionStore {
                             .proposal
                             .expectedBehavior,
                         limit: 360
-                    ) + " Historical regression memory: " + regressionMemory.summary,
+                    ) + " Historical regression memory: " + regressionMemory.summary +
+                    " Replay checks: " + regressionMemory.replayChecks.joined(separator: " • "),
                 provenanceIDs:
                     Array(
                         externalIDs +
@@ -851,12 +853,28 @@ struct AgentDevelopmentSuggestionStore {
             summary = String(matchingFailures.count) + " similar failed candidate(s) found; require explicit regression checks before review."
         }
 
+        let replayChecks: [String]
+        if matchingFailures.isEmpty {
+            replayChecks = [
+                "Run the proposal verification contract before lead review.",
+                "Keep the candidate isolated until the rollback condition is verified."
+            ]
+        } else {
+            replayChecks = matchingFailures.prefix(3).map {
+                "Replay the failed-candidate boundary: " + compactText($0.title, limit: 90)
+            } + [
+                "Run the proposal verification contract before lead review.",
+                "Confirm the rollback condition before any publication decision."
+            ]
+        }
+
         return AgentDevelopmentRegressionMemory(
             failedCandidateCount: failed.count,
             releasedCandidateCount: released.count,
             matchingFailureCount: matchingFailures.count,
             risk: risk,
-            summary: summary
+            summary: summary,
+            replayChecks: replayChecks
         )
     }
 

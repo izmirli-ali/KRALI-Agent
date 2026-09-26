@@ -624,12 +624,22 @@ struct DevelopmentResearchQualitySelfTest {
             "continuous quality benchmark"
         )
 
+        let claimGraph = AgentDevelopmentResearchClaimGraph.build(
+            evidence: conflictEvidence
+        )
+        check(
+            claimGraph.clusters.count == 1 &&
+            claimGraph.clusters[0].requiresReview,
+            "claim graph makes conflicting evidence reviewable"
+        )
+
         let impactMap = AgentDevelopmentResearchImpactMap.build(
             proposal: proposal
         )
         check(
             impactMap.affectedFiles == ["AgentResearchQueryPlanner.swift"] &&
-            !impactMap.regressionChecks.isEmpty,
+            !impactMap.regressionChecks.isEmpty &&
+            !impactMap.dependencyEdges.isEmpty,
             "proposal impact map preserves regression contract"
         )
 
@@ -644,5 +654,6 @@ struct DevelopmentResearchQualitySelfTest {
         print("contradiction_audit=PASS")
         print("continuous_benchmark=PASS")
         print("impact_map=PASS")
+        print("claim_graph=PASS")
     }
 }

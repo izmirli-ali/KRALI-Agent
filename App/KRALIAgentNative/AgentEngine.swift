@@ -117,6 +117,8 @@ final class AgentEngine: ObservableObject {
         AgentDevelopmentResearchSourceClassifier()
     private let developmentResearchVerifier =
         AgentDevelopmentResearchVerifier()
+    private let developmentResearchHistoryStore =
+        AgentDevelopmentResearchHistoryStore()
     private let mentorTraceStore = MentorTraceStore()
     private let trainingLab = AgentTrainingLab()
     private let trainingLabStore = TrainingLabStore()
@@ -1507,6 +1509,35 @@ final class AgentEngine: ObservableObject {
                     executedCapabilityIDs:
                         executedCapabilities
                 )
+
+        let evidenceAudit =
+            AgentDevelopmentResearchEvidenceAudit.analyze(
+                sources: sourceAssessments,
+                evidence: evidenceRecords
+            )
+        let qualityBenchmark =
+            AgentDevelopmentResearchQualityBenchmark.evaluate(
+                sources: sourceAssessments,
+                evidence: evidenceRecords,
+                audit: evidenceAudit
+            )
+        let claimGraph =
+            AgentDevelopmentResearchClaimGraph.build(
+                evidence: evidenceRecords
+            )
+        if let sourceRevision = currentExactSourceRevision {
+            developmentResearchHistoryStore.append(
+                AgentDevelopmentResearchRunRecord(
+                    id: UUID(),
+                    recordedAt: Date(),
+                    sourceRevision: sourceRevision,
+                    sourceURLs: Array(Set(sourceAssessments.map(\.sourceURL))).sorted(),
+                    evidenceIDs: evidenceRecords.map(\.id),
+                    benchmarkScore: qualityBenchmark.score,
+                    contradictionClusterCount: claimGraph.clusters.filter(\.requiresReview).count
+                )
+            )
+        }
 
         let verification:
             AgentVerificationResult
@@ -3585,7 +3616,7 @@ final class AgentEngine: ObservableObject {
             return
         }
 
-        guard suggestion.source == .research else {
+        guard suggestion.source == .research || suggestion.source == .usability else {
             postAssistantMessage(
                 "Bu öneri tipi henüz bounded developer task'a çevrilemiyor. Geliştirme başlatılmadı."
             )
@@ -3641,7 +3672,9 @@ final class AgentEngine: ObservableObject {
 
         postAssistantMessage(
             suggestion.title +
-            " geliştirmesi onaylandı. Research proposal mutation authority vermedi; KRALİ önceden tanımlı research scope'u içinde izole candidate üretecek. Yayın için ayrıca lead review gerekecek."
+            " geliştirmesi onaylandı. KRALİ yalnız önceden tanımlı bounded " +
+            (suggestion.source == .usability ? "UI" : "research") +
+            " scope'u içinde izole candidate üretecek. Yayın için ayrıca lead review gerekecek."
         )
 
         runDeveloperAgent(

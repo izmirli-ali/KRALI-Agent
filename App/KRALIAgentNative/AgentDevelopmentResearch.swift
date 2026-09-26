@@ -187,6 +187,95 @@ struct AgentDevelopmentResearchEvidenceAudit: Hashable {
     }
 }
 
+/// Groups evidence by the research facet it is answering. This is a
+/// deterministic claim map: it exposes both supporting and challenging
+/// excerpts for human review without treating a lexical match as truth.
+struct AgentDevelopmentResearchClaimCluster: Codable, Hashable {
+    let facetID: String
+    let evidenceIDs: [String]
+    let supportingEvidenceIDs: [String]
+    let challengingEvidenceIDs: [String]
+    let requiresReview: Bool
+}
+
+struct AgentDevelopmentResearchClaimGraph: Codable, Hashable {
+    let clusters: [AgentDevelopmentResearchClaimCluster]
+
+    static func build(
+        evidence: [AgentDevelopmentResearchEvidenceRecord]
+    ) -> Self {
+        let grouped = Dictionary(grouping: evidence, by: \.facetID)
+        let clusters: [AgentDevelopmentResearchClaimCluster] = grouped.keys.sorted().map { facetID in
+            let items = grouped[facetID] ?? []
+            let supporting = items.filter {
+                polarity($0.excerpt) > 0
+            }.map(\.id)
+            let challenging = items.filter {
+                polarity($0.excerpt) < 0
+            }.map(\.id)
+            return AgentDevelopmentResearchClaimCluster(
+                facetID: facetID,
+                evidenceIDs: items.map(\.id).sorted(),
+                supportingEvidenceIDs: supporting.sorted(),
+                challengingEvidenceIDs: challenging.sorted(),
+                requiresReview: !supporting.isEmpty && !challenging.isEmpty
+            )
+        }
+        return Self(clusters: clusters)
+    }
+
+    private static func polarity(_ value: String) -> Int {
+        let text = " " + value.folding(
+            options: [.caseInsensitive, .diacriticInsensitive],
+            locale: Locale(identifier: "tr_TR")
+        ).lowercased() + " "
+        let positive = ["improves", "supports", "effective", "better", "iyilestir", "basarili", "destekler"]
+        let negative = [" not ", " no ", "cannot", "fails", "worse", "risk", "degil", "yetersiz", "basarisiz"]
+        let score = positive.filter { text.contains($0) }.count - negative.filter { text.contains($0) }.count
+        return score == 0 ? 0 : (score > 0 ? 1 : -1)
+    }
+}
+
+/// Compact, local-only research ledger. It retains reproducibility metadata
+/// and benchmark measurements, but has no mutation or publishing authority.
+struct AgentDevelopmentResearchRunRecord: Codable, Hashable {
+    let id: UUID
+    let recordedAt: Date
+    let sourceRevision: String
+    let sourceURLs: [String]
+    let evidenceIDs: [String]
+    let benchmarkScore: Int
+    let contradictionClusterCount: Int
+}
+
+struct AgentDevelopmentResearchHistoryStore {
+    private let fileManager = FileManager.default
+
+    private var url: URL {
+        fileManager.homeDirectoryForCurrentUser
+            .appendingPathComponent("Library/Application Support/KRALI Agent/Research", isDirectory: true)
+            .appendingPathComponent("research-run-history.json", isDirectory: false)
+    }
+
+    func append(_ record: AgentDevelopmentResearchRunRecord) {
+        let decoder = JSONDecoder()
+        decoder.dateDecodingStrategy = .iso8601
+        let existing = (try? Data(contentsOf: url))
+            .flatMap { try? decoder.decode([AgentDevelopmentResearchRunRecord].self, from: $0) } ?? []
+        let updated = Array((existing + [record]).suffix(80))
+
+        do {
+            try fileManager.createDirectory(at: url.deletingLastPathComponent(), withIntermediateDirectories: true)
+            let encoder = JSONEncoder()
+            encoder.dateEncodingStrategy = .iso8601
+            encoder.outputFormatting = [.prettyPrinted, .sortedKeys, .withoutEscapingSlashes]
+            try encoder.encode(updated).write(to: url, options: .atomic)
+        } catch {
+            // Research history is advisory and must never block a task.
+        }
+    }
+}
+
 /// A deterministic, reviewable benchmark. It deliberately measures only
 /// evidence already collected; it never turns a score into mutation authority.
 struct AgentDevelopmentResearchQualityBenchmark: Hashable {
@@ -222,18 +311,25 @@ struct AgentDevelopmentResearchImpactMap: Hashable {
     let affectedFiles: [String]
     let scopeBoundaries: [String]
     let regressionChecks: [String]
+    let dependencyEdges: [String]
 
     static func build(
         proposal: AgentDevelopmentResearchProposal
     ) -> Self {
-        Self(
-            affectedFiles: Array(Set(proposal.likelyFiles)).sorted(),
+        let affectedFiles = Array(Set(proposal.likelyFiles)).sorted()
+        let regressionChecks = Array(Set(
+            proposal.verificationContract +
+            proposal.behavioralBenchmark +
+            [proposal.rollbackCondition]
+        )).sorted()
+        return Self(
+            affectedFiles: affectedFiles,
             scopeBoundaries: Array(Set(proposal.allowedScope)).sorted(),
-            regressionChecks: Array(Set(
-                proposal.verificationContract +
-                proposal.behavioralBenchmark +
-                [proposal.rollbackCondition]
-            )).sorted()
+            regressionChecks: regressionChecks,
+            dependencyEdges: affectedFiles.map { file in
+                file + " → bounded verification contract (" +
+                String(regressionChecks.count) + " check(s))"
+            }
         )
     }
 }
@@ -323,6 +419,7 @@ struct AgentDevelopmentResearchSynthesis: Codable, Hashable {
             audit: audit
         )
         let impactMap = AgentDevelopmentResearchImpactMap.build(proposal: proposal)
+        let claimGraph = AgentDevelopmentResearchClaimGraph.build(evidence: evidence)
 
         let approachText = approaches.enumerated().map { index, item in
             """
@@ -393,6 +490,8 @@ struct AgentDevelopmentResearchSynthesis: Codable, Hashable {
         \(bullets(impactMap.affectedFiles))
         Impact Boundaries:
         \(bullets(impactMap.scopeBoundaries))
+        Dependency / Verification Map:
+        \(bullets(impactMap.dependencyEdges))
         Risks:
         \(bullets(proposal.risks))
         Security Boundaries:
@@ -405,6 +504,7 @@ struct AgentDevelopmentResearchSynthesis: Codable, Hashable {
 
         I. Evidence & Provenance
         Material approaches and the selected proposal carry explicit external and repository evidence IDs.
+        Claim Graph: \(claimGraph.clusters.count) facet cluster(s) • \(claimGraph.clusters.filter(\.requiresReview).count) contradiction cluster(s) require human review.
 
         J. Risks & Security Boundaries
         \(bullets(risks))
