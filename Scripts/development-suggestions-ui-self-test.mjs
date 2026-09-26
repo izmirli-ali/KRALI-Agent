@@ -179,6 +179,13 @@ ok(
 );
 
 ok(
+  engine.includes("isExplicitPublicResearchRequest") &&
+  engine.includes('outcomes: resolvedGoal.outcomes.union([.research])') &&
+  engine.includes('"research.web"'),
+  "an explicit research request cannot be downgraded to a prose-only semantic mission"
+);
+
+ok(
   store.includes("func pruneUnverifiedResearchSuggestions") &&
   !store.includes("guard suggestion.source == .research") &&
   store.includes("yeterli kanıt bulunmamaktadır") &&

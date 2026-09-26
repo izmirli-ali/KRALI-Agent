@@ -2489,6 +2489,24 @@ final class AgentEngine: ObservableObject {
                     from: mission,
                     fallback: goalProfile
                 )
+
+                // A semantic planner may narrow a broad goal, but it may not
+                // remove an explicit request for public, evidence-backed
+                // research. Keeping this contract prevents a prose-only
+                // fallback from being presented as research.
+                if isExplicitPublicResearchRequest(text) {
+                    resolvedGoal = AgentGoalProfile(
+                        summary: resolvedGoal.summary,
+                        outcomes: resolvedGoal.outcomes.union([.research]),
+                        requiredCapabilityIDs:
+                            resolvedGoal.requiredCapabilityIDs.union([
+                                "research.web"
+                            ]),
+                        isCompound: resolvedGoal.isCompound,
+                        commandAssessment:
+                            resolvedGoal.commandAssessment
+                    )
+                }
             resolvedCapabilities = semanticCapabilities(
                 from: mission,
                 fallback: capabilities
@@ -7164,9 +7182,14 @@ final class AgentEngine: ObservableObject {
                         false
                 )
 
+            let evidenceDomains = Set(
+                webResearchEvidence.map {
+                    $0.source.domain.lowercased()
+                }
+            )
             let hasEvidence =
-                !webResearchEvidence
-                    .isEmpty
+                webResearchEvidence.count >= 2 &&
+                evidenceDomains.count >= 2
 
             return OutcomeStrategyExecutionResult(
                 succeeded:
@@ -7177,8 +7200,8 @@ final class AgentEngine: ObservableObject {
                     : "",
                 summary:
                     hasEvidence
-                    ? "Gerçek web kaynak kanıtı üretildi."
-                    : "Web araştırması sonuç veya derin okuma üretse bile başarı kriterini destekleyen gerçek kaynak kanıtı oluşmadı.",
+                    ? "Yeterli sayfa kanıtı ve bağımsız kaynak çeşitliliği üretildi."
+                    : "Web araştırması sonuç veya derin okuma üretse bile iki bağımsız domain üzerinde yeterli gerçek kaynak kanıtı oluşmadı.",
                 executedCapabilityIDs:
                     hasEvidence
                     ? Set(
@@ -7313,6 +7336,26 @@ final class AgentEngine: ObservableObject {
             .trimmingCharacters(
                 in: .whitespacesAndNewlines
             )
+    }
+
+    private func isExplicitPublicResearchRequest(
+        _ rawText: String
+    ) -> Bool {
+        let normalized = rawText
+            .folding(
+                options: [.caseInsensitive, .diacriticInsensitive],
+                locale: Locale(identifier: "tr_TR")
+            )
+            .lowercased()
+
+        let researchSignals = [
+            "arastir", "internetten", "internette", "webde",
+            "web'de", "kaynak", "sayfa kaniti", "dogrulanmis"
+        ]
+
+        return researchSignals.contains {
+            normalized.contains($0)
+        }
     }
 
     private func performWebResearch(
