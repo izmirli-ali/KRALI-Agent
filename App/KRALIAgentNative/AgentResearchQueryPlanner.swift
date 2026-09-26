@@ -73,6 +73,45 @@ struct AgentResearchQueryPlanner {
             )
         }
 
+        if normalized.contains("nist") &&
+           containsAny(normalized, [
+               "kuantum", "quantum", "pqc", "kriptografi", "cryptography"
+           ]) {
+            return ResearchQueryPlan(
+                original: query,
+                variants: [
+                    "site:nist.gov post-quantum cryptography standards",
+                    "site:csrc.nist.gov post-quantum cryptography standards FIPS",
+                    "NIST post quantum cryptography standards independent analysis",
+                    "post quantum cryptography FIPS 203 204 205 current status"
+                ],
+                conceptGroups: [
+                    ["nist"],
+                    ["post quantum", "post-quantum", "kuantum sonrasi", "pqc"],
+                    ["cryptography", "kriptografi", "fips", "standard"]
+                ],
+                mandatoryConceptGroups: [
+                    ["nist"],
+                    ["post quantum", "post-quantum", "kuantum sonrasi", "pqc"]
+                ],
+                preferredDomains: ["nist.gov", "csrc.nist.gov"],
+                entityTerms: ["nist"],
+                facets: [
+                    ResearchFacet(id: "primary", title: "NIST birincil kaynak", query: "site:csrc.nist.gov post-quantum cryptography standards FIPS"),
+                    ResearchFacet(id: "standards", title: "Yayımlanan standartlar", query: "site:nist.gov FIPS 203 FIPS 204 FIPS 205"),
+                    ResearchFacet(id: "independent", title: "Bağımsız teknik doğrulama", query: "NIST post quantum cryptography standards independent analysis"),
+                    ResearchFacet(id: "recent", title: "Güncel durum", query: "NIST post quantum cryptography current status 2025")
+                ],
+                directCandidates: [
+                    ResearchDirectCandidate(
+                        title: "NIST Post-Quantum Cryptography",
+                        url: URL(string: "https://csrc.nist.gov/projects/post-quantum-cryptography")!,
+                        domain: "csrc.nist.gov"
+                    )
+                ]
+            )
+        }
+
         let entity = extractEntity(
             from: query,
             normalized: normalized

@@ -164,6 +164,14 @@ ok(
 );
 
 ok(
+  queryPlanner.includes('site:csrc.nist.gov post-quantum cryptography standards FIPS') &&
+  queryPlanner.includes('domain: "csrc.nist.gov"') &&
+  engine.includes("requiresNISTPrimaryEvidence") &&
+  engine.includes("NIST'in kendi alan adından doğrudan"),
+  "NIST standards research requires a readable primary NIST source in addition to independent evidence"
+);
+
+ok(
   engine.includes("webResearchEvidence.isEmpty") &&
   engine.includes("Araştırma sentezi atlandı: doğrulanmış sayfa kanıtı yok."),
   "research synthesis cannot invent a detailed answer when page evidence is absent"

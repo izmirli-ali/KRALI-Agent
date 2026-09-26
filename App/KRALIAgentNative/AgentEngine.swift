@@ -7432,6 +7432,15 @@ final class AgentEngine: ObservableObject {
             let evidenceDomains = Set(evidence.map { $0.source.domain.lowercased() })
             let hasIndependentEvidence =
                 evidence.count >= 2 && evidenceDomains.count >= 2
+            let requiresNISTPrimaryEvidence =
+                AgentResearchQueryPlanner()
+                    .researchSubject(from: query)
+                    .localizedCaseInsensitiveContains("NIST")
+            let hasRequiredPrimaryEvidence =
+                !requiresNISTPrimaryEvidence ||
+                evidenceDomains.contains(where: {
+                    $0 == "nist.gov" || $0.hasSuffix(".nist.gov")
+                })
 
             let resolvedTargets = report.results.filter {
                 !$0.evidenceEligible
@@ -7463,11 +7472,21 @@ final class AgentEngine: ObservableObject {
                 return reply
             }
 
-            guard hasIndependentEvidence else {
+            guard hasIndependentEvidence,
+                  hasRequiredPrimaryEvidence
+            else {
                 var reply =
-                    "Kanıt yetersiz: (evidence.count) okunmuş kaynak ve " +
-                    "(evidenceDomains.count) bağımsız alan adı doğrulayabildim. " +
+                    "Kanıt yetersiz: " + String(evidence.count) +
+                    " okunmuş kaynak ve " + String(evidenceDomains.count) +
+                    " bağımsız alan adı doğrulayabildim. " +
                     "En az iki okunmuş kaynak ile iki bağımsız alan adı olmadan sonuç üretmedim."
+
+                if requiresNISTPrimaryEvidence,
+                   !hasRequiredPrimaryEvidence {
+                    reply +=
+                        " Bu konu için NIST'in kendi alan adından doğrudan " +
+                        "okunmuş birincil kaynak da bulunamadı."
+                }
 
                 if !lines.isEmpty {
                     reply += "\n\nİncelenen kaynaklar:\n" + lines
