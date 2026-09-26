@@ -330,8 +330,9 @@ struct AgentDevelopmentSuggestionStore {
     }
 
     /// Generated ideas are tied to an exact source revision. Do not present a
-    /// stale idea as if it can be safely developed on a newer build; a fresh
-    /// idea will be generated for the current revision instead.
+    /// stale idea as if it can be safely developed on a newer build. While the
+    /// user is focusing on UI work, untouched generated research ideas are
+    /// also rotated out so the compact queue leads with UI candidates.
     func pruneStaleInnovationSuggestions(
         sourceRevision: String?,
         in existing: [AgentDevelopmentSuggestion]
@@ -343,8 +344,11 @@ struct AgentDevelopmentSuggestionStore {
         return existing.filter {
             !(
                 $0.fingerprint.hasPrefix("innovation:") &&
-                ($0.state == .proposed || $0.state == .deferred || $0.state == .failed) &&
-                $0.sourceRevision != revision
+                (
+                    $0.sourceRevision != revision ||
+                    ($0.source == .research &&
+                        ($0.state == .proposed || $0.state == .deferred || $0.state == .failed))
+                )
             )
         }
     }
@@ -449,9 +453,15 @@ struct AgentDevelopmentSuggestionStore {
 
         let calendar = Calendar(identifier: .gregorian)
         let day = calendar.ordinality(of: .day, in: .era, for: now) ?? 0
-        let ordered = (0..<definitions.count).map {
-            definitions[(day + $0) % definitions.count]
+        let uiDefinitions = definitions.filter { $0.4 == .usability }
+        let researchDefinitions = definitions.filter { $0.4 == .research }
+        let orderedUI = (0..<uiDefinitions.count).map {
+            uiDefinitions[(day + $0) % uiDefinitions.count]
         }
+        let orderedResearch = (0..<researchDefinitions.count).map {
+            researchDefinitions[(day + $0) % researchDefinitions.count]
+        }
+        let ordered = orderedUI + orderedResearch
 
         guard let definition = ordered.first(where: {
             !fingerprints.contains($0.3) && !suppressed.contains($0.3)
