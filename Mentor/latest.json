@@ -1,111 +1,111 @@
 {
   "activityTail" : [
     {
-      "date" : "2026-09-26T05:58:10Z",
-      "text" : "Self-development research önerisi sidebar geliştirme listesine eklendi"
+      "date" : "2026-09-26T15:43:00Z",
+      "text" : "Yerel zeka sentezi uygulandı"
     },
     {
-      "date" : "2026-09-26T05:57:40Z",
+      "date" : "2026-09-26T15:42:46Z",
       "text" : "Web Research tamamlandı: 4 kaynak, 4 kaynak okundu"
     },
     {
-      "date" : "2026-09-26T05:57:37Z",
+      "date" : "2026-09-26T15:42:26Z",
       "text" : "Web Research başladı"
     },
     {
-      "date" : "2026-09-26T05:57:37Z",
-      "text" : "Web Research tamamlandı: 6 kaynak, 0 kaynak okundu"
+      "date" : "2026-09-26T15:42:26Z",
+      "text" : "Semantic rota: Core → Goal → Context → Plan → Research → Verify → Response"
     },
     {
-      "date" : "2026-09-26T05:57:35Z",
-      "text" : "Web Research başladı"
+      "date" : "2026-09-26T15:42:26Z",
+      "text" : "Task Graph: 0:context.local[reason] → 1:research.web[retrieve] → 2:core.reasoning[transform]"
     },
     {
-      "date" : "2026-09-26T05:57:35Z",
-      "text" : "Web Research tamamlandı: 4 kaynak, 4 kaynak okundu"
+      "date" : "2026-09-26T15:42:26Z",
+      "text" : "Problem Solver adayları: Mevcut provider'ı kullan[100] | Mevcut provider'ı kullan[100] | Mevcut provider'ı kullan[100] | Kanıtı reasoning ile dönüştür[75]"
     },
     {
-      "date" : "2026-09-26T05:57:32Z",
-      "text" : "Web Research başladı"
+      "date" : "2026-09-26T15:42:26Z",
+      "text" : "Problem Solver seçimi: Mevcut provider'ı kullan • score=100 • capabilities=context.local"
     },
     {
-      "date" : "2026-09-26T05:57:32Z",
-      "text" : "Web Research tamamlandı: 1 kaynak, 1 kaynak okundu"
+      "date" : "2026-09-26T15:42:26Z",
+      "text" : "Semantic capability planı: context.local, core.reasoning, research.web"
     },
     {
-      "date" : "2026-09-26T05:57:27Z",
-      "text" : "Web Research başladı"
+      "date" : "2026-09-26T15:42:26Z",
+      "text" : "Semantic planner sağlayıcısı: Apple Foundation Models"
     },
     {
-      "date" : "2026-09-26T05:57:27Z",
-      "text" : "Web Research tamamlandı: 4 kaynak, 4 kaynak okundu"
+      "date" : "2026-09-26T15:42:26Z",
+      "text" : "Semantic Mission: ARAŞTIRMA TESTİ — NVIDIA Şirket Analizi\n\nNVIDIA’yı güncel ve güvenilir kaynaklarla araştır.\n\nŞunları ayrı başlıklarda incele:\n1. Şirketin temel faaliyet alanları ve gelir kaynakları\n2. Yapay zekâ veri merkezi pazarındaki konumu\n3. Son 12 aydaki önemli ürün, finansal sonuç veya stratejik gelişmeler\n4. Başlıca rakipleri ve rekabet avantajları\n5. Riskler: tedarik zinciri, regülasyon, Çin ihracat kısıtlamaları ve pazar bağımlılığı\n6. Bağımsız kaynaklarda geçen eleştiriler veya çelişkili bulgular\n\nKaynak kuralları:\n- En az 6 kaynak kullan.\n- NVIDIA resmî yatırımcı ilişkileri veya SEC kaynağı kullan.\n- En az 2 bağımsız güvenilir kaynak ekle.\n- Her önemli iddiayı kaynakla ilişkilendir.\n- Kaynakların tarihini, türünü ve güvenilirlik gerekçesini belirt.\n- Eski veya çelişkili bilgi varsa açıkça yaz.\n- Kanıt yoksa varsayım yapma.\n\nSonuçta şunları üret:\n- 100 üzerinden araştırma kalite puanı\n- Kaynak çeşitliliği ve bağımsız doğrulama puanı\n- İddia–kanıt tablosu\n- Belirsizlikler ve eksikler\n- En fazla 5 maddelik yönetici özeti"
     },
     {
-      "date" : "2026-09-26T05:57:24Z",
-      "text" : "Web Research başladı"
+      "date" : "2026-09-26T15:42:26Z",
+      "text" : "Outcome Solver: başarı kriterleri mevcut capability'lerle kapsandı • Outcome'u core.reasoning ile çöz"
     },
     {
-      "date" : "2026-09-26T05:57:24Z",
-      "text" : "Web Research tamamlandı: 4 kaynak, 4 kaynak okundu"
+      "date" : "2026-09-26T15:42:15Z",
+      "text" : "Developer Agent durumu: Kaynak kartları (developer.suggestion.usability.4b5236c8-078) native local agent iteration sınırına ulaştı."
     },
     {
-      "date" : "2026-09-26T05:57:21Z",
-      "text" : "Web Research başladı"
+      "date" : "2026-09-26T15:42:15Z",
+      "text" : "Debug/Recovery: Bilinmeyen hata • Geliştirmeye yükseltildi • Developer Agent"
     },
     {
-      "date" : "2026-09-26T05:57:21Z",
-      "text" : "Web Research tamamlandı: 4 kaynak, 4 kaynak okundu"
+      "date" : "2026-09-26T15:42:06Z",
+      "text" : "Seçilen kabiliyetler: Akıl yürütme, Bağlam, Dosya metadata, Dosya arama, Web araştırma"
     },
     {
-      "date" : "2026-09-26T05:57:19Z",
-      "text" : "Web Research başladı"
+      "date" : "2026-09-26T15:42:06Z",
+      "text" : "Otomatik rota: Core → Goal → Context → Plan → Files → Research → Verify → Response"
     },
     {
-      "date" : "2026-09-26T05:57:19Z",
-      "text" : "Web Research tamamlandı: 1 kaynak, 1 kaynak okundu"
+      "date" : "2026-09-26T15:42:06Z",
+      "text" : "Seçilen plan: Seçili çalışma alanını salt-okunur tara, filtreleri uygula ve en uygun sonuçları göster"
     },
     {
-      "date" : "2026-09-26T05:57:14Z",
-      "text" : "Web Research başladı"
+      "date" : "2026-09-26T15:42:06Z",
+      "text" : "KRALİ Core hedef sözleşmesi: hedef öğeleri bul → güncel kaynaklarla araştır"
     },
     {
-      "date" : "2026-09-26T05:57:03Z",
-      "text" : "Self-development research başladı • repo=/Users/medusa/Developer/KRALI-Agent"
+      "date" : "2026-09-26T15:42:06Z",
+      "text" : "Problem Solver başlangıç stratejisi: Mevcut provider'ı kullan • Task Graph bu capability'yi doğrudan seçti ve provider available."
     },
     {
-      "date" : "2026-09-26T05:57:03Z",
-      "text" : "Developer context firewall: conversational task memory isolated"
+      "date" : "2026-09-26T15:42:06Z",
+      "text" : "Bağlam firewall: önceki görev bağlamları bu tura taşınmadı"
     },
     {
-      "date" : "2026-09-26T05:56:29Z",
+      "date" : "2026-09-26T15:41:24Z",
       "text" : "Debug/Recovery: Bağımlılık • Recovery uygulanıyor • Developer Agent"
     },
     {
-      "date" : "2026-09-26T05:56:28Z",
-      "text" : "Developer Agent kontrollü task başlatıldı • approved-usability-92ae9904-650"
+      "date" : "2026-09-26T15:41:23Z",
+      "text" : "Developer Agent kontrollü task başlatıldı • approved-usability-4b5236c8-078"
     },
     {
-      "date" : "2026-09-26T05:53:51Z",
+      "date" : "2026-09-26T15:34:23Z",
       "text" : "Apple yerel zeka hazır"
     },
     {
-      "date" : "2026-09-26T05:53:51Z",
+      "date" : "2026-09-26T15:34:22Z",
       "text" : "Çalışma klasörü yolu geri yüklendi; indeks gerektiğinde oluşturulacak: Desktop"
     },
     {
-      "date" : "2026-09-26T05:53:51Z",
+      "date" : "2026-09-26T15:34:22Z",
       "text" : "Ağır geliştirici testleri normal açılışta otomatik çalıştırılmıyor"
     },
     {
-      "date" : "2026-09-26T05:53:51Z",
+      "date" : "2026-09-26T15:34:22Z",
       "text" : "Dinamik hedef ve kabiliyet yönlendirme aktif"
     },
     {
-      "date" : "2026-09-26T05:53:51Z",
+      "date" : "2026-09-26T15:34:22Z",
       "text" : "KRALİ Core hazır"
     }
   ],
-  "appVersion" : "0.11.28",
+  "appVersion" : "0.11.34",
   "capabilities" : [
     {
       "available" : true,
@@ -132,25 +132,107 @@
   "contextMemory" : [
 
   ],
-  "createdAt" : "2026-09-26T05:58:10Z",
-  "developerMissionReason" : "KRALİ is the target and the request asks for read-only self-development research before mutation.",
-  "developerRepository" : "/Users/medusa/Developer/KRALI-Agent",
+  "createdAt" : "2026-09-26T15:43:00Z",
+  "developerMissionReason" : "Goal is external/user work, not a supported KRALİ self-development intent.",
   "executionProfile" : "developmentResearchMode",
   "executionSteps" : [
-
+    {
+      "capabilityID" : "context.local",
+      "detail" : "Yalnızca bu kullanıcı hedefiyle ilgili bağlamı hazırla; eski görev hedeflerini yeni göreve taşıma. Operation: context.resolve",
+      "kind" : "reasoning",
+      "state" : "completed",
+      "title" : "Görev bağlamını hazırla"
+    },
+    {
+      "capabilityID" : "research.web",
+      "detail" : "Önceki adımda çözülen gerçek hedef/veriyi kullanarak dış kaynaklardan gerekli bilgiyi araştır. Ön koşul adımları: 1. Operation: web.research",
+      "kind" : "action",
+      "state" : "completed",
+      "title" : "Gerekli dış bilgiyi araştır"
+    },
+    {
+      "capabilityID" : "core.reasoning",
+      "detail" : "Önceki adımların gerçek çıktısını birlikte değerlendir ve sonraki adımın kullanabileceği sonucu üret. Ön koşul adımları: 2. Operation: content.analyze",
+      "kind" : "reasoning",
+      "state" : "completed",
+      "title" : "Toplanan veriyi analiz et"
+    },
+    {
+      "capabilityID" : "core.reasoning",
+      "detail" : "Gerçekleşen adımları hedefle, capability durumuyla ve üretilen sonuçla karşılaştır.",
+      "kind" : "verification",
+      "state" : "completed",
+      "title" : "Mission sonucunu doğrula"
+    },
+    {
+      "detail" : "Tamamlanan, bekleyen ve kullanıcı bilgisi gerektiren kısımları birbirinden ayır.",
+      "kind" : "response",
+      "state" : "completed",
+      "title" : "Sonucu kullanıcıya aktar"
+    }
   ],
-  "finalResponse" : "A. Current KRALİ Architecture\n• KRALI_ARCHITECTURE.md\n• App/KRALIAgentNative/AgentTrainingLab.swift\n\nB. Research Sources\n1. [Tier B] Claude Opus \\ Anthropic — www.anthropic.com — https://www.anthropic.com/claude/opus\n2. [Tier B] Newsroom \\ Anthropic — www.anthropic.com — https://www.anthropic.com/news\n3. [Tier C] Log in to your Claude account | Claude Help Center — support.claude.com — https://support.claude.com/en/articles/13189465-log-in-to-your-claude-account\n4. [Tier C] Anthropic nedir? - Forbes Türkiye — www.forbes.com.tr — https://www.forbes.com.tr/haberleri/anthropic\n5. [Tier C] Anthropic - Wikipedia — en.wikipedia.org — https://en.wikipedia.org/wiki/Anthropic\n6. [Tier C] Install Claude Desktop | Claude Help Center — support.claude.com — https://support.claude.com/en/articles/10065433-install-claude-desktop\n7. [Tier C] Claude (AI) - Wikipedia — en.wikipedia.org — https://en.wikipedia.org/wiki/Claude_(AI)\n8. [Tier C] The AI for Problem Solvers | Claude by Anthropic — claude.com — https://claude.com/product/overview\nQuality Scorecard: Sources: 8 • Independent origins: 4 • Preferred source kinds: 3 • Tier A/B: 2 • Dated: 0 • Freshness: 0/100 • Known citations: 0\nEvidence Audit: Recent sources: 0 • Unknown dates: 8 • Potential contradictions requiring review: 0\nContinuous Benchmark: 55/100 • Diversity 30/30 • Evidence 10/30 • Freshness 0/25 • Contradiction review 15/15\n\nC. External Approaches Found\n1. Anthropic Claude Code Ürününün Yazılım Geliştirme Ortamındaki İncelemesi — DISCARD\nAnthropic Claude Code ürününün temel özellikleri, kod yazma, dosya değiştirme, test çalıştırma, Git süreçleri, güvenlik/izin modeli, fiyatlandırma, kullanım modeli, sınırlamaları, güvenlik riskleri ve kullanıcı geri bildirimleri açısından yeterli kanıt bulunmamaktadır. Sadece verilen araştırma facet ve mevcut kanıtlar, Claude Opus 5 ile ilgili haber ve KRALI'nin eğitim ve yürütme adımları hakkında bilgi vermektedir. Bu bağlamda, Claude Code ürününün detaylı analizi için yeterli kanıt eksikliği nedeniyle bu ürünün karşılaştırılması mümkün değildir.\nExternal evidence: W2\nRepository evidence: E2, E3, E4\nBenefits: -\nRisks: -\n\nD. KRALİ Comparison\nHer yaklaşım external evidence IDs ile repository evidence IDs üzerinden karşılaştırıldı.\n\nE. DISCARD / IMPROVE / MERGE / CREATE Decisions\n• DISCARD: Anthropic Claude Code Ürününün Yazılım Geliştirme Ortamındaki İncelemesi\n\nF. Biggest Current Gap\nAnthropic Claude Code ürününün temel yetenekleri, geliştirme ortamları, kod yazma, dosya değiştirme, test çalıştırma ve Git süreçlerindeki yetkileri, güvenlik/izin modeli, fiyatlandırma veya kullanım modeli gibi alanlarda yeterli kanıt bulunmamaktadır.\n\nG. Selected Improvement\nKRALI ile karşılaştırıldığında alınabilecek mimari fikirler: `content-plan-not-file-search`, `inline-turkish-rewrite` ve gerçek memory retrieval için `named-topic-memory-isolation` regresyonları eklenir.\n\nH. Development Proposal\nProblem: Claude Code'un geliştirici ortamındaki işlevsellik ve güvenlik katmanlarının eksik analizi.\nCurrent Architecture: KRALI ile geliştirilen mimari bileşenler: `content-plan-not-file-search`, `inline-turkish-rewrite`, `named-topic-memory-isolation`\nResearch Findings:\n• KRALI_ARCHITECTURE.md\n• App/KRALIAgentNative/AgentTrainingLab.swift\nEvidence: W2\nRepository Evidence: E2, E3, E4\nGap: Anthropic'in resmi dokümantasyonu ve bağımsız teknik kaynaklar, güvenlik değerlendirmeleri ve kullanıcı geri bildirimleri gibi kaynaklarda yeterli bilgi bulunmamaktadır.\nAlternatives: \nSelected Strategy: Core artık açık-dünya görevleri\nWhy This Strategy: KRALI, açık-dünya görevleri için yeni mimari bileşenler geliştirerek Claude Code'un sınırlamalarını aşmayı hedefler.\nExpected Behavior: Yeni mimari bileşenler, Claude Code'un mevcut sınırlamalarına karşı daha esnek ve güvenli bir yapı sunar.\nAllowed Scope:\n• content-plan-not-file-search\n• inline-turkish-rewrite\n• named-topic-memory-isolation\nFiles / Components Likely Affected:\n• App/KRALIAgentNative/\nImpact Boundaries:\n• content-plan-not-file-search\n• inline-turkish-rewrite\n• named-topic-memory-isolation\nDependency / Verification Map:\n• App/KRALIAgentNative/ → bounded verification contract (5 check(s))\nRisks:\n• Güvenlik riskleri\n• Kullanıcı geri bildirimleri\nSecurity Boundaries:\n• Kullanıcı onayı\n• Terminal komutları\n• Hassas dosyalar\n• Dış ağ erişimi\nVerification Contract:\n• KRALI_ARCHITECTURE.md\n• App/KRALIAgentNative/AgentTrainingLab.swift\nBehavioral Benchmark:\n• App/KRALIAgentNative/AgentTrainingLab.swift\n• KRALI_ARCHITECTURE.md\n• Memory retrieval efficiency\n• Open-world task execution\n• Yeni mimari bileşenlerin etkinliği test edilerek geri alınabilir.\nRollback Condition: Yeni mimari bileşenlerin etkinliği test edilerek geri alınabilir.\n\nI. Evidence & Provenance\nMaterial approaches and the selected proposal carry explicit external and repository evidence IDs.\nClaim Graph: 2 facet cluster(s) • 0 contradiction cluster(s) require human review.\n\nJ. Risks & Security Boundaries\n• Güvenlik riskleri\n• Kullanıcı geri bildirimleri\n\nK. Verification Plan\n• KRALI_ARCHITECTURE.md\n• App/KRALIAgentNative/AgentTrainingLab.swift\n\nL. Mutation Recommended\nMutation Recommended: YES\n\nM. Mutation Started\nMutation Started: NO\n\nN. Recommended Next Step\nAnthropic'in resmi dokümantasyonu ve bağımsız teknik kaynaklarda yeterli bilgi eksikliği • Güvenlik değerlendirmeleri ve kullanıcı geri bildirimleri • Fiyatlandırma ve kullanım modeli bilgisi • Evidence-bound approach coverage 1/5",
-  "goal" : "KRALİ self-development research",
+  "finalResponse" : "Bu istekle çalışılamıyor.\n\n**NVIDIA Şirket Analizi** için gerekli olan güncel ve güvenilir kaynaklar, özellikle SEC veya resmî yatırımcı ilişkileri gibi resmi kanıtlar, mevcut kanıtlarla uyuşmamaktadır. Sağlanan kaynaklar yalnızca bir araç kullanım kılavuzu ve akademik bir inceleme içermektedir; bunlar NVIDIA’nın finansal sonuçları, pazar konumu veya bağımsız eleştiriler hakkında yeterli ve güvenilir bilgi sunmamaktadır.\n\n**Kanıt yoksa varsayım yapma** kuralı gereği, resmi raporlar veya bağımsız analizler hakkında çıkarım yapılamaz. Mevcut kanıtlar, NVIDIA’nın operasyonel teknolojilerine ve araçlarına odaklanmaktadır, ancak şirketin genel faaliyetleri, gelir kaynakları, rekabet avantajları veya pazar riskleri hakkında yeterli derinlik sağlamamaktadır.\n\n**Sonuç:**\n- Hedef sözleşmesi gereği tüm başlıklar ayrı ayrı incelenmeliydi.\n- Ancak mevcut kanıtlar, bu kapsamdaki analiz için uygun değildir.\n- **Belirsizlik:** NVIDIA’nın 12 aylık finansal sonuçları, pazar konumu ve rakipleri hakkında güvenilir veri bulunmamaktadır.\n- **Eksiklik:** Resmi kaynaklar ve bağımsız analizler kullanılmadığı için kapsamlı bir değerlendirme yapılamaz.\n\nBu nedenle, istenen 100 puanlık kalite puanı, kaynak çeşitliliği, iddia–kanıt tablosu, yönetici özeti gibi bölümlerin tamamlanması mümkün değildir.",
+  "goal" : "ARAŞTIRMA TESTİ — NVIDIA Şirket Analizi\n\nNVIDIA’yı güncel ve güvenilir kaynaklarla araştır.\n\nŞunları ayrı başlıklarda incele:\n1. Şirketin temel faaliyet alanları ve gelir kaynakları\n2. Yapay zekâ veri merkezi pazarındaki konumu\n3. Son 12 aydaki önemli ürün, finansal sonuç veya stratejik gelişmeler\n4. Başlıca rakipleri ve rekabet avantajları\n5. Riskler: tedarik zinciri, regülasyon, Çin ihracat kısıtlamaları ve pazar bağımlılığı\n6. Bağımsız kaynaklarda geçen eleştiriler veya çelişkili bulgular\n\nKaynak kuralları:\n- En az 6 kaynak kullan.\n- NVIDIA resmî yatırımcı ilişkileri veya SEC kaynağı kullan.\n- En az 2 bağımsız güvenilir kaynak ekle.\n- Her önemli iddiayı kaynakla ilişkilendir.\n- Kaynakların tarihini, türünü ve güvenilirlik gerekçesini belirt.\n- Eski veya çelişkili bilgi varsa açıkça yaz.\n- Kanıt yoksa varsayım yapma.\n\nSonuçta şunları üret:\n- 100 üzerinden araştırma kalite puanı\n- Kaynak çeşitliliği ve bağımsız doğrulama puanı\n- İddia–kanıt tablosu\n- Belirsizlikler ve eksikler\n- En fazla 5 maddelik yönetici özeti",
   "inputSource" : "text",
-  "intelligenceProvider" : "Apple Foundation Models / Staged Evidence-Bound Development Research",
+  "intelligenceProvider" : "Apple Foundation Models",
   "learningPlans" : [
 
   ],
-  "missionOwner" : "developer",
-  "missionPhase" : "research",
+  "missionOwner" : "runtime",
+  "missionPhase" : "runtime",
   "outcomeAttempts" : [
 
   ],
+  "outcomeResolution" : {
+    "chosenStrategyIDs" : [
+      "reasoning-output:direct:core.reasoning"
+    ],
+    "contract" : {
+      "instrumentalCapabilityIDs" : [
+
+      ],
+      "objective" : "ARAŞTIRMA TESTİ — NVIDIA Şirket Analizi\n\nNVIDIA’yı güncel ve güvenilir kaynaklarla araştır.\n\nŞunları ayrı başlıklarda incele:\n1. Şirketin temel faaliyet alanları ve gelir kaynakları\n2. Yapay zekâ veri merkezi pazarındaki konumu\n3. Son 12 aydaki önemli ürün, finansal sonuç veya stratejik gelişmeler\n4. Başlıca rakipleri ve rekabet avantajları\n5. Riskler: tedarik zinciri, regülasyon, Çin ihracat kısıtlamaları ve pazar bağımlılığı\n6. Bağımsız kaynaklarda geçen eleştiriler veya çelişkili bulgular\n\nKaynak kuralları:\n- En az 6 kaynak kullan.\n- NVIDIA resmî yatırımcı ilişkileri veya SEC kaynağı kullan.\n- En az 2 bağımsız güvenilir kaynak ekle.\n- Her önemli iddiayı kaynakla ilişkilendir.\n- Kaynakların tarihini, türünü ve güvenilirlik gerekçesini belirt.\n- Eski veya çelişkili bilgi varsa açıkça yaz.\n- Kanıt yoksa varsayım yapma.\n\nSonuçta şunları üret:\n- 100 üzerinden araştırma kalite puanı\n- Kaynak çeşitliliği ve bağımsız doğrulama puanı\n- İddia–kanıt tablosu\n- Belirsizlikler ve eksikler\n- En fazla 5 maddelik yönetici özeti",
+      "requirements" : [
+        {
+          "acceptableCapabilityIDs" : [
+            "core.reasoning"
+          ],
+          "id" : "reasoning-output",
+          "kind" : "transformEvidence",
+          "preferredCapabilityIDs" : [
+            "core.reasoning"
+          ],
+          "requiresMutation" : false,
+          "successCriterion" : "Çıktı eldeki kanıt ve kullanıcı hedefiyle tutarlı olmalı.",
+          "title" : "Kanıttan istenen çıktıyı üret"
+        }
+      ],
+      "successCriteria" : [
+        "Çıktı eldeki kanıt ve kullanıcı hedefiyle tutarlı olmalı."
+      ]
+    },
+    "coveredRequirementIDs" : [
+      "reasoning-output"
+    ],
+    "strategies" : [
+      {
+        "capabilityIDs" : [
+          "core.reasoning"
+        ],
+        "executableNow" : true,
+        "id" : "reasoning-output:direct:core.reasoning",
+        "kind" : "reasoningTransform",
+        "rationale" : "Bu capability başarı kriterini doğrudan karşılayabiliyor.",
+        "requirementID" : "reasoning-output",
+        "requiresLearning" : false,
+        "score" : 95,
+        "title" : "Outcome'u core.reasoning ile çöz"
+      }
+    ],
+    "suppressedLearningCapabilityIDs" : [
+
+    ]
+  },
   "pausedCapabilities" : [
     "app.workflow",
     "browser.control",
@@ -159,185 +241,299 @@
     "perception.screen",
     "system.open.url"
   ],
-  "plan" : "Exact source revision → read-only repository evidence → research.web → compare → development proposal → stop",
-  "reflectionSummary" : "Development research • facets=5 • requiredApproaches=5 • pageEvidence=8 • verification=partial",
+  "plan" : "Görev bağlamını hazırla → Gerekli dış bilgiyi araştır → Toplanan veriyi analiz et",
+  "problemResolution" : {
+    "chosenStrategyID" : "primary:context.local",
+    "frame" : {
+      "availableCapabilityIDs" : [
+        "context.local",
+        "core.reasoning",
+        "files.metadata",
+        "files.move.reversible",
+        "files.reveal",
+        "files.search",
+        "files.write.text",
+        "memory.local",
+        "research.web",
+        "speech.input",
+        "speech.output"
+      ],
+      "blockedCapabilityIDs" : [
+
+      ],
+      "constraints" : [
+        "Başarı gerçek observation/verification ile kanıtlanmalı.",
+        "Dış dünyaya commit eden işlem kullanıcı onayı olmadan uygulanmamalı.",
+        "Uygulama/marka adına özel hard-code yerine generic capability/strategy tercih edilmeli."
+      ],
+      "objective" : "ARAŞTIRMA TESTİ — NVIDIA Şirket Analizi\n\nNVIDIA’yı güncel ve güvenilir kaynaklarla araştır.\n\nŞunları ayrı başlıklarda incele:\n1. Şirketin temel faaliyet alanları ve gelir kaynakları\n2. Yapay zekâ veri merkezi pazarındaki konumu\n3. Son 12 aydaki önemli ürün, finansal sonuç veya stratejik gelişmeler\n4. Başlıca rakipleri ve rekabet avantajları\n5. Riskler: tedarik zinciri, regülasyon, Çin ihracat kısıtlamaları ve pazar bağımlılığı\n6. Bağımsız kaynaklarda geçen eleştiriler veya çelişkili bulgular\n\nKaynak kuralları:\n- En az 6 kaynak kullan.\n- NVIDIA resmî yatırımcı ilişkileri veya SEC kaynağı kullan.\n- En az 2 bağımsız güvenilir kaynak ekle.\n- Her önemli iddiayı kaynakla ilişkilendir.\n- Kaynakların tarihini, türünü ve güvenilirlik gerekçesini belirt.\n- Eski veya çelişkili bilgi varsa açıkça yaz.\n- Kanıt yoksa varsayım yapma.\n\nSonuçta şunları üret:\n- 100 üzerinden araştırma kalite puanı\n- Kaynak çeşitliliği ve bağımsız doğrulama puanı\n- İddia–kanıt tablosu\n- Belirsizlikler ve eksikler\n- En fazla 5 maddelik yönetici özeti",
+      "observations" : [
+        "Seçili çalışma alanı: Desktop",
+        "Son debug gözlemi: Kaynak kartları (developer.suggestion.usability.4b5236c8-078) native local agent iteration sınırına ulaştı."
+      ]
+    },
+    "strategies" : [
+      {
+        "capabilityIDs" : [
+          "context.local"
+        ],
+        "executableNow" : true,
+        "id" : "primary:context.local",
+        "kind" : "primary",
+        "rationale" : "Task Graph bu capability'yi doğrudan seçti ve provider available.",
+        "requiresLearning" : false,
+        "score" : 100,
+        "summary" : "Görev bağlamını hazırla adımını context.local ile yürüt.",
+        "title" : "Mevcut provider'ı kullan"
+      },
+      {
+        "capabilityIDs" : [
+          "research.web"
+        ],
+        "executableNow" : true,
+        "id" : "primary:research.web",
+        "kind" : "primary",
+        "rationale" : "Task Graph bu capability'yi doğrudan seçti ve provider available.",
+        "requiresLearning" : false,
+        "score" : 100,
+        "summary" : "Gerekli dış bilgiyi araştır adımını research.web ile yürüt.",
+        "title" : "Mevcut provider'ı kullan"
+      },
+      {
+        "capabilityIDs" : [
+          "core.reasoning"
+        ],
+        "executableNow" : true,
+        "id" : "primary:core.reasoning",
+        "kind" : "primary",
+        "rationale" : "Task Graph bu capability'yi doğrudan seçti ve provider available.",
+        "requiresLearning" : false,
+        "score" : 100,
+        "summary" : "Toplanan veriyi analiz et adımını core.reasoning ile yürüt.",
+        "title" : "Mevcut provider'ı kullan"
+      },
+      {
+        "capabilityIDs" : [
+          "core.reasoning"
+        ],
+        "executableNow" : true,
+        "id" : "reasoning:0",
+        "kind" : "reasoningTransform",
+        "rationale" : "Adımın amacı dış değişiklik değil; mevcut kanıttan yeni bir bilgi/çıktı üretmek.",
+        "requiresLearning" : false,
+        "score" : 75,
+        "summary" : "Mevcut dependency evidence üzerinde analiz/sentez uygula.",
+        "title" : "Kanıtı reasoning ile dönüştür"
+      }
+    ]
+  },
   "researchEvidence" : [
     {
-      "conceptCoverage" : 3,
-      "domain" : "www.anthropic.com",
-      "excerpt" : "8 Hybrid reasoning model built for serious coding and AI agents, featuring a 1M context window Try Claude Get API access Announcements NEW Claude Opus 5. Read more Claude Opus 5 Jul 24, 2026 A step-change improvement for the Opus tier: stronger coding, more capable agents, and sharper professional work. 5 is also available now in Claude Code and on the Claude Platform with up to 2",
+      "conceptCoverage" : 4,
+      "domain" : "thedocumentation.org",
+      "excerpt" : "video-analyzer documentation video-analyzer Home View on GitHub Video Analyzer: Overview Video Analyzer is a powerful command-line tool that leverages large language vision models (LLMs) and audio transcription to create detailed, narrative descriptions of video content. 2 Vision, it can generate comprehensive summaries of what's happening in a video. 👁️ Contextual Frame Analysis : Each key frame is analyzed with the context of previous frames, building a coherent narrative throughout the video",
       "matchedConcepts" : [
-        "claude",
-        "agents",
-        "code"
+        "video",
+        "analyze",
+        "vision",
+        "analysis"
       ],
       "sourceType" : "search-result",
-      "title" : "Claude Opus \\ Anthropic",
-      "url" : "https://www.anthropic.com/claude/opus"
-    },
-    {
-      "conceptCoverage" : 1,
-      "domain" : "www.anthropic.com",
-      "excerpt" : "Newsroom \\ Anthropic Skip to main content Skip to footer Try Claude Newsroom Press inquiries press@anthropic. com Non-media inquiries How to get support Media assets Download press kit Introducing Claude Opus 5. Features Sep 22, 2026 The Situation Report A rare strain of Ebola, with no confirmed vaccine, is spreading through the east of the Democratic Republic of Congo",
-      "matchedConcepts" : [
-        "anthropic"
-      ],
-      "sourceType" : "search-result",
-      "title" : "Newsroom \\ Anthropic",
-      "url" : "https://www.anthropic.com/news"
+      "title" : "video-analyzer documentation",
+      "url" : "https://thedocumentation.org/video-analyzer/"
     },
     {
       "conceptCoverage" : 3,
-      "domain" : "support.claude.com",
-      "excerpt" : "Understanding your Team plan invoices Admin management Roles and permissions Purchase and manage seats on Team plans Purchase and manage seats on Enterprise plans Manage members on Team and Enterprise plans Claude Enterprise consumption guide Manage usage credits for Team and seat-based Enterprise plans Manage user feedback settings on Team and Enterprise plans Control project sharing for your organization Manage plugins for your organization Account management FAQs Manage groups and group spend limits on Enterprise plans Manage custom roles on Enterprise plans Set up role-based permissions on Enterprise plans Set organization instructions Claude Design admin guide for Team and Enterprise plans Claim and migrate accounts on your domain Designate support contacts for human support Claude Enterprise Admin API reference guide Claude Enterprise activation promo for Claude Code and Cowork Set",
+      "domain" : "thedocumentation.org",
+      "excerpt" : "Usage Guide - video-analyzer documentation video-analyzer Usage Guide View on GitHub CLI Usage Guide This guide covers all configuration options and command-line arguments for the video-analyzer tool, along with practical examples for different use cases. ai/api/v1 Command-Line Arguments The video-analyzer command accepts the following arguments to override default and file-based configurations. 2-vision --model gpt-4o --duration Duration of the video in seconds to process from the start",
       "matchedConcepts" : [
-        "claude",
-        "code",
-        "agents"
+        "video",
+        "analyze",
+        "vision"
       ],
       "sourceType" : "search-result",
-      "title" : "Log in to your Claude account | Claude Help Center",
-      "url" : "https://support.claude.com/en/articles/13189465-log-in-to-your-claude-account"
-    },
-    {
-      "conceptCoverage" : 3,
-      "domain" : "www.forbes.com.tr",
-      "excerpt" : "Google, OpenAI, xAI gibi büyük teknoloji firmalarıyla rekabet eden Anthropic, yapay zeka alanında hızla büyüyen önemli bir oyuncu olarak öne çıkıyor. - Forbes Türkiye E-Bülten’e Abone Olun Abonelik Giriş Arama Dergi Yazarlar Milyarderler Türk Dolar Milyarderleri Ekonomi Para - Yatırım FİNTEK Küresel Ekonomi Teknoloji Yapay Zeka Otomobil Dünya Forbes Life Life Seyahat Gastronomi Moda Sanat Sağlık Sürdürülebilirlik Yeşil Küre - Tarım Video Hukuk Forbes Türkiye 30 Altı 30 50 Üstü 50 Başvuru 30 Altı 30 2026 Başvuru Türkiye'nin En İyi İşverenleri Forbes Türkiye En Başarılı Girişimler Forbes Next Mobilitenin Geleceği Zirvesi Forbes Stüdyo İçerik Üreticileri \"Anthropic\" ile ilgili içerikler Anthropic Anthropic merkezi San Francisco'da bulunan bir Amerikan yapay zeka şirketi. Şirket, Claude adını taşıyan bir dizi büyük dil modeli geliştirdi",
-      "matchedConcepts" : [
-        "anthropic",
-        "firma",
-        "sirket"
-      ],
-      "sourceType" : "search-result",
-      "title" : "Anthropic nedir? - Forbes Türkiye",
-      "url" : "https://www.forbes.com.tr/haberleri/anthropic"
-    },
-    {
-      "conceptCoverage" : 3,
-      "domain" : "en.wikipedia.org",
-      "excerpt" : "com Anthropic, PBC (stylized as ANTHROP\\C ) [ 8 ] [ 9 ] is an American artificial intelligence (AI) public benefit corporation headquartered in San Francisco , California. [ 31 ] In September 2025, Anthropic announced that it would stop selling its products to groups majority-owned by Chinese, Russian, Iranian, or North Korean entities due to national security concerns. [ 40 ] The same month, Anthropic donated $20 million to Public First Action , an AI regulation advocacy group",
-      "matchedConcepts" : [
-        "anthropic",
-        "corporation",
-        "group"
-      ],
-      "sourceType" : "search-result",
-      "title" : "Anthropic - Wikipedia",
-      "url" : "https://en.wikipedia.org/wiki/Anthropic"
+      "title" : "Usage Guide - video-analyzer documentation",
+      "url" : "https://thedocumentation.org/video-analyzer/usage_guide/"
     },
     {
       "conceptCoverage" : 2,
-      "domain" : "claude.com",
-      "excerpt" : "The AI for Problem Solvers | Claude by Anthropic Skip to main content Contact sales Try Claude Latest news Claude Cowork is now just Claude. Group it into themes with counts, tie each to a roadmap item, and post the digest to my team channel. Group the feedback into themes, count how often each comes up, and tell me what to prioritize",
+      "domain" : "arxiv.org",
+      "excerpt" : "The most significant research works on the image and video coding related topics using neural networks are highlighted, and future trends are also envisioned. In recent years, the image and video coding technologies have advanced by leaps and bounds. However, due to the popularization of image and video acquisition devices, the growth rate of image and video data is far beyond the improvement of the compression ratio",
       "matchedConcepts" : [
-        "anthropic",
-        "group"
+        "video",
+        "vision"
       ],
+      "publishedAt" : "2019-04-07T01:59:57Z",
       "sourceType" : "search-result",
-      "title" : "The AI for Problem Solvers | Claude by Anthropic",
-      "url" : "https://claude.com/product/overview"
-    },
-    {
-      "conceptCoverage" : 3,
-      "domain" : "support.claude.com",
-      "excerpt" : "Understanding your Team plan invoices Admin management Roles and permissions Purchase and manage seats on Team plans Purchase and manage seats on Enterprise plans Manage members on Team and Enterprise plans Claude Enterprise consumption guide Manage usage credits for Team and seat-based Enterprise plans Manage user feedback settings on Team and Enterprise plans Control project sharing for your organization Manage plugins for your organization Account management FAQs Manage groups and group spend limits on Enterprise plans Manage custom roles on Enterprise plans Set up role-based permissions on Enterprise plans Set organization instructions Claude Design admin guide for Team and Enterprise plans Claim and migrate accounts on your domain Designate support contacts for human support Claude Enterprise Admin API reference guide Claude Enterprise activation promo for Claude Code and Cowork Set",
-      "matchedConcepts" : [
-        "claude",
-        "code",
-        "agents"
-      ],
-      "sourceType" : "search-result",
-      "title" : "Install Claude Desktop | Claude Help Center",
-      "url" : "https://support.claude.com/en/articles/10065433-install-claude-desktop"
+      "title" : "Image and Video Compression with Neural Networks: A Review",
+      "url" : "http://arxiv.org/abs/1904.03567v2"
     },
     {
       "conceptCoverage" : 2,
-      "domain" : "en.wikipedia.org",
-      "excerpt" : "Anthropic sells Claude-based agentic tools including Claude Code, a terminal coding agent, and Claude Cowork, a similar tool for non-programmers. [ 15 ] Claude Code [ edit ] Claude Code, released in February 2025, is an agentic command line tool to delegate coding tasks from the terminal using natural language prompts. [ 18 ] On October 20, 2025, Anthropic launched a web version of Claude Code and a sandboxing feature",
+      "domain" : "docs.opencv.org",
+      "excerpt" : "Video Analysis — OpenCV Tutorials Skip to main content Back to top OpenCV 5. 0 Search Ctrl + K Ctrl + K GitHub Search Ctrl + K Ctrl + K GitHub Collapse Sidebar Expand Sidebar Video Analysis # Topics # Motion Analysis Object Tracking Detailed Description # On this page so the DOM is not blocked -->. Video Analysis — OpenCV Tutorials",
       "matchedConcepts" : [
-        "claude",
-        "code"
+        "video",
+        "analysis"
       ],
       "sourceType" : "search-result",
-      "title" : "Claude (AI) - Wikipedia",
-      "url" : "https://en.wikipedia.org/wiki/Claude_(AI)"
+      "title" : "Video Analysis — OpenCV Tutorials",
+      "url" : "https://docs.opencv.org/5.0/main_modules/video.html"
     }
   ],
   "researchSources" : [
     {
-      "domain" : "www.anthropic.com",
-      "snippet" : "To get started, use claude-opus-5-5 via the Claude API. Fast mode for Opus 5.5 is also available now in Claude Code and on the Claude Platform with up to 2.5x faster speed.",
+      "domain" : "thedocumentation.org",
       "sourceType" : "search-result",
-      "title" : "Claude Opus \\ Anthropic",
-      "url" : "https://www.anthropic.com/claude/opus"
+      "title" : "video-analyzer documentation",
+      "url" : "https://thedocumentation.org/video-analyzer/"
     },
     {
-      "domain" : "www.anthropic.com",
-      "snippet" : "Anthropic is an AI safety and research company that's working to build reliable, interpretable, and steerable AI systems.",
+      "domain" : "thedocumentation.org",
       "sourceType" : "search-result",
-      "title" : "Newsroom \\ Anthropic",
-      "url" : "https://www.anthropic.com/news"
+      "title" : "Usage Guide - video-analyzer documentation",
+      "url" : "https://thedocumentation.org/video-analyzer/usage_guide/"
     },
     {
-      "domain" : "support.claude.com",
-      "snippet" : "Subscription plans can only be used by subscribers, and the usage included in these plans is designed to support ordinary use of native Anthropic applications, including the Claude web, desktop, and mobile applications and Claude Code.",
+      "domain" : "arxiv.org",
+      "publishedAt" : "2019-04-07T01:59:57Z",
+      "snippet" : "In recent years, the image and video coding technologies have advanced by leaps and bounds. However, due to the popularization of image and video acquisition devices, the growth rate of image and video data is far beyond the improvement of the compression ratio. In particular, it has been widely recognized that there are increasing challenges of pursuing further coding performance improvement within the traditional hybrid coding framework. Deep convolution neural network (CNN) which makes the neural network resurge in recent years and has achieved great success in both artificial intelligent and signal processing fields, also provides a novel and promising solution for image and video compression. In this paper, we provide a systematic, comprehensive and up-to-date review of neural network based image and video compression techniques. The evolution and development of neural network based compression methodologies are introduced for images and video respectively. More specifically, the cutting-edge video coding techniques by leveraging deep learning and HEVC framework are presented and discussed, which promote the state-of-the-art video coding performance substantially. Moreover, the end-to-end image and video coding frameworks based on neural networks are also reviewed, revealing interesting explorations on next generation image and video coding frameworks/standards. The most significant research works on the image and video coding related topics using neural networks are highlighted, and future trends are also envisioned. In particular, the joint compression on semantic and visual information is tentatively explored to formulate high efficiency signal representation structure for both human vision and machine vision, which are the two dominant signal receptor in the age of artificial intelligence.",
       "sourceType" : "search-result",
-      "title" : "Log in to your Claude account | Claude Help Center",
-      "url" : "https://support.claude.com/en/articles/13189465-log-in-to-your-claude-account"
+      "title" : "Image and Video Compression with Neural Networks: A Review",
+      "url" : "http://arxiv.org/abs/1904.03567v2"
     },
     {
-      "domain" : "www.forbes.com.tr",
-      "snippet" : "Anthropic merkezi San Francisco'da bulunan bir Amerikan yapay zeka şirketi. Şirket, Claude adını taşıyan bir dizi büyük dil modeli geliştirdi.",
+      "domain" : "docs.opencv.org",
       "sourceType" : "search-result",
-      "title" : "Anthropic nedir? - Forbes Türkiye",
-      "url" : "https://www.forbes.com.tr/haberleri/anthropic"
-    },
-    {
-      "domain" : "en.wikipedia.org",
-      "snippet" : "In November, Nvidia and Microsoft were expected to invest up to $15 billion in Anthropic, and Anthropic said it would buy $30 billion of computing capacity from Microsoft Azure running on Nvidia AI systems.",
-      "sourceType" : "search-result",
-      "title" : "Anthropic - Wikipedia",
-      "url" : "https://en.wikipedia.org/wiki/Anthropic"
-    },
-    {
-      "domain" : "claude.com",
-      "snippet" : "I’m an in-house product lawyer at Anthropic. This morning, a product manager sent me a Slack asking a quick question on a feature that launched a few months ago.",
-      "sourceType" : "search-result",
-      "title" : "The AI for Problem Solvers | Claude by Anthropic",
-      "url" : "https://claude.com/product/overview"
-    },
-    {
-      "domain" : "support.claude.com",
-      "snippet" : "The Claude desktop apps bring Claude's capabilities directly to your computer, allowing for seamless integration with your workflow.",
-      "sourceType" : "search-result",
-      "title" : "Install Claude Desktop | Claude Help Center",
-      "url" : "https://support.claude.com/en/articles/10065433-install-claude-desktop"
-    },
-    {
-      "domain" : "en.wikipedia.org",
-      "snippet" : "Claude (AI) ... Claude is a series of large language models (LLMs) developed by American software company Anthropic. Claude was released as an AI -based chatbot in March 2023. It is also used in AI-assisted software development.",
-      "sourceType" : "search-result",
-      "title" : "Claude (AI) - Wikipedia",
-      "url" : "https://en.wikipedia.org/wiki/Claude_(AI)"
+      "title" : "Video Analysis — OpenCV Tutorials",
+      "url" : "https://docs.opencv.org/5.0/main_modules/video.html"
     }
   ],
   "route" : [
     "Core",
-    "Developer",
-    "Research Plan",
-    "Source Quality",
-    "Page Evidence",
-    "Repository",
-    "Compare",
-    "Research Verify",
-    "Proposal",
-    "Stop"
+    "Goal",
+    "Context",
+    "Plan",
+    "Research",
+    "Intelligence",
+    "Verify",
+    "Response"
   ],
-  "taskGraph" : [
+  "runtimeTask" : {
+    "completedStepIndexes" : [
+      0,
+      2,
+      1
+    ],
+    "createdAt" : "2026-09-26T15:42:26Z",
+    "id" : "E5CC11DB-977F-4949-8DD8-2E2314D457B6",
+    "objective" : "ARAŞTIRMA TESTİ — NVIDIA Şirket Analizi\n\nNVIDIA’yı güncel ve güvenilir kaynaklarla araştır.\n\nŞunları ayrı başlıklarda incele:\n1. Şirketin temel faaliyet alanları ve gelir kaynakları\n2. Yapay zekâ veri merkezi pazarındaki konumu\n3. Son 12 aydaki önemli ürün, finansal sonuç veya stratejik gelişmeler\n4. Başlıca rakipleri ve rekabet avantajları\n5. Riskler: tedarik zinciri, regülasyon, Çin ihracat kısıtlamaları ve pazar bağımlılığı\n6. Bağımsız kaynaklarda geçen eleştiriler veya çelişkili bulgular\n\nKaynak kuralları:\n- En az 6 kaynak kullan.\n- NVIDIA resmî yatırımcı ilişkileri veya SEC kaynağı kullan.\n- En az 2 bağımsız güvenilir kaynak ekle.\n- Her önemli iddiayı kaynakla ilişkilendir.\n- Kaynakların tarihini, türünü ve güvenilirlik gerekçesini belirt.\n- Eski veya çelişkili bilgi varsa açıkça yaz.\n- Kanıt yoksa varsayım yapma.\n\nSonuçta şunları üret:\n- 100 üzerinden araştırma kalite puanı\n- Kaynak çeşitliliği ve bağımsız doğrulama puanı\n- İddia–kanıt tablosu\n- Belirsizlikler ve eksikler\n- En fazla 5 maddelik yönetici özeti",
+    "priority" : 0,
+    "runningStepIndexes" : [
 
+    ],
+    "state" : "completed",
+    "waitingResourceIDs" : [
+
+    ]
+  },
+  "semanticMission" : {
+    "confidence" : 0.88,
+    "objective" : "ARAŞTIRMA TESTİ — NVIDIA Şirket Analizi\n\nNVIDIA’yı güncel ve güvenilir kaynaklarla araştır.\n\nŞunları ayrı başlıklarda incele:\n1. Şirketin temel faaliyet alanları ve gelir kaynakları\n2. Yapay zekâ veri merkezi pazarındaki konumu\n3. Son 12 aydaki önemli ürün, finansal sonuç veya stratejik gelişmeler\n4. Başlıca rakipleri ve rekabet avantajları\n5. Riskler: tedarik zinciri, regülasyon, Çin ihracat kısıtlamaları ve pazar bağımlılığı\n6. Bağımsız kaynaklarda geçen eleştiriler veya çelişkili bulgular\n\nKaynak kuralları:\n- En az 6 kaynak kullan.\n- NVIDIA resmî yatırımcı ilişkileri veya SEC kaynağı kullan.\n- En az 2 bağımsız güvenilir kaynak ekle.\n- Her önemli iddiayı kaynakla ilişkilendir.\n- Kaynakların tarihini, türünü ve güvenilirlik gerekçesini belirt.\n- Eski veya çelişkili bilgi varsa açıkça yaz.\n- Kanıt yoksa varsayım yapma.\n\nSonuçta şunları üret:\n- 100 üzerinden araştırma kalite puanı\n- Kaynak çeşitliliği ve bağımsız doğrulama puanı\n- İddia–kanıt tablosu\n- Belirsizlikler ve eksikler\n- En fazla 5 maddelik yönetici özeti",
+    "outcomes" : [
+      "analyze",
+      "explain",
+      "research"
+    ],
+    "requiredCapabilityIDs" : [
+      "context.local",
+      "core.reasoning",
+      "research.web"
+    ],
+    "requiresUserInput" : false,
+    "steps" : [
+      {
+        "capabilityID" : "context.local",
+        "dependsOn" : [
+
+        ],
+        "operation" : "context.resolve",
+        "purpose" : "Yalnızca bu kullanıcı hedefiyle ilgili bağlamı hazırla; eski görev hedeflerini yeni göreve taşıma.",
+        "title" : "Görev bağlamını hazırla"
+      },
+      {
+        "capabilityID" : "research.web",
+        "dependsOn" : [
+          0
+        ],
+        "operation" : "web.research",
+        "purpose" : "Önceki adımda çözülen gerçek hedef/veriyi kullanarak dış kaynaklardan gerekli bilgiyi araştır.",
+        "title" : "Gerekli dış bilgiyi araştır"
+      },
+      {
+        "capabilityID" : "core.reasoning",
+        "dependsOn" : [
+          1
+        ],
+        "operation" : "content.analyze",
+        "purpose" : "Önceki adımların gerçek çıktısını birlikte değerlendir ve sonraki adımın kullanabileceği sonucu üret.",
+        "title" : "Toplanan veriyi analiz et"
+      }
+    ]
+  },
+  "semanticPlannerProvider" : "Apple Foundation Models",
+  "taskGraph" : [
+    {
+      "available" : true,
+      "capabilityID" : "context.local",
+      "dependsOn" : [
+
+      ],
+      "index" : 0,
+      "operation" : "context.resolve",
+      "requiresApproval" : false,
+      "resourceIDs" : [
+
+      ],
+      "risk" : "reasoning",
+      "role" : "reason",
+      "title" : "Görev bağlamını hazırla"
+    },
+    {
+      "available" : true,
+      "capabilityID" : "research.web",
+      "dependsOn" : [
+        0
+      ],
+      "index" : 1,
+      "operation" : "web.research",
+      "requiresApproval" : false,
+      "resourceIDs" : [
+        "network"
+      ],
+      "risk" : "external",
+      "role" : "retrieve",
+      "title" : "Gerekli dış bilgiyi araştır"
+    },
+    {
+      "available" : true,
+      "capabilityID" : "core.reasoning",
+      "dependsOn" : [
+        1
+      ],
+      "index" : 2,
+      "operation" : "content.analyze",
+      "requiresApproval" : false,
+      "resourceIDs" : [
+
+      ],
+      "risk" : "reasoning",
+      "role" : "transform",
+      "title" : "Toplanan veriyi analiz et"
+    }
   ],
-  "traceID" : "2DB0BBC4-88F4-4D1A-92E4-48CDEF217844",
-  "userInput" : "Araştırma görevi: Anthropic şirketinin Claude Code ürününü, yazılım geliştirme ajanı olarak detaylı incele.  \nŞunları araştır:\n1. Ürünün temel yetenekleri ve hangi geliştirme ortamlarında çalıştığı\n2. Kod yazma, dosya değiştirme, test çalıştırma ve Git süreçlerindeki yetkileri\n3. Güvenlik/izin modeli: kullanıcı onayı, terminal komutları, hassas dosyalar ve dış ağ erişimi\n4. Fiyatlandırma veya kullanım modeli\n5. Başlıca sınırlamaları, güvenlik riskleri ve kullanıcı geri bildirimleri\n6. KRALİ ile karşılaştırıldığında alınabilecek mimari fikirler\nKaynak standardı:\n- Önce Anthropic’in resmi dokümantasyonu ve ürün sayfaları.\n- Ardından bağımsız teknik kaynaklar, güvenlik değerlendirmeleri ve mümkünse resmi GitHub kaynakları.\n- Her önemli iddia için URL, kaynak türü, tarih/güncellik ve kanıt gücü belirt.\n- Aynı bilgiyi tekrarlayan kaynakları bağımsız doğrulama olarak sayma.\n- Çelişki veya belirsizlik varsa açıkça yaz.\nÇıktı sonunda 100 üzerinden araştırma kalite puanı ver; puanı kaynak çeşitliliği, güncellik, iddiaya doğrudan destek, bağımsız doğrulama ve güvenlik analiziyle gerekçelendir. Kod değişikliği yapma; yalnızca araştırma raporu ve öneri paketi üret.",
-  "verificationState" : "partial",
-  "verificationSummary" : "A proposal finding cites evidence IDs, but its wording is not supported by the cited page-derived excerpts."
+  "traceID" : "51817F68-3186-420A-9644-E6B1535664AA",
+  "userInput" : "ARAŞTIRMA TESTİ — NVIDIA Şirket Analizi\n\nNVIDIA’yı güncel ve güvenilir kaynaklarla araştır.\n\nŞunları ayrı başlıklarda incele:\n1. Şirketin temel faaliyet alanları ve gelir kaynakları\n2. Yapay zekâ veri merkezi pazarındaki konumu\n3. Son 12 aydaki önemli ürün, finansal sonuç veya stratejik gelişmeler\n4. Başlıca rakipleri ve rekabet avantajları\n5. Riskler: tedarik zinciri, regülasyon, Çin ihracat kısıtlamaları ve pazar bağımlılığı\n6. Bağımsız kaynaklarda geçen eleştiriler veya çelişkili bulgular\n\nKaynak kuralları:\n- En az 6 kaynak kullan.\n- NVIDIA resmî yatırımcı ilişkileri veya SEC kaynağı kullan.\n- En az 2 bağımsız güvenilir kaynak ekle.\n- Her önemli iddiayı kaynakla ilişkilendir.\n- Kaynakların tarihini, türünü ve güvenilirlik gerekçesini belirt.\n- Eski veya çelişkili bilgi varsa açıkça yaz.\n- Kanıt yoksa varsayım yapma.\n\nSonuçta şunları üret:\n- 100 üzerinden araştırma kalite puanı\n- Kaynak çeşitliliği ve bağımsız doğrulama puanı\n- İddia–kanıt tablosu\n- Belirsizlikler ve eksikler\n- En fazla 5 maddelik yönetici özeti",
+  "verificationState" : "passed",
+  "verificationSummary" : "Arama teknik olarak tamamlandı ve 0 sonuç doğrulandı; belirtilen kapsamda hedef bulunamadı."
 }
