@@ -1160,6 +1160,14 @@ struct AgentResearchQueryPlanner {
             return true
         }
 
+        let researchSubject = englishTerms.isEmpty ? query : englishTerms.joined(separator: " ")
+        let generalFacets = [
+            ResearchFacet(id: "official", title: "Resmi belgeler", query: researchSubject + " official documentation"),
+            ResearchFacet(id: "standards", title: "Standartlar ve birincil kaynaklar", query: researchSubject + " standards specification primary source"),
+            ResearchFacet(id: "independent", title: "Bağımsız teknik doğrulama", query: researchSubject + " independent technical analysis"),
+            ResearchFacet(id: "recent", title: "Güncel gelişmeler", query: researchSubject + " latest update release notes")
+        ]
+
         return ResearchQueryPlan(
             original: query,
             variants: variants,
@@ -1169,7 +1177,7 @@ struct AgentResearchQueryPlanner {
                 Set(preferredDomains)
             ).sorted(),
             entityTerms: [],
-            facets: [],
+            facets: generalFacets,
             directCandidates: []
         )
     }

@@ -40,8 +40,15 @@ struct CommandUnderstandingSelfTest {
             context: emptyContext
         )
         expect(ambiguous.commandAssessment.requiresClarification, "ambiguous mixed command requests clarification")
+        let unsafeScope = interpreter.interpret(
+            "Hepsini düzelt.",
+            decision: general,
+            context: emptyContext
+        )
+        expect(unsafeScope.commandAssessment.requiresClarification, "unbounded change command requests scope")
         print("command_understanding_self_test_ok")
         print("clear_command=confident")
         print("ambiguous_command=clarification_required")
+        print("unbounded_change=clarification_required")
     }
 }

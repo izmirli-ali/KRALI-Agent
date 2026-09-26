@@ -557,6 +557,17 @@ struct AgentGoalInterpreter {
             ambiguities.append("çoklu işlemlerin uygulanma sırası")
         }
 
+        if containsAny(normalized, ["sil", "kaldır", "kaldir", "değiştir", "degistir", "düzelt", "duzelt"]) &&
+            !containsAny(normalized, ["dosya", "kart", "metin", "klasör", "klasor", "görsel", "gorsel", "video", "öneri", "oneri"]) {
+            ambiguities.append("hangi öğe üzerinde değişiklik yapılacağı")
+        }
+
+        if containsAny(normalized, ["hepsini", "tümünü", "tumunu", "her şeyi", "her seyi"]) &&
+            context.relevantMemoryCount == 0 &&
+            context.previousFileResultCount == 0 {
+            ambiguities.append("kapsama dahil edilecek öğelerin sınırı")
+        }
+
         let confidence = max(
             0.25,
             0.95 - Double(ambiguities.count) * 0.28

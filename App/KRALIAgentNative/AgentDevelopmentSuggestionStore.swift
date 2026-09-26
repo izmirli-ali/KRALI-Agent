@@ -226,19 +226,19 @@ struct AgentDevelopmentSuggestionStore {
             fingerprint: String
         )] = [
             (
-                title: "KRALİ araştırma kalitesini iyileştir",
+                title: "Araştırma kalitesi",
                 reason: "Kaynak çeşitliliği ve kanıt bağlama kalitesini kontrollü olarak gözden geçirmek için başlangıç önerisi.",
                 benefit: "Araştırma cevaplarında daha tutarlı, doğrulanabilir kaynak ve bulgu eşleştirmesi.",
                 fingerprint: "fallback:research-quality"
             ),
             (
-                title: "KRALİ arayüz önerilerini iyileştir",
+                title: "Arayüz önerileri",
                 reason: "Araştırma sonuçlarındaki öneri metinlerinin okunabilirliğini ve öncelik sırasını kontrollü olarak incelemek için başlangıç önerisi.",
                 benefit: "Kullanıcıya sunulan araştırma önerilerinin daha açık ve taranabilir olması.",
                 fingerprint: "fallback:ui-readability"
             ),
             (
-                title: "KRALİ eğitim raporu analizini iyileştir",
+                title: "Eğitim raporları",
                 reason: "Eğitim raporlarındaki bulgu ve öneri özetlerinin daha tutarlı analiz edilmesi için başlangıç önerisi.",
                 benefit: "Eğitim raporlarından daha anlaşılır, kanıta dayalı geliştirme bulguları üretmek.",
                 fingerprint: "fallback:training-report-analyzer"
@@ -382,70 +382,70 @@ struct AgentDevelopmentSuggestionStore {
 
         let definitions: [(String, String, String, String, AgentDevelopmentSuggestionSource)] = [
             (
-                "KRALİ araştırma sonuç ekranını iyileştir",
+                "Araştırma sonuçları",
                 "Kaynak, kanıt, çelişki ve puan özetini daha taranabilir bir hiyerarşide sunmak.",
                 "Uzun araştırma sonuçlarında kritik bulgulara daha hızlı ulaşılması.",
                 "innovation:ui-research-results",
                 .usability
             ),
             (
-                "KRALİ geliştirme öneri akışını iyileştir",
+                "Öneri akışı",
                 "Yeni fikirler, öneriler, geliştirme durumu ve inceleme gereksinimini daha sade bir kontrol yüzeyinde toplamak.",
                 "Kullanıcının doğru geliştirme kararını daha az arayüz gürültüsüyle vermesi.",
                 "innovation:ui-development-flow",
                 .usability
             ),
             (
-                "KRALİ erişilebilirlik ve klavye akışını iyileştir",
+                "Erişilebilirlik ve klavye",
                 "Önemli durumlar, odak sırası ve klavye ile erişilebilir geliştirme kontrollerini gözden geçirmek.",
                 "Arayüzün daha hızlı, öngörülebilir ve erişilebilir kullanılması.",
                 "innovation:ui-accessibility",
                 .usability
             ),
             (
-                "KRALİ araştırma kaynak kartlarını iyileştir",
+                "Kaynak kartları",
                 "Kaynak türü, güncellik, kanıt gücü ve bağımsızlık bilgisini kompakt kartlarda görünür kılmak.",
                 "Araştırma kalitesinin kaynak bazında daha anlaşılır değerlendirilmesi.",
                 "innovation:ui-source-cards",
                 .usability
             ),
             (
-                "KRALİ kanıt çelişkisi incelemesini iyileştir",
+                "Kanıt çelişkileri",
                 "Aynı iddia için farklı kaynakların uyuşmayan bulgularını ayrı bir inceleme kuyruğunda görünür kılmak.",
                 "Araştırma sonuçlarında güven derecesi ve belirsizliğin daha açık gösterilmesi.",
                 "innovation:claim-contradictions",
                 .research
             ),
             (
-                "KRALİ araştırma tekrar üretilebilirliğini iyileştir",
+                "Tekrar üretilebilir araştırma",
                 "Kaynak tarihi, sürümü, erişim zamanı ve kanıt alıntısını tutarlı bir araştırma kaydında birleştirmek.",
                 "Bulguların daha sonra denetlenmesi ve aynı araştırmanın tekrar çalıştırılabilmesi.",
                 "innovation:research-reproducibility",
                 .research
             ),
             (
-                "KRALİ geliştirme regresyon hafızasını iyileştir",
+                "Regresyon hafızası",
                 "Geçmiş candidate hatalarını test sonucu, hata sınıfı ve kullanıcı geri bildirimiyle ilişkilendirmek.",
                 "Benzer geliştirmelerde daha erken risk uyarısı ve daha güvenli planlama.",
                 "innovation:regression-memory",
                 .research
             ),
             (
-                "KRALİ bağımlılık etkisi analizini iyileştir",
+                "Bağımlılık etkisi",
                 "Önerilen dosya değişikliklerinin çağrı zinciri ve doğrulama kapsamına etkisini araştırmak.",
                 "Daha küçük, geri alınabilir ve test kapsamı açık candidate paketleri.",
                 "innovation:dependency-impact",
                 .research
             ),
             (
-                "KRALİ çok dilli araştırma değerlendirmesini iyileştir",
+                "Çok dilli araştırma",
                 "Aynı araştırma iddiasını Türkçe ve İngilizce sorgularla karşılaştırarak kaynak kör noktalarını ölçmek.",
                 "Dil kaynaklı bulgu kaybını azaltan daha dengeli araştırma kalitesi.",
                 "innovation:multilingual-evaluation",
                 .research
             ),
             (
-                "KRALİ geliştirme benchmark geçmişini iyileştir",
+                "Kalite geçmişi",
                 "Araştırma ve candidate çıktılarının kalite puanlarını zaman içinde karşılaştırılabilir biçimde kaydetmek.",
                 "Gelişimin gerçek görevlerde ölçülmesi ve gerilemelerin fark edilmesi.",
                 "innovation:quality-history",

@@ -271,6 +271,27 @@ struct ConversationSidebarView: View {
         ).first ?? suggestion.fingerprint
     }
 
+    private func suggestionCardTitle(
+        _ suggestion: AgentDevelopmentSuggestion
+    ) -> String {
+        let compactTitles = [
+            "innovation:ui-research-results": "Araştırma sonuçları",
+            "innovation:ui-development-flow": "Öneri akışı",
+            "innovation:ui-accessibility": "Erişilebilirlik ve klavye",
+            "innovation:ui-source-cards": "Kaynak kartları",
+            "innovation:claim-contradictions": "Kanıt çelişkileri",
+            "innovation:research-reproducibility": "Tekrar üretilebilir araştırma",
+            "innovation:regression-memory": "Regresyon hafızası",
+            "innovation:dependency-impact": "Bağımlılık etkisi",
+            "innovation:multilingual-evaluation": "Çok dilli araştırma",
+            "innovation:quality-history": "Kalite geçmişi"
+        ]
+        if let compact = compactTitles[suggestion.fingerprint] { return compact }
+        return suggestion.title
+            .replacingOccurrences(of: "KRALİ ", with: "")
+            .replacingOccurrences(of: "KRALI ", with: "")
+    }
+
     private func developmentSuggestionPriority(
         _ suggestion:
             AgentDevelopmentSuggestion
@@ -340,7 +361,7 @@ struct ConversationSidebarView: View {
                             .foregroundStyle(.secondary)
                             .padding(.top, 2)
 
-                        Text(suggestion.title)
+                        Text(suggestionCardTitle(suggestion))
                             .font(.system(size: 13, weight: .semibold))
                             .multilineTextAlignment(.leading)
                             .lineLimit(isExpanded ? 3 : 2)

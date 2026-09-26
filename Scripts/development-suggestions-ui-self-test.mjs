@@ -159,6 +159,14 @@ ok(
   "unverified legacy research is removed and safe UI candidates are prioritized"
 );
 
+ok(
+  sidebar.includes("suggestionCardTitle") &&
+  sidebar.includes('replacingOccurrences(of: "KRALİ ", with: "")') &&
+  store.includes('"Öneri akışı"') &&
+  store.includes('"Araştırma sonuçları"'),
+  "sidebar cards use short, task-first labels without the KRALİ prefix"
+);
+
 console.log("development_suggestions_ui_self_test_ok");
 console.log("research_to_suggestion=bounded_after_approval");
 console.log("candidate_progress=90");
