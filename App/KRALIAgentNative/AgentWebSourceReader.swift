@@ -41,7 +41,7 @@ actor AgentWebSourceReader {
                 max(1, plan.conceptGroups.count)
             )
 
-        var evidence: [WebSourceEvidence] = []
+        var selectedSources: [WebResearchResult] = []
         var seenDomains: [String: Int] = [:]
 
         let prioritized = sources.sorted { left, right in
@@ -62,7 +62,7 @@ actor AgentWebSourceReader {
         }
 
         for source in prioritized {
-            guard evidence.count < max(1, min(limit, 6)) else {
+            guard selectedSources.count < max(1, min(limit, 6)) else {
                 break
             }
 
@@ -75,16 +75,37 @@ actor AgentWebSourceReader {
                 continue
             }
 
-            if let item = await readSource(
-                source,
-                plan: plan,
-                requiredCoverage: requiredCoverage,
-                allowSnippetFallback:
-                    allowSnippetFallback
-            ) {
-                evidence.append(item)
-                seenDomains[source.domain, default: 0] += 1
+            selectedSources.append(source)
+            seenDomains[source.domain, default: 0] += 1
+        }
+
+        // Each source already has a bounded request/resource timeout. Reading
+        // the selected, domain-diverse pages concurrently keeps research
+        // latency close to one bounded request instead of the sum of all
+        // source timeouts.
+        let evidence = await withTaskGroup(
+            of: WebSourceEvidence?.self,
+            returning: [WebSourceEvidence].self
+        ) { group in
+            for source in selectedSources {
+                group.addTask {
+                    await self.readSource(
+                        source,
+                        plan: plan,
+                        requiredCoverage: requiredCoverage,
+                        allowSnippetFallback:
+                            allowSnippetFallback
+                    )
+                }
             }
+
+            var collected: [WebSourceEvidence] = []
+            for await item in group {
+                if let item {
+                    collected.append(item)
+                }
+            }
+            return collected
         }
 
         return evidence.sorted { left, right in

@@ -15,6 +15,8 @@ const engine = read("App/KRALIAgentNative/AgentEngine.swift");
 const gate = read("App/KRALIAgentNative/AgentPublicResearchQualityGate.swift");
 const compiler = read("App/KRALIAgentNative/AgentBoundedDevelopmentTaskCompiler.swift");
 const missionNormalizer = read("App/KRALIAgentNative/AgentMissionNormalizer.swift");
+const sourceReader = read("App/KRALIAgentNative/AgentWebSourceReader.swift");
+const executionProfile = read("App/KRALIAgentNative/AgentExecutionProfile.swift");
 const perception = read("App/KRALIAgentNative/AgentScreenPerception.swift");
 const workflow = read(".github/workflows/krali-ci.yml");
 const marketingVersions = [...project.matchAll(/MARKETING_VERSION = ([^;]+);/g)].map((match) => match[1]);
@@ -51,6 +53,33 @@ ok(
     missionNormalizer.includes('"desktop.control"') &&
     missionNormalizer.includes('"browser.control"'),
   "Explicit public research can still inherit stale Desktop, file-search, or browser-control steps."
+);
+
+ok(
+  engine.includes("let researchQualityFailure") &&
+    engine.includes("Araştırma kalite kapısı yetersiz kanıt tespit etti") &&
+    engine.includes("reply:\n                    reply,"),
+  "A research-quality shortfall can still become a browser/Desktop capability gap or hide its evidence report."
+);
+
+ok(
+  sourceReader.includes("let evidence = await withTaskGroup(") &&
+    sourceReader.includes("selectedSources") &&
+    sourceReader.includes("domain-diverse pages concurrently"),
+  "Research source reads lost their bounded parallel execution contract."
+);
+
+ok(
+  engine.includes("executionProfile: AgentExecutionProfile = .conversationResearchCore") &&
+    executionProfile.includes("case conversationResearchCore") &&
+    executionProfile.includes("retiredAutomationCapabilityIDs") &&
+    executionProfile.includes('"files.search"'),
+  "The default core profile still exposes retired desktop or local-file automation."
+);
+
+ok(
+  engine.includes("Retired local automation blocked in conversation research core"),
+  "Retired local automation must also be blocked on direct intent execution."
 );
 
 ok(

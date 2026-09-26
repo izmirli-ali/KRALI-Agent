@@ -50,7 +50,7 @@ final class AgentEngine: ObservableObject {
     @Published var missionPhase: AgentMissionPhase = .runtime
     @Published var developerRepository: AgentDeveloperRepository?
     @Published var developerMissionReason: String?
-    @Published var executionProfile: AgentExecutionProfile = .developmentResearchMode
+    @Published var executionProfile: AgentExecutionProfile = .conversationResearchCore
     @Published var currentTaskGraph: AgentTaskGraph?
     @Published var currentRuntimeTask: AgentRuntimeTask?
     @Published var taskGraphStatus = "Henüz görev grafiği yok."
@@ -2878,6 +2878,22 @@ final class AgentEngine: ObservableObject {
                                 attemptSummaries
                         )
 
+                // Evidence quality is a research outcome, not proof that an
+                // interactive browser capability is missing. Preserving this
+                // distinction prevents an honest research refusal from
+                // creating an unrelated desktop/browser development card.
+                let researchQualityFailure =
+                    chainResult
+                        .attempts
+                        .contains {
+                            $0.strategyID.contains(
+                                "public-research"
+                            ) &&
+                            $0.summary.contains(
+                                "kalite eşiğini geçemedi"
+                            )
+                        }
+
                 let browserGap =
                     capabilityGapResolver
                         .resolveExhaustedOutcomeCapability(
@@ -2892,7 +2908,7 @@ final class AgentEngine: ObservableObject {
                                     .all
                         )
 
-                if transientFailure {
+                if transientFailure || researchQualityFailure {
                     currentOutcomeFailureIsTransient = true
 
                     capabilityLearningPlans
@@ -2928,14 +2944,22 @@ final class AgentEngine: ObservableObject {
                                     .whitespacesAndNewlines
                             )
                             .isEmpty
-                        ? "Web hedefini açmayı denedim ancak gözlem sırasında foreground değiştiği için sonucu doğrulayamadım. Bu geçici bir gözlem kesintisi; yeni bir capability öğrenmesi başlatılmadı."
+                        ? (
+                            researchQualityFailure
+                            ? "Araştırma yeterli kaynak kalitesine ulaşmadı; kesin sonuç üretmedim. Bu bir tarayıcı veya Desktop capability eksikliği değildir."
+                            : "Web hedefini açmayı denedim ancak gözlem sırasında foreground değiştiği için sonucu doğrulayamadım. Bu geçici bir gözlem kesintisi; yeni bir capability öğrenmesi başlatılmadı."
+                        )
                         : chainResult.reply
 
                     currentReflectionSummary =
-                        "Outcome gözlemi kullanıcı/uygulama foreground değişimiyle kesildi; transient failure capability gap olarak sınıflandırılmadı."
+                        researchQualityFailure
+                        ? "Araştırma kalite kapısı yetersiz kanıt tespit etti; browser/Desktop capability gap oluşturulmadı."
+                        : "Outcome gözlemi kullanıcı/uygulama foreground değişimiyle kesildi; transient failure capability gap olarak sınıflandırılmadı."
 
                     log(
-                        "Outcome gözlemi kesildi; Learning Gateway açılmadı"
+                        researchQualityFailure
+                        ? "Araştırma kalite kapısı reddetti; Learning Gateway açılmadı"
+                        : "Outcome gözlemi kesildi; Learning Gateway açılmadı"
                     )
                 } else {
                     queueInteractiveAccessCapability()
@@ -3981,8 +4005,7 @@ final class AgentEngine: ObservableObject {
         _ goal: AgentGoalProfile
     ) -> AgentGoalProfile {
         guard
-            executionProfile ==
-                .developmentResearchMode,
+            executionProfile != .full,
             goal.outcomes.contains(.research) ||
             goal.requiredCapabilityIDs.contains(
                 "research.web"
@@ -6208,6 +6231,17 @@ final class AgentEngine: ObservableObject {
         for text: String,
         decision: AgentDecision
     ) -> String {
+        if executionProfile == .conversationResearchCore {
+            switch decision.intent {
+            case .organizeScreenshots, .fileSearch, .compoundFileTask:
+                log("Retired local automation blocked in conversation research core")
+                return "Yerel masaüstü ve dosya otomasyonu bu ürün çekirdeğinde emekliye alındı. İsteğini konuşma, web araştırması veya GitHub üzerinde geliştirme görevi olarak yeniden ifade edebilirsin."
+
+            default:
+                break
+            }
+        }
+
         switch decision.intent {
         case .approve:
             return approvePendingFileAction()
@@ -7196,9 +7230,7 @@ final class AgentEngine: ObservableObject {
                 succeeded:
                     hasEvidence,
                 reply:
-                    hasEvidence
-                    ? reply
-                    : "",
+                    reply,
                 summary:
                     hasEvidence
                     ? "Yeterli sayfa kanıtı, kaynak otoritesi, bağımsız çeşitlilik ve kalite eşiği üretildi."
