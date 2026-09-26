@@ -402,7 +402,7 @@ struct ConversationSidebarView: View {
                 }
 
                 if suggestion.state == .failed || suggestion.state == .readyForReview {
-                    Button("Yeniden araştır") {
+                    Button("Kontrollü tekrar dene") {
                         engine.retryDevelopmentSuggestion(id: suggestion.id)
                     }
                     .buttonStyle(.bordered)
@@ -452,7 +452,7 @@ struct ConversationSidebarView: View {
             }
 
             if suggestion.state == .failed || suggestion.state == .readyForReview {
-                Button("Yeniden araştır") {
+                Button("Kontrollü tekrar dene") {
                     engine.retryDevelopmentSuggestion(id: suggestion.id)
                 }
             }

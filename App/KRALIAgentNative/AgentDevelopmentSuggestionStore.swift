@@ -548,16 +548,16 @@ struct AgentDevelopmentSuggestionStore {
         guard
             let revision = AgentSourceRevisionPolicy.exactRevision(sourceRevision),
             let original = existing.first(where: { $0.id == suggestionID }),
-            original.state == .failed || original.state == .readyForReview,
-            original.sourceRevision != revision
+            original.state == .failed || original.state == .readyForReview
         else {
             return existing
         }
 
-        let fingerprint = original.fingerprint + "|retry|" + compactIdentifier(revision)
-        guard !existing.contains(where: { $0.fingerprint == fingerprint }) else {
-            return existing
-        }
+        let retryPrefix = original.fingerprint + "|retry|" + compactIdentifier(revision)
+        let retryAttempt = existing.filter {
+            $0.fingerprint.hasPrefix(retryPrefix)
+        }.count + 1
+        let fingerprint = retryPrefix + "|attempt-" + String(retryAttempt)
 
         let now = Date()
         var provenance = Array(original.provenanceIDs.prefix(8))
@@ -575,7 +575,7 @@ struct AgentDevelopmentSuggestionStore {
                 learningPath: original.learningPath,
                 candidateCapabilityIDs: original.candidateCapabilityIDs,
                 title: original.title,
-                reason: "Kullanıcı önceki teşhis/denemeden sonra bu önerinin güncel kaynak revizyonunda yeniden araştırılmasını istedi.",
+                reason: "Kullanıcı durmuş aday için kontrollü tekrar denemesi istedi. Önceki kayıt korunur; bu deneme yeniden onay olmadan kod veya yayın yapmaz.",
                 expectedBenefit: original.expectedBenefit,
                 provenanceIDs: provenance,
                 sourceRevision: revision,

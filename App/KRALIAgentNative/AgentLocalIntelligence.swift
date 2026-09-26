@@ -3092,29 +3092,22 @@ actor AgentLocalIntelligence {
                             .repositoryEvidenceIDs
                     )
 
-                guard
-                    !proposalExternalIDs
-                        .isEmpty,
-                    proposalExternalIDs
-                        .isSubset(
-                            of:
-                                usedExternalIDs
-                        ),
-                    !proposalRepositoryIDs
-                        .isEmpty,
-                    proposalRepositoryIDs
-                        .isSubset(
-                            of:
-                                usedRepositoryIDs
-                        )
-                else {
-                    lastDevelopmentResearchSynthesisFailure =
-                        "Proposal selection cited missing or unknown evidence IDs."
-                    return nil
-                }
+                let selectionHasValidEvidenceIDs =
+                    !proposalExternalIDs.isEmpty &&
+                    proposalExternalIDs.isSubset(of: usedExternalIDs) &&
+                    !proposalRepositoryIDs.isEmpty &&
+                    proposalRepositoryIDs.isSubset(of: usedRepositoryIDs)
 
-                let proposal =
-                    AgentDevelopmentResearchProposal(
+                let fallbackApproach = approaches.sorted {
+                    if $0.decision == $1.decision {
+                        return $0.title < $1.title
+                    }
+                    return $0.decision.rawValue < $1.decision.rawValue
+                }.first!
+
+                let proposal: AgentDevelopmentResearchProposal
+                if selectionHasValidEvidenceIDs {
+                    proposal = AgentDevelopmentResearchProposal(
                         problem:
                             generated
                                 .proposal
@@ -3186,10 +3179,41 @@ actor AgentLocalIntelligence {
                                 .proposal
                                 .rollbackCondition
                     )
+                } else {
+                    // The approach stage has already validated these IDs and
+                    // direct excerpt support. Preserve a review-only result
+                    // rather than discarding the whole research run when the
+                    // final language-model selection mistypes an ID.
+                    proposal = AgentDevelopmentResearchProposal(
+                        problem: "Selection-stage evidence identifiers could not be verified.",
+                        currentArchitecture: "Read-only repository comparison completed.",
+                        researchFindings: [fallbackApproach.summary],
+                        evidenceIDs: fallbackApproach.evidenceIDs,
+                        repositoryEvidenceIDs: fallbackApproach.repositoryEvidenceIDs,
+                        gap: "Final proposal selection needs human review because it cited an unknown identifier.",
+                        alternatives: approaches.map(\.title),
+                        selectedStrategy: "Review the verified approach before creating any code candidate.",
+                        whyThisStrategy: "It retains only approach-stage evidence IDs that were already validated against page excerpts.",
+                        expectedBehavior: "Produce a reviewable evidence-bound research outcome without starting mutation.",
+                        allowedScope: ["Read-only research report and review metadata"],
+                        likelyFiles: [],
+                        risks: ["Selection-stage identifier mismatch"],
+                        securityBoundaries: ["No mutation, branch, push, merge, or publication authority"],
+                        verificationContract: ["Verify every retained evidence ID against collected page evidence"],
+                        behavioralBenchmark: ["Report retains the verified approach and marks the selection limitation"],
+                        rollbackCondition: "Discard the review-only proposal if a human cannot confirm the selected approach."
+                    )
+                }
 
                 var remaining =
                     generated
                         .remainingLimitations
+
+                if !selectionHasValidEvidenceIDs {
+                    remaining.append(
+                        "Final selection cited unknown evidence IDs; a review-only proposal was reconstructed from a previously validated approach."
+                    )
+                }
 
                 if approaches.count <
                     plan.requiredApproachCount {
@@ -3212,10 +3236,13 @@ actor AgentLocalIntelligence {
                     approaches:
                         approaches,
                     biggestGap:
-                        generated.biggestGap,
+                        selectionHasValidEvidenceIDs
+                        ? generated.biggestGap
+                        : proposal.gap,
                     selectedImprovement:
-                        generated
-                            .selectedImprovement,
+                        selectionHasValidEvidenceIDs
+                        ? generated.selectedImprovement
+                        : fallbackApproach.title,
                     proposal:
                         proposal,
                     risks:
@@ -3224,8 +3251,8 @@ actor AgentLocalIntelligence {
                         generated
                             .verificationPlan,
                     mutationRecommended:
-                        generated
-                            .mutationRecommended,
+                        selectionHasValidEvidenceIDs &&
+                        generated.mutationRecommended,
                     mutationStarted:
                         false,
                     remainingLimitations:

@@ -94,6 +94,14 @@ ok(
 );
 
 ok(
+  store.includes("retryAttempt") &&
+  store.includes('"|attempt-"') &&
+  !store.includes("original.sourceRevision != revision") &&
+  sidebar.includes('Button("Kontrollü tekrar dene")'),
+  "a stopped candidate can create an auditable controlled retry on the same source revision"
+);
+
+ok(
   engine.includes("fraction: 1.0") &&
   engine.includes('title: "Yayınlandı"') &&
   engine.includes('title: "Tamamlandı"'),
@@ -116,8 +124,18 @@ ok(
   "research claims, local history, dependency checks, and regression replay are explicit"
 );
 
+const localIntelligence = read("App/KRALIAgentNative/AgentLocalIntelligence.swift");
+ok(
+  localIntelligence.includes("selectionHasValidEvidenceIDs") &&
+  localIntelligence.includes("review-only proposal was reconstructed") &&
+  localIntelligence.includes("mutationRecommended:") &&
+  localIntelligence.includes("selectionHasValidEvidenceIDs &&"),
+  "invalid final selection IDs preserve only a review-only evidence-bound outcome"
+);
+
 console.log("development_suggestions_ui_self_test_ok");
 console.log("research_to_suggestion=bounded_after_approval");
 console.log("candidate_progress=90");
 console.log("release_progress=100");
 console.log("stable_cards_and_replay_checks=PASS");
+console.log("same_revision_retry_and_selection_recovery=PASS");
