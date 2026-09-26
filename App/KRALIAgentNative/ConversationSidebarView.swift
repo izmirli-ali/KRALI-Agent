@@ -5,6 +5,7 @@ struct ConversationSidebarView: View {
     @EnvironmentObject private var engine: AgentEngine
     @State private var pendingDelete:
         ConversationArchiveSegment?
+    @State private var expandedSuggestionID: UUID?
 
     var body: some View {
         VStack(alignment: .leading, spacing: 0) {
@@ -316,22 +317,46 @@ struct ConversationSidebarView: View {
             engine.developmentProgress(
                 for: suggestion
             )
+        let isExpanded = expandedSuggestionID == suggestion.id
 
-        VStack(alignment: .leading, spacing: 5) {
+        VStack(alignment: .leading, spacing: 8) {
             HStack(spacing: 7) {
-                Text(suggestion.title)
-                    .font(.system(size: 12, weight: .semibold))
-                    .lineLimit(1)
-                    .help(suggestionTooltip(suggestion, progress: progress))
+                Button {
+                    expandedSuggestionID = isExpanded
+                        ? nil
+                        : suggestion.id
+                } label: {
+                    HStack(alignment: .top, spacing: 6) {
+                        Image(systemName: isExpanded ? "chevron.down" : "chevron.right")
+                            .font(.caption2.weight(.bold))
+                            .foregroundStyle(.secondary)
+                            .padding(.top, 2)
+
+                        Text(suggestion.title)
+                            .font(.system(size: 13, weight: .semibold))
+                            .multilineTextAlignment(.leading)
+                            .lineLimit(isExpanded ? 3 : 2)
+                            .fixedSize(horizontal: false, vertical: true)
+                    }
+                }
+                .buttonStyle(.plain)
 
                 Spacer(minLength: 0)
 
-                Text(suggestion.state.title)
-                    .font(.system(size: 9, weight: .semibold))
-                    .foregroundStyle(.secondary)
-
                 suggestionMenu(suggestion)
             }
+
+            HStack(spacing: 5) {
+                Text(suggestion.source.title)
+                Text("•")
+                Text(suggestion.state.title)
+                Spacer(minLength: 0)
+                if suggestion.state == .proposed || suggestion.state == .deferred {
+                    Text(engine.canDevelopSuggestion(suggestion) ? "Uygulanabilir" : "İnceleme")
+                }
+            }
+            .font(.system(size: 10, weight: .medium))
+            .foregroundStyle(.secondary)
 
             if suggestion.state == .approved ||
                 suggestion.state == .developing ||
@@ -341,12 +366,57 @@ struct ConversationSidebarView: View {
                     .progressViewStyle(.linear)
                     .help(progress.title + " — " + progress.detail)
             }
+
+            if isExpanded {
+                Divider()
+
+                Text(suggestion.reason)
+                    .font(.caption)
+                    .foregroundStyle(.secondary)
+                    .fixedSize(horizontal: false, vertical: true)
+
+                Text("Fayda: " + suggestion.expectedBenefit)
+                    .font(.caption)
+                    .foregroundStyle(.secondary)
+                    .fixedSize(horizontal: false, vertical: true)
+
+                Text("Durum: " + progress.title + " — " + progress.detail)
+                    .font(.caption2)
+                    .foregroundStyle(.tertiary)
+                    .fixedSize(horizontal: false, vertical: true)
+
+                if suggestion.state == .proposed || suggestion.state == .deferred {
+                    HStack(spacing: 7) {
+                        Button("Geliştir") {
+                            engine.approveDevelopmentSuggestion(id: suggestion.id)
+                        }
+                        .buttonStyle(.borderedProminent)
+                        .controlSize(.small)
+                        .disabled(!engine.canDevelopSuggestion(suggestion))
+
+                        Button("Gizle", role: .destructive) {
+                            engine.suppressDevelopmentSuggestion(id: suggestion.id)
+                            expandedSuggestionID = nil
+                        }
+                        .buttonStyle(.bordered)
+                        .controlSize(.small)
+                    }
+                }
+
+                if suggestion.state == .failed || suggestion.state == .readyForReview {
+                    Button("Yeniden araştır") {
+                        engine.retryDevelopmentSuggestion(id: suggestion.id)
+                    }
+                    .buttonStyle(.bordered)
+                    .controlSize(.small)
+                }
+            }
         }
-        .padding(.horizontal, 9)
-        .padding(.vertical, 7)
+        .padding(.horizontal, 10)
+        .padding(.vertical, 10)
         .background(
             Color.primary
-                .opacity(0.045)
+                .opacity(isExpanded ? 0.08 : 0.05)
         )
         .overlay(
             RoundedRectangle(
