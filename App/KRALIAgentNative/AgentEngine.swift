@@ -7301,7 +7301,10 @@ final class AgentEngine: ObservableObject {
             )
         }
 
-        return query
+        let subject = AgentResearchQueryPlanner()
+            .researchSubject(from: query)
+
+        return subject
             .replacingOccurrences(
                 of: "\\s+",
                 with: " ",

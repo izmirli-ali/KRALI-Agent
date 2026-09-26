@@ -32,10 +32,11 @@ struct AgentResearchQueryPlanner {
         let query = rawQuery.trimmingCharacters(
             in: .whitespacesAndNewlines
         )
-        let normalized = normalize(query)
+        let researchSubject = researchSubject(from: query)
+        let normalized = normalize(researchSubject)
 
         if let socialPlan = socialProfilePlan(
-            original: query,
+            original: researchSubject,
             normalized: normalized
         ) {
             return socialPlan
@@ -88,15 +89,63 @@ struct AgentResearchQueryPlanner {
 
         if let entity, isBrandResearch {
             return brandPlan(
-                original: query,
+                original: researchSubject,
                 entity: entity
             )
         }
 
         return generalPlan(
-            original: query,
+            original: researchSubject,
             normalized: normalized
         )
+    }
+
+    /// Uzun araştırma istemlerinde konu ile çıktı kuralları birlikte gelir.
+    /// Arama ve kanıt eşleştirme yalnızca gerçek konuyu kullanmalıdır.
+    func researchSubject(from rawQuery: String) -> String {
+        let query = rawQuery.trimmingCharacters(
+            in: .whitespacesAndNewlines
+        )
+        let directiveMarkers = [
+            "araştırma plan", "arastirma plan", "çıktı formatı",
+            "cikti formati", "kural:", "yönetici özeti",
+            "yonetici ozeti", "iddia", "kaynak türü",
+            "kaynak turu", "belirsizlik"
+        ]
+
+        for rawLine in query.components(separatedBy: .newlines) {
+            let line = rawLine.trimmingCharacters(
+                in: .whitespacesAndNewlines
+            )
+            let normalizedLine = normalize(line)
+
+            guard line.count >= 12,
+                  !directiveMarkers.contains(where: {
+                      normalizedLine.contains(normalize($0))
+                  })
+            else {
+                continue
+            }
+
+            for marker in ["araştır", "arastir", "incele", "değerlendir", "degerlendir"] {
+                guard let range = line.range(
+                    of: marker,
+                    options: [.caseInsensitive, .diacriticInsensitive]
+                ) else {
+                    continue
+                }
+
+                let candidate = String(line[..<range.lowerBound])
+                    .trimmingCharacters(in: .whitespacesAndNewlines)
+                    .trimmingCharacters(in: CharacterSet(charactersIn: ":-—–."))
+
+                if candidate.count >= 12 {
+                    return candidate
+                }
+            }
+        }
+
+        return query
     }
 
     func developmentPlan(

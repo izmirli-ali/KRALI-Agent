@@ -27,6 +27,22 @@ struct DevelopmentResearchQualitySelfTest {
 
     static func main() {
         let planner = AgentResearchQueryPlanner()
+        let structuredResearchPrompt = """
+        ARAŞTIRMA KALİTE TESTİ — GENEL
+        Kuantum bilgisayarların güncel açık anahtarlı kriptografiye etkisini araştır.
+        Araştırma planı:
+        1. Konuyu dört alt soruya ayır ve her biri için kaynak ara.
+        Çıktı formatı: iddia → kanıt tablosu.
+        """
+
+        let publicResearchPlan = planner.plan(structuredResearchPrompt)
+        check(
+            publicResearchPlan.original.lowercased().contains("kuantum") &&
+            publicResearchPlan.original.lowercased().contains("kriptograf") &&
+            !publicResearchPlan.original.lowercased().contains("çıktı formatı"),
+            "structured public research isolates the requested subject from output rules"
+        )
+
         let mission = """
         KRALİ RESEARCH-CORE TEST — kendi araştırma ve gelişim mimarini iyileştir.
 

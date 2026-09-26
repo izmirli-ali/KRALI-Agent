@@ -11,6 +11,7 @@ function ok(value, message) {
 
 const store = read("App/KRALIAgentNative/AgentDevelopmentSuggestionStore.swift");
 const engine = read("App/KRALIAgentNative/AgentEngine.swift");
+const verifier = read("App/KRALIAgentNative/AgentVerifier.swift");
 const sidebar = read("App/KRALIAgentNative/ConversationSidebarView.swift");
 const bridge = read("App/KRALIAgentNative/AgentDeveloperBridge.swift");
 
@@ -166,6 +167,15 @@ ok(
   engine.includes("webResearchEvidence.isEmpty") &&
   engine.includes("Araştırma sentezi atlandı: doğrulanmış sayfa kanıtı yok."),
   "research synthesis cannot invent a detailed answer when page evidence is absent"
+);
+
+ok(
+  queryPlanner.includes("func researchSubject(from rawQuery: String)") &&
+  queryPlanner.includes("Uzun araştırma istemlerinde konu ile çıktı kuralları") &&
+  engine.includes(".researchSubject(from: query)") &&
+  verifier.includes("webResearchEvidenceCount >= 2") &&
+  verifier.includes("webResearchUniqueDomainCount >= 2"),
+  "structured research prompts search their subject only and cannot pass on a single or single-domain evidence set"
 );
 
 ok(

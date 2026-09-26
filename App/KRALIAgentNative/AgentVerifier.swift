@@ -99,18 +99,13 @@ struct AgentVerifier {
                         $0.executableNow
                     }
                ) {
-                guard
-                    snapshot
-                        .webResearchEvidenceCount >
-                        0 ||
-                    snapshot
-                        .webResearchResultCount >
-                        0
+                guard snapshot.webResearchEvidenceCount >= 2,
+                      snapshot.webResearchUniqueDomainCount >= 2
                 else {
                     return attention(
-                        "Outcome stratejisi public web araştırmasını seçti ancak gerçek kaynak kanıtı üretmedi.",
+                        "Outcome stratejisi public web araştırmasını seçti ancak yeterli sayfa kanıtı ve bağımsız kaynak çeşitliliği üretmedi.",
                         fallback:
-                            "Aynı başarı kriteri için başka güvenli outcome stratejisini dene; kanıt üretmeden başarılı sayma."
+                            "Kanıtın sorgunun ana konusunu desteklediğini doğrula; en az iki bağımsız domain ve iki sayfa kanıtı olmadan başarılı sayma."
                     )
                 }
 
