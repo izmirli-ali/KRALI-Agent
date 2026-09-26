@@ -1,67 +1,22 @@
 
 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
  KRALİ DEVELOPER AGENT
- 20260926-184123
+ 20260926-185229
 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 ⚠️ Global Node.js v26 Cline bağımlılıklarıyla uyumlu değil; izole Node 22 runtime hazırlanıyor.
 ✅ Developer Agent runtime: v22.23.2
-cloudflare_proxy_ready|127.0.0.1:22375|main=@cf/zai-org/glm-4.7-flash|json=@cf/meta/llama-3.3-70b-instruct-fp8-fast|transport=openai-chat-completions
+cloudflare_proxy_ready|127.0.0.1:23458|main=@cf/zai-org/glm-4.7-flash|json=@cf/meta/llama-3.3-70b-instruct-fp8-fast|transport=openai-chat-completions
 ☁️ Remote-first Developer AI hazır: Cloudflare Workers AI • main=@cf/zai-org/glm-4.7-flash • json=@cf/meta/llama-3.3-70b-instruct-fp8-fast
 ☁️ Yerel Ollama hazırlığı atlandı; Developer inference remote-first çalışacak.
 Kontrollü KRALİ Developer görevi bulundu; task kartı kullanılacak.
-Preparing worktree (new branch 'krali-dev-agent/20260926-184123')
-HEAD is now at 6a81191 Improve suggestion clarity and planning coverage
-Developer prompt mode: gap • 5703 bytes
+Preparing worktree (new branch 'krali-dev-agent/20260926-185229')
+HEAD is now at 62f3c12 Constrain innovation ideas to atomic tasks
+Developer prompt mode: gap • 5554 bytes
 ☁️ Structured controller remote: @cf/meta/llama-3.3-70b-instruct-fp8-fast
-developer_task_decomposer_failed|plan-validation:node-fields-missing
-⚠️ KRALİ baseline task decomposition üretilemedi; mevcut tek-task güvenli akış korunuyor.
-☁️ Model rolleri: remote main=@cf/zai-org/glm-4.7-flash • structured=@cf/meta/llama-3.3-70b-instruct-fp8-fast
-KRALI_LOCAL_STAGE local_agent_starting • Kaynak kartları (developer.suggestion.usability.4b5236c8-078) native Ollama agent başlatılıyor: cloudflare-main
-KRALI_LOCAL_STAGE local_agent_running • Kaynak kartları (developer.suggestion.usability.4b5236c8-078) yerel model çalışıyor • adım 1/14
-KRALI_LOCAL_STAGE local_agent_tool • Kaynak kartları (developer.suggestion.usability.4b5236c8-078) araç çalışıyor: list_files
-KRALI_LOCAL_STAGE local_agent_running • Kaynak kartları (developer.suggestion.usability.4b5236c8-078) yerel model çalışıyor • adım 2/14
-KRALI_LOCAL_STAGE local_agent_tool • Kaynak kartları (developer.suggestion.usability.4b5236c8-078) araç çalışıyor: read_file
-KRALI_LOCAL_STAGE local_agent_running • Kaynak kartları (developer.suggestion.usability.4b5236c8-078) yerel model çalışıyor • adım 3/14
-KRALI_LOCAL_STAGE local_agent_tool • Kaynak kartları (developer.suggestion.usability.4b5236c8-078) araç çalışıyor: read_file
-KRALI_LOCAL_STAGE local_agent_running • Kaynak kartları (developer.suggestion.usability.4b5236c8-078) yerel model çalışıyor • adım 4/14
-KRALI_LOCAL_STAGE local_agent_tool • Kaynak kartları (developer.suggestion.usability.4b5236c8-078) araç çalışıyor: search_codebase
-KRALI_LOCAL_STAGE local_agent_scope_target_fallback • Kaynak kartları (developer.suggestion.usability.4b5236c8-078) search eşleşmesi mutation hedefi vermedi; active scope içindeki mevcut dosya doğrulanacak • targets=["App/KRALIAgentNative/ConversationSidebarView.swift"]
-KRALI_LOCAL_STAGE local_agent_implementation_phase • Kaynak kartları (developer.suggestion.usability.4b5236c8-078) hedefli inspection kanıtı tamamlandı • implementation zorunlu • 4/4
-KRALI_LOCAL_STAGE local_agent_running • Kaynak kartları (developer.suggestion.usability.4b5236c8-078) yerel model çalışıyor • adım 5/14
-KRALI_LOCAL_STAGE local_agent_tool • Kaynak kartları (developer.suggestion.usability.4b5236c8-078) araç çalışıyor: read_file
-KRALI_LOCAL_STAGE local_agent_implementation_required • Kaynak kartları (developer.suggestion.usability.4b5236c8-078) tekrar/genel inspection reddedildi • implementation fazı aktif • read_file
-KRALI_LOCAL_STAGE local_agent_iteration_grace • Kaynak kartları (developer.suggestion.usability.4b5236c8-078) implementation inspection reddi ana iteration bütçesinden düşülmedi • grace=1/4
-KRALI_LOCAL_STAGE local_agent_running • Kaynak kartları (developer.suggestion.usability.4b5236c8-078) yerel model çalışıyor • adım 6/14
-KRALI_LOCAL_STAGE local_agent_tool • Kaynak kartları (developer.suggestion.usability.4b5236c8-078) araç çalışıyor: search_codebase
-KRALI_LOCAL_STAGE local_agent_implementation_required • Kaynak kartları (developer.suggestion.usability.4b5236c8-078) tekrar/genel inspection reddedildi • implementation fazı aktif • search_codebase
-KRALI_LOCAL_STAGE local_agent_iteration_grace • Kaynak kartları (developer.suggestion.usability.4b5236c8-078) implementation inspection reddi ana iteration bütçesinden düşülmedi • grace=2/4
-KRALI_LOCAL_STAGE local_agent_running • Kaynak kartları (developer.suggestion.usability.4b5236c8-078) yerel model çalışıyor • adım 7/14
-KRALI_LOCAL_STAGE local_agent_tool • Kaynak kartları (developer.suggestion.usability.4b5236c8-078) araç çalışıyor: read_file
-KRALI_LOCAL_STAGE local_agent_implementation_required • Kaynak kartları (developer.suggestion.usability.4b5236c8-078) tekrar/genel inspection reddedildi • implementation fazı aktif • read_file
-KRALI_LOCAL_STAGE local_agent_iteration_grace • Kaynak kartları (developer.suggestion.usability.4b5236c8-078) implementation inspection reddi ana iteration bütçesinden düşülmedi • grace=3/4
-KRALI_LOCAL_STAGE local_agent_running • Kaynak kartları (developer.suggestion.usability.4b5236c8-078) yerel model çalışıyor • adım 8/14
-KRALI_LOCAL_STAGE local_agent_tool • Kaynak kartları (developer.suggestion.usability.4b5236c8-078) araç çalışıyor: search_codebase
-KRALI_LOCAL_STAGE local_agent_implementation_required • Kaynak kartları (developer.suggestion.usability.4b5236c8-078) tekrar/genel inspection reddedildi • implementation fazı aktif • search_codebase
-KRALI_LOCAL_STAGE local_agent_iteration_grace • Kaynak kartları (developer.suggestion.usability.4b5236c8-078) implementation inspection reddi ana iteration bütçesinden düşülmedi • grace=4/4
-KRALI_LOCAL_STAGE local_agent_running • Kaynak kartları (developer.suggestion.usability.4b5236c8-078) yerel model çalışıyor • adım 9/14
-KRALI_LOCAL_STAGE local_agent_tool • Kaynak kartları (developer.suggestion.usability.4b5236c8-078) araç çalışıyor: list_files
-KRALI_LOCAL_STAGE local_agent_implementation_required • Kaynak kartları (developer.suggestion.usability.4b5236c8-078) tekrar/genel inspection reddedildi • implementation fazı aktif • list_files
-KRALI_LOCAL_STAGE local_agent_running • Kaynak kartları (developer.suggestion.usability.4b5236c8-078) yerel model çalışıyor • adım 10/14
-KRALI_LOCAL_STAGE local_agent_tool • Kaynak kartları (developer.suggestion.usability.4b5236c8-078) araç çalışıyor: read_file
-KRALI_LOCAL_STAGE local_agent_implementation_required • Kaynak kartları (developer.suggestion.usability.4b5236c8-078) tekrar/genel inspection reddedildi • implementation fazı aktif • read_file
-KRALI_LOCAL_STAGE local_agent_running • Kaynak kartları (developer.suggestion.usability.4b5236c8-078) yerel model çalışıyor • adım 11/14
-KRALI_LOCAL_STAGE local_agent_tool • Kaynak kartları (developer.suggestion.usability.4b5236c8-078) araç çalışıyor: search_codebase
-KRALI_LOCAL_STAGE local_agent_implementation_required • Kaynak kartları (developer.suggestion.usability.4b5236c8-078) tekrar/genel inspection reddedildi • implementation fazı aktif • search_codebase
-KRALI_LOCAL_STAGE local_agent_running • Kaynak kartları (developer.suggestion.usability.4b5236c8-078) yerel model çalışıyor • adım 12/14
-KRALI_LOCAL_STAGE local_agent_tool • Kaynak kartları (developer.suggestion.usability.4b5236c8-078) araç çalışıyor: search_codebase
-KRALI_LOCAL_STAGE local_agent_implementation_required • Kaynak kartları (developer.suggestion.usability.4b5236c8-078) tekrar/genel inspection reddedildi • implementation fazı aktif • search_codebase
-KRALI_LOCAL_STAGE local_agent_running • Kaynak kartları (developer.suggestion.usability.4b5236c8-078) yerel model çalışıyor • adım 13/14
-KRALI_LOCAL_STAGE local_agent_tool • Kaynak kartları (developer.suggestion.usability.4b5236c8-078) araç çalışıyor: search_codebase
-KRALI_LOCAL_STAGE local_agent_implementation_required • Kaynak kartları (developer.suggestion.usability.4b5236c8-078) tekrar/genel inspection reddedildi • implementation fazı aktif • search_codebase
-KRALI_LOCAL_STAGE local_agent_running • Kaynak kartları (developer.suggestion.usability.4b5236c8-078) yerel model çalışıyor • adım 14/14
-KRALI_LOCAL_STAGE local_agent_tool • Kaynak kartları (developer.suggestion.usability.4b5236c8-078) araç çalışıyor: search_codebase
-KRALI_LOCAL_STAGE local_agent_implementation_required • Kaynak kartları (developer.suggestion.usability.4b5236c8-078) tekrar/genel inspection reddedildi • implementation fazı aktif • search_codebase
-Kaynak kartları (developer.suggestion.usability.4b5236c8-078) native local agent iteration sınırına ulaştı.
-ℹ️ Cursor Architect atlandı • reasons=disabled
-Deleted branch krali-dev-agent/20260926-184123 (was 6a81191).
-❌ Native yerel Developer Agent durdu: Kaynak kartları (developer.suggestion.usability.4b5236c8-078) native local agent iteration sınırına ulaştı.
+cloudflare_provider_error|status=429|model=@cf/meta/llama-3.3-70b-instruct-fp8-fast|detail=[{"code":4006,"message":"AiError: AiError: you have used up your daily free allocation of 10,000 neurons, please upgrade to Cloudflare's Workers Paid plan if you would like to continue usage. (0cb8265c-c4e8-4d34-81d4-f93f3b3ff950)"}]
+developer_task_decomposer_failed|http-429
+⚡ Cloudflare structured controller quota/timeout verdi; aynı run içinde local circuit-breaker fallback deneniyor.
+⚡ Remote provider circuit breaker açıldı • reason=cloudflare-json-quota
+⛔ Local fallback kullanılamıyor: ollama-service-not-running • otomatik sistem değişikliği yapılmadı.
+⛔ Remote quota nedeniyle devam edilemiyor ve side-effect-free local fallback hazır değil; candidate üretilmeden oturum kapatılıyor.
+Deleted branch krali-dev-agent/20260926-185229 (was 62f3c12).

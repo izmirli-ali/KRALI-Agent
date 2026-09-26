@@ -1,29 +1,4 @@
 
-[2026-09-23T12:28:49Z] local.stage=ollama_check
-
-[2026-09-23T12:28:49Z] local.stage=service_ready
-
-[2026-09-23T12:28:49Z] local.models=devstral-small-2:24b,devstral:24b,qwen2.5-coder:14b-instruct
-
-[2026-09-23T12:28:49Z] local.stage=model_found model=devstral:24b
-
-[2026-09-23T12:28:49Z] local.stage=request_started model=devstral:24b
-
-[2026-09-23T12:44:42Z] local.failure=request_exception error=The request timed out.
-
-━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-KRALİ Semantic Planner Fallback
-status=9
-reason=uncaughtSignal
-duration=0.23s
-executable=/opt/homebrew/bin/cline
-input=Yeni açılan bir kahve markasını araştırıp görsel dilini analiz edelim ve Photoshop'ta örnek bir Instagram postu hazırlayalım.
-output:
-
-[2026-09-25T18:52:16Z] local.stage=ollama_check
-
-[2026-09-25T18:52:16Z] local.stage=service_start_requested
-
 [2026-09-25T18:52:16Z] local.stage=service_started attempt=1
 
 [2026-09-25T18:52:16Z] local.stage=service_ready
@@ -118,3 +93,28 @@ output:
 [2026-09-25T22:59:37Z] local.stage=response_received duration=51.67s
 
 [2026-09-25T22:59:37Z] local.stage=json_validated provider=Local Ollama/devstral:24b
+
+[2026-09-26T16:10:48Z] local.stage=ollama_check
+
+[2026-09-26T16:10:48Z] local.stage=service_start_requested
+
+[2026-09-26T16:10:48Z] local.stage=service_started attempt=1
+
+[2026-09-26T16:10:48Z] local.stage=service_ready
+
+[2026-09-26T16:10:48Z] local.models=devstral-small-2:24b,devstral:24b,qwen2.5-coder:14b-instruct
+
+[2026-09-26T16:10:48Z] local.stage=model_found model=devstral:24b
+
+[2026-09-26T16:10:48Z] local.stage=request_started model=devstral:24b
+
+[2026-09-26T16:12:04Z] local.failure=request_exception error=The request timed out.
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+KRALİ Semantic Planner Fallback
+status=9
+reason=uncaughtSignal
+duration=1.00s
+executable=/opt/homebrew/bin/cline
+input=Kuantum bilgisayarların güncel açık anahtarlı kriptografiye etkisini araştır. Her önemli iddiayı yalnızca doğrudan ilgili, okunmuş sayfa kanıtıyla bağla. En az iki bağımsız domain ve iki derin kanıt yoksa sonuç üretme; kanıt yetersiz de.
+output:
