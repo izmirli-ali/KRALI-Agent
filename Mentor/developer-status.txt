@@ -1,1 +1,1 @@
-local_agent_iteration_limit|Kaynak kartları (developer.suggestion.usability.4b5236c8-078) native local agent iteration sınırına ulaştı.|krali-dev-agent/20260926-184123|/Users/medusa/Developer/KRALI-Agent-Dev-20260926-184123|@meta|app=0.11.34|at=1790437335|run=20260926-184123
+stale_run|Önceki Developer Agent oturumu aktif değil veya bu sürüme ait değil.|krali-dev-agent/20260926-184123|/Users/medusa/Developer/KRALI-Agent-Dev-20260926-184123|@meta|app=0.11.35|at=1790437770|run=20260926-184123
