@@ -155,6 +155,20 @@ ok(
 );
 
 ok(
+  queryPlanner.includes('"Standartlar ve birincil kaynaklar"') &&
+  queryPlanner.includes('"Bağımsız teknik doğrulama"') &&
+  queryPlanner.includes('variants.append(') &&
+  queryPlanner.includes('generalFacets.map'),
+  "general research plans search official, primary, independent, and current facets"
+);
+
+ok(
+  engine.includes("webResearchEvidence.isEmpty") &&
+  engine.includes("Araştırma sentezi atlandı: doğrulanmış sayfa kanıtı yok."),
+  "research synthesis cannot invent a detailed answer when page evidence is absent"
+);
+
+ok(
   store.includes("func pruneUnverifiedResearchSuggestions") &&
   !store.includes("guard suggestion.source == .research") &&
   store.includes("yeterli kanıt bulunmamaktadır") &&

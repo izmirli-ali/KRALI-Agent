@@ -1168,6 +1168,18 @@ struct AgentResearchQueryPlanner {
             ResearchFacet(id: "recent", title: "Güncel gelişmeler", query: researchSubject + " latest update release notes")
         ]
 
+        variants.append(
+            contentsOf: generalFacets.map(\.query)
+        )
+
+        seen.removeAll()
+        variants = variants.filter {
+            let key = normalize($0)
+            guard !seen.contains(key) else { return false }
+            seen.insert(key)
+            return true
+        }
+
         return ResearchQueryPlan(
             original: query,
             variants: variants,
