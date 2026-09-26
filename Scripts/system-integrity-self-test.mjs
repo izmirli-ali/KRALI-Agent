@@ -16,9 +16,11 @@ const gate = read("App/KRALIAgentNative/AgentPublicResearchQualityGate.swift");
 const compiler = read("App/KRALIAgentNative/AgentBoundedDevelopmentTaskCompiler.swift");
 const missionNormalizer = read("App/KRALIAgentNative/AgentMissionNormalizer.swift");
 const sourceReader = read("App/KRALIAgentNative/AgentWebSourceReader.swift");
+const webResearch = read("App/KRALIAgentNative/AgentWebResearch.swift");
 const executionProfile = read("App/KRALIAgentNative/AgentExecutionProfile.swift");
 const suggestionStore = read("App/KRALIAgentNative/AgentDevelopmentSuggestionStore.swift");
-const perception = read("App/KRALIAgentNative/AgentScreenPerception.swift");
+const missionRouter = read("App/KRALIAgentNative/AgentMissionRouter.swift");
+const contentView = read("App/KRALIAgentNative/ContentView.swift");
 const workflow = read(".github/workflows/krali-ci.yml");
 const marketingVersions = [...project.matchAll(/MARKETING_VERSION = ([^;]+);/g)].map((match) => match[1]);
 const buildVersions = [...project.matchAll(/CURRENT_PROJECT_VERSION = (\d+);/g)].map((match) => match[1]);
@@ -71,6 +73,28 @@ ok(
 );
 
 ok(
+  webResearch.includes("let providerOutcomes = await withTaskGroup(") &&
+    webResearch.includes("case arxiv") &&
+    webResearch.includes("case crossref") &&
+    webResearch.includes("case openReview"),
+  "General, academic, and review research providers must run in the same bounded parallel search round."
+);
+
+ok(
+  missionRouter.includes("func classifyCoreIntent") &&
+    engine.includes("coreGoalProfile(") &&
+    engine.includes("activeCoreIntent = coreIntentDecision.intent"),
+  "Conversation, research, and development no longer have an explicit top-level routing contract."
+);
+
+ok(
+  contentView.includes('Text("Çekirdek yetenekler")') &&
+    contentView.includes('quickButton(\n                    "Detaylı araştır"') &&
+    !contentView.includes('quickButton(\n                    "Ekran görüntülerini toparla"'),
+  "The primary UI still exposes the retired Desktop/file workflow instead of the three core capabilities."
+);
+
+ok(
   engine.includes("executionProfile: AgentExecutionProfile = .conversationResearchCore") &&
     executionProfile.includes("case conversationResearchCore") &&
     executionProfile.includes("retiredAutomationCapabilityIDs") &&
@@ -105,16 +129,6 @@ ok(
     compiler.includes('allowedScope: ["App/KRALIAgentNative/ConversationSidebarView.swift"]'),
   "Bounded development compiler no longer protects approval/control scope or view-only usability scope."
 );
-
-for (const field of [
-  "captureScope",
-  "capturedApplicationBundleIdentifier",
-  "capturedWindowTitle",
-  "capturedWindowID",
-  "recognizedText"
-]) {
-  ok(perception.includes(field), `Screen perception evidence field is missing: ${field}`);
-}
 
 ok(
   workflow.includes("node Scripts/system-integrity-self-test.mjs"),

@@ -5,7 +5,6 @@ import Foundation
 struct ContentView: View {
     @EnvironmentObject private var engine: AgentEngine
     @State private var prompt = ""
-    @State private var developerToolsExpanded = false
     @State private var inspectorVisible = false
     @State private var compactSidebarVisible = false
     @StateObject private var updater = UpdateController()
@@ -1374,33 +1373,28 @@ struct ContentView: View {
         ScrollView(.horizontal, showsIndicators: false) {
             HStack(spacing: 7) {
                 quickButton(
-                    "Ekran görüntülerini toparla",
-                    "Masaüstümdeki ekran görüntülerini bir klasöre toparla."
+                    "Detaylı araştır",
+                    "Bu konuyu güncel ve bağımsız kaynaklarla detaylı araştır; her önemli iddiayı doğrudan kanıtla ve belirsizlikleri açıkça belirt."
                 )
 
                 quickButton(
-                    "PDF'leri bul",
-                    "PDF dosyalarını bul."
+                    "Kaynakları doğrula",
+                    "Bu konuşmadaki önemli iddiaları kaynak kalitesi, güncellik ve çelişki açısından doğrula."
                 )
 
                 quickButton(
-                    "Videoları bul",
-                    "Video dosyalarını bul."
+                    "Fikir danış",
+                    "Bu konu için alternatifleri, artıları, riskleri ve en güçlü önerini birlikte değerlendirelim."
                 )
 
                 quickButton(
-                    "Geri al",
-                    "geri al"
+                    "KRALİ'yi geliştir",
+                    "KRALİ'nin mevcut kaynak kodunu ve kanıtlarını incele; en yüksek etkili güvenli geliştirmeyi bir GitHub adayı olarak planla."
                 )
 
                 quickButton(
-                    "Bir şey öğret",
-                    "Öğret: konuşmalı Reels videolarında 35 saniyeyi geçme."
-                )
-
-                quickButton(
-                    "Sorunu çöz",
-                    "Premiere eklentisinde hata var. Önce projeyi incele, çözemezsen ChatGPT'ye sor."
+                    "Bağlamı özetle",
+                    "Bu konuşmadaki hedefi, doğrulanmış bulguları, açık soruları ve sonraki en iyi adımı özetle."
                 )
             }
         }
@@ -1440,7 +1434,7 @@ struct ContentView: View {
 
                 compactStatusCard
 
-                systemHealthSection
+                coreCapabilitiesSection
 
                 if let incident =
                     engine.inspectorState
@@ -1458,7 +1452,6 @@ struct ContentView: View {
                     compactDeveloperCard
                 }
 
-                developerToolsSection
             }
             .padding(14)
         }
@@ -1541,28 +1534,6 @@ struct ContentView: View {
                     )
             }
 
-            if let root =
-                engine.selectedRootURL {
-                Label(
-                    engine.workspaceIndexReady
-                        ? root.lastPathComponent +
-                            " • " +
-                            String(
-                                engine
-                                    .indexedFiles
-                                    .count
-                            ) +
-                            " dosya"
-                        : root.lastPathComponent +
-                            " • indeks gerektiğinde hazırlanacak",
-                    systemImage: "folder"
-                )
-                .font(.caption2)
-                .foregroundStyle(
-                    .tertiary
-                )
-                .lineLimit(2)
-            }
         }
         .padding(12)
         .background(
@@ -1578,6 +1549,85 @@ struct ContentView: View {
                 style: .continuous
             )
         )
+    }
+
+    private var coreCapabilitiesSection: some View {
+        VStack(
+            alignment: .leading,
+            spacing: 10
+        ) {
+            HStack {
+                Text("Çekirdek yetenekler")
+                    .font(.caption.weight(.semibold))
+
+                Spacer()
+
+                Text(engine.activeCoreIntent.title)
+                    .font(.caption2.weight(.medium))
+                    .foregroundStyle(Color.accentColor)
+            }
+
+            Divider()
+
+            coreStatusRow(
+                title: "Konuşma ve anlama",
+                detail: engine.contextMemoryStatus,
+                systemImage: "bubble.left.and.bubble.right"
+            )
+
+            coreStatusRow(
+                title: "Araştırma",
+                detail: engine.webResearchStatus,
+                systemImage: "globe"
+            )
+
+            coreStatusRow(
+                title: "GitHub geliştirme",
+                detail: engine.inspectorState.developerAgentStatus.message,
+                systemImage: "hammer"
+            )
+
+            Text(
+                "Desktop, ekran kontrolü ve yerel dosya otomasyonu bu çekirdek profilde kapalıdır."
+            )
+            .font(.caption2)
+            .foregroundStyle(.secondary)
+            .fixedSize(horizontal: false, vertical: true)
+        }
+        .padding(11)
+        .background(
+            Color(nsColor: .controlBackgroundColor)
+        )
+        .clipShape(
+            RoundedRectangle(
+                cornerRadius: 11,
+                style: .continuous
+            )
+        )
+    }
+
+    private func coreStatusRow(
+        title: String,
+        detail: String,
+        systemImage: String
+    ) -> some View {
+        HStack(alignment: .top, spacing: 8) {
+            Image(systemName: systemImage)
+                .foregroundStyle(.secondary)
+                .frame(width: 16)
+
+            VStack(alignment: .leading, spacing: 2) {
+                Text(title)
+                    .font(.caption.weight(.medium))
+
+                Text(detail)
+                    .font(.caption2)
+                    .foregroundStyle(.secondary)
+                    .lineLimit(3)
+            }
+
+            Spacer(minLength: 0)
+        }
     }
 
     private func compactDebugCard(
@@ -1780,107 +1830,6 @@ struct ContentView: View {
 
 
     @ViewBuilder
-    private var systemHealthSection: some View {
-        if let report =
-            engine.inspectorState
-                .trainingLabReport {
-            sectionTitle("Sistem sağlığı")
-
-            VStack(
-                alignment: .leading,
-                spacing: 9
-            ) {
-                HStack {
-                    Label(
-                        "Training",
-                        systemImage:
-                            "checklist"
-                    )
-                    .font(
-                        .caption
-                            .weight(.semibold)
-                    )
-
-                    Spacer()
-
-                    Text(
-                        String(report.passed) +
-                        "/" +
-                        String(report.total)
-                    )
-                    .font(
-                        .caption
-                            .monospacedDigit()
-                            .weight(.semibold)
-                    )
-                }
-
-                HStack(spacing: 8) {
-                    Text(
-                        "Core " +
-                        String(
-                            report.corePassed
-                        ) +
-                        "/" +
-                        String(
-                            report.coreTotal
-                        )
-                    )
-
-                    Text("•")
-
-                    Text(
-                        "North Star " +
-                        String(
-                            report.northStarPassed
-                        ) +
-                        "/" +
-                        String(
-                            report.northStarTotal
-                        )
-                    )
-
-                    Spacer()
-                }
-                .font(.caption2)
-                .foregroundStyle(.secondary)
-
-                if report.failed > 0 {
-                    Label(
-                        String(report.failed) +
-                        " bilinen açık",
-                        systemImage:
-                            "exclamationmark.triangle"
-                    )
-                    .font(.caption2)
-                    .foregroundStyle(
-                        Color.orange
-                    )
-                } else {
-                    Label(
-                        "Tüm regression testleri geçti",
-                        systemImage:
-                            "checkmark.seal.fill"
-                    )
-                    .font(.caption2)
-                    .foregroundStyle(
-                        Color.green
-                    )
-                }
-            }
-            .padding(11)
-            .background(
-                Color(nsColor:
-                    .controlBackgroundColor)
-            )
-            .clipShape(
-                RoundedRectangle(
-                    cornerRadius: 11
-                )
-            )
-        }
-    }
-
     private var contextInspectorSection: some View {
         Group {
             sectionTitle("Bağlam")
@@ -1995,167 +1944,6 @@ struct ContentView: View {
                     cornerRadius: 11
                 )
             )
-        }
-    }
-
-    private var developerToolsSection: some View {
-        DisclosureGroup(
-            "Geliştirici araçları",
-            isExpanded:
-                $developerToolsExpanded
-        ) {
-            VStack(
-                alignment: .leading,
-                spacing: 10
-            ) {
-                Divider()
-
-                developerToolRow(
-                    title: "Training Lab",
-                    status:
-                        engine.inspectorState
-                            .trainingLabStatus,
-                    buttonTitle: "Çalıştır",
-                    busy:
-                        engine.inspectorState
-                            .trainingLabBusy
-                ) {
-                    engine.runTrainingLab()
-                }
-
-                developerToolRow(
-                    title: "Live Research Eval",
-                    status:
-                        engine.inspectorState
-                            .liveResearchEvalStatus,
-                    buttonTitle: "Çalıştır",
-                    busy:
-                        engine.inspectorState
-                            .liveResearchEvalBusy
-                ) {
-                    engine.runLiveResearchEval()
-                }
-
-                developerToolRow(
-                    title: "KRALİ Arena",
-                    status:
-                        engine.inspectorState
-                            .arenaStatus,
-                    buttonTitle: "Çalıştır",
-                    busy:
-                        engine.inspectorState
-                            .arenaBusy
-                ) {
-                    engine.runArena()
-                }
-
-                developerToolRow(
-                    title:
-                        "Screen Perception Probe",
-                    status:
-                        engine.inspectorState
-                            .screenPerceptionStatus,
-                    buttonTitle: "Test",
-                    busy:
-                        engine.inspectorState
-                            .screenPerceptionBusy
-                ) {
-                    engine
-                        .runScreenPerceptionProbe()
-                }
-
-                developerToolRow(
-                    title:
-                        "Desktop Control Probe",
-                    status:
-                        engine.inspectorState
-                            .desktopControlStatus,
-                    buttonTitle: "Test",
-                    busy:
-                        engine.inspectorState
-                            .desktopControlBusy
-                ) {
-                    engine
-                        .runDesktopControlProbe()
-                }
-
-                developerToolRow(
-                    title: "Developer Agent",
-                    status:
-                        engine.inspectorState
-                            .developerAgentStatus
-                            .message,
-                    buttonTitle: "Çalıştır",
-                    busy:
-                        engine.inspectorState
-                            .developerAgentBusy
-                ) {
-                    engine.runDeveloperAgent()
-                }
-
-                Text(
-                    "Bu butonlar yalnız geliştirici testi / tanısı içindir. Günlük KRALİ kullanımı doğal dil komutlarıyla yapılır."
-                )
-                .font(.caption2)
-                .foregroundStyle(.secondary)
-
-                Text(
-                    "Fiziksel veya sistem etkili developer adımları yine chat onayı ister."
-                )
-                .font(.caption2)
-                .foregroundStyle(
-                    Color.orange
-                )
-            }
-            .padding(.top, 4)
-        }
-        .font(.caption.weight(.medium))
-        .padding(11)
-        .background(
-            Color(nsColor:
-                .controlBackgroundColor)
-        )
-        .clipShape(
-            RoundedRectangle(
-                cornerRadius: 11
-            )
-        )
-    }
-
-    private func developerToolRow(
-        title: String,
-        status: String,
-        buttonTitle: String,
-        busy: Bool,
-        action: @escaping () -> Void
-    ) -> some View {
-        HStack {
-            VStack(
-                alignment: .leading,
-                spacing: 2
-            ) {
-                Text(title)
-                    .font(
-                        .caption
-                            .weight(.medium)
-                    )
-
-                Text(status)
-                    .font(.caption2)
-                    .foregroundStyle(
-                        .secondary
-                    )
-                    .lineLimit(3)
-            }
-
-            Spacer()
-
-            Button(
-                buttonTitle,
-                action: action
-            )
-            .controlSize(.small)
-            .disabled(busy)
         }
     }
 
