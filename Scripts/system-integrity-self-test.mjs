@@ -78,6 +78,11 @@ ok(
 );
 
 ok(
+  engine.includes("Retired local automation blocked in conversation research core"),
+  "Retired local automation must also be blocked on direct intent execution."
+);
+
+ok(
   gate.includes("independentDomainCount >= 2") &&
     gate.includes("highQualitySourceCount >= 1") &&
     gate.includes("requiresPreferredPrimarySource") &&
