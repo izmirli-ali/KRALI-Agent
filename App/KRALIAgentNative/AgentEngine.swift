@@ -3195,10 +3195,7 @@ final class AgentEngine: ObservableObject {
            shouldUseIntelligence(
             goal: resolvedGoal,
             verification: finalVerification
-        ) && !(
-            resolvedGoal.outcomes.contains(.research) &&
-            webResearchEvidence.isEmpty
-        ) {
+        ) && !resolvedGoal.outcomes.contains(.research) {
             if let synthesized = await localIntelligence.synthesize(
                 userInput: text,
                 goal: resolvedGoal.summary,
@@ -3325,6 +3322,10 @@ final class AgentEngine: ObservableObject {
            webResearchEvidence.isEmpty {
             intelligenceProviderStatus =
                 "Araştırma sentezi atlandı: doğrulanmış sayfa kanıtı yok."
+            log(intelligenceProviderStatus)
+        } else if resolvedGoal.outcomes.contains(.research) {
+            intelligenceProviderStatus =
+                "Araştırma yanıtı doğrudan doğrulanmış kaynak kanıtından üretildi."
             log(intelligenceProviderStatus)
         }
 

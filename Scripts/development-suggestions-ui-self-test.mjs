@@ -186,6 +186,12 @@ ok(
 );
 
 ok(
+  engine.includes("!resolvedGoal.outcomes.contains(.research)") &&
+  engine.includes("Araştırma yanıtı doğrudan doğrulanmış kaynak kanıtından üretildi."),
+  "research output keeps its evidence-bound source response instead of a citation-dropping synthesis"
+);
+
+ok(
   store.includes("func pruneUnverifiedResearchSuggestions") &&
   !store.includes("guard suggestion.source == .research") &&
   store.includes("yeterli kanıt bulunmamaktadır") &&
