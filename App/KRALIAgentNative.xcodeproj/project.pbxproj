@@ -59,6 +59,7 @@
 		A10000000000000000000050 /* AgentDevelopmentSuggestionStore.swift in Sources */ = {isa = PBXBuildFile; fileRef = B10000000000000000000050 /* AgentDevelopmentSuggestionStore.swift */; };
 		A10000000000000000000051 /* AgentBoundedDevelopmentTaskCompiler.swift in Sources */ = {isa = PBXBuildFile; fileRef = B10000000000000000000051 /* AgentBoundedDevelopmentTaskCompiler.swift */; };
 		A10000000000000000000052 /* AgentDevelopmentReleaseVerifier.swift in Sources */ = {isa = PBXBuildFile; fileRef = B10000000000000000000052 /* AgentDevelopmentReleaseVerifier.swift */; };
+		A10000000000000000000053 /* AgentPublicResearchQualityGate.swift in Sources */ = {isa = PBXBuildFile; fileRef = B10000000000000000000053 /* AgentPublicResearchQualityGate.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
@@ -115,6 +116,7 @@
 		B10000000000000000000050 /* AgentDevelopmentSuggestionStore.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AgentDevelopmentSuggestionStore.swift; sourceTree = "<group>"; };
 		B10000000000000000000051 /* AgentBoundedDevelopmentTaskCompiler.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AgentBoundedDevelopmentTaskCompiler.swift; sourceTree = "<group>"; };
 		B10000000000000000000052 /* AgentDevelopmentReleaseVerifier.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AgentDevelopmentReleaseVerifier.swift; sourceTree = "<group>"; };
+		B10000000000000000000053 /* AgentPublicResearchQualityGate.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AgentPublicResearchQualityGate.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -191,6 +193,7 @@
 				B10000000000000000000050 /* AgentDevelopmentSuggestionStore.swift */,
 				B10000000000000000000051 /* AgentBoundedDevelopmentTaskCompiler.swift */,
 				B10000000000000000000052 /* AgentDevelopmentReleaseVerifier.swift */,
+				B10000000000000000000053 /* AgentPublicResearchQualityGate.swift */,
 			);
 			path = KRALIAgentNative;
 			sourceTree = "<group>";
@@ -341,6 +344,7 @@
 				A10000000000000000000050 /* AgentDevelopmentSuggestionStore.swift in Sources */,
 				A10000000000000000000051 /* AgentBoundedDevelopmentTaskCompiler.swift in Sources */,
 				A10000000000000000000052 /* AgentDevelopmentReleaseVerifier.swift in Sources */,
+				A10000000000000000000053 /* AgentPublicResearchQualityGate.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -378,7 +382,7 @@
 				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
 				CODE_SIGN_STYLE = Automatic;
 				COMBINE_HIDPI_IMAGES = YES;
-				CURRENT_PROJECT_VERSION = 281;
+				CURRENT_PROJECT_VERSION = 282;
 				DEVELOPMENT_TEAM = 65244UMFCK;
 				ENABLE_HARDENED_RUNTIME = NO;
 				ENABLE_PREVIEWS = YES;
@@ -394,7 +398,7 @@
 					"@executable_path/../Frameworks",
 				);
 				MACOSX_DEPLOYMENT_TARGET = 14.0;
-				MARKETING_VERSION = 0.11.41;
+				MARKETING_VERSION = 0.11.42;
 				PRODUCT_BUNDLE_IDENTIFIER = com.aliihsancanuysal.kraliagent;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				SDKROOT = macosx;
@@ -410,7 +414,7 @@
 				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
 				CODE_SIGN_STYLE = Automatic;
 				COMBINE_HIDPI_IMAGES = YES;
-				CURRENT_PROJECT_VERSION = 281;
+				CURRENT_PROJECT_VERSION = 282;
 				DEVELOPMENT_TEAM = 65244UMFCK;
 				ENABLE_HARDENED_RUNTIME = NO;
 				GENERATE_INFOPLIST_FILE = YES;
@@ -425,7 +429,7 @@
 					"@executable_path/../Frameworks",
 				);
 				MACOSX_DEPLOYMENT_TARGET = 14.0;
-				MARKETING_VERSION = 0.11.41;
+				MARKETING_VERSION = 0.11.42;
 				PRODUCT_BUNDLE_IDENTIFIER = com.aliihsancanuysal.kraliagent;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				SDKROOT = macosx;

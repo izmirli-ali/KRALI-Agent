@@ -768,7 +768,13 @@ struct AgentDevelopmentResearchSourceClassifier {
     private func isOfficialDocumentationHost(
         _ domain: String
     ) -> Bool {
-        domain.hasPrefix("docs.") ||
+        if domain.hasSuffix(".gov") ||
+            domain.hasSuffix(".edu") ||
+            domain.hasSuffix(".ac.uk") {
+            return true
+        }
+
+        return domain.hasPrefix("docs.") ||
         domain.contains(".docs.") ||
         domain.hasPrefix("developer.") ||
         [
@@ -776,7 +782,15 @@ struct AgentDevelopmentResearchSourceClassifier {
             "platform.openai.com",
             "developer.apple.com",
             "developer.adobe.com",
-            "learn.microsoft.com"
+            "learn.microsoft.com",
+            "nist.gov",
+            "csrc.nist.gov",
+            "ietf.org",
+            "w3.org",
+            "iso.org",
+            "eur-lex.europa.eu",
+            "ec.europa.eu",
+            "europa.eu"
         ]
         .contains {
             domain == $0 ||

@@ -7183,14 +7183,14 @@ final class AgentEngine: ObservableObject {
                         false
                 )
 
-            let evidenceDomains = Set(
-                webResearchEvidence.map {
-                    $0.source.domain.lowercased()
-                }
+            let quality = AgentPublicResearchQualityGate().assess(
+                query: webResearchQuery(from: userInput),
+                plan: AgentResearchQueryPlanner().plan(
+                    webResearchQuery(from: userInput)
+                ),
+                evidence: webResearchEvidence
             )
-            let hasEvidence =
-                webResearchEvidence.count >= 2 &&
-                evidenceDomains.count >= 2
+            let hasEvidence = quality.isSufficient
 
             return OutcomeStrategyExecutionResult(
                 succeeded:
@@ -7201,8 +7201,8 @@ final class AgentEngine: ObservableObject {
                     : "",
                 summary:
                     hasEvidence
-                    ? "Yeterli sayfa kanıtı ve bağımsız kaynak çeşitliliği üretildi."
-                    : "Web araştırması sonuç veya derin okuma üretse bile iki bağımsız domain üzerinde yeterli gerçek kaynak kanıtı oluşmadı.",
+                    ? "Yeterli sayfa kanıtı, kaynak otoritesi, bağımsız çeşitlilik ve kalite eşiği üretildi."
+                    : "Web araştırması sayfa kanıtı üretse bile kalite eşiğini geçemedi: " + quality.shortfall,
                 executedCapabilityIDs:
                     hasEvidence
                     ? Set(
@@ -7429,18 +7429,24 @@ final class AgentEngine: ObservableObject {
             }
             .joined(separator: "\n")
 
-            let evidenceDomains = Set(evidence.map { $0.source.domain.lowercased() })
-            let hasIndependentEvidence =
-                evidence.count >= 2 && evidenceDomains.count >= 2
-            let requiresNISTPrimaryEvidence =
-                AgentResearchQueryPlanner()
-                    .researchSubject(from: query)
-                    .localizedCaseInsensitiveContains("NIST")
-            let hasRequiredPrimaryEvidence =
-                !requiresNISTPrimaryEvidence ||
-                evidenceDomains.contains(where: {
-                    $0 == "nist.gov" || $0.hasSuffix(".nist.gov")
-                })
+            let qualityPlan = AgentResearchQueryPlanner().plan(query)
+            let qualityGate = AgentPublicResearchQualityGate()
+            let quality = qualityGate.assess(
+                query: query,
+                plan: qualityPlan,
+                evidence: evidence
+            )
+            let qualitySummary =
+                "Araştırma kalite denetimi: \(quality.score)/100 • " +
+                "A/B kaynak: \(quality.highQualitySourceCount) • " +
+                "tarihli: \(quality.datedSourceCount) • " +
+                "bağımsız alan adı: \(quality.independentDomainCount)"
+            let sourceAudit = zip(
+                evidence.prefix(4),
+                quality.sourceAssessments.prefix(4)
+            ).map { item, assessment in
+                "• \(item.source.title) — \(qualityGate.sourceLabel(assessment))"
+            }.joined(separator: "\n")
 
             let resolvedTargets = report.results.filter {
                 !$0.evidenceEligible
@@ -7472,20 +7478,13 @@ final class AgentEngine: ObservableObject {
                 return reply
             }
 
-            guard hasIndependentEvidence,
-                  hasRequiredPrimaryEvidence
-            else {
+            guard quality.isSufficient else {
                 var reply =
-                    "Kanıt yetersiz: " + String(evidence.count) +
-                    " okunmuş kaynak ve " + String(evidenceDomains.count) +
-                    " bağımsız alan adı doğrulayabildim. " +
-                    "En az iki okunmuş kaynak ile iki bağımsız alan adı olmadan sonuç üretmedim."
+                    "Kanıt yetersiz; kesin sonuç üretmedim. Eksik kriterler: " +
+                    quality.shortfall + ".\n\n" + qualitySummary
 
-                if requiresNISTPrimaryEvidence,
-                   !hasRequiredPrimaryEvidence {
-                    reply +=
-                        " Bu konu için NIST'in kendi alan adından doğrudan " +
-                        "okunmuş birincil kaynak da bulunamadı."
+                if !sourceAudit.isEmpty {
+                    reply += "\n\nKaynak kalite incelemesi:\n" + sourceAudit
                 }
 
                 if !lines.isEmpty {
@@ -7496,8 +7495,7 @@ final class AgentEngine: ObservableObject {
             }
 
             var reply =
-                "Web araştırması doğrulandı: \(evidence.count) okunmuş kaynak, " +
-                "\(evidenceDomains.count) bağımsız alan adı."
+                "Web araştırması doğrulandı. " + qualitySummary
 
             if !evidenceText.isEmpty {
                 reply +=
@@ -7506,6 +7504,10 @@ final class AgentEngine: ObservableObject {
             } else {
                 reply +=
                     "\n\nKaynakları buldum fakat bu turda sayfa içeriğinden yeterli kanıt çıkaramadım."
+            }
+
+            if !sourceAudit.isEmpty {
+                reply += "\n\nKaynak kalite incelemesi:\n" + sourceAudit
             }
 
             reply += "\n\nKaynaklar:\n" + lines

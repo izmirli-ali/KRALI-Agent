@@ -166,8 +166,8 @@ ok(
 ok(
   queryPlanner.includes('site:csrc.nist.gov post-quantum cryptography standards FIPS') &&
   queryPlanner.includes('domain: "csrc.nist.gov"') &&
-  engine.includes("requiresNISTPrimaryEvidence") &&
-  engine.includes("NIST'in kendi alan adından doğrudan"),
+  read("App/KRALIAgentNative/AgentPublicResearchQualityGate.swift").includes("requiresPreferredPrimarySource") &&
+  engine.includes("quality.shortfall"),
   "NIST standards research requires a readable primary NIST source in addition to independent evidence"
 );
 
@@ -178,8 +178,8 @@ ok(
 );
 
 ok(
-  engine.includes("Kanıt yetersiz:") &&
-  engine.includes("En az iki okunmuş kaynak ile iki bağımsız alan adı olmadan sonuç üretmedim.") &&
+  engine.includes("Kanıt yetersiz; kesin sonuç üretmedim.") &&
+  engine.includes("Kaynak kalite incelemesi:") &&
   engine.includes("result.url.absoluteString") &&
   engine.includes("Eşleşen kavramlar:"),
   "research output exposes traceable source links and refuses a conclusion without cross-domain read evidence"
@@ -191,6 +191,24 @@ ok(
   sourceReader.includes("contentType.contains(\"html\")") &&
   sourceReader.includes("compressed bytes into evidence"),
   "binary documents cannot be mistaken for readable page evidence"
+);
+
+const publicResearchQuality = read("App/KRALIAgentNative/AgentPublicResearchQualityGate.swift");
+ok(
+  publicResearchQuality.includes("highQualitySourceCount >= 1") &&
+  publicResearchQuality.includes("requiresPreferredPrimarySource") &&
+  publicResearchQuality.includes("potentialContradictionCount") &&
+  publicResearchQuality.includes("Araştırma kalite denetimi") === false &&
+  engine.includes("Araştırma kalite denetimi:") &&
+  engine.includes("quality.isSufficient"),
+  "public research requires source authority, direct evidence, diversity, freshness, and a transparent quality threshold"
+);
+
+ok(
+  localIntelligence.includes("selectionHasValidEvidenceIDs") &&
+  read("App/KRALIAgentNative/AgentDevelopmentResearch.swift").includes('domain.hasSuffix(".gov")') &&
+  read("App/KRALIAgentNative/AgentDevelopmentResearch.swift").includes('"csrc.nist.gov"'),
+  "official public institutions and standards bodies are classified as primary sources"
 );
 
 ok(
