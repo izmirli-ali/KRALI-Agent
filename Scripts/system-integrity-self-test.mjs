@@ -54,6 +54,13 @@ ok(
 );
 
 ok(
+  engine.includes("let researchQualityFailure") &&
+    engine.includes("Araştırma kalite kapısı yetersiz kanıt tespit etti") &&
+    engine.includes("reply:\n                    reply,"),
+  "A research-quality shortfall can still become a browser/Desktop capability gap or hide its evidence report."
+);
+
+ok(
   gate.includes("independentDomainCount >= 2") &&
     gate.includes("highQualitySourceCount >= 1") &&
     gate.includes("requiresPreferredPrimarySource") &&
