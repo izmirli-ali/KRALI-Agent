@@ -14,6 +14,7 @@ const project = read("App/KRALIAgentNative.xcodeproj/project.pbxproj");
 const engine = read("App/KRALIAgentNative/AgentEngine.swift");
 const gate = read("App/KRALIAgentNative/AgentPublicResearchQualityGate.swift");
 const compiler = read("App/KRALIAgentNative/AgentBoundedDevelopmentTaskCompiler.swift");
+const missionNormalizer = read("App/KRALIAgentNative/AgentMissionNormalizer.swift");
 const perception = read("App/KRALIAgentNative/AgentScreenPerception.swift");
 const workflow = read(".github/workflows/krali-ci.yml");
 
@@ -40,6 +41,14 @@ ok(
   engine.includes("quality.shortfall") &&
     engine.includes("Kanıt yetersiz; kesin sonuç üretmedim."),
   "Research quality shortfalls are not visible to the user."
+);
+
+ok(
+  missionNormalizer.includes("let explicitPublicResearch") &&
+    missionNormalizer.includes("!explicitPublicResearch &&") &&
+    missionNormalizer.includes('"desktop.control"') &&
+    missionNormalizer.includes('"browser.control"'),
+  "Explicit public research can still inherit stale Desktop, file-search, or browser-control steps."
 );
 
 ok(

@@ -69,6 +69,23 @@ struct AgentMissionNormalizer {
                 ]
             )
 
+        // A public research request may mention documents, videos, or images
+        // as its subject. Those words must not let a stale semantic plan turn
+        // the request into a Desktop/Finder search.
+        let explicitPublicResearch =
+            research &&
+            containsAny(
+                corpus,
+                [
+                    "webde", "web'de",
+                    "webden", "web'den",
+                    "internetten", "internette",
+                    "kaynak", "resmi belge",
+                    "resmî belge", "dogrula",
+                    "doğrula"
+                ]
+            )
+
         let analyze =
             containsAny(
                 corpus,
@@ -217,6 +234,7 @@ struct AgentMissionNormalizer {
             browserWorkflow
 
         let localFileSearch =
+            !explicitPublicResearch &&
             containsAny(
                 affirmativeWorkflowCorpus,
                 [
@@ -358,6 +376,8 @@ struct AgentMissionNormalizer {
                     explicitContentAssessment,
                 defersMutation:
                     defersMutation,
+                explicitPublicResearch:
+                    explicitPublicResearch,
                 capabilities:
                     capabilities
             )
@@ -766,6 +786,7 @@ struct AgentMissionNormalizer {
         explicitReveal: Bool,
         explicitContentAssessment: Bool,
         defersMutation: Bool,
+        explicitPublicResearch: Bool,
         capabilities: [AgentCapability]
     ) -> AgentSemanticMission {
         var forbidden = Set<String>()
@@ -794,6 +815,19 @@ struct AgentMissionNormalizer {
             forbidden.insert(
                 "perception.media"
             )
+        }
+
+        // Public research is deliberately read-only and provider-backed.
+        // Never execute stale local-file, desktop, or interactive-browser
+        // steps injected by an earlier planner turn.
+        if explicitPublicResearch {
+            forbidden.formUnion([
+                "files.search",
+                "files.metadata",
+                "desktop.app",
+                "desktop.control",
+                "browser.control"
+            ])
         }
 
         if defersMutation {
