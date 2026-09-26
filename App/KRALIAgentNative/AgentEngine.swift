@@ -6231,14 +6231,15 @@ final class AgentEngine: ObservableObject {
         for text: String,
         decision: AgentDecision
     ) -> String {
-        if executionProfile == .conversationResearchCore,
-           [
-                AgentIntentKind.organizeScreenshots,
-                .fileSearch,
-                .compoundFileTask
-           ].contains(decision.intent) {
-            log("Retired local automation blocked in conversation research core")
-            return "Yerel masaüstü ve dosya otomasyonu bu ürün çekirdeğinde emekliye alındı. İsteğini konuşma, web araştırması veya GitHub üzerinde geliştirme görevi olarak yeniden ifade edebilirsin."
+        if executionProfile == .conversationResearchCore {
+            switch decision.intent {
+            case .organizeScreenshots, .fileSearch, .compoundFileTask:
+                log("Retired local automation blocked in conversation research core")
+                return "Yerel masaüstü ve dosya otomasyonu bu ürün çekirdeğinde emekliye alındı. İsteğini konuşma, web araştırması veya GitHub üzerinde geliştirme görevi olarak yeniden ifade edebilirsin."
+
+            default:
+                break
+            }
         }
 
         switch decision.intent {
