@@ -1,21 +1,3 @@
-[2026-09-23T12:25:46Z] local.stage=service_ready
-
-[2026-09-23T12:25:46Z] local.models=devstral-small-2:24b,devstral:24b,qwen2.5-coder:14b-instruct
-
-[2026-09-23T12:25:46Z] local.stage=model_found model=devstral:24b
-
-[2026-09-23T12:25:46Z] local.stage=request_started model=devstral:24b
-
-[2026-09-23T12:27:02Z] local.failure=request_exception error=The request timed out.
-
-━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-KRALİ Semantic Planner Fallback
-status=9
-reason=uncaughtSignal
-duration=1.21s
-executable=/opt/homebrew/bin/cline
-input=Son çekimlerden hızlı ve enerjik bir kurgu çıkarmamız gerekiyor.
-output:
 
 [2026-09-23T12:28:49Z] local.stage=ollama_check
 
@@ -118,3 +100,21 @@ Toplam: /100
 
 Dosya değiştirme, uygulama kontrolü, dış sisteme yazma, branch oluşturma, merge veya push yapma. Yalnızca araştırma raporu ve gerekirse kullanıcı onayına bağlı bounded geliştirme önerisi üret.
 output:
+
+[2026-09-25T22:58:45Z] local.stage=ollama_check
+
+[2026-09-25T22:58:45Z] local.stage=service_start_requested
+
+[2026-09-25T22:58:46Z] local.stage=service_started attempt=1
+
+[2026-09-25T22:58:46Z] local.stage=service_ready
+
+[2026-09-25T22:58:46Z] local.models=devstral-small-2:24b,devstral:24b,qwen2.5-coder:14b-instruct
+
+[2026-09-25T22:58:46Z] local.stage=model_found model=devstral:24b
+
+[2026-09-25T22:58:46Z] local.stage=request_started model=devstral:24b
+
+[2026-09-25T22:59:37Z] local.stage=response_received duration=51.67s
+
+[2026-09-25T22:59:37Z] local.stage=json_validated provider=Local Ollama/devstral:24b

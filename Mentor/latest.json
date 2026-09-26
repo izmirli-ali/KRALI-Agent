@@ -1,127 +1,115 @@
 {
   "activityTail" : [
     {
-      "date" : "2026-09-25T20:11:11Z",
-      "text" : "Bağlam firewall: önceki görev bağlamları bu tura taşınmadı"
+      "date" : "2026-09-26T05:49:15Z",
+      "text" : "Developer Agent durumu: KRALİ erişilebilirlik ve klavye akışını iyileştir (developer.suggestion.usability.e90922c2-fbd) native local agent iteration sınırına ulaştı."
     },
     {
-      "date" : "2026-09-25T20:10:28Z",
-      "text" : "Problem-solver capability gap yalnız geliştirme önerisine dönüştürüldü • onay bekliyor"
+      "date" : "2026-09-26T05:49:15Z",
+      "text" : "Debug/Recovery: Bilinmeyen hata • Geliştirmeye yükseltildi • Developer Agent"
     },
     {
-      "date" : "2026-09-25T20:10:28Z",
-      "text" : "Mentor trace yerel olarak kaydedildi"
+      "date" : "2026-09-26T05:48:45Z",
+      "text" : "Web Research tamamlandı: 4 kaynak, 4 kaynak okundu"
     },
     {
-      "date" : "2026-09-25T20:09:59Z",
-      "text" : "Görev tamamlandı • 16.31 sn"
-    },
-    {
-      "date" : "2026-09-25T20:09:59Z",
-      "text" : "Mentor trace yerel olarak kaydedildi"
-    },
-    {
-      "date" : "2026-09-25T20:09:59Z",
-      "text" : "Task Graph approval gate: 2 • files.write.text • Dosya sistemine yeni bir metin dosyası yazılacak."
-    },
-    {
-      "date" : "2026-09-25T20:09:59Z",
-      "text" : "Web Research başarısız: Web araştırması yeterince alakalı sonuç üretmedi."
-    },
-    {
-      "date" : "2026-09-25T20:09:52Z",
+      "date" : "2026-09-26T05:48:43Z",
       "text" : "Web Research başladı"
     },
     {
-      "date" : "2026-09-25T20:09:52Z",
-      "text" : "Semantic rota: Core → Goal → Context → Plan → Files → Research → Verify → Response"
+      "date" : "2026-09-26T05:48:43Z",
+      "text" : "Web Research tamamlandı: 1 kaynak, 1 kaynak okundu"
     },
     {
-      "date" : "2026-09-25T20:09:52Z",
-      "text" : "Task Graph kullanıcı onayı bekleyen step: 2"
+      "date" : "2026-09-26T05:48:39Z",
+      "text" : "Web Research başladı"
     },
     {
-      "date" : "2026-09-25T20:09:52Z",
-      "text" : "Task Graph: 0:research.web[retrieve] → 1:core.reasoning[transform] → 2:files.write.text[persist] → 3:context.local[reason]"
+      "date" : "2026-09-26T05:48:39Z",
+      "text" : "Web Research tamamlandı: 4 kaynak, 4 kaynak okundu"
     },
     {
-      "date" : "2026-09-25T20:09:52Z",
-      "text" : "Problem Solver adayları: Mevcut provider'ı kullan[100] | Mevcut provider'ı kullan[100] | Mevcut provider'ı kullan[100] | Mevcut provider'ı kullan[100] | Kanıtı reasoning ile dönüştür[75]"
+      "date" : "2026-09-26T05:48:34Z",
+      "text" : "Web Research başladı"
     },
     {
-      "date" : "2026-09-25T20:09:52Z",
-      "text" : "Problem Solver seçimi: Mevcut provider'ı kullan • score=100 • capabilities=research.web"
+      "date" : "2026-09-26T05:48:34Z",
+      "text" : "Web Research tamamlandı: 5 kaynak, 0 kaynak okundu"
     },
     {
-      "date" : "2026-09-25T20:09:52Z",
-      "text" : "Semantic capability planı: context.local, core.reasoning, files.write.text, research.web"
+      "date" : "2026-09-26T05:48:31Z",
+      "text" : "Web Research başladı"
     },
     {
-      "date" : "2026-09-25T20:09:52Z",
-      "text" : "Semantic planner sağlayıcısı: Apple + Contract Repair"
+      "date" : "2026-09-26T05:48:31Z",
+      "text" : "Web Research tamamlandı: 4 kaynak, 4 kaynak okundu"
     },
     {
-      "date" : "2026-09-25T20:09:52Z",
-      "text" : "Semantic Mission: Araştırma yapabiliyor musun?"
+      "date" : "2026-09-26T05:48:29Z",
+      "text" : "Web Research başladı"
     },
     {
-      "date" : "2026-09-25T20:09:52Z",
-      "text" : "Outcome Solver: başarı kriterleri mevcut capability'lerle kapsandı • Outcome'u core.reasoning ile çöz"
+      "date" : "2026-09-26T05:48:29Z",
+      "text" : "Web Research tamamlandı: 4 kaynak, 4 kaynak okundu"
     },
     {
-      "date" : "2026-09-25T20:09:42Z",
-      "text" : "Seçilen kabiliyetler: Akıl yürütme, Bağlam, Web araştırma"
+      "date" : "2026-09-26T05:48:26Z",
+      "text" : "Web Research başladı"
     },
     {
-      "date" : "2026-09-25T20:09:42Z",
-      "text" : "Otomatik rota: Core → Goal → Context → Plan → Research → Verify → Response"
+      "date" : "2026-09-26T05:48:26Z",
+      "text" : "Web Research tamamlandı: 4 kaynak, 4 kaynak okundu"
     },
     {
-      "date" : "2026-09-25T20:09:42Z",
-      "text" : "Seçilen plan: Kullanıcının mevcut isteğini doğrudan çöz; yalnız gerçekten gerekliyse bağlam veya araç kullan, gerekmiyorsa reasoning ile yanıtla."
+      "date" : "2026-09-26T05:48:21Z",
+      "text" : "Web Research başladı"
     },
     {
-      "date" : "2026-09-25T20:09:42Z",
-      "text" : "KRALİ Core hedef sözleşmesi: güncel kaynaklarla araştır"
+      "date" : "2026-09-26T05:48:21Z",
+      "text" : "Web Research tamamlandı: 7 kaynak, 0 kaynak okundu"
     },
     {
-      "date" : "2026-09-25T20:09:42Z",
-      "text" : "Problem Solver başlangıç stratejisi: Mevcut provider'ı kullan • Task Graph bu capability'yi doğrudan seçti ve provider available."
+      "date" : "2026-09-26T05:48:16Z",
+      "text" : "Web Research başladı"
     },
     {
-      "date" : "2026-09-25T20:09:42Z",
-      "text" : "Bağlam firewall: önceki görev bağlamları bu tura taşınmadı"
+      "date" : "2026-09-26T05:48:08Z",
+      "text" : "Self-development research başladı • repo=/Users/medusa/Developer/KRALI-Agent"
     },
     {
-      "date" : "2026-09-25T20:07:18Z",
-      "text" : "Diagnostics isteğe bağlı yüklendi"
+      "date" : "2026-09-26T05:48:08Z",
+      "text" : "Developer context firewall: conversational task memory isolated"
     },
     {
-      "date" : "2026-09-25T20:07:16Z",
-      "text" : "Geçmiş sohbet silindi: SELF-DEVELOPMENT MISSION 001 Reliable Web R…"
+      "date" : "2026-09-26T05:46:41Z",
+      "text" : "Debug/Recovery: Bağımlılık • Recovery uygulanıyor • Developer Agent"
     },
     {
-      "date" : "2026-09-25T20:05:30Z",
+      "date" : "2026-09-26T05:46:41Z",
+      "text" : "Developer Agent kontrollü task başlatıldı • approved-usability-e90922c2-fbd"
+    },
+    {
+      "date" : "2026-09-26T05:44:45Z",
       "text" : "Apple yerel zeka hazır"
     },
     {
-      "date" : "2026-09-25T20:05:30Z",
+      "date" : "2026-09-26T05:44:45Z",
       "text" : "Çalışma klasörü yolu geri yüklendi; indeks gerektiğinde oluşturulacak: Desktop"
     },
     {
-      "date" : "2026-09-25T20:05:30Z",
+      "date" : "2026-09-26T05:44:45Z",
       "text" : "Ağır geliştirici testleri normal açılışta otomatik çalıştırılmıyor"
     },
     {
-      "date" : "2026-09-25T20:05:30Z",
+      "date" : "2026-09-26T05:44:45Z",
       "text" : "Dinamik hedef ve kabiliyet yönlendirme aktif"
     },
     {
-      "date" : "2026-09-25T20:05:30Z",
+      "date" : "2026-09-26T05:44:45Z",
       "text" : "KRALİ Core hazır"
     }
   ],
-  "appVersion" : "0.11.13",
+  "appVersion" : "0.11.27",
   "capabilities" : [
     {
       "available" : true,
@@ -148,136 +136,25 @@
   "contextMemory" : [
 
   ],
-  "createdAt" : "2026-09-25T20:13:26Z",
-  "developerMissionReason" : "Goal is external/user work, not a supported KRALİ self-development intent.",
+  "createdAt" : "2026-09-26T05:49:22Z",
+  "developerMissionReason" : "KRALİ is the target and the request asks for read-only self-development research before mutation.",
+  "developerRepository" : "/Users/medusa/Developer/KRALI-Agent",
   "executionProfile" : "developmentResearchMode",
   "executionSteps" : [
-    {
-      "capabilityID" : "context.local",
-      "detail" : "Yalnızca bu kullanıcı hedefiyle ilgili bağlamı hazırla; eski görev hedeflerini yeni göreve taşıma. Operation: context.resolve",
-      "kind" : "reasoning",
-      "state" : "completed",
-      "title" : "Görev bağlamını hazırla"
-    },
-    {
-      "capabilityID" : "research.web",
-      "detail" : "Kullanıcının verdiği public web hedefini GUI veya bilgisayar kontrolü kullanmadan araştırma sağlayıcısıyla oku ve kaynak kanıtı üret. Ön koşul adımları: 1. Operation: web.research",
-      "kind" : "action",
-      "state" : "completed",
-      "title" : "Web hedefini araştır"
-    },
-    {
-      "capabilityID" : "core.reasoning",
-      "detail" : "Önceki adımların gerçek çıktısını birlikte değerlendir ve sonraki adımın kullanabileceği sonucu üret. Ön koşul adımları: 2. Operation: content.analyze",
-      "kind" : "reasoning",
-      "state" : "completed",
-      "title" : "Toplanan veriyi analiz et"
-    },
-    {
-      "capabilityID" : "core.reasoning",
-      "detail" : "Gerçekleşen adımları hedefle, capability durumuyla ve üretilen sonuçla karşılaştır.",
-      "kind" : "verification",
-      "state" : "completed",
-      "title" : "Mission sonucunu doğrula"
-    },
-    {
-      "detail" : "Tamamlanan, bekleyen ve kullanıcı bilgisi gerektiren kısımları birbirinden ayır.",
-      "kind" : "response",
-      "state" : "completed",
-      "title" : "Sonucu kullanıcıya aktar"
-    }
+
   ],
-  "finalResponse" : "**Site Yapısı ve İçerik Odaklı Analiz**\n\n- **Site, doğrudan bir teknik yapı veya SEO sistematik analizi içermemektedir.** Mevcut kanıtlar yalnızca içerik, hizmetler, şubeler ve kurumsal yapıya odaklanmıştır.\n- **Hizmetler arasında Reformer, Grup Pilatesi, Hamile Pilatesi ve Skolyoz Eğitimi gibi alanlar yer alıyor.** Bu, sistemin fizyoterapist bakış açısıyla şekillendiğini gösterir.\n- **Şubeler Buca, Şirinyer, Çiğli, Yeşilyurt ve Bayraklı’da bulunuyor.** Bu dağılım, bölgesel erişimi yansıtır.\n- **İletişim bilgileri ve detaylı bilgi için telefon numarası (+90 507 935 00 70) sunulmuş.** Bu, kullanıcı etkileşimi için temel bir kanal.\n- **Anasayfa, Kurumsal, Hakkımızda, Uzman Kadromuz, Blog ve Şubeler bölümleri mevcut.** Bu, temel içerik yapısını gösterir.\n- **\"Hizmetlerim\" bölümünde içerik çeşitliliği dikkat çekiyor.** Ancak bu çeşitlilik, teknik SEO uygulamalarıyla doğrudan ilişkilendirilmemiş.\n- **\"Estafiz Franchising Pilates değil, fizyoterapist bakışıyla kurulmuş bir sağlıklı yaşam sistemi\" ifadesi, markanın kimliğini vurguluyor.** Bu, içerik stratejisinin temelini oluşturuyor.\n\n**Fırsat ve Risk Analizi**\n\n- **Fırsat:** İçerik yoğunluğu ve hizmet çeşitliliği, kullanıcıya kapsamlı bilgi sunma potansiyeli yaratıyor. Özellikle fiziksel sağlık odaklı içeriklerin SEO ile desteklenmesi mümkün.\n- **Risk:** Teknik SEO analizi eksikliği, arama motorlarında görünürlüğün sınırlı kalmasına neden olabilir. Kod yapısı veya yapısal optimize edilmemiş sayfalar, sıralamayı olumsuz etkileyebilir.\n\n**Özet**\n\n- Mevcut veri, **teknik SEO incelemesi veya kod analizi için yeterli değil.**\n- **İçerik ve yapı temel düzeyde sunulmuş.**\n- **Ana çıkarım: İçerik stratejisi güçlü, ancak teknik altyapı ve SEO sistematik çalışması eksik.**",
-  "goal" : "https://estafiz.com/franchise/ bu sitenin teknik olarak site yapısını seo sistematiğini ve kodlarını incelemeni istiyorum incele, analiz et ve bana sun.",
+  "finalResponse" : "A. Current KRALİ Architecture\nRead-only repository evidence collected from 10 current-source snippets.\n\nB. Research Sources\n[Tier B] Claude Opus \\ Anthropic — www.anthropic.com\n[Tier B] Newsroom \\ Anthropic — www.anthropic.com\n[Tier C] Log in to your Claude account | Claude Help Center — support.claude.com\n[Tier C] Anthropic nedir? - Forbes Türkiye — www.forbes.com.tr\n[Tier C] Anthropic - Wikipedia — en.wikipedia.org\n[Tier C] The AI for Problem Solvers | Claude by Anthropic — claude.com\n[Tier C] Install Claude Desktop | Claude Help Center — support.claude.com\n[Tier C] Claude (AI) - Wikipedia — en.wikipedia.org\n\nF. Biggest Current Gap\nStructured, evidence-ID-bound comparison could not be completed to the mission-derived verification contract.\n\nK. Verification Plan\nResearch evidence exists, but structured comparison/proposal synthesis is missing.\n\nL. Mutation Recommended\nMutation Recommended: NO\n\nM. Mutation Started\nMutation Started: NO\n\nN. Recommended Next Step\nProposal selection cited missing or unknown evidence IDs.",
+  "goal" : "KRALİ self-development research",
   "inputSource" : "text",
-  "intelligenceProvider" : "Apple Foundation Models",
+  "intelligenceProvider" : "Apple Foundation Models / Staged Research Synthesis (failed): Proposal selection cited missing or unknown evidence IDs.",
   "learningPlans" : [
 
   ],
-  "missionOwner" : "runtime",
-  "missionPhase" : "runtime",
+  "missionOwner" : "developer",
+  "missionPhase" : "research",
   "outcomeAttempts" : [
 
   ],
-  "outcomeResolution" : {
-    "chosenStrategyIDs" : [
-      "public-information:public-research",
-      "reasoning-output:direct:core.reasoning"
-    ],
-    "contract" : {
-      "instrumentalCapabilityIDs" : [
-
-      ],
-      "objective" : "https://estafiz.com/franchise/ bu sitenin teknik olarak site yapısını seo sistematiğini ve kodlarını incelemeni istiyorum incele, analiz et ve bana sun.",
-      "requirements" : [
-        {
-          "acceptableCapabilityIDs" : [
-            "research.web"
-          ],
-          "id" : "public-information",
-          "kind" : "retrievePublicInformation",
-          "preferredCapabilityIDs" : [
-            "research.web"
-          ],
-          "requiresMutation" : false,
-          "successCriterion" : "Kullanıcının istediği bilgi gerçek public kaynaktan kanıtla elde edilmiş olmalı.",
-          "title" : "İstenen public bilgiyi elde et"
-        },
-        {
-          "acceptableCapabilityIDs" : [
-            "core.reasoning"
-          ],
-          "id" : "reasoning-output",
-          "kind" : "transformEvidence",
-          "preferredCapabilityIDs" : [
-            "core.reasoning"
-          ],
-          "requiresMutation" : false,
-          "successCriterion" : "Çıktı eldeki kanıt ve kullanıcı hedefiyle tutarlı olmalı.",
-          "title" : "Kanıttan istenen çıktıyı üret"
-        }
-      ],
-      "successCriteria" : [
-        "Kullanıcının istediği bilgi gerçek public kaynaktan kanıtla elde edilmiş olmalı.",
-        "Çıktı eldeki kanıt ve kullanıcı hedefiyle tutarlı olmalı."
-      ]
-    },
-    "coveredRequirementIDs" : [
-      "public-information",
-      "reasoning-output"
-    ],
-    "strategies" : [
-      {
-        "capabilityIDs" : [
-          "research.web"
-        ],
-        "executableNow" : true,
-        "id" : "public-information:public-research",
-        "kind" : "publicResearch",
-        "rationale" : "Kullanıcının başarı kriteri bilgi edinmek; tarayıcı UI'sı araçtır, zorunlu outcome değildir.",
-        "requirementID" : "public-information",
-        "requiresLearning" : false,
-        "score" : 110,
-        "title" : "Public kaynaktan bilgi edin"
-      },
-      {
-        "capabilityIDs" : [
-          "core.reasoning"
-        ],
-        "executableNow" : true,
-        "id" : "reasoning-output:direct:core.reasoning",
-        "kind" : "reasoningTransform",
-        "rationale" : "Bu capability başarı kriterini doğrudan karşılayabiliyor.",
-        "requirementID" : "reasoning-output",
-        "requiresLearning" : false,
-        "score" : 95,
-        "title" : "Outcome'u core.reasoning ile çöz"
-      }
-    ],
-    "suppressedLearningCapabilityIDs" : [
-
-    ]
-  },
   "pausedCapabilities" : [
     "app.workflow",
     "browser.control",
@@ -286,237 +163,185 @@
     "perception.screen",
     "system.open.url"
   ],
-  "plan" : "Görev bağlamını hazırla → Web hedefini araştır → Toplanan veriyi analiz et",
-  "problemResolution" : {
-    "chosenStrategyID" : "primary:context.local",
-    "frame" : {
-      "availableCapabilityIDs" : [
-        "context.local",
-        "core.reasoning",
-        "files.metadata",
-        "files.move.reversible",
-        "files.reveal",
-        "files.search",
-        "files.write.text",
-        "memory.local",
-        "research.web",
-        "speech.input",
-        "speech.output"
-      ],
-      "blockedCapabilityIDs" : [
-
-      ],
-      "constraints" : [
-        "Başarı gerçek observation/verification ile kanıtlanmalı.",
-        "Dış dünyaya commit eden işlem kullanıcı onayı olmadan uygulanmamalı.",
-        "Uygulama/marka adına özel hard-code yerine generic capability/strategy tercih edilmeli."
-      ],
-      "objective" : "https://estafiz.com/franchise/ bu sitenin teknik olarak site yapısını seo sistematiğini ve kodlarını incelemeni istiyorum incele, analiz et ve bana sun.",
-      "observations" : [
-        "Seçili çalışma alanı: Desktop"
-      ]
-    },
-    "strategies" : [
-      {
-        "capabilityIDs" : [
-          "context.local"
-        ],
-        "executableNow" : true,
-        "id" : "primary:context.local",
-        "kind" : "primary",
-        "rationale" : "Task Graph bu capability'yi doğrudan seçti ve provider available.",
-        "requiresLearning" : false,
-        "score" : 100,
-        "summary" : "Görev bağlamını hazırla adımını context.local ile yürüt.",
-        "title" : "Mevcut provider'ı kullan"
-      },
-      {
-        "capabilityIDs" : [
-          "research.web"
-        ],
-        "executableNow" : true,
-        "id" : "primary:research.web",
-        "kind" : "primary",
-        "rationale" : "Task Graph bu capability'yi doğrudan seçti ve provider available.",
-        "requiresLearning" : false,
-        "score" : 100,
-        "summary" : "Web hedefini araştır adımını research.web ile yürüt.",
-        "title" : "Mevcut provider'ı kullan"
-      },
-      {
-        "capabilityIDs" : [
-          "core.reasoning"
-        ],
-        "executableNow" : true,
-        "id" : "primary:core.reasoning",
-        "kind" : "primary",
-        "rationale" : "Task Graph bu capability'yi doğrudan seçti ve provider available.",
-        "requiresLearning" : false,
-        "score" : 100,
-        "summary" : "Toplanan veriyi analiz et adımını core.reasoning ile yürüt.",
-        "title" : "Mevcut provider'ı kullan"
-      },
-      {
-        "capabilityIDs" : [
-          "core.reasoning"
-        ],
-        "executableNow" : true,
-        "id" : "reasoning:0",
-        "kind" : "reasoningTransform",
-        "rationale" : "Adımın amacı dış değişiklik değil; mevcut kanıttan yeni bir bilgi/çıktı üretmek.",
-        "requiresLearning" : false,
-        "score" : 75,
-        "summary" : "Mevcut dependency evidence üzerinde analiz/sentez uygula.",
-        "title" : "Kanıtı reasoning ile dönüştür"
-      }
-    ]
-  },
+  "plan" : "Exact source revision → read-only repository evidence → research.web → compare → development proposal → stop",
+  "reflectionSummary" : "Development research • facets=5 • requiredApproaches=5 • pageEvidence=8 • verification=partial • synthesisFailure=Proposal selection cited missing or unknown evidence IDs.",
   "researchEvidence" : [
     {
-      "conceptCoverage" : 1,
-      "domain" : "estafiz.com",
-      "excerpt" : "Estafiz Franchise | Pilates & Fizyoterapi İş Modeli Estafiz: Buca Koop, Şirinyer, Çiğli, Yeşilyurt, Bayraklı – İnterfiz: Gaziemir info@estafiz. Hİzmetlerİmİz Reformer Grup Pilates Hamile Pilatesi Skolyoz Eğitimi Şubelerimiz Estafiz Bayraklı Estafiz Çiğli Estafiz Şirinyer Estafiz Buca Estafiz Yeşilyurt Franchise İletİşİm Ü c r e t s İ z D e m o D e r s İ Detaylı Bilgi için +90 507 935 00 70 Anasayfa Kurumsal Hakkımızda Uzman Kadromuz Blog S. Hİzmetlerİmİz Reformer Grup Pilates Hamile Pilatesi Skolyoz Eğitimi Şubelerimiz Estafiz Bayraklı Estafiz Çiğli Estafiz Şirinyer Estafiz Buca Estafiz Yeşilyurt Franchise İletİşİm Ü c r e t s İ z D e m o D e r s İ Detaylı Bilgi için +90 507 935 00 70 Estafiz Franchising Pilates değil, fizyoterapist bakışıyla kurulmuş bir sağlıklı yaşam sistemi",
+      "conceptCoverage" : 3,
+      "domain" : "www.anthropic.com",
+      "excerpt" : "8 Hybrid reasoning model built for serious coding and AI agents, featuring a 1M context window Try Claude Get API access Announcements NEW Claude Opus 5. Read more Claude Opus 5 Jul 24, 2026 A step-change improvement for the Opus tier: stronger coding, more capable agents, and sharper professional work. 5 is also available now in Claude Code and on the Claude Platform with up to 2",
       "matchedConcepts" : [
-        "estafiz"
+        "claude",
+        "agents",
+        "code"
       ],
-      "sourceType" : "canonical-direct",
-      "title" : "estafiz.com — doğrudan kaynak adayı",
-      "url" : "https://estafiz.com/franchise/"
+      "sourceType" : "search-result",
+      "title" : "Claude Opus \\ Anthropic",
+      "url" : "https://www.anthropic.com/claude/opus"
+    },
+    {
+      "conceptCoverage" : 1,
+      "domain" : "www.anthropic.com",
+      "excerpt" : "Newsroom \\ Anthropic Skip to main content Skip to footer Try Claude Newsroom Press inquiries press@anthropic. com Non-media inquiries How to get support Media assets Download press kit Introducing Claude Opus 5. Features Sep 22, 2026 The Situation Report A rare strain of Ebola, with no confirmed vaccine, is spreading through the east of the Democratic Republic of Congo",
+      "matchedConcepts" : [
+        "anthropic"
+      ],
+      "sourceType" : "search-result",
+      "title" : "Newsroom \\ Anthropic",
+      "url" : "https://www.anthropic.com/news"
+    },
+    {
+      "conceptCoverage" : 3,
+      "domain" : "support.claude.com",
+      "excerpt" : "Understanding your Team plan invoices Admin management Roles and permissions Purchase and manage seats on Team plans Purchase and manage seats on Enterprise plans Manage members on Team and Enterprise plans Claude Enterprise consumption guide Manage usage credits for Team and seat-based Enterprise plans Manage user feedback settings on Team and Enterprise plans Control project sharing for your organization Manage plugins for your organization Account management FAQs Manage groups and group spend limits on Enterprise plans Manage custom roles on Enterprise plans Set up role-based permissions on Enterprise plans Set organization instructions Claude Design admin guide for Team and Enterprise plans Claim and migrate accounts on your domain Designate support contacts for human support Claude Enterprise Admin API reference guide Claude Enterprise activation promo for Claude Code and Cowork Set",
+      "matchedConcepts" : [
+        "claude",
+        "code",
+        "agents"
+      ],
+      "sourceType" : "search-result",
+      "title" : "Log in to your Claude account | Claude Help Center",
+      "url" : "https://support.claude.com/en/articles/13189465-log-in-to-your-claude-account"
+    },
+    {
+      "conceptCoverage" : 3,
+      "domain" : "www.forbes.com.tr",
+      "excerpt" : "Google, OpenAI, xAI gibi büyük teknoloji firmalarıyla rekabet eden Anthropic, yapay zeka alanında hızla büyüyen önemli bir oyuncu olarak öne çıkıyor. - Forbes Türkiye E-Bülten’e Abone Olun Abonelik Giriş Arama Dergi Yazarlar Milyarderler Türk Dolar Milyarderleri Ekonomi Para - Yatırım FİNTEK Küresel Ekonomi Teknoloji Yapay Zeka Otomobil Dünya Forbes Life Life Seyahat Gastronomi Moda Sanat Sağlık Sürdürülebilirlik Yeşil Küre - Tarım Video Hukuk Forbes Türkiye 30 Altı 30 50 Üstü 50 Başvuru 30 Altı 30 2026 Başvuru Türkiye'nin En İyi İşverenleri Forbes Türkiye En Başarılı Girişimler Forbes Next Mobilitenin Geleceği Zirvesi Forbes Stüdyo İçerik Üreticileri \"Anthropic\" ile ilgili içerikler Anthropic Anthropic merkezi San Francisco'da bulunan bir Amerikan yapay zeka şirketi. Şirket, Claude adını taşıyan bir dizi büyük dil modeli geliştirdi",
+      "matchedConcepts" : [
+        "anthropic",
+        "firma",
+        "sirket"
+      ],
+      "sourceType" : "search-result",
+      "title" : "Anthropic nedir? - Forbes Türkiye",
+      "url" : "https://www.forbes.com.tr/haberleri/anthropic"
+    },
+    {
+      "conceptCoverage" : 3,
+      "domain" : "en.wikipedia.org",
+      "excerpt" : "com Anthropic, PBC (stylized as ANTHROP\\C ) [ 8 ] [ 9 ] is an American artificial intelligence (AI) public benefit corporation headquartered in San Francisco , California. [ 31 ] In September 2025, Anthropic announced that it would stop selling its products to groups majority-owned by Chinese, Russian, Iranian, or North Korean entities due to national security concerns. [ 40 ] The same month, Anthropic donated $20 million to Public First Action , an AI regulation advocacy group",
+      "matchedConcepts" : [
+        "anthropic",
+        "corporation",
+        "group"
+      ],
+      "sourceType" : "search-result",
+      "title" : "Anthropic - Wikipedia",
+      "url" : "https://en.wikipedia.org/wiki/Anthropic"
+    },
+    {
+      "conceptCoverage" : 2,
+      "domain" : "claude.com",
+      "excerpt" : "The AI for Problem Solvers | Claude by Anthropic Skip to main content Contact sales Try Claude Latest news Claude Cowork is now just Claude. Group it into themes with counts, tie each to a roadmap item, and post the digest to my team channel. Group the feedback into themes, count how often each comes up, and tell me what to prioritize",
+      "matchedConcepts" : [
+        "anthropic",
+        "group"
+      ],
+      "sourceType" : "search-result",
+      "title" : "The AI for Problem Solvers | Claude by Anthropic",
+      "url" : "https://claude.com/product/overview"
+    },
+    {
+      "conceptCoverage" : 3,
+      "domain" : "support.claude.com",
+      "excerpt" : "Understanding your Team plan invoices Admin management Roles and permissions Purchase and manage seats on Team plans Purchase and manage seats on Enterprise plans Manage members on Team and Enterprise plans Claude Enterprise consumption guide Manage usage credits for Team and seat-based Enterprise plans Manage user feedback settings on Team and Enterprise plans Control project sharing for your organization Manage plugins for your organization Account management FAQs Manage groups and group spend limits on Enterprise plans Manage custom roles on Enterprise plans Set up role-based permissions on Enterprise plans Set organization instructions Claude Design admin guide for Team and Enterprise plans Claim and migrate accounts on your domain Designate support contacts for human support Claude Enterprise Admin API reference guide Claude Enterprise activation promo for Claude Code and Cowork Set",
+      "matchedConcepts" : [
+        "claude",
+        "code",
+        "agents"
+      ],
+      "sourceType" : "search-result",
+      "title" : "Install Claude Desktop | Claude Help Center",
+      "url" : "https://support.claude.com/en/articles/10065433-install-claude-desktop"
+    },
+    {
+      "conceptCoverage" : 2,
+      "domain" : "en.wikipedia.org",
+      "excerpt" : "Anthropic sells Claude-based agentic tools including Claude Code, a terminal coding agent, and Claude Cowork, a similar tool for non-programmers. [ 15 ] Claude Code [ edit ] Claude Code, released in February 2025, is an agentic command line tool to delegate coding tasks from the terminal using natural language prompts. [ 18 ] On October 20, 2025, Anthropic launched a web version of Claude Code and a sandboxing feature",
+      "matchedConcepts" : [
+        "claude",
+        "code"
+      ],
+      "sourceType" : "search-result",
+      "title" : "Claude (AI) - Wikipedia",
+      "url" : "https://en.wikipedia.org/wiki/Claude_(AI)"
     }
   ],
   "researchSources" : [
     {
-      "domain" : "estafiz.com",
-      "sourceType" : "canonical-direct",
-      "title" : "estafiz.com — doğrudan kaynak adayı",
-      "url" : "https://estafiz.com/franchise/"
+      "domain" : "www.anthropic.com",
+      "snippet" : "To get started, use claude-opus-5-5 via the Claude API. Fast mode for Opus 5.5 is also available now in Claude Code and on the Claude Platform with up to 2.5x faster speed.",
+      "sourceType" : "search-result",
+      "title" : "Claude Opus \\ Anthropic",
+      "url" : "https://www.anthropic.com/claude/opus"
+    },
+    {
+      "domain" : "www.anthropic.com",
+      "snippet" : "Anthropic is an AI safety and research company that's working to build reliable, interpretable, and steerable AI systems.",
+      "sourceType" : "search-result",
+      "title" : "Newsroom \\ Anthropic",
+      "url" : "https://www.anthropic.com/news"
+    },
+    {
+      "domain" : "support.claude.com",
+      "snippet" : "Subscription plans can only be used by subscribers, and the usage included in these plans is designed to support ordinary use of native Anthropic applications, including the Claude web, desktop, and mobile applications and Claude Code.",
+      "sourceType" : "search-result",
+      "title" : "Log in to your Claude account | Claude Help Center",
+      "url" : "https://support.claude.com/en/articles/13189465-log-in-to-your-claude-account"
+    },
+    {
+      "domain" : "www.forbes.com.tr",
+      "snippet" : "Anthropic merkezi San Francisco'da bulunan bir Amerikan yapay zeka şirketi. Şirket, Claude adını taşıyan bir dizi büyük dil modeli geliştirdi.",
+      "sourceType" : "search-result",
+      "title" : "Anthropic nedir? - Forbes Türkiye",
+      "url" : "https://www.forbes.com.tr/haberleri/anthropic"
+    },
+    {
+      "domain" : "en.wikipedia.org",
+      "snippet" : "In November, Nvidia and Microsoft were expected to invest up to $15 billion in Anthropic, and Anthropic said it would buy $30 billion of computing capacity from Microsoft Azure running on Nvidia AI systems.",
+      "sourceType" : "search-result",
+      "title" : "Anthropic - Wikipedia",
+      "url" : "https://en.wikipedia.org/wiki/Anthropic"
+    },
+    {
+      "domain" : "claude.com",
+      "snippet" : "I’m an in-house product lawyer at Anthropic. This morning, a product manager sent me a Slack asking a quick question on a feature that launched a few months ago.",
+      "sourceType" : "search-result",
+      "title" : "The AI for Problem Solvers | Claude by Anthropic",
+      "url" : "https://claude.com/product/overview"
+    },
+    {
+      "domain" : "support.claude.com",
+      "snippet" : "The Claude desktop apps bring Claude's capabilities directly to your computer, allowing for seamless integration with your workflow.",
+      "sourceType" : "search-result",
+      "title" : "Install Claude Desktop | Claude Help Center",
+      "url" : "https://support.claude.com/en/articles/10065433-install-claude-desktop"
+    },
+    {
+      "domain" : "en.wikipedia.org",
+      "snippet" : "Claude (AI) ... Claude is a series of large language models (LLMs) developed by American software company Anthropic. Claude was released as an AI -based chatbot in March 2023. It is also used in AI-assisted software development.",
+      "sourceType" : "search-result",
+      "title" : "Claude (AI) - Wikipedia",
+      "url" : "https://en.wikipedia.org/wiki/Claude_(AI)"
     }
   ],
   "route" : [
     "Core",
-    "Goal",
-    "Context",
-    "Plan",
-    "Research",
-    "Intelligence",
-    "Verify",
-    "Response"
+    "Developer",
+    "Research Plan",
+    "Source Quality",
+    "Page Evidence",
+    "Repository",
+    "Compare",
+    "Research Verify",
+    "Proposal",
+    "Stop"
   ],
-  "runtimeTask" : {
-    "completedStepIndexes" : [
-      1,
-      2,
-      0
-    ],
-    "createdAt" : "2026-09-25T20:12:59Z",
-    "id" : "2B262761-1E67-49F4-A952-A0C05A7EAD3D",
-    "objective" : "https://estafiz.com/franchise/ bu sitenin teknik olarak site yapısını seo sistematiğini ve kodlarını incelemeni istiyorum incele, analiz et ve bana sun.",
-    "priority" : 0,
-    "runningStepIndexes" : [
-
-    ],
-    "state" : "completed",
-    "waitingResourceIDs" : [
-
-    ]
-  },
-  "semanticMission" : {
-    "confidence" : 0.9,
-    "objective" : "https://estafiz.com/franchise/ bu sitenin teknik olarak site yapısını seo sistematiğini ve kodlarını incelemeni istiyorum incele, analiz et ve bana sun.",
-    "outcomes" : [
-      "analyze",
-      "explain",
-      "research"
-    ],
-    "requiredCapabilityIDs" : [
-      "context.local",
-      "core.reasoning",
-      "research.web"
-    ],
-    "requiresUserInput" : false,
-    "steps" : [
-      {
-        "capabilityID" : "context.local",
-        "dependsOn" : [
-
-        ],
-        "operation" : "context.resolve",
-        "purpose" : "Yalnızca bu kullanıcı hedefiyle ilgili bağlamı hazırla; eski görev hedeflerini yeni göreve taşıma.",
-        "title" : "Görev bağlamını hazırla"
-      },
-      {
-        "capabilityID" : "research.web",
-        "dependsOn" : [
-          0
-        ],
-        "operation" : "web.research",
-        "purpose" : "Kullanıcının verdiği public web hedefini GUI veya bilgisayar kontrolü kullanmadan araştırma sağlayıcısıyla oku ve kaynak kanıtı üret.",
-        "title" : "Web hedefini araştır"
-      },
-      {
-        "capabilityID" : "core.reasoning",
-        "dependsOn" : [
-          1
-        ],
-        "operation" : "content.analyze",
-        "purpose" : "Önceki adımların gerçek çıktısını birlikte değerlendir ve sonraki adımın kullanabileceği sonucu üret.",
-        "title" : "Toplanan veriyi analiz et"
-      }
-    ]
-  },
-  "semanticPlannerProvider" : "Apple Foundation Models",
   "taskGraph" : [
-    {
-      "available" : true,
-      "capabilityID" : "context.local",
-      "dependsOn" : [
 
-      ],
-      "index" : 0,
-      "operation" : "context.resolve",
-      "requiresApproval" : false,
-      "resourceIDs" : [
-
-      ],
-      "risk" : "reasoning",
-      "role" : "reason",
-      "title" : "Görev bağlamını hazırla"
-    },
-    {
-      "available" : true,
-      "capabilityID" : "research.web",
-      "dependsOn" : [
-        0
-      ],
-      "index" : 1,
-      "operation" : "web.research",
-      "requiresApproval" : false,
-      "resourceIDs" : [
-        "network"
-      ],
-      "risk" : "external",
-      "role" : "retrieve",
-      "title" : "Web hedefini araştır"
-    },
-    {
-      "available" : true,
-      "capabilityID" : "core.reasoning",
-      "dependsOn" : [
-        1
-      ],
-      "index" : 2,
-      "operation" : "content.analyze",
-      "requiresApproval" : false,
-      "resourceIDs" : [
-
-      ],
-      "risk" : "reasoning",
-      "role" : "transform",
-      "title" : "Toplanan veriyi analiz et"
-    }
   ],
-  "traceID" : "F0BF0030-3639-4C24-A266-3F4508B046DB",
-  "userInput" : "https://estafiz.com/franchise/ bu sitenin teknik olarak site yapısını seo sistematiğini ve kodlarını incelemeni istiyorum incele, analiz et ve bana sun.",
-  "verificationState" : "passed",
-  "verificationSummary" : "Outcome doğrulandı: kullanıcı tarafından istenen public bilgi gerçek web kanıtıyla elde edildi; araç/provider adımlarının kendisi başarı kriteri olarak zorunlu tutulmadı."
+  "traceID" : "EDB54AE4-4497-4597-963D-CCAB4C4AB261",
+  "userInput" : "Araştırma görevi: Anthropic şirketinin Claude Code ürününü, yazılım geliştirme ajanı olarak detaylı incele.  \nŞunları araştır:\n1. Ürünün temel yetenekleri ve hangi geliştirme ortamlarında çalıştığı\n2. Kod yazma, dosya değiştirme, test çalıştırma ve Git süreçlerindeki yetkileri\n3. Güvenlik/izin modeli: kullanıcı onayı, terminal komutları, hassas dosyalar ve dış ağ erişimi\n4. Fiyatlandırma veya kullanım modeli\n5. Başlıca sınırlamaları, güvenlik riskleri ve kullanıcı geri bildirimleri\n6. KRALİ ile karşılaştırıldığında alınabilecek mimari fikirler\nKaynak standardı:\n- Önce Anthropic’in resmi dokümantasyonu ve ürün sayfaları.\n- Ardından bağımsız teknik kaynaklar, güvenlik değerlendirmeleri ve mümkünse resmi GitHub kaynakları.\n- Her önemli iddia için URL, kaynak türü, tarih/güncellik ve kanıt gücü belirt.\n- Aynı bilgiyi tekrarlayan kaynakları bağımsız doğrulama olarak sayma.\n- Çelişki veya belirsizlik varsa açıkça yaz.\nÇıktı sonunda 100 üzerinden araştırma kalite puanı ver; puanı kaynak çeşitliliği, güncellik, iddiaya doğrudan destek, bağımsız doğrulama ve güvenlik analiziyle gerekçelendir. Kod değişikliği yapma; yalnızca araştırma raporu ve öneri paketi üret.",
+  "verificationState" : "partial",
+  "verificationSummary" : "Research evidence exists, but structured comparison/proposal synthesis is missing."
 }
