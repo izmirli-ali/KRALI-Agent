@@ -3107,6 +3107,12 @@ actor AgentLocalIntelligence {
 
                 let proposal: AgentDevelopmentResearchProposal
                 if selectionHasValidEvidenceIDs {
+                    let directFindings = selectedEvidence
+                        .prefix(3)
+                        .map { item in
+                            "Doğrudan kaynak kanıtı: " +
+                            String(item.excerpt.prefix(360))
+                        }
                     proposal = AgentDevelopmentResearchProposal(
                         problem:
                             generated
@@ -3117,9 +3123,7 @@ actor AgentLocalIntelligence {
                                 .proposal
                                 .currentArchitecture,
                         researchFindings:
-                            generated
-                                .proposal
-                                .researchFindings,
+                            directFindings,
                         evidenceIDs:
                             Array(
                                 proposalExternalIDs

@@ -1623,7 +1623,7 @@ final class AgentEngine: ObservableObject {
         if let synthesis,
            synthesis.mutationRecommended,
            !synthesis.mutationStarted,
-           verification.state != .attention {
+           verification.state == .passed {
             developmentSuggestions =
                 developmentSuggestionStore
                     .observeResearch(
@@ -2064,6 +2064,24 @@ final class AgentEngine: ObservableObject {
             researchCoreGoalProfile(
                 interpretedGoalProfile
             )
+
+        if goalProfile.commandAssessment.requiresClarification {
+            currentGoal = goalProfile.summary
+            busy = false
+            let questions = goalProfile.commandAssessment.ambiguities
+                .map { "• " + $0 }
+                .joined(separator: "\n")
+            postAssistantMessage(
+                "Komutu güvenli biçimde tek bir hedefe bağlamak için kısa bir netleştirme gerekiyor:\n" +
+                questions +
+                "\n\nİstediğin ilk sonucu veya işlem sırasını belirtir misin?"
+            )
+            log(
+                "Komut netleştirme bekliyor • confidence=" +
+                String(format: "%.2f", goalProfile.commandAssessment.confidence)
+            )
+            return
+        }
 
         let requestedActionCapabilityIDs =
             goalProfile.requiredCapabilityIDs

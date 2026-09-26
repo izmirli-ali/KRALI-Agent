@@ -18,11 +18,40 @@ enum AgentGoalOutcome: String, Hashable {
     case communicate
 }
 
+struct AgentCommandAssessment: Hashable {
+    let confidence: Double
+    let ambiguities: [String]
+
+    var requiresClarification: Bool {
+        confidence < 0.55 && !ambiguities.isEmpty
+    }
+
+    static let confident = AgentCommandAssessment(
+        confidence: 0.95,
+        ambiguities: []
+    )
+}
+
 struct AgentGoalProfile: Hashable {
     let summary: String
     let outcomes: Set<AgentGoalOutcome>
     let requiredCapabilityIDs: Set<String>
     let isCompound: Bool
+    let commandAssessment: AgentCommandAssessment
+
+    init(
+        summary: String,
+        outcomes: Set<AgentGoalOutcome>,
+        requiredCapabilityIDs: Set<String>,
+        isCompound: Bool,
+        commandAssessment: AgentCommandAssessment = .confident
+    ) {
+        self.summary = summary
+        self.outcomes = outcomes
+        self.requiredCapabilityIDs = requiredCapabilityIDs
+        self.isCompound = isCompound
+        self.commandAssessment = commandAssessment
+    }
 }
 
 struct AgentGoalInterpreter {
@@ -45,7 +74,8 @@ struct AgentGoalInterpreter {
                 requiredCapabilityIDs: [
                     "desktop.app"
                 ],
-                isCompound: false
+                isCompound: false,
+                commandAssessment: .confident
             )
         }
 
@@ -413,7 +443,12 @@ struct AgentGoalInterpreter {
             summary: goalSummary,
             outcomes: outcomes,
             requiredCapabilityIDs: capabilityIDs,
-            isCompound: isCompound
+            isCompound: isCompound,
+            commandAssessment: commandAssessment(
+                rawText: rawText,
+                outcomes: outcomes,
+                context: context
+            )
         )
     }
 
@@ -493,5 +528,42 @@ struct AgentGoalInterpreter {
 
     private func containsAny(_ text: String, _ values: [String]) -> Bool {
         values.contains { text.contains($0) }
+    }
+
+    private func commandAssessment(
+        rawText: String,
+        outcomes: Set<AgentGoalOutcome>,
+        context: AgentContextSnapshot
+    ) -> AgentCommandAssessment {
+        let normalized = languageResolver.normalized(rawText)
+        var ambiguities: [String] = []
+
+        if containsAny(normalized, ["bunu", "şunu", "sunu", "onu", "burayı", "burayi"]) &&
+            context.relevantMemoryCount == 0 &&
+            context.previousFileResultCount == 0 &&
+            context.previousFolderResultCount == 0 {
+            ambiguities.append("hangi önceki öğe veya sonucu kastettiğin")
+        }
+
+        if containsAny(normalized, ["veya", "ya da", "hangisi", "birini"]) &&
+            outcomes.count > 1 {
+            ambiguities.append("hangi alternatifin öncelikli olduğu")
+        }
+
+        let toolOutcomes: Set<AgentGoalOutcome> = [
+            .open, .research, .edit, .organize, .communicate, .locate
+        ]
+        if outcomes.intersection(toolOutcomes).count >= 3 {
+            ambiguities.append("çoklu işlemlerin uygulanma sırası")
+        }
+
+        let confidence = max(
+            0.25,
+            0.95 - Double(ambiguities.count) * 0.28
+        )
+        return AgentCommandAssessment(
+            confidence: confidence,
+            ambiguities: ambiguities
+        )
     }
 }

@@ -165,6 +165,10 @@ struct AgentBoundedDevelopmentTaskCompiler {
             - Preserve paused computer-control policy and all approval boundaries.
             - Do not change application behavior outside the allowed scope.
             - Prefer the smallest generalized implementation that addresses the approved research improvement.
+            - First inspect only the allowed files and identify one concrete, testable change.
+            - For a UI task, complete one coherent view-level improvement; do not attempt a broad redesign or unrelated cleanup.
+            - Run the supplied verification command after the smallest change. If it fails, diagnose only within the allowed files and make one bounded repair attempt.
+            - If the evidence does not support a safe change, stop with a precise ready-for-review note instead of repeatedly exploring alternatives.
             - A candidate is not a release. Stop at ready_for_review.
             """
 

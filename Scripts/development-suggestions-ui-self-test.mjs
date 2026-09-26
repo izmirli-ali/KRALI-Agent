@@ -23,8 +23,8 @@ ok(
 
 ok(
   engine.includes("observeResearch(") &&
-  engine.includes("verification.state != .attention"),
-  "engine promotes only non-attention research proposals to suggestions"
+  engine.includes("verification.state == .passed"),
+  "engine promotes only fully verified research proposals to suggestions"
 );
 
 ok(
@@ -131,6 +131,13 @@ ok(
   localIntelligence.includes("mutationRecommended:") &&
   localIntelligence.includes("selectionHasValidEvidenceIDs &&"),
   "invalid final selection IDs preserve only a review-only evidence-bound outcome"
+);
+
+const compiler = read("App/KRALIAgentNative/AgentBoundedDevelopmentTaskCompiler.swift");
+ok(
+  compiler.includes("one concrete, testable change") &&
+  compiler.includes("one bounded repair attempt"),
+  "bounded UI candidates receive a small, verifiable local-agent task contract"
 );
 
 console.log("development_suggestions_ui_self_test_ok");
