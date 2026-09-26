@@ -15,6 +15,7 @@ const engine = read("App/KRALIAgentNative/AgentEngine.swift");
 const gate = read("App/KRALIAgentNative/AgentPublicResearchQualityGate.swift");
 const compiler = read("App/KRALIAgentNative/AgentBoundedDevelopmentTaskCompiler.swift");
 const missionNormalizer = read("App/KRALIAgentNative/AgentMissionNormalizer.swift");
+const sourceReader = read("App/KRALIAgentNative/AgentWebSourceReader.swift");
 const perception = read("App/KRALIAgentNative/AgentScreenPerception.swift");
 const workflow = read(".github/workflows/krali-ci.yml");
 const marketingVersions = [...project.matchAll(/MARKETING_VERSION = ([^;]+);/g)].map((match) => match[1]);
@@ -58,6 +59,13 @@ ok(
     engine.includes("Araştırma kalite kapısı yetersiz kanıt tespit etti") &&
     engine.includes("reply:\n                    reply,"),
   "A research-quality shortfall can still become a browser/Desktop capability gap or hide its evidence report."
+);
+
+ok(
+  sourceReader.includes("let evidence = await withTaskGroup(") &&
+    sourceReader.includes("selectedSources") &&
+    sourceReader.includes("domain-diverse pages concurrently"),
+  "Research source reads lost their bounded parallel execution contract."
 );
 
 ok(
