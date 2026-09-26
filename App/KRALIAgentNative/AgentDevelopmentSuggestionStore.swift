@@ -377,7 +377,7 @@ struct AgentDevelopmentSuggestionStore {
             ),
             (
                 "KRALİ geliştirme öneri akışını iyileştir",
-                "Yeni fikirler, öneriler, onay durumu ve inceleme gereksinimini daha sade bir kontrol yüzeyinde toplamak.",
+                "Yeni fikirler, öneriler, geliştirme durumu ve inceleme gereksinimini daha sade bir kontrol yüzeyinde toplamak.",
                 "Kullanıcının doğru geliştirme kararını daha az arayüz gürültüsüyle vermesi.",
                 "innovation:ui-development-flow",
                 .usability
@@ -447,8 +447,8 @@ struct AgentDevelopmentSuggestionStore {
             ($0.state == .proposed || $0.state == .deferred)
         }.count
 
-        // Keep the sidebar compact. A new idea is added only while fewer than
-        // three user-actionable innovation cards are visible.
+        // Keep the sidebar compact while giving the user a useful choice set.
+        // A fresh queue fills up to three user-actionable ideas at once.
         guard activeInnovationCount < 3 else { return existing }
 
         let calendar = Calendar(identifier: .gregorian)
@@ -463,14 +463,18 @@ struct AgentDevelopmentSuggestionStore {
         }
         let ordered = orderedUI + orderedResearch
 
-        guard let definition = ordered.first(where: {
+        let additions = ordered.filter {
             !fingerprints.contains($0.3) && !suppressed.contains($0.3)
-        }) else {
+        }
+        .prefix(3 - activeInnovationCount)
+
+        guard !additions.isEmpty else {
             return existing
         }
 
         var refreshed = existing
-        refreshed.append(
+        for definition in additions {
+            refreshed.append(
             AgentDevelopmentSuggestion(
                 id: UUID(),
                 fingerprint: definition.3,
@@ -493,7 +497,8 @@ struct AgentDevelopmentSuggestionStore {
                 createdAt: now,
                 updatedAt: now
             )
-        )
+            )
+        }
         return refreshed
     }
 
