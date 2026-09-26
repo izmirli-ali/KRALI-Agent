@@ -342,6 +342,28 @@ struct AgentDevelopmentSuggestionStore {
         }
     }
 
+    /// A persisted suggestion can outlive the product capability it was
+    /// created for. Do not let a retired Desktop, browser, or local-file
+    /// capability remain actionable after the execution profile changes.
+    func prunePausedCapabilitySuggestions(
+        for profile: AgentExecutionProfile,
+        in existing: [AgentDevelopmentSuggestion]
+    ) -> [AgentDevelopmentSuggestion] {
+        existing.filter { suggestion in
+            var capabilityIDs = Set(
+                suggestion.candidateCapabilityIDs
+            )
+
+            if let capabilityID = suggestion.capabilityID {
+                capabilityIDs.insert(capabilityID)
+            }
+
+            return capabilityIDs.isDisjoint(
+                with: profile.pausedCapabilityIDs
+            )
+        }
+    }
+
     /// Generated ideas are tied to an exact source revision. Do not present a
     /// stale idea as if it can be safely developed on a newer build. While the
     /// user is focusing on UI work, untouched generated research ideas are
