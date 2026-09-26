@@ -136,8 +136,10 @@ ok(
 const compiler = read("App/KRALIAgentNative/AgentBoundedDevelopmentTaskCompiler.swift");
 ok(
   compiler.includes("one concrete, testable change") &&
-  compiler.includes("one bounded repair attempt"),
-  "bounded UI candidates receive a small, verifiable local-agent task contract"
+  compiler.includes("one bounded repair attempt") &&
+  compiler.includes("Improve keyboard focus and accessibility semantics") &&
+  compiler.includes('allowedScope: ["App/KRALIAgentNative/ConversationSidebarView.swift"]'),
+  "bounded UI candidates receive a focused, verifiable view-level task contract"
 );
 
 console.log("development_suggestions_ui_self_test_ok");

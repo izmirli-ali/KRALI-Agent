@@ -74,6 +74,12 @@ struct AgentBoundedDevelopmentTaskCompiler {
         "App/KRALIAgentNative/ConversationSidebarView.swift"
     ]
 
+    private struct UsabilityBlueprint {
+        let objective: String
+        let allowedScope: [String]
+        let acceptanceCriteria: [String]
+    }
+
     func supports(
         _ suggestion:
             AgentDevelopmentSuggestion,
@@ -124,10 +130,19 @@ struct AgentBoundedDevelopmentTaskCompiler {
                 .prefix(12)
             )
         let isUsabilitySuggestion = suggestion.source == .usability
+        let usabilityBlueprint = isUsabilitySuggestion
+            ? blueprint(for: suggestion)
+            : nil
         let taskKind = isUsabilitySuggestion ? "usability" : "research"
-        let allowedScope = isUsabilitySuggestion
+        let allowedScope = usabilityBlueprint?.allowedScope ?? (isUsabilitySuggestion
             ? usabilityAllowedScope
             : researchAllowedScope
+        )
+        let objective = usabilityBlueprint?.objective ?? compactTitle
+        let acceptanceCriteria = usabilityBlueprint?.acceptanceCriteria ?? [
+            "Keep the candidate within the exact allowed scope.",
+            "Pass the supplied verification command."
+        ]
 
         let shortID =
             String(
@@ -145,13 +160,16 @@ struct AgentBoundedDevelopmentTaskCompiler {
             USER-APPROVED BOUNDED \(isUsabilitySuggestion ? "UI" : "RESEARCH") IMPROVEMENT.
 
             Objective:
-            \(compactTitle)
+            \(objective)
 
             Current evidence-backed gap:
             \(compactReason)
 
             Expected benefit:
             \(compactBenefit)
+
+            Acceptance criteria:
+            \(acceptanceCriteria.map { "- " + $0 }.joined(separator: "\n"))
 
             Provenance IDs:
             \(provenance.joined(separator: ", "))
@@ -382,6 +400,49 @@ struct AgentBoundedDevelopmentTaskCompiler {
         }
 
         return sourceRevision
+    }
+
+    private func blueprint(
+        for suggestion: AgentDevelopmentSuggestion
+    ) -> UsabilityBlueprint {
+        let title = suggestion.title.folding(
+            options: [.caseInsensitive, .diacriticInsensitive],
+            locale: Locale(identifier: "tr_TR")
+        ).lowercased()
+
+        if title.contains("erisilebilirlik") || title.contains("klavye") {
+            return UsabilityBlueprint(
+                objective: "Improve keyboard focus and accessibility semantics for development suggestion cards.",
+                allowedScope: ["App/KRALIAgentNative/ConversationSidebarView.swift"],
+                acceptanceCriteria: [
+                    "Add or improve one keyboard/focus or accessibility label behavior on the suggestion card.",
+                    "Keep card order and existing approval actions unchanged.",
+                    "Pass development-suggestions-ui-self-test.mjs."
+                ]
+            )
+        }
+
+        if title.contains("kaynak kart") {
+            return UsabilityBlueprint(
+                objective: "Make research source-card evidence and review state easier to scan in the sidebar.",
+                allowedScope: ["App/KRALIAgentNative/ConversationSidebarView.swift"],
+                acceptanceCriteria: [
+                    "Improve one source-card hierarchy or evidence-state affordance.",
+                    "Preserve the existing bounded approval actions.",
+                    "Pass development-suggestions-ui-self-test.mjs."
+                ]
+            )
+        }
+
+        return UsabilityBlueprint(
+            objective: "Improve one clear interaction in the development suggestion flow.",
+            allowedScope: ["App/KRALIAgentNative/ConversationSidebarView.swift"],
+            acceptanceCriteria: [
+                "Complete one visible card-flow improvement rather than a broad redesign.",
+                "Preserve user approval and review boundaries.",
+                "Pass development-suggestions-ui-self-test.mjs."
+            ]
+        )
     }
 
     private func compact(
