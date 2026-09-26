@@ -59,6 +59,7 @@ jobs:
           python3 Scripts/self-development-research-policy-self-test.py
           node Scripts/development-authority-self-test.mjs
           node Scripts/development-suggestions-ui-self-test.mjs
+          node Scripts/system-integrity-self-test.mjs
           node Scripts/bounded-development-compiler-self-test.mjs
           node Scripts/development-release-reconciliation-self-test.mjs
 

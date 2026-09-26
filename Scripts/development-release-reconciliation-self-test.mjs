@@ -52,7 +52,7 @@ ok(
 
 const reconcile = engine.slice(
   engine.indexOf("private func reconcileReleasedDevelopmentSuggestions"),
-  engine.indexOf("func canDevelopSuggestion")
+  engine.indexOf("private func reconcileUnverifiedReviewSuggestions")
 );
 
 ok(
@@ -64,8 +64,8 @@ ok(
 );
 
 ok(
-  sidebar.includes("case .released") &&
-  sidebar.includes("checkmark.circle.fill"),
+  sidebar.includes("case .released,") &&
+  sidebar.includes("Text(suggestion.state.title)"),
   "sidebar does not render released state as completed"
 );
 

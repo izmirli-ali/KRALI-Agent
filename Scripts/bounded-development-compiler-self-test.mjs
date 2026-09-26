@@ -126,7 +126,7 @@ ok(
 );
 
 ok(
-  bridge.includes("fraction: 0.95") &&
+  bridge.includes("fraction: 0.90") &&
   bridge.includes('title: "Candidate hazır"') &&
   bridge.includes("Lead / ChatGPT incelemesi gerekiyor"),
   "candidate must stop at human review stage"
