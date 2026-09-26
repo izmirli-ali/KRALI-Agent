@@ -86,6 +86,11 @@ struct ConversationSidebarView: View {
                         }
                     }
 
+                    if !visibleDevelopmentSuggestions.isEmpty {
+                        developmentStatusSummaryView(developmentStatusSummary)
+                            .padding(.top, 12)
+                    }
+
                     sectionLabel("GEÇMİŞ")
                         .padding(.top, 10)
 
@@ -263,6 +268,18 @@ struct ConversationSidebarView: View {
         }
     }
 
+    private var developmentStatusSummary: DevelopmentStatusSummary {
+        DevelopmentStatusSummary(
+            total: visibleDevelopmentSuggestions.count,
+            developing: visibleDevelopmentSuggestions.filter { $0.state == .developing }.count,
+            readyForReview: visibleDevelopmentSuggestions.filter { $0.state == .readyForReview }.count,
+            approved: visibleDevelopmentSuggestions.filter { $0.state == .approved }.count,
+            proposed: visibleDevelopmentSuggestions.filter { $0.state == .proposed }.count,
+            deferred: visibleDevelopmentSuggestions.filter { $0.state == .deferred }.count,
+            failed: visibleDevelopmentSuggestions.filter { $0.state == .failed }.count
+        )
+    }
+
     private func suggestionLineageKey(
         _ suggestion: AgentDevelopmentSuggestion
     ) -> String {
@@ -304,6 +321,68 @@ struct ConversationSidebarView: View {
                 .updatedAt
                 .timeIntervalSince1970
         )
+    }
+
+    private struct DevelopmentStatusSummary {
+        let total: Int
+        let developing: Int
+        let readyForReview: Int
+        let approved: Int
+        let proposed: Int
+        let deferred: Int
+        let failed: Int
+    }
+
+    private func developmentStatusSummaryView(_ summary: DevelopmentStatusSummary) -> some View {
+        HStack(spacing: 12) {
+            if summary.total > 0 {
+                Text("\(summary.total) öneri")
+                    .font(.caption2.weight(.semibold))
+                    .foregroundStyle(.tertiary)
+            }
+
+            if summary.developing > 0 {
+                statusBadge("Geliştiriliyor", count: summary.developing, color: .orange)
+            }
+
+            if summary.readyForReview > 0 {
+                statusBadge("İnceleme", count: summary.readyForReview, color: .blue)
+            }
+
+            if summary.approved > 0 {
+                statusBadge("Onaylandı", count: summary.approved, color: .green)
+            }
+
+            if summary.proposed > 0 {
+                statusBadge("Önerildi", count: summary.proposed, color: .purple)
+            }
+
+            if summary.deferred > 0 {
+                statusBadge("Ertelendi", count: summary.deferred, color: .gray)
+            }
+
+            if summary.failed > 0 {
+                statusBadge("Başarısız", count: summary.failed, color: .red)
+            }
+        }
+        .padding(.horizontal, 8)
+        .padding(.vertical, 6)
+        .background(Color.primary.opacity(0.04))
+        .clipShape(RoundedRectangle(cornerRadius: 8, style: .continuous))
+    }
+
+    private func statusBadge(_ text: String, count: Int, color: Color) -> some View {
+        HStack(spacing: 4) {
+            Text(text)
+                .font(.caption2.weight(.medium))
+                .foregroundStyle(color)
+
+            if count > 0 {
+                Text("\(count)")
+                    .font(.caption2.weight(.bold))
+                    .foregroundStyle(color)
+            }
+        }
     }
 
     @ViewBuilder
