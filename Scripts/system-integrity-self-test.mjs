@@ -17,10 +17,12 @@ const compiler = read("App/KRALIAgentNative/AgentBoundedDevelopmentTaskCompiler.
 const missionNormalizer = read("App/KRALIAgentNative/AgentMissionNormalizer.swift");
 const perception = read("App/KRALIAgentNative/AgentScreenPerception.swift");
 const workflow = read(".github/workflows/krali-ci.yml");
+const marketingVersions = [...project.matchAll(/MARKETING_VERSION = ([^;]+);/g)].map((match) => match[1]);
+const buildVersions = [...project.matchAll(/CURRENT_PROJECT_VERSION = (\d+);/g)].map((match) => match[1]);
 
-ok(version === "0.11.42", "VERSION must remain 0.11.42 for this candidate.");
-ok(project.includes("MARKETING_VERSION = 0.11.42;"), "Xcode marketing version is inconsistent.");
-ok(project.includes("CURRENT_PROJECT_VERSION = 282;"), "Xcode build version is inconsistent.");
+ok(/^\d+\.\d+\.\d+$/.test(version), "VERSION must use semantic major.minor.patch format.");
+ok(marketingVersions.length > 0 && marketingVersions.every((item) => item === version), "Xcode marketing version is inconsistent with VERSION.");
+ok(buildVersions.length > 0 && buildVersions.every((item) => Number(item) > 0), "Xcode build version must be a positive integer.");
 
 ok(
   project.includes("AgentPublicResearchQualityGate.swift in Sources") &&
