@@ -50,7 +50,7 @@ final class AgentEngine: ObservableObject {
     @Published var missionPhase: AgentMissionPhase = .runtime
     @Published var developerRepository: AgentDeveloperRepository?
     @Published var developerMissionReason: String?
-    @Published var executionProfile: AgentExecutionProfile = .developmentResearchMode
+    @Published var executionProfile: AgentExecutionProfile = .conversationResearchCore
     @Published var currentTaskGraph: AgentTaskGraph?
     @Published var currentRuntimeTask: AgentRuntimeTask?
     @Published var taskGraphStatus = "Henüz görev grafiği yok."
@@ -4005,8 +4005,7 @@ final class AgentEngine: ObservableObject {
         _ goal: AgentGoalProfile
     ) -> AgentGoalProfile {
         guard
-            executionProfile ==
-                .developmentResearchMode,
+            executionProfile != .full,
             goal.outcomes.contains(.research) ||
             goal.requiredCapabilityIDs.contains(
                 "research.web"

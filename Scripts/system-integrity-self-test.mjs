@@ -16,6 +16,7 @@ const gate = read("App/KRALIAgentNative/AgentPublicResearchQualityGate.swift");
 const compiler = read("App/KRALIAgentNative/AgentBoundedDevelopmentTaskCompiler.swift");
 const missionNormalizer = read("App/KRALIAgentNative/AgentMissionNormalizer.swift");
 const sourceReader = read("App/KRALIAgentNative/AgentWebSourceReader.swift");
+const executionProfile = read("App/KRALIAgentNative/AgentExecutionProfile.swift");
 const perception = read("App/KRALIAgentNative/AgentScreenPerception.swift");
 const workflow = read(".github/workflows/krali-ci.yml");
 const marketingVersions = [...project.matchAll(/MARKETING_VERSION = ([^;]+);/g)].map((match) => match[1]);
@@ -66,6 +67,14 @@ ok(
     sourceReader.includes("selectedSources") &&
     sourceReader.includes("domain-diverse pages concurrently"),
   "Research source reads lost their bounded parallel execution contract."
+);
+
+ok(
+  engine.includes("executionProfile: AgentExecutionProfile = .conversationResearchCore") &&
+    executionProfile.includes("case conversationResearchCore") &&
+    executionProfile.includes("retiredAutomationCapabilityIDs") &&
+    executionProfile.includes('"files.search"'),
+  "The default core profile still exposes retired desktop or local-file automation."
 );
 
 ok(

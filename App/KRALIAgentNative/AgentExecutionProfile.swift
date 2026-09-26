@@ -1,6 +1,7 @@
 import Foundation
 
 enum AgentExecutionProfile: String, Codable {
+    case conversationResearchCore
     case developmentResearchMode
     case full
 
@@ -13,8 +14,20 @@ enum AgentExecutionProfile: String, Codable {
         "perception.screen"
     ]
 
+    static let retiredAutomationCapabilityIDs: Set<String> = [
+        "files.search",
+        "files.metadata",
+        "files.move.reversible",
+        "files.reveal",
+        "files.write.text",
+        "perception.media"
+    ]
+
     var pausedCapabilityIDs: Set<String> {
         switch self {
+        case .conversationResearchCore:
+            return Self.computerControlCapabilityIDs
+                .union(Self.retiredAutomationCapabilityIDs)
         case .developmentResearchMode:
             return Self.computerControlCapabilityIDs
         case .full:
