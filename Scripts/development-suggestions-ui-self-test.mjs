@@ -170,6 +170,22 @@ ok(
 );
 
 ok(
+  engine.includes("Kanıt yetersiz:") &&
+  engine.includes("En az iki okunmuş kaynak ile iki bağımsız alan adı olmadan sonuç üretmedim.") &&
+  engine.includes("result.url.absoluteString") &&
+  engine.includes("Eşleşen kavramlar:"),
+  "research output exposes traceable source links and refuses a conclusion without cross-domain read evidence"
+);
+
+const sourceReader = read("App/KRALIAgentNative/AgentWebSourceReader.swift");
+ok(
+  sourceReader.includes('forHTTPHeaderField: "Content-Type"') &&
+  sourceReader.includes("contentType.contains(\"html\")") &&
+  sourceReader.includes("compressed bytes into evidence"),
+  "binary documents cannot be mistaken for readable page evidence"
+);
+
+ok(
   queryPlanner.includes("func researchSubject(from rawQuery: String)") &&
   queryPlanner.includes("Uzun araştırma istemlerinde konu ile çıktı kuralları") &&
   engine.includes(".researchSubject(from: query)") &&

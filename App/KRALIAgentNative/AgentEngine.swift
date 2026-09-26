@@ -7413,14 +7413,25 @@ final class AgentEngine: ObservableObject {
                 index,
                 result in
 
-                "\(index + 1). \(result.title) — \(result.domain)"
+                let publication = result.publishedAt.map {
+                    " • " + Self.researchSourceDateFormatter.string(from: $0)
+                } ?? ""
+
+                return "\(index + 1). \(result.title) — \(result.domain)\(publication)\n   \(result.url.absoluteString)"
             }
             .joined(separator: "\n")
 
             let evidenceText = evidence.prefix(3).map { item in
-                "• \(item.source.title): \(item.excerpt)"
+                let concepts = item.matchedConcepts.isEmpty
+                    ? ""
+                    : "\n  Eşleşen kavramlar: \(item.matchedConcepts.joined(separator: ", "))"
+                return "• \(item.source.title) (\(item.source.domain))\n  Kanıt: \(item.excerpt)\(concepts)"
             }
             .joined(separator: "\n")
+
+            let evidenceDomains = Set(evidence.map { $0.source.domain.lowercased() })
+            let hasIndependentEvidence =
+                evidence.count >= 2 && evidenceDomains.count >= 2
 
             let resolvedTargets = report.results.filter {
                 !$0.evidenceEligible
@@ -7452,8 +7463,22 @@ final class AgentEngine: ObservableObject {
                 return reply
             }
 
+            guard hasIndependentEvidence else {
+                var reply =
+                    "Kanıt yetersiz: (evidence.count) okunmuş kaynak ve " +
+                    "(evidenceDomains.count) bağımsız alan adı doğrulayabildim. " +
+                    "En az iki okunmuş kaynak ile iki bağımsız alan adı olmadan sonuç üretmedim."
+
+                if !lines.isEmpty {
+                    reply += "\n\nİncelenen kaynaklar:\n" + lines
+                }
+
+                return reply
+            }
+
             var reply =
-                "Web'de araştırdım ve \(webResearchResults.count) alakalı kaynak buldum."
+                "Web araştırması doğrulandı: \(evidence.count) okunmuş kaynak, " +
+                "\(evidenceDomains.count) bağımsız alan adı."
 
             if !evidenceText.isEmpty {
                 reply +=
@@ -7479,6 +7504,14 @@ final class AgentEngine: ObservableObject {
                 error.localizedDescription
         }
     }
+
+    private static let researchSourceDateFormatter: DateFormatter = {
+        let formatter = DateFormatter()
+        formatter.locale = Locale(identifier: "tr_TR")
+        formatter.calendar = Calendar(identifier: .gregorian)
+        formatter.dateFormat = "d MMM yyyy"
+        return formatter
+    }()
 
     private func queueInteractiveAccessCapability() {
         guard

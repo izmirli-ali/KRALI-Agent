@@ -129,6 +129,22 @@ actor AgentWebSourceReader {
                 )
             }
 
+            let contentType = http.value(
+                forHTTPHeaderField: "Content-Type"
+            )?.lowercased() ?? ""
+
+            // A PDF or arbitrary binary response can be decoded as Latin-1,
+            // but that is not a page KRALİ has actually read.  Treat it as
+            // unavailable rather than leaking compressed bytes into evidence.
+            guard
+                contentType.isEmpty ||
+                contentType.contains("text/") ||
+                contentType.contains("html") ||
+                contentType.contains("xml")
+            else {
+                return nil
+            }
+
             if let html = String(data: data, encoding: .utf8) {
                 pageText = readableText(from: html)
             } else if let html = String(
