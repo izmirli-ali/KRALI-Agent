@@ -45,7 +45,9 @@ ok(
 
 ok(
   store.includes("func refreshInnovationSuggestions") &&
-  store.includes("innovation:ui-development-flow") &&
+  store.includes("innovation:ui-source-badge") &&
+  store.includes("innovation:ui-status-line") &&
+  store.includes("innovation:ui-action-labels") &&
   engine.includes("refreshInnovationSuggestions") &&
   engine.includes("pruneLegacyStoppedResearch"),
   "fresh innovation queue replaces obsolete static fallback cards"
@@ -88,7 +90,7 @@ ok(
 ok(
   store.includes("pruneLegacyStoppedResearch") &&
   store.includes("pruneStaleInnovationSuggestions") &&
-  store.includes("innovation:ui-development-flow") &&
+  store.includes("innovation:ui-source-badge") &&
   store.includes(".usability"),
   "legacy stopped research is pruned and new ideas prioritize bounded UI improvements"
 );
@@ -137,7 +139,9 @@ const compiler = read("App/KRALIAgentNative/AgentBoundedDevelopmentTaskCompiler.
 ok(
   compiler.includes("one concrete, testable change") &&
   compiler.includes("one bounded repair attempt") &&
-  compiler.includes("Improve keyboard focus and accessibility semantics") &&
+  compiler.includes("Make the existing suggestion source type visually scannable") &&
+  compiler.includes("Make the existing suggestion status line concise") &&
+  compiler.includes("Add concise accessibility labels") &&
   compiler.includes('allowedScope: ["App/KRALIAgentNative/ConversationSidebarView.swift"]'),
   "bounded UI candidates receive a focused, verifiable view-level task contract"
 );
@@ -162,8 +166,8 @@ ok(
 ok(
   sidebar.includes("suggestionCardTitle") &&
   sidebar.includes('replacingOccurrences(of: "KRALİ ", with: "")') &&
-  store.includes('"Öneri akışı"') &&
-  store.includes('"Araştırma sonuçları"'),
+  store.includes('"Kart durum metni"') &&
+  store.includes('"Kaynak türü etiketi"'),
   "sidebar cards use short, task-first labels without the KRALİ prefix"
 );
 

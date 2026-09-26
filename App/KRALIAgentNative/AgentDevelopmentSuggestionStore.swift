@@ -382,74 +382,25 @@ struct AgentDevelopmentSuggestionStore {
 
         let definitions: [(String, String, String, String, AgentDevelopmentSuggestionSource)] = [
             (
-                "Araştırma sonuçları",
-                "Kaynak, kanıt, çelişki ve puan özetini daha taranabilir bir hiyerarşide sunmak.",
-                "Uzun araştırma sonuçlarında kritik bulgulara daha hızlı ulaşılması.",
-                "innovation:ui-research-results",
+                "Kaynak türü etiketi",
+                "Karttaki kaynak türünü tek bir kısa rozetle görünür kılmak.",
+                "Kartın neye dayandığının ilk bakışta anlaşılması.",
+                "innovation:ui-source-badge",
                 .usability
             ),
             (
-                "Öneri akışı",
-                "Yeni fikirler, öneriler, geliştirme durumu ve inceleme gereksinimini daha sade bir kontrol yüzeyinde toplamak.",
-                "Kullanıcının doğru geliştirme kararını daha az arayüz gürültüsüyle vermesi.",
-                "innovation:ui-development-flow",
+                "Kart durum metni",
+                "Kart durumunu tek kısa satırda ve sabit sırayla göstermek.",
+                "Geliştirme durumunun daha hızlı taranması.",
+                "innovation:ui-status-line",
                 .usability
             ),
             (
-                "Erişilebilirlik ve klavye",
-                "Önemli durumlar, odak sırası ve klavye ile erişilebilir geliştirme kontrollerini gözden geçirmek.",
-                "Arayüzün daha hızlı, öngörülebilir ve erişilebilir kullanılması.",
-                "innovation:ui-accessibility",
+                "Kart eylemi açıklaması",
+                "Geliştir ve Gizle eylemlerine kısa erişilebilir açıklamalar eklemek.",
+                "Klavye ve ekran okuyucu kullanımında eylem amacının anlaşılması.",
+                "innovation:ui-action-labels",
                 .usability
-            ),
-            (
-                "Kaynak kartları",
-                "Kaynak türü, güncellik, kanıt gücü ve bağımsızlık bilgisini kompakt kartlarda görünür kılmak.",
-                "Araştırma kalitesinin kaynak bazında daha anlaşılır değerlendirilmesi.",
-                "innovation:ui-source-cards",
-                .usability
-            ),
-            (
-                "Kanıt çelişkileri",
-                "Aynı iddia için farklı kaynakların uyuşmayan bulgularını ayrı bir inceleme kuyruğunda görünür kılmak.",
-                "Araştırma sonuçlarında güven derecesi ve belirsizliğin daha açık gösterilmesi.",
-                "innovation:claim-contradictions",
-                .research
-            ),
-            (
-                "Tekrar üretilebilir araştırma",
-                "Kaynak tarihi, sürümü, erişim zamanı ve kanıt alıntısını tutarlı bir araştırma kaydında birleştirmek.",
-                "Bulguların daha sonra denetlenmesi ve aynı araştırmanın tekrar çalıştırılabilmesi.",
-                "innovation:research-reproducibility",
-                .research
-            ),
-            (
-                "Regresyon hafızası",
-                "Geçmiş candidate hatalarını test sonucu, hata sınıfı ve kullanıcı geri bildirimiyle ilişkilendirmek.",
-                "Benzer geliştirmelerde daha erken risk uyarısı ve daha güvenli planlama.",
-                "innovation:regression-memory",
-                .research
-            ),
-            (
-                "Bağımlılık etkisi",
-                "Önerilen dosya değişikliklerinin çağrı zinciri ve doğrulama kapsamına etkisini araştırmak.",
-                "Daha küçük, geri alınabilir ve test kapsamı açık candidate paketleri.",
-                "innovation:dependency-impact",
-                .research
-            ),
-            (
-                "Çok dilli araştırma",
-                "Aynı araştırma iddiasını Türkçe ve İngilizce sorgularla karşılaştırarak kaynak kör noktalarını ölçmek.",
-                "Dil kaynaklı bulgu kaybını azaltan daha dengeli araştırma kalitesi.",
-                "innovation:multilingual-evaluation",
-                .research
-            ),
-            (
-                "Kalite geçmişi",
-                "Araştırma ve candidate çıktılarının kalite puanlarını zaman içinde karşılaştırılabilir biçimde kaydetmek.",
-                "Gelişimin gerçek görevlerde ölçülmesi ve gerilemelerin fark edilmesi.",
-                "innovation:quality-history",
-                .research
             )
         ]
 
@@ -466,15 +417,10 @@ struct AgentDevelopmentSuggestionStore {
 
         let calendar = Calendar(identifier: .gregorian)
         let day = calendar.ordinality(of: .day, in: .era, for: now) ?? 0
-        let uiDefinitions = definitions.filter { $0.4 == .usability }
-        let researchDefinitions = definitions.filter { $0.4 == .research }
-        let orderedUI = (0..<uiDefinitions.count).map {
-            uiDefinitions[(day + $0) % uiDefinitions.count]
+        let orderedUI = (0..<definitions.count).map {
+            definitions[(day + $0) % definitions.count]
         }
-        let orderedResearch = (0..<researchDefinitions.count).map {
-            researchDefinitions[(day + $0) % researchDefinitions.count]
-        }
-        let ordered = orderedUI + orderedResearch
+        let ordered = orderedUI
 
         let additions = ordered.filter {
             !fingerprints.contains($0.3) && !suppressed.contains($0.3)

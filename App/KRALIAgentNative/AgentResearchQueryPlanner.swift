@@ -1187,6 +1187,10 @@ struct AgentResearchQueryPlanner {
         normalized: String
     ) -> String? {
         let markers = [
+            " şirket analizi",
+            " sirket analizi",
+            " şirket araştırması",
+            " sirket arastirmasi",
             " markasını",
             " markasini",
             " markası",

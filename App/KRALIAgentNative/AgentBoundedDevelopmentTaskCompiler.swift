@@ -410,25 +410,37 @@ struct AgentBoundedDevelopmentTaskCompiler {
             locale: Locale(identifier: "tr_TR")
         ).lowercased()
 
-        if title.contains("erisilebilirlik") || title.contains("klavye") {
+        if title.contains("eylemi aciklama") {
             return UsabilityBlueprint(
-                objective: "Improve keyboard focus and accessibility semantics for development suggestion cards.",
+                objective: "Add concise accessibility labels to the existing suggestion-card action controls.",
                 allowedScope: ["App/KRALIAgentNative/ConversationSidebarView.swift"],
                 acceptanceCriteria: [
-                    "Add or improve one keyboard/focus or accessibility label behavior on the suggestion card.",
+                    "Improve only the existing action-control accessibility labels.",
                     "Keep card order and existing approval actions unchanged.",
                     "Pass development-suggestions-ui-self-test.mjs."
                 ]
             )
         }
 
-        if title.contains("kaynak kart") {
+        if title.contains("kaynak turu etiketi") {
             return UsabilityBlueprint(
-                objective: "Make research source-card evidence and review state easier to scan in the sidebar.",
+                objective: "Make the existing suggestion source type visually scannable with one compact label treatment.",
                 allowedScope: ["App/KRALIAgentNative/ConversationSidebarView.swift"],
                 acceptanceCriteria: [
-                    "Improve one source-card hierarchy or evidence-state affordance.",
+                    "Change only the source-type presentation on the existing card.",
                     "Preserve the existing bounded approval actions.",
+                    "Pass development-suggestions-ui-self-test.mjs."
+                ]
+            )
+        }
+
+        if title.contains("kart durum metni") {
+            return UsabilityBlueprint(
+                objective: "Make the existing suggestion status line concise and consistently ordered.",
+                allowedScope: ["App/KRALIAgentNative/ConversationSidebarView.swift"],
+                acceptanceCriteria: [
+                    "Change only the existing status-line presentation.",
+                    "Preserve card order and approval actions.",
                     "Pass development-suggestions-ui-self-test.mjs."
                 ]
             )

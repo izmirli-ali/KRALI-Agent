@@ -275,16 +275,9 @@ struct ConversationSidebarView: View {
         _ suggestion: AgentDevelopmentSuggestion
     ) -> String {
         let compactTitles = [
-            "innovation:ui-research-results": "Araştırma sonuçları",
-            "innovation:ui-development-flow": "Öneri akışı",
-            "innovation:ui-accessibility": "Erişilebilirlik ve klavye",
-            "innovation:ui-source-cards": "Kaynak kartları",
-            "innovation:claim-contradictions": "Kanıt çelişkileri",
-            "innovation:research-reproducibility": "Tekrar üretilebilir araştırma",
-            "innovation:regression-memory": "Regresyon hafızası",
-            "innovation:dependency-impact": "Bağımlılık etkisi",
-            "innovation:multilingual-evaluation": "Çok dilli araştırma",
-            "innovation:quality-history": "Kalite geçmişi"
+            "innovation:ui-source-badge": "Kaynak türü etiketi",
+            "innovation:ui-status-line": "Kart durum metni",
+            "innovation:ui-action-labels": "Kart eylemi açıklaması"
         ]
         if let compact = compactTitles[suggestion.fingerprint] { return compact }
         return suggestion.title
