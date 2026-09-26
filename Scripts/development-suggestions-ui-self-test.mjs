@@ -152,6 +152,7 @@ ok(
 
 ok(
   store.includes("func pruneUnverifiedResearchSuggestions") &&
+  !store.includes("guard suggestion.source == .research") &&
   engine.includes("pruneUnverifiedResearchSuggestions") &&
   sidebar.includes("let impactRank = suggestion.source == .usability ? 0 : 1"),
   "unverified legacy research is removed and safe UI candidates are prioritized"

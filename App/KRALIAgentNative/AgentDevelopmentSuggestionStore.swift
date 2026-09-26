@@ -334,7 +334,6 @@ struct AgentDevelopmentSuggestionStore {
         _ existing: [AgentDevelopmentSuggestion]
     ) -> [AgentDevelopmentSuggestion] {
         existing.filter { suggestion in
-            guard suggestion.source == .research else { return true }
             let text = (suggestion.reason + " " + suggestion.expectedBenefit)
                 .folding(options: [.caseInsensitive, .diacriticInsensitive], locale: Locale(identifier: "tr_TR"))
                 .lowercased()
