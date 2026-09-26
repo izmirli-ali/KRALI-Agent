@@ -75,6 +75,7 @@ final class AgentEngine: ObservableObject {
     @Published var webResearchStatus = "Henüz web araştırması yapılmadı."
     @Published var localIntelligenceState: LocalIntelligenceState = .checking
     @Published var intelligenceProviderStatus = "Sentez sağlayıcısı henüz kullanılmadı."
+    @Published var activeCoreIntent: AgentCoreIntent = .conversation
 
     @Published var voiceOutputEnabled = true {
         didSet {
@@ -2042,6 +2043,16 @@ final class AgentEngine: ObservableObject {
             )
         )
 
+        let coreIntentDecision =
+            missionRouter.classifyCoreIntent(text)
+        activeCoreIntent = coreIntentDecision.intent
+        log(
+            "Çekirdek yönlendirme: " +
+            coreIntentDecision.intent.title +
+            " • confidence=" +
+            String(format: "%.2f", coreIntentDecision.confidence)
+        )
+
         if handleDeveloperTaskChatCommand(
             text
         ) {
@@ -2068,8 +2079,9 @@ final class AgentEngine: ObservableObject {
             )
 
         let goalProfile =
-            researchCoreGoalProfile(
-                interpretedGoalProfile
+            coreGoalProfile(
+                interpretedGoalProfile,
+                intent: coreIntentDecision.intent
             )
 
         if goalProfile.commandAssessment.requiresClarification {
@@ -4039,6 +4051,34 @@ final class AgentEngine: ObservableObject {
                 capabilityIDs,
             isCompound:
                 goal.isCompound
+        )
+    }
+
+    private func coreGoalProfile(
+        _ goal: AgentGoalProfile,
+        intent: AgentCoreIntent
+    ) -> AgentGoalProfile {
+        let normalized = researchCoreGoalProfile(goal)
+
+        guard intent == .research else {
+            return normalized
+        }
+
+        var outcomes = normalized.outcomes
+        outcomes.insert(.research)
+        outcomes.insert(.explain)
+
+        var capabilityIDs = normalized.requiredCapabilityIDs
+        capabilityIDs.insert("core.reasoning")
+        capabilityIDs.insert("context.local")
+        capabilityIDs.insert("research.web")
+
+        return AgentGoalProfile(
+            summary: normalized.summary,
+            outcomes: outcomes,
+            requiredCapabilityIDs: capabilityIDs,
+            isCompound: outcomes.count > 1,
+            commandAssessment: normalized.commandAssessment
         )
     }
 

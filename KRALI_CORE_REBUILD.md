@@ -82,3 +82,15 @@ created without a separate approval.
 3. Migrate Mentor and candidate-development reporting.
 4. Delete retired desktop/file families and their obsolete UI/diagnostics.
 5. Run GitHub CI and targeted live evaluations before each release.
+
+## Runtime consolidation status
+
+- The default UI exposes only conversation/understanding, evidence-bound
+  research, and GitHub development.
+- Top-level intent routing classifies every new turn into one of those three
+  product modes before legacy planning can influence execution.
+- General search engines, academic indexes, DOI metadata, and review sources
+  run in the same bounded parallel research round; result selection still
+  requires source diversity and the public-research quality gate.
+- Desktop, screen-control, and local-file automation remain unavailable in the
+  default profile and are no longer offered as primary UI actions.
