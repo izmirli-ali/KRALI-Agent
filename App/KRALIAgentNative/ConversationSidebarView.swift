@@ -356,6 +356,27 @@ struct ConversationSidebarView: View {
             .font(.system(size: 10, weight: .medium))
             .foregroundStyle(.secondary)
 
+            // Compact status indicator row
+            HStack(spacing: 6) {
+                if suggestion.state == .approved || suggestion.state == .developing || suggestion.state == .readyForReview || suggestion.state == .failed {
+                    ProgressView(value: progress.fraction)
+                        .progressViewStyle(.linear)
+                        .frame(width: 60, height: 4)
+                        .help(progress.title + " — " + progress.detail)
+                } else if suggestion.state == .proposed || suggestion.state == .deferred {
+                    HStack(spacing: 4) {
+                        Image(systemName: engine.canDevelopSuggestion(suggestion) ? "checkmark.circle.fill" : "circle")
+                            .font(.caption2)
+                            .foregroundStyle(engine.canDevelopSuggestion(suggestion) ? .green : .orange)
+                        Text(engine.canDevelopSuggestion(suggestion) ? "Hazır" : "İnceleme")
+                            .font(.caption2)
+                            .foregroundStyle(.secondary)
+                    }
+                }
+                Spacer(minLength: 0)
+            }
+            .padding(.top, 2)
+
             if suggestion.state == .approved ||
                 suggestion.state == .developing ||
                 suggestion.state == .readyForReview ||
