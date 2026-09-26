@@ -330,6 +330,19 @@ struct AgentDevelopmentSuggestionStore {
         }
     }
 
+    func pruneUnverifiedResearchSuggestions(
+        _ existing: [AgentDevelopmentSuggestion]
+    ) -> [AgentDevelopmentSuggestion] {
+        existing.filter { suggestion in
+            guard suggestion.source == .research else { return true }
+            let text = (suggestion.reason + " " + suggestion.expectedBenefit)
+                .folding(options: [.caseInsensitive, .diacriticInsensitive], locale: Locale(identifier: "tr_TR"))
+                .lowercased()
+            return !text.contains("yeterli kanit bulunmamaktadir") &&
+                !text.contains("evidence-bound approach coverage 1/5")
+        }
+    }
+
     /// Generated ideas are tied to an exact source revision. Do not present a
     /// stale idea as if it can be safely developed on a newer build. While the
     /// user is focusing on UI work, untouched generated research ideas are

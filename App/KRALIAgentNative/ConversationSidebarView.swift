@@ -297,9 +297,19 @@ struct ConversationSidebarView: View {
             rank = 9
         }
 
+        let impactRank = suggestion.source == .usability ? 0 : 1
+        let riskRank: Int
+        switch suggestion.risk.lowercased() {
+        case "low": riskRank = 0
+        case "medium": riskRank = 1
+        default: riskRank = 2
+        }
+
         return String(
-            format: "%02d-%020.3f",
+            format: "%02d-%02d-%02d-%020.3f",
             rank,
+            impactRank,
+            riskRank,
             -suggestion
                 .updatedAt
                 .timeIntervalSince1970

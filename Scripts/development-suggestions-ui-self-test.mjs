@@ -142,9 +142,25 @@ ok(
   "bounded UI candidates receive a focused, verifiable view-level task contract"
 );
 
+const queryPlanner = read("App/KRALIAgentNative/AgentResearchQueryPlanner.swift");
+ok(
+  queryPlanner.includes('Claude Code official documentation permissions security') &&
+  queryPlanner.includes('docs.anthropic.com') &&
+  queryPlanner.includes('Bağımsız teknik doğrulama'),
+  "specific product research receives official, security, pricing, repository, and independent-source facets"
+);
+
+ok(
+  store.includes("func pruneUnverifiedResearchSuggestions") &&
+  engine.includes("pruneUnverifiedResearchSuggestions") &&
+  sidebar.includes("let impactRank = suggestion.source == .usability ? 0 : 1"),
+  "unverified legacy research is removed and safe UI candidates are prioritized"
+);
+
 console.log("development_suggestions_ui_self_test_ok");
 console.log("research_to_suggestion=bounded_after_approval");
 console.log("candidate_progress=90");
 console.log("release_progress=100");
 console.log("stable_cards_and_replay_checks=PASS");
 console.log("same_revision_retry_and_selection_recovery=PASS");
+console.log("targeted_research_and_priority_cleanup=PASS");

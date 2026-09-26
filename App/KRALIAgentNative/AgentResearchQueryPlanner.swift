@@ -48,6 +48,30 @@ struct AgentResearchQueryPlanner {
             return directWebPlan
         }
 
+        if normalized.contains("claude code") {
+            return ResearchQueryPlan(
+                original: query,
+                variants: [
+                    "Claude Code official documentation permissions security",
+                    "site:docs.anthropic.com Claude Code",
+                    "site:anthropic.com Claude Code pricing",
+                    "site:github.com anthropics Claude Code"
+                ],
+                conceptGroups: [["claude", "code"]],
+                mandatoryConceptGroups: [["claude", "code"]],
+                preferredDomains: ["docs.anthropic.com", "anthropic.com", "github.com"],
+                entityTerms: ["claude", "code"],
+                facets: [
+                    ResearchFacet(id: "official", title: "Resmi ürün belgeleri", query: "site:docs.anthropic.com Claude Code"),
+                    ResearchFacet(id: "security", title: "İzin ve güvenlik", query: "Claude Code permissions security official"),
+                    ResearchFacet(id: "pricing", title: "Fiyatlandırma", query: "Claude Code pricing official"),
+                    ResearchFacet(id: "independent", title: "Bağımsız teknik doğrulama", query: "Claude Code security review technical"),
+                    ResearchFacet(id: "repository", title: "Açık kaynak referansları", query: "site:github.com anthropics Claude Code")
+                ],
+                directCandidates: []
+            )
+        }
+
         let entity = extractEntity(
             from: query,
             normalized: normalized

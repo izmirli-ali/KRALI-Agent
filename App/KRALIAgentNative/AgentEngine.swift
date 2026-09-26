@@ -325,9 +325,12 @@ final class AgentEngine: ObservableObject {
                     sourceRevision: currentExactSourceRevision,
                     in: developmentSuggestionStore
                         .pruneLegacyStoppedResearch(
-                            reconcileReleasedDevelopmentSuggestions(
-                                storedDevelopmentSuggestions
-                            )
+                            developmentSuggestionStore
+                                .pruneUnverifiedResearchSuggestions(
+                                    reconcileReleasedDevelopmentSuggestions(
+                                        storedDevelopmentSuggestions
+                                    )
+                                )
                         )
                 )
 
