@@ -84,7 +84,9 @@ ok(
   missionRouter.includes("func classifyCoreIntent") &&
     missionRouter.includes("forbidsResearch") &&
     missionRouter.includes("forbidsDevelopmentMutation") &&
+    missionRouter.includes("requiresDeliberation") &&
     engine.includes("coreGoalProfile(") &&
+    engine.includes("applyCoreIntent(") &&
     engine.includes("activeCoreIntent = coreIntentDecision.intent") &&
     engine.includes('capabilityIDs.remove("research.web")') &&
     engine.includes('capabilityIDs.remove("files.write.text")'),

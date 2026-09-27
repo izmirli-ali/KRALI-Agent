@@ -36,6 +36,7 @@ struct AgentCoreIntentDecision: Codable, Hashable {
     let reason: String
     let forbidsResearch: Bool
     let forbidsDevelopmentMutation: Bool
+    let requiresDeliberation: Bool
 }
 
 struct AgentMissionRoutingDecision: Codable, Hashable {
@@ -52,8 +53,9 @@ struct AgentMissionRouter {
     func classifyCoreIntent(
         _ input: String
     ) -> AgentCoreIntentDecision {
-        let words = Set(normalize(input))
-        let normalized = normalize(input).joined(separator: " ")
+        let tokens = normalize(input)
+        let words = Set(tokens)
+        let normalized = tokens.joined(separator: " ")
 
         let developmentTerms: Set<String> = [
             "kod", "kodla", "gelistir", "geliştir", "duzelt", "düzelt",
@@ -71,28 +73,24 @@ struct AgentMissionRouter {
         let hasURL = normalized.contains("http ") ||
             normalized.hasPrefix("http") ||
             normalized.contains(" www ")
-        let forbidsResearch = containsAnyPhrase(
-            normalized,
-            [
-                "web arastirmasi yapma",
-                "webde arastirma yapma",
-                "internette arama yapma",
-                "arastirma yapma",
-                "kaynak arama",
-                "kaynak tarama"
+        let forbidsResearch = hasScopedNegation(
+            tokens,
+            actionPrefixes: [
+                "arastir", "web", "internet", "kaynak", "dogrula"
             ]
         )
-        let forbidsDevelopmentMutation = containsAnyPhrase(
-            normalized,
-            [
-                "kod yazma",
-                "kodlama yapma",
-                "degisiklik yapma",
-                "degisiklik baslatma",
-                "gelistirme baslatma",
-                "uygulama yapma"
+        let forbidsDevelopmentMutation = hasScopedNegation(
+            tokens,
+            actionPrefixes: [
+                "kod", "gelistir", "degisiklik", "uygula", "implement"
             ]
         )
+        let requiresDeliberation = [
+            "karar", "hedef", "kisit", "celiski", "varsayim",
+            "netlestir", "soru", "tercih", "oncelik"
+        ].contains { prefix in
+            tokens.contains { $0.hasPrefix(prefix) }
+        }
 
         if !forbidsDevelopmentMutation &&
            developmentScore > 0 &&
@@ -102,7 +100,8 @@ struct AgentMissionRouter {
                 confidence: min(0.98, 0.72 + Double(developmentScore) * 0.08),
                 reason: "Kod, test veya GitHub teslimatı istendi.",
                 forbidsResearch: forbidsResearch,
-                forbidsDevelopmentMutation: false
+                forbidsDevelopmentMutation: false,
+                requiresDeliberation: false
             )
         }
 
@@ -113,7 +112,8 @@ struct AgentMissionRouter {
                 confidence: min(0.98, 0.74 + Double(researchScore) * 0.07),
                 reason: "Dış kaynak, güncellik veya doğrulama gerektiren araştırma istendi.",
                 forbidsResearch: false,
-                forbidsDevelopmentMutation: forbidsDevelopmentMutation
+                forbidsDevelopmentMutation: forbidsDevelopmentMutation,
+                requiresDeliberation: false
             )
         }
 
@@ -124,7 +124,8 @@ struct AgentMissionRouter {
                 ? "Açık eylem yasakları korunarak konuşma ve netleştirme istendi."
                 : "İstek konuşma, açıklama veya fikir danışma çekirdeğine ait.",
             forbidsResearch: forbidsResearch,
-            forbidsDevelopmentMutation: forbidsDevelopmentMutation
+            forbidsDevelopmentMutation: forbidsDevelopmentMutation,
+            requiresDeliberation: requiresDeliberation
         )
     }
 
@@ -250,13 +251,46 @@ struct AgentMissionRouter {
             .filter { !$0.isEmpty }
     }
 
-    private func containsAnyPhrase(
-        _ normalized: String,
-        _ phrases: [String]
+    private func hasScopedNegation(
+        _ tokens: [String],
+        actionPrefixes: [String]
     ) -> Bool {
-        phrases.contains {
-            normalized.contains($0)
+        let negativeActions: Set<String> = [
+            "yapma", "etme", "bakma", "arama", "tarama", "kullanma",
+            "yazma", "uretme", "baslatma", "degistirme", "uygulama",
+            "istemiyorum", "istemem", "olmasin"
+        ]
+        let nounContinuationPrefixes = [
+            "beceri", "kalite", "sistem", "yetenek", "yetkinlik",
+            "modul", "kapasite"
+        ]
+
+        for (index, token) in tokens.enumerated() {
+            guard actionPrefixes.contains(where: {
+                token.hasPrefix($0)
+            }) else {
+                continue
+            }
+
+            let upperBound = min(tokens.count, index + 5)
+            for candidateIndex in (index + 1)..<upperBound {
+                let candidate = tokens[candidateIndex]
+                guard negativeActions.contains(candidate) else {
+                    continue
+                }
+
+                if candidateIndex + 1 < tokens.count,
+                   nounContinuationPrefixes.contains(where: {
+                       tokens[candidateIndex + 1].hasPrefix($0)
+                   }) {
+                    continue
+                }
+
+                return true
+            }
         }
+
+        return false
     }
 }
 
