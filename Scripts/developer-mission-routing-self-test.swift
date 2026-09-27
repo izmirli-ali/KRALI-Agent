@@ -48,6 +48,21 @@ struct DeveloperMissionRoutingSelfTest {
             prohibitedActions.forbidsDevelopmentMutation,
             "negated research and development constraints"
         )
+        let alternateProhibition = router.classifyCoreIntent(
+            "İnternette araştırma yapma, kod üretme ve henüz çözüm önerme."
+        )
+        expect(
+            alternateProhibition.intent == .conversation &&
+            alternateProhibition.forbidsResearch &&
+            alternateProhibition.forbidsDevelopmentMutation,
+            "scoped Turkish action negation"
+        )
+        expect(
+            router.classifyCoreIntent(
+                "KRALİ'nin kod yazma becerisini ve araştırma kalitesini geliştir."
+            ).intent == .development,
+            "verbal noun must not become prohibition"
+        )
 
         let selfDevelopment = router.classify(
             "Web araştırmasında başarısız oldun. Kendi mimarini incele, root cause'u bul ve gerekliyse capability'ni geliştir."

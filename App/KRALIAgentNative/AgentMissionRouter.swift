@@ -52,8 +52,9 @@ struct AgentMissionRouter {
     func classifyCoreIntent(
         _ input: String
     ) -> AgentCoreIntentDecision {
-        let words = Set(normalize(input))
-        let normalized = normalize(input).joined(separator: " ")
+        let tokens = normalize(input)
+        let words = Set(tokens)
+        let normalized = tokens.joined(separator: " ")
 
         let developmentTerms: Set<String> = [
             "kod", "kodla", "gelistir", "geliştir", "duzelt", "düzelt",
@@ -71,28 +72,40 @@ struct AgentMissionRouter {
         let hasURL = normalized.contains("http ") ||
             normalized.hasPrefix("http") ||
             normalized.contains(" www ")
-        let forbidsResearch = containsAnyPhrase(
-            normalized,
-            [
+        let forbidsResearch =
+            containsAnyPhrase(
+                normalized,
+                [
                 "web arastirmasi yapma",
                 "webde arastirma yapma",
                 "internette arama yapma",
                 "arastirma yapma",
                 "kaynak arama",
                 "kaynak tarama"
-            ]
-        )
-        let forbidsDevelopmentMutation = containsAnyPhrase(
-            normalized,
-            [
+                ]
+            ) || hasScopedNegation(
+                tokens,
+                actionPrefixes: [
+                    "arastir", "web", "internet", "kaynak", "dogrula"
+                ]
+            )
+        let forbidsDevelopmentMutation =
+            containsAnyPhrase(
+                normalized,
+                [
                 "kod yazma",
                 "kodlama yapma",
                 "degisiklik yapma",
                 "degisiklik baslatma",
                 "gelistirme baslatma",
                 "uygulama yapma"
-            ]
-        )
+                ]
+            ) || hasScopedNegation(
+                tokens,
+                actionPrefixes: [
+                    "kod", "gelistir", "degisiklik", "uygula", "implement"
+                ]
+            )
 
         if !forbidsDevelopmentMutation &&
            developmentScore > 0 &&
@@ -257,6 +270,46 @@ struct AgentMissionRouter {
         phrases.contains {
             normalized.contains($0)
         }
+    }
+
+    private func hasScopedNegation(
+        _ tokens: [String],
+        actionPrefixes: [String]
+    ) -> Bool {
+        let negativeActions: Set<String> = [
+            "yapma", "etme", "bakma", "arama", "tarama", "kullanma",
+            "yazma", "uretme", "baslatma", "degistirme", "uygulama",
+            "istemiyorum", "istemem", "olmasin"
+        ]
+        let nounContinuations: Set<String> = [
+            "becerisi", "kalitesi", "sistemi", "yetenegi", "yetkinligi",
+            "modulu", "kapasitesi"
+        ]
+
+        for (index, token) in tokens.enumerated() {
+            guard actionPrefixes.contains(where: {
+                token.hasPrefix($0)
+            }) else {
+                continue
+            }
+
+            let upperBound = min(tokens.count, index + 5)
+            for candidateIndex in (index + 1)..<upperBound {
+                let candidate = tokens[candidateIndex]
+                guard negativeActions.contains(candidate) else {
+                    continue
+                }
+
+                if candidateIndex + 1 < tokens.count,
+                   nounContinuations.contains(tokens[candidateIndex + 1]) {
+                    continue
+                }
+
+                return true
+            }
+        }
+
+        return false
     }
 }
 
