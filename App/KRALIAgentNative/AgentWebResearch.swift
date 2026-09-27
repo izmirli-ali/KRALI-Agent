@@ -61,7 +61,7 @@ enum WebResearchError: LocalizedError {
 }
 
 actor AgentWebResearchService {
-    private enum Provider: CaseIterable {
+    private enum Provider: CaseIterable, Sendable {
         case bingRSS
         case google
         case bingHTML
@@ -89,6 +89,12 @@ actor AgentWebResearchService {
         let conceptCoverage: Int
         let sourceKind: AgentResearchSourceKind?
         let origin: String
+    }
+
+    private struct ProviderFetchOutcome: Sendable {
+        let provider: Provider
+        let payload: String?
+        let failure: String?
     }
 
     private let session: URLSession
@@ -192,55 +198,83 @@ actor AgentWebResearchService {
         }
 
         for (variantIndex, variant) in variants.enumerated() {
-            for provider in Provider.allCases {
-                do {
-                    let payload = try await fetch(
-                        provider: provider,
-                        query: variant
-                    )
-
-                    let parsed = parseResults(
-                        provider: provider,
-                        payload: payload,
-                        conceptGroups: queryPlan.conceptGroups,
-                        mandatoryConceptGroups: queryPlan.mandatoryConceptGroups,
-                        preferredDomains: queryPlan.preferredDomains,
-                        entityTerms: queryPlan.entityTerms,
-                        developmentFacet:
-                            developmentFacet,
-                        limit: safeLimit * 2
-                    )
-
-                    if !parsed.isEmpty && !providerNames.contains(provider.name) {
-                        providerNames.append(provider.name)
-                    }
-
-                    for item in parsed {
-                        let key = canonicalURLKey(item.result.url)
-                        guard !seenURLs.contains(key) else {
-                            continue
+            let providerOutcomes = await withTaskGroup(
+                of: ProviderFetchOutcome.self,
+                returning: [ProviderFetchOutcome].self
+            ) { group in
+                for provider in Provider.allCases {
+                    group.addTask {
+                        do {
+                            let payload = try await self.fetch(
+                                provider: provider,
+                                query: variant
+                            )
+                            return ProviderFetchOutcome(
+                                provider: provider,
+                                payload: payload,
+                                failure: nil
+                            )
+                        } catch {
+                            return ProviderFetchOutcome(
+                                provider: provider,
+                                payload: nil,
+                                failure: error.localizedDescription
+                            )
                         }
-
-                        seenURLs.insert(key)
-                        candidates.append(item)
                     }
-
-                    candidates.sort { left, right in
-                        if left.score == right.score {
-                            return left.result.title.count >
-                                right.result.title.count
-                        }
-                        return left.score > right.score
-                    }
-
-                    if candidates.filter({ $0.conceptCoverage >= requiredCoverage }).count >= safeLimit {
-                        break
-                    }
-                } catch {
-                    failures.append(
-                        provider.name + ": " + error.localizedDescription
-                    )
                 }
+
+                var outcomes: [ProviderFetchOutcome] = []
+                for await outcome in group {
+                    outcomes.append(outcome)
+                }
+                return outcomes
+            }
+
+            for outcome in providerOutcomes.sorted(
+                by: { $0.provider.name < $1.provider.name }
+            ) {
+                guard let payload = outcome.payload else {
+                    failures.append(
+                        outcome.provider.name + ": " +
+                        (outcome.failure ?? "Bilinmeyen sağlayıcı hatası")
+                    )
+                    continue
+                }
+
+                let parsed = parseResults(
+                    provider: outcome.provider,
+                    payload: payload,
+                    conceptGroups: queryPlan.conceptGroups,
+                    mandatoryConceptGroups: queryPlan.mandatoryConceptGroups,
+                    preferredDomains: queryPlan.preferredDomains,
+                    entityTerms: queryPlan.entityTerms,
+                    developmentFacet: developmentFacet,
+                    limit: safeLimit * 2
+                )
+
+                if !parsed.isEmpty &&
+                   !providerNames.contains(outcome.provider.name) {
+                    providerNames.append(outcome.provider.name)
+                }
+
+                for item in parsed {
+                    let key = canonicalURLKey(item.result.url)
+                    guard !seenURLs.contains(key) else {
+                        continue
+                    }
+
+                    seenURLs.insert(key)
+                    candidates.append(item)
+                }
+            }
+
+            candidates.sort { left, right in
+                if left.score == right.score {
+                    return left.result.title.count >
+                        right.result.title.count
+                }
+                return left.score > right.score
             }
 
             let searchedEnoughVariants =

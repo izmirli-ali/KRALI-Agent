@@ -15,6 +15,31 @@ struct DeveloperMissionRoutingSelfTest {
     static func main() {
         let router = AgentMissionRouter()
 
+        expect(
+            router.classifyCoreIntent(
+                "Bir şirketi resmi belgeler, güncel haberler ve bağımsız kaynaklarla araştır."
+            ).intent == .research,
+            "company research core intent"
+        )
+        expect(
+            router.classifyCoreIntent(
+                "https://example.com sitesindeki iddiaları doğrula."
+            ).intent == .research,
+            "URL research core intent"
+        )
+        expect(
+            router.classifyCoreIntent(
+                "KRALİ için Swift kodunu düzelt, test et ve GitHub adayı hazırla."
+            ).intent == .development,
+            "development core intent"
+        )
+        expect(
+            router.classifyCoreIntent(
+                "Bu fikir hakkında sen ne düşünüyorsun?"
+            ).intent == .conversation,
+            "conversation core intent"
+        )
+
         let selfDevelopment = router.classify(
             "Web araştırmasında başarısız oldun. Kendi mimarini incele, root cause'u bul ve gerekliyse capability'ni geliştir."
         )
@@ -85,6 +110,7 @@ struct DeveloperMissionRoutingSelfTest {
         expect(AgentDeveloperRepositoryResolver().resolve(configuredRoot: root, userWorkspace: root) == nil, "workspace cannot become developer repository")
 
         print("developer_mission_routing_self_test_ok")
+        print("core_intents=conversation,research,development")
         print("self_development=developer")
         print("normal_research=runtime")
         print("self_development_research=research")

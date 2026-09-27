@@ -13,6 +13,29 @@ enum AgentMissionPhase: String, Codable {
     case authorityEscalation = "authority_escalation"
 }
 
+enum AgentCoreIntent: String, Codable, Hashable {
+    case conversation
+    case research
+    case development
+
+    var title: String {
+        switch self {
+        case .conversation:
+            return "Konuşma ve anlama"
+        case .research:
+            return "Araştırma"
+        case .development:
+            return "GitHub geliştirme"
+        }
+    }
+}
+
+struct AgentCoreIntentDecision: Codable, Hashable {
+    let intent: AgentCoreIntent
+    let confidence: Double
+    let reason: String
+}
+
 struct AgentMissionRoutingDecision: Codable, Hashable {
     let owner: AgentMissionOwner
     let phase: AgentMissionPhase
@@ -24,6 +47,53 @@ struct AgentMissionRoutingDecision: Codable, Hashable {
 /// Owns the boundary between user work and KRALİ self-development.  This is a
 /// policy decision only: it grants neither mutation nor broader authority.
 struct AgentMissionRouter {
+    func classifyCoreIntent(
+        _ input: String
+    ) -> AgentCoreIntentDecision {
+        let words = Set(normalize(input))
+        let normalized = normalize(input).joined(separator: " ")
+
+        let developmentTerms: Set<String> = [
+            "kod", "kodla", "gelistir", "geliştir", "duzelt", "düzelt",
+            "refactor", "implement", "github", "branch", "commit", "pr",
+            "swift", "test", "derle", "build"
+        ]
+        let researchTerms: Set<String> = [
+            "arastir", "araştır", "kaynak", "web", "internette", "guncel",
+            "güncel", "dogrula", "doğrula", "makale", "rapor", "sirket",
+            "şirket", "literatur", "literatür", "kanit", "kanıt"
+        ]
+
+        let developmentScore = words.intersection(developmentTerms).count
+        let researchScore = words.intersection(researchTerms).count
+        let hasURL = normalized.contains("http ") ||
+            normalized.hasPrefix("http") ||
+            normalized.contains(" www ")
+
+        if developmentScore > 0 &&
+           developmentScore >= researchScore {
+            return AgentCoreIntentDecision(
+                intent: .development,
+                confidence: min(0.98, 0.72 + Double(developmentScore) * 0.08),
+                reason: "Kod, test veya GitHub teslimatı istendi."
+            )
+        }
+
+        if researchScore > 0 || hasURL {
+            return AgentCoreIntentDecision(
+                intent: .research,
+                confidence: min(0.98, 0.74 + Double(researchScore) * 0.07),
+                reason: "Dış kaynak, güncellik veya doğrulama gerektiren araştırma istendi."
+            )
+        }
+
+        return AgentCoreIntentDecision(
+            intent: .conversation,
+            confidence: 0.82,
+            reason: "İstek konuşma, açıklama veya fikir danışma çekirdeğine ait."
+        )
+    }
+
     func classify(_ input: String) -> AgentMissionRoutingDecision {
         let words = Set(normalize(input))
         let normalized = normalize(input).joined(separator: " ")
