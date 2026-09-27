@@ -82,8 +82,12 @@ ok(
 
 ok(
   missionRouter.includes("func classifyCoreIntent") &&
+    missionRouter.includes("forbidsResearch") &&
+    missionRouter.includes("forbidsDevelopmentMutation") &&
     engine.includes("coreGoalProfile(") &&
-    engine.includes("activeCoreIntent = coreIntentDecision.intent"),
+    engine.includes("activeCoreIntent = coreIntentDecision.intent") &&
+    engine.includes('capabilityIDs.remove("research.web")') &&
+    engine.includes('capabilityIDs.remove("files.write.text")'),
   "Conversation, research, and development no longer have an explicit top-level routing contract."
 );
 

@@ -2081,7 +2081,7 @@ final class AgentEngine: ObservableObject {
         let goalProfile =
             coreGoalProfile(
                 interpretedGoalProfile,
-                intent: coreIntentDecision.intent
+                decision: coreIntentDecision
             )
 
         if goalProfile.commandAssessment.requiresClarification {
@@ -4056,28 +4056,51 @@ final class AgentEngine: ObservableObject {
 
     private func coreGoalProfile(
         _ goal: AgentGoalProfile,
-        intent: AgentCoreIntent
+        decision: AgentCoreIntentDecision
     ) -> AgentGoalProfile {
-        let normalized = researchCoreGoalProfile(goal)
+        var outcomes = goal.outcomes
+        var capabilityIDs = goal.requiredCapabilityIDs
 
-        guard intent == .research else {
-            return normalized
+        if decision.forbidsResearch {
+            outcomes.remove(.research)
+            capabilityIDs.remove("research.web")
+            capabilityIDs.remove("browser.control")
         }
 
-        var outcomes = normalized.outcomes
-        outcomes.insert(.research)
-        outcomes.insert(.explain)
+        if decision.forbidsDevelopmentMutation {
+            outcomes.remove(.edit)
+            capabilityIDs.remove("files.write.text")
+        }
 
-        var capabilityIDs = normalized.requiredCapabilityIDs
-        capabilityIDs.insert("core.reasoning")
-        capabilityIDs.insert("context.local")
-        capabilityIDs.insert("research.web")
-
-        return AgentGoalProfile(
-            summary: normalized.summary,
+        let constrained = AgentGoalProfile(
+            summary: goal.summary,
             outcomes: outcomes,
             requiredCapabilityIDs: capabilityIDs,
             isCompound: outcomes.count > 1,
+            commandAssessment: goal.commandAssessment
+        )
+
+        let normalized = researchCoreGoalProfile(constrained)
+
+        guard decision.intent == .research,
+              !decision.forbidsResearch else {
+            return normalized
+        }
+
+        var researchOutcomes = normalized.outcomes
+        researchOutcomes.insert(.research)
+        researchOutcomes.insert(.explain)
+
+        var researchCapabilityIDs = normalized.requiredCapabilityIDs
+        researchCapabilityIDs.insert("core.reasoning")
+        researchCapabilityIDs.insert("context.local")
+        researchCapabilityIDs.insert("research.web")
+
+        return AgentGoalProfile(
+            summary: normalized.summary,
+            outcomes: researchOutcomes,
+            requiredCapabilityIDs: researchCapabilityIDs,
+            isCompound: researchOutcomes.count > 1,
             commandAssessment: normalized.commandAssessment
         )
     }

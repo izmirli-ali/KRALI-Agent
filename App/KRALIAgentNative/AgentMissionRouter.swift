@@ -34,6 +34,8 @@ struct AgentCoreIntentDecision: Codable, Hashable {
     let intent: AgentCoreIntent
     let confidence: Double
     let reason: String
+    let forbidsResearch: Bool
+    let forbidsDevelopmentMutation: Bool
 }
 
 struct AgentMissionRoutingDecision: Codable, Hashable {
@@ -69,28 +71,60 @@ struct AgentMissionRouter {
         let hasURL = normalized.contains("http ") ||
             normalized.hasPrefix("http") ||
             normalized.contains(" www ")
+        let forbidsResearch = containsAnyPhrase(
+            normalized,
+            [
+                "web arastirmasi yapma",
+                "webde arastirma yapma",
+                "internette arama yapma",
+                "arastirma yapma",
+                "kaynak arama",
+                "kaynak tarama"
+            ]
+        )
+        let forbidsDevelopmentMutation = containsAnyPhrase(
+            normalized,
+            [
+                "kod yazma",
+                "kodlama yapma",
+                "degisiklik yapma",
+                "degisiklik baslatma",
+                "gelistirme baslatma",
+                "uygulama yapma"
+            ]
+        )
 
-        if developmentScore > 0 &&
+        if !forbidsDevelopmentMutation &&
+           developmentScore > 0 &&
            developmentScore >= researchScore {
             return AgentCoreIntentDecision(
                 intent: .development,
                 confidence: min(0.98, 0.72 + Double(developmentScore) * 0.08),
-                reason: "Kod, test veya GitHub teslimatı istendi."
+                reason: "Kod, test veya GitHub teslimatı istendi.",
+                forbidsResearch: forbidsResearch,
+                forbidsDevelopmentMutation: false
             )
         }
 
-        if researchScore > 0 || hasURL {
+        if !forbidsResearch &&
+           (researchScore > 0 || hasURL) {
             return AgentCoreIntentDecision(
                 intent: .research,
                 confidence: min(0.98, 0.74 + Double(researchScore) * 0.07),
-                reason: "Dış kaynak, güncellik veya doğrulama gerektiren araştırma istendi."
+                reason: "Dış kaynak, güncellik veya doğrulama gerektiren araştırma istendi.",
+                forbidsResearch: false,
+                forbidsDevelopmentMutation: forbidsDevelopmentMutation
             )
         }
 
         return AgentCoreIntentDecision(
             intent: .conversation,
-            confidence: 0.82,
-            reason: "İstek konuşma, açıklama veya fikir danışma çekirdeğine ait."
+            confidence: forbidsResearch || forbidsDevelopmentMutation ? 0.96 : 0.82,
+            reason: forbidsResearch || forbidsDevelopmentMutation
+                ? "Açık eylem yasakları korunarak konuşma ve netleştirme istendi."
+                : "İstek konuşma, açıklama veya fikir danışma çekirdeğine ait.",
+            forbidsResearch: forbidsResearch,
+            forbidsDevelopmentMutation: forbidsDevelopmentMutation
         )
     }
 
@@ -211,8 +245,18 @@ struct AgentMissionRouter {
         value
             .folding(options: [.caseInsensitive, .diacriticInsensitive], locale: Locale(identifier: "tr_TR"))
             .lowercased()
+            .replacingOccurrences(of: "ı", with: "i")
             .components(separatedBy: CharacterSet.alphanumerics.inverted)
             .filter { !$0.isEmpty }
+    }
+
+    private func containsAnyPhrase(
+        _ normalized: String,
+        _ phrases: [String]
+    ) -> Bool {
+        phrases.contains {
+            normalized.contains($0)
+        }
     }
 }
 

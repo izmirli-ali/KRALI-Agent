@@ -39,6 +39,15 @@ struct DeveloperMissionRoutingSelfTest {
             ).intent == .conversation,
             "conversation core intent"
         )
+        let prohibitedActions = router.classifyCoreIntent(
+            "Şimdilik web araştırması yapma, kod yazma ve herhangi bir değişiklik başlatma. Önce en fazla üç soru sor."
+        )
+        expect(
+            prohibitedActions.intent == .conversation &&
+            prohibitedActions.forbidsResearch &&
+            prohibitedActions.forbidsDevelopmentMutation,
+            "negated research and development constraints"
+        )
 
         let selfDevelopment = router.classify(
             "Web araştırmasında başarısız oldun. Kendi mimarini incele, root cause'u bul ve gerekliyse capability'ni geliştir."
