@@ -54,9 +54,16 @@ struct DeveloperMissionRoutingSelfTest {
         expect(
             alternateProhibition.intent == .conversation &&
             alternateProhibition.forbidsResearch &&
-            alternateProhibition.forbidsDevelopmentMutation &&
-            alternateProhibition.requiresDeliberation,
+            alternateProhibition.forbidsDevelopmentMutation,
             "scoped Turkish action negation"
+        )
+        let constrainedDeliberation = router.classifyCoreIntent(
+            "Önce hedefi ve kısıtları ayır, çelişkiyi belirt ve yalnızca iki soru sor."
+        )
+        expect(
+            constrainedDeliberation.intent == .conversation &&
+            constrainedDeliberation.requiresDeliberation,
+            "deliberative conversation routing"
         )
         expect(
             router.classifyCoreIntent(
