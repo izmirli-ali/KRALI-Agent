@@ -2066,9 +2066,13 @@ final class AgentEngine: ObservableObject {
             return
         }
 
-        let decision = brain.analyze(
+        let analyzedDecision = brain.analyze(
             text,
             context: brainContext()
+        )
+        let decision = applyCoreIntent(
+            to: analyzedDecision,
+            core: coreIntentDecision
         )
 
         let interpretedGoalProfile =
@@ -4072,6 +4076,15 @@ final class AgentEngine: ObservableObject {
             capabilityIDs.remove("files.write.text")
         }
 
+        if decision.intent == .conversation,
+           decision.requiresDeliberation {
+            outcomes.insert(.converse)
+            outcomes.insert(.analyze)
+            outcomes.insert(.explain)
+            capabilityIDs.insert("core.reasoning")
+            capabilityIDs.insert("context.local")
+        }
+
         let constrained = AgentGoalProfile(
             summary: goal.summary,
             outcomes: outcomes,
@@ -4102,6 +4115,32 @@ final class AgentEngine: ObservableObject {
             requiredCapabilityIDs: researchCapabilityIDs,
             isCompound: researchOutcomes.count > 1,
             commandAssessment: normalized.commandAssessment
+        )
+    }
+
+    private func applyCoreIntent(
+        to decision: AgentDecision,
+        core: AgentCoreIntentDecision
+    ) -> AgentDecision {
+        guard core.intent == .conversation else {
+            return decision
+        }
+
+        return AgentDecision(
+            intent: .conversation,
+            target: .any,
+            dateRange: nil,
+            dateField: .either,
+            sortMode: .relevance,
+            route: ["Core", "Conversation"],
+            goal: decision.goal,
+            selectedPlan: core.requiresDeliberation
+                ? "Kullanıcının hedefini, kısıtlarını ve belirsizliklerini analiz et; istenmeyen eylemleri başlatmadan yalnız gerekli netleştirmeyi yap."
+                : "Doğal konuşmayı bağlama uygun biçimde sürdür.",
+            alternatives: [],
+            proactiveSuggestion: nil,
+            usePreviousResults: false,
+            resultSelection: nil
         )
     }
 

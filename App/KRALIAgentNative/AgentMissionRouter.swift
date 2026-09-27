@@ -36,6 +36,7 @@ struct AgentCoreIntentDecision: Codable, Hashable {
     let reason: String
     let forbidsResearch: Bool
     let forbidsDevelopmentMutation: Bool
+    let requiresDeliberation: Bool
 }
 
 struct AgentMissionRoutingDecision: Codable, Hashable {
@@ -84,6 +85,12 @@ struct AgentMissionRouter {
                 "kod", "gelistir", "degisiklik", "uygula", "implement"
             ]
         )
+        let requiresDeliberation = [
+            "karar", "hedef", "kisit", "celiski", "varsayim",
+            "netlestir", "soru", "tercih", "oncelik"
+        ].contains { prefix in
+            tokens.contains { $0.hasPrefix(prefix) }
+        }
 
         if !forbidsDevelopmentMutation &&
            developmentScore > 0 &&
@@ -93,7 +100,8 @@ struct AgentMissionRouter {
                 confidence: min(0.98, 0.72 + Double(developmentScore) * 0.08),
                 reason: "Kod, test veya GitHub teslimatı istendi.",
                 forbidsResearch: forbidsResearch,
-                forbidsDevelopmentMutation: false
+                forbidsDevelopmentMutation: false,
+                requiresDeliberation: false
             )
         }
 
@@ -104,7 +112,8 @@ struct AgentMissionRouter {
                 confidence: min(0.98, 0.74 + Double(researchScore) * 0.07),
                 reason: "Dış kaynak, güncellik veya doğrulama gerektiren araştırma istendi.",
                 forbidsResearch: false,
-                forbidsDevelopmentMutation: forbidsDevelopmentMutation
+                forbidsDevelopmentMutation: forbidsDevelopmentMutation,
+                requiresDeliberation: false
             )
         }
 
@@ -115,7 +124,8 @@ struct AgentMissionRouter {
                 ? "Açık eylem yasakları korunarak konuşma ve netleştirme istendi."
                 : "İstek konuşma, açıklama veya fikir danışma çekirdeğine ait.",
             forbidsResearch: forbidsResearch,
-            forbidsDevelopmentMutation: forbidsDevelopmentMutation
+            forbidsDevelopmentMutation: forbidsDevelopmentMutation,
+            requiresDeliberation: requiresDeliberation
         )
     }
 

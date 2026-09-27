@@ -54,7 +54,8 @@ struct DeveloperMissionRoutingSelfTest {
         expect(
             alternateProhibition.intent == .conversation &&
             alternateProhibition.forbidsResearch &&
-            alternateProhibition.forbidsDevelopmentMutation,
+            alternateProhibition.forbidsDevelopmentMutation &&
+            alternateProhibition.requiresDeliberation,
             "scoped Turkish action negation"
         )
         expect(
