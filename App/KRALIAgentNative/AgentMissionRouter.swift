@@ -72,40 +72,18 @@ struct AgentMissionRouter {
         let hasURL = normalized.contains("http ") ||
             normalized.hasPrefix("http") ||
             normalized.contains(" www ")
-        let forbidsResearch =
-            containsAnyPhrase(
-                normalized,
-                [
-                "web arastirmasi yapma",
-                "webde arastirma yapma",
-                "internette arama yapma",
-                "arastirma yapma",
-                "kaynak arama",
-                "kaynak tarama"
-                ]
-            ) || hasScopedNegation(
-                tokens,
-                actionPrefixes: [
-                    "arastir", "web", "internet", "kaynak", "dogrula"
-                ]
-            )
-        let forbidsDevelopmentMutation =
-            containsAnyPhrase(
-                normalized,
-                [
-                "kod yazma",
-                "kodlama yapma",
-                "degisiklik yapma",
-                "degisiklik baslatma",
-                "gelistirme baslatma",
-                "uygulama yapma"
-                ]
-            ) || hasScopedNegation(
-                tokens,
-                actionPrefixes: [
-                    "kod", "gelistir", "degisiklik", "uygula", "implement"
-                ]
-            )
+        let forbidsResearch = hasScopedNegation(
+            tokens,
+            actionPrefixes: [
+                "arastir", "web", "internet", "kaynak", "dogrula"
+            ]
+        )
+        let forbidsDevelopmentMutation = hasScopedNegation(
+            tokens,
+            actionPrefixes: [
+                "kod", "gelistir", "degisiklik", "uygula", "implement"
+            ]
+        )
 
         if !forbidsDevelopmentMutation &&
            developmentScore > 0 &&
@@ -261,15 +239,6 @@ struct AgentMissionRouter {
             .replacingOccurrences(of: "ı", with: "i")
             .components(separatedBy: CharacterSet.alphanumerics.inverted)
             .filter { !$0.isEmpty }
-    }
-
-    private func containsAnyPhrase(
-        _ normalized: String,
-        _ phrases: [String]
-    ) -> Bool {
-        phrases.contains {
-            normalized.contains($0)
-        }
     }
 
     private func hasScopedNegation(
