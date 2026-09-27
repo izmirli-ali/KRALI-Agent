@@ -250,9 +250,9 @@ struct AgentMissionRouter {
             "yazma", "uretme", "baslatma", "degistirme", "uygulama",
             "istemiyorum", "istemem", "olmasin"
         ]
-        let nounContinuations: Set<String> = [
-            "becerisi", "kalitesi", "sistemi", "yetenegi", "yetkinligi",
-            "modulu", "kapasitesi"
+        let nounContinuationPrefixes = [
+            "beceri", "kalite", "sistem", "yetenek", "yetkinlik",
+            "modul", "kapasite"
         ]
 
         for (index, token) in tokens.enumerated() {
@@ -270,7 +270,9 @@ struct AgentMissionRouter {
                 }
 
                 if candidateIndex + 1 < tokens.count,
-                   nounContinuations.contains(tokens[candidateIndex + 1]) {
+                   nounContinuationPrefixes.contains(where: {
+                       tokens[candidateIndex + 1].hasPrefix($0)
+                   }) {
                     continue
                 }
 
