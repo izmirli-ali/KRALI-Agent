@@ -245,6 +245,7 @@ struct AgentMissionRouter {
         value
             .folding(options: [.caseInsensitive, .diacriticInsensitive], locale: Locale(identifier: "tr_TR"))
             .lowercased()
+            .replacingOccurrences(of: "ı", with: "i")
             .components(separatedBy: CharacterSet.alphanumerics.inverted)
             .filter { !$0.isEmpty }
     }
